@@ -7,7 +7,7 @@
 (2) Install all requirements
 
 ```
-pip install -r requirements.txt -r dev.txt
+pip install -r requirements.txt -r test_requirements.txt
 ```
 
 (3) Launch the application (with reloading enabled)

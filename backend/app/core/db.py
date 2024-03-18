@@ -1,8 +1,7 @@
 import contextlib
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator
 from typing import Any
 
-from app.core import settings
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     AsyncSession,
@@ -48,11 +47,16 @@ class DatabaseSessionManager:
 
 
 session_manager = DatabaseSessionManager(
-    str(settings.SQLALCHEMY_DATABASE_URI),
+    host="sqlite+aiosqlite://",
     engine_kwargs={"echo": True},
 )
 
 
-async def initialize_db():
+async def init_db():
     async with session_manager.connect() as connection:
         await connection.run_sync(Base.metadata.create_all)
+
+
+async def get_db_session() -> AsyncGenerator[AsyncSession, None, None]:
+    async with session_manager.session() as session:
+        yield session

@@ -9,6 +9,7 @@ ray[default]==2.9.3
 
 # Database
 sqlalchemy[asyncio]==2.0.28
+aiosqlite==0.20.0
 
 # Utils
 loguru==0.7.2

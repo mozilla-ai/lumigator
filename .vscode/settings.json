@@ -1,5 +1,4 @@
 {
-    "python.analysis.importFormat": "absolute",
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,

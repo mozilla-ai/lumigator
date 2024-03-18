@@ -57,6 +57,9 @@ exclude = ["*.ipynb"]
 # Avoid trying to fix some violations
 unfixable = ["B", "SIM", "TRY", "RUF"]
 
+[lint.isort]
+known-first-party = ["app"]
+
 [lint.extend-per-file-ignores]
 "__init__.py" = [
     "E402", # import violations

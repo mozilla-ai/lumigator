@@ -1,0 +1,14 @@
+# Server
+uvicorn[standard]==0.28.0
+fastapi==0.110.0
+pydantic==2.6.4
+pydantic-settings==2.2.1
+
+# Ray
+ray[default]==2.9.3
+
+# Database
+sqlalchemy[asyncio]==2.0.28
+
+# Utils
+loguru==0.7.2

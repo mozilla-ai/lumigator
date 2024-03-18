@@ -1,7 +1,18 @@
+from contextlib import asynccontextmanager
+
 import uvicorn
+from app.core.db import initialize_db, session_manager
 from fastapi import FastAPI
 
-app = FastAPI(title="MZAI Platform")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await initialize_db()
+    yield
+    await session_manager.close()
+
+
+app = FastAPI(title="MZAI Platform", lifespan=lifespan)
 
 
 @app.get("/")

@@ -2,21 +2,16 @@
 
 ## Setup
 
-(1) Create a virtual environment and install Poetry for managing dependencies
+(1) Create a virtual environment
+
+(2) Install all requirements
 
 ```
-pip install poetry
-```
-
-(2) Install backend dependencies in your virtual environment
-
-```
-poetry lock
-poetry install
+pip install -r requirements.txt -r test_requirements.txt
 ```
 
 (3) Launch the application
 
 ```
-python backend/app/main.py
+python app/main.py
 ```

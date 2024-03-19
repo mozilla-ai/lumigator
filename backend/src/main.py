@@ -1,14 +1,9 @@
-from fastapi import FastAPI
+import uvicorn
 
-from src.api import api_router
 from src.core.settings import settings
 
-app = FastAPI(title="MZAI Platform")
-
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the MZAI Platform!"}
-
-
-app.include_router(api_router, prefix=settings.API_V1_STR)
+if __name__ == "__main__":
+    uvicorn.run(
+        "src.core.server:app",
+        reload=settings.ENVIRONMENT != "production",
+    )

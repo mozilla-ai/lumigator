@@ -28,5 +28,6 @@ jobs:
 
       - name: Run Tests
         run: |
+          cd backend
           pytest
           

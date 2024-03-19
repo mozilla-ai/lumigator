@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+pythonpath = "./"
+testpaths = ["app/tests"]
+addopts = "-v --cov app --no-cov-on-fail --disable-warnings"
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

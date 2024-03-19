@@ -5,12 +5,12 @@ from loguru import logger
 
 from app.api.deps import DBSessionDep
 from app.crud import user as crud
-from app.schemas.user import ListUsers, UserCreate, UserResponse
+from app.schemas.user import ListUsers, UserCreate, UserSchema
 
 router = APIRouter()
 
 
-@router.post("/", response_model=UserResponse)
+@router.post("/", response_model=UserSchema)
 async def create_user(db: DBSessionDep, request: UserCreate):
     existing_user = await crud.get_user_by_name(db, name=request.name)
     if existing_user is not None:
@@ -19,7 +19,7 @@ async def create_user(db: DBSessionDep, request: UserCreate):
     return user
 
 
-@router.get("/{id}", response_model=UserResponse)
+@router.get("/{id}", response_model=UserSchema)
 async def get_user(db: DBSessionDep, id: UUID):
     record = await crud.get_user_by_id(db, id=id)
     if record is None:

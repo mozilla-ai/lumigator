@@ -3,15 +3,15 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class UserCreate(BaseModel):
-    name: str
-
-
-class UserResponse(BaseModel, from_attributes=True):
+class UserSchema(BaseModel, from_attributes=True):
     id: UUID
     name: str
 
 
+class UserCreate(BaseModel):
+    name: str
+
+
 class ListUsers(BaseModel):
-    users: list[UserResponse]
+    users: list[UserSchema]
     count: int

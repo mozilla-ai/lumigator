@@ -3,7 +3,7 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 
-from src.main import app
+from src.core.server import app
 
 
 @pytest.fixture(scope="session")

@@ -29,4 +29,4 @@ jobs:
       - name: Run Tests
         run: |
           cd backend
-          pytest
+          poetry run pytest

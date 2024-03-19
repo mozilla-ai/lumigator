@@ -161,6 +161,3 @@ cython_debug/
 
 # Ruff
 .ruff_cache
-
-# Poetry
-poetry.lock

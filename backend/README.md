@@ -2,16 +2,22 @@
 
 ## Setup
 
-(1) Create a virtual environment
+(1) Create a virtual environment and install Poetry for managing dependencies
+
+```
+pip install poetry
+```
 
 (2) Install all requirements
 
 ```
-pip install -r requirements.txt -r test_requirements.txt
+poetry lock && poetry install
 ```
 
-(3) Launch the application
+(3) Launch the application.
+Note that the main script must be executed as a Python module (via `python -m`)
+to get imports to line up.
 
 ```
-python app/main.py
+python -m src.main
 ```

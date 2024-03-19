@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.core.settings import EnvironmentType
+from src.settings import EnvironmentType
 
 
 class Health(BaseModel):

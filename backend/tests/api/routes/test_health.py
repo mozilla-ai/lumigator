@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from src.core.settings import settings
+from src.settings import settings
 
 
 def test_health_check(client: TestClient):

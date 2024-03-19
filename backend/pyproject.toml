@@ -22,6 +22,10 @@ ruff = "0.3.3"
 pytest = "8.1.1"
 pytest-cov = "4.1.0"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov src/ --no-cov-on-fail --disable-warnings"
+
 [tool.ruff]
 target-version = "py310"
 

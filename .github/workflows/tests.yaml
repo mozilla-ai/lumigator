@@ -23,8 +23,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd backend
-          pip install -r requirements.txt -r test_requirements.txt
+          curl -sSL https://install.python-poetry.org | python3 -
+          cd backend && poetry install
 
       - name: Run Tests
         run: |

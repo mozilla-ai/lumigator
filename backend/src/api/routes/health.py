@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.schemas.extras import Health
-from core.settings import settings
+from src.app.schemas.extras import Health
+from src.core.settings import settings
 
 router = APIRouter()
 

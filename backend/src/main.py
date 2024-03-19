@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from api import api_router
-from core.settings import settings
+from src.api import api_router
+from src.core.settings import settings
 
 app = FastAPI(title="MZAI Platform")
 

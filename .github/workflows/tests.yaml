@@ -23,10 +23,11 @@ jobs:
 
       - name: Build Backend Image
         run: |
-          cd backend && docker build . -f ../infra/docker/backend/Dockerfile -t backend
+          cd backend
+          docker build . -f ../infra/docker/backend/Dockerfile --target testing -t backend:testing
 
       - name: Lint
-        run: docker run --rm backend bash /app/scripts/lint.sh
+        run: docker run --rm --entrypoint ./scripts/lint.sh backend:testing
 
       - name: Test
-        run: docker run --rm backend bash /app/scripts/test.sh
+        run: docker run --rm --entrypoint ./scripts/test.sh backend:testing

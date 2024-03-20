@@ -26,6 +26,8 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           cd backend && poetry install
 
-      - name: Run Tests
-        run: |
-          cd backend && poetry run pytest
+      - name: Lint
+        run: cd backend && poetry run scripts/lint.sh
+
+      - name: Test
+        run: cd backend && poetry run scripts/test.sh

@@ -27,11 +27,7 @@ jobs:
           cd backend && poetry install
 
       - name: Lint
-        run: |
-          cd backend
-          ./scripts/lint.sh
+        run: cd backend && poetry run scripts/lint.sh
 
       - name: Test
-        run: |
-          cd backend
-          ./scripts/test.sh
+        run: cd backend && poetry run scripts/test.sh

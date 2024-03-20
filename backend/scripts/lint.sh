@@ -3,5 +3,5 @@
 set -e
 set -x
 
-ruff src
+ruff check src
 ruff format src --check

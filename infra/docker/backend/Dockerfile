@@ -1,5 +1,5 @@
 # Main setup
-FROM python:3.10.13 as setup
+FROM python:3.10.13
 
 WORKDIR /app
 
@@ -18,14 +18,4 @@ ENV PYTHONPATH=/app/src
 
 COPY ./src /app/src
 
-# App entrypoint
-FROM setup as app
-
 ENTRYPOINT ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
-
-# Testing stage
-FROM setup as testing
-
-RUN poetry install --no-root
-
-COPY ./scripts /app/scripts

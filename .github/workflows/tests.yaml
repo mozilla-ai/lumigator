@@ -21,13 +21,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Build Backend Image
+      - name: Install Dependencies
         run: |
-          cd backend
-          docker build . -f ../infra/docker/backend/Dockerfile --target testing -t backend:testing
+          curl -sSL https://install.python-poetry.org | python3 -
+          cd backend && poetry install
 
       - name: Lint
-        run: docker run --rm --entrypoint ./scripts/lint.sh backend:testing
+        run: |
+          cd backend
+          ./scripts/lint.sh
 
       - name: Test
-        run: docker run --rm --entrypoint ./scripts/test.sh backend:testing
+        run: |
+          cd backend
+          ./scripts/test.sh

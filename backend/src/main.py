@@ -4,6 +4,6 @@ from src.settings import settings
 
 if __name__ == "__main__":
     uvicorn.run(
-        "src.core.server:app",
+        "src.server:app",
         reload=settings.ENVIRONMENT != "production",
     )

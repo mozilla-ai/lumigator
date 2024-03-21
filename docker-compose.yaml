@@ -8,6 +8,8 @@ services:
         - postgres_data:/var/lib/postgresql/data/
       expose:
         - ${POSTGRES_PORT}
+      ports:
+        - ${POSTGRES_PORT}:${POSTGRES_PORT}
       environment:
         - POSTGRES_USER
         - POSTGRES_PASSWORD
@@ -27,7 +29,7 @@ services:
       - POSTGRES_PORT
       - POSTGRES_DB
     ports:
-      - "8000:80"
+      - "80:80"
 
 volumes:
     postgres_data: 

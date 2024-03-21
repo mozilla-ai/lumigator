@@ -25,14 +25,10 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> Url:  # noqa: N802
-        pg_vars = [
-            self.POSTGRES_USER,
-            self.POSTGRES_PASSWORD,
-            self.POSTGRES_HOST,
-            self.POSTGRES_PORT,
-            self.POSTGRES_DB,
-        ]
-        if any(pg_vars):
+        if self.DEPLOYMENT_TYPE == DeploymentType.LOCAL:
+            # In-memory SQLite connection when running locally without PG
+            return Url.build(scheme="sqlite+aiosqlite", host="")
+        else:
             return Url.build(
                 scheme="postgresql+asyncpg",
                 username=self.POSTGRES_USER,
@@ -41,9 +37,6 @@ class Settings(BaseSettings):
                 port=self.POSTGRES_PORT,
                 path=self.POSTGRES_DB,
             )
-        else:
-            # In-memory SQLite connection when running without PG
-            return Url.build(scheme="sqlite+aiosqlite", host="")
 
 
 settings = Settings()

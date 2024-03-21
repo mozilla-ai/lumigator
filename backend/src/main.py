@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await session_manager.close()
 
 
-app = FastAPI(title="MZAI Platform", lifepsan=lifespan)
+app = FastAPI(title="Platform Backend", lifepsan=lifespan)
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

@@ -16,9 +16,7 @@ services:
         - POSTGRES_DB
 
   backend:
-    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
-    build: 
-      context: ./backend
+    build: ./backend
     depends_on:
       - db
     environment:

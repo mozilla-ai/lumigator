@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  backend:
+    image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
+    build: 
+      context: ./backend
+    depends_on:
+      - db
+    environment:
+      - DEPLOYMENT_TYPE
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_DB
+    ports:
+      - "8000:80"
+
+  db:
+      image: postgres:16-alpine
+      volumes:
+        - postgres_data:/var/lib/postgresql/data/
+      expose:
+        - ${POSTGRES_PORT}
+      environment:
+        - POSTGRES_USER
+        - POSTGRES_PASSWORD
+        - POSTGRES_DB
+
+volumes:
+    postgres_data: 

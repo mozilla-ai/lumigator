@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -14,6 +15,14 @@ class FinetuningJobResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str
     status: JobStatus
+    created_at: datetime.datetime
+    updated_at: datetime.datetime | None
+
+
+class FinetuningLogsResponse(BaseModel):
+    id: UUID
+    status: JobStatus
+    logs: list[str]
 
 
 class ListFinetuningJobs(BaseModel):

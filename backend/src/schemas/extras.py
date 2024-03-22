@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 
-from src.settings import EnvironmentType
+from src.settings import DeploymentType
 
 
 class Health(BaseModel):
-    environment: EnvironmentType = Field(..., example=EnvironmentType.PRODUCTION)
-    status: str = Field(..., example="Healthy")
+    status: str = Field(..., example="Ok")
+    deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)

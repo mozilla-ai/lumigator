@@ -8,4 +8,4 @@ router = APIRouter()
 
 @router.get("/")
 async def get_health() -> Health:
-    return Health(environment=settings.ENVIRONMENT, status="healthy")
+    return Health(deployment_type=settings.DEPLOYMENT_TYPE, status="OK")

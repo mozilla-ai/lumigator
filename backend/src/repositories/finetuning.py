@@ -1,5 +1,7 @@
+import uuid
 from uuid import UUID
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.finetuning import FinetuningJob
@@ -11,20 +13,25 @@ class FinetuningJobRepository:
         self.session = session
 
     async def count(self) -> int:
-        pass
+        stmt = select(func.count()).select_from(FinetuningJob)
+        return await self.session.scalar(stmt)
 
-    async def create(self, name: str, submission_id: str):
-        job = FinetuningJob(name=name, submission_id=submission_id, status=JobStatus.CREATED)
+    async def create(self, name: str, submission_id: str) -> FinetuningJob:
+        job = FinetuningJob(
+            id=uuid.uuid4(),
+            name=name,
+            submission_id=submission_id,
+            status=JobStatus.CREATED,
+        )
         self.session.add(job)
         await self.session.commit()
         await self.session.refresh(job)
         return job
 
-    async def get(self, job_id: UUID):
-        pass
+    async def get(self, job_id: UUID) -> FinetuningJob | None:
+        stmt = select(FinetuningJob).where(FinetuningJob.id == job_id)
+        return await self.session.scalar(stmt)
 
-    async def get_logs(self, job_id: UUID):
-        pass
-
-    async def list(self, skip: int = 0, limit: int = 100):
-        pass
+    async def list(self, skip: int = 0, limit: int = 100) -> list[FinetuningJob]:
+        stmt = select(FinetuningJob).offset(skip).limit(limit)
+        return await self.session.scalars(stmt)

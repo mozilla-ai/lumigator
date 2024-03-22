@@ -9,13 +9,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
 
+from src.models.base import BaseSQLModel
 from src.settings import settings
-
-
-class BaseSQL(DeclarativeBase):
-    pass
 
 
 class DatabaseSessionManager:
@@ -35,7 +31,7 @@ class DatabaseSessionManager:
         async with self.connect() as connection:
             # TODO: This creates tables in the DB for all subclasses of BaseSQL
             # We will get rid of this when switching to Alembic for migrations
-            await connection.run_sync(BaseSQL.metadata.create_all)
+            await connection.run_sync(BaseSQLModel.metadata.create_all)
 
     async def close(self):
         await self._engine.dispose()

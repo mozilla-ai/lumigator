@@ -1,4 +1,3 @@
-import uuid
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -17,12 +16,7 @@ class FinetuningJobRepository:
         return await self.session.scalar(stmt)
 
     async def create(self, name: str, submission_id: str) -> FinetuningJob:
-        job = FinetuningJob(
-            id=uuid.uuid4(),
-            name=name,
-            submission_id=submission_id,
-            status=JobStatus.CREATED,
-        )
+        job = FinetuningJob(name=name, submission_id=submission_id, status=JobStatus.CREATED)
         self.session.add(job)
         await self.session.commit()
         await self.session.refresh(job)

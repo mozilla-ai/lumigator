@@ -23,8 +23,3 @@ class FinetuningLogsResponse(BaseModel):
     id: UUID
     status: JobStatus
     logs: list[str]
-
-
-class ListFinetuningJobs(BaseModel):
-    count: int
-    jobs: list[FinetuningJobResponse]

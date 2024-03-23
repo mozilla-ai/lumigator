@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 
 @declarative_mixin
-class DateTimeSQLMixin:
+class DateTimeMappings:
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

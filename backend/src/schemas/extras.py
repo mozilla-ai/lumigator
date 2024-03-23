@@ -1,8 +1,11 @@
 from enum import Enum
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
 from src.settings import DeploymentType
+
+ItemType = TypeVar("ItemType")
 
 
 class JobStatus(str, Enum):
@@ -14,3 +17,8 @@ class JobStatus(str, Enum):
 class Health(BaseModel):
     status: str = Field(..., example="Ok")
     deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)
+
+
+class ItemsList(Generic[ItemType], BaseModel):
+    total: int
+    items: list[ItemType]

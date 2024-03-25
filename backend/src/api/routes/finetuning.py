@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter
 
 from src.api.deps import FinetuningServiceDep
-from src.schemas.extras import ItemsList
+from src.schemas.extras import ListItems
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
@@ -28,6 +28,6 @@ async def get_finetuning_job_logs(service: FinetuningServiceDep, job_id: UUID):
     return await service.get_job_logs(job_id)
 
 
-@router.get("/jobs", response_model=ItemsList[FinetuningJobResponse])
+@router.get("/jobs", response_model=ListItems[FinetuningJobResponse])
 async def list_finetuning_jobs(service: FinetuningServiceDep, skip: int = 0, limit: int = 100):
     return await service.list_jobs(skip, limit)

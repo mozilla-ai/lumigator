@@ -5,7 +5,7 @@ from ray.job_submission import JobSubmissionClient
 
 from src.models.finetuning import FinetuningJob
 from src.repositories.finetuning import FinetuningJobRepository
-from src.schemas.extras import ItemsList
+from src.schemas.extras import ListItems
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
@@ -43,10 +43,10 @@ class FinetuningService:
             logs=logs.strip().split("\n"),
         )
 
-    async def list_jobs(self, skip: int = 0, limit: int = 100) -> ItemsList[FinetuningJobResponse]:
+    async def list_jobs(self, skip: int = 0, limit: int = 100) -> ListItems[FinetuningJobResponse]:
         total = await self.job_repo.count()
         db_jobs = await self.job_repo.list(skip, limit)
-        return ItemsList(
+        return ListItems(
             total=total,
             items=[FinetuningJobResponse.model_validate(x) for x in db_jobs],
         )

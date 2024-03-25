@@ -32,10 +32,10 @@ class Settings(BaseSettings):
     def SQLALCHEMY_DATABASE_URL(self) -> Url:  # noqa: N802
         if self.DEPLOYMENT_TYPE == DeploymentType.LOCAL:
             # In-memory SQLite connection when running locally without PG
-            return Url.build(scheme="sqlite+aiosqlite", host="")
+            return Url.build(scheme="sqlite", host="")
         else:
             return Url.build(
-                scheme="postgresql+asyncpg",
+                scheme="postgresql",
                 username=self.POSTGRES_USER,
                 password=self.POSTGRES_PASSWORD,
                 host=self.POSTGRES_HOST,

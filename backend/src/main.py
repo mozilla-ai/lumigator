@@ -9,9 +9,9 @@ from src.settings import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await session_manager.initialize()
+    session_manager.initialize()
     yield
-    await session_manager.close()
+    session_manager.close()
 
 
 app = FastAPI(title="Platform Backend", lifespan=lifespan)

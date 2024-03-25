@@ -12,6 +12,8 @@ class JobStatus(str, Enum):
     CREATED = "created"
     RUNNING = "running"
     FAILED = "failed"
+    STOPPED = "stopped"
+    SUCCEEDED = "succeeded"
 
 
 class Health(BaseModel):

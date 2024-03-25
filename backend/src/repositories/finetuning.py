@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from src.models.finetuning import FinetuningJob
@@ -12,8 +11,7 @@ class FinetuningJobRepository:
         self.session = session
 
     def count(self) -> int:
-        stmt = select(func.count()).select_from(FinetuningJob)
-        return self.session.scalar(stmt)
+        return self.session.query(FinetuningJob).count()
 
     def create(self, name: str, submission_id: str) -> FinetuningJob:
         job = FinetuningJob(name=name, submission_id=submission_id, status=JobStatus.CREATED)
@@ -26,5 +24,4 @@ class FinetuningJobRepository:
         return self.session.query(FinetuningJob).where(FinetuningJob.id == job_id).first()
 
     def list(self, skip: int = 0, limit: int = 100) -> list[FinetuningJob]:
-        stmt = select(FinetuningJob).offset(skip).limit(limit)
-        return self.session.scalars(stmt)
+        return self.session.query(FinetuningJob).offset(skip).limit(limit).all()

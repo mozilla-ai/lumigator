@@ -5,7 +5,7 @@ from ray.job_submission import JobSubmissionClient
 
 from src.models.finetuning import FinetuningJob
 from src.repositories.finetuning import FinetuningJobRepository
-from src.schemas.extras import ListItems
+from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
@@ -42,10 +42,10 @@ class FinetuningService:
             logs=logs.strip().split("\n"),
         )
 
-    def list_jobs(self, skip: int = 0, limit: int = 100) -> ListItems[FinetuningJobResponse]:
+    def list_jobs(self, skip: int = 0, limit: int = 100) -> ListingResponse[FinetuningJobResponse]:
         total = self.job_repo.count()
         db_jobs = self.job_repo.list(skip, limit)
-        return ListItems(
+        return ListingResponse(
             total=total,
             items=[FinetuningJobResponse.model_validate(x) for x in db_jobs],
         )

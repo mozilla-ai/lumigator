@@ -1,11 +1,11 @@
 import pytest
+import sqlalchemy
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from testcontainers.postgres import PostgresContainer
 
 from src.api.deps import get_db_session
-from src.db import Base, DatabaseSessionManager
+from src.db import BaseRecord, DatabaseSessionManager
 from src.main import create_app
 from src.settings import settings
 
@@ -20,13 +20,13 @@ def test_db_engine():
         dbname=settings.POSTGRES_DB,
     ) as postgres:
         url = postgres.get_connection_url()
-        yield create_engine(url, echo=True)
+        yield sqlalchemy.create_engine(url, echo=True)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_db(test_db_engine):
     # TODO: Run migrations here once using Alembic
-    Base.metadata.create_all(test_db_engine)
+    BaseRecord.metadata.create_all(test_db_engine)
 
 
 @pytest.fixture(scope="session")

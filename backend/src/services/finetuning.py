@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
-from src.models.finetuning import FinetuningJob
+from src.records.finetuning import FinetuningJobRecord
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
@@ -18,34 +18,34 @@ class FinetuningService:
         self.job_repo = job_repo
         self.ray_client = ray_client
 
-    def _get_db_job(self, job_id: UUID) -> FinetuningJob:
-        db_job = self.job_repo.get(job_id)
-        if db_job is None:
+    def _get_db_record(self, job_id: UUID) -> FinetuningJobRecord:
+        record = self.job_repo.get(job_id)
+        if record is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"Finetuning job {job_id} not found.")
-        return db_job
+        return record
 
     def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
         submission_id = self.ray_client.submit_job(entrypoint="echo 'Hello from Ray!'")
-        db_job = self.job_repo.create(name=request.name, submission_id=submission_id)
-        return FinetuningJobResponse.model_validate(db_job)
+        record = self.job_repo.create(name=request.name, submission_id=submission_id)
+        return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:
-        db_job = self._get_db_job(job_id)
-        return FinetuningJobResponse.model_validate(db_job)
+        record = self._get_db_record(job_id)
+        return FinetuningJobResponse.model_validate(record)
 
     def get_job_logs(self, job_id: UUID) -> FinetuningLogsResponse:
-        db_job = self._get_db_job(job_id)
-        logs = self.ray_client.get_job_logs(db_job.submission_id)
+        record = self._get_db_record(job_id)
+        logs = self.ray_client.get_job_logs(record.submission_id)
         return FinetuningLogsResponse(
-            id=db_job.id,
-            status=db_job.status,
+            id=record.id,
+            status=record.status,
             logs=logs.strip().split("\n"),
         )
 
     def list_jobs(self, skip: int = 0, limit: int = 100) -> ListingResponse[FinetuningJobResponse]:
         total = self.job_repo.count()
-        db_jobs = self.job_repo.list(skip, limit)
+        records = self.job_repo.list(skip, limit)
         return ListingResponse(
             total=total,
-            items=[FinetuningJobResponse.model_validate(x) for x in db_jobs],
+            items=[FinetuningJobResponse.model_validate(x) for x in records],
         )

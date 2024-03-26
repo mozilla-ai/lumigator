@@ -453,6 +453,27 @@ files = [
 ]
 
 [[package]]
+name = "docker"
+version = "7.0.0"
+description = "A Python library for the Docker Engine API."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "docker-7.0.0-py3-none-any.whl", hash = "sha256:12ba681f2777a0ad28ffbcc846a69c31b4dfd9752b47eb425a274ee269c5e14b"},
+    {file = "docker-7.0.0.tar.gz", hash = "sha256:323736fb92cd9418fc5e7133bc953e11a9da04f4483f828b527db553f1e7e5a3"},
+]
+
+[package.dependencies]
+packaging = ">=14.0"
+pywin32 = {version = ">=304", markers = "sys_platform == \"win32\""}
+requests = ">=2.26.0"
+urllib3 = ">=1.26.0"
+
+[package.extras]
+ssh = ["paramiko (>=2.4.3)"]
+websockets = ["websocket-client (>=1.3.0)"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.0"
 description = "Backport of PEP 654 (exception groups)"
@@ -1609,6 +1630,29 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "pywin32"
+version = "306"
+description = "Python for Window Extensions"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pywin32-306-cp310-cp310-win32.whl", hash = "sha256:06d3420a5155ba65f0b72f2699b5bacf3109f36acbe8923765c22938a69dfc8d"},
+    {file = "pywin32-306-cp310-cp310-win_amd64.whl", hash = "sha256:84f4471dbca1887ea3803d8848a1616429ac94a4a8d05f4bc9c5dcfd42ca99c8"},
+    {file = "pywin32-306-cp311-cp311-win32.whl", hash = "sha256:e65028133d15b64d2ed8f06dd9fbc268352478d4f9289e69c190ecd6818b6407"},
+    {file = "pywin32-306-cp311-cp311-win_amd64.whl", hash = "sha256:a7639f51c184c0272e93f244eb24dafca9b1855707d94c192d4a0b4c01e1100e"},
+    {file = "pywin32-306-cp311-cp311-win_arm64.whl", hash = "sha256:70dba0c913d19f942a2db25217d9a1b726c278f483a919f1abfed79c9cf64d3a"},
+    {file = "pywin32-306-cp312-cp312-win32.whl", hash = "sha256:383229d515657f4e3ed1343da8be101000562bf514591ff383ae940cad65458b"},
+    {file = "pywin32-306-cp312-cp312-win_amd64.whl", hash = "sha256:37257794c1ad39ee9be652da0462dc2e394c8159dfd913a8a4e8eb6fd346da0e"},
+    {file = "pywin32-306-cp312-cp312-win_arm64.whl", hash = "sha256:5821ec52f6d321aa59e2db7e0a35b997de60c201943557d108af9d4ae1ec7040"},
+    {file = "pywin32-306-cp37-cp37m-win32.whl", hash = "sha256:1c73ea9a0d2283d889001998059f5eaaba3b6238f767c9cf2833b13e6a685f65"},
+    {file = "pywin32-306-cp37-cp37m-win_amd64.whl", hash = "sha256:72c5f621542d7bdd4fdb716227be0dd3f8565c11b280be6315b06ace35487d36"},
+    {file = "pywin32-306-cp38-cp38-win32.whl", hash = "sha256:e4c092e2589b5cf0d365849e73e02c391c1349958c5ac3e9d5ccb9a28e017b3a"},
+    {file = "pywin32-306-cp38-cp38-win_amd64.whl", hash = "sha256:e8ac1ae3601bee6ca9f7cb4b5363bf1c0badb935ef243c4733ff9a393b1690c0"},
+    {file = "pywin32-306-cp39-cp39-win32.whl", hash = "sha256:e25fd5b485b55ac9c057f67d94bc203f3f6595078d1fb3b458c9c28b7153a802"},
+    {file = "pywin32-306-cp39-cp39-win_amd64.whl", hash = "sha256:39b61c15272833b5c329a2989999dcae836b1eed650252ab1b7bfbe1d59f30f4"},
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.1"
 description = "YAML parser and emitter for Python"
@@ -1930,13 +1974,13 @@ files = [
 
 [[package]]
 name = "smart-open"
-version = "7.0.3"
+version = "7.0.4"
 description = "Utils for streaming large files (S3, HDFS, GCS, Azure Blob Storage, gzip, bz2...)"
 optional = false
 python-versions = "<4.0,>=3.7"
 files = [
-    {file = "smart_open-7.0.3-py3-none-any.whl", hash = "sha256:7969ac4f1a04fd829d50f086fd106c6b84c8f68786666a4fac7bdc208f24f3b6"},
-    {file = "smart_open-7.0.3.tar.gz", hash = "sha256:dfea0d6815798f843fd2f4dbeb2ddf2d4a2304ece749c5251a97ac5f2dcb1a8e"},
+    {file = "smart_open-7.0.4-py3-none-any.whl", hash = "sha256:4e98489932b3372595cddc075e6033194775165702887216b65eba760dfd8d47"},
+    {file = "smart_open-7.0.4.tar.gz", hash = "sha256:62b65852bdd1d1d516839fcb1f6bc50cd0f16e05b4ec44b52f43d38bcb838524"},
 ]
 
 [package.dependencies]
@@ -2067,6 +2111,43 @@ anyio = ">=3.4.0,<5"
 
 [package.extras]
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.7)", "pyyaml"]
+
+[[package]]
+name = "testcontainers"
+version = "4.2.0"
+description = "Python library for throwaway instances of anything that can run in a Docker container"
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "testcontainers-4.2.0-py3-none-any.whl", hash = "sha256:64d24b1a3c9ce6ca67434e91771a9070b174f6912c3be729d506361d098f51f4"},
+    {file = "testcontainers-4.2.0.tar.gz", hash = "sha256:ee06222f17594dc41ee15b6f19c5758bc47e1c546082e80edde21a6c8ae59126"},
+]
+
+[package.dependencies]
+docker = "*"
+urllib3 = "*"
+wrapt = "*"
+
+[package.extras]
+arangodb = ["python-arango (>=7.8,<8.0)"]
+azurite = ["azure-storage-blob (>=12.19,<13.0)"]
+clickhouse = ["clickhouse-driver"]
+google = ["google-cloud-pubsub (>=2)"]
+influxdb = ["influxdb", "influxdb-client"]
+k3s = ["kubernetes", "pyyaml"]
+kafka = ["kafka-python"]
+keycloak = ["python-keycloak"]
+localstack = ["boto3"]
+minio = ["minio"]
+mongodb = ["pymongo"]
+mssql = ["pymssql", "sqlalchemy"]
+mysql = ["pymysql[rsa]", "sqlalchemy"]
+neo4j = ["neo4j"]
+opensearch = ["opensearch-py"]
+oracle = ["cx_Oracle", "sqlalchemy"]
+rabbitmq = ["pika"]
+redis = ["redis"]
+selenium = ["selenium"]
 
 [[package]]
 name = "tomli"
@@ -2575,4 +2656,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "0c9769254417a27649094870e68ea04326bfe13dd2ad25475a914b05ae283f3b"
+content-hash = "6fc46251fc40ad5d284dc4ef5e0499aae997139cf382d87652f3420ff49deed2"

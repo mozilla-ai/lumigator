@@ -21,17 +21,12 @@ class DatabaseSessionManager:
     def __init__(self, host: str, engine_kwargs: dict[str, Any]):
         logger.info(f"Creating DB engine for {host}")
         self._engine = create_engine(host, **engine_kwargs)
-        self._sessionmaker = sessionmaker(autocommit=False, bind=self._engine)
+        self._sessionmaker = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
 
     def initialize(self):
         # TODO: This creates tables in the DB for all subclasses of BaseSQL
         # We will get rid of this when switching to Alembic for migrations
         BaseSQLModel.metadata.create_all(bind=self._engine)
-
-    def close(self):
-        self._engine.dispose()
-        self._engine = None
-        self._sessionmaker = None
 
     @contextlib.contextmanager
     def connect(self) -> Iterator[Connection]:

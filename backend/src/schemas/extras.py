@@ -21,6 +21,6 @@ class Health(BaseModel):
     deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)
 
 
-class ListItems(Generic[ItemType], BaseModel):
+class ListingResponse(Generic[ItemType], BaseModel):
     total: int
     items: list[ItemType]

@@ -1,32 +1,26 @@
 import contextlib
 from collections.abc import Iterator
-from typing import Any
 
-from loguru import logger
-from sqlalchemy import Connection, create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import Connection, Engine, create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from src.models.base import BaseSQLModel
 from src.settings import settings
 
 
-class DatabaseSessionManager:
-    """Connection/session manager for SQLAlchemy databases.
+class Base(DeclarativeBase):
+    pass
 
-    The manager binds to a DB engine specified by the `SQLALCHEMY_DATABASE_URL` in the app settings.
-    Connections and sessions can be obtained by the `connect` and `session` methods,
-    which handles rollbacks in case of errors while the connections are open.
+
+class DatabaseSessionManager:
+    """Connection/session manager for SQLAlchemy database engines.
+
+    Connections and sessions are obtained by the `connect` and `session` methods,
+    which establish SQL transactions and handles rollbacks in case of exceptions.
     """
 
-    def __init__(self, host: str, engine_kwargs: dict[str, Any]):
-        logger.info(f"Creating DB engine for {host}")
-        self._engine = create_engine(host, **engine_kwargs)
+    def __init__(self, engine: Engine):
+        self._engine = engine
         self._sessionmaker = sessionmaker(autocommit=False, autoflush=False, bind=self._engine)
-
-    def initialize(self):
-        # TODO: This creates tables in the DB for all subclasses of BaseSQL
-        # We will get rid of this when switching to Alembic for migrations
-        BaseSQLModel.metadata.create_all(bind=self._engine)
 
     @contextlib.contextmanager
     def connect(self) -> Iterator[Connection]:
@@ -49,7 +43,5 @@ class DatabaseSessionManager:
             session.close()
 
 
-session_manager = DatabaseSessionManager(
-    str(settings.SQLALCHEMY_DATABASE_URL),
-    engine_kwargs={"echo": True},
-)
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URL), echo=True)
+session_manager = DatabaseSessionManager(engine)

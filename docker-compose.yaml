@@ -3,7 +3,6 @@ version: "3.8"
 
 services:
   db:
-    env_file: compose.env
     image: postgres:16-alpine
     volumes:
       - postgres-data:/var/lib/postgresql/data/
@@ -20,7 +19,6 @@ services:
     build: ./backend
     depends_on:
       - db
-    env_file: compose.env
     environment:
       - DEPLOYMENT_TYPE
       - POSTGRES_USER

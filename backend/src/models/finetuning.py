@@ -2,12 +2,12 @@ import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.db import BaseSQLModel
+from src.db import Base
 from src.models.common import DateTimeMappings
 from src.schemas.extras import JobStatus
 
 
-class FinetuningJob(BaseSQLModel, DateTimeMappings):
+class FinetuningJob(Base, DateTimeMappings):
     __tablename__ = "finetuning-jobs"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

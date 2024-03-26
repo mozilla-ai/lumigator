@@ -4,8 +4,8 @@ from src.repositories.finetuning import FinetuningJobRepository
 
 
 @pytest.fixture
-def job_repository(db_session):
-    return FinetuningJobRepository(db_session)
+def job_repository(test_db_session):
+    return FinetuningJobRepository(test_db_session)
 
 
 def test_create_and_get_job(job_repository):

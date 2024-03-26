@@ -7,11 +7,11 @@ Source code for the MZAI Platform.
 (1) Launch the application (in detach mode).
 
 ```
-docker compose up -d
+docker compose --env-file=compose.env up -d
 ```
 
 (2) Spin the application down.
 
 ```
-docker compose down
+docker compose --env-file=compose.env down
 ```

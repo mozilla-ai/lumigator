@@ -7,7 +7,7 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from src.settings import settings
 
 
-class Base(DeclarativeBase):
+class BaseRecord(DeclarativeBase):
     pass
 
 

@@ -1,8 +1,8 @@
 from enum import Enum
 
 from pydantic import computed_field
-from pydantic_core import Url
 from pydantic_settings import BaseSettings
+from sqlalchemy.engine import URL
 
 
 class DeploymentType(str, Enum):
@@ -29,14 +29,14 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def SQLALCHEMY_DATABASE_URL(self) -> Url:  # noqa: N802
-        return Url.build(
-            scheme="postgresql",
+    def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
+        return URL.create(
+            drivername="postgresql",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_HOST,
             port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
+            database=self.POSTGRES_DB,
         )
 
 

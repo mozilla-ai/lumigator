@@ -14,7 +14,7 @@ from src.settings import settings
 
 
 @pytest.fixture(scope="session")
-def test_db_engine():
+def db_engine():
     """Initialize a Postgres test container as the DB engine for integration tests."""
     with PostgresContainer(
         "postgres:16-alpine",
@@ -29,30 +29,30 @@ def test_db_engine():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def initialize_db(test_db_engine):
+def initialize_db(db_engine):
     """Create DB database/tables for the test suite.
 
     # TODO: Run migrations here once switched over to Alembic.
     """
-    BaseRecord.metadata.create_all(test_db_engine)
+    BaseRecord.metadata.create_all(db_engine)
 
 
 @pytest.fixture(scope="session")
-def test_app(test_db_engine):
+def app(db_engine):
     """Create the FastAPI app bound to the test DB engine."""
-    app = create_app(test_db_engine)
+    app = create_app(db_engine)
     return app
 
 
 @pytest.fixture(scope="function")
-def test_client(test_app):
+def client(app):
     """Create a test client for calling the FastAPI app."""
-    with TestClient(test_app) as c:
+    with TestClient(app) as c:
         yield c
 
 
 @pytest.fixture(scope="function")
-def test_db_session(test_db_engine):
+def db_session(db_engine):
     """Fixture to provide a clean DB session per test function.
 
     This method yields a session and rolls it back after test completion
@@ -60,7 +60,7 @@ def test_db_session(test_db_engine):
 
     Reference: https://dev.to/jbrocher/fastapi-testing-a-database-5ao5
     """
-    with test_db_engine.begin() as connection:
+    with db_engine.begin() as connection:
         try:
             session = Session(bind=connection)
             yield session
@@ -69,13 +69,13 @@ def test_db_session(test_db_engine):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def session_override(test_app, test_db_session) -> None:
+def session_override(app, db_session) -> None:
     """Override the FastAPI dependency injection for test DB sessions.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
     """
 
     def get_db_session_override():
-        yield test_db_session
+        yield db_session
 
-    test_app.dependency_overrides[get_db_session] = get_db_session_override
+    app.dependency_overrides[get_db_session] = get_db_session_override

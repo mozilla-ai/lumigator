@@ -2,16 +2,18 @@
 
 Source code for the MZAI Platform.
 
-## Running Locally
+## Running locally with Docker Compose
+
+A `Makefile` is defined for running `docker compose` commands with the proper environment.
 
 (1) Launch the application (in detach mode).
 
 ```
-docker compose up -d
+make up
 ```
 
 (2) Spin the application down.
 
 ```
-docker compose down
+make down
 ```

@@ -1,6 +1,6 @@
 # Platform Backend
 
-## Local Setup
+## Local setup
 
 (1) Create a virtual environment and install Poetry for managing dependencies.
 
@@ -14,24 +14,26 @@ pip install poetry
 poetry lock && poetry install
 ```
 
-(3) Launch the application (with auto-reloading).
+(3) Run linting checks.
 
 ```
-uvicorn src.main:app --reload
+./scripts/lint.sh
 ```
 
-## Docker
-
-(1) Build the backend Docker image.
+(4) Run test suite.
 
 ```
-docker build . -t backend
+./scripts/test.sh
 ```
 
-(2) Launch the application (forwarded to port 80 of your local machine).
+## Test dependencies
 
-```
-docker run --rm -p 80:80 backend
-```
+The backend application depends on a handful of external services
+(e.g., Postgres, Ray cluster) to function.
+These dependencies are configured as pytest fixtures to enable
+running unit/integration tests locally while developing.
+However, they will not be present if you try to launch the FastAPI server alone via the `main.py` script, 
+and the application will fail to start.
 
-(3) View the API documentation in your browser at `http://0.0.0.0:80/docs`.
+To run the entire application locally,
+follow the guide in the parent [README.md](../README.md) using Docker Compose.

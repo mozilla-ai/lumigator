@@ -17,10 +17,10 @@ class JobStatus(str, Enum):
 
 
 class Health(BaseModel):
-    status: str = Field(..., example="Ok")
+    status: str = Field(..., example="OK")
     deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)
 
 
-class ListingResponse(Generic[ItemType], BaseModel):
+class ListingResponse(BaseModel, Generic[ItemType]):
     total: int
     items: list[ItemType]

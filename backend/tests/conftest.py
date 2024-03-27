@@ -20,7 +20,8 @@ def test_db_engine():
         dbname=settings.POSTGRES_DB,
     ) as postgres:
         url = postgres.get_connection_url()
-        yield sqlalchemy.create_engine(url, echo=True)
+        engine = sqlalchemy.create_engine(url, echo=True)
+        yield engine
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -31,7 +32,8 @@ def initialize_db(test_db_engine):
 
 @pytest.fixture(scope="session")
 def test_app(test_db_engine):
-    return create_app(test_db_engine)
+    app = create_app(test_db_engine)
+    return app
 
 
 @pytest.fixture(scope="function")

@@ -24,6 +24,7 @@ class DatabaseSessionManager:
 
     @contextlib.contextmanager
     def connect(self) -> Iterator[Connection]:
+        """Yield a transactional connection, rolling back on errors."""
         with self._engine.begin() as connection:
             try:
                 yield connection
@@ -43,5 +44,5 @@ class DatabaseSessionManager:
             session.close()
 
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URL), echo=True)
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
 session_manager = DatabaseSessionManager(engine)

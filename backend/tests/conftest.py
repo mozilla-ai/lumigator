@@ -9,6 +9,9 @@ from src.db import BaseRecord, DatabaseSessionManager
 from src.main import create_app
 from src.settings import settings
 
+# TODO: Add test fixtures for Ray cluster (and other services?)
+# Possibly break tests into "unit" and "integration" for those requiring external deps or not
+
 
 @pytest.fixture(scope="session")
 def test_db_engine():

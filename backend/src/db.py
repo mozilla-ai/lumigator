@@ -8,7 +8,13 @@ from src.settings import settings
 
 
 class BaseRecord(DeclarativeBase):
-    pass
+    """Base class for declarative SQLAlchemy mappings.
+
+    Commonly, these mappings are referred to as "models".
+    However, "model" is an incredibly overloaded term on the platform,
+    so we're using the term "record" instead to indicate that instances of these classes
+    generally correspond to single records (i.e., rows) in a DB table.
+    """
 
 
 class DatabaseSessionManager:

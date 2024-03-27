@@ -16,7 +16,7 @@ class JobStatus(str, Enum):
     SUCCEEDED = "succeeded"
 
 
-class Health(BaseModel):
+class HealthResponse(BaseModel):
     status: str = Field(..., example="OK")
     deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)
 

@@ -1,4 +1,5 @@
 import pytest
+import ray
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -9,8 +10,24 @@ from src.db import BaseRecord
 from src.main import create_app
 from src.settings import settings
 
-# TODO: Add test fixtures for Ray cluster (and other services?)
-# Possibly break tests into "unit" and "integration" for those requiring external deps or not
+# TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ray_cluster():
+    """Initialize a small, fixed-size Ray cluster for testing.
+
+    Ray has other options for testing that we could explore down the road
+    (https://docs.ray.io/en/latest/ray-core/examples/testing-tips.html).
+    But for now, a small, static-size cluster as a fixture seems to work fine.
+    """
+    try:
+        # Num CPUs is auto-detected so we don't need to pass it
+        # TODO: DO we need to set any env vars here for Ray storage?
+        ray.init(num_gpus=0)
+        yield
+    finally:
+        ray.shutdown()
 
 
 @pytest.fixture(scope="session")
@@ -47,7 +64,8 @@ def app(db_engine):
 @pytest.fixture(scope="function")
 def client(app):
     """Create a test client for calling the FastAPI app."""
-    with TestClient(app) as c:
+    base_url = f"http://testserver{settings.API_V1_STR}"
+    with TestClient(app, base_url=base_url) as c:
         yield c
 
 

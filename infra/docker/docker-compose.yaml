@@ -2,12 +2,10 @@ name: mzai-platform
 version: "3.8"
 
 services:
-  db:
-    image: postgres:16-alpine
+  postgres:
+    image: ${POSTGRES_IMAGE}
     volumes:
       - postgres-data:/var/lib/postgresql/data/
-    expose:
-      - ${POSTGRES_PORT}
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     environment:
@@ -15,19 +13,33 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB
 
+  ray:
+    image: ${RAY_IMAGE}
+    command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=${RAY_DASHBOARD_PORT} --block"
+    ports:
+      - ${RAY_DASHBOARD_PORT}:${RAY_DASHBOARD_PORT}
+    deploy:
+      resources:
+        limits:
+          cpus: ${RAY_HEAD_NODE_CPUS}
+          memory: ${RAY_HEAD_NODE_MEMORY}
+
   backend:
     build: ../../backend
     depends_on:
-      - db
+      - postgres
+      - ray
+    ports:
+      - 80:80
     environment:
       - DEPLOYMENT_TYPE
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
       - POSTGRES_HOST
       - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
       - POSTGRES_DB
-    ports:
-      - "80:80"
+      - RAY_HEAD_NODE_HOST
+      - RAY_DASHBOARD_PORT
 
 
 volumes:

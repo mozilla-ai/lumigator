@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
-    RAY_HEAD_NODE_PORT: int = 8265
+    RAY_DASHBOARD_PORT: int = 8265
 
     @computed_field
     @property

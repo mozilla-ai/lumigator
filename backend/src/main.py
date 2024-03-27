@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from sqlalchemy import Engine
 
 from src.api.router import api_router
+from src.api.tags import tags_metadata
 from src.db import BaseRecord, engine
 from src.settings import settings
 
@@ -15,7 +16,11 @@ def create_app(engine: Engine) -> FastAPI:
         BaseRecord.metadata.create_all(engine)
         yield
 
-    app = FastAPI(title="Platform Backend", lifespan=lifespan)
+    app = FastAPI(
+        title="Platform Backend",
+        lifespan=lifespan,
+        openapi_tags=tags_metadata,
+    )
     app.include_router(api_router, prefix=settings.API_V1_STR)
     return app
 

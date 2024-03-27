@@ -25,7 +25,10 @@ class FinetuningService:
         return record
 
     def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
-        submission_id = self.ray_client.submit_job(entrypoint="echo 'Hello from Ray!'")
+        # TODO: Dummy submission logic that needs to be updated for real
+        submission_id = self.ray_client.submit_job(
+            entrypoint="echo 'Hello from Ray!'",
+        )
         record = self.job_repo.create(name=request.name, submission_id=submission_id)
         return FinetuningJobResponse.model_validate(record)
 

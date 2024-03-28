@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.settings import DeploymentType
 
@@ -17,8 +17,8 @@ class JobStatus(str, Enum):
 
 
 class HealthResponse(BaseModel):
-    status: str = Field(..., example="OK")
-    deployment_type: DeploymentType = Field(..., example=DeploymentType.PRODUCTION)
+    status: str
+    deployment_type: DeploymentType
 
 
 class ListingResponse(BaseModel, Generic[ItemType]):

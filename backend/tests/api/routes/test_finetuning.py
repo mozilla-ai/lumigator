@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from src.api.deps import DBSessionDep, get_finetuning_service
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.extras import ListingResponse
-from src.schemas.finetuning import FinetuningJobCreate, FinetuningJobResponse
+from src.schemas.finetuning import FinetuningJobCreate, FinetuningJobResponse, FinetuningJobUpdate
 from tests.fakes.finetuning_service import FakeFinetuningService
 
 
@@ -26,7 +26,7 @@ def create_jobs_via_backdoor(db_session):
 
 @pytest.fixture(scope="function", autouse=True)
 def finetuning_service_override(app) -> None:
-    """Override the FastAPI dependency injection with fake finetuning services.
+    """Override the FastAPI dependency injection with a fake finetuning service.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
     """
@@ -84,3 +84,20 @@ def test_list_jobs(client: TestClient, create_jobs_via_backdoor):
     skip_listing = ListingResponse.model_validate(skip_response.json())
     assert skip_listing.total == 5
     assert len(skip_listing.items) == 2
+
+
+def test_update_job(client: TestClient, create_jobs_via_backdoor):
+    update_request = FinetuningJobUpdate(name="updated", description="updated")
+
+    # Before job exists
+    random_id = uuid.uuid4()
+    response = client.put(f"/finetuning/jobs/{random_id}", json=update_request.model_dump())
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    # After creating job
+    created_id = create_jobs_via_backdoor(n_jobs=1)[0]
+    response = client.put(f"/finetuning/jobs/{created_id}", json=update_request.model_dump())
+    assert response.status_code == status.HTTP_200_OK
+    updated_job = FinetuningJobResponse.model_validate(response.json())
+    assert updated_job.name == update_request.name
+    assert updated_job.description == update_request.description

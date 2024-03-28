@@ -1,3 +1,6 @@
+import tempfile
+from pathlib import Path
+
 import pytest
 import ray
 from fastapi.testclient import TestClient
@@ -6,28 +9,12 @@ from sqlalchemy.orm import Session
 from testcontainers.postgres import PostgresContainer
 
 from src.api.deps import get_db_session
+from src.api.router import API_V1_PREFIX
 from src.db import BaseRecord
 from src.main import create_app
 from src.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
-
-
-@pytest.fixture(scope="session", autouse=True)
-def ray_cluster():
-    """Initialize a small, fixed-size Ray cluster for testing.
-
-    Ray has other options for testing that we could explore down the road
-    (https://docs.ray.io/en/latest/ray-core/examples/testing-tips.html).
-    But for now, a small, static-size cluster as a fixture seems to work fine.
-    """
-    try:
-        # Num CPUs is auto-detected so we don't need to pass it
-        # TODO: DO we need to set any env vars here for Ray storage?
-        ray.init(num_gpus=0)
-        yield
-    finally:
-        ray.shutdown()
 
 
 @pytest.fixture(scope="session")
@@ -54,6 +41,23 @@ def initialize_db(db_engine):
     BaseRecord.metadata.create_all(db_engine)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def initialize_ray():
+    """Initialize a small, fixed-size Ray cluster for testing.
+
+    Ray has other options for testing that we could explore down the road
+    (https://docs.ray.io/en/latest/ray-core/examples/testing-tips.html).
+    But for now, a small, static-size cluster as a fixture seems to work fine.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        try:
+            env_vars = {"RAY_STORAGE": str(Path(tmpdir) / "ray")}
+            ray.init(num_cpus=1, num_gpus=0, runtime_env={"env_vars": env_vars})
+            yield
+        finally:
+            ray.shutdown()
+
+
 @pytest.fixture(scope="session")
 def app(db_engine):
     """Create the FastAPI app bound to the test DB engine."""
@@ -64,7 +68,7 @@ def app(db_engine):
 @pytest.fixture(scope="function")
 def client(app):
     """Create a test client for calling the FastAPI app."""
-    base_url = f"http://testserver{settings.API_V1_STR}"
+    base_url = f"http://mzai-platform.com{API_V1_PREFIX}"
     with TestClient(app, base_url=base_url) as c:
         yield c
 

@@ -15,7 +15,6 @@ class FinetuningJobCreate(BaseModel):
 class FinetuningJobUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
-    status: JobStatus | None = None
 
 
 class FinetuningJobResponse(BaseModel, from_attributes=True):

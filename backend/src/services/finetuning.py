@@ -19,10 +19,13 @@ class FinetuningService:
         self.job_repo = job_repo
         self.ray_client = ray_client
 
+    def _raise_job_not_found(self, job_id: UUID):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Finetuning job {job_id} not found.")
+
     def _get_job_record(self, job_id: UUID) -> FinetuningJobRecord:
         record = self.job_repo.get(job_id)
         if record is None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Finetuning job {job_id} not found.")
+            self._raise_job_not_found(job_id)
         return record
 
     def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
@@ -58,5 +61,9 @@ class FinetuningService:
             items=[FinetuningJobResponse.model_validate(x) for x in records],
         )
 
-    def update_job(self, request: FinetuningJobUpdate):
-        pass
+    def update_job(self, job_id: UUID, request: FinetuningJobUpdate) -> FinetuningJobResponse:
+        updates = request.model_dump(exclude_unset=True)
+        record = self.job_repo.update(job_id, updates)
+        if record is None:
+            self._raise_job_not_found(job_id)
+        return FinetuningJobResponse.model_validate(record)

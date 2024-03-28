@@ -7,6 +7,7 @@ from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
+    FinetuningJobUpdate,
     FinetuningLogsResponse,
 )
 
@@ -31,3 +32,12 @@ def get_finetuning_job_logs(service: FinetuningServiceDep, job_id: UUID):
 @router.get("/jobs", response_model=ListingResponse[FinetuningJobResponse])
 def list_finetuning_jobs(service: FinetuningServiceDep, skip: int = 0, limit: int = 100):
     return service.list_jobs(skip, limit)
+
+
+@router.put("/jobs/{job_id}", response_model=FinetuningJobResponse)
+def update_finetuning_job(
+    service: FinetuningServiceDep,
+    job_id: UUID,
+    request: FinetuningJobUpdate,
+):
+    return service.update_job(job_id, request)

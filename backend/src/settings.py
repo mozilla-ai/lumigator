@@ -13,7 +13,6 @@ class DeploymentType(str, Enum):
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
 
     # Postgres

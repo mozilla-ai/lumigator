@@ -26,12 +26,6 @@ class FinetuningJobRepository:
         self.session.refresh(job)
         return job
 
-    def get(self, job_id: UUID) -> FinetuningJobRecord | None:
-        return self.session.query(FinetuningJobRecord).get(job_id)
-
-    def list(self, skip: int = 0, limit: int = 100) -> list[FinetuningJobRecord]:
-        return self.session.query(FinetuningJobRecord).offset(skip).limit(limit).all()
-
     def update(self, job_id: UUID, updates: dict[str, Any]) -> FinetuningJobRecord | None:
         job = self.get(job_id)
         if job is None:
@@ -41,3 +35,9 @@ class FinetuningJobRepository:
         self.session.commit()
         self.session.refresh(job)
         return job
+
+    def get(self, job_id: UUID) -> FinetuningJobRecord | None:
+        return self.session.query(FinetuningJobRecord).get(job_id)
+
+    def list(self, skip: int = 0, limit: int = 100) -> list[FinetuningJobRecord]:
+        return self.session.query(FinetuningJobRecord).offset(skip).limit(limit).all()

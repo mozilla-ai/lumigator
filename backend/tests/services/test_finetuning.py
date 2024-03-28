@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 
 from src.repositories.finetuning import FinetuningJobRepository
+from src.schemas.finetuning import FinetuningJobUpdate
 from tests.fakes.finetuning_service import FakeFinetuningService
 
 
@@ -13,6 +14,11 @@ def finetuning_service(db_session):
     return FakeFinetuningService(job_repo)
 
 
-def test_get_missing_job_raises(finetuning_service):
+def test_not_found_exception(finetuning_service):
     with pytest.raises(HTTPException, match="not found"):
-        finetuning_service.get_job(uuid.uuid4())
+        random_id = uuid.uuid4()
+        finetuning_service.get_job(random_id)
+
+    with pytest.raises(HTTPException, match="not found"):
+        random_id = uuid.uuid4()
+        finetuning_service.update_job(random_id, FinetuningJobUpdate())

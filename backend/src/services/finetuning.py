@@ -9,6 +9,7 @@ from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
+    FinetuningJobUpdate,
     FinetuningLogsResponse,
 )
 
@@ -29,7 +30,11 @@ class FinetuningService:
         submission_id = self.ray_client.submit_job(
             entrypoint="echo 'Hello from Ray!'",
         )
-        record = self.job_repo.create(name=request.name, submission_id=submission_id)
+        record = self.job_repo.create(
+            name=request.name,
+            description=request.description,
+            submission_id=submission_id,
+        )
         return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:
@@ -52,3 +57,6 @@ class FinetuningService:
             total=total,
             items=[FinetuningJobResponse.model_validate(x) for x in records],
         )
+
+    def update_job(self, request: FinetuningJobUpdate):
+        pass

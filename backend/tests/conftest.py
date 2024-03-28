@@ -1,8 +1,4 @@
-import tempfile
-from pathlib import Path
-
 import pytest
-import ray
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -39,23 +35,6 @@ def initialize_db(db_engine):
     # TODO: Run migrations here once switched over to Alembic.
     """
     BaseRecord.metadata.create_all(db_engine)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def initialize_ray():
-    """Initialize a small, fixed-size Ray cluster for testing.
-
-    Ray has other options for testing that we could explore down the road
-    (https://docs.ray.io/en/latest/ray-core/examples/testing-tips.html).
-    But for now, a small, static-size cluster as a fixture seems to work fine.
-    """
-    with tempfile.TemporaryDirectory() as tmpdir:
-        try:
-            env_vars = {"RAY_STORAGE": str(Path(tmpdir) / "ray")}
-            ray.init(num_cpus=1, num_gpus=0, runtime_env={"env_vars": env_vars})
-            yield
-        finally:
-            ray.shutdown()
 
 
 @pytest.fixture(scope="session")

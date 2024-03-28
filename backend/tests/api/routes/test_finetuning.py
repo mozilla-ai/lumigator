@@ -82,7 +82,7 @@ def test_list_jobs(client: TestClient, create_jobs_via_backdoor):
     skip_response = client.get("/finetuning/jobs?skip=2&limit=2")
     assert skip_response.status_code == status.HTTP_200_OK
     skip_listing = ListingResponse.model_validate(skip_response.json())
-    assert skip_listing.total == 5
+    assert skip_listing.total == n_jobs
     assert len(skip_listing.items) == 2
 
 

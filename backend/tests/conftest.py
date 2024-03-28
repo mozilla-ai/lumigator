@@ -47,7 +47,7 @@ def app(db_engine):
 @pytest.fixture(scope="function")
 def client(app):
     """Create a test client for calling the FastAPI app."""
-    base_url = f"http://mzai-platform.com{API_V1_PREFIX}"
+    base_url = f"http://mzai.dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
 

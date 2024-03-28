@@ -4,36 +4,48 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from src.api.deps import DBSessionDep, get_finetuning_service
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.extras import ListingResponse
-from src.schemas.finetuning import FinetuningJobResponse
+from src.schemas.finetuning import FinetuningJobCreate, FinetuningJobResponse
+from tests.fakes.finetuning_service import FakeFinetuningService
 
 
 @pytest.fixture
-def create_jobs_via_backdoor_func(db_session):
-    def create(n_jobs: int):
+def create_jobs_via_backdoor(db_session):
+    def create_func(n_jobs: int) -> list[uuid.UUID]:
         created_ids = []
         job_repo = FinetuningJobRepository(db_session)
         for i in range(n_jobs):
-            record = job_repo.create(name=f"Job {i}", submission_id=f"Ray {i}")
+            record = job_repo.create(name=f"Job {i}", description="", submission_id=f"Ray {i}")
             created_ids.append(record.id)
         return created_ids
 
-    return create
+    return create_func
 
 
-# TODO: This will actually trigger the Ray job, perhaps mock this out somehow
-#       Do we want to be using a real Ray cluster in these ITs, or fake out the interactions?
-# def test_create_job(client: TestClient):
-#     # Create via API route
-#
-#     request = FinetuningJobCreate(name="test-job", config={})
-#     response = client.post("/finetuning/jobs", json=request.model_dump())
-#     assert response.status_code == status.HTTP_201_CREATED
+@pytest.fixture(scope="function", autouse=True)
+def finetuning_service_override(app) -> None:
+    """Override the FastAPI dependency injection with fake finetuning services.
+
+    Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
+    """
+
+    def get_finetuning_service_override(session: DBSessionDep):
+        job_repo = FinetuningJobRepository(session)
+        yield FakeFinetuningService(job_repo)
+
+    app.dependency_overrides[get_finetuning_service] = get_finetuning_service_override
 
 
-def test_get_job(client: TestClient, create_jobs_via_backdoor_func):
-    created_id = create_jobs_via_backdoor_func(n_jobs=1)[0]
+def test_create_job(client: TestClient):
+    request = FinetuningJobCreate(name="job", description="fake", config={})
+    response = client.post("/finetuning/jobs", json=request.model_dump())
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_get_job(client: TestClient, create_jobs_via_backdoor):
+    created_id = create_jobs_via_backdoor(n_jobs=1)[0]
 
     response = client.get(f"/finetuning/jobs/{created_id}")
     assert response.status_code == status.HTTP_200_OK
@@ -47,7 +59,7 @@ def test_get_missing_job(client: TestClient):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_list_jobs(client: TestClient, create_jobs_via_backdoor_func):
+def test_list_jobs(client: TestClient, create_jobs_via_backdoor):
     # List on an empty database
     empty_response = client.get("/finetuning/jobs")
     assert empty_response.status_code == status.HTTP_200_OK
@@ -57,7 +69,7 @@ def test_list_jobs(client: TestClient, create_jobs_via_backdoor_func):
 
     # Create some jobs via repository backdoor
     n_jobs = 5
-    create_jobs_via_backdoor_func(n_jobs=n_jobs)
+    create_jobs_via_backdoor(n_jobs=n_jobs)
 
     # Check listing after jobs created
     all_response = client.get("/finetuning/jobs")

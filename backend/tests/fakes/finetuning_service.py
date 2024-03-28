@@ -1,5 +1,11 @@
+from uuid import UUID
+
 from src.repositories.finetuning import FinetuningJobRepository
-from src.schemas.finetuning import FinetuningJobCreate, FinetuningJobResponse
+from src.schemas.finetuning import (
+    FinetuningJobCreate,
+    FinetuningJobResponse,
+    FinetuningLogsResponse,
+)
 from src.services.finetuning import FinetuningService
 
 
@@ -14,4 +20,10 @@ class FakeFinetuningService(FinetuningService):
             name=request.name,
             description=request.description,
             submission_id="",
+        )
+
+    def get_job_logs(self, job_id: UUID) -> FinetuningLogsResponse:
+        record = self._get_job_record(job_id)
+        return FinetuningLogsResponse(
+            id=record.id, status=record.status, logs=["Fake logs from Ray."]
         )

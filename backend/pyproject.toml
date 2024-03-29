@@ -35,7 +35,7 @@ testcontainers = "4.2.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov src/ --no-cov-on-fail --disable-warnings"
+addopts = "-v --cov src/ --no-cov-on-fail"
 
 [tool.ruff]
 target-version = "py310"

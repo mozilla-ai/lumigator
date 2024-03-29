@@ -6,7 +6,7 @@ class Tags(str, Enum):
     FINETUNING = "finetuning"
 
 
-tags_metadata = [
+TAGS_METADATA = [
     {
         "name": Tags.HEALTH,
         "description": "Health check for the application.",
@@ -16,3 +16,7 @@ tags_metadata = [
         "description": "Create and manage finetuning jobs.",
     },
 ]
+"""Metadata to associate with route tags in the OpenAPI documentation.
+
+Reference: https://fastapi.tiangolo.com/tutorial/metadata/#metadata-for-tags
+"""

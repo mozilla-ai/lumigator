@@ -27,7 +27,7 @@ jobs:
           cd backend && poetry install
 
       - name: Lint
-        run: cd backend && poetry run scripts/lint.sh
+        run: cd backend && poetry run make lint
 
       - name: Test
-        run: cd backend && poetry run scripts/test.sh
+        run: cd backend && poetry run make test

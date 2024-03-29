@@ -13,7 +13,6 @@ class DeploymentType(str, Enum):
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
 
     # Postgres
@@ -25,7 +24,7 @@ class Settings(BaseSettings):
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
-    RAY_HEAD_NODE_PORT: int = 8265
+    RAY_DASHBOARD_PORT: int = 8265
 
     @computed_field
     @property

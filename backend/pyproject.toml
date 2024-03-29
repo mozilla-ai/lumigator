@@ -81,6 +81,7 @@ select = [
 ]
 
 ignore = [
+    "ISC001", #
     "D417", # documentation for every function parameter.
     "N806", # ignore uppercased variables
     "N812", # import as uppercased

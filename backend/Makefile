@@ -1,6 +1,11 @@
-lint:
+lint: format
 	ruff check src
-	ruff format src --check
+
+format:
+	ruff check . --fix
 
 test:
 	pytest
+
+
+.PHONY: lint format test

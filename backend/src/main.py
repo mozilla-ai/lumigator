@@ -20,4 +20,6 @@ def create_app(engine: Engine) -> FastAPI:
     return app
 
 
+
 app = create_app(engine)
+

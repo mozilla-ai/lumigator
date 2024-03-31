@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 
 from src.api.deps import FinetuningServiceDep
+from src.handlers import FinetuningJobHandler
 from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
@@ -15,8 +16,16 @@ router = APIRouter()
 
 
 @router.post("/jobs", response_model=FinetuningJobResponse, status_code=status.HTTP_201_CREATED)
-def create_finetuning_job(service: FinetuningServiceDep, request: FinetuningJobCreate):
-    return service.create_job(request)
+def create_finetuning_job(
+    service: FinetuningServiceDep,
+    background: BackgroundTasks,
+    request: FinetuningJobCreate,
+):
+    response = service.create_job(request)
+    submission_id = service.get_job_submission_id(response.id)
+    handler = FinetuningJobHandler(response.id)
+    background.add_task(handler.poll, submission_id)
+    return response
 
 
 @router.get("/jobs/{job_id}", response_model=FinetuningJobResponse)

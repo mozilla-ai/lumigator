@@ -6,7 +6,7 @@ class Tags(str, Enum):
     FINETUNING = "finetuning"
 
 
-TAGS_METADATA = [
+tags_metadata = [
     {
         "name": Tags.HEALTH,
         "description": "Health check for the application.",

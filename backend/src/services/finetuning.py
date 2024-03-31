@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -5,7 +6,7 @@ from ray.job_submission import JobSubmissionClient
 
 from src.records.finetuning import FinetuningJobRecord
 from src.repositories.finetuning import FinetuningJobRepository
-from src.schemas.extras import ListingResponse
+from src.schemas.extras import JobStatus, ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
@@ -24,6 +25,12 @@ class FinetuningService:
 
     def _get_job_record(self, job_id: UUID) -> FinetuningJobRecord:
         record = self.job_repo.get(job_id)
+        if record is None:
+            self._raise_job_not_found(job_id)
+        return record
+
+    def _update_job_record(self, job_id: UUID, updates: dict[str, Any]) -> FinetuningJobRecord:
+        record = self.job_repo.update(job_id, updates)
         if record is None:
             self._raise_job_not_found(job_id)
         return record
@@ -53,6 +60,10 @@ class FinetuningService:
             logs=logs.strip().split("\n"),
         )
 
+    def get_job_submission_id(self, job_id: UUID) -> str:
+        record = self._get_job_record(job_id)
+        return record.submission_id
+
     def list_jobs(self, skip: int = 0, limit: int = 100) -> ListingResponse[FinetuningJobResponse]:
         total = self.job_repo.count()
         records = self.job_repo.list(skip, limit)
@@ -63,7 +74,10 @@ class FinetuningService:
 
     def update_job(self, job_id: UUID, request: FinetuningJobUpdate) -> FinetuningJobResponse:
         updates = request.model_dump(exclude_unset=True)
-        record = self.job_repo.update(job_id, updates)
-        if record is None:
-            self._raise_job_not_found(job_id)
+        record = self._update_job_record(job_id, updates)
+        return FinetuningJobResponse.model_validate(record)
+
+    def update_job_status(self, job_id: UUID, status: JobStatus) -> FinetuningJobResponse:
+        updates = {"status": status}
+        record = self._update_job_record(job_id, updates)
         return FinetuningJobResponse.model_validate(record)

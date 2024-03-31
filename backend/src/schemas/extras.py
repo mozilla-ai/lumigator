@@ -10,7 +10,7 @@ ItemType = TypeVar("ItemType")
 
 
 class JobStatus(str, Enum):
-    INPROGRESS = "in-progress"
+    IN_PROGRESS = "in_progress"
     FAILED = "failed"
     STOPPED = "stopped"
     SUCCEEDED = "succeeded"
@@ -19,7 +19,7 @@ class JobStatus(str, Enum):
     def from_ray(cls, ray_status: RayJobStatus) -> "JobStatus":
         match ray_status:
             case RayJobStatus.PENDING | RayJobStatus.RUNNING:
-                return JobStatus.INPROGRESS
+                return JobStatus.IN_PROGRESS
             case RayJobStatus.FAILED:
                 return JobStatus.FAILED
             case RayJobStatus.STOPPED:

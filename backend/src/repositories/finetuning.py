@@ -19,7 +19,7 @@ class FinetuningJobRepository:
             name=name,
             description=description,
             submission_id=submission_id,
-            status=JobStatus.INPROGRESS,
+            status=JobStatus.IN_PROGRESS,
         )
         self.session.add(job)
         self.session.commit()

@@ -3,7 +3,6 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, status
 
 from src.api.deps import FinetuningServiceDep
-from src.handlers import FinetuningJobHandler
 from src.schemas.extras import ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
@@ -21,11 +20,7 @@ def create_finetuning_job(
     background: BackgroundTasks,
     request: FinetuningJobCreate,
 ):
-    response = service.create_job(request)
-    submission_id = service.get_job_submission_id(response.id)
-    handler = FinetuningJobHandler(response.id)
-    background.add_task(handler.poll, submission_id)
-    return response
+    return service.create_job(request, background)
 
 
 @router.get("/jobs/{job_id}", response_model=FinetuningJobResponse)

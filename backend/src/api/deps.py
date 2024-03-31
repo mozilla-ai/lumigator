@@ -8,14 +8,7 @@ from sqlalchemy.orm import Session
 from src.db import session_manager
 from src.repositories.finetuning import FinetuningJobRepository
 from src.services.finetuning import FinetuningService
-from src.settings import settings
-
-
-def get_ray_client() -> JobSubmissionClient:
-    return JobSubmissionClient(
-        f"http://{settings.RAY_HEAD_NODE_HOST}:{settings.RAY_DASHBOARD_PORT}"
-    )
-
+from src.utils import get_ray_client
 
 RayClientDep = Annotated[JobSubmissionClient, Depends(get_ray_client)]
 

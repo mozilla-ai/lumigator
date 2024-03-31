@@ -1,9 +1,10 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from src.jobs.handlers import FinetuningJobHandler
 from src.records.finetuning import FinetuningJobRecord
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.extras import JobStatus, ListingResponse
@@ -35,7 +36,11 @@ class FinetuningService:
             self._raise_job_not_found(job_id)
         return record
 
-    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
+    def create_job(
+        self,
+        request: FinetuningJobCreate,
+        background: BackgroundTasks,
+    ) -> FinetuningJobResponse:
         # TODO: Dummy submission logic that needs to be updated for real
         submission_id = self.ray_client.submit_job(
             entrypoint="echo 'Hello from Ray!'",
@@ -45,6 +50,11 @@ class FinetuningService:
             description=request.description,
             submission_id=submission_id,
         )
+
+        # Poll for job completion in background
+        handler = FinetuningJobHandler(record.id)
+        background.add_task(handler.poll, submission_id)
+
         return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:

@@ -30,6 +30,7 @@ class RayJobHandler(ABC):
 
         while True:
             details = self.ray_client.get_job_info(self.submission_id)
+            logger.info(f"Polling for Ray job '{self.submission_id}', status = {details.status}")
             if details.status.is_terminal():
                 self.on_complete(details)
                 break
@@ -56,6 +57,9 @@ class FinetuningJobHandler(RayJobHandler):
     def _get_finetuning_service(self):
         from src.services.finetuning import FinetuningService
 
+        # We should avoid injecting API dependencies into the handlers that run in the background
+        # This is to avoid DB sessions from the API hanging while the background task runs
+        # Discussion: https://github.com/tiangolo/fastapi/discussions/8502
         with session_manager.session() as session:
             job_repo = FinetuningJobRepository(session)
             yield FinetuningService(job_repo, self.ray_client)

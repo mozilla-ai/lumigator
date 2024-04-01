@@ -1,5 +1,4 @@
 import time
-from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from uuid import UUID
 
@@ -12,46 +11,16 @@ from src.schemas.extras import JobStatus
 from src.settings import settings
 
 
-class RayJobHandler(ABC):
-    """Interface for polling Ray jobs for completion and handling the results."""
+class FinetuningJobHandler:
+    """Handler for monitoring/updating the results of a finetuning job.
 
-    def __init__(self, submission_id: str):
+    Currently implemented by polling the Ray jobs API for terminal status.
+    """
+
+    def __init__(self, job_id: UUID, submission_id: str):
+        self.job_id = job_id
         self.submission_id = submission_id
         self.ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-
-    def poll(
-        self,
-        *,
-        interval: float = 5.0,
-        timeout: float | None = None,
-    ) -> None:
-        start_time = time.time()
-        timeout = timeout or float("inf")
-
-        while True:
-            details = self.ray_client.get_job_info(self.submission_id)
-            logger.info(f"Polling for Ray job '{self.submission_id}', status = {details.status}")
-            if details.status.is_terminal():
-                self.on_complete(details)
-                break
-
-            elapsed_time = time.time() - start_time
-            if elapsed_time > timeout:
-                msg = f"Polling for job {self} failed due to timeout."
-                logger.error(msg)
-                raise TimeoutError(msg)
-
-            time.sleep(interval)
-
-    @abstractmethod
-    def on_complete(self, details: JobDetails) -> None:
-        pass
-
-
-class FinetuningJobHandler(RayJobHandler):
-    def __init__(self, job_id: UUID, submission_id: str):
-        super().__init__(submission_id)
-        self.job_id = job_id
 
     @contextmanager
     def _get_finetuning_service(self):
@@ -64,9 +33,33 @@ class FinetuningJobHandler(RayJobHandler):
             job_repo = FinetuningJobRepository(session)
             yield FinetuningService(job_repo, self.ray_client)
 
-    def on_complete(self, details: JobDetails) -> None:
+    def _on_complete(self, details: JobDetails) -> None:
         # TODO: Also create a record in the Models table here
         logger.info(f"Finetuning job {self.job_id} finished with details {details}")
         with self._get_finetuning_service() as finetuning_service:
             status = JobStatus.from_ray(details.status)
             finetuning_service.update_job_status(self.job_id, status)
+
+    def poll(
+        self,
+        *,
+        interval: float = 5.0,
+        timeout: float | None = None,
+    ) -> None:
+        start_time = time.time()
+        timeout = timeout or float("inf")
+
+        while True:
+            details = self.ray_client.get_job_info(self.submission_id)
+            logger.info(f"Polling for finetuning job {self.job_id}', status = {details.status}")
+            if details.status.is_terminal():
+                self._on_complete(details)
+                break
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > timeout:
+                msg = f"Polling for finetuning job {self.job_id} failed due to timeout."
+                logger.error(msg)
+                raise TimeoutError(msg)
+
+            time.sleep(interval)

@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from fastapi import BackgroundTasks
+
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.finetuning import (
     FinetuningJobCreate,
@@ -15,7 +17,11 @@ class FakeFinetuningService(FinetuningService):
     def __init__(self, job_repo: FinetuningJobRepository):
         super().__init__(job_repo, ray_client=None)
 
-    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
+    def create_job(
+        self,
+        request: FinetuningJobCreate,
+        background: BackgroundTasks,
+    ) -> FinetuningJobResponse:
         return self.job_repo.create(
             name=request.name,
             description=request.description,

@@ -11,15 +11,6 @@ from src.services.finetuning import FinetuningService
 from src.settings import settings
 
 
-def get_ray_client() -> JobSubmissionClient:
-    return JobSubmissionClient(
-        f"http://{settings.RAY_HEAD_NODE_HOST}:{settings.RAY_DASHBOARD_PORT}"
-    )
-
-
-RayClientDep = Annotated[JobSubmissionClient, Depends(get_ray_client)]
-
-
 def get_db_session() -> Generator[Session, None, None]:
     with session_manager.session() as session:
         yield session
@@ -28,8 +19,9 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
-def get_finetuning_service(session: DBSessionDep, ray_client: RayClientDep) -> FinetuningService:
+def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
     job_repo = FinetuningJobRepository(session)
+    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
     return FinetuningService(job_repo, ray_client)
 
 

@@ -28,6 +28,11 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
+    def RAY_DASHBOARD_URL(self) -> str:  # noqa: N802
+        return f"http://{self.RAY_HEAD_NODE_HOST}:{self.RAY_DASHBOARD_PORT}"
+
+    @computed_field
+    @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
         return URL.create(
             drivername="postgresql",

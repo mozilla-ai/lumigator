@@ -4,12 +4,12 @@ from contextlib import contextmanager
 from uuid import UUID
 
 from loguru import logger
-from ray.job_submission import JobDetails
+from ray.job_submission import JobDetails, JobSubmissionClient
 
 from src.db import session_manager
 from src.repositories.finetuning import FinetuningJobRepository
 from src.schemas.extras import JobStatus
-from src.utils import get_ray_job_client
+from src.settings import settings
 
 
 class RayJobHandler(ABC):
@@ -17,7 +17,7 @@ class RayJobHandler(ABC):
 
     def __init__(self, submission_id: str):
         self.submission_id = submission_id
-        self.ray_client = get_ray_job_client()
+        self.ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
 
     def poll(
         self,

@@ -40,7 +40,7 @@ class FinetuningService:
     def create_job(
         self,
         request: FinetuningJobCreate,
-        background: BackgroundTasks,
+        background_tasks: BackgroundTasks,
     ) -> FinetuningJobResponse:
         # Submit job to Ray
         entrypoint = FinetuningJobEntrypoint(config=request.config)
@@ -55,7 +55,7 @@ class FinetuningService:
 
         # Poll for job completion in background
         handler = FinetuningJobHandler(record.id, submission_id)
-        background.add_task(handler.poll)
+        background_tasks.add_task(handler.poll)
 
         return FinetuningJobResponse.model_validate(record)
 

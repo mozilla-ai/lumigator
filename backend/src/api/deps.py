@@ -8,9 +8,7 @@ from sqlalchemy.orm import Session
 from src.db import session_manager
 from src.repositories.finetuning import FinetuningJobRepository
 from src.services.finetuning import FinetuningService
-from src.utils import get_ray_job_client
-
-RayJobClientDep = Annotated[JobSubmissionClient, Depends(get_ray_job_client)]
+from src.settings import settings
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -21,8 +19,9 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
-def get_finetuning_service(session: DBSessionDep, ray_client: RayJobClientDep) -> FinetuningService:
+def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
     job_repo = FinetuningJobRepository(session)
+    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
     return FinetuningService(job_repo, ray_client)
 
 

@@ -17,13 +17,13 @@ poetry lock && poetry install
 (3) Run linting checks.
 
 ```
-./scripts/lint.sh
+make lint
 ```
 
 (4) Run test suite.
 
 ```
-./scripts/test.sh
+make test
 ```
 
 ## Test dependencies

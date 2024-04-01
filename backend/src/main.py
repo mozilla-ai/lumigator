@@ -15,11 +15,7 @@ def create_app(engine: Engine) -> FastAPI:
         BaseRecord.metadata.create_all(engine)
         yield
 
-    app = FastAPI(
-        title="Platform Backend",
-        lifespan=lifespan,
-        openapi_tags=TAGS_METADATA,
-    )
+    app = FastAPI(title="Platform Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
     app.include_router(api_router)
     return app
 

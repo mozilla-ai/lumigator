@@ -1,11 +1,14 @@
+from typing import Any
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from src.jobs.entrypoints import FinetuningJobEntrypoint, submit_ray_job
+from src.jobs.handlers import FinetuningJobHandler
 from src.records.finetuning import FinetuningJobRecord
 from src.repositories.finetuning import FinetuningJobRepository
-from src.schemas.extras import ListingResponse
+from src.schemas.extras import JobStatus, ListingResponse
 from src.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
@@ -28,16 +31,32 @@ class FinetuningService:
             self._raise_job_not_found(job_id)
         return record
 
-    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
-        # TODO: Dummy submission logic that needs to be updated for real
-        submission_id = self.ray_client.submit_job(
-            entrypoint="echo 'Hello from Ray!'",
-        )
+    def _update_job_record(self, job_id: UUID, updates: dict[str, Any]) -> FinetuningJobRecord:
+        record = self.job_repo.update(job_id, updates)
+        if record is None:
+            self._raise_job_not_found(job_id)
+        return record
+
+    def create_job(
+        self,
+        request: FinetuningJobCreate,
+        background_tasks: BackgroundTasks,
+    ) -> FinetuningJobResponse:
+        # Submit job to Ray
+        entrypoint = FinetuningJobEntrypoint(config=request.config)
+        submission_id = submit_ray_job(self.ray_client, entrypoint)
+
+        # Create DB record of job submission
         record = self.job_repo.create(
             name=request.name,
             description=request.description,
             submission_id=submission_id,
         )
+
+        # Poll for job completion in background
+        handler = FinetuningJobHandler(record.id, submission_id)
+        background_tasks.add_task(handler.poll)
+
         return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:
@@ -63,7 +82,10 @@ class FinetuningService:
 
     def update_job(self, job_id: UUID, request: FinetuningJobUpdate) -> FinetuningJobResponse:
         updates = request.model_dump(exclude_unset=True)
-        record = self.job_repo.update(job_id, updates)
-        if record is None:
-            self._raise_job_not_found(job_id)
+        record = self._update_job_record(job_id, updates)
+        return FinetuningJobResponse.model_validate(record)
+
+    def update_job_status(self, job_id: UUID, status: JobStatus) -> FinetuningJobResponse:
+        updates = {"status": status}
+        record = self._update_job_record(job_id, updates)
         return FinetuningJobResponse.model_validate(record)

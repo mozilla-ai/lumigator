@@ -27,9 +27,6 @@ class JobStatus(str, Enum):
             case RayJobStatus.SUCCEEDED:
                 return JobStatus.SUCCEEDED
 
-    def is_complete(self) -> bool:
-        return self in {JobStatus.FAILED, JobStatus.STOPPED, JobStatus.SUCCEEDED}
-
 
 class HealthResponse(BaseModel):
     status: str

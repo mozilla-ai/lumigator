@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import BackgroundTasks, HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from src.jobs.entrypoints import FinetuningJobEntrypoint, submit_ray_job
 from src.jobs.handlers import FinetuningJobHandler
 from src.records.finetuning import FinetuningJobRecord
 from src.repositories.finetuning import FinetuningJobRepository
@@ -41,10 +42,10 @@ class FinetuningService:
         request: FinetuningJobCreate,
         background: BackgroundTasks,
     ) -> FinetuningJobResponse:
-        # TODO: Dummy submission logic that needs to be updated for real
-        submission_id = self.ray_client.submit_job(
-            entrypoint="echo 'Hello from Ray!'",
-        )
+        entrypoint = FinetuningJobEntrypoint(config=request.config)
+        submission_id = submit_ray_job(self.ray_client, entrypoint)
+
+        # Create DB record of job submission
         record = self.job_repo.create(
             name=request.name,
             description=request.description,

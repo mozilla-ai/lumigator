@@ -72,10 +72,6 @@ class FinetuningService:
             logs=logs.strip().split("\n"),
         )
 
-    def get_job_submission_id(self, job_id: UUID) -> str:
-        record = self._get_job_record(job_id)
-        return record.submission_id
-
     def list_jobs(self, skip: int = 0, limit: int = 100) -> ListingResponse[FinetuningJobResponse]:
         total = self.job_repo.count()
         records = self.job_repo.list(skip, limit)

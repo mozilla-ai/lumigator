@@ -17,6 +17,22 @@ def dump_schema(app: FastAPI) -> None:
         ), f)
 
 
+def aiopenapigen():
+    import aiopenapi3
+    from aiopenapi3.loader import FileSystemLoader
+    from pathlib import Path
+
+    a = FileSystemLoader(Path(base="./openapi.json"))
+    api = aiopenapi3.OpenAPI.load_file("https://localhost/apispect",
+                                     path=Path("./openapi.json"),
+                                     loader=a)
+
+
+    operationIds = list(api._.Iter(api, False))
+    print(operationIds)
+
+
+
 if __name__ == '__main__':
-    from main import app
-    dump_schema(app)
+    # from main import app
+    aiopenapigen()

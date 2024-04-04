@@ -1,0 +1,48 @@
+[GLOBAL]
+pants_version = "2.19.1"
+colors = true
+
+
+
+backend_packages = [
+  "pants.backend.docker",
+  "pants.backend.shell",
+  "pants.backend.python",
+  "pants.backend.shell.lint.shfmt",
+  "pants.backend.shell.lint.shellcheck",
+  "pants.backend.experimental.python.lint.ruff",
+]
+
+[source]
+# defines the "roots" for subprojects. anything with folders like
+# mzai-platform/**/src/[python|docker|k8s|infra]/<name>
+# will be importable as `<name>.whatever` in python/etc.
+root_patterns = ["src/python", "src/docker", "src/k8s", "src/infra"]
+
+[tailor]
+build_file_name = "BUILD.pants"
+
+[python]
+interpreter_constraints = ['CPython==3.10.*']
+# Enable the "resolves" mechanism, which turns on lockfiles for user code. See
+# https://www.pantsbuild.org/docs/python-third-party-dependencies. This also adds the
+# `generate-lockfiles` goal for Pants to generate the lockfile for you.
+enable_resolves = true
+resolver_manylinux = "manylinux2014"
+resolves = { python-default = "python-default.lock"}
+
+[python-infer]
+use_rust_parser = true
+
+[ruff]
+config = "ruff.toml"
+
+
+[docker.registries.dockerhub]
+address = "docker.io"
+default = true
+
+[docker.registries.corewave_ngcp]
+address = "docker-registry.taild6f0e.ts.net"
+default = false # optional
+

@@ -1,0 +1,19 @@
+file(
+    name="ubuntu_2204_py310",
+    source="ubuntu_2204_pex_platform_tags.json"
+)
+
+file(
+    name="macosx_py310",
+    source="macosx_14_pex_platform_tags.json"
+)
+
+
+docker_image(
+    name = "gen_ubuntu_platform_tags",
+    build_platform = ["linux/amd64"],
+    image_tags = [
+        "dev",
+    ],
+    source="Dockerfile.ubuntu_plat_tags"
+)

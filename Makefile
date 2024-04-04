@@ -1,4 +1,4 @@
-DOCKER_DIR=infra/docker
+DOCKER_DIR=src/infra/docker
 COMPOSE_FILE=${DOCKER_DIR}/docker-compose.yaml
 ENV_FILE=${DOCKER_DIR}/.env.local
 

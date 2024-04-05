@@ -1,5 +1,5 @@
 import pytest
-from backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.schemas.extras import JobStatus
 
 

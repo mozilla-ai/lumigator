@@ -1,8 +1,14 @@
-python_sources()
-
-poetry_requirements(
+python_requirements(
     name = "backend_deps",
+    overrides = {
+        "ray": {"dependencies": [":backend_deps#setuptools"]},
+        "sqlalchemy": {"dependencies": [":backend_deps#psycopg2-binary"]},
+    },
     source = "pyproject.toml",
+)
+
+python_sources(
+    name = "backend",
 )
 
 pex_binary(

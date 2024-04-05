@@ -46,3 +46,8 @@ default = true
 address = "docker-registry.taild6f0e.ts.net"
 default = false # optional
 
+[pytest]
+requirements = [
+    "httpx"
+]
+args =["-v"]

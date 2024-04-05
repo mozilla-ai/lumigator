@@ -2,7 +2,7 @@ import uuid
 
 from mzai.backend.db import BaseRecord
 from mzai.backend.records.mixins import DateTimeMixin, NameDescriptionMixin
-from mzai.backend.schemas.extras import JobStatus
+from mzai.schemas.extras import JobStatus
 from sqlalchemy.orm import Mapped, mapped_column
 
 

@@ -5,10 +5,11 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from mzai.backend.tests.fakes.finetuning_service import FakeFinetuningService
+
 from mzai.backend.api.deps import DBSessionDep, get_finetuning_service
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
-from mzai.backend.schemas.extras import ListingResponse
-from mzai.backend.schemas.finetuning import (
+from mzai.schemas.extras import ListingResponse
+from mzai.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
     FinetuningJobUpdate,

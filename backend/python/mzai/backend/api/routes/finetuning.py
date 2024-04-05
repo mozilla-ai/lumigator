@@ -3,8 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, status
 
 from mzai.backend.api.deps import FinetuningServiceDep
-from mzai.backend.schemas.extras import ListingResponse
-from mzai.backend.schemas.finetuning import (
+from mzai.schemas.extras import ListingResponse
+from mzai.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
     FinetuningJobUpdate,

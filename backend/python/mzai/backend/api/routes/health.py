@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from mzai.backend.schemas.extras import HealthResponse
+from mzai.schemas.extras import HealthResponse
 from mzai.backend.settings import settings
 
 router = APIRouter()

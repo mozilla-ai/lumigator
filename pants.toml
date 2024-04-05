@@ -16,7 +16,7 @@ backend_packages = [
 
 [source]
 # defines the "roots" for subprojects. anything with folders like
-# mzai-platform/**/backend/[python|docker|k8s|infra]/<name>
+# //**/[python|docker|k8s|infra]/<name>/
 # will be importable as `<name>.whatever` in python/etc.
 root_patterns = ["python", "infra" ]
 
@@ -30,7 +30,7 @@ interpreter_constraints = ['CPython==3.10.*']
 # `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-resolves = { python-default = "python-default.lock"}
+resolves = { python-default = "pants_tools/python-default.lock"}
 
 [python-infer]
 use_rust_parser = true

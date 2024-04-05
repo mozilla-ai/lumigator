@@ -4,7 +4,7 @@ python_distribution(
     name="mzai_platform_schemas",
     dependencies=[
         ":schemas",
-        "src/python/mzai/backend:backend_reqs",
+        "backend/python/mzai/backend:backend_reqs",
     ],
     provides=python_artifact(
         name="mzai_platform_schemas",

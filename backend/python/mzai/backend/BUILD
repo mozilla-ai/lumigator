@@ -27,7 +27,7 @@ pex_binary(
     dependencies=[
         ":backend",  # defined implicitly by `python_sources()`
         ":backend_deps",
-        "src/python/mzai/backend/schemas:schemas",
+        "backend/python/mzai/backend/schemas:schemas",
     ],
     execution_mode="venv",
     include_sources=True,

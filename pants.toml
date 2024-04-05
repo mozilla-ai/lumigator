@@ -16,9 +16,9 @@ backend_packages = [
 
 [source]
 # defines the "roots" for subprojects. anything with folders like
-# mzai-platform/**/src/[python|docker|k8s|infra]/<name>
+# mzai-platform/**/backend/[python|docker|k8s|infra]/<name>
 # will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["src/python", "src/docker", "src/k8s", "src/infra"]
+root_patterns = ["python", "infra" ]
 
 [tailor]
 build_file_name = "BUILD.pants"

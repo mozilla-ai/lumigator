@@ -25,8 +25,8 @@ RUN curl -sS https://bootstrap.pypa.io/get-pip.py | ${PY_EXECUTABLE}
 # RUN pex3 interpreter inspect --markers --tags --interpreter-constraint "CPython==3.10.*"
 
 WORKDIR /app
-# src.python.mzai.backend is the output place for the built pex
-# it's in `//dist/src.python.mzai.backed`
+# backend.python.mzai.backend is the output place for the built pex
+# it's in `//dist/backend.python.mzai.backed`
 COPY src.python.mzai.backend/backend_fastapi_app.pex .
 RUN export PEX_TOOLS=1
 

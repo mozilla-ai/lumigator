@@ -8,6 +8,9 @@ run_shell_command(
 
 run_shell_command(
     command="./docker-compose.sh down",
-    execution_dependencies=[":shell-scripts", ],
+    execution_dependencies=[
+        ":shell-scripts",
+    ],
     name="mzai_backend_down",
 )
+

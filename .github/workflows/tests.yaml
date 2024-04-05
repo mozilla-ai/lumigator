@@ -37,7 +37,7 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run:
           for file in ${ALL_CHANGED_FILES}; do
-            pants lint fmt $file
+            pants lint fmt $file;
           done
 
       - name: Test

@@ -5,7 +5,7 @@ from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.tests.fakes.finetuning_service import FakeFinetuningService
 from fastapi import HTTPException
 
-from mzai.backend.schemas.finetuning import FinetuningJobUpdate
+from mzai.schemas.finetuning import FinetuningJobUpdate
 
 
 @pytest.fixture

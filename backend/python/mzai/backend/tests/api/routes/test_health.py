@@ -1,6 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-from mzai.backend.schemas.extras import HealthResponse
+from mzai.schemas.extras import HealthResponse
 
 
 def test_health_check(client: TestClient):

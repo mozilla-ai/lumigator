@@ -2,7 +2,7 @@ from typing import Any
 from uuid import UUID
 
 from mzai.backend.records.finetuning import FinetuningJobRecord
-from mzai.backend.schemas.extras import JobStatus
+from mzai.schemas.extras import JobStatus
 from sqlalchemy.orm import Session
 
 

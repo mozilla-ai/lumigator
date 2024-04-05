@@ -27,7 +27,7 @@ RUN curl -sS https://bootstrap.pypa.io/get-pip.py | ${PY_EXECUTABLE}
 WORKDIR /app
 # backend.python.mzai.backend is the output place for the built pex
 # it's in `//dist/backend.python.mzai.backed`
-COPY src.python.mzai.backend/backend_fastapi_app.pex .
+COPY backend.python.mzai.backend/backend_fastapi_app.pex .
 RUN export PEX_TOOLS=1
 
 ENTRYPOINT ["python3", "backend_fastapi_app.pex"]

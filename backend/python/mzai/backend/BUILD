@@ -1,14 +1,8 @@
-python_requirements(
-    name = "backend_deps",
-    overrides = {
-        "ray": {"dependencies": [":backend_deps#setuptools"]},
-        "sqlalchemy": {"dependencies": [":backend_deps#psycopg2-binary"]},
-    },
-    source = "pyproject.toml",
-)
-
 python_sources(
     name = "backend",
+    dependencies = [
+        "backend/3rdparty/python:3rdparty",
+    ],
 )
 
 pex_binary(
@@ -26,8 +20,8 @@ pex_binary(
     ],
     dependencies = [
         ":backend",  # defined implicitly by `python_sources()`
-        ":backend_deps",
-        "backend/python/mzai/backend/schemas:schemas",
+        # ":backend_deps",
+        # "backend/python/mzai/schemas:schemas",
     ],
     execution_mode = "venv",
     include_sources = True,
@@ -37,8 +31,8 @@ pex_binary(
 pex_binary(
     name = "backend_pex_for_ide",
     dependencies = [
-        ":backend_deps",
-        ":schemas",
+        ":backend",
+        "backend/python/mzai/schemas:schemas",
     ],
     execution_mode = "venv",
     include_sources = True,

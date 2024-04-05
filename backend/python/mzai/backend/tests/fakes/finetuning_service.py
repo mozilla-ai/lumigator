@@ -4,7 +4,7 @@ from fastapi import BackgroundTasks
 
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.services.finetuning import FinetuningService
-from mzai.backend.schemas.finetuning import (
+from mzai.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
     FinetuningLogsResponse,

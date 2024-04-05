@@ -1,5 +1,5 @@
 
-src = ["src/python"]
+src = ["model_builder"]
 target-version = "py310"
 # Group violations by containing file
 output-format = "grouped"
@@ -93,6 +93,9 @@ ignore = [
 
 [lint.pydocstyle]
 convention = "google"
+
+[lint.isort]
+known-first-party = ["mzai"]
 
 # allow unused *args, **kwargs
 [lint.flake8-unused-arguments]

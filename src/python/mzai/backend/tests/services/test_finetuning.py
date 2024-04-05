@@ -1,8 +1,8 @@
 import uuid
 
 import pytest
-from backend.repositories.finetuning import FinetuningJobRepository
-from fakes import FakeFinetuningService
+from mzai.backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.tests.fakes.finetuning_service import FakeFinetuningService
 from fastapi import HTTPException
 
 from mzai.backend.schemas.finetuning import FinetuningJobUpdate

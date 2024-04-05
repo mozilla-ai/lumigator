@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from backend.repositories.finetuning import FinetuningJobRepository
-from backend.services.finetuning import FinetuningService
 from fastapi import BackgroundTasks
+
+from mzai.backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,

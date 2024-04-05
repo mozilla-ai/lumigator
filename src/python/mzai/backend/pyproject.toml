@@ -1,43 +1,22 @@
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[project]
+version = "0.0.1"
+requires-python = "3.10"
 
-[tool.poetry]
-name = "backend"
-version = "0.1.0"
-description = "Backend services for the MZAI Platform."
-# readme = "README.md"
-authors = []
-
-[tool.poetry.dependencies]
-python = "^3.10"
-
-# Core
-uvicorn = { extras = ["standard"], version = "0.28.0" }
-fastapi = "0.110.0"
-pydantic = "2.6.4"
-pydantic-settings = "2.2.1"
-loguru = "0.7.2"
-pex = "2.3.0"
-
-# DB
-sqlalchemy = { extras = ["asyncio"], version = "2.0.28" }
-psycopg2-binary = "^2.9.9"
-
-
-# Ray
-ray = { extras = ["default"], version = "2.9.3" }
-
-
-[tool.poetry.dev-dependencies]
-ruff = "0.3.3"
-pytest = "8.1.1"
-pytest-cov = "4.1.0"
-httpx = "0.27.0"
-testcontainers = "4.2.0"
-setuptools = "69.2.0"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-v --cov src/ --no-cov-on-fail"
-
+dependencies = [
+    "uvicorn[standard]==0.28.0",
+    "fastapi[all]==0.110.0",
+    "pydantic==2.6.4",
+    "pydantic-settings==2.2.1",
+    "loguru==0.7.2",
+    "pex==2.3.0",
+    "httpx==0.27.0",
+    "sqlalchemy[asyncio]==2.0.28",
+    "psycopg2-binary==2.9.9",
+    "ray[default]==2.9.3",
+    "starlette",
+    "ruff",
+    "pytest",
+    "pytest-cov",
+    "testcontainers",
+    "setuptools>=60"
+]

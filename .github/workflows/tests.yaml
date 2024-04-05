@@ -15,8 +15,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-            fetch-depth: 2
+
+      - name: get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,9 +33,12 @@ jobs:
           named-caches-hash: ${{ hashFiles('lockfiles/*.json', '**/something-else.lock') }}
 
       - name: Lint
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run:
-          make ci-lint
-          make ci-fmt
+          for file in ${ALL_CHANGED_FILES}; do
+            pants lint fmt $file
+          done
 
       - name: Test
         run:

@@ -1,3 +1,3 @@
 python_sources(
-    dependencies = ["src/python/mzai/backend:backend"],
+    dependencies=["src/python/mzai/backend:backend"],
 )

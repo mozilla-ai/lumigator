@@ -1,11 +1,4 @@
-file(name="compose_file",
-source = "docker-compose.yaml"
-)
-file(name="env_file",
-source = ".env.local"
-)
+file(name="compose_file", source="docker-compose.yaml")
+file(name="env_file", source=".env.local")
 
-shell_sources(name="docker_compose_shell_scripts",
-    dependencies=[":compose_file", ":env_file"]
-)
-
+shell_sources(name="docker_compose_shell_scripts", dependencies=[":compose_file", ":env_file"])

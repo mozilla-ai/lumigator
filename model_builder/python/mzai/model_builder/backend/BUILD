@@ -1,50 +1,50 @@
 python_sources(
-    name = "model_builder",
-    dependencies = [
+    name="model_builder",
+    dependencies=[
         "model_builder/3rdparty/python:3rdparty",
     ],
 )
 
 pex_binary(
-    name = "model_builder_fastapi_app",
-    args = [
+    name="model_builder_fastapi_app",
+    args=[
         "mzai.model_builder.main:app",
         "--host",
         "0.0.0.0",
         "--port",
         "80",
     ],
-    complete_platforms = [
+    complete_platforms=[
         "pants_tools:ubuntu_2204_py310",
         "pants_tools:macosx_py310",
     ],
-    dependencies = [
+    dependencies=[
         ":model_builder",
     ],
-    execution_mode = "venv",
-    include_sources = True,
-    script = "uvicorn",
+    execution_mode="venv",
+    include_sources=True,
+    script="uvicorn",
 )
 
 pex_binary(
-    name = "backend_pex_for_ide",
-    dependencies = [
+    name="backend_pex_for_ide",
+    dependencies=[
         ":model_builder",
         "model_builder/python/mzai/model_builder/schemas:schemas",
     ],
-    execution_mode = "venv",
-    include_sources = True,
-    include_tools = True,
+    execution_mode="venv",
+    include_sources=True,
+    include_tools=True,
 )
 
 docker_image(
-    name = "model_builder_image",
-    build_platform = ["linux/amd64"],
-    dependencies = [":model_builder_fastapi_app"],
-    image_tags = [
+    name="model_builder_image",
+    build_platform=["linux/amd64"],
+    dependencies=[":model_builder_fastapi_app"],
+    image_tags=[
         "dev",
         "0.1",
     ],
-    repository = "{directory}/{name}",
-    source = "Dockerfile",
+    repository="{directory}/{name}",
+    source="Dockerfile",
 )

@@ -4,14 +4,21 @@ ENV_FILE=${DOCKER_DIR}/.env.local
 
 .PHONY: build config up down
 
-build:
-	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} build
 
-config:
-	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} config
 
-up:
-	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} up -d
 
-down:
-	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} down
+ci-setup:
+	pants --version  # Bootstrap Pants.
+
+
+ci-lint: ci-setup
+	pants --changed-since=origin/main \
+	update-build-files --check \
+	lint
+
+ci-fmt: ci-lint
+	pants --changed-since=origin/main fmt
+
+ci-tests:
+	pants test ::
+

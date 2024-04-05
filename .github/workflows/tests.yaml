@@ -21,13 +21,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          cd backend && poetry install
+      - name: Initialize Pants
+        uses: pantsbuild/actions/init-pants@main
+        with:
+          # cache0 makes it easy to bust the cache if needed
+          gha-cache-key: cache0-py3.10
+          named-caches-hash: ${{ hashFiles('lockfiles/*.json', '**/something-else.lock') }}
 
       - name: Lint
-        run: cd backend && poetry run make lint
+        run:
+          make ci-lint
+          make ci-fmt
 
       - name: Test
-        run: cd backend && poetry run make test
+        run:
+          make ci-fmt

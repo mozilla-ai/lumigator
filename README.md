@@ -2,18 +2,41 @@
 
 Source code for the MZAI Platform.
 
-## Running locally with Docker Compose
 
-A `Makefile` is defined for running `docker compose` commands with the proper environment.
+# Setup 
 
-(1) Launch the application (in detach mode).
+install pants:
+
+```shell
+brew install pants
+pants --version  # start the daemon
+```
+
+setup:
+```bash
+cat ./pants_tools/macosx_14_pex_platform_tags.json | jq '.path = "'$(which python)'"' > ./pants_tools/macosx_14_pex_platform_tags.json
+
 
 ```
-make up
+
+compile targets manually:
+
+```bash
+pants package <target>
+pants package src/python/mzai/backend:backend
+# docker image
+pants package src/python/mzai/backend:mzai_backend
 ```
 
-(2) Spin the application down.
 
+## Running locally with Docker Compose via pants
+
+```bash
+pants run src/infra/docker:mzai_backend_up
+# shutdown
+pants run src/infra/docker:mzai_backend_down
 ```
-make down
-```
+
+
+
+

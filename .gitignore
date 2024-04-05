@@ -28,6 +28,7 @@ MANIFEST
 
 /.pants.d
 /dist/
+pants_tools/macosx_14_pex_platform_tags.json
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

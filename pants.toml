@@ -1,8 +1,7 @@
 [GLOBAL]
-pants_version = "2.19.1"
+# pants_version = "2.19.1"
+pants_version = "2.20.0rc2"
 colors = true
-
-
 
 backend_packages = [
   "pants.backend.docker",
@@ -10,7 +9,9 @@ backend_packages = [
   "pants.backend.python",
   "pants.backend.shell.lint.shfmt",
   "pants.backend.shell.lint.shellcheck",
-  "pants.backend.experimental.python.lint.ruff",
+  "pants.backend.experimental.python.lint.ruff.check",
+  "pants.backend.experimental.python.lint.ruff.format",
+  "pants.backend.build_files.fmt.ruff",
 ]
 
 [source]
@@ -47,7 +48,4 @@ address = "docker-registry.taild6f0e.ts.net"
 default = false # optional
 
 [pytest]
-requirements = [
-    "httpx"
-]
 args =["-v"]

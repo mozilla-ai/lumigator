@@ -1,6 +1,9 @@
+
+src = ["src/python"]
 target-version = "py310"
 # Group violations by containing file
 output-format = "grouped"
+
 # Exclude a variety of commonly ignored directories.
 # don't include notebooks
 include = ["*.py", "*.pyi"]
@@ -32,7 +35,6 @@ exclude = [
   "bazel-*",
 ]
 
-# Formatting
 line-length = 100
 
 [lint]
@@ -55,6 +57,12 @@ unfixable = ["B", "SIM", "TRY", "RUF"]
 
 
 ignore = [
+  # TODO:  remove D101, D102, D103 after we get settled
+  "D101", # missing docstrings in public class
+  "D102", # missing docstrings in public method
+  "D103", # missing docstrings in public function
+  "D104", # missing docstrings in public packages
+  "D107", # missing docstrings in __init__.py
   "D417", # documentation for every function parameter.
   "N806", # ignore uppercased variables
   "N812", # import as uppercased
@@ -71,7 +79,7 @@ ignore = [
   "D104", # missing docstrings in public packages
   "F401", # import unused
 ]
-"research/**" = [
+"**/tests/**" = [
   "D101", # missing docstrings in public class
   "D102", # missing docstrings in public method
   "D103", # missing docstrings in public function
@@ -103,3 +111,6 @@ skip-magic-trailing-comma = false
 
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+
+docstring-code-format = true

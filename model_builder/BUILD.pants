@@ -1,8 +1,8 @@
 run_shell_command(
     command="./infra/mzai/model_builder/docker/docker-compose.sh up",
     execution_dependencies=[
-        "//model_builder/infra/mzai/model_builder/docker:docker_compose_shell_scripts",
-        "model_builder/python/mzai/model_builder/backend:model_builder_image",
+        "//model_builder/infra/mzai/docker:docker_compose_shell_scripts",
+        "model_builder/python/mzai/backend:model_builder_image",
     ],
     name="mzai_backend_up",
 )
@@ -10,7 +10,7 @@ run_shell_command(
 run_shell_command(
     command="./infra/mzai/model_builder/docker/docker-compose.sh down",
     execution_dependencies=[
-        "//model_builder/infra/mzai/model_builder/docker:docker_compose_shell_scripts",
+        "//model_builder/infra/mzai/docker:docker_compose_shell_scripts",
     ],
     name="mzai_backend_down",
 )

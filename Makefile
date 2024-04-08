@@ -30,3 +30,6 @@ show-all-major-targets::
 
 	@echo "this is not an exhaustive list, just a convienience."
 
+
+ide-venv:
+	pants export --resolve=python-default

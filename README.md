@@ -28,11 +28,18 @@ compile targets manually:
 
 ```bash
 pants package <target>
-pants package src/python/mzai/model_builder:model_builder
+pants package model_builder/python/mzai/backend
 # docker image
-pants package src/python/mzai/model_builder:mzai_backend
+pants package model_builder/python/mzai/backend:model_builder_image
 ```
 
+export a venv for your IDE:
+
+```bash
+make ide-venv
+
+
+```
 
 ## Running locally with Docker Compose via pants
 

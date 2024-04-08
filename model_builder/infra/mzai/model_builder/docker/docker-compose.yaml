@@ -25,7 +25,6 @@ services:
           memory: ${RAY_HEAD_NODE_MEMORY}
 
   backend:
-    # build: ../../python/mzai/model_builder
     image: ${BACKEND_IMAGE}
     depends_on:
       - postgres

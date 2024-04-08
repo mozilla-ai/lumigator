@@ -2997,13 +2997,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "07740d40fd3be6956840ebbc7de5e8591b01166144634f0c1bbe1c7214162146",
-              "url": "https://files.pythonhosted.org/packages/5a/e7/9d659154e02cf55fcf6fe18c5021a1355fe6c74c8f418d9e85eba43de63b/testcontainers-4.3.1-py3-none-any.whl"
+              "hash": "1fb85448cd11e60389b7c611017fb1c212bb77c6830f284c7e12efd94248943f",
+              "url": "https://files.pythonhosted.org/packages/43/ef/1abb46bb59c37c64d47f403bc06c16f23baca919c8f32cd1b04780d8a6a5/testcontainers-4.3.2-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "0ce770a4010c1c38a2103e7c9823e6c398bc005b2b4761fcd8f5b3f9e3b53eca",
-              "url": "https://files.pythonhosted.org/packages/c8/88/de4d98bb1b9484860e24aa4aa136146eb82feaeff103623508d01b58b9d2/testcontainers-4.3.1.tar.gz"
+              "hash": "acc8bce39043130c571e82f5fb8182b70a785dd1cc817f904c81005cd5bb425c",
+              "url": "https://files.pythonhosted.org/packages/77/ab/1c3de2c95044c6ab83fc62d9f6fc4a16d9ee8cad5a6d1c9202af8c0de65d/testcontainers-4.3.2.tar.gz"
             }
           ],
           "project_name": "testcontainers",
@@ -3040,7 +3040,7 @@
             "wrapt"
           ],
           "requires_python": "<4.0,>=3.9",
-          "version": "4.3.1"
+          "version": "4.3.2"
         },
         {
           "artifacts": [

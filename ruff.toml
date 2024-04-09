@@ -1,0 +1,119 @@
+
+src = ["model_builder"]
+target-version = "py310"
+# Group violations by containing file
+output-format = "grouped"
+
+# Exclude a variety of commonly ignored directories.
+# don't include notebooks
+include = ["*.py", "*.pyi"]
+fix = true
+
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".github",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "archive",
+  "bazel-*",
+]
+
+line-length = 100
+
+[lint]
+select = [
+  "E",    # pycodestyle
+  "F",    # pyflakes
+  "UP",   # pyupgrade
+  "D",    # pydocstyle
+  "I001", # import sorting
+  "B",    # flake8-bugbear
+  "N",    # pep8 naming
+  "ISC",  # flake8 implicit string concat
+  "PTH",  # flake8-use-pathlib use Path library
+  "PD",   # pandas-vet
+  # "ANN",   # flake8-annotations; disbled for now
+]
+
+# Avoid trying to fix flake8-bugbear (`B`) violations.
+unfixable = ["B", "SIM", "TRY", "RUF"]
+
+
+ignore = [
+  # TODO:  remove D101, D102, D103 after we get settled
+  "D101", # missing docstrings in public class
+  "D102", # missing docstrings in public method
+  "D103", # missing docstrings in public function
+  "D104", # missing docstrings in public packages
+  "D107", # missing docstrings in __init__.py
+  "D417", # documentation for every function parameter.
+  "N806", # ignore uppercased variables
+  "N812", # import as uppercased
+  "N803", # lowercased args
+  "N817", # imported as acryonym
+  "B023", # doesn't bind loop var, we do this a lot in torch
+  "D100", # module-level docstrings
+  "N805", # first param needs to be self; pydantic breaks this sometimes
+]
+
+[lint.per-file-ignores]
+"__init__.py" = [
+  "E402", # import violations
+  "D104", # missing docstrings in public packages
+  "F401", # import unused
+]
+"**/tests/**" = [
+  "D101", # missing docstrings in public class
+  "D102", # missing docstrings in public method
+  "D103", # missing docstrings in public function
+  "D104", # missing docstrings in public packages
+  "E402", # import violations
+  "F401", # import unused
+  "E501", # line too long
+  "B905", # `zip()` without an explicit `strict=` parameter
+
+]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+known-first-party = ["mzai"]
+
+# allow unused *args, **kwargs
+[lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[format]
+
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+
+docstring-code-format = true

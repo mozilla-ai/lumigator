@@ -1,0 +1,4 @@
+ARG BASE_IMAGE=src/python/mzai/backend:mzai_backend
+FROM $BASE_IMAGE
+
+CMD ['pex3', 'interpreter', 'inspect', '--markers', '--tags', '--interpreter-constraint', 'CPython==3.10.*']

@@ -16,18 +16,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          cd backend && poetry install
+      - name: Initialize Pants
+        uses: pantsbuild/actions/init-pants@main
+        with:
+          # cache0 makes it easy to bust the cache if needed
+          gha-cache-key: cache0-py3.10
+          named-caches-hash: ${{ hashFiles('lockfiles/*.json', '**/something-else.lock') }}
 
       - name: Lint
-        run: cd backend && poetry run make lint
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run:
+          for file in ${ALL_CHANGED_FILES}; do
+            pants lint fmt $file;
+          done
 
       - name: Test
-        run: cd backend && poetry run make test
+        run:
+          make ci-tests

@@ -38,3 +38,9 @@ ide-roots:
 
 ide-venv:
 	pants export --py-resolve-format=mutable_virtualenv --resolve=python-default
+
+bootstrap-python: pants_tools/bootstrap_python.sh
+	bash pants_tools/bootstrap_python.sh $(uname -o)
+
+clean-python:
+	rm -r $(HOME)/workspace/.pythoninterpreters/*

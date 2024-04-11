@@ -5,26 +5,26 @@ Source code for the MZAI model builder platform.
 
 # Setup 
 
-install pants:
+Install pants:
 
 ```shell
-brew install pants
+brew install pantsbuild/tap/pants
 pants --version  # start the daemon
 ```
 
-setup:
+Setup:
+
 ```bash
 cat ./pants_tools/macosx_14_pex_platform_tags.json | jq '.path = "'$(which python)'"' > ./pants_tools/macosx_14_pex_platform_tags.json
-
 ```
 
-show targets:
+Show targets:
 
 ```bash
 make show-all-major-targets
 ```
 
-compile targets manually:
+Compile targets manually:
 
 ```bash
 pants package <target>
@@ -33,17 +33,20 @@ pants package model_builder/python/mzai/backend
 pants package model_builder/python/mzai/backend:model_builder_image
 ```
 
-export a venv for your IDE:
+Export a venv for your IDE:
 
 ```bash
+make pants-roots # Sets PYTHONPATH for first-party directories in a .env file
 make ide-venv
-
-
 ```
+
+For VSCode users, should activate the venv before opening your IDE
+and it should be recognized automatically.
 
 ## Running locally with Docker Compose via pants
 
 ```bash
+# startup
 pants run model_builder:mzai_backend_up
 # shutdown
 pants run model_builder:mzai_backend_down

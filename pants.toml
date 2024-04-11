@@ -15,22 +15,22 @@ backend_packages = [
 ]
 
 [source]
-# defines the "roots" for subprojects. anything with folders like
+# Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
-# will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["python", "infra" ]
+# Will be importable as `<name>.whatever` in python/etc.
+root_patterns = ["python", "infra"]
 
 [tailor]
 build_file_name = "BUILD.pants"
 
 [python]
-interpreter_constraints = ['CPython==3.10.*']
+interpreter_constraints = ['CPython==3.10.14']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
-# https://www.pantsbuild.org/docs/python-third-party-dependencies. This also adds the
-# `generate-lockfiles` goal for Pants to generate the lockfile for you.
+# https://www.pantsbuild.org/docs/python-third-party-dependencies. 
+# This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-resolves = { python-default = "pants_tools/python-default.lock"}
+resolves = { python-default = "pants_tools/python-default.lock" }
 
 [python-infer]
 use_rust_parser = true
@@ -38,14 +38,13 @@ use_rust_parser = true
 [ruff]
 config = "ruff.toml"
 
-
 [docker.registries.dockerhub]
 address = "docker.io"
 default = true
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
-default = false # optional
+default = false                              # optional
 
 [pytest]
-args =["-v"]
+args = ["-v"]

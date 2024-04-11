@@ -1,5 +1,8 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv
 
+ci-setup:
+	pants --version  # Bootstrap Pants.
+
 ci-lint: ci-setup
 	pants --changed-since=origin/main \
 	update-build-files --check \
@@ -27,7 +30,6 @@ show-pants-targets:
 	pants --filter-target-type=archive list ::
 
 	@echo "this is not an exhaustive list, just a convienience."
-
 
 ide-roots:
 	# From: https://www.pantsbuild.org/2.18/docs/using-pants/setting-up-an-ide

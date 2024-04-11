@@ -1,14 +1,14 @@
 python_sources(
-    name="model_builder",
+    name="backend_sources",
     dependencies=[
         "model_builder/3rdparty/python:3rdparty",
     ],
 )
 
 pex_binary(
-    name="model_builder_fastapi_app",
+    name="backend_app",
     args=[
-        "mzai.model_builder.main:app",
+        "mzai.backend.main:app",
         "--host",
         "0.0.0.0",
         "--port",
@@ -19,7 +19,8 @@ pex_binary(
         "pants_tools:macosx_py310",
     ],
     dependencies=[
-        ":model_builder",
+        ":backend_sources",
+        "model_builder/python/mzai/schemas:schemas_distribution",
     ],
     execution_mode="venv",
     include_sources=True,
@@ -29,8 +30,8 @@ pex_binary(
 pex_binary(
     name="backend_pex_for_ide",
     dependencies=[
-        ":model_builder",
-        "model_builder/python/mzai/schemas:schemas",
+        ":backend_sources",
+        "model_builder/python/mzai/schemas:schemas_distribution",
     ],
     execution_mode="venv",
     include_sources=True,
@@ -38,9 +39,9 @@ pex_binary(
 )
 
 docker_image(
-    name="model_builder_image",
+    name="backend_image",
     build_platform=["linux/amd64"],
-    dependencies=[":model_builder_fastapi_app"],
+    dependencies=[":backend_app"],
     image_tags=[
         "dev",
         "0.1",

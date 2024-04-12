@@ -29,9 +29,10 @@ Compile targets manually:
 
 ```bash
 pants package <target>
+# backend app
 pants package model_builder/python/mzai/backend
-# docker image
-pants package model_builder/python/mzai/backend:model_builder_image
+# backend docker image
+pants package model_builder/python/mzai/backend:backend_image
 ```
 
 Export a venv for your IDE:

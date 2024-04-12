@@ -38,13 +38,6 @@ search_path = [
     "$HOME/workspace/.pythoninterpreters/python3.10.13/python/install/bin"
 ]
 
-[python-bootstrap.internal_python_build_standalone_info]
-macos_arm64=[
-    "https://github.com/indygreg/python-build-standalone/releases/tag/20240107/cpython-3.10.13+20240107-aarch64-apple-darwin-pgo+lto-full.tar.zst",
-    "57b83a4aa32bdbe7611f1290313ef24f2574dff5fa59181c0ccb26c14c688b73",
-    "33663025"
-]
-
 
 [python-infer]
 use_rust_parser = true

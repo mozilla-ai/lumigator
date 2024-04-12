@@ -24,9 +24,14 @@ if [[ $arch == "Darwin" ]]; then
   rm cpython*
   cd "$WORKSPACE/mzai-platform/"
 
+  echo "updating local platform tags file"
   macos_tags_file="$WORKSPACE/mzai-platform/pants_tools/macosx_14_pex_platform_tags.json"
 	cat "$macos_tags_file" | jq '.path = "'"$INTERPRETER"'"' > "${macos_tags_file}.new"
 	mv "${macos_tags_file}.new" "$macos_tags_file"
+
+	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
+
+
 
 elif [[ $arch  == "debian" ]]; then
   echo "installing debian interpreter"

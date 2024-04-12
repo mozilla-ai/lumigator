@@ -36,6 +36,7 @@ elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"
   wget "$URL/$DEBIAN"
   tar -axvf "$DEBIAN"
+  rm cpython* || true
 else
   echo "$arch was passed but isn't valid. exiting!"
 fi

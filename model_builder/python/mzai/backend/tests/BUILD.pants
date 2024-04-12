@@ -1,7 +1,7 @@
 python_test_utils(
     name="test_utils",
     dependencies=[
-        "model_builder/python/mzai/backend:model_builder",
+        "model_builder/python/mzai/backend:backend_sources",
         "model_builder/python/mzai/backend/tests/fakes:fakes",
     ],
 )

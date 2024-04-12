@@ -14,8 +14,9 @@ pants --version  # start the daemon
 
 Setup:
 
+Will download a standalone interpreter for python.
 ```bash
-cat ./pants_tools/macosx_14_pex_platform_tags.json | jq '.path = "'$(which python)'"' > ./pants_tools/macosx_14_pex_platform_tags.json
+make bootstrap-python
 ```
 
 Show targets:

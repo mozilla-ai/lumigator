@@ -1,5 +1,6 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv bootstrap-python clean-python
 
+PLAT:= $(shell uname -o)
 ci-setup:
 	pants --version  # Bootstrap Pants.
 
@@ -39,8 +40,9 @@ ide-roots:
 ide-venv:
 	pants export --py-resolve-format=mutable_virtualenv --resolve=python-default
 
-bootstrap-python: pants_tools/bootstrap_python.sh
-	bash pants_tools/bootstrap_python.sh $(uname -o)
+
+bootstrap-python:
+	bash pants_tools/bootstrap_python.sh $(PLAT)
 
 clean-python:
 	rm -r $(HOME)/workspace/.pythoninterpreters/*

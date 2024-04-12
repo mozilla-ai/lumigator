@@ -39,5 +39,5 @@ elif [[ $arch  == "debian" ]]; then
   wget "$URL/$DEBIAN"
   tar -axvf "$DEBIAN"
 else
-  echo "no platform passed"
+  echo "$arch was passed but isn't valid. exiting!"
 fi

@@ -18,7 +18,7 @@ rm -r ./*python* || true
 arch=${1:-Darwin}
 if [[ $arch == "Darwin" ]]; then
   echo "installing macos interpreter"
-  wget "$URL/$DARWIN"
+  wget -nv "$URL/$DARWIN"
   tarbase=${DARWIN%.*}
   zstd -d "$DARWIN"
   tar xzf "${tarbase}"
@@ -35,8 +35,9 @@ if [[ $arch == "Darwin" ]]; then
 elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"
   wget "$URL/$DEBIAN"
-  tar -axvf "$DEBIAN"
+  tar -axf "$DEBIAN"
   rm cpython* || true
+	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
 else
   echo "$arch was passed but isn't valid. exiting!"
 fi

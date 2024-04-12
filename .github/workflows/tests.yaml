@@ -21,8 +21,9 @@ jobs:
         uses: tj-actions/changed-files@v44
 
       - name: Set up Python
-        run:
-          make bootstrap-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.13'
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main

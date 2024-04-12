@@ -31,7 +31,9 @@ if [[ $arch == "Darwin" ]]; then
 	mv "${macos_tags_file}.new" "$macos_tags_file"
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
 
-elif [[ $arch  == "GNU/Linux" ]]; then
+
+
+elif [[ $arch  == "debian" ]]; then
   echo "installing debian interpreter"
   wget -nv "$URL/$DEBIAN"
   tar -axf "$DEBIAN"

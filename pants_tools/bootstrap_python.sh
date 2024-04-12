@@ -12,7 +12,8 @@ LOCAL_PYTHON_PATH="$HOME/workspace/.pythoninterpreters/python${PY_VERSION}"
 INTERPRETER="${LOCAL_PYTHON_PATH}/python/install/bin/python3"
 mkdir -p "$LOCAL_PYTHON_PATH"
 pushd "$LOCAL_PYTHON_PATH"
-(set +o pipefail ; rm -r *python*)
+echo "cleaning previous installation at $LOCAL_PYTHON_PATH"
+rm -r ./*python* || true
 
 arch=${1:-Darwin}
 if [[ $arch == "Darwin" ]]; then

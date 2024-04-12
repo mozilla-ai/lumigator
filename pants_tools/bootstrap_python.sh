@@ -7,7 +7,7 @@ TAG=$(echo "$RELEASE" | jq ".tag" -r)
 PY_VERSION="3.10.13"
 DEBIAN="cpython-${PY_VERSION}+${TAG}-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst"
 DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"
-REPOROOT=cd $(git rev-parse --show-toplevel)
+REPOROOT=$(git rev-parse --show-toplevel)
 LOCAL_PYTHON_PATH="$HOME/workspace/.pythoninterpreters/python${PY_VERSION}"
 INTERPRETER="${LOCAL_PYTHON_PATH}/python/install/bin/python3"
 mkdir -p "$LOCAL_PYTHON_PATH"

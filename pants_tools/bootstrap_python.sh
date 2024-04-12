@@ -7,7 +7,7 @@ TAG=$(echo "$RELEASE" | jq ".tag" -r)
 PY_VERSION="3.10.13"
 DEBIAN="cpython-${PY_VERSION}+${TAG}-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst"
 DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"
-
+REPOROOT=cd $(git rev-parse --show-toplevel)
 LOCAL_PYTHON_PATH="$HOME/workspace/.pythoninterpreters/python${PY_VERSION}"
 INTERPRETER="${LOCAL_PYTHON_PATH}/python/install/bin/python3"
 mkdir -p "$LOCAL_PYTHON_PATH"
@@ -23,18 +23,17 @@ if [[ $arch == "Darwin" ]]; then
   zstd -d "$DARWIN"
   tar xzf "${tarbase}"
   rm cpython*
-  cd "$WORKSPACE/mzai-platform/"
+  cd "$REPOROOT"
 
   echo "updating local platform tags file"
-  macos_tags_file="$WORKSPACE/mzai-platform/pants_tools/macosx_14_pex_platform_tags.json"
+  macos_tags_file="$REPOROOT/pants_tools/macosx_14_pex_platform_tags.json"
 	cat "$macos_tags_file" | jq '.path = "'"$INTERPRETER"'"' > "${macos_tags_file}.new"
 	mv "${macos_tags_file}.new" "$macos_tags_file"
-
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
 
 elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"
-  wget "$URL/$DEBIAN"
+  wget -nv "$URL/$DEBIAN"
   tar -axf "$DEBIAN"
   rm cpython* || true
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"

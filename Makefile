@@ -1,4 +1,4 @@
-.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv
+.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv bootstrap-python clean-python
 
 ci-setup:
 	pants --version  # Bootstrap Pants.

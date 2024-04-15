@@ -35,7 +35,7 @@ resolves = { python-default = "pants_tools/python-default.lock" }
 search_path = [
     "<PATH>",
     "<PYENV>",
-    "$HOME/workspace/.pythoninterpreters/python3.10.13/python/install/bin"
+    "%(buildroot)s/.python/python3.10.13/python/install/bin",
 ]
 
 

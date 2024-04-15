@@ -45,4 +45,10 @@ bootstrap-python:
 	bash pants_tools/bootstrap_python.sh $(PLAT)
 
 clean-python:
-	rm -r $(HOME)/workspace/.pythoninterpreters/*
+	rm -rf .python/
+
+
+clean-pants:
+	rm -rf $(HOME)/.cache/pants
+	rm -rf ./dist/
+

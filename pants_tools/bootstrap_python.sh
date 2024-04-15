@@ -32,7 +32,7 @@ if [[ $arch == "Darwin" ]]; then
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
 
 
-elif [[ $arch  == "debian" ]]; then
+elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"
   wget -nv "$URL/$DEBIAN"
   tar -axf "$DEBIAN"

@@ -1,5 +1,4 @@
 [GLOBAL]
-# pants_version = "2.19.1"
 pants_version = "2.20.0rc2"
 colors = true
 
@@ -24,13 +23,21 @@ root_patterns = ["python", "infra"]
 build_file_name = "BUILD.pants"
 
 [python]
-interpreter_constraints = ['CPython==3.10.14']
+interpreter_constraints = ['CPython==3.10.13']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
 # https://www.pantsbuild.org/docs/python-third-party-dependencies. 
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
 resolves = { python-default = "pants_tools/python-default.lock" }
+
+[python-bootstrap]
+search_path = [
+    "<PATH>",
+    "<PYENV>",
+    "%(buildroot)s/.python/python3.10.13/python/install/bin",
+]
+
 
 [python-infer]
 use_rust_parser = true
@@ -44,7 +51,8 @@ default = true
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
-default = false                              # optional
+default = false  # optional
 
 [pytest]
 args = ["-v"]
+

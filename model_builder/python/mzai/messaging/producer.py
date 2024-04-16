@@ -39,7 +39,7 @@ class MessageProducer:
             logger.info(
                 f"Publishing message: "
                 f"Exchange = '{self.exchange_name}', "
-                f"Routing key = '{self.routing_key}', "
+                f"Routing key = '{routing_key}', "
                 f"Body = {body_json}"
             )
             message = Message(body_json.encode(), delivery_mode=delivery_mode)

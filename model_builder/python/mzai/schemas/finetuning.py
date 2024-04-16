@@ -8,12 +8,12 @@ from mzai.schemas.extras import JobStatus
 
 
 class FinetuningEvent(str, Enum):
-    JOB_STARTED = "job_started"
-    JOB_FINISHED = "job_finished"
+    JOB_FAILED = "job_failed"
+    JOB_SUCCEEDED = "job_succeeded"
 
 
 class FinetuningMessage(BaseModel):
-    message: str
+    details: str
     event: FinetuningEvent
 
 

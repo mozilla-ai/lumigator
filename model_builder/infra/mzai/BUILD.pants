@@ -1,0 +1,12 @@
+shell_sources()
+
+
+
+
+helm_deployment(
+  name="local",
+  chart="model_builder/infra/mzai/helm/model_builder",
+  sources=["model_builder/infra/mzai/helm/model_builder/common-values.yaml"],
+  values={ "image": "//model_builder/python/mzai/backend:backend_image" },
+  # kubeconfig=f"--kubeconfig=$HOME/.kube/kind-config",
+)

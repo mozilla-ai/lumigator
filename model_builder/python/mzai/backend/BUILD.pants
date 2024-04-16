@@ -36,6 +36,8 @@ docker_image(
         "dev",
         "0.1",
     ],
-    repository="model_builder/{name}",
+    repository="mzdotai/model_builder",
+    registries=["@kind",], # push to the local registry
     source="Dockerfile",
 )
+

@@ -1,8 +1,12 @@
 [GLOBAL]
 pants_version = "2.20.0rc2"
 colors = true
+pythonpath = ["%(buildroot)s/pants-plugins"]
+print_stacktrace = true # You'll want this enabled - trust me
+
 
 backend_packages = [
+  "pants.backend.plugin_development",
   "pants.backend.docker",
   "pants.backend.shell",
   "pants.backend.python",
@@ -11,13 +15,15 @@ backend_packages = [
   "pants.backend.experimental.python.lint.ruff.check",
   "pants.backend.experimental.python.lint.ruff.format",
   "pants.backend.build_files.fmt.ruff",
+  "pants.backend.experimental.helm",
+  "internal.helm_args"
 ]
 
 [source]
 # Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
 # Will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["python", "infra"]
+root_patterns = ["python", "infra", "pants-plugins"]
 
 [tailor]
 build_file_name = "BUILD.pants"
@@ -45,14 +51,37 @@ use_rust_parser = true
 [ruff]
 config = "ruff.toml"
 
+[docker]
+build_args = ["HOME"]
+env_vars = ["DOCKER_CONFIG=%(homedir)s/.docker"]
+tools = [
+  "docker-credential-osxkeychain",
+  "docker-credential-desktop",
+  "dirname",
+  "readlink",
+  "python3",
+  # These may be necessary if using Pyenv-installed Python.
+  "cut",
+  "sed",
+  "bash",
+  "kubectl"
+]
+
+
+[docker.registries.kind]
+address = "localhost:5001"  # this is setup via a script and not managed by pants.
+default = true
+
 [docker.registries.dockerhub]
 address = "docker.io"
-default = true
+
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
-default = false  # optional
+default = false
 
 [pytest]
 args = ["-v"]
+
+
 

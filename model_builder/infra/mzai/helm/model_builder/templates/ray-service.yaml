@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose --file ./docker/tmp.config convert --chart --controller deployment --service-group-mode label --service-group-name mzai-local-app --out helm/model_builder
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: ray
+  name: ray
+spec:
+  ports:
+    - name: "8265"
+      port: 8265
+      targetPort: 8265
+  selector:
+    io.kompose.service: ray

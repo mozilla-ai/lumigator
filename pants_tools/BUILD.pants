@@ -9,3 +9,5 @@ docker_image(
     ],
     source="Dockerfile.ubuntu_plat_tags",
 )
+
+shell_sources()

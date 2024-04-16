@@ -13,6 +13,11 @@ up() {
 	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} up -d
 }
 
+convert_compose(){
+	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} config > tmp.config
+  kompose  --file tmp.config convert --chart --controller deployment --service-group-mode label --service-group-name mzai-local-app --out "$ROOT/../helm/model_builder"
+}
+
 case "$1" in
 build)
 	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} build
@@ -24,6 +29,10 @@ up)
 
 down)
 	down
+	;;
+
+convert)
+  convert_compose
 	;;
 
 *)

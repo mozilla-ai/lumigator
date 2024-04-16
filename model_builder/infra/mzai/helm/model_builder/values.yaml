@@ -1,0 +1,2 @@
+image: mzdotai/backend:dev
+DEPLOYMENT_TYPE: local

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --file ./docker/tmp.config convert --chart --controller deployment --service-group-mode label --service-group-name mzai-local-app --out helm/model_builder
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: ray
+  name: ray
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: ray
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --file ./docker/tmp.config convert --chart --controller deployment --service-group-mode label --service-group-name mzai-local-app --out helm/model_builder
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/mzai-platform-default: "true"
+        io.kompose.service: ray
+    spec:
+      containers:
+        - args:
+            - bash
+            - -c
+            - ray start --head --dashboard-host=0.0.0.0 --dashboard-port=8265 --block
+          image: rayproject/ray:2.9.3.94a6d7-py310-aarch64
+          name: ray
+          ports:
+            - containerPort: 8265
+              hostPort: 8265
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "2"
+              memory: "4294967296"
+      restartPolicy: Always

@@ -1,9 +1,20 @@
 import datetime
+from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from mzai.schemas.extras import JobStatus
+
+
+class FinetuningEvent(str, Enum):
+    JOB_STARTED = "job_started"
+    JOB_FINISHED = "job_finished"
+
+
+class FinetuningMessage(BaseModel):
+    message: str
+    event: FinetuningEvent
 
 
 class FinetuningJobCreate(BaseModel):

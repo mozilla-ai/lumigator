@@ -48,9 +48,9 @@ and it should be recognized automatically.
 
 ```bash
 # startup
-pants run model_builder:mzai_backend_up
+pants run model_builder:docker_compose_up
 # shutdown
-pants run model_builder:mzai_backend_down
+pants run model_builder:docker_compose_down
 ```
 
 

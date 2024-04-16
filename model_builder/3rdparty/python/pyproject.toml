@@ -14,6 +14,7 @@ dependencies = [
     "sqlalchemy[asyncio]==2.0.28",
     "psycopg2-binary==2.9.9",
     "ray[default]==2.9.3",
+    "aio-pika==9.4.1",
     "starlette",
     "ruff",
     "pytest",

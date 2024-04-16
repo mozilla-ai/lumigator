@@ -4,14 +4,18 @@ version: "3.8"
 services:
   postgres:
     image: ${POSTGRES_IMAGE}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data/
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
+
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE}
+    ports:
+      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
+      - ${RABBITMQ_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}
 
   ray:
     image: ${RAY_IMAGE}
@@ -29,6 +33,7 @@ services:
     depends_on:
       - postgres
       - ray
+      - rabbitmq
     ports:
       - 80:80
     environment:
@@ -40,7 +45,7 @@ services:
       - POSTGRES_DB
       - RAY_HEAD_NODE_HOST
       - RAY_DASHBOARD_PORT
-
-
-volumes:
-    postgres-data:
+      - RABBITMQ_HOST
+      - RABBITMQ_PORT
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_

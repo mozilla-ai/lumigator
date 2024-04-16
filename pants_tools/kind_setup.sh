@@ -16,6 +16,7 @@
 # Argbash is FREE SOFTWARE, see https://argbash.io for more info
 # Generated online by https://argbash.io/generate
 
+KINDKUBECONFIG="$HOME/.kube/kind-config"
 
 die()
 {
@@ -200,11 +201,14 @@ data:
     host: "localhost:${reg_port}"
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
-if [[ ! -f "$HOME/.kube/config" ]]; then
-  kind get kubeconfig > "$HOME/.kube/kind-config"
+if [[ ! -f $KINDKUBECONFIG ]]; then
+  kind get kubeconfig > "$KINDKUBECONFIG"
 fi
 }
 
+### BODY
+
+brew info "kind" &> /dev/null || brew install "kind" || die
 
 if [[ "$_arg_clean" == "on"  ]]; then
   kind delete cluster
@@ -213,7 +217,6 @@ fi
 if [[ "$_arg_create_cluster" == "on"  ]]; then
   echo "creating cluster"
   create_registry_and_cluster
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 fi
 
 if [[ -n "$_arg_apply_dir"  ]]; then
@@ -231,6 +234,5 @@ fi
 if [[ -n "$_arg_push_image" ]]; then
   kind load docker-image "$_arg_push_image"
 fi
-
 
 # ] <-- needed because of Argbash

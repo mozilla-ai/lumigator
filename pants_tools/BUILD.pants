@@ -10,4 +10,17 @@ docker_image(
     source="Dockerfile.ubuntu_plat_tags",
 )
 
-shell_sources()
+shell_source(name="kind", source="./kind_setup.sh")
+
+run_shell_command(
+    name="create_kind_cluster",
+    command="./kind_setup.sh --create-cluster && kind get kubeconfig > $HOME/.kube/kind-config",
+    # tools=["kubectl", "env", "bash", "kind"],
+    execution_dependencies=[":kind"]
+)
+
+shell_command(
+    name="ensure_create_kindconf",
+    command="kind get kubeconfig > $HOME/.kube/kind-config",
+    tools = ["kind"]
+)

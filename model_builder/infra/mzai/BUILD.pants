@@ -1,12 +1,10 @@
 shell_sources()
 
 
-
-
 helm_deployment(
   name="local",
   chart="model_builder/infra/mzai/helm/model_builder",
-  sources=["model_builder/infra/mzai/helm/model_builder/common-values.yaml"],
+  sources=["model_builder/infra/mzai/helm/model_builder/values.yaml"],
   values={ "image": "//model_builder/python/mzai/backend:backend_image" },
-  # kubeconfig=f"--kubeconfig=$HOME/.kube/kind-config",
+  dependencies=["pants_tools:create_kind_cluster"],
 )

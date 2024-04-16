@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -eou pipefail
-
+PY_VERSION=${MZAI_PY_VERISON:-3.10.13}
 RELEASE=$(curl https://raw.githubusercontent.com/indygreg/python-build-standalone/latest-release/latest-release.json)
 URL=$(echo "$RELEASE" | jq ".asset_url_prefix" -r)
 TAG=$(echo "$RELEASE" | jq ".tag" -r)
-PY_VERSION="3.10.13"
 DEBIAN="cpython-${PY_VERSION}+${TAG}-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst"
 DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"
 REPOROOT=$(git rev-parse --show-toplevel)

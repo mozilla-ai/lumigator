@@ -7,6 +7,12 @@ from loguru import logger
 
 
 class MessageConsumer(ABC):
+    """Message consumer bound to a single RabbitMQ broker/exchange.
+
+    Routing keys are provided on instantiation of this class
+    which control the messages this consumer receives from the exchange.
+    """
+
     def __init__(
         self,
         broker_url: str,

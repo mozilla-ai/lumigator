@@ -45,6 +45,10 @@ use_rust_parser = true
 [ruff]
 config = "ruff.toml"
 
+[docker]
+use_buildx = true
+build_args = ["HOME"]
+
 [docker.registries.dockerhub]
 address = "docker.io"
 default = true

@@ -16,18 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10.13' 
 
-      - name: get changed files
+      - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
-
-      # # todo - sort out why pants won't use the interpreter via the bootstrapper
-      # - name: Set up Python
-      #   run: |
-      #     make bootstrap-python
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main

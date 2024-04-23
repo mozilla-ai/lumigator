@@ -6,7 +6,9 @@ from ray.job_submission import JobSubmissionClient
 from sqlalchemy.orm import Session
 
 from mzai.backend.db import session_manager
+from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.settings import settings
 
@@ -25,4 +27,11 @@ def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
     return FinetuningService(job_repo, ray_client)
 
 
+def get_experiment_service(session: DBSessionDep) -> ExperimentService:
+    experiment_repo = ExperimentRepository(session)
+    result_repo = ExperimentResultRepository(session)
+    return FinetuningService(experiment_repo, result_repo)
+
+
 FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]
+ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]

@@ -49,5 +49,12 @@ class ExperimentResultRepository:
     def get(self, result_id: UUID) -> ExperimentResultRecord | None:
         return self.session.get(ExperimentResultRecord, result_id)
 
+    def get_by_experiment_id(self, experiment_id: UUID) -> ExperimentResultRecord | None:
+        return (
+            self.session.query(ExperimentResultRecord)
+            .where(ExperimentResultRecord.experiment_id == experiment_id)
+            .first()
+        )
+
     def list(self, skip: int = 0, limit: int = 100) -> list[ExperimentResultRecord]:
         return self.session.query(ExperimentResultRecord).offset(skip).limit(limit).all()

@@ -42,6 +42,7 @@ ide-venv:
 
 
 bootstrap-python:
+	MZAI_PY_VERSION=$$(yq -ot '.python.interpreter_constraints' pants.toml | sed 's/CPython==//') && \
 	bash pants_tools/bootstrap_python.sh $(PLAT)
 
 clean-python:
@@ -51,4 +52,7 @@ clean-python:
 clean-pants:
 	rm -rf $(HOME)/.cache/pants
 	rm -rf ./dist/
+
+setup-local-dev: ci-setup bootstrap-python ide-venv
+	bash pants_tools/kind_setup --clean --create-cluster
 

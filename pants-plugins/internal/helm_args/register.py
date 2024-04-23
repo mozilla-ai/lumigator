@@ -1,11 +1,5 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
-
-from pants.backend.experimental.helm.target_types import HelmDeploymentTarget
+from pants.backend.helm.target_types import HelmDeploymentTarget
 from pants.engine.target import StringField
-
 
 class KubeconfigFileField(StringField):
     alias = "kubeconfig"

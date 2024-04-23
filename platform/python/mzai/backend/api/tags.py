@@ -4,6 +4,7 @@ from enum import Enum
 class Tags(str, Enum):
     HEALTH = "health"
     FINETUNING = "finetuning"
+    EXPERIMENTS = "experiments"
 
 
 TAGS_METADATA = [
@@ -14,6 +15,10 @@ TAGS_METADATA = [
     {
         "name": Tags.FINETUNING,
         "description": "Create and manage finetuning jobs.",
+    },
+    {
+        "name": Tags.EXPERIMENTS,
+        "description": "Create and manage evaluation experiments.",
     },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.

@@ -1,8 +1,0 @@
-python_requirements(
-    name="3rdparty",
-    overrides={
-        "ray": {"dependencies": [":3rdparty#setuptools"]},
-        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
-    },
-    source="pyproject.toml",
-)

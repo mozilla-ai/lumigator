@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -15,6 +16,8 @@ class ExperimentResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     status: JobStatus
+    created_at: datetime.datetime
+    updated_at: datetime.datetime | None
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):

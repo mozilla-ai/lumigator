@@ -49,6 +49,9 @@ class ExperimentService:
         if result_record is None:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
-                f"No result available for experiment {experiment_record.name}.",
+                (
+                    f"No result available for experiment {experiment_record.name} "
+                    f"(status = {experiment_record.status})."
+                ),
             )
         return ExperimentResultResponse.model_validate(result_record)

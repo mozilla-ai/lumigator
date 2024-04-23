@@ -1,5 +1,5 @@
 
-src = ["model_builder"]
+src = ["platform"]
 target-version = "py310"
 # Group violations by containing file
 output-format = "grouped"

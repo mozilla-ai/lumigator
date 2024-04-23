@@ -1,0 +1,16 @@
+run_shell_command(
+    command="./infra/mzai/docker/docker-compose.sh up",
+    execution_dependencies=[
+        "platform/infra/mzai/docker:docker_compose_shell_scripts",
+        "platform/python/mzai/backend:backend_image",
+    ],
+    name="docker_compose_up",
+)
+
+run_shell_command(
+    command="./infra/mzai/docker/docker-compose.sh down",
+    execution_dependencies=[
+        "platform/infra/mzai/docker:docker_compose_shell_scripts",
+    ],
+    name="docker_compose_down",
+)

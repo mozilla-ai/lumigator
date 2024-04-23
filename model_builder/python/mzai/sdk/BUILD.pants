@@ -1,4 +1,0 @@
-python_sources(
-    name="sdk_sources",
-    dependencies=["model_builder/python/mzai/schemas:schemas_sources"],
-)

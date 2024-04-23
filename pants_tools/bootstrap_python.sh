@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -eou pipefail
-
-RELEASE=$(curl https://raw.githubusercontent.com/indygreg/python-build-standalone/latest-release/latest-release.json)
-URL=$(echo "$RELEASE" | jq ".asset_url_prefix" -r)
-TAG=$(echo "$RELEASE" | jq ".tag" -r)
-PY_VERSION="3.10.13"
+PY_VERSION=${MZAI_PY_VERISON:-3.10.13}
+# this is the release tag - see https://github.com/indygreg/python-build-standalone/releases/
+TAG="20240107"
+URL="https://github.com/indygreg/python-build-standalone/releases/download/$TAG"
 DEBIAN="cpython-${PY_VERSION}+${TAG}-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst"
 DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"
 REPOROOT=$(git rev-parse --show-toplevel)
@@ -17,7 +16,7 @@ rm -r ./*python* || true  # hack for make to have this  always return true.
 
 arch=${1:-Darwin}
 if [[ $arch == "Darwin" ]]; then
-  echo "installing macos interpreter"
+  echo "installing macos interpreter from $URL/$DARWIN"
   wget -nv "$URL/$DARWIN"
   tarbase=${DARWIN%.*}
   zstd -d "$DARWIN"

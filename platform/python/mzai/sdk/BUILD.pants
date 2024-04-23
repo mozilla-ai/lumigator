@@ -1,0 +1,4 @@
+python_sources(
+    name="sdk_sources",
+    dependencies=["platform/python/mzai/schemas:schemas_sources"],
+)

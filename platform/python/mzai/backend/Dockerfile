@@ -22,9 +22,9 @@ RUN apt-get update \
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | ${PY_EXECUTABLE}
 
 WORKDIR /app
-# model_builder.python.mzai is the output place for the built pex
-# it's in `dist/model_builder.python.mzai.backend`
-COPY model_builder.python.mzai.backend/backend_app.pex .
+# platform.python.mzai is the output place for the built pex
+# it's in `dist/platform.python.mzai.backend`
+COPY platform.python.mzai.backend/backend_app.pex .
 RUN export PEX_TOOLS=1
 
 ENTRYPOINT ["python3", "backend_app.pex"]

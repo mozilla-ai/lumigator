@@ -2,7 +2,7 @@ python_sources(
     name="backend_tests_sources",
     sources=["**/*.py"],
     dependencies=[
-        "model_builder/python/mzai/backend:backend_sources",
+        "platform/python/mzai/backend:backend_sources",
     ],
 )
 

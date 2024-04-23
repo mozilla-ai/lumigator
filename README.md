@@ -30,9 +30,9 @@ Compile targets manually:
 ```bash
 pants package <target>
 # backend app
-pants package model_builder/python/mzai/backend
+pants package platform/python/mzai/backend
 # backend docker image
-pants package model_builder/python/mzai/backend:backend_image
+pants package platform/python/mzai/backend:backend_image
 ```
 
 Export a venv for your IDE:
@@ -49,9 +49,9 @@ and it should be recognized automatically.
 
 ```bash
 # startup
-pants run model_builder:mzai_backend_up
+pants run platform:docker_compose_up
 # shutdown
-pants run model_builder:mzai_backend_down
+pants run platform:docker_compose_down
 ```
 
 

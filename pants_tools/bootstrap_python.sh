@@ -13,7 +13,7 @@ INTERPRETER="${LOCAL_PYTHON_PATH}/python/install/bin/python3"
 mkdir -p "$LOCAL_PYTHON_PATH"
 pushd "$LOCAL_PYTHON_PATH"
 echo "cleaning previous installation at $LOCAL_PYTHON_PATH"
-rm -r ./*python* || true  # hack for make to have this  always return true.
+rm -rf ./*python* || true  # hack for make to have this  always return true.
 
 arch=${1:-Darwin}
 if [[ $arch == "Darwin" ]]; then

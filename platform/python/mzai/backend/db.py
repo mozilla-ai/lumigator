@@ -1,5 +1,6 @@
 import contextlib
 from collections.abc import Generator
+from typing import Any
 
 from sqlalchemy import JSON, Connection, Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -16,7 +17,8 @@ class BaseRecord(DeclarativeBase):
     generally correspond to single records (i.e., rows) in a DB table.
     """
 
-    type_annotation_map = {dict[str, float]: JSON}
+    # Additional mappings from Python type to SQLAlchemy type
+    type_annotation_map = {dict[str, Any]: JSON}
 
 
 class DatabaseSessionManager:

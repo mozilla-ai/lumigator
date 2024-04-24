@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from mzai.backend.records.experiments import ExperimentRecord, ExperimentResultRecord
 from mzai.backend.repositories.base import BaseRepository
-from mzai.schemas.extras import JobStatus
 
 
 class ExperimentRepository(BaseRepository[ExperimentRecord]):
@@ -13,11 +12,7 @@ class ExperimentRepository(BaseRepository[ExperimentRecord]):
         super().__init__(ExperimentRecord, session)
 
     def create(self, name: str, description: str) -> ExperimentRecord:
-        experiment = ExperimentRecord(
-            name=name,
-            description=description,
-            status=JobStatus.IN_PROGRESS,
-        )
+        experiment = ExperimentRecord(name=name, description=description)
         self.session.add(experiment)
         self.session.commit()
         self.session.refresh(experiment)

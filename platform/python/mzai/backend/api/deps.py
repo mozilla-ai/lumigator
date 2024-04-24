@@ -30,7 +30,7 @@ def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
 def get_experiment_service(session: DBSessionDep) -> ExperimentService:
     experiment_repo = ExperimentRepository(session)
     result_repo = ExperimentResultRepository(session)
-    return FinetuningService(experiment_repo, result_repo)
+    return ExperimentService(experiment_repo, result_repo)
 
 
 FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]

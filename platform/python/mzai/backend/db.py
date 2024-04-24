@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import JSON, Connection, Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from .settings import settings
+from mzai.backend.settings import settings
 
 
 class BaseRecord(DeclarativeBase):

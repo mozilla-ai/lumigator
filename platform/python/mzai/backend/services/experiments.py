@@ -20,7 +20,10 @@ class ExperimentService:
     def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
         record = self.experiment_repo.get(experiment_id)
         if record is None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Experiment {experiment_id} not found.")
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                f"Experiment '{experiment_id}' not found.",
+            )
         return record
 
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
@@ -50,8 +53,8 @@ class ExperimentService:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 (
-                    f"No result available for experiment {experiment_record.name} "
-                    f"(status = {experiment_record.status})."
+                    f"No result available for experiment '{experiment_record.name}' "
+                    f"(status = '{experiment_record.status}')."
                 ),
             )
         return ExperimentResultResponse.model_validate(result_record)

@@ -27,6 +27,6 @@ def test_create_and_get_experiment(experiment_repository):
 
 def test_duplicate_results_error(experiment_repository, result_repository):
     experiment = experiment_repository.create(name="test", description="")
-    result_repository.create(experiment.id, metrics={})
+    result_repository.create(experiment_id=experiment.id, metrics={})
     with pytest.raises(IntegrityError):
-        result_repository.create(experiment.id, metrics={})
+        result_repository.create(experiment_id=experiment.id, metrics={})

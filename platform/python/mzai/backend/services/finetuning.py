@@ -1,4 +1,3 @@
-from typing import Any
 from uuid import UUID
 
 from fastapi import BackgroundTasks, HTTPException, status
@@ -31,8 +30,8 @@ class FinetuningService:
             self._raise_job_not_found(job_id)
         return record
 
-    def _update_job_record(self, job_id: UUID, updates: dict[str, Any]) -> FinetuningJobRecord:
-        record = self.job_repo.update(job_id, updates)
+    def _update_job_record(self, job_id: UUID, **updates) -> FinetuningJobRecord:
+        record = self.job_repo.update(job_id, **updates)
         if record is None:
             self._raise_job_not_found(job_id)
         return record
@@ -82,10 +81,9 @@ class FinetuningService:
 
     def update_job(self, job_id: UUID, request: FinetuningJobUpdate) -> FinetuningJobResponse:
         updates = request.model_dump(exclude_unset=True)
-        record = self._update_job_record(job_id, updates)
+        record = self._update_job_record(job_id, **updates)
         return FinetuningJobResponse.model_validate(record)
 
     def update_job_status(self, job_id: UUID, status: JobStatus) -> FinetuningJobResponse:
-        updates = {"status": status}
-        record = self._update_job_record(job_id, updates)
+        record = self._update_job_record(job_id, status=status)
         return FinetuningJobResponse.model_validate(record)

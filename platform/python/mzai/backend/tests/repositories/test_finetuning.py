@@ -19,7 +19,7 @@ def test_create_and_get_job(job_repository):
 
 def test_update_job(job_repository):
     job = job_repository.create(name="test", description="", submission_id="ray")
-    job_repository.update(job.id, {"status": JobStatus.FAILED, "description": "Axolotl"})
+    job_repository.update(job.id, status=JobStatus.FAILED, description="Axolotl")
     job = job_repository.get(job.id)
     assert job.status == JobStatus.FAILED
     assert job.description == "Axolotl"

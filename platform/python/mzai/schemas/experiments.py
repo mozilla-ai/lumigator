@@ -21,4 +21,5 @@ class ExperimentResponse(BaseModel, from_attributes=True):
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):
-    pass
+    id: UUID
+    experiment_id: UUID

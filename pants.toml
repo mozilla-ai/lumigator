@@ -33,11 +33,10 @@ resolves = { python-default = "pants_tools/python-default.lock" }
 
 [python-bootstrap]
 search_path = [
-    "<PATH>",
-    "<PYENV>",
-    "%(buildroot)s/.python/python3.10.13/python/install/bin",
+  "<PATH>",
+  "<PYENV>",
+  "%(buildroot)s/.python/python3.10.13/python/install/bin",
 ]
-
 
 [python-infer]
 use_rust_parser = true
@@ -55,8 +54,7 @@ default = true
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
-default = false  # optional
+default = false                              # optional
 
 [pytest]
 args = ["-v"]
-

@@ -1,3 +1,4 @@
+import uuid
 from math import exp
 
 import pytest
@@ -23,6 +24,12 @@ def test_create_and_get_experiment(experiment_repository):
     assert created_experiment.id == retrieved_experiment.id
     assert created_experiment.name == retrieved_experiment.name
     assert created_experiment.status == JobStatus.CREATED
+
+
+def test_experiment_foreign_key(result_repository):
+    random_id = uuid.uuid4()
+    with pytest.raises(IntegrityError):
+        result_repository.create(experiment_id=random_id, metrics={})
 
 
 def test_duplicate_results_error(experiment_repository, result_repository):

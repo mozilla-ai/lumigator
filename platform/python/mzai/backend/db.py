@@ -1,7 +1,7 @@
 import contextlib
 from collections.abc import Generator
 
-from sqlalchemy import Connection, Engine, create_engine
+from sqlalchemy import JSON, Connection, Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from .settings import settings
@@ -15,6 +15,8 @@ class BaseRecord(DeclarativeBase):
     so we're using the term "record" instead to indicate that instances of these classes
     generally correspond to single records (i.e., rows) in a DB table.
     """
+
+    type_annotation_map = {dict[str, float]: JSON}
 
 
 class DatabaseSessionManager:

@@ -4,15 +4,13 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from mzai.backend.records.experiments import ExperimentRecord, ExperimentResultRecord
+from mzai.backend.repositories.base import BaseRepository
 from mzai.schemas.extras import JobStatus
 
 
-class ExperimentRepository:
+class ExperimentRepository(BaseRepository[ExperimentRecord]):
     def __init__(self, session: Session):
-        self.session = session
-
-    def count(self) -> int:
-        return self.session.query(ExperimentRecord).count()
+        super().__init__(ExperimentRecord, session)
 
     def create(self, name: str, description: str) -> ExperimentRecord:
         experiment = ExperimentRecord(
@@ -25,19 +23,10 @@ class ExperimentRepository:
         self.session.refresh(experiment)
         return experiment
 
-    def get(self, experiment_id: UUID) -> ExperimentRecord | None:
-        return self.session.get(ExperimentRecord, experiment_id)
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[ExperimentRecord]:
-        return self.session.query(ExperimentRecord).offset(skip).limit(limit).all()
-
-
-class ExperimentResultRepository:
+class ExperimentResultRepository(BaseRepository[ExperimentResultRecord]):
     def __init__(self, session: Session):
-        self.session = session
-
-    def count(self) -> int:
-        return self.session.query(ExperimentResultRecord).count()
+        super().__init__(ExperimentResultRecord, session)
 
     def create(self, experiment_id: UUID, metrics: dict[str, Any]) -> ExperimentResultRecord:
         result = ExperimentResultRecord(experiment_id=experiment_id, metrics=metrics)
@@ -46,15 +35,9 @@ class ExperimentResultRepository:
         self.session.refresh(result)
         return result
 
-    def get(self, result_id: UUID) -> ExperimentResultRecord | None:
-        return self.session.get(ExperimentResultRecord, result_id)
-
     def get_by_experiment_id(self, experiment_id: UUID) -> ExperimentResultRecord | None:
         return (
             self.session.query(ExperimentResultRecord)
             .where(ExperimentResultRecord.experiment_id == experiment_id)
             .first()
         )
-
-    def list(self, skip: int = 0, limit: int = 100) -> list[ExperimentResultRecord]:
-        return self.session.query(ExperimentResultRecord).offset(skip).limit(limit).all()

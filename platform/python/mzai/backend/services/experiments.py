@@ -27,7 +27,7 @@ class ExperimentService:
         return record
 
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
-        record = self.experiment_repo.create(request.name, request.description)
+        record = self.experiment_repo.create(name=request.name, description=request.description)
         return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:

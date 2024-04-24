@@ -54,7 +54,8 @@ default = true
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
-default = false                              # optional
+# optional
+default = false
 
 [pytest]
 args = ["-v"]

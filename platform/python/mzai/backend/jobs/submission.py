@@ -1,29 +1,23 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
 from ray.job_submission import JobSubmissionClient
 
+from mzai.schemas.jobs import JobConfig
+
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
+    config: JobConfig
     runtime_env: dict[str, Any] | None = None
     num_cpus: int | float | None = None
     num_gpus: int | float | None = None
     memory: int | float | None = None
 
     @property
-    @abstractmethod
     def command(self) -> str:
-        pass
-
-
-@dataclass(kw_only=True)
-class ExperimentEntrypoint(RayJobEntrypoint):
-    @property
-    def command(self) -> str:
-        # TODO: Dummy entrypoint logic that needs to be updated for real
-        return "./jobrunner.pex"
+        return f"./jobrunner.pex {self.config.model_dump_json()}"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

@@ -13,7 +13,7 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB
 
-  jobrunner:
+  ray:
     image: ${RAY_IMAGE}
     command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=${RAY_DASHBOARD_PORT} --block"
     ports:
@@ -31,7 +31,7 @@ services:
     image: ${BACKEND_IMAGE}
     depends_on:
       - postgres
-      - jobrunner
+      - ray
     ports:
       - 80:80
     environment:

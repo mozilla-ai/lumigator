@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from mzai.backend.db import BaseRecord
 from mzai.backend.records.mixins import DateTimeMixin, NameDescriptionMixin
-from mzai.schemas.extras import JobStatus
+from mzai.schemas.jobs import JobStatus
 
 
 class FinetuningJobRecord(BaseRecord, NameDescriptionMixin, DateTimeMixin):

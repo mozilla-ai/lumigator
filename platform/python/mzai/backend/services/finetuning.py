@@ -7,13 +7,14 @@ from mzai.backend.jobs.entrypoints import FinetuningJobEntrypoint, submit_ray_jo
 from mzai.backend.jobs.handlers import FinetuningJobHandler
 from mzai.backend.records.finetuning import FinetuningJobRecord
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
-from mzai.schemas.extras import JobStatus, ListingResponse
+from mzai.schemas.extras import ListingResponse
 from mzai.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
     FinetuningJobUpdate,
     FinetuningLogsResponse,
 )
+from mzai.schemas.jobs import JobStatus
 
 
 class FinetuningService:

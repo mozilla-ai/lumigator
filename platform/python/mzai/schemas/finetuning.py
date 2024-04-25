@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from mzai.schemas.extras import JobStatus
+from mzai.schemas.jobs import JobStatus
 
 
 class FinetuningJobCreate(BaseModel):

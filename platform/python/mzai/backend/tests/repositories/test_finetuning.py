@@ -1,7 +1,7 @@
 import pytest
 
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
-from mzai.schemas.extras import JobStatus
+from mzai.schemas.jobs import JobStatus
 
 
 @pytest.fixture

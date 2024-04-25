@@ -1,6 +1,7 @@
-FROM ubuntu:22.04 as base
+ARG BASE_IMAGE="ubuntu:22.04"
 
-FROM base as builder
+FROM $BASE_IMAGE
+
 ARG PY_VERSION="3.10"
 ARG PY_EXECUTABLE="python${PY_VERSION}"
 
@@ -14,7 +15,7 @@ RUN apt-get update \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get -y install \
     gcc \
-    python3.10-dev \
+    python${PY_VERSION}-dev \
     libpq-dev \
     curl
 
@@ -22,6 +23,7 @@ RUN apt-get update \
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | ${PY_EXECUTABLE}
 
 WORKDIR /app
+
 # platform.python.mzai is the output place for the built pex
 # it's in `dist/platform.python.mzai.backend`
 COPY platform.python.mzai.backend/backend_app.pex .

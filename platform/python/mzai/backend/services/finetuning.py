@@ -52,7 +52,7 @@ class FinetuningService:
 
     def get_job_logs(self, job_id: UUID) -> FinetuningLogsResponse:
         record = self._get_job_record(job_id)
-        logs = self.ray_client.get_job_logs(record.submission_id)
+        logs = self.ray_client.get_job_logs(str(record.id))
         return FinetuningLogsResponse(
             id=record.id,
             status=record.status,

@@ -1,11 +1,14 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from ray.job_submission import JobSubmissionClient
 
+from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
 from mzai.schemas.extras import ListingResponse
+from mzai.schemas.jobs import JobConfig, JobType
 
 
 class ExperimentService:
@@ -13,9 +16,11 @@ class ExperimentService:
         self,
         experiment_repo: ExperimentRepository,
         result_repo: ExperimentResultRepository,
+        ray_client: JobSubmissionClient,
     ):
         self.experiment_repo = experiment_repo
         self.result_repo = result_repo
+        self.ray_client = ray_client
 
     def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
         record = self.experiment_repo.get(experiment_id)
@@ -28,6 +33,12 @@ class ExperimentService:
 
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
+
+        # Submit the job to Ray
+        config = JobConfig(id=record.id, type=JobType.FINETUNING, args={"name": request.name})
+        entrypoint = RayJobEntrypoint(config=config)
+        submit_ray_job(self.ray_client, entrypoint)
+
         return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:

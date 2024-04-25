@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.finetuning import FinetuningJobRecord
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.schemas.extras import ListingResponse
@@ -12,7 +13,7 @@ from mzai.schemas.finetuning import (
     FinetuningJobUpdate,
     FinetuningLogsResponse,
 )
-from mzai.schemas.jobs import JobStatus
+from mzai.schemas.jobs import JobConfig, JobStatus, JobType
 
 
 class FinetuningService:
@@ -36,8 +37,13 @@ class FinetuningService:
         return record
 
     def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
-        # TODO: Actually run job submission to Ray
         record = self.job_repo.create(name=request.name, description=request.description)
+
+        # Submit the job to Ray
+        config = JobConfig(id=record.id, type=JobType.EXPERIMENT, args={"name": request.name})
+        entrypoint = RayJobEntrypoint(config=config)
+        submit_ray_job(self.ray_client, entrypoint)
+
         return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:

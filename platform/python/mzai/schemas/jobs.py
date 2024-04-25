@@ -1,34 +1,26 @@
 from enum import Enum
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from ray.job_submission import JobStatus as RayJobStatus
 
 
 class JobType(str, Enum):
     EXPERIMENT = "experiment"
+    FINETUNING = "finetuning"
 
 
 class JobStatus(str, Enum):
     CREATED = "created"
     RUNNING = "running"
     FAILED = "failed"
-    STOPPED = "stopped"
     SUCCEEDED = "succeeded"
 
-    @classmethod
-    def from_ray(cls, ray_status: RayJobStatus) -> "JobStatus":
-        match ray_status:
-            case RayJobStatus.PENDING:
-                return JobStatus.CREATED
-            case RayJobStatus.RUNNING:
-                return JobStatus.RUNNING
-            case RayJobStatus.FAILED:
-                return JobStatus.FAILED
-            case RayJobStatus.STOPPED:
-                return JobStatus.STOPPED
-            case RayJobStatus.SUCCEEDED:
-                return JobStatus.SUCCEEDED
+
+class JobConfig(BaseModel):
+    id: UUID
+    type: JobType
+    args: dict[str, Any]
 
 
 class JobEvent(BaseModel):

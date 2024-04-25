@@ -19,13 +19,11 @@ class RayJobEntrypoint(ABC):
 
 
 @dataclass(kw_only=True)
-class FinetuningJobEntrypoint(RayJobEntrypoint):
-    config: dict[str, Any]
-
+class ExperimentEntrypoint(RayJobEntrypoint):
     @property
     def command(self) -> str:
         # TODO: Dummy entrypoint logic that needs to be updated for real
-        return "echo 'Hello from Ray!'"
+        return "./jobrunner.pex"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

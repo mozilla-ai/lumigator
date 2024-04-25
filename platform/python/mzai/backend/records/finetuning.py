@@ -12,4 +12,3 @@ class FinetuningJobRecord(BaseRecord, NameDescriptionMixin, DateTimeMixin):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     status: Mapped[JobStatus] = mapped_column(default=JobStatus.CREATED)
-    submission_id: Mapped[str]

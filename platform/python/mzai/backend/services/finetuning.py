@@ -1,10 +1,8 @@
 from uuid import UUID
 
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
-from mzai.backend.jobs.entrypoints import FinetuningJobEntrypoint, submit_ray_job
-from mzai.backend.jobs.handlers import FinetuningJobHandler
 from mzai.backend.records.finetuning import FinetuningJobRecord
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.schemas.extras import ListingResponse
@@ -37,26 +35,9 @@ class FinetuningService:
             self._raise_job_not_found(job_id)
         return record
 
-    def create_job(
-        self,
-        request: FinetuningJobCreate,
-        background_tasks: BackgroundTasks,
-    ) -> FinetuningJobResponse:
-        # Submit job to Ray
-        entrypoint = FinetuningJobEntrypoint(config=request.config)
-        submission_id = submit_ray_job(self.ray_client, entrypoint)
-
-        # Create DB record of job submission
-        record = self.job_repo.create(
-            name=request.name,
-            description=request.description,
-            submission_id=submission_id,
-        )
-
-        # Poll for job completion in background
-        handler = FinetuningJobHandler(record.id, submission_id)
-        background_tasks.add_task(handler.poll)
-
+    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
+        # TODO: Actually run job submission to Ray
+        record = self.job_repo.create(name=request.name, description=request.description)
         return FinetuningJobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> FinetuningJobResponse:

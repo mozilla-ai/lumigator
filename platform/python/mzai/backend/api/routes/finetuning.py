@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, status
 
 from mzai.backend.api.deps import FinetuningServiceDep
 from mzai.schemas.extras import ListingResponse
@@ -17,10 +17,9 @@ router = APIRouter()
 @router.post("/jobs", status_code=status.HTTP_201_CREATED)
 def create_finetuning_job(
     service: FinetuningServiceDep,
-    background_tasks: BackgroundTasks,
     request: FinetuningJobCreate,
 ) -> FinetuningJobResponse:
-    return service.create_job(request, background_tasks)
+    return service.create_job(request)
 
 
 @router.get("/jobs/{job_id}")

@@ -21,7 +21,7 @@ def create_jobs_via_backdoor(db_session):
         created_ids = []
         job_repo = FinetuningJobRepository(db_session)
         for i in range(n_jobs):
-            record = job_repo.create(name=f"Job {i}", description="", submission_id=f"Ray {i}")
+            record = job_repo.create(name=f"Job {i}", description="")
             created_ids.append(record.id)
         return created_ids
 

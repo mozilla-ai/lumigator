@@ -17,16 +17,8 @@ class FakeFinetuningService(FinetuningService):
     def __init__(self, job_repo: FinetuningJobRepository):
         super().__init__(job_repo, ray_client=None)
 
-    def create_job(
-        self,
-        request: FinetuningJobCreate,
-        background: BackgroundTasks,
-    ) -> FinetuningJobResponse:
-        return self.job_repo.create(
-            name=request.name,
-            description=request.description,
-            submission_id="",
-        )
+    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
+        return self.job_repo.create(name=request.name, description=request.description)
 
     def get_job_logs(self, job_id: UUID) -> FinetuningLogsResponse:
         record = self._get_job_record(job_id)

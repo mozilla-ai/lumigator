@@ -12,7 +12,7 @@ class DeploymentType(str, Enum):
     PRODUCTION = "production"
 
 
-class Settings(BaseSettings):
+class BackendSettings(BaseSettings):
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
 
     # Postgres
@@ -44,4 +44,4 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()
+settings = BackendSettings()

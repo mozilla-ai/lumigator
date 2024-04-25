@@ -1,0 +1,37 @@
+python_sources(
+    name="joblib_sources",
+    sources=["**/*.py", "!tests"],
+    dependencies=[
+        "platform/3rdparty/python:3rdparty",
+        "platform/python/mzai/schemas:schemas_sources",
+    ],
+)
+
+pex_binary(
+    name="joblib_app",
+    complete_platforms=[
+        "pants_tools:ubuntu_2204_py310",
+        "pants_tools:macosx_py310",
+    ],
+    dependencies=[
+        ":joblib_sources",
+    ],
+    execution_mode="venv",
+    include_sources=True,
+    script="python",
+    args = [
+        "runner.py",
+    ]
+)
+
+docker_image(
+    name="joblib_image",
+    build_platform=["linux/amd64"],
+    dependencies=[":joblib_app"],
+    image_tags=[
+        "dev",
+        "0.1",
+    ],
+    repository="platform/{name}",
+    source="Dockerfile",
+)

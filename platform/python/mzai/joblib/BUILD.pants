@@ -18,10 +18,7 @@ pex_binary(
     ],
     execution_mode="venv",
     include_sources=True,
-    script="python",
-    args = [
-        "runner.py",
-    ]
+    entry_point="runner.py",
 )
 
 docker_image(

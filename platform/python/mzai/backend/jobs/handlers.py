@@ -8,7 +8,7 @@ from ray.job_submission import JobDetails, JobSubmissionClient
 from mzai.backend.db import session_manager
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.settings import settings
-from mzai.schemas.extras import JobStatus
+from mzai.schemas.jobs import JobStatus
 
 
 class FinetuningJobHandler:

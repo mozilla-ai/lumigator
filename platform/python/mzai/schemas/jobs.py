@@ -21,10 +21,3 @@ class JobConfig(BaseModel):
     id: UUID
     type: JobType
     args: dict[str, Any]
-
-
-class JobEvent(BaseModel):
-    id: UUID
-    type: JobType
-    status: JobStatus
-    detail: str | None = None

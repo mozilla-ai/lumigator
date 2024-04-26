@@ -17,7 +17,7 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        return f"./jobrunner.pex '{self.config.model_dump_json()}'"
+        return f"./jobrunner.pex --config '{self.config.model_dump_json()}'"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

@@ -5,7 +5,7 @@ from mzai.schemas.jobs import JobConfig
 
 
 @click.command(name="Job Runner Entrypoint")
-@click.argument("config", type=str)
+@click.option("--config", type=str)
 def main(config: str):
     config = JobConfig.model_validate_json(config)
     runner = JobRunner()

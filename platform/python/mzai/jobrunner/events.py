@@ -14,10 +14,8 @@ def send_job_event(
     detail: str | None = None,
 ) -> None:
     event = JobEvent(job_id=job_id, job_type=job_type, status=status, detail=detail)
-    logger.info(f"Sending job event {event}")
-    response = requests.post(
-        url=settings.BACKEND_EVENTS_URL,
-        json=event.model_dump(mode="json"),
-    )
+    event_json = event.model_dump(mode="json")
+    logger.info(f"Sending job event {event_json}")
+    response = requests.post(url=settings.BACKEND_EVENTS_URL, json=event_json)
     if response.status_code != 200:
         logger.error(f"Failed to send event for job '{job_id}': {response.json()}")

@@ -1,10 +1,16 @@
+from enum import Enum
 from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
-from mzai.backend.settings import DeploymentType
-
 ItemType = TypeVar("ItemType")
+
+
+class DeploymentType(str, Enum):
+    LOCAL = "local"
+    DEVELOPMENT = "development"
+    STAGING = "staging"
+    PRODUCTION = "production"
 
 
 class HealthResponse(BaseModel):

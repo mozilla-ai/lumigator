@@ -2,6 +2,5 @@ python_sources(
     name="schemas_sources",
     dependencies=[
         "platform/3rdparty/python:3rdparty#pydantic",
-        "platform/3rdparty/python:3rdparty#pydantic-settings",
     ],
 )

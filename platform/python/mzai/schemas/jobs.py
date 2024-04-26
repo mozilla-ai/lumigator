@@ -18,6 +18,6 @@ class JobStatus(str, Enum):
 
 
 class JobConfig(BaseModel):
-    id: UUID
-    type: JobType
+    job_id: UUID
+    job_type: JobType
     args: dict[str, Any]

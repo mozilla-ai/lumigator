@@ -27,5 +27,5 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
         entrypoint_num_gpus=entrypoint.num_gpus,
         entrypoint_memory=entrypoint.memory,
         runtime_env=entrypoint.runtime_env,
-        submission_id=str(entrypoint.config.id),  # Use the backend ID for the Ray submission ID
+        submission_id=str(entrypoint.config.job_id),  # Use the record ID for the Ray submission
     )

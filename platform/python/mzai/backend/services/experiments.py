@@ -35,7 +35,11 @@ class ExperimentService:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
         # Submit the job to Ray
-        config = JobConfig(id=record.id, type=JobType.EXPERIMENT, args={"name": request.name})
+        config = JobConfig(
+            job_id=record.id,
+            job_type=JobType.EXPERIMENT,
+            args={"name": request.name},
+        )
         entrypoint = RayJobEntrypoint(config=config)
         submit_ray_job(self.ray_client, entrypoint)
 

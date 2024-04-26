@@ -34,5 +34,11 @@ docker_image(
         "0.1",
     ],
     repository="platform/{name}",
-    source="Dockerfile",
+    instructions=[
+        "ARG BASE_IMAGE=python:3.10",
+        "FROM $BASE_IMAGE",
+        "WORKDIR /app",
+        "COPY platform.python.mzai.backend/backend_app.pex .",
+        "ENTRYPOINT [\"./backend_app.pex\"]",
+    ],
 )

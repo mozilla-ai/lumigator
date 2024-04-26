@@ -5,10 +5,10 @@ Source code for the MZAI model builder platform.
 
 # Setup 
 
-Install pants:
+Install pants + dependencies:
 
 ```shell
-brew install pantsbuild/tap/pants
+brew install pantsbuild/tap/pants jq
 pants --version  # start the daemon
 ```
 
@@ -22,7 +22,7 @@ make bootstrap-python
 Show targets:
 
 ```bash
-make show-all-major-targets
+make show-pants-targets
 ```
 
 Compile targets manually:
@@ -30,7 +30,7 @@ Compile targets manually:
 ```bash
 pants package <target>
 # backend app
-pants package platform/python/mzai/backend
+pants package platform/python/mzai/backend --no-local-cache
 # backend docker image
 pants package platform/python/mzai/backend:backend_image
 ```
@@ -38,7 +38,7 @@ pants package platform/python/mzai/backend:backend_image
 Export a venv for your IDE:
 
 ```bash
-make pants-roots # Sets PYTHONPATH for first-party directories in a .env file
+make ide-roots # Sets PYTHONPATH for first-party directories in a .env file
 make ide-venv
 ```
 

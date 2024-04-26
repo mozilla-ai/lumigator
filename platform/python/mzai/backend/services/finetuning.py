@@ -1,19 +1,19 @@
 from uuid import UUID
 
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
-from mzai.backend.jobs.entrypoints import FinetuningJobEntrypoint, submit_ray_job
-from mzai.backend.jobs.handlers import FinetuningJobHandler
+from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.finetuning import FinetuningJobRecord
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
-from mzai.schemas.extras import JobStatus, ListingResponse
+from mzai.schemas.extras import ListingResponse
 from mzai.schemas.finetuning import (
     FinetuningJobCreate,
     FinetuningJobResponse,
     FinetuningJobUpdate,
     FinetuningLogsResponse,
 )
+from mzai.schemas.jobs import JobConfig, JobStatus, JobType
 
 
 class FinetuningService:
@@ -36,25 +36,17 @@ class FinetuningService:
             self._raise_job_not_found(job_id)
         return record
 
-    def create_job(
-        self,
-        request: FinetuningJobCreate,
-        background_tasks: BackgroundTasks,
-    ) -> FinetuningJobResponse:
-        # Submit job to Ray
-        entrypoint = FinetuningJobEntrypoint(config=request.config)
-        submission_id = submit_ray_job(self.ray_client, entrypoint)
+    def create_job(self, request: FinetuningJobCreate) -> FinetuningJobResponse:
+        record = self.job_repo.create(name=request.name, description=request.description)
 
-        # Create DB record of job submission
-        record = self.job_repo.create(
-            name=request.name,
-            description=request.description,
-            submission_id=submission_id,
+        # Submit the job to Ray
+        config = JobConfig(
+            job_id=record.id,
+            job_type=JobType.FINETUNING,
+            args={"name": request.name},
         )
-
-        # Poll for job completion in background
-        handler = FinetuningJobHandler(record.id, submission_id)
-        background_tasks.add_task(handler.poll)
+        entrypoint = RayJobEntrypoint(config=config)
+        submit_ray_job(self.ray_client, entrypoint)
 
         return FinetuningJobResponse.model_validate(record)
 
@@ -64,7 +56,7 @@ class FinetuningService:
 
     def get_job_logs(self, job_id: UUID) -> FinetuningLogsResponse:
         record = self._get_job_record(job_id)
-        logs = self.ray_client.get_job_logs(record.submission_id)
+        logs = self.ray_client.get_job_logs(str(record.id))
         return FinetuningLogsResponse(
             id=record.id,
             status=record.status,

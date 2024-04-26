@@ -9,6 +9,13 @@ python_sources(
 
 pex_binary(
     name="backend_app",
+    dependencies=[":backend_sources"],
+    complete_platforms=[
+        "pants_tools:ubuntu_2204_py310",
+        "pants_tools:macosx_py310",
+    ],
+    execution_mode="venv",
+    script="uvicorn",
     args=[
         "mzai.backend.main:app",
         "--host",
@@ -16,16 +23,6 @@ pex_binary(
         "--port",
         "80",
     ],
-    complete_platforms=[
-        "pants_tools:ubuntu_2204_py310",
-        "pants_tools:macosx_py310",
-    ],
-    dependencies=[
-        ":backend_sources",
-    ],
-    execution_mode="venv",
-    include_sources=True,
-    script="uvicorn",
 )
 
 docker_image(
@@ -37,5 +34,11 @@ docker_image(
         "0.1",
     ],
     repository="platform/{name}",
-    source="Dockerfile",
+    instructions=[
+        "ARG BASE_IMAGE=python:3.10",
+        "FROM $BASE_IMAGE",
+        "WORKDIR /app",
+        "COPY platform.python.mzai.backend/backend_app.pex .",
+        'ENTRYPOINT ["./backend_app.pex"]',
+    ],
 )

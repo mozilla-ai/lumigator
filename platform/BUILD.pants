@@ -3,6 +3,7 @@ run_shell_command(
     execution_dependencies=[
         "platform/infra/mzai/docker:docker_compose_shell_scripts",
         "platform/python/mzai/backend:backend_image",
+        "platform/python/mzai/jobrunner:ray_jobrunner_image",
     ],
     name="docker_compose_up",
 )

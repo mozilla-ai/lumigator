@@ -1,18 +1,11 @@
-from enum import Enum
-
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
 
-
-class DeploymentType(str, Enum):
-    LOCAL = "local"
-    DEVELOPMENT = "development"
-    STAGING = "staging"
-    PRODUCTION = "production"
+from mzai.schemas.extras import DeploymentType
 
 
-class Settings(BaseSettings):
+class BackendSettings(BaseSettings):
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
 
     # Postgres
@@ -44,4 +37,4 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()
+settings = BackendSettings()

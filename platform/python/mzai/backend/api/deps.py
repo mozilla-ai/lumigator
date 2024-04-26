@@ -30,7 +30,8 @@ def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
 def get_experiment_service(session: DBSessionDep) -> ExperimentService:
     experiment_repo = ExperimentRepository(session)
     result_repo = ExperimentResultRepository(session)
-    return ExperimentService(experiment_repo, result_repo)
+    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
+    return ExperimentService(experiment_repo, result_repo, ray_client)
 
 
 FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]

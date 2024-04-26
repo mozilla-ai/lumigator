@@ -1,31 +1,23 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
 from ray.job_submission import JobSubmissionClient
 
+from mzai.schemas.jobs import JobConfig
+
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
+    config: JobConfig
     runtime_env: dict[str, Any] | None = None
     num_cpus: int | float | None = None
     num_gpus: int | float | None = None
     memory: int | float | None = None
 
     @property
-    @abstractmethod
     def command(self) -> str:
-        pass
-
-
-@dataclass(kw_only=True)
-class FinetuningJobEntrypoint(RayJobEntrypoint):
-    config: dict[str, Any]
-
-    @property
-    def command(self) -> str:
-        # TODO: Dummy entrypoint logic that needs to be updated for real
-        return "echo 'Hello from Ray!'"
+        return f"./jobrunner.pex --config '{self.config.model_dump_json()}'"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
@@ -35,4 +27,5 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
         entrypoint_num_gpus=entrypoint.num_gpus,
         entrypoint_memory=entrypoint.memory,
         runtime_env=entrypoint.runtime_env,
+        submission_id=str(entrypoint.config.job_id),  # Use the record ID for the Ray submission
     )

@@ -23,9 +23,6 @@ services:
         limits:
           cpus: ${RAY_HEAD_NODE_CPUS}
           memory: ${RAY_HEAD_NODE_MEMORY}
-    environment:
-      - BACKEND_HOST
-      - BACKEND_PORT
 
   backend:
     image: ${BACKEND_IMAGE}

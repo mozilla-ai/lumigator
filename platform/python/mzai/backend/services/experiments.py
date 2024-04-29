@@ -8,7 +8,7 @@ from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
 from mzai.schemas.extras import ListingResponse
-from mzai.schemas.jobs import JobConfig, JobType
+from mzai.schemas.jobs import JobConfig, JobStatus, JobType
 
 
 class ExperimentService:
@@ -22,13 +22,19 @@ class ExperimentService:
         self.result_repo = result_repo
         self.ray_client = ray_client
 
+    def _raise_not_found(self, experiment_id: UUID):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Experiment {experiment_id} not found.")
+
     def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
         record = self.experiment_repo.get(experiment_id)
         if record is None:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                f"Experiment '{experiment_id}' not found.",
-            )
+            self._raise_not_found(experiment_id)
+        return record
+
+    def _update_experiment_record(self, job_id: UUID, **updates) -> ExperimentRecord:
+        record = self.experiment_repo.update(job_id, **updates)
+        if record is None:
+            self._raise_not_found(job_id)
         return record
 
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
@@ -60,6 +66,14 @@ class ExperimentService:
             total=total,
             items=[ExperimentResponse.model_validate(x) for x in records],
         )
+
+    def update_experiment_status(
+        self,
+        experiment_id: UUID,
+        status: JobStatus,
+    ) -> ExperimentResponse:
+        record = self._update_experiment_record(experiment_id, status=status)
+        return ExperimentResponse.model_validate(record)
 
     def get_experiment_result(self, experiment_id: UUID) -> ExperimentResultResponse:
         experiment_record = self._get_experiment_record(experiment_id)

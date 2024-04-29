@@ -5,6 +5,7 @@ class Tags(str, Enum):
     HEALTH = "health"
     FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
+    EVENTS = "events"
 
 
 TAGS_METADATA = [
@@ -19,6 +20,10 @@ TAGS_METADATA = [
     {
         "name": Tags.EXPERIMENTS,
         "description": "Create and manage evaluation experiments.",
+    },
+    {
+        "name": Tags.EVENTS,
+        "description": "Send a job event to the application.",
     },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.

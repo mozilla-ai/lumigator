@@ -23,6 +23,9 @@ services:
         limits:
           cpus: ${RAY_HEAD_NODE_CPUS}
           memory: ${RAY_HEAD_NODE_MEMORY}
+    environment:
+      - BACKEND_HOST
+      - BACKEND_PORT
 
   backend:
     image: ${BACKEND_IMAGE}
@@ -30,7 +33,7 @@ services:
       - postgres
       - ray
     ports:
-      - 80:80
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
       - DEPLOYMENT_TYPE
       - POSTGRES_HOST

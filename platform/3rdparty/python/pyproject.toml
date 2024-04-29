@@ -16,6 +16,7 @@ dependencies = [
     "psycopg2-binary==2.9.9",
     "ray[default]==2.9.3",
     "starlette",
+    "requests",
     "ruff",
     "pytest",
     "pytest-cov",

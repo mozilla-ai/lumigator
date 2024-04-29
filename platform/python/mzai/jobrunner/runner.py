@@ -29,8 +29,8 @@ class JobRunner:
         )
 
     def run(self, config: JobConfig):
-        self.on_begin(config)
         try:
+            self.on_begin(config)
             if random.random() >= 0.5:
                 raise ValueError("Job went crazy!")
             self.on_success(config)

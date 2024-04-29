@@ -33,7 +33,7 @@ services:
       - postgres
       - ray
     ports:
-      - 80:80
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
       - DEPLOYMENT_TYPE
       - POSTGRES_HOST

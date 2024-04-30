@@ -13,6 +13,19 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB
 
+  localstack:
+    image: ${LOCALSTACK_IMAGE}
+    ports:
+      - ${S3_PORT}:${S3_PORT}
+    environment:
+      - SERVICES=s3:${S3_PORT}      
+      - HOSTNAME=${AWS_HOST}
+      - HOSTNAME_EXTERNAL=${AWS_HOST}
+      - DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - S3_BUCKET
+    volumes:
+      - ./localstack:/etc/localstack/init/ready.d # Sync localstack startup scripts
+
   ray:
     image: ${RAY_IMAGE}
     command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=${RAY_DASHBOARD_PORT} --block"
@@ -31,6 +44,7 @@ services:
     image: ${BACKEND_IMAGE}
     depends_on:
       - postgres
+      - localstack
       - ray
     ports:
       - ${BACKEND_PORT}:${BACKEND_PORT}
@@ -43,6 +57,11 @@ services:
       - POSTGRES_DB
       - RAY_HEAD_NODE_HOST
       - RAY_DASHBOARD_PORT
+      - S3_PORT
+      - AWS_HOST
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_DEFAULT_REGION
 
 
 volumes:

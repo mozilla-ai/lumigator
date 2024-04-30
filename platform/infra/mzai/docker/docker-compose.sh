@@ -4,6 +4,10 @@ ROOT="infra/mzai/docker"
 COMPOSE_FILE="$ROOT/docker-compose.yaml"
 ENV_FILE="$ROOT/.env.local"
 
+config() {
+	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} config
+}
+
 down() {
 	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} down
 }
@@ -24,6 +28,10 @@ up)
 
 down)
 	down
+	;;
+
+config)
+	config
 	;;
 
 *)

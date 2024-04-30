@@ -15,6 +15,14 @@ class BackendSettings(BaseSettings):
     POSTGRES_PASSWORD: str | None = None
     POSTGRES_DB: str | None = None
 
+    # AWS
+    AWS_HOST: str = "localhost"
+    AWS_ACCESS_KEY_ID: str = "test"
+    AWS_SECRET_ACCESS_KEY: str = "test"
+    AWS_DEFAULT_REGION: str = "us-east-2"
+    S3_PORT: int = 4566
+    S3_BUCKET: str = "backend-storage"
+
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
     RAY_DASHBOARD_PORT: int = 8265

@@ -22,7 +22,7 @@ services:
       - HOSTNAME=${AWS_HOST}
       - HOSTNAME_EXTERNAL=${AWS_HOST}
       - DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - S3_BUCKET
+      - CREATE_BUCKETS=${S3_BUCKET}
     volumes:
       - ./localstack:/etc/localstack/init/ready.d # Sync localstack startup scripts
 
@@ -57,11 +57,12 @@ services:
       - POSTGRES_DB
       - RAY_HEAD_NODE_HOST
       - RAY_DASHBOARD_PORT
-      - S3_PORT
       - AWS_HOST
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION
+      - S3_PORT
+      - S3_BUCKET
 
 
 volumes:

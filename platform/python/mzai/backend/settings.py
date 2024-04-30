@@ -21,7 +21,7 @@ class BackendSettings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = "test"
     AWS_DEFAULT_REGION: str = "us-east-2"
     S3_PORT: int = 4566
-    S3_BUCKET: str = "backend-storage"
+    S3_BUCKET: str = "platform-storage"
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"

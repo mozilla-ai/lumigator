@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-awslocal s3api create-bucket --bucket $S3_BUCKET
+for bucket in ${CREATE_BUCKETS//,/ }; do
+    awslocal s3api create-bucket --bucket $bucket
+done

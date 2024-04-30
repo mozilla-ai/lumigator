@@ -19,9 +19,6 @@ services:
       - ${S3_PORT}:${S3_PORT}
     environment:
       - SERVICES=s3:${S3_PORT}      
-      - HOSTNAME=${AWS_HOST}
-      - HOSTNAME_EXTERNAL=${AWS_HOST}
-      - DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - CREATE_BUCKETS=${S3_BUCKET}
     volumes:
       - ./localstack:/etc/localstack/init/ready.d # Sync localstack startup scripts

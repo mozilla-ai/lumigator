@@ -11,13 +11,22 @@ class NameDescriptionMixin:
 
 
 @declarative_mixin
-class DateTimeMixin:
+class CreatedAtMixin:
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
     )
+
+
+@declarative_mixin
+class UpdatedAtMixin:
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         DateTime(timezone=True),
         onupdate=func.now(),
         nullable=True,
     )
+
+
+@declarative_mixin
+class DateTimeMixin(CreatedAtMixin, UpdatedAtMixin):
+    pass

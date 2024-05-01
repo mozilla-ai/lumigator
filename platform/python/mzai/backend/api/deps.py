@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Annotated, Any
+from typing import Annotated
 
 import boto3
 from fastapi import Depends
@@ -24,14 +24,15 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
-def get_s3_client() -> Generator[Any, None, None]:
-    return boto3
-
-
 def get_dataset_service(session: DBSessionDep) -> DatasetService:
     dataset_repo = DatasetRepository(session)
-    s3_client = boto3.client
-    pass
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+    return DatasetService(dataset_repo, s3_client)
 
 
 def get_finetuning_service(session: DBSessionDep) -> FinetuningService:

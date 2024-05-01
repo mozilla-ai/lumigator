@@ -16,6 +16,10 @@ class BaseRepository(Generic[RecordType]):
     def count(self) -> int:
         return self.session.query(self.record_cls).count()
 
+    def exists(self, **filters) -> bool:
+        q = self.session.query(self.record_cls).filter_by(**filters)
+        return self.session.query(q.exists()).scalar()
+
     def create(self, **fields) -> RecordType:
         record = self.record_cls(**fields)
         self.session.add(record)

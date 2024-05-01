@@ -21,7 +21,9 @@ services:
       - SERVICES=s3:${S3_PORT}      
       - CREATE_BUCKETS=${S3_BUCKET}
     volumes:
-      - ./localstack:/etc/localstack/init/ready.d # Sync localstack startup scripts
+      # Sync localstack startup scripts
+      # https://docs.localstack.cloud/references/init-hooks/
+      - ./localstack:/etc/localstack/init/ready.d
 
   ray:
     image: ${RAY_IMAGE}

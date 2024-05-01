@@ -1,4 +1,4 @@
-from pydantic import computed_field
+from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
 
@@ -6,7 +6,9 @@ from mzai.schemas.extras import DeploymentType
 
 
 class BackendSettings(BaseSettings):
+    # Backend
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
+    MAX_UPLOAD_SIZE: ByteSize = 50_000_000  # Bytes
 
     # Postgres
     POSTGRES_HOST: str = "localhost"

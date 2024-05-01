@@ -1,4 +1,12 @@
 run_shell_command(
+    command="./infra/mzai/docker/docker-compose.sh config",
+    execution_dependencies=[
+        "platform/infra/mzai/docker:docker_compose_shell_scripts",
+    ],
+    name="docker_compose_config",
+)
+
+run_shell_command(
     command="./infra/mzai/docker/docker-compose.sh up",
     execution_dependencies=[
         "platform/infra/mzai/docker:docker_compose_shell_scripts",

@@ -20,8 +20,12 @@ class BackendSettings(BaseSettings):
     AWS_ACCESS_KEY_ID: str = "test"
     AWS_SECRET_ACCESS_KEY: str = "test"
     AWS_DEFAULT_REGION: str = "us-east-2"
+
+    # S3
     S3_PORT: int = 4566
     S3_BUCKET: str = "platform-storage"
+    S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
+    S3_DATASETS_PREFIX: str = "datasets"
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
@@ -29,13 +33,13 @@ class BackendSettings(BaseSettings):
 
     @computed_field
     @property
-    def RAY_DASHBOARD_URL(self) -> str:  # noqa: N802
-        return f"http://{self.RAY_HEAD_NODE_HOST}:{self.RAY_DASHBOARD_PORT}"
+    def S3_ENDPOINT_URL(self) -> str:  # noqa: N802
+        return f"http://{self.AWS_HOST}:{self.S3_PORT}"
 
     @computed_field
     @property
-    def S3_ENDPOINT_URL(self) -> str:  # noqa: N802
-        return f"http://{self.AWS_HOST}:{self.RAY_DASHBOARD_PORT}"
+    def RAY_DASHBOARD_URL(self) -> str:  # noqa: N802
+        return f"http://{self.RAY_HEAD_NODE_HOST}:{self.RAY_DASHBOARD_PORT}"
 
     @computed_field
     @property

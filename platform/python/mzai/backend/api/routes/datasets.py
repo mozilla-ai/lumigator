@@ -21,7 +21,7 @@ def upload_dataset(
 
 @router.get("/{dataset_id}")
 def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse:
-    pass
+    return service.get_dataset(dataset_id)
 
 
 @router.get("/")
@@ -30,9 +30,9 @@ def list_experiments(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[DatasetResponse]:
-    pass
+    return service.list_datasets(skip, limit)
 
 
-@router.get("/{dataset_id}/contents")
+@router.get("/{dataset_id}/download")
 def get_dataset_contents(service: DatasetServiceDep, dataset_id: UUID) -> DatasetDownloadResponse:
-    pass
+    return service.get_dataset_download(dataset_id)

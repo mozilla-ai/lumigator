@@ -16,7 +16,7 @@ def upload_dataset(
     dataset: UploadFile,
     format: Annotated[DatasetFormat, Form()],
 ) -> DatasetResponse:
-    pass
+    return service.upload_dataset(dataset, format)
 
 
 @router.get("/{dataset_id}")

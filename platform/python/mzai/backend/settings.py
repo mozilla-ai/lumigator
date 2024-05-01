@@ -26,6 +26,11 @@ class BackendSettings(BaseSettings):
 
     @computed_field
     @property
+    def S3_ENDPOINT_URL(self) -> str:  # noqa: N802
+        return f"http://{self.AWS_HOST}:{self.RAY_DASHBOARD_PORT}"
+
+    @computed_field
+    @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
         return URL.create(
             drivername="postgresql",

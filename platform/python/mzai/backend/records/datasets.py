@@ -8,6 +8,8 @@ from mzai.schemas.datasets import DatasetFormat
 
 
 class DatasetRecord(BaseRecord, CreatedAtMixin):
+    __tablename__ = "datasets"
+
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     filename: Mapped[str]
     format: Mapped[DatasetFormat]

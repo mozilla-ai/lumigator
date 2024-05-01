@@ -3,7 +3,6 @@ from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel
-from pydantic_core import Url
 
 
 class DatasetFormat(str, Enum):
@@ -12,7 +11,7 @@ class DatasetFormat(str, Enum):
 
 class DatasetDownloadResponse(BaseModel):
     id: UUID
-    download_url: Url
+    download_url: str
 
 
 class DatasetResponse(BaseModel, from_attributes=True):

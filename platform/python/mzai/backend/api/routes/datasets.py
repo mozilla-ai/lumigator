@@ -3,14 +3,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Form, UploadFile
 
-from mzai.backend.api.deps import DatasetServiceDep
+from mzai.backend.api.deps import ContentLengthDep, DatasetServiceDep
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", dependencies=[ContentLengthDep])
 def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,
@@ -25,7 +25,7 @@ def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse
 
 
 @router.get("/")
-def list_experiments(
+def list_datasets(
     service: DatasetServiceDep,
     skip: int = 0,
     limit: int = 100,
@@ -34,5 +34,5 @@ def list_experiments(
 
 
 @router.get("/{dataset_id}/download")
-def get_dataset_contents(service: DatasetServiceDep, dataset_id: UUID) -> DatasetDownloadResponse:
+def get_dataset_download(service: DatasetServiceDep, dataset_id: UUID) -> DatasetDownloadResponse:
     return service.get_dataset_download(dataset_id)

@@ -1,11 +1,13 @@
 from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, Any
 
+import boto3
 from fastapi import Depends
 from ray.job_submission import JobSubmissionClient
 from sqlalchemy.orm import Session
 
 from mzai.backend.db import session_manager
+from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.services.datasets import DatasetService
@@ -22,7 +24,13 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
+def get_s3_client() -> Generator[Any, None, None]:
+    return boto3
+
+
 def get_dataset_service(session: DBSessionDep) -> DatasetService:
+    dataset_repo = DatasetRepository(session)
+    s3_client = boto3.client
     pass
 
 

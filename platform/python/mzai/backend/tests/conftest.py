@@ -6,8 +6,8 @@ from testcontainers.postgres import PostgresContainer
 
 from mzai.backend.api.deps import get_db_session
 from mzai.backend.api.router import API_V1_PREFIX
-from mzai.backend.db import BaseRecord
 from mzai.backend.main import create_app
+from mzai.backend.records.base import BaseRecord
 from mzai.backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies

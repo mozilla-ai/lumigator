@@ -2,7 +2,7 @@ from collections.abc import Generator
 from typing import Annotated
 
 import boto3
-from fastapi import Depends, Header
+from fastapi import Depends
 from ray.job_submission import JobSubmissionClient
 from sqlalchemy.orm import Session
 
@@ -14,13 +14,6 @@ from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.settings import settings
-
-
-def valid_content_length(content_length: int = Header(..., lt=settings.MAX_UPLOAD_SIZE)):
-    return content_length
-
-
-ContentLengthDep = Annotated[int, Depends(valid_content_length)]
 
 
 def get_db_session() -> Generator[Session, None, None]:

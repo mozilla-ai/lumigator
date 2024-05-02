@@ -1,16 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Form, UploadFile
+from fastapi import APIRouter, Form, UploadFile, status
 
-from mzai.backend.api.deps import ContentLengthDep, DatasetServiceDep
+from mzai.backend.api.deps import DatasetServiceDep
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
 router = APIRouter()
 
 
-@router.post("/", dependencies=[ContentLengthDep])
+@router.post("/")
 def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,
@@ -22,6 +22,11 @@ def upload_dataset(
 @router.get("/{dataset_id}")
 def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse:
     return service.get_dataset(dataset_id)
+
+
+@router.delete("/{dataset_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
+    service.delete_dataset(dataset_id)
 
 
 @router.get("/")

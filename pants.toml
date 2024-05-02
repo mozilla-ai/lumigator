@@ -74,10 +74,11 @@ default = true
 
 [docker.registries.dockerhub]
 address = "docker.io"
-
+default = true
 
 [docker.registries.corewave_ngcp]
 address = "docker-registry.taild6f0e.ts.net"
+# optional
 default = false
 
 [pytest]

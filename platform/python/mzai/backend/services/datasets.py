@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
-from loguru import logger
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
@@ -9,50 +8,32 @@ from mzai.backend.settings import settings
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
-ALLOWED_CONTENT_TYPES = {"text/csv"}
-
 
 class DatasetService:
-    def __init__(
-        self,
-        dataset_repo: DatasetRepository,
-        s3_client,
-        max_dataset_size: int | None = None,
-    ):
+    def __init__(self, dataset_repo: DatasetRepository, s3_client):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
-        self.max_dataset_size = max_dataset_size
 
-    # TODO: Abstract this so all services have the same exception logic
+    def _raise_not_found(self, dataset_id: UUID) -> None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
+
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
         record = self.dataset_repo.get(dataset_id)
         if record is None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset {dataset_id} not found.")
+            self._raise_not_found(dataset_id)
         return record
 
-    def _dataset_s3_key(self, dataset_id: UUID) -> str:
-        return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}"
+    def _dataset_s3_key(self, dataset_id: UUID, filename: str) -> str:
+        """Generate the S3 key for the dataset contents.
 
-    def _validate_upload_file(self, dataset: UploadFile, format: DatasetFormat) -> None:
-        # Validation for all datasets
-        if dataset.content_type not in ALLOWED_CONTENT_TYPES:
-            raise HTTPException(
-                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                f"Dataset content type must be one of the following: {ALLOWED_CONTENT_TYPES}",
-            )
-        # Validation per dataset format
-        match format:
-            case DatasetFormat.EXPERIMENT:
-                self._validate_experiment_format(dataset)
-            case _:
-                # This should never be reached
-                logger.error(f"Encountered unknown dataset format: '{format}'")
-                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def _validate_experiment_format(self, dataset: UploadFile) -> None:
-        pass
+        The original filename is included in the key so the filename stays the same
+        when downloading the object from S3.
+        """
+        return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
+        # TODO (MZPLATFORM-79): Add validation logic to dataset uploads
+
         # Create DB record
         record = self.dataset_repo.create(
             filename=dataset.filename,
@@ -61,7 +42,7 @@ class DatasetService:
         )
 
         # Upload to S3
-        dataset_key = self._dataset_s3_key(record.id)
+        dataset_key = self._dataset_s3_key(record.id, record.filename)
         self.s3_client.upload_fileobj(dataset.file, settings.S3_BUCKET, dataset_key)
 
         # Response
@@ -71,18 +52,27 @@ class DatasetService:
         record = self._get_dataset_record(dataset_id)
         return DatasetResponse.model_validate(record)
 
+    def delete_dataset(self, dataset_id: UUID) -> None:
+        record = self._get_dataset_record(dataset_id)
+
+        # Delete from S3
+        # S3 delete is called first, since if this fails the DB delete won't take place
+        dataset_key = self._dataset_s3_key(record.id, record.filename)
+        self.s3_client.delete_object(Bucket=settings.S3_BUCKET, Key=dataset_key)
+
+        # Delete DB record
+        self.dataset_repo.delete(record.id)
+
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
         record = self._get_dataset_record(dataset_id)
 
         # Generate presigned download URL for the object
-        dataset_key = self._dataset_s3_key(dataset_id)
+        dataset_key = self._dataset_s3_key(dataset_id, record.filename)
         download_url = self.s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,
                 "Key": dataset_key,
-                # Sets a header to download the object with the original filename
-                "ResponseContentDisposition": f"attachment; filename = {record.filename}",
             },
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )

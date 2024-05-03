@@ -35,7 +35,6 @@ py_library(
     name = "py_bullseye_base_deps",
     deps = [
         requirement("click"),
-        requirement("cryptography"),
         requirement("requests"),
         requirement("virtualenv"),
         requirement("kubernetes"),
@@ -46,13 +45,25 @@ py_library(
     name = "py_ml_libs",
     deps = [
         requirement("transformers"),
-        requirement("cryptography"),
         requirement("nvidia-cuda-runtime-cu12"),
     ],
 )
 
 py_binary(
     name = "pydeps_dummy_bin",
+    srcs = [
+        "__init__.py",
+        "bundle.py",
+    ],
+    main = "bundle.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":py_bullseye_base_deps",
+    ],
+)
+
+py_binary(
+    name = "mldeps_dummy_bin",
     srcs = [
         "__init__.py",
         "bundle.py",
@@ -73,13 +84,14 @@ py_oci_container(
     name = "minipython",
     base = "@distrolesspy3",
     binary = ":pydeps_dummy_bin",
-    entrypoint = ["/infrastructure/containers/golden_images/pydeps_dummy_bin"],
+    # entrypoint = ["/infrastructure/containers/golden_images/pydeps_dummy_bin"],
     registry = registry,
     repository = repository,
     tags = ["minipython"],
     tars = [
         ":debian_packages_for_distroless",
     ],
+    visibility = ["//visibility:public"],
 )
 
 oci_container(

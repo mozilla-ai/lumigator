@@ -39,17 +39,19 @@ py_binary(
     deps = [":backend_lib"],
 )
 
-repository = "containertests"
+repository = "platform_app_test"
 
 registry = "index.docker.io/mzdotai"
 
 py_oci_container(
     name = "backend_image",
-    base = "//containers/golden_images:minipython",
+    # base = "//containers/golden_images:minipython",
+    base = "@distrolesspy3",
     binary = ":backend_app",
     entrypoint = [""],
     env = {"PATH": "/usr/local/bin:$PATH"},
     registry = registry,
     repository = repository,
     tags = ["latest"],
+    visibility = ["//visibility:public"],
 )

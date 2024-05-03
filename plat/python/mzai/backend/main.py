@@ -19,5 +19,5 @@ def create_app(engine: Engine) -> FastAPI:
     app.include_router(api_router)
     return app
 
-
+print("blah")
 app = create_app(engine)

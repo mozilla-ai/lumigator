@@ -1,0 +1,14 @@
+common --enable_bzlmod
+common --lockfile_mode=off
+
+# build --workspace_status_command=tools/workspace_status.sh
+# build --flag_alias=build_type=//tools:build_type
+# build --flag_alias=append_to_tag=//infrastructure/docker_projects/docker_builder:append_to_tag
+build --verbose_failures
+build --show_progress
+
+## cc toolchain
+# build --incompatible_enable_cc_toolchain_resolution
+# rely on heremetic one
+# build --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+# build --cxxopt='-std=c++14'

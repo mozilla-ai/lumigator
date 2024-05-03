@@ -168,3 +168,10 @@ cython_debug/
 
 # Ruff
 .ruff_cache
+
+# Bazel-generated files
+bazel-bin
+bazel-out
+bazel-source
+bazel-testlogs
+

@@ -1,5 +1,6 @@
 [project]
-name = "3rdparty-python-dependencies"
+# name = "3rdparty-python-dependencies"
+name = "pypi"
 version = "0.0.1"
 requires-python = ">=3.10,<3.11"
 

@@ -1,0 +1,50 @@
+- distros: ["debian12"]
+  archs: ["amd64"]
+  packages:
+    - ack
+    - apt
+    - apt-transport-https
+    - bash
+    - base-files
+    - build-essential
+    - ca-certificates
+    - coreutils
+    - curl
+    - dash
+    - dirmngr
+    - dpkg
+    - findutils
+    - netbase
+    - tzdata
+    # required to replicate distroless/base
+    - git
+    - libc6
+    - libssl3
+    - openssl
+    - openssh-client
+    # required to replicate distroless/cc
+    - libgcc-s1
+    - libgomp1
+    - libstdc++6
+    # required to replicate distroless/python
+    - libc-bin
+    - python3.11-full
+    - python3-distutils
+    - s3cmd
+    - wget
+    - software-properties-common
+    - xz-utils
+
+  exclude_packages:
+    # generally excluded from distroless
+    - debconf
+    - debconf-2.0
+    # - dpkg
+    - install-info
+    - debianutils
+    - media-types
+    - mime-support
+    # excluded from distroless/python
+    - readline-common
+    - libtirpc-common
+

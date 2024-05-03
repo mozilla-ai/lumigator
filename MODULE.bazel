@@ -35,12 +35,43 @@ python.toolchain(
     is_default = True,
     python_version = "3.10",
 )
+use_repo(python, "python_3_10")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pypi",
     python_version = "3.10",
-    requirements_linux = "//platform/3rdparty/python:requirements_lock.linux",
-    requirements_lock = "//platform/3rdparty/python:requirements_lock.txt",
+    requirements_linux = "//plat/3rdparty/python:requirements_linux.txt",
+    requirements_lock = "//plat/3rdparty/python:requirements_lock.txt",
 )
 use_repo(pip, "pypi")
+
+## OCI setup
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.toolchains(crane_version = "v0.18.0")
+
+# Declare external images you need to pull, for example:
+
+oci.pull(
+    name = "distrolesspy3",
+    digest = "sha256:89e02d85b985cabc28db563a60ccdfdd88107185956a4c11cb331d253659769a",
+    image = "gcr.io/distroless/python3-debian12",
+    platforms = [
+        "linux/arm64/v8",
+        "linux/amd64",
+    ],
+)
+
+# For each oci.pull call, repeat the "name" here to expose them as dependencies.
+
+oci.pull(
+    name = "cuda_12_1_pytorch_2_2_2",
+    digest = "sha256:923f687790bec78081c357e71dcd5dcef80b0cc00f6c34484902a5e83362c854",
+    image = "index.docker.io/pytorch/pytorch",
+    platforms = [
+        "linux/amd64",
+    ],
+)
+use_repo(oci, "cuda_12_1_pytorch_2_2_2")
+use_repo(oci, "distrolesspy3")

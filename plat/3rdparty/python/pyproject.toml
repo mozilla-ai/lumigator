@@ -23,4 +23,16 @@ dependencies = [
     "pytest-cov",
     "testcontainers",
     "setuptools>=60",
+    "kubernetes",
+    # debianpackages
+    "nvidia-cuda-runtime-cu12==12.2.140; sys_platform == 'linux'",
+    "torch; sys_platform == 'linux'",
+    "torchvision; sys_platform == 'linux'",
+    "torchaudio; sys_platform == 'linux'",
+    "transformers; sys_platform == 'linux'",
+
+    ### darwin
+    # this transformers is cpu-only
+    "transformers[torch]; sys_platform == 'darwin'"
 ]
+

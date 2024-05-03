@@ -21,7 +21,7 @@ compile_pip_requirements(
         "--no-reuse-hashes",
     ],
     requirements_in = "pyproject.toml",
-    requirements_linux = "requirements_lock.linux",
+    requirements_linux = "requirements_linux.txt",
     requirements_txt = "requirements_lock.txt",
 )
 

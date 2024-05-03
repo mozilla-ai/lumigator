@@ -1,0 +1,14 @@
+load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_lockfile")
+
+# Generate lockfile with:
+# bazel run :debian_packages.generate
+# Update snapshots with:
+# bazel run :debian_packages.update
+debian_packages_lockfile(
+    name = "debian_packages",
+    debug = True,
+    lock_file = "packages.lock",
+    packages_file = "packages.yaml",
+    snapshots_file = "snapshots.yaml",
+    verbose = True,
+)

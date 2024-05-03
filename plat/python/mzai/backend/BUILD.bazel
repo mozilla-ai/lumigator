@@ -1,0 +1,55 @@
+# gazelle:python_root
+load("@pypi//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("//containers:py_layers.bzl", "py_oci_image")
+load("//containers:container_macros.bzl", "oci_container", "py_oci_container")
+
+py_library(
+    name = "backend_lib",
+    srcs = glob(["**/*.py"]),
+    imports = ["../.."],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//plat/python/mzai/schemas:mzai_schemas",
+        requirement("uvicorn"),
+        requirement("fastapi"),
+        requirement("pydantic"),
+        requirement("pydantic-settings"),
+        requirement("click"),
+        requirement("loguru"),
+        requirement("pex"),
+        requirement("httpx"),
+        requirement("sqlalchemy"),
+        requirement("psycopg2-binary"),
+        requirement("ray"),
+        requirement("starlette"),
+        requirement("requests"),
+        requirement("ruff"),
+        requirement("pytest"),
+        requirement("pytest-cov"),
+        requirement("testcontainers"),
+    ],
+)
+
+py_binary(
+    name = "backend_app",
+    srcs = ["main.py"],
+    main = "main.py",
+    visibility = ["//visibility:public"],
+    deps = [":backend_lib"],
+)
+
+repository = "containertests"
+
+registry = "index.docker.io/mzdotai"
+
+py_oci_container(
+    name = "backend_image",
+    base = "//containers/golden_images:minipython",
+    binary = ":backend_app",
+    entrypoint = [""],
+    env = {"PATH": "/usr/local/bin:$PATH"},
+    registry = registry,
+    repository = repository,
+    tags = ["latest"],
+)

@@ -1,0 +1,94 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+load("@debian_packages//:packages.bzl", "debian_package_layer")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@pypi//:requirements.bzl", "all_requirements", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@aspect_bazel_lib//lib:tar.bzl", "mtree_spec", "tar")
+load("//containers:py_layers.bzl", "py_oci_image")
+load("//containers:container_macros.bzl", "oci_container", "py_oci_container")
+
+# put all the debian packages into a single tarball, which will be
+# one layer in the image
+pkg_tar(
+    name = "debian_packages_for_distroless",
+    deps = [
+        debian_package_layer("apt"),
+        debian_package_layer("dpkg"),
+        debian_package_layer("xz-utils"),
+        debian_package_layer("findutils"),
+        debian_package_layer("bash"),
+        debian_package_layer("openssh-client"),
+        debian_package_layer("git"),
+        debian_package_layer("wget"),
+        debian_package_layer("ack"),
+        debian_package_layer("s3cmd"),
+        debian_package_layer("curl"),
+        debian_package_layer("ca-certificates"),
+        debian_package_layer("openssl"),
+        debian_package_layer("dash"),
+        debian_package_layer("libc-bin"),
+        debian_package_layer("coreutils"),
+    ],
+)
+
+py_library(
+    name = "py_bullseye_base_deps",
+    deps = [
+        requirement("click"),
+        requirement("cryptography"),
+        requirement("requests"),
+        requirement("virtualenv"),
+        requirement("kubernetes"),
+    ],
+)
+
+py_library(
+    name = "py_ml_libs",
+    deps = [
+        requirement("transformers"),
+        requirement("cryptography"),
+        requirement("nvidia-cuda-runtime-cu12"),
+    ],
+)
+
+py_binary(
+    name = "pydeps_dummy_bin",
+    srcs = [
+        "__init__.py",
+        "bundle.py",
+    ],
+    main = "bundle.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":py_bullseye_base_deps",
+        ":py_ml_libs",
+    ],
+)
+
+repository = "containertests"
+
+registry = "index.docker.io/mzdotai"
+
+py_oci_container(
+    name = "minipython",
+    base = "@distrolesspy3",
+    binary = ":pydeps_dummy_bin",
+    entrypoint = ["/infrastructure/containers/golden_images/pydeps_dummy_bin"],
+    registry = registry,
+    repository = repository,
+    tags = ["minipython"],
+    tars = [
+        ":debian_packages_for_distroless",
+    ],
+)
+
+oci_container(
+    name = "bullseye_cuda_12.1_python3.10",
+    base = "@cuda_12_1_pytorch_2_2_2",
+    registry = registry,
+    repository = repository,
+    tags = ["cuda_pytorch_base_dev"],
+    tars = [
+        ":debian_packages_for_distroless",
+    ],
+)

@@ -1,0 +1,15 @@
+load("@pypi//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+
+py_library(
+    name = "mzai_schemas",
+    srcs = glob(["*.py"]),
+    imports = ["../.."],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("pydantic"),
+        requirement("pydantic-settings"),
+        requirement("click"),
+        requirement("loguru"),
+    ],
+)

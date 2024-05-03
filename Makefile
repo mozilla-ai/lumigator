@@ -56,3 +56,8 @@ clean-pants:
 setup-local-dev: ci-setup bootstrap-python ide-venv
 	bash pants_tools/kind_setup --clean --create-cluster
 
+
+
+update-3rdparty:
+	bazel run //plat/3rdparty/python:requirements.update &
+	bazel run //plat/3rdparty/debian:requirements.update

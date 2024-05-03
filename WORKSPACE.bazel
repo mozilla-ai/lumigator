@@ -1,0 +1,71 @@
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_debian_packages",
+    sha256 = "0ae3b332f9d894e57693ce900769d2bd1b693e1f5ea1d9cdd82fa4479c93bcc8",
+    strip_prefix = "rules_debian_packages-0.2.0",
+    url = "https://github.com/betaboon/rules_debian_packages/releases/download/v0.2.0/rules_debian_packages-v0.2.0.tar.gz",
+)
+
+load("@rules_debian_packages//debian_packages:repositories.bzl", "rules_debian_packages_dependencies")
+load("@rules_debian_packages//debian_packages:defs.bzl", "debian_packages_repository")
+
+rules_debian_packages_dependencies()
+
+rules_debian_packages_dependencies(python_interpreter_target = "@python_3_10//:py3_runtime")
+
+debian_packages_repository(
+    name = "debian_packages",
+    default_arch = "amd64",
+    default_distro = "debian12",
+    lock_file = "//plat/3rdparty/debian:packages.lock",
+)
+
+load("@debian_packages//:packages.bzl", debian_packages_install_deps = "install_deps")
+
+debian_packages_install_deps()
+
+# rules_pyvenv allows you to create a venv target for a given python target
+rules_pyvenv = http_archive(
+    name = "rules_pyvenv",
+    integrity = "sha256-liqHcY5av7QpUw3e4De+054evOa5wtZp4JX+2t6a9Yk=",
+    strip_prefix = "rules_pyvenv-main",
+    url = "https://github.com/cedarai/rules_pyvenv/archive/main.tar.gz",
+)
+
+http_archive(
+    name = "rules_cc",
+    sha256 = "3d9e271e2876ba42e114c9b9bc51454e379cbf0ec9ef9d40e2ae4cec61a31b40",
+    strip_prefix = "rules_cc-0.0.6",
+    urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.6/rules_cc-0.0.6.tar.gz"],
+)
+
+##############
+# Uber zig GCC toolchain; prevents needing to install in an image
+
+HERMETIC_CC_TOOLCHAIN_VERSION = "v2.1.2"
+
+http_archive(
+    name = "hermetic_cc_toolchain",
+    sha256 = "28fc71b9b3191c312ee83faa1dc65b38eb70c3a57740368f7e7c7a49bedf3106",
+    urls = [
+        "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+        "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+    ],
+)
+
+load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
+
+register_toolchains(
+    "@zig_sdk//toolchain:linux_amd64_gnu.2.28",
+    "@zig_sdk//toolchain:linux_arm64_gnu.2.28",
+    "@zig_sdk//toolchain:darwin_amd64",
+    "@zig_sdk//toolchain:darwin_arm64",
+    "@zig_sdk//toolchain:windows_amd64",
+    "@zig_sdk//toolchain:windows_arm64",
+)
+
+# Plain zig_toolchains() will pick reasonable defaults. See
+# toolchain/defs.bzl:toolchains on how to change the Zig SDK version and
+# download URL.
+zig_toolchains()

@@ -8,7 +8,7 @@ from mzai.schemas.extras import DeploymentType
 class BackendSettings(BaseSettings):
     # Backend
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
-    MAX_DATASET_SIZE: ByteSize = 50_000_000  # Bytes
+    MAX_DATASET_SIZE: ByteSize = "50MB"
 
     # Postgres
     POSTGRES_HOST: str = "localhost"

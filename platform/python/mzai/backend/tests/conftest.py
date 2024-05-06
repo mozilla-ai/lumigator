@@ -1,7 +1,11 @@
+import os
+from unittest import mock
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
 
 from mzai.backend.api.deps import get_db_session
@@ -11,6 +15,38 @@ from mzai.backend.records.base import BaseRecord
 from mzai.backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
+
+
+@pytest.fixture(scope="session")
+def localstack():
+    """Initialize a LocalStack test container."""
+    edge_port = 4566
+    region_name = "us-east-2"
+    with LocalStackContainer(
+        "localstack/localstack:3.4.0", edge_port=edge_port, region_name=region_name
+    ) as localstack:
+        yield localstack
+
+
+@pytest.fixture(scope="session", autouse=True)
+def initialize_aws(localstack: LocalStackContainer):
+    """Setup env vars/AWS resources for use with the LocalStack container."""
+    # Initialize S3
+    bucket_name = "test-bucket"
+    s3 = localstack.get_client("s3")
+    s3.create_bucket(
+        Bucket=bucket_name,
+        CreateBucketConfiguration={"LocationConstraint": localstack.region_name},
+    )
+    # Patch env vars for BackendSettings
+    localstack_env_vars = {
+        "S3_BUCKET": bucket_name,
+        "S3_PORT": str(localstack.edge_port),
+        "AWS_HOST": localstack.get_container_host_ip(),
+        "AWS_DEFAULT_REGION": localstack.region_name,
+    }
+    with mock.patch.dict(os.environ, localstack_env_vars):
+        yield
 
 
 @pytest.fixture(scope="session")
@@ -70,7 +106,7 @@ def db_session(db_engine):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def session_override(app, db_session) -> None:
+def dependency_overrides(app, db_session) -> None:
     """Override the FastAPI dependency injection for test DB sessions.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/

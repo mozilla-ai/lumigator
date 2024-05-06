@@ -23,7 +23,7 @@ class DatasetService:
             self._raise_not_found(dataset_id)
         return record
 
-    def _dataset_s3_key(self, dataset_id: UUID, filename: str) -> str:
+    def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
 
         The original filename is included in the key so the filename stays the same
@@ -42,7 +42,7 @@ class DatasetService:
         )
 
         # Upload to S3
-        dataset_key = self._dataset_s3_key(record.id, record.filename)
+        dataset_key = self._get_s3_key(record.id, record.filename)
         self.s3_client.upload_fileobj(dataset.file, settings.S3_BUCKET, dataset_key)
 
         # Response
@@ -57,7 +57,7 @@ class DatasetService:
 
         # Delete from S3
         # S3 delete is called first, since if this fails the DB delete won't take place
-        dataset_key = self._dataset_s3_key(record.id, record.filename)
+        dataset_key = self._get_s3_key(record.id, record.filename)
         self.s3_client.delete_object(Bucket=settings.S3_BUCKET, Key=dataset_key)
 
         # Delete DB record
@@ -67,7 +67,7 @@ class DatasetService:
         record = self._get_dataset_record(dataset_id)
 
         # Generate presigned download URL for the object
-        dataset_key = self._dataset_s3_key(dataset_id, record.filename)
+        dataset_key = self._get_s3_key(dataset_id, record.filename)
         download_url = self.s3_client.generate_presigned_url(
             "get_object",
             Params={

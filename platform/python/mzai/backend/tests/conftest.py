@@ -9,67 +9,36 @@ from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
 
-from mzai.backend.api.deps import get_db_session
+from mzai.backend.api.deps import get_db_session, get_s3_client
 from mzai.backend.api.router import API_V1_PREFIX
 from mzai.backend.main import create_app
 from mzai.backend.records.base import BaseRecord
+from mzai.backend.settings import settings
+from mzai.backend.types import S3Client
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
-
-@pytest.fixture(scope="session")
-def localstack():
-    """Initialize a LocalStack test container."""
-    with LocalStackContainer("localstack/localstack:3.4.0", region_name="us-east-2") as localstack:
-        yield localstack
+# TODO: Look into ways of injecting backend settings/DB engine
+# so we don't need to override the app dependencies in order to use the test containers.
+# Reference: https://fastapi.tiangolo.com/advanced/settings/#settings-in-a-dependency
 
 
 @pytest.fixture(scope="session")
-def postgres():
+def postgres_container():
     """Initialize a Postgres test container."""
     with PostgresContainer("postgres:16-alpine") as postgres:
         yield postgres
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_aws(localstack: LocalStackContainer):
-    """Setup env vars/AWS resources for use with the LocalStack container."""
-    # Initialize S3
-    bucket_name = "test-bucket"
-    s3 = localstack.get_client("s3")
-    s3.create_bucket(
-        Bucket=bucket_name,
-        CreateBucketConfiguration={"LocationConstraint": localstack.region_name},
-    )
-    # Patch env vars for BackendSettings
-    localstack_env_vars = {
-        "S3_BUCKET": bucket_name,
-        "S3_PORT": str(localstack.edge_port),
-        "AWS_HOST": localstack.get_container_host_ip(),
-        "AWS_DEFAULT_REGION": localstack.region_name,
-    }
-    with mock.patch.dict(os.environ, localstack_env_vars):
-        yield
-
-
-@pytest.fixture(scope="session")
-def db_engine(postgres: PostgresContainer):
+def db_engine(postgres_container: PostgresContainer):
     """Initialize a DB engine bound to the Postres container, and create tables."""
-    engine = create_engine(postgres.get_connection_url(), echo=True)
+    engine = create_engine(postgres_container.get_connection_url(), echo=True)
 
     # TODO: Run migrations here once switched over to Alembic.
     BaseRecord.metadata.create_all(engine)
 
-    # Patch env vars for BackendSettings
-    # In theory it shouldnt matter because tests run off the test DB engine, but just in case
-    postgres_env_vars = {
-        "POSTGRES_PORT": str(postgres.port),
-        "POSTGRES_USER": postgres.username,
-        "POSTGRES_PASSWORD": postgres.password,
-        "POSTGRES_DB": postgres.dbname,
-    }
-    with mock.patch.dict(os.environ, postgres_env_vars):
-        yield engine
+    return engine
 
 
 @pytest.fixture(scope="function")
@@ -90,6 +59,29 @@ def db_session(db_engine: Engine):
 
 
 @pytest.fixture(scope="session")
+def localstack_container():
+    """Initialize a LocalStack test container."""
+    with LocalStackContainer("localstack/localstack:3.4.0") as localstack:
+        yield localstack
+
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_aws(localstack_container: LocalStackContainer):
+    """Setup env vars/AWS resources for use with the LocalStack container."""
+    # Initialize S3
+    s3 = localstack_container.get_client("s3")
+    s3.create_bucket(
+        Bucket=settings.S3_BUCKET,
+        CreateBucketConfiguration={"LocationConstraint": localstack_container.region_name},
+    )
+
+
+@pytest.fixture(scope="function")
+def s3_client(localstack_container: LocalStackContainer) -> S3Client:
+    return localstack_container.get_client("s3")
+
+
+@pytest.fixture(scope="session")
 def app(db_engine: Engine):
     """Create the FastAPI app bound to the test DB engine."""
     app = create_app(db_engine)
@@ -105,7 +97,7 @@ def app_client(app: FastAPI):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def dependency_overrides(app: FastAPI, db_session: Session) -> None:
+def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client) -> None:
     """Override the FastAPI dependency injection for test DB sessions.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
@@ -114,4 +106,8 @@ def dependency_overrides(app: FastAPI, db_session: Session) -> None:
     def get_db_session_override():
         yield db_session
 
+    def get_s3_client_override():
+        yield s3_client
+
     app.dependency_overrides[get_db_session] = get_db_session_override
+    app.dependency_overrides[get_s3_client] = get_s3_client_override

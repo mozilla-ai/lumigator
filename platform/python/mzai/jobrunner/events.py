@@ -25,6 +25,11 @@ class EventsClient:
 
     @contextmanager
     def _get_session(self):
+        """Initialize a requests session with a retry adapter included.
+
+        The session object includes auto-retry capabilities for all http/https requests.
+        After exiting this context manager, the session is closed.
+        """
         with requests.Session() as session:
             retries = Retry(
                 total=self.max_retries,

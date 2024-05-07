@@ -14,6 +14,7 @@ from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.settings import settings
+from mzai.backend.types import S3Client
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -24,14 +25,21 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
-def get_dataset_service(session: DBSessionDep) -> DatasetService:
-    dataset_repo = DatasetRepository(session)
-    s3_client = boto3.client(
+def get_s3_client() -> Generator[S3Client, None, None]:
+    raise ValueError("I am here")
+    return boto3.client(
         "s3",
         endpoint_url=settings.S3_ENDPOINT_URL,
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
     )
+
+
+S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
+
+
+def get_dataset_service(session: DBSessionDep, s3_client: S3ClientDep) -> DatasetService:
+    dataset_repo = DatasetRepository(session)
     return DatasetService(dataset_repo, s3_client)
 
 

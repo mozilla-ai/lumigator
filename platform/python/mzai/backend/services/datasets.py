@@ -5,12 +5,13 @@ from fastapi import HTTPException, UploadFile, status
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.settings import settings
+from mzai.backend.types import S3Client
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
 
 class DatasetService:
-    def __init__(self, dataset_repo: DatasetRepository, s3_client):
+    def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
 

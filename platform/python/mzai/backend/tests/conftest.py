@@ -2,8 +2,9 @@ import os
 from unittest import mock
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
@@ -12,7 +13,6 @@ from mzai.backend.api.deps import get_db_session
 from mzai.backend.api.router import API_V1_PREFIX
 from mzai.backend.main import create_app
 from mzai.backend.records.base import BaseRecord
-from mzai.backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
@@ -20,16 +20,19 @@ from mzai.backend.settings import settings
 @pytest.fixture(scope="session")
 def localstack():
     """Initialize a LocalStack test container."""
-    edge_port = 4566
-    region_name = "us-east-2"
-    with LocalStackContainer(
-        "localstack/localstack:3.4.0", edge_port=edge_port, region_name=region_name
-    ) as localstack:
+    with LocalStackContainer("localstack/localstack:3.4.0", region_name="us-east-2") as localstack:
         yield localstack
 
 
+@pytest.fixture(scope="session")
+def postgres():
+    """Initialize a Postgres test container."""
+    with PostgresContainer("postgres:16-alpine") as postgres:
+        yield postgres
+
+
 @pytest.fixture(scope="session", autouse=True)
-def initialize_aws(localstack: LocalStackContainer):
+def setup_aws(localstack: LocalStackContainer):
     """Setup env vars/AWS resources for use with the LocalStack container."""
     # Initialize S3
     bucket_name = "test-bucket"
@@ -50,46 +53,27 @@ def initialize_aws(localstack: LocalStackContainer):
 
 
 @pytest.fixture(scope="session")
-def db_engine():
-    """Initialize a Postgres test container as the DB engine for integration tests."""
-    with PostgresContainer(
-        "postgres:16-alpine",
-        port=settings.POSTGRES_PORT,
-        username=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
-        dbname=settings.POSTGRES_DB,
-    ) as postgres:
-        url = postgres.get_connection_url()
-        engine = create_engine(url, echo=True)
+def db_engine(postgres: PostgresContainer):
+    """Initialize a DB engine bound to the Postres container, and create tables."""
+    engine = create_engine(postgres.get_connection_url(), echo=True)
+
+    # TODO: Run migrations here once switched over to Alembic.
+    BaseRecord.metadata.create_all(engine)
+
+    # Patch env vars for BackendSettings
+    # In theory it shouldnt matter because tests run off the test DB engine, but just in case
+    postgres_env_vars = {
+        "POSTGRES_PORT": str(postgres.port),
+        "POSTGRES_USER": postgres.username,
+        "POSTGRES_PASSWORD": postgres.password,
+        "POSTGRES_DB": postgres.dbname,
+    }
+    with mock.patch.dict(os.environ, postgres_env_vars):
         yield engine
 
 
-@pytest.fixture(scope="session", autouse=True)
-def initialize_db(db_engine):
-    """Create DB database/tables for the test suite.
-
-    # TODO: Run migrations here once switched over to Alembic.
-    """
-    BaseRecord.metadata.create_all(db_engine)
-
-
-@pytest.fixture(scope="session")
-def app(db_engine):
-    """Create the FastAPI app bound to the test DB engine."""
-    app = create_app(db_engine)
-    return app
-
-
 @pytest.fixture(scope="function")
-def client(app):
-    """Create a test client for calling the FastAPI app."""
-    base_url = f"http://mzai.dev{API_V1_PREFIX}"  # Fake base URL for the app
-    with TestClient(app, base_url=base_url) as c:
-        yield c
-
-
-@pytest.fixture(scope="function")
-def db_session(db_engine):
+def db_session(db_engine: Engine):
     """Fixture to provide a clean DB session per test function.
 
     This method yields a session and rolls it back after test completion
@@ -105,8 +89,23 @@ def db_session(db_engine):
             session.rollback()
 
 
+@pytest.fixture(scope="session")
+def app(db_engine: Engine):
+    """Create the FastAPI app bound to the test DB engine."""
+    app = create_app(db_engine)
+    return app
+
+
+@pytest.fixture(scope="function")
+def app_client(app: FastAPI):
+    """Create a test client for calling the FastAPI app."""
+    base_url = f"http://mzai.dev{API_V1_PREFIX}"  # Fake base URL for the app
+    with TestClient(app, base_url=base_url) as c:
+        yield c
+
+
 @pytest.fixture(scope="function", autouse=True)
-def dependency_overrides(app, db_session) -> None:
+def dependency_overrides(app: FastAPI, db_session: Session) -> None:
     """Override the FastAPI dependency injection for test DB sessions.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/

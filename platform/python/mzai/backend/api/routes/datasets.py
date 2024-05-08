@@ -10,7 +10,7 @@ from mzai.schemas.extras import ListingResponse
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,

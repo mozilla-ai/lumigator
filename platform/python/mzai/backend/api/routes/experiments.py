@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from mzai.backend.api.deps import ExperimentServiceDep
 from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
@@ -9,7 +9,7 @@ from mzai.schemas.extras import ListingResponse
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_experiment(
     service: ExperimentServiceDep,
     request: ExperimentCreate,

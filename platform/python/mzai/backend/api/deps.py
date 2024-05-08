@@ -26,7 +26,6 @@ DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
 def get_s3_client() -> Generator[S3Client, None, None]:
-    raise ValueError("I am here")
     return boto3.client(
         "s3",
         endpoint_url=settings.S3_ENDPOINT_URL,

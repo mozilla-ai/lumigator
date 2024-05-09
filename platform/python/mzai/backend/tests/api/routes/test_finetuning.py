@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from fastapi import status
+from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from mzai.backend.api.deps import DBSessionDep, get_finetuning_service
@@ -29,7 +29,7 @@ def create_jobs_via_backdoor(db_session):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def finetuning_service_override(app) -> None:
+def finetuning_service_override(app: FastAPI) -> None:
     """Override the FastAPI dependency injection with a fake finetuning service.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
@@ -42,30 +42,30 @@ def finetuning_service_override(app) -> None:
     app.dependency_overrides[get_finetuning_service] = get_finetuning_service_override
 
 
-def test_create_job(client: TestClient):
+def test_create_job(app_client: TestClient):
     request = FinetuningJobCreate(name="job", description="fake", config={})
-    response = client.post("/finetuning/jobs", json=request.model_dump())
+    response = app_client.post("/finetuning/jobs", json=request.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
 
 
-def test_get_job(client: TestClient, create_jobs_via_backdoor):
+def test_get_job(app_client: TestClient, create_jobs_via_backdoor):
     created_id = create_jobs_via_backdoor(n_jobs=1)[0]
 
-    response = client.get(f"/finetuning/jobs/{created_id}")
+    response = app_client.get(f"/finetuning/jobs/{created_id}")
     assert response.status_code == status.HTTP_200_OK
     retrieved_job = FinetuningJobResponse.model_validate(response.json())
     assert retrieved_job.id == created_id
 
 
-def test_get_missing_job(client: TestClient):
+def test_get_missing_job(app_client: TestClient):
     random_id = uuid.uuid4()
-    response = client.get(f"/finetuning/jobs/{random_id}")
+    response = app_client.get(f"/finetuning/jobs/{random_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_list_jobs(client: TestClient, create_jobs_via_backdoor):
+def test_list_jobs(app_client: TestClient, create_jobs_via_backdoor):
     # List on an empty database
-    empty_response = client.get("/finetuning/jobs")
+    empty_response = app_client.get("/finetuning/jobs")
     assert empty_response.status_code == status.HTTP_200_OK
     empty_listing = ListingResponse.model_validate(empty_response.json())
     assert empty_listing.total == 0
@@ -76,31 +76,31 @@ def test_list_jobs(client: TestClient, create_jobs_via_backdoor):
     create_jobs_via_backdoor(n_jobs=n_jobs)
 
     # Check listing after jobs created
-    all_response = client.get("/finetuning/jobs")
+    all_response = app_client.get("/finetuning/jobs")
     assert all_response.status_code == status.HTTP_200_OK
     all_listing = ListingResponse.model_validate(all_response.json())
     assert all_listing.total == n_jobs
     assert len(all_listing.items) == n_jobs
 
     # Check listing with skip and limit
-    skip_response = client.get("/finetuning/jobs?skip=2&limit=2")
+    skip_response = app_client.get("/finetuning/jobs?skip=2&limit=2")
     assert skip_response.status_code == status.HTTP_200_OK
     skip_listing = ListingResponse.model_validate(skip_response.json())
     assert skip_listing.total == n_jobs
     assert len(skip_listing.items) == 2
 
 
-def test_update_job(client: TestClient, create_jobs_via_backdoor):
+def test_update_job(app_client: TestClient, create_jobs_via_backdoor):
     update_request = FinetuningJobUpdate(name="updated", description="updated")
 
     # Before job exists
     random_id = uuid.uuid4()
-    response = client.put(f"/finetuning/jobs/{random_id}", json=update_request.model_dump())
+    response = app_client.put(f"/finetuning/jobs/{random_id}", json=update_request.model_dump())
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     # After creating job
     created_id = create_jobs_via_backdoor(n_jobs=1)[0]
-    response = client.put(f"/finetuning/jobs/{created_id}", json=update_request.model_dump())
+    response = app_client.put(f"/finetuning/jobs/{created_id}", json=update_request.model_dump())
     assert response.status_code == status.HTTP_200_OK
     updated_job = FinetuningJobResponse.model_validate(response.json())
     assert updated_job.name == update_request.name

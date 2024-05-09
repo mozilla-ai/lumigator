@@ -1,24 +1,10 @@
 import contextlib
 from collections.abc import Generator
-from typing import Any
 
-from sqlalchemy import JSON, Connection, Engine, create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy import Connection, Engine, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from mzai.backend.settings import settings
-
-
-class BaseRecord(DeclarativeBase):
-    """Base class for declarative SQLAlchemy mappings.
-
-    Commonly, these mappings are referred to as "models".
-    However, "model" is an incredibly overloaded term on the platform,
-    so we're using the term "record" instead to indicate that instances of these classes
-    generally correspond to single records (i.e., rows) in a DB table.
-    """
-
-    # Additional mappings from Python type to SQLAlchemy type
-    type_annotation_map = {dict[str, Any]: JSON}
 
 
 class DatabaseSessionManager:

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from mzai.backend.db import BaseRecord
+from mzai.backend.records.base import BaseRecord
 
 RecordType = TypeVar("RecordType", bound=BaseRecord)
 
@@ -35,6 +35,11 @@ class BaseRepository(Generic[RecordType]):
 
     def get(self, record_id: UUID) -> RecordType | None:
         return self.session.get(self.record_cls, record_id)
+
+    def delete(self, record_id: UUID) -> int:
+        count = self.session.query(self.record_cls).where(self.record_cls.id == record_id).delete()
+        self.session.commit()
+        return count
 
     def list(self, skip: int = 0, limit: int = 100) -> list[RecordType]:
         return self.session.query(self.record_cls).offset(skip).limit(limit).all()

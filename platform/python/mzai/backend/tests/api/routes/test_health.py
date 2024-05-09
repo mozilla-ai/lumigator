@@ -4,8 +4,8 @@ from fastapi.testclient import TestClient
 from mzai.schemas.extras import HealthResponse
 
 
-def test_health_check(client: TestClient):
-    response = client.get("/health")
+def test_health_check(app_client: TestClient):
+    response = app_client.get("/health")
     assert response.status_code == status.HTTP_200_OK
     health = HealthResponse.model_validate(response.json())
     assert health.status == "OK"

@@ -3,6 +3,7 @@ from enum import Enum
 
 class Tags(str, Enum):
     HEALTH = "health"
+    DATASETS = "datasets"
     FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
     EVENTS = "events"
@@ -12,6 +13,10 @@ TAGS_METADATA = [
     {
         "name": Tags.HEALTH,
         "description": "Health check for the application.",
+    },
+    {
+        "name": Tags.DATASETS,
+        "description": "Upload and download datasets.",
     },
     {
         "name": Tags.FINETUNING,

@@ -18,10 +18,6 @@ from mzai.backend.types import S3Client
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
-# TODO(MZPLATFORM-89): Look into ways of injecting backend settings/DB engine
-# so we don't need to override the app dependencies in order to use the test containers.
-# Reference: https://fastapi.tiangolo.com/advanced/settings/#settings-in-a-dependency
-
 
 @pytest.fixture(scope="session")
 def postgres_container():

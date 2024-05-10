@@ -1,6 +1,12 @@
+import csv
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
+from loguru import logger
+from pydantic import ByteSize
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
@@ -8,6 +14,57 @@ from mzai.backend.settings import settings
 from mzai.backend.types import S3Client
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
+
+UnprocessableEntityError = UnicodeDecodeError
+"""An error we expect because someone uploaded an invalid file format."""
+
+
+def write_temporary_dataset(input: BinaryIO, buffer: BinaryIO, max_size: ByteSize) -> bytes:
+    dataset_size = 0
+    for chunk in input:
+        dataset_size += len(chunk)
+        if dataset_size > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Dataset exceeds the {max_size.human_readable(decimal=True)} limit.",
+            )
+        buffer.write(chunk)
+    return dataset_size
+
+
+def validate_dataset_format(filename: str, format: DatasetFormat):
+    try:
+        match format:
+            case DatasetFormat.EXPERIMENT:
+                validate_experiment_dataset(filename)
+    except UnprocessableEntityError as e:
+        logger.opt(exception=e).info("Error processing dataset upload.")
+        http_exception = HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Dataset is not a valid CSV file.",
+        )
+        raise http_exception from e
+
+
+def validate_experiment_dataset(filename: str):
+    with Path(filename).open() as f:
+        reader = csv.DictReader(f)
+        fields: list[str] = reader.fieldnames or []
+        if "examples" not in fields:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Experiment dataset must contain an 'examples' field.",
+            )
+        allowed_fields = {"examples", "ground_truth"}
+        invalid_fields = {x for x in fields if x not in allowed_fields}
+        if invalid_fields:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    f"Experiment dataset contains invalid fields {invalid_fields}. "
+                    f"Only {allowed_fields} are allowed."
+                ),
+            )
 
 
 class DatasetService:
@@ -33,20 +90,30 @@ class DatasetService:
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
-        # TODO (MZPLATFORM-79): Add validation logic to dataset uploads
+        temp = NamedTemporaryFile(delete=False)
+        try:
+            # Write to tempfile and validate size
+            with temp as buffer:
+                real_size = write_temporary_dataset(dataset.file, buffer, settings.MAX_DATASET_SIZE)
 
-        # Create DB record
-        record = self.dataset_repo.create(
-            filename=dataset.filename,
-            format=format,
-            size=dataset.size,
-        )
+            # Validate format
+            validate_dataset_format(temp.name, format)
 
-        # Upload to S3
-        dataset_key = self._get_s3_key(record.id, record.filename)
-        self.s3_client.upload_fileobj(dataset.file, settings.S3_BUCKET, dataset_key)
+            # Create DB record
+            record = self.dataset_repo.create(
+                filename=dataset.filename,
+                format=format,
+                size=real_size,
+            )
 
-        # Response
+            # Upload to S3
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            self.s3_client.upload_file(temp.name, settings.S3_BUCKET, dataset_key)
+
+        finally:
+            # Cleanup temp file
+            Path(temp.name).unlink()
+
         return DatasetResponse.model_validate(record)
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse:

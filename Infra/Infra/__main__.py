@@ -190,24 +190,24 @@ command = bucket.id.apply(
     lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"
 )
 
-pulumi.export("command", command)
+# pulumi.export("command", command)
 
-s3_pod = kubernetes.core.v1.Pod(
-    "test-pod",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(namespace=namespace),
-    spec=kubernetes.core.v1.PodSpecArgs(
-        service_account_name=service_account.metadata.name,
-        containers=[
-            kubernetes.core.v1.ContainerArgs(
-                name="my-pod",
-                image="amazonlinux:2018.03",
-                command=["sh", "-c", command],
-                env=[
-                    kubernetes.core.v1.EnvVarArgs(name="AWS_DEFAULT_REGION", value="us-east-2"),
-                    kubernetes.core.v1.EnvVarArgs(name="ENABLE_IRP", value="true"),
-                ],
-            ),
-        ],
-    ),
-    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
-)
+# s3_pod = kubernetes.core.v1.Pod(
+#    "test-pod",
+#    metadata=kubernetes.meta.v1.ObjectMetaArgs(namespace=namespace),
+#    spec=kubernetes.core.v1.PodSpecArgs(
+#        service_account_name=service_account.metadata.name,
+#        containers=[
+#            kubernetes.core.v1.ContainerArgs(
+#                name="my-pod",
+#                image="amazonlinux:2018.03",
+#                command=["sh", "-c", command],
+#                env=[
+#                    kubernetes.core.v1.EnvVarArgs(name="AWS_DEFAULT_REGION", value="us-east-2"),
+#                    kubernetes.core.v1.EnvVarArgs(name="ENABLE_IRP", value="true"),
+#                ],
+#            ),
+#        ],
+#    ),
+#    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
+# )

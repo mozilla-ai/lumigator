@@ -1,5 +1,6 @@
 import csv
 import io
+from typing import Any
 from urllib.parse import urlparse
 
 import pytest
@@ -9,16 +10,31 @@ from fastapi.testclient import TestClient
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
-@pytest.fixture
-def experiment_dataset() -> io.BytesIO:
+def write_dataset(data: list[list[Any]]) -> io.BytesIO:
     str_obj = io.StringIO()
-    data = [["input", "target"], ["Hello World", "Hello"]]
     csv.writer(str_obj).writerows(data)
+    str_obj.seek(0)
     return io.BytesIO(str_obj.read().encode("utf-8"))
 
 
-def test_upload_delete(app_client: TestClient, experiment_dataset):
+@pytest.fixture
+def valid_experiment_data() -> list[list[Any]]:
+    return [["examples", "ground_truth"], ["Hello World", "Hello"]]
+
+
+@pytest.fixture
+def missing_examples_data() -> list[list[Any]]:
+    return [["ground_truth"], ["Hello"]]
+
+
+@pytest.fixture
+def extra_column_data() -> list[list[Any]]:
+    return [["examples", "ground_truth", "extra"], ["Hello World", "Hello", "Nope"]]
+
+
+def test_upload_delete(app_client: TestClient, valid_experiment_data):
     upload_filename = "dataset.csv"
+    experiment_dataset = write_dataset(valid_experiment_data)
 
     # Create
     create_response = app_client.post(
@@ -48,8 +64,9 @@ def test_upload_delete(app_client: TestClient, experiment_dataset):
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_presigned_download(app_client: TestClient, experiment_dataset):
+def test_presigned_download(app_client: TestClient, valid_experiment_data):
     upload_filename = "dataset.csv"
+    experiment_dataset = write_dataset(valid_experiment_data)
 
     # Create
     create_response = app_client.post(
@@ -70,3 +87,21 @@ def test_presigned_download(app_client: TestClient, experiment_dataset):
     # (not as a content disposition header)
     parse_result = urlparse(download_model.download_url)
     assert parse_result.path.endswith(upload_filename)
+
+
+def test_experiment_format_validation(
+    app_client: TestClient,
+    missing_examples_data,
+    extra_column_data,
+):
+    datasets = [
+        write_dataset(missing_examples_data),
+        write_dataset(extra_column_data),
+    ]
+    for d in datasets:
+        response = app_client.post(
+            url="/datasets",
+            data={"format": DatasetFormat.EXPERIMENT.value},
+            files={"dataset": ("dataset.csv", d)},
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN

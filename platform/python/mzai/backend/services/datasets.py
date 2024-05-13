@@ -11,7 +11,7 @@ from pydantic import ByteSize
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.settings import settings
-from mzai.backend.types import S3Client, UnprocessableEntityError
+from mzai.backend.types import S3Client
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
@@ -32,13 +32,12 @@ def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) ->
     """
     actual_size = 0
     for chunk in input:
-        actual_size += len(chunk)
+        actual_size += output.write(chunk)
         if actual_size > max_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds the {max_size.human_readable(decimal=True)} limit.",
+                detail=f"File upload exceeds the {max_size.human_readable(decimal=True)} limit.",
             )
-        output.write(chunk)
     return actual_size
 
 
@@ -47,8 +46,10 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
         match format:
             case DatasetFormat.EXPERIMENT:
                 validate_experiment_dataset(filename)
-
-    except UnprocessableEntityError as e:
+            case _:
+                # Should not be reachable
+                raise ValueError(f"Unknown dataset format: {format}")
+    except UnicodeError as e:
         logger.opt(exception=e).info("Error processing dataset upload.")
         http_exception = HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -66,7 +67,7 @@ def validate_experiment_dataset(filename: str):
         if missing_fields:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Experiment dataset is missing the required fields {missing_fields}.",
+                detail=f"Experiment dataset is missing the required fields: {missing_fields}.",
             )
 
         extra_fields = fields.difference(ALLOWED_EXPERIMENT_FIELDS)
@@ -74,7 +75,7 @@ def validate_experiment_dataset(filename: str):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=(
-                    f"Experiment dataset contains the invalid fields {extra_fields}. "
+                    f"Experiment dataset contains the invalid fields: {extra_fields}. "
                     f"Only {ALLOWED_EXPERIMENT_FIELDS} are allowed."
                 ),
             )

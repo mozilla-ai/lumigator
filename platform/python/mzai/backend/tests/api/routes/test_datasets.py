@@ -9,7 +9,8 @@ from fastapi.testclient import TestClient
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
-def write_dataset(data: list[list[str]]) -> str:
+def format_dataset(data: list[list[str]]) -> str:
+    """Format a list of tabular data as a CSV string."""
     buffer = io.StringIO()
     csv.writer(buffer).writerows(data)
     buffer.seek(0)
@@ -17,38 +18,40 @@ def write_dataset(data: list[list[str]]) -> str:
 
 
 @pytest.fixture
-def valid_experiment_data() -> list[list[str]]:
-    return [
+def valid_experiment_dataset() -> str:
+    data = [
         ["examples", "ground_truth"],
         ["Hello World", "Hello"],
     ]
+    return format_dataset(data)
 
 
 @pytest.fixture
-def missing_examples_data() -> list[list[str]]:
-    return [
+def missing_examples_dataset() -> str:
+    data = [
         ["ground_truth"],
         ["Hello"],
     ]
+    return format_dataset(data)
 
 
 @pytest.fixture
-def extra_column_data() -> list[list[str]]:
-    return [
+def extra_column_dataset() -> str:
+    data = [
         ["examples", "ground_truth", "extra"],
         ["Hello World", "Hello", "Nope"],
     ]
+    return format_dataset(data)
 
 
-def test_upload_delete(app_client: TestClient, valid_experiment_data):
+def test_upload_delete(app_client: TestClient, valid_experiment_dataset):
     upload_filename = "dataset.csv"
-    experiment_dataset = write_dataset(valid_experiment_data)
 
     # Create
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.EXPERIMENT.value},
-        files={"dataset": (upload_filename, experiment_dataset)},
+        files={"dataset": (upload_filename, valid_experiment_dataset)},
     )
     assert create_response.status_code == status.HTTP_201_CREATED
 
@@ -72,15 +75,14 @@ def test_upload_delete(app_client: TestClient, valid_experiment_data):
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_presigned_download(app_client: TestClient, valid_experiment_data):
+def test_presigned_download(app_client: TestClient, valid_experiment_dataset):
     upload_filename = "dataset.csv"
-    experiment_dataset = write_dataset(valid_experiment_data)
 
     # Create
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.EXPERIMENT.value},
-        files={"dataset": (upload_filename, experiment_dataset)},
+        files={"dataset": (upload_filename, valid_experiment_dataset)},
     )
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
@@ -99,13 +101,10 @@ def test_presigned_download(app_client: TestClient, valid_experiment_data):
 
 def test_experiment_format_validation(
     app_client: TestClient,
-    missing_examples_data,
-    extra_column_data,
+    missing_examples_dataset,
+    extra_column_dataset,
 ):
-    datasets = [
-        write_dataset(missing_examples_data),
-        write_dataset(extra_column_data),
-    ]
+    datasets = [missing_examples_dataset, extra_column_dataset]
     for d in datasets:
         response = app_client.post(
             url="/datasets",

@@ -10,26 +10,35 @@ from fastapi.testclient import TestClient
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
-def write_dataset(data: list[list[Any]]) -> io.BytesIO:
-    str_obj = io.StringIO()
-    csv.writer(str_obj).writerows(data)
-    str_obj.seek(0)
-    return io.BytesIO(str_obj.read().encode("utf-8"))
+def write_dataset(data: list[list[Any]]) -> str:
+    buffer = io.StringIO()
+    csv.writer(buffer).writerows(data)
+    buffer.seek(0)
+    return buffer.read()
 
 
 @pytest.fixture
 def valid_experiment_data() -> list[list[Any]]:
-    return [["examples", "ground_truth"], ["Hello World", "Hello"]]
+    return [
+        ["examples", "ground_truth"],
+        ["Hello World", "Hello"],
+    ]
 
 
 @pytest.fixture
 def missing_examples_data() -> list[list[Any]]:
-    return [["ground_truth"], ["Hello"]]
+    return [
+        ["ground_truth"],
+        ["Hello"],
+    ]
 
 
 @pytest.fixture
 def extra_column_data() -> list[list[Any]]:
-    return [["examples", "ground_truth", "extra"], ["Hello World", "Hello", "Nope"]]
+    return [
+        ["examples", "ground_truth", "extra"],
+        ["Hello World", "Hello", "Nope"],
+    ]
 
 
 def test_upload_delete(app_client: TestClient, valid_experiment_data):

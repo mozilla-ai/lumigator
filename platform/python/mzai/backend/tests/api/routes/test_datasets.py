@@ -1,6 +1,5 @@
 import csv
 import io
-from typing import Any
 from urllib.parse import urlparse
 
 import pytest
@@ -10,7 +9,7 @@ from fastapi.testclient import TestClient
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
-def write_dataset(data: list[list[Any]]) -> str:
+def write_dataset(data: list[list[str]]) -> str:
     buffer = io.StringIO()
     csv.writer(buffer).writerows(data)
     buffer.seek(0)
@@ -18,7 +17,7 @@ def write_dataset(data: list[list[Any]]) -> str:
 
 
 @pytest.fixture
-def valid_experiment_data() -> list[list[Any]]:
+def valid_experiment_data() -> list[list[str]]:
     return [
         ["examples", "ground_truth"],
         ["Hello World", "Hello"],
@@ -26,7 +25,7 @@ def valid_experiment_data() -> list[list[Any]]:
 
 
 @pytest.fixture
-def missing_examples_data() -> list[list[Any]]:
+def missing_examples_data() -> list[list[str]]:
     return [
         ["ground_truth"],
         ["Hello"],
@@ -34,7 +33,7 @@ def missing_examples_data() -> list[list[Any]]:
 
 
 @pytest.fixture
-def extra_column_data() -> list[list[Any]]:
+def extra_column_data() -> list[list[str]]:
     return [
         ["examples", "ground_truth", "extra"],
         ["Hello World", "Hello", "Nope"],

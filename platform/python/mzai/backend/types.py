@@ -5,3 +5,7 @@ S3Client = NewType("S3Client", Any)
 
 TODO(MZPLATFORM-87): Look into using a type stub library for boto3.
 """
+
+
+UnprocessableEntityError = UnicodeError  # TODO: Add more in a union type here
+"""An expected error from failing to process a file."""

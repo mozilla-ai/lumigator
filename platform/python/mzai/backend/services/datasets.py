@@ -1,4 +1,5 @@
 import csv
+import io
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -11,25 +12,37 @@ from pydantic import ByteSize
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.settings import settings
-from mzai.backend.types import S3Client
+from mzai.backend.types import S3Client, UnprocessableEntityError
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
-UnprocessableEntityError = UnicodeDecodeError
-"""An error we expect because someone uploaded an invalid file format."""
+ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
+REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
 
 
-def write_temporary_dataset(input: BinaryIO, buffer: BinaryIO, max_size: ByteSize) -> bytes:
-    dataset_size = 0
+def validate_dataset_size(input: BinaryIO, max_size: ByteSize) -> BinaryIO:
+    """Write the input contents to a buffer while validating its size.
+
+    A file is not completely sent to the server before the app starts processing the request.
+    We could mandate a `Content-Length` header within a given range, but there is nothing
+    stopping an "attacker" from sending a file with a faked out header value.
+    Our best bet is to traverse the file in chunks and throw an error if its too large.
+    We can then process the file as a whole once its been written to a buffer on the server.
+
+    Reference: https://github.com/tiangolo/fastapi/issues/362#issuecomment-584104025
+    """
+    actual_size = 0
+    buffer = io.BytesIO()
     for chunk in input:
-        dataset_size += len(chunk)
-        if dataset_size > max_size:
+        actual_size += len(chunk)
+        if actual_size > max_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail=f"Dataset exceeds the {max_size.human_readable(decimal=True)} limit.",
             )
         buffer.write(chunk)
-    return dataset_size
+    buffer.seek(0)
+    return buffer, actual_size
 
 
 def validate_dataset_format(filename: str, format: DatasetFormat):
@@ -37,6 +50,12 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
         match format:
             case DatasetFormat.EXPERIMENT:
                 validate_experiment_dataset(filename)
+            case _:
+                # This should not be reached
+                msg = f"Unexpected dataset format {format}."
+                logger.error(msg)
+                raise ValueError(msg)
+
     except UnprocessableEntityError as e:
         logger.opt(exception=e).info("Error processing dataset upload.")
         http_exception = HTTPException(
@@ -49,20 +68,22 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
 def validate_experiment_dataset(filename: str):
     with Path(filename).open() as f:
         reader = csv.DictReader(f)
-        fields: list[str] = reader.fieldnames or []
-        if "examples" not in fields:
+        fields: set[str] = set(reader.fieldnames) or set()
+
+        missing_fields = REQUIRED_EXPERIMENT_FIELDS.difference(fields)
+        if missing_fields:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Experiment dataset must contain an 'examples' field.",
+                detail=f"Experiment dataset is missing the required fields {missing_fields}.",
             )
-        allowed_fields = {"examples", "ground_truth"}
-        invalid_fields = {x for x in fields if x not in allowed_fields}
-        if invalid_fields:
+
+        extra_fields = fields.difference(ALLOWED_EXPERIMENT_FIELDS)
+        if extra_fields:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=(
-                    f"Experiment dataset contains invalid fields {invalid_fields}. "
-                    f"Only {allowed_fields} are allowed."
+                    f"Experiment dataset contains the invalid fields {extra_fields}. "
+                    f"Only {ALLOWED_EXPERIMENT_FIELDS} are allowed."
                 ),
             )
 
@@ -94,7 +115,7 @@ class DatasetService:
         try:
             # Write to tempfile and validate size
             with temp as buffer:
-                real_size = write_temporary_dataset(dataset.file, buffer, settings.MAX_DATASET_SIZE)
+                buffer, real_size = validate_dataset_size(dataset.file, settings.MAX_DATASET_SIZE)
 
             # Validate format
             validate_dataset_format(temp.name, format)

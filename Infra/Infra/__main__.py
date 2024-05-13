@@ -1,5 +1,3 @@
-"""An AWS Python Pulumi program"""
-
 import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
@@ -22,7 +20,8 @@ vpc = awsx.ec2.Vpc("vpc")
 # Create an EKS cluster with the default configuration.
 # Note needed to change region - Could not create in us-east-1
 # See region set in .env file
-# Cannot create cluster 'cluster-eksCluster-6d3eb4a' because EKS does not support creating control plane instances in us-east-1e, the targeted availability zone
+# Cannot create cluster 'cluster-eksCluster-6d3eb4a' because EKS does not support creating control
+# plane instances in us-east-1e, the targeted availability zone
 # https://github.com/pulumi/pulumi-eks/issues/95
 # https://github.com/eksctl-io/eksctl/issues/118
 
@@ -33,7 +32,96 @@ cluster = eks.Cluster(
     public_subnet_ids=vpc.public_subnet_ids,
     private_subnet_ids=vpc.private_subnet_ids,
     node_associate_public_ip_address=False,
+    create_oidc_provider=True,
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
+)
+
+cluster_provider = kubernetes.Provider(
+    "clusterProvider",
+    kubeconfig=cluster.kubeconfig,
+    enable_server_side_apply=True,
+    opts=pulumi.ResourceOptions(depends_on=[cluster]),
+)
+
+cluster_oidc_provider_url = cluster.core.oidc_provider.url
+
+pulumi.export("oidc_url", cluster_oidc_provider_url)
+
+cluster_oidc_provider_arn = cluster.core.oidc_provider.arn
+
+pulumi.export("oidc_arn", cluster_oidc_provider_arn)
+
+# Use the OIDC provider URL to retrieve the OIDC provider ARN
+# oidc_provider_arn = cluster.core.oidc_provider_url.apply(
+#     lambda url: aws.iam.get_open_id_connect_provider(
+#         arn=f"arn:aws:iam::{aws.get_caller_identity().account_id}:oidc-provider/{url.split('https://')[1]}"
+#     )
+# )
+
+pulumi.export("oidc_url", cluster_oidc_provider_url)  # Exporting this value materializes the value
+
+# Get the name of the default namespace
+namespace = "default"
+
+sa_name = "s3"
+
+# Create the new IAM policy for the Service Account using the AssumeRoleWebWebIdentity action.
+# May need to use pulumi.all here to materialize the values before they are used.
+# Need to add `aud` to the conditions
+
+sub = cluster.core.oidc_provider.url.apply(lambda url: url + ":sub")
+
+pulumi.export("sub", sub)
+
+eks_assume_role_policy = aws.iam.get_policy_document(
+    statements=[
+        aws.iam.GetPolicyDocumentStatementArgs(
+            actions=["sts:AssumeRoleWithWebIdentity"],
+            principals=[
+                aws.iam.GetPolicyDocumentStatementPrincipalArgs(
+                    type="Federated",
+                    identifiers=[cluster_oidc_provider_arn],
+                )
+            ],
+            effect="Allow",
+            conditions=[
+                # https://kubedemy.io/aws-eks-part-13-setup-iam-roles-for-service-accounts-irsa
+                # TODO: Look into "oidc.eks.eu-west-2.amazonaws.com/id/41C415204248C3A34377D6A4D103A9C8:aud": "sts.amazonaws.com",
+                aws.iam.GetPolicyDocumentStatementConditionArgs(
+                    test="StringEquals",
+                    variable=sub,  # May need to remove "https" from URL
+                    # Tried to use f"{url}:sub" but got the following error when inspecting the object: Calling __str__ on an Output[T] is not supported.\n\nTo get the value of an Output[T] as an Output[str] consider:\n1. o.apply(lambda v: f\"prefix{v}suffix\")\n\nSee https://www.pulumi.com/docs/concepts/inputs-outputs for more details.\nThis function may throw in a future version of Pulumi.:sub
+                    values=[f"system:serviceaccount:{namespace}:{sa_name}"],
+                )
+            ],
+        )
+    ]
+)
+pulumi.export("policy_doc", eks_assume_role_policy)
+
+# source_json is deprecated: Not used
+eks_role = aws.iam.Role("eks_irsa_iam_role", assume_role_policy=eks_assume_role_policy.json)
+
+# Attach necessary policies to the IAM role
+managed_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+]
+for policy_arn in managed_policy_arns:
+    aws.iam.RolePolicyAttachment(
+        f"eksPolicy-{policy_arn}", policy_arn=policy_arn, role=eks_role.name
+    )
+
+# Create a Kubernetes Service Account in the default namespace
+service_account = kubernetes.core.v1.ServiceAccount(
+    "test-sa",
+    metadata=kubernetes.meta.v1.ObjectMetaArgs(
+        name=sa_name,
+        namespace=namespace,
+        annotations={
+            "eks.amazonaws.com/role-arn": eks_role.arn,
+        },
+    ),
+    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
 # Export the cluster's kubeconfig.
@@ -84,14 +172,6 @@ db_instance = aws.rds.Instance(
 
 pulumi.export("db-url", db_instance.address)
 
-cluster_provider = kubernetes.Provider(
-    "clusterProvider",
-    kubeconfig=cluster.kubeconfig,
-    enable_server_side_apply=True,
-    opts=pulumi.ResourceOptions(depends_on=[cluster]),
-)
-
-
 kube_ray = Chart(
     "kuberay-operator",
     ChartOpts(
@@ -104,107 +184,30 @@ kube_ray = Chart(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
-# helm install raycluster kuberay/ray-cluster --version 1.1.0
-# TODO Get ray head svc address as output
-# TODO Replace with CRD directly
-kube_ray = Chart(
-    "ray-cluster",
-    ChartOpts(
-        chart="ray-cluster",
-        version="1.1.0",
-        fetch_opts=FetchOpts(
-            repo="https://ray-project.github.io/kuberay-helm/",
-        ),
-        values={
-            "image": {
-                "repository": "381492205691.dkr.ecr.us-east-2.amazonaws.com/repository-004e6f0",
-                "tag": "job-runner-0.1",
-            },
-            "common": {
-                "containerEnv": [
-                    {"name": "BACKEND_HOST", "value": "backend-svc"},
-                    {"name": "BACKEND_PORT", "value": "80"},
-                ],
-            },
-        },
-    ),
-    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
+bucket = aws.s3.Bucket("pod-irsa-job-bucket")
+
+command = bucket.id.apply(
+    lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"
 )
 
-my_deployment = kubernetes.apps.v1.Deployment(
-    "backend-deployment",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels={
-            "appClass": "my-deployment",
-        },
-    ),
-    spec=kubernetes.apps.v1.DeploymentSpecArgs(
-        replicas=2,
-        selector=kubernetes.meta.v1.LabelSelectorArgs(
-            match_labels={
-                "appClass": "my-deployment",
-            },
-        ),
-        template=kubernetes.core.v1.PodTemplateSpecArgs(
-            metadata=kubernetes.meta.v1.ObjectMetaArgs(
-                labels={
-                    "appClass": "my-deployment",
-                },
-            ),
-            spec=kubernetes.core.v1.PodSpecArgs(
-                containers=[
-                    kubernetes.core.v1.ContainerArgs(
-                        name="my-deployment",
-                        image="381492205691.dkr.ecr.us-east-2.amazonaws.com/repository-004e6f0:backend-0.1",  # nginx
-                        ports=[
-                            kubernetes.core.v1.ContainerPortArgs(
-                                name="http",
-                                container_port=80,
-                            )
-                        ],
-                        env=[
-                            kubernetes.core.v1.EnvVarArgs(name="POSTGRES_DB", value=db_name),
-                            kubernetes.core.v1.EnvVarArgs(
-                                name="POSTGRES_HOST", value=db_instance.address
-                            ),
-                            kubernetes.core.v1.EnvVarArgs(name="POSTGRES_USER", value=pg_user),
-                            kubernetes.core.v1.EnvVarArgs(name="POSTGRES_PASSWORD", value=pg_pass),
-                            kubernetes.core.v1.EnvVarArgs(name="POSTGRES_PORT", value="5432"),
-                            kubernetes.core.v1.EnvVarArgs(
-                                name="RAY_HEAD_NODE_HOST", value="ray-cluster-kuberay-head-svc"
-                            ),
-                            kubernetes.core.v1.EnvVarArgs(name="RAY_DASHBOARD_PORT", value="8265"),
-                        ],
-                    )
+pulumi.export("command", command)
+
+s3_pod = kubernetes.core.v1.Pod(
+    "test-pod",
+    metadata=kubernetes.meta.v1.ObjectMetaArgs(namespace=namespace),
+    spec=kubernetes.core.v1.PodSpecArgs(
+        service_account_name=service_account.metadata.name,
+        containers=[
+            kubernetes.core.v1.ContainerArgs(
+                name="my-pod",
+                image="amazonlinux:2018.03",
+                command=["sh", "-c", command],
+                env=[
+                    kubernetes.core.v1.EnvVarArgs(name="AWS_DEFAULT_REGION", value="us-east-2"),
+                    kubernetes.core.v1.EnvVarArgs(name="ENABLE_IRP", value="true"),
                 ],
             ),
-        ),
-    ),
-    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
-)
-
-my_service = kubernetes.core.v1.Service(
-    "backend-service",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        name="backend-svc",
-        labels={
-            "appClass": "my-deployment",
-        },
-    ),
-    spec=kubernetes.core.v1.ServiceSpecArgs(
-        type="LoadBalancer",
-        ports=[
-            kubernetes.core.v1.ServicePortArgs(
-                port=80,
-                target_port="http",
-            )
         ],
-        selector={
-            "appClass": "my-deployment",
-        },
     ),
-    opts=pulumi.ResourceOptions(provider=cluster_provider),
+    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
-
-# Export the URL for the load balanced service.
-pulumi.export("svc-url", my_service.status.load_balancer.ingress[0].hostname)

@@ -1,5 +1,4 @@
 import csv
-import io
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -20,8 +19,8 @@ ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
 
 
-def validate_dataset_size(input: BinaryIO, max_size: ByteSize) -> BinaryIO:
-    """Write the input contents to a buffer while validating its size.
+def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) -> int:
+    """Write the input contents to an output buffer while validating its size.
 
     A file is not completely sent to the server before the app starts processing the request.
     We could mandate a `Content-Length` header within a given range, but there is nothing
@@ -32,17 +31,15 @@ def validate_dataset_size(input: BinaryIO, max_size: ByteSize) -> BinaryIO:
     Reference: https://github.com/tiangolo/fastapi/issues/362#issuecomment-584104025
     """
     actual_size = 0
-    buffer = io.BytesIO()
     for chunk in input:
         actual_size += len(chunk)
         if actual_size > max_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"Dataset exceeds the {max_size.human_readable(decimal=True)} limit.",
+                detail=f"File size exceeds the {max_size.human_readable(decimal=True)} limit.",
             )
-        buffer.write(chunk)
-    buffer.seek(0)
-    return buffer, actual_size
+        output.write(chunk)
+    return actual_size
 
 
 def validate_dataset_format(filename: str, format: DatasetFormat):
@@ -50,11 +47,6 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
         match format:
             case DatasetFormat.EXPERIMENT:
                 validate_experiment_dataset(filename)
-            case _:
-                # This should not be reached
-                msg = f"Unexpected dataset format {format}."
-                logger.error(msg)
-                raise ValueError(msg)
 
     except UnprocessableEntityError as e:
         logger.opt(exception=e).info("Error processing dataset upload.")
@@ -68,7 +60,7 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
 def validate_experiment_dataset(filename: str):
     with Path(filename).open() as f:
         reader = csv.DictReader(f)
-        fields: set[str] = set(reader.fieldnames) or set()
+        fields = set(reader.fieldnames or [])
 
         missing_fields = REQUIRED_EXPERIMENT_FIELDS.difference(fields)
         if missing_fields:
@@ -114,8 +106,10 @@ class DatasetService:
         temp = NamedTemporaryFile(delete=False)
         try:
             # Write to tempfile and validate size
+            # We are writing to a tempfile because we have to re-process it multiple times
+            # Using an in-memory buffer would be prone to losing the contents when closed
             with temp as buffer:
-                buffer, real_size = validate_dataset_size(dataset.file, settings.MAX_DATASET_SIZE)
+                actual_size = validate_file_size(dataset.file, buffer, settings.MAX_DATASET_SIZE)
 
             # Validate format
             validate_dataset_format(temp.name, format)
@@ -124,7 +118,7 @@ class DatasetService:
             record = self.dataset_repo.create(
                 filename=dataset.filename,
                 format=format,
-                size=real_size,
+                size=actual_size,
             )
 
             # Upload to S3

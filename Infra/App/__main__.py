@@ -36,8 +36,8 @@ db_pass = stack_ref.get_output(DATABASE_PASSWORD)
 
 repository_url = stack_ref.get_output(REPOSITORY_URL)
 
-ray_tag = ""
-platform_tag = ""
+ray_tag = "ray_jobrunner_image-0.1"  # TODO make into CLI Args
+platform_tag = "backend_image-0.1"  # TODO Make into CLI Arg
 
 service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 
@@ -65,8 +65,8 @@ kube_ray = Chart(
         ),
         values={
             "image": {
-                "repository": "381492205691.dkr.ecr.us-east-2.amazonaws.com/repository-004e6f0",  # TODO
-                "tag": "job-runner-0.1",  # TODO
+                "repository": repository_url,
+                "tag": ray_tag,
             },
             "common": {
                 "containerEnv": [
@@ -78,6 +78,8 @@ kube_ray = Chart(
     ),
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
 )
+
+image = pulumi.Output.format("{0}:{1}", repository_url, platform_tag)
 
 platform_backend_deployment = kubernetes.apps.v1.Deployment(
     "platform-api",
@@ -104,7 +106,7 @@ platform_backend_deployment = kubernetes.apps.v1.Deployment(
                 containers=[
                     kubernetes.core.v1.ContainerArgs(
                         name="platform-api",
-                        image=f"{repository_url}:{platform_tag}",
+                        image=image,
                         ports=[
                             kubernetes.core.v1.ContainerPortArgs(
                                 name="http",
@@ -112,11 +114,13 @@ platform_backend_deployment = kubernetes.apps.v1.Deployment(
                             )
                         ],
                         env=[
-                            # TODO: Add Bucket Name
+                            kubernetes.core.v1.EnvVarArgs(name="S3_BUCKET", value=bucket_id),
                             kubernetes.core.v1.EnvVarArgs(name="POSTGRES_DB", value=db_name),
                             kubernetes.core.v1.EnvVarArgs(name="POSTGRES_HOST", value=db_instance),
                             kubernetes.core.v1.EnvVarArgs(name="POSTGRES_USER", value=db_user),
-                            kubernetes.core.v1.EnvVarArgs(name="POSTGRES_PASSWORD", value=db_pass),
+                            kubernetes.core.v1.EnvVarArgs(
+                                name="POSTGRES_PASSWORD", value=db_pass
+                            ),  # TODO Use Kube Secret
                             kubernetes.core.v1.EnvVarArgs(name="POSTGRES_PORT", value="5432"),
                             kubernetes.core.v1.EnvVarArgs(
                                 name="RAY_HEAD_NODE_HOST", value="ray-cluster-kuberay-head-svc"

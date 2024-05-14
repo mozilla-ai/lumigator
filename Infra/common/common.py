@@ -1,0 +1,8 @@
+REPOSITORY_URL = "repo-url"
+KUBECONFIG = "kubeconfig"
+SERVICE_ACCOUNT_NAME = "sa-name"
+DATABASE_URL = "db-url"
+DATABASE_NAME = "db-name"
+DATABASE_USER = "db-user"
+DATABASE_PASSWORD = "db-pass"
+BUCKET_ID = "bucket-id"

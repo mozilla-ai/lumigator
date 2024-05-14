@@ -45,4 +45,35 @@ There are two main pulumi stacks in this folder:
 `App` - This stack is the app itself, it can be run every time a new code version is deployed.
 
 
+# Running Pulumi
+
+```
+env $(cat .env | xargs) pulumi up
+```
+
+# Best Practices
+
+DependsOn / Resource Graph
+
+```
+opts=pulumi.ResourceOptions(depends_on=[cluster])
+```
+
+https://www.pulumi.com/docs/concepts/inputs-outputs/all/
+
+# Troubleshooting
+
+Sometimes it's easier to apply and `UP` to delete a resource
+
+State manipulation
+
+"Stuck" Resources
+
+opts=pulumi.ResourceOptions(depends_on=[cluster])
+
+Auth tokens, etc timing out after x minutes
+
+Failed up and destroy
+
+Token error
 

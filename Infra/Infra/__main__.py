@@ -36,6 +36,9 @@ cluster = eks.Cluster(
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
 )
 
+# Export the cluster's kubeconfig.
+pulumi.export("kubeconfig", cluster.kubeconfig)
+
 cluster_provider = kubernetes.Provider(
     "clusterProvider",
     kubeconfig=cluster.kubeconfig,
@@ -43,22 +46,14 @@ cluster_provider = kubernetes.Provider(
     opts=pulumi.ResourceOptions(depends_on=[cluster]),
 )
 
-cluster_oidc_provider_url = cluster.core.oidc_provider.url
-
-pulumi.export("oidc_url", cluster_oidc_provider_url)
-
-cluster_oidc_provider_arn = cluster.core.oidc_provider.arn
-
-pulumi.export("oidc_arn", cluster_oidc_provider_arn)
-
+# Another potential method for accessing the OIDC ARN
+###
 # Use the OIDC provider URL to retrieve the OIDC provider ARN
 # oidc_provider_arn = cluster.core.oidc_provider_url.apply(
 #     lambda url: aws.iam.get_open_id_connect_provider(
 #         arn=f"arn:aws:iam::{aws.get_caller_identity().account_id}:oidc-provider/{url.split('https://')[1]}"
 #     )
 # )
-
-pulumi.export("oidc_url", cluster_oidc_provider_url)  # Exporting this value materializes the value
 
 # Get the name of the default namespace
 namespace = "default"
@@ -71,8 +66,6 @@ sa_name = "s3"
 
 sub = cluster.core.oidc_provider.url.apply(lambda url: url + ":sub")
 
-pulumi.export("sub", sub)
-
 eks_assume_role_policy = aws.iam.get_policy_document(
     statements=[
         aws.iam.GetPolicyDocumentStatementArgs(
@@ -80,7 +73,7 @@ eks_assume_role_policy = aws.iam.get_policy_document(
             principals=[
                 aws.iam.GetPolicyDocumentStatementPrincipalArgs(
                     type="Federated",
-                    identifiers=[cluster_oidc_provider_arn],
+                    identifiers=[cluster.core.oidc_provider.arn],
                 )
             ],
             effect="Allow",
@@ -97,12 +90,12 @@ eks_assume_role_policy = aws.iam.get_policy_document(
         )
     ]
 )
-pulumi.export("policy_doc", eks_assume_role_policy)
 
 # source_json is deprecated: Not used
 eks_role = aws.iam.Role("eks_irsa_iam_role", assume_role_policy=eks_assume_role_policy.json)
 
 # Attach necessary policies to the IAM role
+# TODO Lock down to specific bucket
 managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonS3FullAccess",
 ]
@@ -124,8 +117,7 @@ service_account = kubernetes.core.v1.ServiceAccount(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
-# Export the cluster's kubeconfig.
-pulumi.export("kubeconfig", cluster.kubeconfig)
+pulumi.export("sa-name", service_account.metadata.name)
 
 # Just use private subnets from VPC, or create separate subnets for DB?
 db_subnet_group = aws.rds.SubnetGroup(
@@ -152,7 +144,8 @@ security_group = aws.ec2.SecurityGroup(
 
 db_name = "mydatabase"
 pg_user = "db_admin"
-pg_pass = "password123"
+pg_pass = "password123"  # TODO Use Pulumi Secret
+
 ## Create a RDS instance
 db_instance = aws.rds.Instance(
     "db-instance",
@@ -168,7 +161,6 @@ db_instance = aws.rds.Instance(
     db_subnet_group_name=db_subnet_group.name,
     opts=pulumi.ResourceOptions(depends_on=[security_group, db_subnet_group]),
 )
-
 
 pulumi.export("db-url", db_instance.address)
 
@@ -186,9 +178,11 @@ kube_ray = Chart(
 
 bucket = aws.s3.Bucket("pod-irsa-job-bucket")
 
-command = bucket.id.apply(
-    lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"
-)
+pulumi.export("bucket-id", bucket.id)
+
+# command = bucket.id.apply(
+#    lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"
+# )
 
 # pulumi.export("command", command)
 

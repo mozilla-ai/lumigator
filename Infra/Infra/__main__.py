@@ -5,13 +5,34 @@ import pulumi_eks as eks
 import pulumi_kubernetes as kubernetes
 from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 
+# Can't do parent imports
+# from ..common import (
+#     BUCKET_ID,
+#     DATABASE_NAME,
+#     DATABASE_PASSWORD,
+#     DATABASE_URL,
+#     DATABASE_USER,
+#     KUBECONFIG,
+#     REPOSITORY_URL,
+#     SERVICE_ACCOUNT_NAME,
+# )
+
+REPOSITORY_URL = "repo-url"
+KUBECONFIG = "kubeconfig"
+SERVICE_ACCOUNT_NAME = "sa-name"
+DATABASE_URL = "db-url"
+DATABASE_NAME = "db-name"
+DATABASE_USER = "db-user"
+DATABASE_PASSWORD = "db-pass"
+BUCKET_ID = "bucket-id"
+
 # Need IAM role on kube nodes?
 repository = awsx.ecr.Repository(
     "repository",
     awsx.ecr.RepositoryArgs(force_delete=True),
 )
 
-pulumi.export("repo-url", repository.url)
+pulumi.export(REPOSITORY_URL, repository.url)
 
 # Create a VPC for our cluster.
 vpc = awsx.ec2.Vpc("vpc")
@@ -37,7 +58,7 @@ cluster = eks.Cluster(
 )
 
 # Export the cluster's kubeconfig.
-pulumi.export("kubeconfig", cluster.kubeconfig)
+pulumi.export(KUBECONFIG, cluster.kubeconfig)
 
 cluster_provider = kubernetes.Provider(
     "clusterProvider",
@@ -60,6 +81,7 @@ namespace = "default"
 
 sa_name = "s3"
 
+# https://www.pulumi.com/blog/eks-oidc/
 # Create the new IAM policy for the Service Account using the AssumeRoleWebWebIdentity action.
 # May need to use pulumi.all here to materialize the values before they are used.
 # Need to add `aud` to the conditions
@@ -94,6 +116,7 @@ eks_assume_role_policy = aws.iam.get_policy_document(
 # source_json is deprecated: Not used
 eks_role = aws.iam.Role("eks_irsa_iam_role", assume_role_policy=eks_assume_role_policy.json)
 
+# https://www.pulumi.com/registry/packages/aws/api-docs/iam/policy/
 # Attach necessary policies to the IAM role
 # TODO Lock down to specific bucket
 managed_policy_arns = [
@@ -117,7 +140,7 @@ service_account = kubernetes.core.v1.ServiceAccount(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
-pulumi.export("sa-name", service_account.metadata.name)
+pulumi.export(SERVICE_ACCOUNT_NAME, service_account.metadata.name)
 
 # Just use private subnets from VPC, or create separate subnets for DB?
 db_subnet_group = aws.rds.SubnetGroup(
@@ -143,8 +166,8 @@ security_group = aws.ec2.SecurityGroup(
 )
 
 db_name = "mydatabase"
-pg_user = "db_admin"
-pg_pass = "password123"  # TODO Use Pulumi Secret
+db_user = "db_admin"
+db_pass = "password123"  # TODO Use Pulumi Secret
 
 ## Create a RDS instance
 db_instance = aws.rds.Instance(
@@ -153,8 +176,8 @@ db_instance = aws.rds.Instance(
     instance_class="db.t3.small",
     allocated_storage=20,
     db_name=db_name,
-    username=pg_user,
-    password=pg_pass,  # TODO Pulumi Secrets
+    username=db_user,
+    password=db_pass,
     publicly_accessible=False,
     skip_final_snapshot=True,
     vpc_security_group_ids=[security_group.id],
@@ -162,7 +185,10 @@ db_instance = aws.rds.Instance(
     opts=pulumi.ResourceOptions(depends_on=[security_group, db_subnet_group]),
 )
 
-pulumi.export("db-url", db_instance.address)
+pulumi.export(DATABASE_URL, db_instance.address)
+pulumi.export(DATABASE_NAME, db_name)
+pulumi.export(DATABASE_USER, db_user)
+pulumi.export(DATABASE_PASSWORD, db_pass)
 
 kube_ray = Chart(
     "kuberay-operator",
@@ -178,7 +204,7 @@ kube_ray = Chart(
 
 bucket = aws.s3.Bucket("pod-irsa-job-bucket")
 
-pulumi.export("bucket-id", bucket.id)
+pulumi.export(BUCKET_ID, bucket.id)
 
 # command = bucket.id.apply(
 #    lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"

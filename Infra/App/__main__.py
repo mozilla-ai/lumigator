@@ -53,6 +53,7 @@ cluster_provider = kubernetes.Provider(
 )  # opts=pulumi.ResourceOptions(depends_on=[cluster])
 
 # helm install raycluster kuberay/ray-cluster --version 1.1.0
+# TODO Service Account access to bucket
 # TODO Get ray head svc address as output
 # TODO Replace with CRD directly
 kube_ray = Chart(

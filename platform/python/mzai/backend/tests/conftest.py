@@ -1,9 +1,7 @@
-import os
-from unittest import mock
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from mypy_boto3_s3 import S3Client
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
@@ -14,7 +12,6 @@ from mzai.backend.api.router import API_V1_PREFIX
 from mzai.backend.main import create_app
 from mzai.backend.records.base import BaseRecord
 from mzai.backend.settings import settings
-from mzai.backend.types import S3Client
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 

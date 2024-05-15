@@ -1,6 +1,12 @@
+import csv
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import BinaryIO
 from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
+from loguru import logger
+from pydantic import ByteSize
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
@@ -8,6 +14,71 @@ from mzai.backend.settings import settings
 from mzai.backend.types import S3Client
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
+
+ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
+REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
+
+
+def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) -> int:
+    """Write the input contents to an output buffer while validating its size.
+
+    A file is not completely sent to the server before the app starts processing the request.
+    We could mandate a `Content-Length` header within a given range, but there is nothing
+    stopping an "attacker" from sending a file with a faked out header value.
+    Our best bet is to traverse the file in chunks and throw an error if its too large.
+    We can then process the file as a whole once its been written to a buffer on the server.
+
+    Reference: https://github.com/tiangolo/fastapi/issues/362#issuecomment-584104025
+    """
+    actual_size = 0
+    for chunk in input:
+        actual_size += output.write(chunk)
+        if actual_size > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File upload exceeds the {max_size.human_readable(decimal=True)} limit.",
+            )
+    return actual_size
+
+
+def validate_dataset_format(filename: str, format: DatasetFormat):
+    try:
+        match format:
+            case DatasetFormat.EXPERIMENT:
+                validate_experiment_dataset(filename)
+            case _:
+                # Should not be reachable
+                raise ValueError(f"Unknown dataset format: {format}")
+    except UnicodeError as e:
+        logger.opt(exception=e).info("Error processing dataset upload.")
+        http_exception = HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Dataset is not a valid CSV file.",
+        )
+        raise http_exception from e
+
+
+def validate_experiment_dataset(filename: str):
+    with Path(filename).open() as f:
+        reader = csv.DictReader(f)
+        fields = set(reader.fieldnames or [])
+
+        missing_fields = REQUIRED_EXPERIMENT_FIELDS.difference(fields)
+        if missing_fields:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Experiment dataset is missing the required fields: {missing_fields}.",
+            )
+
+        extra_fields = fields.difference(ALLOWED_EXPERIMENT_FIELDS)
+        if extra_fields:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    f"Experiment dataset contains the invalid fields: {extra_fields}. "
+                    f"Only {ALLOWED_EXPERIMENT_FIELDS} are allowed."
+                ),
+            )
 
 
 class DatasetService:
@@ -33,20 +104,32 @@ class DatasetService:
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
-        # TODO (MZPLATFORM-79): Add validation logic to dataset uploads
+        temp = NamedTemporaryFile(delete=False)
+        try:
+            # Write to tempfile and validate size
+            # We are writing to a tempfile because we have to re-process it multiple times
+            # Using an in-memory buffer would be prone to losing the contents when closed
+            with temp as buffer:
+                actual_size = validate_file_size(dataset.file, buffer, settings.MAX_DATASET_SIZE)
 
-        # Create DB record
-        record = self.dataset_repo.create(
-            filename=dataset.filename,
-            format=format,
-            size=dataset.size,
-        )
+            # Validate format
+            validate_dataset_format(temp.name, format)
 
-        # Upload to S3
-        dataset_key = self._get_s3_key(record.id, record.filename)
-        self.s3_client.upload_fileobj(dataset.file, settings.S3_BUCKET, dataset_key)
+            # Create DB record
+            record = self.dataset_repo.create(
+                filename=dataset.filename,
+                format=format,
+                size=actual_size,
+            )
 
-        # Response
+            # Upload to S3
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            self.s3_client.upload_file(temp.name, settings.S3_BUCKET, dataset_key)
+
+        finally:
+            # Cleanup temp file
+            Path(temp.name).unlink()
+
         return DatasetResponse.model_validate(record)
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse:

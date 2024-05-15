@@ -18,12 +18,7 @@ class BackendSettings(BaseSettings):
     POSTGRES_DB: str | None = None
 
     # AWS
-    AWS_HOST: str = "localhost"
-    AWS_ACCESS_KEY_ID: str = "test"
-    AWS_SECRET_ACCESS_KEY: str = "test"
-    AWS_DEFAULT_REGION: str = "us-east-2"
-
-    # S3
+    AWS_HOST: str | None = None
     S3_PORT: int = 4566
     S3_BUCKET: str = "platform-storage"
     S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
@@ -35,8 +30,10 @@ class BackendSettings(BaseSettings):
 
     @computed_field
     @property
-    def S3_ENDPOINT_URL(self) -> str:  # noqa: N802
-        return f"http://{self.AWS_HOST}:{self.S3_PORT}"
+    def S3_ENDPOINT_URL(self) -> str | None:  # noqa: N802
+        # Live AWS doesn't require this but LocalStack testing does, so it's optional
+        if self.AWS_HOST is not None:
+            return f"http://{self.AWS_HOST}:{self.S3_PORT}"
 
     @computed_field
     @property

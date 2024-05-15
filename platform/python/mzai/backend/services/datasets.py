@@ -6,12 +6,12 @@ from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
+from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.settings import settings
-from mzai.backend.types import S3Client
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 

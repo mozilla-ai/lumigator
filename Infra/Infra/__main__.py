@@ -17,6 +17,7 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 #     SERVICE_ACCOUNT_NAME,
 # )
 
+# TODO Move to module
 REPOSITORY_URL = "repo-url"
 KUBECONFIG = "kubeconfig"
 SERVICE_ACCOUNT_NAME = "sa-name"
@@ -26,9 +27,14 @@ DATABASE_USER = "db-user"
 DATABASE_PASSWORD = "db-pass"
 BUCKET_ID = "bucket-id"
 
-# Need IAM role on kube nodes?
 repository = awsx.ecr.Repository(
     "repository",
+    awsx.ecr.RepositoryArgs(force_delete=True),
+)
+
+
+repository = awsx.ecr.Repository(
+    "repository-job-runner",
     awsx.ecr.RepositoryArgs(force_delete=True),
 )
 
@@ -67,25 +73,12 @@ cluster_provider = kubernetes.Provider(
     opts=pulumi.ResourceOptions(depends_on=[cluster]),
 )
 
-# Another potential method for accessing the OIDC ARN
-###
-# Use the OIDC provider URL to retrieve the OIDC provider ARN
-# oidc_provider_arn = cluster.core.oidc_provider_url.apply(
-#     lambda url: aws.iam.get_open_id_connect_provider(
-#         arn=f"arn:aws:iam::{aws.get_caller_identity().account_id}:oidc-provider/{url.split('https://')[1]}"
-#     )
-# )
-
 # Get the name of the default namespace
 namespace = "default"
 
 sa_name = "s3"
 
 # https://www.pulumi.com/blog/eks-oidc/
-# Create the new IAM policy for the Service Account using the AssumeRoleWebWebIdentity action.
-# May need to use pulumi.all here to materialize the values before they are used.
-# Need to add `aud` to the conditions
-
 sub = cluster.core.oidc_provider.url.apply(lambda url: url + ":sub")
 
 eks_assume_role_policy = aws.iam.get_policy_document(
@@ -101,11 +94,10 @@ eks_assume_role_policy = aws.iam.get_policy_document(
             effect="Allow",
             conditions=[
                 # https://kubedemy.io/aws-eks-part-13-setup-iam-roles-for-service-accounts-irsa
-                # TODO: Look into "oidc.eks.eu-west-2.amazonaws.com/id/41C415204248C3A34377D6A4D103A9C8:aud": "sts.amazonaws.com",
+                # TODO: Add Audience condition
                 aws.iam.GetPolicyDocumentStatementConditionArgs(
                     test="StringEquals",
                     variable=sub,  # May need to remove "https" from URL
-                    # Tried to use f"{url}:sub" but got the following error when inspecting the object: Calling __str__ on an Output[T] is not supported.\n\nTo get the value of an Output[T] as an Output[str] consider:\n1. o.apply(lambda v: f\"prefix{v}suffix\")\n\nSee https://www.pulumi.com/docs/concepts/inputs-outputs for more details.\nThis function may throw in a future version of Pulumi.:sub
                     values=[f"system:serviceaccount:{namespace}:{sa_name}"],
                 )
             ],
@@ -205,29 +197,3 @@ kube_ray = Chart(
 bucket = aws.s3.Bucket("pod-irsa-job-bucket")
 
 pulumi.export(BUCKET_ID, bucket.id)
-
-# command = bucket.id.apply(
-#    lambda id: f"curl -sL -o /s3-echoer https://git.io/JfnGX && chmod +x /s3-echoer && echo This is an in-cluster test | /s3-echoer {id} && sleep 3600"
-# )
-
-# pulumi.export("command", command)
-
-# s3_pod = kubernetes.core.v1.Pod(
-#    "test-pod",
-#    metadata=kubernetes.meta.v1.ObjectMetaArgs(namespace=namespace),
-#    spec=kubernetes.core.v1.PodSpecArgs(
-#        service_account_name=service_account.metadata.name,
-#        containers=[
-#            kubernetes.core.v1.ContainerArgs(
-#                name="my-pod",
-#                image="amazonlinux:2018.03",
-#                command=["sh", "-c", command],
-#                env=[
-#                    kubernetes.core.v1.EnvVarArgs(name="AWS_DEFAULT_REGION", value="us-east-2"),
-#                    kubernetes.core.v1.EnvVarArgs(name="ENABLE_IRP", value="true"),
-#                ],
-#            ),
-#        ],
-#    ),
-#    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
-# )

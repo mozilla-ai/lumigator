@@ -77,3 +77,4 @@ Failed up and destroy
 
 Token error
 
+Run both and up and destroy to test that resources created and destroyed correctly.

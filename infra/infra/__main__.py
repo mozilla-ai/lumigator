@@ -28,12 +28,12 @@ DATABASE_PASSWORD = "db-pass"
 BUCKET_ID = "bucket-id"
 
 repository = awsx.ecr.Repository(
-    "repository",
+    "backend-repo",
     awsx.ecr.RepositoryArgs(force_delete=True),
 )
 
 repository = awsx.ecr.Repository(
-    "repository-job-runner",
+    "job-runner-repo",
     awsx.ecr.RepositoryArgs(force_delete=True),
 )
 
@@ -53,7 +53,7 @@ vpc = awsx.ec2.Vpc("vpc")
 
 # Create an EKS cluster inside of the VPC.
 cluster = eks.Cluster(
-    "cluster",
+    "platform-cluster",
     vpc_id=vpc.vpc_id,
     public_subnet_ids=vpc.public_subnet_ids,
     private_subnet_ids=vpc.private_subnet_ids,
@@ -75,7 +75,7 @@ cluster_provider = kubernetes.Provider(
 # Get the name of the default namespace
 namespace = "default"
 
-sa_name = "s3"
+sa_name = "platform-sa"
 
 # https://www.pulumi.com/blog/eks-oidc/
 sub = cluster.core.oidc_provider.url.apply(lambda url: url + ":sub")
@@ -120,7 +120,7 @@ for policy_arn in managed_policy_arns:
 
 # Create a Kubernetes Service Account in the default namespace
 service_account = kubernetes.core.v1.ServiceAccount(
-    "test-sa",
+    "platform-sa",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name=sa_name,
         namespace=namespace,
@@ -135,7 +135,7 @@ pulumi.export(SERVICE_ACCOUNT_NAME, service_account.metadata.name)
 
 # Just use private subnets from VPC, or create separate subnets for DB?
 db_subnet_group = aws.rds.SubnetGroup(
-    "new-db-subnet-group",
+    "platform-db-subnet-group",
     subnet_ids=vpc.private_subnet_ids,
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
 )
@@ -143,7 +143,7 @@ db_subnet_group = aws.rds.SubnetGroup(
 # Create a Security Group that allows inbound (ingress) traffic on Port 5432 (default PostgreSQL port)
 # TODO: Lock down to private subnets / kube nodes only
 security_group = aws.ec2.SecurityGroup(
-    "db-sg",
+    "platform-db-sg",
     vpc_id=vpc.vpc_id,
     ingress=[
         {
@@ -156,13 +156,13 @@ security_group = aws.ec2.SecurityGroup(
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
 )
 
-db_name = "mydatabase"
+db_name = "platform"
 db_user = "db_admin"
 db_pass = "password123"  # TODO Use Pulumi Secret
 
 ## Create a RDS instance
 db_instance = aws.rds.Instance(
-    "db-instance",
+    "platform-db",
     engine="postgres",
     instance_class="db.t3.small",
     allocated_storage=20,
@@ -193,6 +193,6 @@ kube_ray = Chart(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
-bucket = aws.s3.Bucket("pod-irsa-job-bucket")
+bucket = aws.s3.Bucket("platform-data")
 
 pulumi.export(BUCKET_ID, bucket.id)

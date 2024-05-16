@@ -52,3 +52,10 @@ clean-pants:
 	rm -rf $(HOME)/.cache/pants
 	rm -rf ./dist/
 
+publish-images:
+	pants run infrastructure/containers/registries:login_coreweave_docker
+	for target in $(GOLDEN_TARGETS); do \
+	  pants package "infrastructure/containers/golden:$${target}"; \
+	  pants publish "infrastructure/containers/golden:$${target}"; \
+	done
+

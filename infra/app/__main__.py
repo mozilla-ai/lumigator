@@ -14,6 +14,8 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 #     SERVICE_ACCOUNT_NAME,
 # )
 
+config = pulumi.Config()
+
 BACKEND_REPOSITORY_URL = "backend-repo-url"
 JOB_RUNNER_REPOSITORY_URL = "jobrunner-repo-url"
 KUBECONFIG = "kubeconfig"
@@ -39,8 +41,8 @@ backend_repository_url = stack_ref.get_output(BACKEND_REPOSITORY_URL)
 jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
 
 
-ray_tag = "ray_jobrunner_image-0.1"  # TODO make into CLI Args
-platform_tag = "backend_image-0.2"  # TODO Make into CLI Arg
+jobrunner_tag = config.require("jobrunner-tag")
+platform_tag = config.require("platform-tag")
 
 service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 
@@ -69,7 +71,7 @@ kube_ray = Chart(
         values={
             "image": {
                 "repository": jobrunner_repository_url,
-                "tag": ray_tag,
+                "tag": jobrunner_tag,
             },
             "common": {
                 "containerEnv": [

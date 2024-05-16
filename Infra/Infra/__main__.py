@@ -32,7 +32,6 @@ repository = awsx.ecr.Repository(
     awsx.ecr.RepositoryArgs(force_delete=True),
 )
 
-
 repository = awsx.ecr.Repository(
     "repository-job-runner",
     awsx.ecr.RepositoryArgs(force_delete=True),

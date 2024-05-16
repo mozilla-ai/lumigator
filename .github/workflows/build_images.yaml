@@ -1,0 +1,198 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    paths:
+    - "platform/**"
+    - "model_builder/**"
+    branches: [ "main" ]
+    # synchronized is when you push new commits
+    types: [ "opened", "synchronize" ]
+
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+
+jobs:
+    build:
+        name: Build Docker image
+        runs-on: ubuntu_2204_150gb  # this is a mzai-custom image on github actions runners.
+        env:
+          # head_ref: source branch of the pull request.
+          # only set on PRs; e.g., for a PR from branch `myname/amazing_model`, will be `myname/amazing_model`
+          # ref_name: short ref name of branch triggering runs. works for pushes to a development branch.
+          # assignment works starting with the head_ref
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        # set up a local registry
+        services:
+          registry:
+            image: registry:2
+            ports:
+              - 5000:5000
+
+        steps:
+        # see https://github.com/actions/runner-images/issues/2840;
+        # taken from other people's solutions
+        - name: Free up disk space
+          run: |
+            sudo rm -rf \
+              /usr/share/dotnet \
+              /opt/ghc \
+              /usr/local/.ghcup \
+              /usr/local/.ghcup/ghc/9.6.2 \
+              /usr/local/share/boost \
+              "$AGENT_TOOLSDIRECTORY" || true
+            docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+            sudo apt purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
+            clang-6.0 lldb-6.0 lld-6.0 clang-format-6.0 clang-8 lldb-8 lld-8 clang-format-8 \
+            clang-9 lldb-9 lld-9 clangd-9 clang-format-9 dotnet-sdk-3.0 dotnet-sdk-3.1=3.1.101-1 \
+            esl-erlang firefox g++-8 g++-9 gfortran-8 gfortran-9 google-chrome-stable \
+            google-cloud-sdk ghc-8.0.2 ghc-8.2.2 ghc-8.4.4 ghc-8.6.2 ghc-8.6.3 ghc-8.6.4 \
+            ghc-8.6.5 ghc-8.8.1 ghc-8.8.2 ghc-8.8.3 ghc-8.10.1 cabal-install-2.0 cabal-install-2.2 \
+            cabal-install-2.4 cabal-install-3.0 cabal-install-3.2 heroku imagemagick \
+            libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
+            mercurial apt-transport-https mono-complete mysql-client libmysqlclient-dev \
+            mysql-server mssql-tools unixodbc-dev yarn bazel chrpath libssl-dev libxft-dev \
+            libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev php7.1 php7.1-bcmath \
+            php7.1-bz2 php7.1-cgi php7.1-cli php7.1-common php7.1-curl php7.1-dba php7.1-dev \
+            php7.1-enchant php7.1-fpm php7.1-gd php7.1-gmp php7.1-imap php7.1-interbase php7.1-intl \
+            php7.1-json php7.1-ldap php7.1-mbstring php7.1-mcrypt php7.1-mysql php7.1-odbc \
+            php7.1-opcache php7.1-pgsql php7.1-phpdbg php7.1-pspell php7.1-readline php7.1-recode \
+            php7.1-snmp php7.1-soap php7.1-sqlite3 php7.1-sybase php7.1-tidy php7.1-xml \
+            php7.1-xmlrpc php7.1-xsl php7.1-zip php7.2 php7.2-bcmath php7.2-bz2 php7.2-cgi \
+            php7.2-cli php7.2-common php7.2-curl php7.2-dba php7.2-dev php7.2-enchant php7.2-fpm \
+            php7.2-gd php7.2-gmp php7.2-imap php7.2-interbase php7.2-intl php7.2-json php7.2-ldap \
+            php7.2-mbstring php7.2-mysql php7.2-odbc php7.2-opcache php7.2-pgsql php7.2-phpdbg \
+            php7.2-pspell php7.2-readline php7.2-recode php7.2-snmp php7.2-soap php7.2-sqlite3 \
+            php7.2-sybase php7.2-tidy php7.2-xml php7.2-xmlrpc php7.2-xsl php7.2-zip php7.3 \
+            php7.3-bcmath php7.3-bz2 php7.3-cgi php7.3-cli php7.3-common php7.3-curl php7.3-dba \
+            php7.3-dev php7.3-enchant php7.3-fpm php7.3-gd php7.3-gmp php7.3-imap php7.3-interbase \
+            php7.3-intl php7.3-json php7.3-ldap php7.3-mbstring php7.3-mysql php7.3-odbc \
+            php7.3-opcache php7.3-pgsql php7.3-phpdbg php7.3-pspell php7.3-readline php7.3-recode \
+            php7.3-snmp php7.3-soap php7.3-sqlite3 php7.3-sybase php7.3-tidy php7.3-xml \
+            php7.3-xmlrpc php7.3-xsl php7.3-zip php7.4 php7.4-bcmath php7.4-bz2 php7.4-cgi \
+            php7.4-cli php7.4-common php7.4-curl php7.4-dba php7.4-dev php7.4-enchant php7.4-fpm \
+            php7.4-gd php7.4-gmp php7.4-imap php7.4-interbase php7.4-intl php7.4-json php7.4-ldap \
+            php7.4-mbstring php7.4-mysql php7.4-odbc php7.4-opcache php7.4-pgsql php7.4-phpdbg \
+            php7.4-pspell php7.4-readline php7.4-snmp php7.4-soap php7.4-sqlite3 php7.4-sybase \
+            php7.4-tidy php7.4-xml php7.4-xmlrpc php7.4-xsl php7.4-zip php-amqp php-apcu \
+            php-igbinary php-memcache php-memcached php-mongodb php-redis php-xdebug \
+            php-zmq snmp pollinate libpq-dev postgresql-client powershell ruby-full \
+            sphinxsearch subversion mongodb-org -yq >/dev/null 2>&1 || true
+
+
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: Get branch name (merge)
+          if: github.event_name != 'pull_request'
+          shell: bash
+          run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+        - name: Get branch name (pull request)
+          if: github.event_name == 'pull_request'
+          shell: bash
+          run: |
+            echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+
+        - name: Inject slug/short variables
+          uses: rlespinasse/github-slug-action@v4
+          with:
+            short-length: 8 # Same as v3 and before
+
+        - name: output
+          run: |
+            echo "Partial variables"
+            echo "   repository owner    : ${{ env.GITHUB_REPOSITORY_OWNER_PART }}"
+            echo "   repository name     : ${{ env.GITHUB_REPOSITORY_NAME_PART }}"
+            echo "Slug variables"
+            echo "   repository          : ${{ env.GITHUB_REPOSITORY_SLUG }}"
+            echo "   repository owner    : ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG }}"
+            echo "   repository name     : ${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG }}"
+            echo "   ref                 : ${{ env.GITHUB_REF_SLUG }}"
+            echo "   head ref            : ${{ env.GITHUB_HEAD_REF_SLUG }}"
+            echo "   base ref            : ${{ env.GITHUB_BASE_REF_SLUG }}"
+            echo "   event ref           : ${{ env.GITHUB_EVENT_REF_SLUG }}"
+            echo "Slug URL variables"
+            echo "   repository          : ${{ env.GITHUB_REPOSITORY_SLUG_URL }}"
+            echo "   repository owner    : ${{ env.GITHUB_REPOSITORY_OWNER_PART_SLUG_URL }}"
+            echo "   repository name     : ${{ env.GITHUB_REPOSITORY_NAME_PART_SLUG_URL }}"
+            echo "   ref                 : ${{ env.GITHUB_REF_SLUG_URL }}"
+            echo "   head ref            : ${{ env.GITHUB_HEAD_REF_SLUG_URL }}"
+            echo "   base ref            : ${{ env.GITHUB_BASE_REF_SLUG_URL }}"
+            echo "   event ref           : ${{ env.GITHUB_EVENT_REF_SLUG_URL }}"
+            echo "Short SHA variables"
+            echo "   sha                 : ${{ env.GITHUB_SHA_SHORT }}"
+            echo "   pull request sha    : ${{ env.GITHUB_EVENT_PULL_REQUEST_HEAD_SHA_SHORT }}"
+            echo "manual set variables"
+            echo "   manual branch name  : ${{ env.BRANCH_NAME }}"
+            echo "   manual github sha short : ${{ env.GITHUB_SHA_SHORT }}"
+
+        - name: Login to Docker Hub
+          uses: docker/login-action@v2.1.0
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
+
+        - name: Get changed files
+          id: changed-files
+          uses: tj-actions/changed-files@v44
+
+
+        - name: Set up Python
+          run: |
+            make bootstrap-python
+
+        - name: Initialize Pants
+          uses: pantsbuild/actions/init-pants@main
+          with:
+            # cache0 makes it easy to bust the cache if needed
+            gha-cache-key: pants-py3.11.9-v0
+            # The Python backend uses named_caches for Pip/PEX state,
+            # so it is appropriate to invalidate on lockfile changes.
+            named-caches-hash: ${{ hashFiles('3rdparty/python/python-default.lock', '.python') }}
+            # If you're not using a fine-grained remote caching service (see https://www.pantsbuild.org/docs/remote-caching),
+            # then you may also want to preserve the local Pants cache (lmdb_store). However this must invalidate for
+            # changes to any file that can affect the build, so may not be practical in larger repos.
+            # A remote cache service integrates with Pants's fine-grained invalidation and avoids these problems.
+            cache-lmdb-store: 'true'  # defaults to 'false'
+            # Note that named_caches and lmdb_store falls back to partial restore keys which
+            # may give a useful partial result that will save time over completely clean state,
+            # but will cause the cache entry to grow without bound over time.
+            # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
+            # Alternatively you change gha-cache-key to ignore old caches.
+
+
+        - name: Lint
+          env:
+            ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          run:
+            for file in ${ALL_CHANGED_FILES}; do
+            pants lint fmt $file;
+            done
+
+
+        - name: Build and push
+          shell: bash
+          env:
+            PANTS_CONFIG_FILES: pants_ci.toml
+            PANTS_DOCKER_BUILD_NO_CACHE: True
+          run: |
+            if [[ ${{ env.BRANCH_NAME }} == "main" ]]; then
+              export GIT_COMMIT=""
+            else
+              export GIT_COMMIT="$GITHUB_EVENT_PULL_REQUEST_HEAD_SHA_SHORT"
+            fi
+            export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
+            make build-golden-images
+              
+
+        - name: Upload pants log
+          uses: actions/upload-artifact@v2
+          with:
+            name: pants-ci-log
+            path: .pants.d/pants.log

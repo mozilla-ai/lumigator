@@ -17,25 +17,34 @@ backend_packages = [
 # Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
 # Will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["python", "infra"]
+root_patterns = ["src", "python", "infrastructure", "research"]
 
 [tailor]
-build_file_name = "BUILD.pants"
+build_file_name = "BUILD"
 
 [python]
-interpreter_constraints = ['CPython==3.10.13']
+interpreter_constraints = ['CPython==3.11.9']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
-# https://www.pantsbuild.org/docs/python-third-party-dependencies. 
+# https://www.pantsbuild.org/docs/python-third-party-dependencies.
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-resolves = { python-default = "pants_tools/python-default.lock" }
+default_resolve = "python_default"
+
+[python-repos]
+indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
+
+[python.resolves]
+python_default = "3rdparty/python/requirements_lock.txt"
+python_linux = "3rdparty/python/requirements_linux_lock.txt"
+neurips_eficiency = "research/neurips_efficiency/requirements_lock.txt"
+
 
 [python-bootstrap]
 search_path = [
   "<PATH>",
   "<PYENV>",
-  "%(buildroot)s/.python/python3.10.13/python/install/bin",
+  "%(buildroot)s/.python/python3.11.9/python/install/bin",
 ]
 
 [python-infer]
@@ -48,15 +57,16 @@ config = "ruff.toml"
 use_buildx = true
 build_args = ["HOME", "GIT_COMMIT"]
 env_vars = [
-  "GIT_COMMIT={pants.hash}",
-  "DOCKER_BUILDKIT=1",
-  "DOCKER_CONFIG=%(homedir)s/.docker"
+    "GIT_COMMIT=%(env.GIT_COMMIT)s",
+    "DOCKER_BUILDKIT=1",
+    "DOCKER_CONFIG=%(homedir)s/.docker"
 ]
+
 tools = [
-  "docker-credential-osxkeychain",
   "dirname",
   "readlink",
   "python3",
+  # These may be necessary if using Pyenv-installed Python.
   "cut",
   "sed",
   "bash",
@@ -66,10 +76,13 @@ tools = [
 address = "docker.io"
 default = true
 
-[docker.registries.coreweave_default]
-address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
+[docker.registries.coreweave_ngcp]
+address = "docker-registry.taild6f0e.ts.net"
 default = false
-
 
 [pytest]
 args = ["-v"]
+
+
+[shfmt]
+args = ["-i 2", "-ci", "-bn"]

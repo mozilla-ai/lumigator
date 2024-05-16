@@ -46,7 +46,6 @@ service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 
 kubeconfig = stack_ref.get_output(KUBECONFIG)
 
-# TODO Import DB Instance from prior stack
 db_instance = stack_ref.get_output(DATABASE_URL)
 
 

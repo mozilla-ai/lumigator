@@ -14,7 +14,8 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 #     SERVICE_ACCOUNT_NAME,
 # )
 
-REPOSITORY_URL = "repo-url"
+BACKEND_REPOSITORY_URL = "backend-repo-url"
+JOB_RUNNER_REPOSITORY_URL = "jobrunner-repo-url"
 KUBECONFIG = "kubeconfig"
 SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
@@ -34,7 +35,9 @@ db_user = stack_ref.get_output(DATABASE_USER)
 db_pass = stack_ref.get_output(DATABASE_PASSWORD)
 
 
-repository_url = stack_ref.get_output(REPOSITORY_URL)
+backend_repository_url = stack_ref.get_output(BACKEND_REPOSITORY_URL)
+jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
+
 
 ray_tag = "ray_jobrunner_image-0.1"  # TODO make into CLI Args
 platform_tag = "backend_image-0.2"  # TODO Make into CLI Arg
@@ -66,7 +69,7 @@ kube_ray = Chart(
         ),
         values={
             "image": {
-                "repository": repository_url,
+                "repository": jobrunner_repository_url,
                 "tag": ray_tag,
             },
             "common": {
@@ -80,7 +83,7 @@ kube_ray = Chart(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
 )
 
-image = pulumi.Output.format("{0}:{1}", repository_url, platform_tag)
+image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
 
 platform_backend_deployment = kubernetes.apps.v1.Deployment(
     "platform-api",

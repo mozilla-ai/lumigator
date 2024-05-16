@@ -78,3 +78,18 @@ Failed up and destroy
 Token error
 
 Run both and up and destroy to test that resources created and destroyed correctly.
+
+# EKS ENI issue
+https://github.com/pulumi/pulumi-eks/issues/382
+
+When destroying EKS clusters, there seems to be an issue with destroying dependent ENIs
+
+```
+DependencyViolation: resource sg-0bf103c05a6fd8766 has a dependent object
+```
+
+You can see dependent objects for the security group using the following command:
+
+```
+aws ec2 describe-network-interfaces --filters Name=group-id,Values=sg-0bf103c05a6fd8766
+```

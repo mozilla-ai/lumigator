@@ -33,8 +33,8 @@ docker_image(
     build_platform=["linux/amd64"],
     dependencies=[":backend_app"],
     image_tags=[
-        "dev",
-        "env(",
+        "dev_{build_args.REPOVERSION}",
+        "latest",
     ],
     instructions=[
         "ARG BASE_IMAGE=python:3.10",

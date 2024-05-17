@@ -29,8 +29,8 @@ docker_image(
     build_platform=["linux/amd64"],
     dependencies=[":jobrunner"],
     image_tags=[
-        "dev",
-        "0.1",
+        "dev_{build_args.REPOVERSION}",
+        "latest",
     ],
     instructions=[
         "ARG BASE_IMAGE=rayproject/ray:2.9.3.94a6d7-py310",

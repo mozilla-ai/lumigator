@@ -13,10 +13,10 @@ ci-fmt: ci-lint
 	pants --changed-since=origin/main fmt
 
 ci-tests:
-	pants --filter-target-type=docker_image list //platform/::
+	pants --filter-target-type=docker_image list platform/::
 
 ci-publish-images:
-	pants --filter-target-type=docker_image list //platform/:: | xargs pants publish
+	pants --filter-target-type=docker_image list platform/:: | xargs pants publish
 
 show-pants-targets:
 	@echo "------shell_command targets-------"
@@ -33,7 +33,7 @@ show-pants-targets:
 	@echo "------archive targets-------"
 	pants --filter-target-type=archive list ::
 
-	@echo "this is not an exhaustive list, just a convienience."
+	@echo "this is not an exhaustive list, just a convenience."
 
 ide-roots:
 	# From: https://www.pantsbuild.org/2.18/docs/using-pants/setting-up-an-ide

@@ -19,6 +19,9 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44
+        with:
+          # gets full repo history
+          fetch-depth: 0
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main
@@ -44,14 +47,10 @@ jobs:
         run: |
           make bootstrap-python
 
-
       - name: Lint
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run:
-          for file in ${ALL_CHANGED_FILES}; do
-            pants lint fmt $file;
-          done
+          pants --changed-since=origin/main lint
+        continue-on-error: false
 
       - name: Test
         run:

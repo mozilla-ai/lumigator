@@ -15,6 +15,7 @@ on:
 # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 permissions:
   id-token: write
+  contents: read  # This is required for actions/checkout
 
 jobs:
     build:

@@ -12,9 +12,13 @@ on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
+# https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+permissions:
+  id-token: write
 
 jobs:
     build:
+
         name: Build Docker image
         runs-on: ubuntu_2204_150gb  # this is a mzai-custom image on github actions runners.
         env:
@@ -101,6 +105,7 @@ jobs:
           uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
           with:
             role-to-assume: arn:aws:iam::198934536556:role/githubaction-assumerole-with-action
+            role-to-assume: arn:aws:iam::198934536556:oidc-provider/token.actions.githubusercontent.com
             aws-region: us-east-1
 
 

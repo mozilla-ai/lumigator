@@ -95,7 +95,7 @@ jobs:
             registry: docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud
             username: ${{ secrets.COREWEAVE_CONTAINER_REGISTRY_USERNAME }}
             password: ${{ secrets.COREWEAVE_CONTAINER_REGISTRY_PW }}
-            
+
         - name: Set up Python
           run: |
             make bootstrap-python

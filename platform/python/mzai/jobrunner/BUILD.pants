@@ -1,22 +1,25 @@
 python_sources(
     name="jobrunner_sources",
-    sources=["**/*.py", "!tests"],
     dependencies=[
         "platform/3rdparty/python:3rdparty#ray",
         "platform/3rdparty/python:3rdparty#click",
         "platform/3rdparty/python:3rdparty#requests",
         "platform/python/mzai/schemas:schemas_sources",
     ],
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
 )
 
 pex_binary(
     name="jobrunner",
-    dependencies=[
-        ":jobrunner_sources",
-    ],
     complete_platforms=[
         "pants_tools:ubuntu_2204_py310",
         "pants_tools:macosx_py310",
+    ],
+    dependencies=[
+        ":jobrunner_sources",
     ],
     entry_point="main.py",
 )
@@ -29,11 +32,15 @@ docker_image(
         "dev",
         "0.1",
     ],
-    repository="platform/{name}",
     instructions=[
         "ARG BASE_IMAGE=rayproject/ray:2.9.3.94a6d7-py310",
         "FROM $BASE_IMAGE",
         "WORKDIR /mzai",
         "COPY platform.python.mzai.jobrunner/jobrunner.pex .",
     ],
+    registries=[
+        "@dockerhub",
+        "@coreweave_default",
+    ],
+    repository="platform/{name}",
 )

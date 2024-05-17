@@ -13,7 +13,12 @@ ci-fmt: ci-lint
 	pants --changed-since=origin/main fmt
 
 ci-tests:
-	pants test ::
+	pants --filter-target-type=docker_image list //platform/::
+
+
+ci-publish-images:
+	pants --filter-target-type=docker_image list //platform/:: | xargs pants publish
+
 
 show-pants-targets:
 	@echo "------shell_command targets-------"
@@ -51,11 +56,3 @@ clean-python:
 clean-pants:
 	rm -rf $(HOME)/.cache/pants
 	rm -rf ./dist/
-
-publish-images:
-	pants run infrastructure/containers/registries:login_coreweave_docker
-	for target in $(GOLDEN_TARGETS); do \
-	  pants package "infrastructure/containers/golden:$${target}"; \
-	  pants publish "infrastructure/containers/golden:$${target}"; \
-	done
-

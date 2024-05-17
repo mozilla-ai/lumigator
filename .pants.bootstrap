@@ -1,1 +1,4 @@
-export GIT_COMMIT="$(git rev-parse --short HEAD)"
+#!/bin/bash
+
+REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
+export REPOVERSION

@@ -15,10 +15,8 @@ ci-fmt: ci-lint
 ci-tests:
 	pants --filter-target-type=docker_image list //platform/::
 
-
 ci-publish-images:
 	pants --filter-target-type=docker_image list //platform/:: | xargs pants publish
-
 
 show-pants-targets:
 	@echo "------shell_command targets-------"
@@ -43,8 +41,9 @@ ide-roots:
 	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 ide-venv:
-	pants export --py-resolve-format=mutable_virtualenv --resolve=python-default
+	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
 
+bootstrap-ide: ide-roots ide-venv
 
 bootstrap-python:
 	bash pants_tools/bootstrap_python.sh $(PLAT)
@@ -52,7 +51,16 @@ bootstrap-python:
 clean-python:
 	rm -rf .python/
 
-
 clean-pants:
-	rm -rf $(HOME)/.cache/pants
 	rm -rf ./dist/
+
+clean-more-pants: clean-pants
+	rm -rf $(HOME)/.cache/pants
+# run once to reset
+	pants --no-pantsd --version
+
+clean-docker-buildcache:
+	docker builder prune --all -f
+
+clean-all: clean-more-pants clean-docker-buildcache
+

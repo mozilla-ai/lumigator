@@ -13,6 +13,9 @@ backend_packages = [
   "pants.backend.build_files.fmt.ruff",
 ]
 
+[cli.alias]
+--debug-build = "--print-stacktrace -ldebug --keep-sandboxes=on_failure"
+
 [source]
 # Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
@@ -46,9 +49,9 @@ config = "ruff.toml"
 
 [docker]
 use_buildx = true
-build_args = ["HOME", "GIT_COMMIT"]
+build_args = ["HOME", "REPOVERSION"]
 env_vars = [
-  "GIT_COMMIT={pants.hash}",
+  "REPOVERSION=%(env.REPOVERSION)s",
   "DOCKER_BUILDKIT=1",
   "DOCKER_CONFIG=%(homedir)s/.docker"
 ]

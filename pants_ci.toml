@@ -29,10 +29,14 @@ interpreter_constraints = ['CPython==3.10.13']
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-resolves = { python_default = "pants_tools/python-default.lock" }
+default_resolve = "python_default"
 
 [python-repos]
+# these are required for nvidia's cuda libs etc.
 indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
+
+[python.resolves]
+python_default = "pants_tools/python_default.lock"
 
 
 [python-bootstrap]

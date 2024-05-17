@@ -23,7 +23,7 @@ root_patterns = ["src", "python", "infrastructure", "research"]
 build_file_name = "BUILD"
 
 [python]
-interpreter_constraints = ['CPython==3.11.9']
+interpreter_constraints = ['CPython==3.10.13']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
 # https://www.pantsbuild.org/docs/python-third-party-dependencies.
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.

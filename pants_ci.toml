@@ -1,56 +1,5 @@
-[GLOBAL]
-pants_version = "2.20.1"
-colors = true
-
-backend_packages = [
-  "pants.backend.docker",
-  "pants.backend.shell",
-  "pants.backend.python",
-  "pants.backend.shell.lint.shfmt",
-  "pants.backend.shell.lint.shellcheck",
-  "pants.backend.experimental.python.lint.ruff.check",
-  "pants.backend.experimental.python.lint.ruff.format",
-  "pants.backend.build_files.fmt.ruff",
-]
-
-[source]
-# Defines the "roots" for subprojects. anything with folders like
-# //**/[python|docker|k8s|infra]/<name>/
-# Will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["src", "python", "infrastructure", "research"]
-
-[tailor]
-build_file_name = "BUILD"
-
-[python]
-interpreter_constraints = ['CPython==3.10.13']
-# Enable the "resolves" mechanism, which turns on lockfiles for user code. See
-# https://www.pantsbuild.org/docs/python-third-party-dependencies.
-# This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
-enable_resolves = true
-resolver_manylinux = "manylinux2014"
-default_resolve = "python_default"
-
-[python-repos]
-# these are required for nvidia's cuda libs etc.
-indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
-
-[python.resolves]
-python_default = "pants_tools/python_default.lock"
-
-
-[python-bootstrap]
-search_path = [
-  "<PATH>",
-  "<PYENV>",
-  "%(buildroot)s/.python/python3.10.13/python/install/bin",
-]
-
-[python-infer]
-use_rust_parser = true
-
-[ruff]
-config = "ruff.toml"
+# this file is only for overrides during CI. pants will primarily process
+# from the normal `pants.toml` file.
 
 [docker]
 use_buildx = true
@@ -65,23 +14,8 @@ tools = [
   "dirname",
   "readlink",
   "python3",
-  # These may be necessary if using Pyenv-installed Python.
   "cut",
   "sed",
   "bash",
 ]
 
-[docker.registries.dockerhub]
-address = "docker.io"
-default = true
-
-[docker.registries.coreweave_default]
-address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
-default = false
-
-[pytest]
-args = ["-v"]
-
-
-[shfmt]
-args = ["-i 2", "-ci", "-bn"]

@@ -34,7 +34,7 @@ docker_image(
     dependencies=[":backend_app"],
     image_tags=[
         "backend_dev_{build_args.REPOVERSION}",
-        "backend_latest",
+        "backend_dev",
     ],
     instructions=[
         # using python image for now; can change this to our own image(s) in the future

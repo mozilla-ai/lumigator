@@ -29,13 +29,10 @@ interpreter_constraints = ['CPython==3.10.13']
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-default_resolve = "python_default"
+resolves = { python_default = "pants_tools/python-default.lock" }
 
 [python-repos]
 indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
-
-[python.resolves]
-python-default = "pants_tools/python-default.lock"
 
 
 [python-bootstrap]

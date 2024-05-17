@@ -41,6 +41,7 @@ docker_image(
     registries=[
         "@dockerhub",
         "@coreweave_default",
+        "@aws_ecr_temp",
     ],
     repository="mzdotai/platform",
 )

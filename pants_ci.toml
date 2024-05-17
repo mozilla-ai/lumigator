@@ -35,9 +35,7 @@ default_resolve = "python_default"
 indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
 
 [python.resolves]
-python_default = "3rdparty/python/requirements_lock.txt"
-python_linux = "3rdparty/python/requirements_linux_lock.txt"
-neurips_eficiency = "research/neurips_efficiency/requirements_lock.txt"
+python-default = "pants_tools/python-default.lock"
 
 
 [python-bootstrap]

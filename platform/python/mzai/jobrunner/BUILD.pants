@@ -39,7 +39,6 @@ docker_image(
         "COPY platform.python.mzai.jobrunner/jobrunner.pex .",
     ],
     registries=[
-        "@dockerhub",
         "@coreweave_default",
         "@aws_ecr_temp",
     ],

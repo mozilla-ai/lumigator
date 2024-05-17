@@ -96,6 +96,9 @@ jobs:
             username: ${{ secrets.CW_CONTAINER_REGISTRY_USERNAME }}
             password: ${{ secrets.CW_CONTAINER_REGISTRY_PW }}
 
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
+
         - name: Initialize Pants
           uses: pantsbuild/actions/init-pants@main
           with:
@@ -103,7 +106,7 @@ jobs:
             gha-cache-key: pants-py3.10.13-v0
             # The Python backend uses named_caches for Pip/PEX state,
             # so it is appropriate to invalidate on lockfile changes.
-            named-caches-hash: ${{ hashFiles('pants_tools/python_default.lock', '.python') }}
+            named-caches-hash: ${{ hashFiles('platform/3rdparty/python/python_default.lock', '.python') }}
             # If you're not using a fine-grained remote caching service (see https://www.pantsbuild.org/docs/remote-caching),
             # then you may also want to preserve the local Pants cache (lmdb_store). However this must invalidate for
             # changes to any file that can affect the build, so may not be practical in larger repos.
@@ -115,19 +118,10 @@ jobs:
             # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
             # Alternatively you change gha-cache-key to ignore old caches.
 
-
-        - name: Set up Python
-          run: |
-            make bootstrap-python
-
         - name: Lint
           run:
             pants --changed-since=origin/main lint
           continue-on-error: false
-
-
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v2
 
         - name: Build and push
           shell: bash
@@ -137,7 +131,6 @@ jobs:
           run: |
             export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
             make ci-publish-images
-              
 
         - name: Upload pants log
           uses: actions/upload-artifact@v2

@@ -105,7 +105,6 @@ jobs:
           uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
           with:
             role-to-assume: arn:aws:iam::198934536556:role/githubaction-assumerole-with-action
-            role-to-assume: arn:aws:iam::198934536556:oidc-provider/token.actions.githubusercontent.com
             aws-region: us-east-1
 
 

@@ -44,7 +44,7 @@ neurips_eficiency = "research/neurips_efficiency/requirements_lock.txt"
 search_path = [
   "<PATH>",
   "<PYENV>",
-  "%(buildroot)s/.python/python3.11.9/python/install/bin",
+  "%(buildroot)s/.python/python3.10.13/python/install/bin",
 ]
 
 [python-infer]

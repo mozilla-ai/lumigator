@@ -36,10 +36,10 @@ default_resolve = "python_default"
 
 [python-repos]
 # these are required for nvidia's cuda libs etc.
-indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu113/"]
+indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu118/"]
 
 [python.resolves]
-python_default = "pants_tools/python_default.lock"
+python_default = "platform/3rdparty/python/python_default.lock"
 
 
 [python-bootstrap]

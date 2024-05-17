@@ -84,7 +84,7 @@ jobs:
             echo "   manual github sha short : ${{ env.GITHUB_SHA_SHORT }}"
 
         - name: Login to Docker Hub
-          uses: docker/login-action@v2.1.0
+          uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -93,8 +93,8 @@ jobs:
           uses: docker/login-action@v3
           with:
             registry: docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud
-            username: ${{ secrets.COREWEAVE_CONTAINER_REGISTRY_USERNAME }}
-            password: ${{ secrets.COREWEAVE_CONTAINER_REGISTRY_PW }}
+            username: ${{ secrets.CW_CONTAINER_REGISTRY_USERNAME }}
+            password: ${{ secrets.CW_CONTAINER_REGISTRY_PW }}
 
         - name: Set up Python
           run: |

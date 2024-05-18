@@ -13,7 +13,10 @@ ci-fmt: ci-lint
 	pants --changed-since=origin/main fmt
 
 ci-tests:
-	pants test ::
+	pants --filter-target-type=docker_image list platform/::
+
+ci-publish-images:
+	pants --filter-target-type=docker_image list platform/:: | xargs pants publish
 
 show-pants-targets:
 	@echo "------shell_command targets-------"
@@ -30,7 +33,7 @@ show-pants-targets:
 	@echo "------archive targets-------"
 	pants --filter-target-type=archive list ::
 
-	@echo "this is not an exhaustive list, just a convienience."
+	@echo "this is not an exhaustive list, just a convenience."
 
 ide-roots:
 	# From: https://www.pantsbuild.org/2.18/docs/using-pants/setting-up-an-ide
@@ -38,8 +41,9 @@ ide-roots:
 	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 ide-venv:
-	pants export --py-resolve-format=mutable_virtualenv --resolve=python-default
+	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
 
+bootstrap-ide: ide-roots ide-venv
 
 bootstrap-python:
 	bash pants_tools/bootstrap_python.sh $(PLAT)
@@ -47,8 +51,16 @@ bootstrap-python:
 clean-python:
 	rm -rf .python/
 
-
 clean-pants:
-	rm -rf $(HOME)/.cache/pants
 	rm -rf ./dist/
+
+clean-more-pants: clean-pants
+	rm -rf $(HOME)/.cache/pants
+# run once to reset
+	pants --no-pantsd --version
+
+clean-docker-buildcache:
+	docker builder prune --all -f
+
+clean-all: clean-more-pants clean-docker-buildcache
 

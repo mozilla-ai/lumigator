@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.20.0rc2"
+pants_version = "2.20.1"
 colors = true
 
 backend_packages = [
@@ -12,6 +12,9 @@ backend_packages = [
   "pants.backend.experimental.python.lint.ruff.format",
   "pants.backend.build_files.fmt.ruff",
 ]
+
+[cli.alias]
+--debug-build = "--print-stacktrace -ldebug --keep-sandboxes=on_failure"
 
 [source]
 # Defines the "roots" for subprojects. anything with folders like
@@ -29,7 +32,15 @@ interpreter_constraints = ['CPython==3.10.13']
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-resolves = { python-default = "pants_tools/python-default.lock" }
+default_resolve = "python_default"
+
+[python-repos]
+# these are required for nvidia's cuda libs etc.
+indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu118/"]
+
+[python.resolves]
+python_default = "platform/3rdparty/python/python_default.lock"
+
 
 [python-bootstrap]
 search_path = [
@@ -46,15 +57,32 @@ config = "ruff.toml"
 
 [docker]
 use_buildx = true
-build_args = ["HOME"]
+build_args = ["HOME", "REPOVERSION"]
+env_vars = [
+  "REPOVERSION=%(env.REPOVERSION)s",
+  "DOCKER_BUILDKIT=1",
+  "DOCKER_CONFIG=%(homedir)s/.docker"
+]
+tools = [
+  "docker-credential-osxkeychain",
+  "dirname",
+  "readlink",
+  "python3",
+  "cut",
+  "sed",
+  "bash",
+]
 
 [docker.registries.dockerhub]
 address = "docker.io"
 default = true
 
-[docker.registries.corewave_ngcp]
-address = "docker-registry.taild6f0e.ts.net"
-# optional
+[docker.registries.coreweave_default]
+address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
+default = false
+
+[docker.registries.aws_ecr_temp]
+address = "198934536556.dkr.ecr.us-east-1.amazonaws.com"
 default = false
 
 [pytest]

@@ -28,6 +28,7 @@ services:
   ray:
     image: ${RAY_IMAGE}
     command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=${RAY_DASHBOARD_PORT} --block"
+    shm_size: 1gb
     ports:
       - ${RAY_DASHBOARD_PORT}:${RAY_DASHBOARD_PORT}
     deploy:

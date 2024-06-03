@@ -30,7 +30,7 @@ pex_binary(
 
 docker_image(
     name="backend_image",
-    build_platform=["linux/amd64"],
+    build_platform=["linux/arm64/v8"],
     dependencies=[":backend_app"],
     image_tags=[
         "backend_dev_{build_args.REPOVERSION}",

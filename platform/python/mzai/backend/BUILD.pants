@@ -45,8 +45,9 @@ docker_image(
         'ENTRYPOINT ["./backend_app.pex"]',
     ],
     registries=[
-        "@coreweave_default",
-        "@aws_ecr_temp",
+        # "@coreweave_default",
+        # "@aws_ecr_temp",
+        # "@devlocal",
     ],
     repository="mzdotai/platform",
 )

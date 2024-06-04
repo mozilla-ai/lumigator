@@ -1,6 +1,11 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv bootstrap-python clean-python
 
 PLAT:= $(shell uname -o)
+
+
+pulumi-setup:
+	pulumi login
+
 ci-setup:
 	pants --version  # Bootstrap Pants.
 
@@ -41,6 +46,7 @@ ide-roots:
 	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 ide-venv:
+	pants generate-lockfiles
 	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
 
 bootstrap-ide: ide-roots ide-venv

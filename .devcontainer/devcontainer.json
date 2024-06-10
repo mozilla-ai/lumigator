@@ -1,0 +1,5 @@
+{
+	"name": "mzai-platform",
+	"service": "pyraws",
+	"dockerComposeFile": "docker-compose-devcontainers.yml"
+}

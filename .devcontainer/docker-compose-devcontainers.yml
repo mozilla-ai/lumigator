@@ -26,7 +26,8 @@ services:
       - ./localstack:/etc/localstack/init/ready.d
 
   ray:
-    build: "jobrunner.Dockerfile"
+    build:
+      dockerfile: "./jobrunner.Dockerfile"
     command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=8265 --block"
     ports:
       - 8265:8265
@@ -40,7 +41,8 @@ services:
       - BACKEND_PORT=80
 
   backend:
-    build: "backend.Dockerfile"
+    build:
+      dockerfile: "./backend.Dockerfile"
     depends_on:
       - postgres
       - localstack

@@ -1,6 +1,7 @@
 name: mzai-platform
 version: "3.8"
 
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -27,7 +28,8 @@ services:
 
   ray:
     build:
-      dockerfile: "./jobrunner.Dockerfile"
+      context: ..
+      dockerfile: ".devcontainer/jobrunner.Dockerfile"
     command: bash -c "ray start --head --dashboard-host=0.0.0.0 --dashboard-port=8265 --block"
     ports:
       - 8265:8265
@@ -42,7 +44,8 @@ services:
 
   backend:
     build:
-      dockerfile: "./backend.Dockerfile"
+      context: ..
+      dockerfile: ".devcontainer/backend.Dockerfile"
     depends_on:
       - postgres
       - localstack

@@ -4,6 +4,10 @@ version: "3.8"
 
 services:
   postgres:
+    # platforms are specified for each for local dev. see
+    # https://stackoverflow.com/questions/77023925/specify-platform-for-docker-image-in-visual-studio-code-devcontainers
+    
+    platform: linux/amd64
     image: postgres:16-alpine
     volumes:
       - postgres-data:/var/lib/postgresql/data/
@@ -15,6 +19,7 @@ services:
       - POSTGRES_DB=platform
 
   localstack:
+    platform: linux/amd64
     image: localstack/localstack:3.4.0
     ports:
       - 4566:4566
@@ -27,6 +32,7 @@ services:
       - ./localstack:/etc/localstack/init/ready.d
 
   ray:
+    platform: linux/amd64
     build:
       context: ..
       dockerfile: ".devcontainer/jobrunner.Dockerfile"
@@ -43,9 +49,11 @@ services:
       - BACKEND_PORT=80
 
   backend:
+    platform: linux/amd64
     build:
       context: ..
       dockerfile: ".devcontainer/backend.Dockerfile"
+
     depends_on:
       - postgres
       - localstack
@@ -68,6 +76,10 @@ services:
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
 
+
+  devenv:
+    platform: linux/amd64
+    image: python:3.10.13
 
 volumes:
     postgres-data:

@@ -4,8 +4,8 @@ version: "3.8"
 
 services:
   postgres:
-    # platforms are specified for each for local dev. see
-    # https://stackoverflow.com/questions/77023925/specify-platform-for-docker-image-in-visual-studio-code-devcontainers
+#     platforms are specified for each for local dev. see
+#     https://stackoverflow.com/questions/77023925/specify-platform-for-docker-image-in-visual-studio-code-devcontainers
     
     platform: linux/amd64
     image: postgres:16-alpine
@@ -54,6 +54,7 @@ services:
       context: ..
       dockerfile: ".devcontainer/backend.Dockerfile"
 
+
     depends_on:
       - postgres
       - localstack
@@ -77,9 +78,19 @@ services:
       - S3_BUCKET=platform-storage
 
 
+# for the devcontainer to work, this is the rough pattern i found that seemed worthwhile.
+# docker compose needs a new 'service', defined here, that will explicitly be the dev container.
+  # it has to run long enough to be pinged, hence the sleep command
   devenv:
+    volumes:
+      # we mount the root of our codebase ('..') here
+      - ..:/workspace:cached
+    # specify the platform; it'll be emulated locally via rosetta
     platform: linux/amd64
+    # this is going to change
     image: python:3.10.13
+    command: sleep infinity
+
 
 volumes:
     postgres-data:

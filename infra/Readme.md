@@ -80,7 +80,7 @@ Token error
 Run both and up and destroy to test that resources created and destroyed correctly.
 
 # EKS ENI issue
-https://github.com/pulumi/pulumi-eks/issues/382
+https://github.com/pulumi/pulumi-eks/issues/194
 
 When destroying EKS clusters, there seems to be an issue with destroying dependent ENIs
 
@@ -93,3 +93,12 @@ You can see dependent objects for the security group using the following command
 ```
 aws ec2 describe-network-interfaces --filters Name=group-id,Values=sg-0bf103c05a6fd8766
 ```
+
+Manually delete ENI eni-07271056c56d4a998
+
+```
+aws ec2 describe-network-interfaces --filters Name=group-id,Values=sg-06454945dcae91482
+```
+
+Manually deleted SG sg-06454945dcae91482
+

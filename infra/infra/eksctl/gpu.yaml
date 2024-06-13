@@ -7,6 +7,9 @@ metadata:
 
 # TODO OIDC
 
+iam:
+  withOIDC: true
+
 managedNodeGroups:
   - name: gpu-group
     amiFamily: Bottlerocket

@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.20.1"
+pants_version = "2.21.0"
 colors = true
 
 backend_packages = [
@@ -26,7 +26,7 @@ root_patterns = ["python", "infra"]
 build_file_name = "BUILD.pants"
 
 [python]
-interpreter_constraints = ['CPython==3.10.13']
+interpreter_constraints = ['CPython==3.11.9']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
 # https://www.pantsbuild.org/docs/python-third-party-dependencies. 
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
@@ -46,7 +46,7 @@ python_default = "platform/3rdparty/python/python_default.lock"
 search_path = [
   "<PATH>",
   "<PYENV>",
-  "%(buildroot)s/.python/python3.10.13/python/install/bin",
+  "%(buildroot)s/.python/python3.11.9/python/install/bin",
 ]
 
 [python-infer]

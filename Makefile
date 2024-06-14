@@ -64,3 +64,13 @@ clean-docker-buildcache:
 
 clean-all: clean-more-pants clean-docker-buildcache
 
+up-arm:
+	export DOCKER_DEFAULT_PLATFORM=linux/amd64
+	docker compose -f docker-compose-local.yaml up  -d
+
+down:
+	docker compose -f docker-compose-local.yaml down
+
+logs:
+	docker compose -f docker-compose-local.yaml logs
+

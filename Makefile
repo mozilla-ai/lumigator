@@ -45,14 +45,27 @@ ide-roots:
 	$(eval ROOTS=$(shell pants roots))
 	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
-ide-venv:
+ide-venv: bootstrap-python
 	pants generate-lockfiles
 	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
 
-bootstrap-ide: ide-roots ide-venv
+
+######### developer setup targets
+prep-devcontainer:
+	docker pull mzdotai/golden:base_latest
+	pants package platform/python/mzai/backend:backend_image
+	pants package platform/python/mzai/jobrunner:ray_jobrunner_image
+	@echo "now you can use the devcontainer file in the IDE of your choice"
+
 
 bootstrap-python:
+	# sets up the local python pod for development
 	bash pants_tools/bootstrap_python.sh $(PLAT)
+	pants package platform/python/mzai/backend:backend_image
+
+bootstrap-ide: ide-roots ide-venv
+
+
 
 clean-python:
 	rm -rf .python/

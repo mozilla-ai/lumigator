@@ -68,5 +68,14 @@ clean-more-pants: clean-pants
 clean-docker-buildcache:
 	docker builder prune --all -f
 
-clean-all: clean-more-pants clean-docker-buildcache
+clean-docker-containers:
+	docker rm -vf $$(docker container ls -aq)
+
+clean-docker-images:
+	docker rmi -f $$(docker image ls -aq)
+
+clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
+
+
+bootstrap-devenv: bootstrap-python
 

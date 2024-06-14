@@ -2,7 +2,7 @@
 	"name": "mzai-platform",
 	"service": "devenv",
 	"dockerComposeFile": "docker-compose-devcontainers.yml",
-	"features": { "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {} },
+	// "features": { "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {} },
 	"build": { "options": [ "--platform=linux/amd64", "--no-cache" ] },
 	"workspaceFolder": "/workspace/${localWorkspaceFolderBasename}"
 

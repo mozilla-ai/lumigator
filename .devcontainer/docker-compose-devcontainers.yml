@@ -11,6 +11,7 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres-data:/var/lib/postgresql/data/
+      - ../..:/workspace:cached
     ports:
       - 5432:5432
     environment:
@@ -30,9 +31,14 @@ services:
       # Sync localstack startup scripts
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
+      # we mount the root of our codebase ('..') here
+      - ../..:/workspace:cached
 
   ray:
     platform: linux/amd64
+    volumes:
+      # we mount the root of our codebase ('..') here
+      - ../..:/workspace:cached
     build:
       context: ..
       dockerfile: ".devcontainer/jobrunner.Dockerfile"
@@ -50,10 +56,10 @@ services:
 
   backend:
     platform: linux/amd64
-    build:
-      context: ..
-      dockerfile: ".devcontainer/backend.Dockerfile"
-
+    volumes:
+      # we mount the root of our codebase ('..') here
+      - ../..:/workspace:cached
+    image: localhost:5000/mzdotai/platform:backend_dev
 
     depends_on:
       - postgres
@@ -82,9 +88,13 @@ services:
 # docker compose needs a new 'service', defined here, that will explicitly be the dev container.
   # it has to run long enough to be pinged, hence the sleep command
   devenv:
+    build:
+      context: ..
+      dockerfile: ".devcontainer/devenv.Dockerfile"
+
     volumes:
       # we mount the root of our codebase ('..') here
-      - ..:/workspace:cached
+      - ../..:/workspace:cached
     # specify the platform; it'll be emulated locally via rosetta
     platform: linux/amd64
     # this is going to change

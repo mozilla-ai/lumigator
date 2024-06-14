@@ -57,7 +57,12 @@ config = "ruff.toml"
 
 [docker]
 use_buildx = true
-build_args = ["HOME", "REPOVERSION"]
+#### This is a terrible hidden edge -
+#### the `--output=type=docker` is required to make buildx, which
+# is sandboxed, push the built cimage to the local docker registry.
+# without it, it requires you to add an explict
+# local registry to pants.
+build_args = ["--output=type=docker", "REPOVERSION"]
 env_vars = [
   "REPOVERSION=%(env.REPOVERSION)s",
   "DOCKER_BUILDKIT=1",

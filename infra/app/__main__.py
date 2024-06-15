@@ -60,29 +60,29 @@ cluster_provider = kubernetes.Provider(
 # TODO Service Account access to bucket
 # TODO Get ray head svc address as output
 # TODO Replace with CRD directly
-kube_ray = Chart(
-    "ray-cluster",
-    ChartOpts(
-        chart="ray-cluster",
-        version="1.1.0",
-        fetch_opts=FetchOpts(
-            repo="https://ray-project.github.io/kuberay-helm/",
-        ),
-        values={
-            "image": {
-                "repository": jobrunner_repository_url,
-                "tag": jobrunner_tag,
-            },
-            "common": {
-                "containerEnv": [
-                    {"name": "BACKEND_HOST", "value": "backend-svc"},
-                    {"name": "BACKEND_PORT", "value": "80"},
-                ],
-            },
-        },
-    ),
-    opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
-)
+# kube_ray = Chart(
+#     "ray-cluster",
+#     ChartOpts(
+#         chart="ray-cluster",
+#         version="1.1.0",
+#         fetch_opts=FetchOpts(
+#             repo="https://ray-project.github.io/kuberay-helm/",
+#         ),
+#         values={
+#             "image": {
+#                 "repository": jobrunner_repository_url,
+#                 "tag": jobrunner_tag,
+#             },
+#             "common": {
+#                 "containerEnv": [
+#                     {"name": "BACKEND_HOST", "value": "backend-svc"},
+#                     {"name": "BACKEND_PORT", "value": "80"},
+#                 ],
+#             },
+#         },
+#     ),
+#     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
+# )
 
 image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
 

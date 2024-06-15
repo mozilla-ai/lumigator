@@ -186,49 +186,55 @@ pulumi.export(JOB_RUNNER_REPOSITORY_URL, backend_repository.url)
 #
 # pulumi.export(SERVICE_ACCOUNT_NAME, service_account.metadata.name)
 #
+
 ## TODO create separate subnets for DB?
-# db_subnet_group = aws.rds.SubnetGroup(
-#    "platform-db-subnet-group",
-#    subnet_ids=vpc.private_subnet_ids,
-#    opts=pulumi.ResourceOptions(depends_on=[vpc]),
-# )
-#
+db_subnet_group = aws.rds.SubnetGroup(
+    "platform-db-subnet-group",
+    subnet_ids=[
+        "subnet-089dca64cb5244510",
+        "subnet-06b37f1c7abe85e48",
+        "subnet-02da01ada8e96eb85",
+    ],  # vpc.private_subnet_ids,
+    # opts=pulumi.ResourceOptions(depends_on=[vpc])
+)
+
 ## Create a Security Group that allows inbound (ingress) traffic on Port 5432 (default PostgreSQL port)
 ## TODO: Lock down to private subnets / kube nodes only
-# security_group = aws.ec2.SecurityGroup(
-#    "platform-db-sg",
-#    vpc_id=vpc.vpc_id,
-#    ingress=[
-#        {
-#            "protocol": "tcp",
-#            "from_port": 5432,
-#            "to_port": 5432,
-#            "cidr_blocks": ["0.0.0.0/0"],
-#        }
-#    ],
-#    opts=pulumi.ResourceOptions(depends_on=[vpc]),
-# )
+security_group = aws.ec2.SecurityGroup(
+    "platform-db-sg",
+    vpc_id="vpc-001dfcb15187ce7d8",  # From eksctl  # vpc.vpc_id,
+    ingress=[
+        {
+            "protocol": "tcp",
+            "from_port": 5432,
+            "to_port": 5432,
+            "cidr_blocks": ["0.0.0.0/0"],
+        }
+    ],
+)  # opts=pulumi.ResourceOptions(depends_on=[vpc]
+
+
+db_name = "platform"
+db_user = "db_admin"
+db_pass = "password123"  # TODO Use Pulumi Secret
+
 #
-# db_name = "platform"
-# db_user = "db_admin"
-# db_pass = "password123"  # TODO Use Pulumi Secret
-#
-### Create a RDS instance
-# db_instance = aws.rds.Instance(
-#    "platform-db",
-#    engine="postgres",
-#    instance_class="db.t3.small",
-#    allocated_storage=20,
-#    db_name=db_name,
-#    username=db_user,
-#    password=db_pass,
-#    publicly_accessible=False,
-#    skip_final_snapshot=True,
-#    vpc_security_group_ids=[security_group.id],
-#    db_subnet_group_name=db_subnet_group.name,
-#    opts=pulumi.ResourceOptions(depends_on=[security_group, db_subnet_group]),
-# )
-#
+## Create a RDS instance
+db_instance = aws.rds.Instance(
+    "platform-db",
+    engine="postgres",
+    instance_class="db.t3.small",
+    allocated_storage=20,
+    db_name=db_name,
+    username=db_user,
+    password=db_pass,
+    publicly_accessible=False,
+    skip_final_snapshot=True,
+    vpc_security_group_ids=[security_group.id],
+    db_subnet_group_name=db_subnet_group.name,
+    opts=pulumi.ResourceOptions(depends_on=[security_group, db_subnet_group]),
+)
+
 # pulumi.export(DATABASE_URL, db_instance.address)
 # pulumi.export(DATABASE_NAME, db_name)
 # pulumi.export(DATABASE_USER, db_user)

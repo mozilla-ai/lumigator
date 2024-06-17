@@ -2,8 +2,6 @@ import contextlib
 
 from fastapi import FastAPI
 from sqlalchemy import Engine
-import sys
-print(sys.path)
 
 from mzai.backend.api.router import api_router
 from mzai.backend.api.tags import TAGS_METADATA

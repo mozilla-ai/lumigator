@@ -6,9 +6,9 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-ENV PYTHONPATH "${PYTHONPATH}:/mzai"
+ENV PYTHONPATH "${PYTHONPATH}:/"
 
 COPY platform/python/mzai .
 
-ENTRYPOINT ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80"]
 

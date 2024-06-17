@@ -19,4 +19,4 @@ pytest
 pytest-cov
 testcontainers
 setuptools==69.5.1
-numpy
+numpy<2.0.0

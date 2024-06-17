@@ -24,5 +24,6 @@ dependencies = [
     "pytest",
     "pytest-cov",
     "testcontainers",
-    "setuptools>=60",
+    "setuptools==69.5.1",
+    "numpy<2.0.0",
 ]

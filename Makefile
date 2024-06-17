@@ -66,7 +66,7 @@ clean-all: clean-more-pants clean-docker-buildcache
 
 up-arm:
 	export DOCKER_DEFAULT_PLATFORM=linux/amd64
-	docker compose -f docker-compose-local.yaml up  -d
+	docker compose -f docker-compose-local.yaml up  -d --build
 
 down:
 	docker compose -f docker-compose-local.yaml down

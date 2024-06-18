@@ -49,10 +49,10 @@ services:
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
     volumes:
-      - code:/mzai
+      - ./:/mzai
 
 
 volumes:
     postgres-data:
-    code:
+
 

@@ -6,8 +6,12 @@
 	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
 	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
 	"dockerComposeFile": [
+<<<<<<< HEAD
 		"../docker-compose-local.yaml",
 		"docker-compose.yml"
+=======
+		"../docker-compose-local.yaml"
+>>>>>>> vboykis/ground-truth-service
 	],
 
 	// The 'service' property is the name of the service for the container that VS Code should

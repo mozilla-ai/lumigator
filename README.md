@@ -45,7 +45,29 @@ make ide-venv
 For VSCode users, should activate the venv before opening your IDE
 and it should be recognized automatically.
 
+<<<<<<< Updated upstream
 
+## Rebuilding dependencies
+
+You may need to manually regenrate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies. 
+To do so: 
+
+1. Add your new dependency to `platform/3rdparty/python/pyproject.toml` 
+2. `pants generate-lockfiles --resolve=python_default`
+3. `pants package platform/python/mzai/backend`
+
+And check to make sure your new dependency is included
+
+
+## Running locally with Docker Compose and devcontainers
+
+cd to the root directory
+=======
+<<<<<<< HEAD
+## Running locally with Docker Compose and devcontainers
+
+cd to the root directory 
+=======
 ## Rebuilding dependencies
 
 You may need to manually regenrate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies. 
@@ -71,7 +93,3 @@ make down
 make logs
 ```
 This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers. 
-
-
-
-

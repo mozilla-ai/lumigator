@@ -1,6 +1,4 @@
 name: mzai-platform
-version: "3.8"
-
 
 services:
   postgres:
@@ -50,7 +48,11 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
+    volumes:
+      code:./mzai
 
 
 volumes:
     postgres-data:
+    code:
+

@@ -48,6 +48,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
+      - PYTHONPATH=${PYTHONPATH}:/mzai/platform/python/mzai
     volumes:
       - ./:/mzai
 

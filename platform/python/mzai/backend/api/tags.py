@@ -31,10 +31,6 @@ TAGS_METADATA = [
         "name": Tags.EVENTS,
         "description": "Send a job event to the application.",
     },
-    {
-        "name": Tags.GROUNDTRUTH,
-        "description": "Create and manage ground truth generation",
-    },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from mzai.backend.api.routes import datasets, events, experiments, finetuning, health, ground_truth
+from mzai.backend.api.routes import datasets, events, experiments, finetuning, health, groundtruth
 from mzai.backend.api.tags import Tags
 
 API_V1_PREFIX = "/api/v1"
@@ -11,4 +11,4 @@ api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASE
 api_router.include_router(finetuning.router, prefix="/finetuning", tags=[Tags.FINETUNING])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(events.router, prefix="/events", tags=[Tags.EVENTS])
-api_router.include_router(ground_truth.router, prefix="/ground-truth", tags=[Tags.GROUNDTRUTH])
+api_router.include_router(groundtruth.router, prefix="/ground-truth", tags=[Tags.GROUNDTRUTH])

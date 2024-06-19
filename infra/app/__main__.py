@@ -44,7 +44,7 @@ jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
 jobrunner_tag = config.require("jobrunner-tag")
 platform_tag = config.require("platform-tag")
 
-service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
+service_account_name = "s3"  # stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 
 kubeconfig = stack_ref.get_output(KUBECONFIG)
 
@@ -53,7 +53,7 @@ db_instance = stack_ref.get_output(DATABASE_URL)
 
 # TODO Kube config assumes aws cli setup and running
 cluster_provider = kubernetes.Provider(
-    "clusterProvider", kubeconfig=kubeconfig, enable_server_side_apply=True
+    "clusterProvider",  #  kubeconfig=kubeconfig, enable_server_side_apply=True
 )  # opts=pulumi.ResourceOptions(depends_on=[cluster])
 
 # helm install raycluster kuberay/ray-cluster --version 1.1.0
@@ -84,7 +84,9 @@ cluster_provider = kubernetes.Provider(
 #     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
 # )
 
-image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
+# image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
+
+image = "381492205691.dkr.ecr.us-east-2.amazonaws.com/backend-repo-f0dd567:backend_dev_663f975"
 
 platform_backend_deployment = kubernetes.apps.v1.Deployment(
     "platform-api",

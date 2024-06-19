@@ -6,8 +6,5 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# pointer for copy but in actuality entire dir is mounted as volume via docker-compose-local
-COPY platform/python/mzai .
-
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
 

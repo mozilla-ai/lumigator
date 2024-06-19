@@ -11,3 +11,4 @@ api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASE
 api_router.include_router(finetuning.router, prefix="/finetuning", tags=[Tags.FINETUNING])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(events.router, prefix="/events", tags=[Tags.EVENTS])
+api_router.include_router(events.router, prefix="/ground-truth", tags=[Tags.EVENTS])

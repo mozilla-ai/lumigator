@@ -7,12 +7,14 @@ class Tags(str, Enum):
     FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
     EVENTS = "events"
+    TEST = "TEST"
+    GROUNDTRUTH = "GROUNDTRUTH"
 
 
 TAGS_METADATA = [
     {
         "name": Tags.HEALTH,
-        "description": "Health check for the application.",
+        "description": "Health check for my app.",
     },
     {
         "name": Tags.DATASETS,
@@ -30,6 +32,10 @@ TAGS_METADATA = [
         "name": Tags.EVENTS,
         "description": "Send a job event to the application.",
     },
+    {
+        "name": Tags.GROUNDTRUTH,
+        "description": "Create and manage ground truth generation",
+    }
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.
 

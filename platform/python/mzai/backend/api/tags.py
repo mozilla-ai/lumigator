@@ -7,7 +7,6 @@ class Tags(str, Enum):
     FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
     EVENTS = "events"
-    TEST = "TEST"
     GROUNDTRUTH = "GROUNDTRUTH"
 
 

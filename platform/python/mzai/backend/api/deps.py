@@ -11,6 +11,7 @@ from mzai.backend.db import session_manager
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
@@ -51,7 +52,7 @@ def get_experiment_service(session: DBSessionDep) -> ExperimentService:
     return ExperimentService(experiment_repo, result_repo, ray_client)
 
 def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
-    pass
+    deployment_repo = GroundTruthDeploymentRepository(session)
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]

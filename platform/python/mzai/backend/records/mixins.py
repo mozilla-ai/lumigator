@@ -5,6 +5,7 @@ from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 from mzai.schemas.jobs import JobStatus
+from mzai.schemas.deployments import DeploymentStatus
 
 
 @declarative_mixin
@@ -23,6 +24,9 @@ class NameDescriptionMixin:
 class JobStatusMixin:
     status: Mapped[JobStatus] = mapped_column(default=JobStatus.CREATED)
 
+@declarative_mixin
+class DeploymentStatusMixin:
+    status: Mapped[DeploymentStatus] = mapped_column(default=DeploymentStatus.CREATED)
 
 @declarative_mixin
 class CreatedAtMixin:

@@ -53,6 +53,7 @@ def get_experiment_service(session: DBSessionDep) -> ExperimentService:
 
 def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
     deployment_repo = GroundTruthDeploymentRepository(session)
+    return GroundTruthService()
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]

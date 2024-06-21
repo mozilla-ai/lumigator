@@ -11,10 +11,12 @@ from mzai.schemas.groundtruth import (
 
 router = APIRouter()
 
+
 # TODO remove
 @router.get("/")
 async def root():
     return {"message": "Ground Truth Root"}
+
 
 @router.post("/deployments", status_code=status.HTTP_201_CREATED)
 def create_groundtruth_deployment(
@@ -23,8 +25,9 @@ def create_groundtruth_deployment(
 ) -> GroundTruthDeploymentResponse:
     return service.create_deployment(request)
 
+
 @router.get("/deployments")
 def list_groundtruth_deployments(
-    service: GroundTruthServiceDep
+    service: GroundTruthServiceDep,
 ) -> ListingResponse[GroundTruthDeploymentResponse]:
     return service.list_deployments()

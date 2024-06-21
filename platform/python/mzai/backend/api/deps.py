@@ -51,6 +51,7 @@ def get_experiment_service(session: DBSessionDep) -> ExperimentService:
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
     return ExperimentService(experiment_repo, result_repo, ray_client)
 
+
 def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
     deployment_repo = GroundTruthDeploymentRepository(session)
     ray_serve_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)

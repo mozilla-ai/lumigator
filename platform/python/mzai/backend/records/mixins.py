@@ -24,9 +24,11 @@ class NameDescriptionMixin:
 class JobStatusMixin:
     status: Mapped[JobStatus] = mapped_column(default=JobStatus.CREATED)
 
+
 @declarative_mixin
 class DeploymentStatusMixin:
     status: Mapped[DeploymentStatus] = mapped_column(default=DeploymentStatus.CREATED)
+
 
 @declarative_mixin
 class CreatedAtMixin:

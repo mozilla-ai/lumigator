@@ -8,7 +8,8 @@ from pydantic import BaseModel
 class DeploymentType(str, Enum):
     GROUNDTRUTH = "groundtruth"
 
-#todo: check Ray Status for serve
+
+# todo: check Ray Status for serve
 class DeploymentStatus(str, Enum):
     CREATED = "created"
     RUNNING = "running"

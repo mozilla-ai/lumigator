@@ -5,6 +5,7 @@ import boto3
 from fastapi import Depends
 from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
+from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 from sqlalchemy.orm import Session
 
 from mzai.backend.db import session_manager
@@ -54,7 +55,7 @@ def get_experiment_service(session: DBSessionDep) -> ExperimentService:
 
 def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
     deployment_repo = GroundTruthDeploymentRepository(session)
-    ray_serve_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
+    ray_serve_client = ServeSubmissionClient(settings.RAY_DASHBOARD_URL)
     return GroundTruthService(deployment_repo, ray_serve_client)
 
 

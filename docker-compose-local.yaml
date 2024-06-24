@@ -24,6 +24,30 @@ services:
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
 
+  ray:
+    image: rayproject/ray-ml:2.30.0-py39-cu118
+    ports:
+      - 6379:6379
+      - 8265:8265
+      - 10001:10001
+    environment:
+      - HOST=localhost
+      - RAY_IMAGE=raytest
+      - REDISPORT=6379
+      - DASHBOARDPORT=8265
+      - HEADNODEPORT=10001
+      - REDISPASSWORD=yourpassword
+      - NUM_WORKERS=4
+      - NUM_CPU_WORKER=1
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block"
+    shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '2g'
+
+
   backend:
     build:
       context: .

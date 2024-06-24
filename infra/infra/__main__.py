@@ -191,9 +191,9 @@ pulumi.export(JOB_RUNNER_REPOSITORY_URL, backend_repository.url)
 db_subnet_group = aws.rds.SubnetGroup(
     "platform-db-subnet-group",
     subnet_ids=[
-        "subnet-089dca64cb5244510",
-        "subnet-06b37f1c7abe85e48",
-        "subnet-02da01ada8e96eb85",
+        "subnet-0d600e4df8ee5b7ee",
+        "subnet-06ff7fb963ba39fa4",
+        "subnet-0aa89ba911c4b06e7",
     ],  # vpc.private_subnet_ids,
     # opts=pulumi.ResourceOptions(depends_on=[vpc])
 )
@@ -202,7 +202,7 @@ db_subnet_group = aws.rds.SubnetGroup(
 ## TODO: Lock down to private subnets / kube nodes only
 security_group = aws.ec2.SecurityGroup(
     "platform-db-sg",
-    vpc_id="vpc-001dfcb15187ce7d8",  # From eksctl  # vpc.vpc_id,
+    vpc_id="vpc-0a998fd9c969b277c",  # From eksctl  # vpc.vpc_id,
     ingress=[
         {
             "protocol": "tcp",
@@ -235,10 +235,10 @@ db_instance = aws.rds.Instance(
     opts=pulumi.ResourceOptions(depends_on=[security_group, db_subnet_group]),
 )
 
-# pulumi.export(DATABASE_URL, db_instance.address)
-# pulumi.export(DATABASE_NAME, db_name)
-# pulumi.export(DATABASE_USER, db_user)
-# pulumi.export(DATABASE_PASSWORD, db_pass)
+pulumi.export(DATABASE_URL, db_instance.address)
+pulumi.export(DATABASE_NAME, db_name)
+pulumi.export(DATABASE_USER, db_user)
+pulumi.export(DATABASE_PASSWORD, db_pass)
 #
 
 # kube_ray = Chart(

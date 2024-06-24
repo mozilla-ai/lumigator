@@ -41,8 +41,8 @@ backend_repository_url = stack_ref.get_output(BACKEND_REPOSITORY_URL)
 jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
 
 
-jobrunner_tag = config.require("jobrunner-tag")
-platform_tag = config.require("platform-tag")
+# jobrunner_tag = config.require("jobrunner-tag")
+# platform_tag = config.require("platform-tag")
 
 service_account_name = "s3"  # stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 

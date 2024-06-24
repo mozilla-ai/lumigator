@@ -130,7 +130,7 @@ platform_backend_deployment = kubernetes.apps.v1.Deployment(
                             ),  # TODO Use Kube Secret
                             kubernetes.core.v1.EnvVarArgs(name="POSTGRES_PORT", value="5432"),
                             kubernetes.core.v1.EnvVarArgs(
-                                name="RAY_HEAD_NODE_HOST", value="ray-cluster-kuberay-head-svc"
+                                name="RAY_HEAD_NODE_HOST", value="raycluster-kuberay-head-svc"
                             ),
                             kubernetes.core.v1.EnvVarArgs(name="RAY_DASHBOARD_PORT", value="8265"),
                         ],

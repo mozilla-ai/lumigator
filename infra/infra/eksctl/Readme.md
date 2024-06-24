@@ -27,3 +27,11 @@ https://aws.amazon.com/blogs/database/deploy-amazon-rds-databases-for-applicatio
 aws eks describe-cluster --name="cluster-with-gpu" --query "cluster.resourcesVpcConfig.vpcId" --output text
 ```
 
+
+```
+helm install kuberay-operator kuberay/kuberay-operator --version 1.1.1
+```
+
+```
+helm install raycluster kuberay/ray-cluster --version 1.1.1 -f ray-cluster.yaml
+```

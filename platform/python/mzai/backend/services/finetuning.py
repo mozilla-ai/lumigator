@@ -45,7 +45,11 @@ class FinetuningService:
             job_type=JobType.FINETUNING,
             args={"name": request.name},
         )
-        entrypoint = RayJobEntrypoint(config=config)
+        runtime_env = {
+            "pip": ["lm-buddy==0.10.6"],
+            "env_vars": {"MZAI_JOB_ID": record.id, "MZAI_HOST": ""},
+        }
+        entrypoint = RayJobEntrypoint(config=config, runtime_env=runtime_env)
         submit_ray_job(self.ray_client, entrypoint)
 
         return FinetuningJobResponse.model_validate(record)

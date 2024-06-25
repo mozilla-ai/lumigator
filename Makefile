@@ -2,10 +2,6 @@
 
 PLAT:= $(shell uname -o)
 
-
-pulumi-setup:
-	pulumi login
-
 ci-setup:
 	pants --version  # Bootstrap Pants.
 
@@ -64,7 +60,6 @@ bootstrap-python:
 	pants package platform/python/mzai/backend:backend_image
 
 bootstrap-ide: ide-roots ide-venv
-
 
 
 clean-python:

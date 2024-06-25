@@ -17,7 +17,7 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        return f"lm-buddy --config '{self.config.model_dump_json()}'"
+        return f"lm-buddy evaluate --config '{self.config.model_dump_json()}'"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

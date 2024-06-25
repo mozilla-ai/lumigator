@@ -41,11 +41,26 @@ class ExperimentService:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
         # Submit the job to Ray
-        config = JobConfig(
-            job_id=record.id,
-            job_type=JobType.EXPERIMENT,
-            args={"name": request.name},
-        )
+        # config = JobConfig(
+        #    job_id=record.id,
+        #    job_type=JobType.EXPERIMENT,
+        #    args={"name": request.name},
+        # )
+
+        config = {
+            "name": "dialog_bart",
+            "dataset": {"path": "s3://platform-data-485fdf9/dialogsum"},
+            "evaluation": {
+                "metrics": ["rouge", "meteor", "bertscore"],
+                "use_pipeline": True,
+                "storage_path": "s3://platform-data-485fdf9/output/dialog-bart-aws",
+                "return_input_data": True,
+                "return_predictions": True,
+                "max_samples": 10,
+            },
+            "model": {"path": "hf://facebook/bart-large-cnn"},
+        }
+
         runtime_env = {
             "pip": ["lm-buddy==0.10.7"],
             "env_vars": {"MZAI_JOB_ID": str(record.id), "MZAI_HOST": ""},

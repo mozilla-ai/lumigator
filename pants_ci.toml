@@ -11,7 +11,6 @@ env_vars = [
 ]
 
 tools = [
-  "docker-credential-pass",
   "dirname",
   "readlink",
   "python3",

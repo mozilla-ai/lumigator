@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.10.13-bookworm
+ARG BASE_IMAGE=python:3.11.9-bookworm
 FROM $BASE_IMAGE
 WORKDIR /app
 COPY platform.python.mzai.backend/backend_app.pex .

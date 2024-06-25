@@ -1,12 +1,9 @@
-from mzai.schemas.extras import ListingResponse
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
-    GroundTruthDeploymentCreate,
     GroundTruthDeploymentResponse,
-    GroundTruthDeploymentUpdate,
-    GroundTruthDeploymentLogsResponse,
 )
 
 
@@ -22,14 +19,12 @@ class GroundTruthService:
     def create_deployment(self):
         pass
 
-    def list_deployments(self, skip: int = 0, limit: int = 100) -> ListingResponse[GroundTruthDeploymentResponse]:
+    def list_deployments(
+        self, skip: int = 0, limit: int = 100
+    ) -> (ListingResponse)[GroundTruthDeploymentResponse]:
         total = self.deployment_repo.count()
         records = self.deployment_repo.list(skip, limit)
         return ListingResponse(
             total=total,
             items=[GroundTruthDeploymentResponse.model_validate(x) for x in records],
         )
-
-
-
-

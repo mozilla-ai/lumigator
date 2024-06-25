@@ -46,7 +46,11 @@ class ExperimentService:
             job_type=JobType.EXPERIMENT,
             args={"name": request.name},
         )
-        entrypoint = RayJobEntrypoint(config=config)
+        runtime_env = {
+            "pip": ["lm-buddy==0.10.7"],
+            "env_vars": {"MZAI_JOB_ID": str(record.id), "MZAI_HOST": ""},
+        }
+        entrypoint = RayJobEntrypoint(config=config, runtime_env=runtime_env)
         submit_ray_job(self.ray_client, entrypoint)
 
         return ExperimentResponse.model_validate(record)

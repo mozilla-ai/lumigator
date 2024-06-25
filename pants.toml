@@ -69,7 +69,6 @@ env_vars = [
   "DOCKER_CONFIG=%(homedir)s/.docker"
 ]
 tools = [
-  "docker-credential-osxkeychain",
   "dirname",
   "readlink",
   "python3",

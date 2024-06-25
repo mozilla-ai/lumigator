@@ -24,7 +24,7 @@ services:
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
 
-  ray-head:
+  ray:
     image: rayproject/ray:nightly-py311-cpu-aarch64
     ports:
       - "6379:6379"

@@ -87,9 +87,6 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 
 bootstrap-devenv: bootstrap-python
 
-up-arm:
-	docker compose -f docker-compose-local.yaml up  -d --build
-
 LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
 
 local-up:

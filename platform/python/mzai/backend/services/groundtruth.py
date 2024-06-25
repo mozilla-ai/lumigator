@@ -1,7 +1,6 @@
 from mzai.schemas.extras import ListingResponse
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
-from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentCreate,

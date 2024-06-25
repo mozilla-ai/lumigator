@@ -1,14 +1,4 @@
 file(
-    name="py310_linux_pex_platform_tags",
-    source="python_3_10_13_linux_pex_platform_tags.json",
-)
-
-file(
-    name="py310_macos_14_pex_platform_tags",
-    source="python_3_10_13_macosx_14_pex_platform_tags.json",
-)
-
-file(
     name="py311_linux_pex_platform_tags",
     source="python_3_11_9_linux_pex_platform_tags.json",
 )

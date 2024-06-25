@@ -1,10 +1,11 @@
-FROM python:3.10.13-bookworm
+FROM python:3.11.9-bookworm
 
 WORKDIR /tmp
 
 
 COPY ../platform/3rdparty/python/python_default.lock .
 RUN pip install pex
+# note the following is needed to convert the pants lockfile to a pip-installable file.
 RUN sed '/^\/\//d' python_default.lock > requirements.json && \
     pex3 lock export requirements.json > requirements.txt && \
     pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt

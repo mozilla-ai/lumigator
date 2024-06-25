@@ -1,13 +1,14 @@
 file(
-    name="ubuntu_2204_py310",
-    source="ubuntu_2204_pex_platform_tags.json",
+    name="py311_linux_pex_platform_tags",
+    source="python_3_11_9_linux_pex_platform_tags.json",
 )
 
 file(
-    name="macosx_py310",
-    source="macosx_14_pex_platform_tags.json",
+    name="py311_macos_14_pex_platform_tags",
+    source="python_3_11_9_macosx_14_pex_platform_tags.json",
 )
 
+# the following is how to generate the platform tag json files.
 docker_image(
     name="gen_ubuntu_platform_tags",
     build_platform=["linux/amd64"],
@@ -15,9 +16,7 @@ docker_image(
         "dev",
     ],
     instructions=[
-        "ARG BASE_IMAGE=platform/python/mzai/backend:backend_image",
-        "FROM $BASE_IMAGE",
-        "RUN pip install pex==2.3.0",
-        'ENTRYPOINT ["pex3", "interpreter", "inspect", "--markers", "--tags", "--interpreter-constraint", "CPython==3.10.13"]',
+        "FROM mzdotai/golden:base_latest",
+        'CMD ["pex3", "interpreter", "inspect", "--markers", "--tags", "--interpreter-constraint", "CPython==3.11.9"]',
     ],
 )

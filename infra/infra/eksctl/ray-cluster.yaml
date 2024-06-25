@@ -1,6 +1,6 @@
 image:
   repository": "rayproject/ray-ml"
-  tag: "2.23.0-py310-gpu"
+  tag: "2.30.0-py310-gpu"
 
 head:
   serviceAccountName: s3
@@ -10,6 +10,7 @@ head:
     limits:
       "nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
+      ephemeral-storage: 20Gi
       # cpu: 4
 worker:
   serviceAccountName: s3

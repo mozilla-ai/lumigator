@@ -27,7 +27,7 @@ services:
       - ./localstack:/etc/localstack/init/ready.d
 
   ray:
-    image: rayproject/ray:nightly-py311-cpu-aarch64
+    image: rayproject/ray:2.30.0-py310-cpu-aarch64
     ports:
       - "6379:6379"
       - "8265:8265"

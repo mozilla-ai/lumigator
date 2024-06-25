@@ -26,8 +26,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: "docker-local/Dockerfile.backend"
+      context: ..
+      dockerfile: ".devcontainer/Dockerfile.backend"
     depends_on:
       - postgres
       - localstack
@@ -48,9 +48,9 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
-      - PYTHONPATH=${PYTHONPATH}:/mzai/platform/python/mzai
+      - PYTHONPATH=/mzai/platform/python/mzai:/mzai/platform/python
     volumes:
-      - ./:/mzai
+      - ../:/mzai
 
 
 volumes:

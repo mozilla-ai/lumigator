@@ -15,8 +15,8 @@ python_sources(
 pex_binary(
     name="jobrunner",
     complete_platforms=[
-        "pants_tools:ubuntu_2204_py310",
-        "pants_tools:macosx_py310",
+        "pants_tools:py311_linux_pex_platform_tags",
+        "pants_tools:py311_macos_14_pex_platform_tags",
     ],
     dependencies=[
         ":jobrunner_sources",

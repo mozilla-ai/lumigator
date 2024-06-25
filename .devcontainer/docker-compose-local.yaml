@@ -3,6 +3,7 @@ name: mzai-platform
 services:
   postgres:
     image: postgres:16-alpine
+    platform: linux/amd64
     volumes:
       - postgres-data:/var/lib/postgresql/data/
     ports:
@@ -14,6 +15,7 @@ services:
 
   localstack:
     image: localstack/localstack:3.4.0
+    platform: linux/amd64
     ports:
       - 4566:4566
     environment:
@@ -51,6 +53,7 @@ services:
     build:
       context: ..
       dockerfile: ".devcontainer/Dockerfile.backend"
+    platform: linux/amd64
     depends_on:
       - postgres
       - localstack

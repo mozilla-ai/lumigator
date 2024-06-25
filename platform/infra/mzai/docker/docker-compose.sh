@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-ROOT="infra/mzai/docker"
-COMPOSE_FILE="$ROOT/docker-compose.yaml"
-ENV_FILE="$ROOT/.env.local"
+COMPOSE_FILE="./docker-compose.yaml"
+ENV_FILE="./.env.local"
 
 config() {
 	docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} config

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -eou pipefail
-PY_VERSION=${MZAI_PY_VERISON:-3.10.13}
+PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
 # this is the release tag - see https://github.com/indygreg/python-build-standalone/releases/
-TAG="20240107"
+TAG="20240415"
 URL="https://github.com/indygreg/python-build-standalone/releases/download/$TAG"
 DEBIAN="cpython-${PY_VERSION}+${TAG}-x86_64-unknown-linux-gnu-pgo+lto-full.tar.zst"
 DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"

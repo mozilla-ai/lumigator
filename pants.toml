@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.20.1"
+pants_version = "2.21.0"
 colors = true
 
 backend_packages = [
@@ -26,7 +26,7 @@ root_patterns = ["python", "infra"]
 build_file_name = "BUILD.pants"
 
 [python]
-interpreter_constraints = ['CPython==3.10.13']
+interpreter_constraints = ['CPython==3.11.9']
 # Enable the "resolves" mechanism, which turns on lockfiles for user code. See
 # https://www.pantsbuild.org/docs/python-third-party-dependencies. 
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
@@ -46,7 +46,7 @@ python_default = "platform/3rdparty/python/python_default.lock"
 search_path = [
   "<PATH>",
   "<PYENV>",
-  "%(buildroot)s/.python/python3.10.13/python/install/bin",
+  "%(buildroot)s/.python/python3.11.9/python/install/bin",
 ]
 
 [python-infer]
@@ -57,14 +57,18 @@ config = "ruff.toml"
 
 [docker]
 use_buildx = true
-build_args = ["HOME", "REPOVERSION"]
+#### This is a terrible hidden edge -
+#### the `--output=type=docker` is required to make buildx, which
+# is sandboxed, push the built image to the local docker registry.
+# without it, it requires you to add an explict
+# local registry to pants.
+build_args = ["--output=type=docker", "REPOVERSION"]
 env_vars = [
   "REPOVERSION=%(env.REPOVERSION)s",
   "DOCKER_BUILDKIT=1",
   "DOCKER_CONFIG=%(homedir)s/.docker"
 ]
 tools = [
-  "docker-credential-osxkeychain",
   "dirname",
   "readlink",
   "python3",
@@ -72,10 +76,6 @@ tools = [
   "sed",
   "bash",
 ]
-
-[docker.registries.dockerhub]
-address = "docker.io"
-default = true
 
 [docker.registries.coreweave_default]
 address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"

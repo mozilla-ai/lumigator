@@ -1,25 +1,30 @@
+workdir = "/platform/infra/mzai/docker"
+
 run_shell_command(
-    command="./infra/mzai/docker/docker-compose.sh config",
+    name="docker_compose_config",
+    command="/docker-compose.sh config",
     execution_dependencies=[
         "platform/infra/mzai/docker:docker_compose_shell_scripts",
     ],
-    name="docker_compose_config",
+    workdir=workdir,
 )
 
 run_shell_command(
-    command="./infra/mzai/docker/docker-compose.sh up",
+    name="docker_compose_up",
+    command="./docker-compose.sh up",
     execution_dependencies=[
         "platform/infra/mzai/docker:docker_compose_shell_scripts",
         "platform/python/mzai/backend:backend_image",
         "platform/python/mzai/jobrunner:ray_jobrunner_image",
     ],
-    name="docker_compose_up",
+    workdir=workdir,
 )
 
 run_shell_command(
-    command="./infra/mzai/docker/docker-compose.sh down",
+    name="docker_compose_down",
+    command="./docker-compose.sh down",
     execution_dependencies=[
         "platform/infra/mzai/docker:docker_compose_shell_scripts",
     ],
-    name="docker_compose_down",
+    workdir=workdir,
 )

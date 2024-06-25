@@ -1,7 +1,7 @@
 [project]
 name = "3rdparty-python-dependencies"
 version = "0.0.1"
-requires-python = ">=3.10,<3.11"
+requires-python = ">3.10,<=3.11"
 
 dependencies = [
     "uvicorn[standard]==0.28.0",

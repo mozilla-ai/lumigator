@@ -1,10 +1,10 @@
 python_requirements(
-    name = "3rdparty",
-    overrides = {
+    name="3rdparty",
+    overrides={
         "pex": {"dependencies": [":3rdparty#setuptools"]},
         "ray": {"dependencies": [":3rdparty#setuptools"]},
         "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
     },
-    resolve = "python_default",
-    source = "pyproject.toml",
+    resolve="python_default",
+    source="pyproject.toml",
 )

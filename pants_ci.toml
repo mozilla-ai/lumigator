@@ -3,7 +3,7 @@
 
 [docker]
 use_buildx = true
-build_args = ["HOME", "REPOVERSION"]
+build_args = ["--output=type=docker", "HOME", "REPOVERSION"]
 env_vars = [
   "REPOVERSION=%(env.REPOVERSION)s",
   "DOCKER_BUILDKIT=1",
@@ -11,6 +11,7 @@ env_vars = [
 ]
 
 tools = [
+  "docker-credential-pass",
   "dirname",
   "readlink",
   "python3",

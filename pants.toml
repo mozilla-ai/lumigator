@@ -59,7 +59,7 @@ config = "ruff.toml"
 use_buildx = true
 #### This is a terrible hidden edge -
 #### the `--output=type=docker` is required to make buildx, which
-# is sandboxed, push the built cimage to the local docker registry.
+# is sandboxed, push the built image to the local docker registry.
 # without it, it requires you to add an explict
 # local registry to pants.
 build_args = ["--output=type=docker", "REPOVERSION"]
@@ -77,10 +77,6 @@ tools = [
   "sed",
   "bash",
 ]
-
-[docker.registries.devlocal]
-address = "localhost:5001"
-default = true
 
 [docker.registries.dockerhub]
 address = "docker.io"

@@ -1,0 +1,14 @@
+FROM python:3.10.13-bookworm
+
+WORKDIR /tmp
+
+
+COPY ../platform/3rdparty/python/python_default.lock .
+RUN pip install pex
+RUN sed '/^\/\//d' python_default.lock > requirements.json && \
+    pex3 lock export requirements.json > requirements.txt && \
+    pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt
+
+WORKDIR /mzai
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
+

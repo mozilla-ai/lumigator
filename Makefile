@@ -1,4 +1,4 @@
-.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv bootstrap-python clean-python
+.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets ide-roots ide-venv bootstrap-python clean-python local-up local-down local-logs
 
 PLAT:= $(shell uname -o)
 ci-setup:
@@ -64,3 +64,14 @@ clean-docker-buildcache:
 
 clean-all: clean-more-pants clean-docker-buildcache
 
+
+LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
+
+local-up:
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+
+local-down:
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+
+local-logs:
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs

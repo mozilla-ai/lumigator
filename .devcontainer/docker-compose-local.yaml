@@ -1,0 +1,59 @@
+name: mzai-platform
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=platform
+
+  localstack:
+    image: localstack/localstack:3.4.0
+    ports:
+      - 4566:4566
+    environment:
+      - SERVICES=s3:4566
+      - CREATE_BUCKETS=platform-storage
+    volumes:
+      # Sync localstack startup scripts
+      # https://docs.localstack.cloud/references/init-hooks/
+      - ./localstack:/etc/localstack/init/ready.d
+
+  backend:
+    build:
+      context: ..
+      dockerfile: ".devcontainer/Dockerfile.backend"
+    depends_on:
+      - postgres
+      - localstack
+    ports:
+      - 80:80
+    environment:
+      - DEPLOYMENT_TYPE=local
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=platform
+      - RAY_HEAD_NODE_HOST=ray
+      - RAY_DASHBOARD_PORT=8265
+      - AWS_HOST=localstack
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-2
+      - S3_PORT=4566
+      - S3_BUCKET=platform-storage
+      - PYTHONPATH=/mzai/platform/python/mzai:/mzai/platform/python
+    volumes:
+      - ../:/mzai
+
+
+volumes:
+    postgres-data:
+
+

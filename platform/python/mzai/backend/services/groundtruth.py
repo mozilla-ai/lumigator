@@ -22,12 +22,12 @@ class GroundTruthService:
 
     def create_deployment(self,request: GroundTruthDeploymentCreate):
         record = self.deployment_repo.create(name=request.name, description=request.description)
-        deployment_args  = ConfigLoader('config/summarizer.yaml').read_config()
+        deployment_args  = ConfigLoader('deployments/summarizer.yaml').read_config()
         config = DeploymentConfig(
             deployment_type=DeploymentType.GROUNDTRUTH,
             args=deployment_args,
-        )
-        self.ray_serve_client.deploy_applications(config)
+        ).dict()
+        self.ray_client.deploy_applications(config)
 
         return GroundTruthDeploymentResponse.model_validate(record)
 

@@ -48,7 +48,7 @@ class ConfigLoader:
     def read_config(self) -> Any:
         try:
             cwd = Path.cwd()
-            config_data = yaml.safe_load(Path(f'{cwd}/{self.config_file}').read_text())
+            config_data = yaml.safe_load(Path(f'{cwd}/platform/python/mzai/backend/api/{self.config_file}').read_text())
             parsed_config = self.config_model.model_validate(config_data)
             return parsed_config.dict()
         except Exception as e:

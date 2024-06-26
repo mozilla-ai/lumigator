@@ -13,7 +13,7 @@ class Tags(str, Enum):
 TAGS_METADATA = [
     {
         "name": Tags.HEALTH,
-        "description": "Health check for my app.",
+        "description": "Health check for the application.",
     },
     {
         "name": Tags.DATASETS,

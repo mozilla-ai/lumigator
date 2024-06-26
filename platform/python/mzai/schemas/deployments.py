@@ -18,9 +18,9 @@ class DeploymentStatus(str, Enum):
 
 
 class DeploymentConfig(BaseModel):
-    deployment_id: UUID
-    deployment_type: DeploymentType
-    args: dict[str, Any]
+    deployment_id: UUID | None = None
+    deployment_type: DeploymentType | None = None
+    args: dict[str, Any] | None = None
 
 
 class DeploymentEvent(BaseModel):

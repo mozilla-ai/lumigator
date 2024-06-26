@@ -25,6 +25,6 @@ class DeploymentConfig(BaseModel):
 
 class DeploymentEvent(BaseModel):
     deployment_id: UUID
-    job_type: DeploymentType
+    deployment_type: DeploymentType
     status: DeploymentStatus
     detail: str | None = None

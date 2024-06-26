@@ -86,7 +86,7 @@ cluster_provider = kubernetes.Provider(
 
 # image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
 
-image = "381492205691.dkr.ecr.us-east-2.amazonaws.com/backend-repo-f0dd567:0.5"
+image = "381492205691.dkr.ecr.us-east-2.amazonaws.com/backend-repo-f0dd567:0.6"
 
 platform_backend_deployment = kubernetes.apps.v1.Deployment(
     "platform-api",

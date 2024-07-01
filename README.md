@@ -3,7 +3,7 @@
 Source code for the MZAI model builder platform.
 
 
-# Setup 
+# Setup
 
 Install pants + dependencies:
 
@@ -17,6 +17,13 @@ Setup:
 Will download a standalone interpreter for python.
 ```bash
 make bootstrap-python
+```
+
+Code style is enforced using the [ruff](https://github.com/astral-sh/ruff) linter
+and a series of [pre-commit](https://pre-commit.com/) hooks. You can install them locally via:
+
+```
+pre-commit install --config ".pre-commit-config.yaml"
 ```
 
 Show targets:
@@ -47,10 +54,10 @@ and it should be recognized automatically.
 
 ## Rebuilding dependencies
 
-You may need to manually regenrate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies. 
-To do so: 
+You may need to manually regenrate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
+To do so:
 
-1. Add your new dependency to `platform/3rdparty/python/pyproject.toml` 
+1. Add your new dependency to `platform/3rdparty/python/pyproject.toml`
 2. `pants generate-lockfiles --resolve=python_default`
 3. `pants package platform/python/mzai/backend`
 
@@ -64,7 +71,3 @@ pants run platform:docker_compose_up
 # shutdown
 pants run platform:docker_compose_down
 ```
-
-
-
-

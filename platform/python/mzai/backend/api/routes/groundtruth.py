@@ -5,11 +5,10 @@ from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentCreate,
     GroundTruthDeploymentResponse,
-    GroundTruthDeploymentUpdate,
-    GroundTruthDeploymentLogsResponse,
 )
 
 router = APIRouter()
+
 
 @router.post("/deployments", status_code=status.HTTP_201_CREATED)
 def create_groundtruth_deployment(

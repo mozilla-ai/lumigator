@@ -7,7 +7,7 @@ class Tags(str, Enum):
     FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
     EVENTS = "events"
-    GROUNDTRUTH = "GROUNDTRUTH"
+    GROUNDTRUTH = "groundtruth"
 
 
 TAGS_METADATA = [

@@ -1,7 +1,9 @@
-import yaml
-from typing import List, Any
-from pydantic import BaseModel
 from pathlib import Path
+from typing import Any
+
+import yaml
+from pydantic import BaseModel
+
 from mzai.backend.api.deployments.summarizer import SummarizerArgs
 
 
@@ -24,7 +26,7 @@ class RayServeDeploymentConfig(BaseModel):
 
 class RayServeRuntimeConfig(BaseModel):
     working_dir: str
-    pip: List[str]
+    pip: list[str]
 
 
 class RayAppConfig(BaseModel):
@@ -33,11 +35,11 @@ class RayAppConfig(BaseModel):
     import_path: str
     args: SummarizerArgs
     runtime_env: RayServeRuntimeConfig
-    deployments: List[RayServeDeploymentConfig]
+    deployments: list[RayServeDeploymentConfig]
 
 
 class RayConfig(BaseModel):
-    applications: List[RayAppConfig]
+    applications: list[RayAppConfig]
 
 
 class ConfigLoader:
@@ -48,7 +50,9 @@ class ConfigLoader:
     def read_config(self) -> Any:
         try:
             cwd = Path.cwd()
-            config_data = yaml.safe_load(Path(f'{cwd}/platform/python/mzai/backend/api/{self.config_file}').read_text())
+            config_data = yaml.safe_load(
+                Path(f"{cwd}/platform/python/mzai/backend/api/{self.config_file}").read_text()
+            )
             parsed_config = self.config_model.model_validate(config_data)
             return parsed_config.dict()
         except Exception as e:

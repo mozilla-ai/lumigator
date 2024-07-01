@@ -26,7 +26,7 @@ class GroundTruthService:
             deployment_type=DeploymentType.GROUNDTRUTH,
             args=deployment_args,
         ).dict()
-        self.ray_client.deploy_applications(config)
+        self.ray_client.deploy_applications(config["args"])
 
         return GroundTruthDeploymentResponse.model_validate(record)
 

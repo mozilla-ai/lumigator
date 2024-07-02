@@ -13,6 +13,7 @@ applications:
       name: facebook/bart-large-cnn
       tokenizer: facebook/bart-large-cnn
       task: summarization
+      description: test app
     deployments:
       - name: Summarizer
         num_replicas: 1

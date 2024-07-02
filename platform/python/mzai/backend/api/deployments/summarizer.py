@@ -9,6 +9,7 @@ class SummarizerArgs(BaseModel):
     name: str  # model name, but model is protected namespace in pydantic
     tokenizer: str
     task: str
+    description: str
 
 
 @serve.deployment()
@@ -38,4 +39,4 @@ class Summarizer:
 
 
 def app(args: SummarizerArgs) -> Application:
-    return Summarizer.bind(args.name, args.tokenizer, args.task)
+    return Summarizer.bind(args.name, args.tokenizer, args.task, args.description)

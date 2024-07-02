@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from loguru import logger
 from pydantic import BaseModel
 
 from mzai.backend.api.deployments.summarizer import SummarizerArgs
@@ -10,12 +11,6 @@ from mzai.backend.api.deployments.summarizer import SummarizerArgs
 class RayServeActorConfig(BaseModel):
     num_cpus: float
     num_gpus: float
-
-
-class RayArgs(BaseModel):
-    model: str
-    tokenizer: str
-    task: str
 
 
 class RayServeDeploymentConfig(BaseModel):
@@ -43,18 +38,34 @@ class RayConfig(BaseModel):
 
 
 class ConfigLoader:
-    def __init__(self, config_file: str) -> dict:
+    def __init__(self, config_file: str):
         self.config_file = config_file
         self.config_model = RayConfig
 
-    def read_config(self) -> Any:
+    def _get_config(self):
+        cwd = Path.cwd()
+        config_data = yaml.safe_load(
+            Path(f"{cwd}/platform/python/mzai/backend/api/{self.config_file}").read_text()
+        )
+        return config_data
+
+    def get_deployment_name(self) -> str:
+        config_data = self._get_config()
+        model_config = self.config_model(**config_data)
+        print(model_config)
+        name: str = model_config.applications[0].name
+        return name
+
+    def get_deployment_description(self) -> str:
+        config_data = self._get_config()
+        model_config = self.config_model(**config_data)
+        description: str = model_config.applications[0].args.description
+        return description
+
+    def read_config(self) -> dict[str, Any] | None:
         try:
-            cwd = Path.cwd()
-            config_data = yaml.safe_load(
-                Path(f"{cwd}/platform/python/mzai/backend/api/{self.config_file}").read_text()
-            )
+            config_data = self._get_config()
             parsed_config = self.config_model.model_validate(config_data)
-            return parsed_config.dict()
+            return parsed_config.model_dump()
         except Exception as e:
-            print(f"Error reading configuration: {e}")
-            return None
+            logger.info(f"Error reading configuration: {e}")

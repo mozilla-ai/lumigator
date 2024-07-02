@@ -15,7 +15,7 @@ def create_groundtruth_deployment(
     service: GroundTruthServiceDep,
     request: GroundTruthDeploymentCreate,
 ) -> GroundTruthDeploymentResponse:
-    return service.create_deployment(request)
+    return service.create_deployment()
 
 
 @router.get("/deployments")

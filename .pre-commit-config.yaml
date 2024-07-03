@@ -4,7 +4,10 @@ repos:
     rev: v1.2.0
     hooks:
       - id: detect-secrets
-        exclude: requirements_lock.txt
+        exclude: |
+          (?x)^(
+              platform/3rdparty/python/*.lock
+          )$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
@@ -14,12 +17,6 @@ repos:
       - id: end-of-file-fixer
       - id: requirements-txt-fixer
         exclude: requirements_lock.txt
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
-    rev: v0.2.1
-    hooks:
-      - id: ruff
-        args: [--exit-non-zero-on-fix]
   - repo: local
     hooks:
       - id: pants-fmt
@@ -28,14 +25,5 @@ repos:
         description: runs ./pants fmt on all files
         entry: "pants --no-dynamic-ui fmt ::"
         language: system
-        pass_filenames: true
-        types: [file]
-
-      - id: pants-lint
-        name: pants lint
-        always_run: false
-        description: runs pants --no-dynamic-ui lint on files
-        entry: "pants --no-dynamic-ui lint ::"
-        language: system
-        pass_filenames: true
+        pass_filenames: false
         types: [file]

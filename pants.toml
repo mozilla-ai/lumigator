@@ -38,15 +38,18 @@ default_resolve = "python_default"
 # these are required for nvidia's cuda libs etc.
 indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu118/"]
 
+find_links = ["%(env.HOME)s/workspace/wheelhouse"]
+path_mappings = ["WHEELS_DIR|%(env.HOME)s/workspace/wheelhouse"]
+
 [python.resolves]
 python_default = "platform/3rdparty/python/python_default.lock"
 
 
 [python-bootstrap]
 search_path = [
-  "<PATH>",
-  "<PYENV>",
   "%(buildroot)s/.python/python3.11.9/python/install/bin",
+  "<PYENV>",
+  "<PATH>",
 ]
 
 [python-infer]

@@ -3,13 +3,11 @@ FROM python:3.11.9-bookworm
 WORKDIR /tmp
 
 
+COPY ../platform/3rdparty/python/convert_pants_lockfile_to_pip.sh .
 COPY ../platform/3rdparty/python/python_default.lock .
 RUN pip install pex
-# note the following is needed to convert the pants lockfile to a pip-installable file.
-RUN sed '/^\/\//d' python_default.lock > requirements.json && \
-    pex3 lock export requirements.json > requirements.txt && \
-    pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt
+RUN bash convert_pants_lockfile_to_pip.sh python_default.lock
+RUN pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt
 
 WORKDIR /mzai
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
-

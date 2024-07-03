@@ -4,7 +4,8 @@
 LOCKFILE=$1
 
 sed '/^\/\//d' "$LOCKFILE" >requirements.json
-pex3 lock export requirements.json >requirements.txt
+wheels="WHEELS_DIR|${WORKSPACE}/wheelhouse"
+pex3 lock export --path-mapping $wheels requirements.json >requirements.txt
 rm requirements.json
 
 echo "to install the requirements file, run:"

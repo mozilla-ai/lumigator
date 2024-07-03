@@ -8,3 +8,20 @@ python_requirements(
     resolve="python_default",
     source="pyproject.toml",
 )
+
+shell_sources(name="shell-scripts")
+
+files(
+    name="lockfile",
+    sources=["python_default.lock"],
+)
+
+run_shell_command(
+    name="make_requirements_file",
+    command="./convert_pants_lockfile_to_pip.sh ./python_default.lock requirements.txt",
+    execution_dependencies=[
+        ":shell-scripts",
+        ":lockfile",
+    ],
+    workdir=".",
+)

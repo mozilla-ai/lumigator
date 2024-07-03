@@ -29,7 +29,7 @@ $(VENVNAME)/bin/activate: $(PYTHON)
 		source ./$(VENVNAME)/bin/activate && \
 		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r ./platform/3rdparty/python/requirements.txt
 
-.env:
+.env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
 	$(eval ROOTS=$(shell pants roots)) && $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 

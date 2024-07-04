@@ -26,7 +26,7 @@ jobs:
 
       - name: Setup EKS
         run: |
-          aws eks --region  ${{ env.AWS_REGION }} update-kubeconfig --name cluster-with-gpus
+          aws eks --region  ${{ env.AWS_REGION }} update-kubeconfig --name cluster-with-gpu
 
       - name: K8s deployments
         run: |

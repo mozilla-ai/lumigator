@@ -1,0 +1,33 @@
+name: Deploy a docker image to K8
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-2
+
+jobs:
+  deploy-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::381492205691:role/GitHubAction-AssumeRoleWithAction
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup EKS
+        run: |
+          aws eks --region  ${{ secrets.AWS_REGION }} update-kubeconfig --name cluster-with-gpus
+
+      - name: K8s deployments
+        run: |
+          kubectl get deployments -n blog

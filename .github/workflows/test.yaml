@@ -30,4 +30,4 @@ jobs:
 
       - name: K8s deployments
         run: |
-          kubectl get deployments -n blog
+          kubectl get deployments

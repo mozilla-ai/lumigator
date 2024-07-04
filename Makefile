@@ -21,13 +21,12 @@ $(PYTHON):
 
 
 $(VENVNAME)/bin/activate: $(PYTHON)
-	# pants will export a venv for you to use. combined with the `env` file created above
-	# it tells your IDE which paths are python libraries or not and ensures the deps are loaded with your interpreter.
-	# pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
+	# use uv to create a venv from our lockfile.
 	pants run platform/3rdparty/python:make_requirements_file
 	uv venv $(VENVNAME) --seed --python $(PYTHON) && \
 		source ./$(VENVNAME)/bin/activate && \
 		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r ./platform/3rdparty/python/requirements.txt
+	@echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide

@@ -6,7 +6,7 @@ repos:
       - id: detect-secrets
         exclude: |
           (?x)^(
-              platform/3rdparty/python/*.lock
+              platform/3rdparty/python/python_default.lock|
           )$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

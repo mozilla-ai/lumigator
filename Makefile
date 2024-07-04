@@ -1,14 +1,26 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants
 
-PLAT:= $(shell uname -o)
-PYTHON:= .python/python3.11.9/python/install/bin/python3.11
+SHELL:=/bin/bash
+UNAME:= $(shell uname -o)
+ifeq ($(UNAME), GNU/Linux)
+	PYTHON:= /opt/python/install/bin/python
+endif
+ifeq ($(UNAME), Darwin)
+	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
+endif
 VENVNAME:= mzaivenv
+
 
 ######### developer (mostly) setup targets ##########
 
 install-pants:
-	# TODO - add platform-agnostic setup - this assumes brew and
-	brew install pantsbuild/tap/pants uv
+	$(shell pants_tools/get-pants.sh)
+ifeq ($(UNAME), GNU/Linux)
+		pip install uv
+endif
+ifeq ($(UNAME), Darwin)
+		brew install uv
+endif
 
 update-3rdparty-lockfiles:
 ### use this target when you add a new dependency to 3rdparty or change versions of a dep.
@@ -28,7 +40,10 @@ $(VENVNAME)/bin/activate: $(PYTHON)
 	pants run platform/3rdparty/python:make_requirements_file
 	uv venv $(VENVNAME) --seed --python $(PYTHON) && \
 		source ./$(VENVNAME)/bin/activate && \
-		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r ./platform/3rdparty/python/requirements.txt
+		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r ./platform/3rdparty/python/requirements.txt && \
+		uv pip install pre-commit && \
+		pre-commit install --config ".pre-commit-config.yaml"
+
 	@echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
 
 .env: $(PYTHON)
@@ -36,7 +51,6 @@ $(VENVNAME)/bin/activate: $(PYTHON)
 	$(eval ROOTS=$(shell pants roots)) && $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 bootstrap-dev-environment: install-pants $(PYTHON) $(VENVNAME)/bin/activate .env
-	pre-commit install --config ".pre-commit-config.yaml"
 
 ###### Local app development workflow. Allows for using
 # devcontainer in `.devcontainer` via local docker compose.
@@ -126,7 +140,7 @@ ci-fmt: ci-lint
 	pants --changed-since=origin/main fmt
 
 ci-tests:
-	pants --filter-target-type=docker_image list platform/::
+	pants test ::
 
 ci-publish-images:
 	pants --filter-target-type=docker_image list platform/:: | xargs pants publish

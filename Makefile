@@ -1,4 +1,4 @@
-.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants
+.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants
 
 PLAT:= $(shell uname -o)
 PYTHON:= .python/python3.11.9/python/install/bin/python3.11
@@ -14,11 +14,14 @@ update-3rdparty-lockfiles:
 ### use this target when you add a new dependency to 3rdparty or change versions of a dep.
 	pants generate-lockfiles
 
+
 $(PYTHON):
 	# uses python standalone - installs it in the repo by default under `./python`. has
 	#  considerations for platform, works on osx and debian / ubuntu linux
 	bash pants_tools/bootstrap_python.sh $(PLAT)
 
+bootstrap-python: $(PYTHON)
+	# dummy target
 
 $(VENVNAME)/bin/activate: $(PYTHON)
 	# use uv to create a venv from our lockfile.

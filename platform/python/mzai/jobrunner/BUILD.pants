@@ -23,22 +23,3 @@ pex_binary(
     ],
     entry_point="main.py",
 )
-
-docker_image(
-    name="ray_jobrunner_image",
-    build_platform=["linux/amd64"],
-    dependencies=[":jobrunner"],
-    image_tags=[
-        "ray_jobrunner_dev_{build_args.REPOVERSION}",
-        "ray_jobrunner_dev",
-    ],
-    instructions=[
-        "ARG BASE_IMAGE=rayproject/ray:2.9.3.94a6d7-py310",
-        "FROM $BASE_IMAGE",
-        "WORKDIR /mzai",
-        "COPY platform.python.mzai.jobrunner/jobrunner.pex .",
-    ],
-    registries=[
-    ],
-    repository="mzdotai/platform",
-)

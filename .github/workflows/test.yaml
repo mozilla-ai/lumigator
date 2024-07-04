@@ -22,11 +22,11 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::381492205691:role/GitHubAction-AssumeRoleWithAction
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup EKS
         run: |
-          aws eks --region  ${{ secrets.AWS_REGION }} update-kubeconfig --name cluster-with-gpus
+          aws eks --region  ${{ env.AWS_REGION }} update-kubeconfig --name cluster-with-gpus
 
       - name: K8s deployments
         run: |

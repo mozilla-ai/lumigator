@@ -13,6 +13,9 @@ on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-2
+
 # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 permissions:
   id-token: write
@@ -119,3 +122,32 @@ jobs:
         with:
           name: pants-ci-log
           path: .pants.d/pants.log
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    # if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      # packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::381492205691:role/GitHubAction-AssumeRoleWithAction
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup EKS
+        run: |
+          aws eks --region  ${{ env.AWS_REGION }} update-kubeconfig --name cluster-with-gpu
+      # Install helm
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - name: Run Helm Upgrade
+        run: |
+          helm upgrade platform platform/infra/mzai/helm/platform/mzai-platform -f platform/infra/mzai/helm/values.yaml

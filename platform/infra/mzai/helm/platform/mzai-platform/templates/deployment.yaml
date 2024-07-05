@@ -24,6 +24,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -34,6 +35,23 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          env:
+            - name: S3_BUCKET
+              value: {{ .Values.s3Bucket }}
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresDb }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.postgresHost }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.postgresPort }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresUser }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresPassword }}
+            - name: RAY_HEAD_NODE_HOST
+              value: {{ .Values.rayAddress }}
+            - name: RAY_DASHBOARD_PORT
+              value: {{ .Values.rayPort }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

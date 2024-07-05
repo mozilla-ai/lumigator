@@ -60,8 +60,7 @@ docker_image(
         "backend_dev",
     ],
     registries=[
-        "@coreweave_default",
         "@aws_ecr_temp",
     ],
-    repository="mzdotai/platform",
+    repository="",
 )

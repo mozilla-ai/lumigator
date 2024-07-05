@@ -4,6 +4,19 @@
 
 replicaCount: 1
 
+s3Bucket: ""
+
+postgresDb: ""
+postgresHost: ""
+postgresPost: ""
+postgresUser: ""
+postgresPassword: ""
+
+rayAddress: ""
+rayPort: ""
+
+serviceAccountName: ""
+
 image:
   repository: docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud/mozilla-ai/mzai-platform
   pullPolicy: IfNotPresent

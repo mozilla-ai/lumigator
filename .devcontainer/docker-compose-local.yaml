@@ -66,8 +66,6 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=platform
-      - RAY_HEAD_NODE_HOST=ray
-      - RAY_DASHBOARD_PORT=8265
       - AWS_HOST=localstack
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
@@ -75,8 +73,15 @@ services:
       - S3_PORT=4566
       - S3_BUCKET=platform-storage
       - PYTHONPATH=/mzai/platform/python/mzai:/mzai/platform/python
+      - RAY_DASHBOARD_PORT=8265
+      # some variables we directly get from the local env
+      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
+      - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
+      - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}
     volumes:
       - ../:/mzai
+      - ../../lm-buddy/:/lm-buddy
 
 
 volumes:

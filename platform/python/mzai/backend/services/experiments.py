@@ -1,4 +1,5 @@
 from uuid import UUID
+import os
 
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
@@ -77,9 +78,9 @@ class ExperimentService:
             "pip": ["lm-buddy==0.10.10"],
             "env_vars": {"MZAI_JOB_ID": str(record.id),
                          "MZAI_HOST": "",
-                        #  "FSSPEC_S3_KEY": "CWPLNREVCVCRUMLB",
-                        #  "FSSPEC_S3_SECRET": "cwopGWf3MQwS6KfXJG04ccHGshl3i8B7rQhNWCVoJU8",
-                        #  "FSSPEC_S3_ENDPOINT_URL": "http://object.lga1.coreweave.com",
+                         "LOCAL_FSSPEC_S3_KEY": os.environ.get('LOCAL_FSSPEC_S3_KEY', ""),
+                         "LOCAL_FSSPEC_S3_SECRET": os.environ.get('LOCAL_FSSPEC_S3_SECRET', ""),
+                         "LOCAL_FSSPEC_S3_ENDPOINT_URL": os.environ.get('LOCAL_FSSPEC_S3_ENDPOINT_URL', "")
             }
         }
         entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)

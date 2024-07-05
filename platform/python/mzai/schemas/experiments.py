@@ -9,6 +9,8 @@ from mzai.schemas.jobs import JobStatus
 class ExperimentCreate(BaseModel):
     name: str
     description: str = ""
+    model: str
+    dataset: str
 
 
 class ExperimentResponse(BaseModel, from_attributes=True):

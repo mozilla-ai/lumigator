@@ -2,6 +2,11 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
+from lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig, HuggingFaceEvaluationConfig
+from lm_buddy.configs.huggingface import (
+    AutoModelConfig,
+    DatasetConfig,
+)
 
 from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
@@ -40,13 +45,44 @@ class ExperimentService:
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
+        eval_config = HuggingFaceEvalJobConfig(
+            name = str(request.name),
+
+            model = AutoModelConfig(
+                path = str(request.model)
+            ),
+
+            dataset = DatasetConfig(
+                path = str(request.dataset)
+            ),
+
+            evaluation = HuggingFaceEvaluationConfig(
+                metrics = ["rouge", "meteor", "bertscore"],
+                use_pipeline = True,
+                max_samples = 100,
+                return_input_data = True,
+                return_predictions = True,
+                storage_path = "s3://platform-storage/experiments/results/"
+            )
+        )
+
         # Submit the job to Ray
-        config = JobConfig(
+        ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,
-            args={"name": request.name},
+            args=eval_config.model_dump(),
         )
-        entrypoint = RayJobEntrypoint(config=config)
+
+        runtime_env = {
+            "pip": ["lm-buddy==0.10.10"],
+            "env_vars": {"MZAI_JOB_ID": str(record.id),
+                         "MZAI_HOST": "",
+                        #  "FSSPEC_S3_KEY": "CWPLNREVCVCRUMLB",
+                        #  "FSSPEC_S3_SECRET": "cwopGWf3MQwS6KfXJG04ccHGshl3i8B7rQhNWCVoJU8",
+                        #  "FSSPEC_S3_ENDPOINT_URL": "http://object.lga1.coreweave.com",
+            }
+        }
+        entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)
         submit_ray_job(self.ray_client, entrypoint)
 
         return ExperimentResponse.model_validate(record)

@@ -1,11 +1,11 @@
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
+import json
 
 from ray.job_submission import JobSubmissionClient
 
 from mzai.schemas.jobs import JobConfig
-
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
@@ -17,7 +17,7 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        return f"./jobrunner.pex --config '{self.config.model_dump_json()}'"
+        return f"lm-buddy evaluate huggingface --config '{json.dumps(self.config.args)}'"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

@@ -37,21 +37,21 @@ spec:
               protocol: TCP
           env:
             - name: S3_BUCKET
-              value: {{ .Values.s3Bucket }}
+              value: {{ .Values.s3Bucket | quote }}
             - name: POSTGRES_DB
-              value: {{ .Values.postgresDb }}
+              value: {{ .Values.postgresDb | quote }}
             - name: POSTGRES_HOST
-              value: {{ .Values.postgresHost }}
+              value: {{ .Values.postgresHost | quote }}
             - name: POSTGRES_PORT
-              value: {{ .Values.postgresPort }}
+              value: {{ .Values.postgresPort | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgresUser }}
+              value: {{ .Values.postgresUser | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgresPassword }}
+              value: {{ .Values.postgresPassword | quote }}
             - name: RAY_HEAD_NODE_HOST
-              value: {{ .Values.rayAddress }}
+              value: {{ .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT
-              value: {{ .Values.rayPort }}
+              value: {{ .Values.rayPort | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

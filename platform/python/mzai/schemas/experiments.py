@@ -11,7 +11,7 @@ class ExperimentCreate(BaseModel):
     description: str = ""
     model: str
     dataset: str
-
+    max_samples: int | None = None
 
 class ExperimentResponse(BaseModel, from_attributes=True):
     id: UUID

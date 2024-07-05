@@ -47,20 +47,20 @@ class ExperimentService:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
         eval_config = HuggingFaceEvalJobConfig(
-            name = str(request.name),
+            name = request.name,
 
             model = AutoModelConfig(
-                path = str(request.model)
+                path = request.model
             ),
 
             dataset = DatasetConfig(
-                path = str(request.dataset)
+                path = request.dataset
             ),
 
             evaluation = HuggingFaceEvaluationConfig(
                 metrics = ["rouge", "meteor", "bertscore"],
                 use_pipeline = True,
-                max_samples = 100,
+                max_samples = request.max_samples,
                 return_input_data = True,
                 return_predictions = True,
                 storage_path = "s3://platform-storage/experiments/results/"

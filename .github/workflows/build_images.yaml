@@ -3,11 +3,12 @@ name: Docker Image CI
 on:
   pull_request:
     paths:
-    - "platform/**"
-    - "model_builder/**"
-    branches: [ "main" ]
+      - "platform/**"
     # synchronized is when you push new commits
-    types: [ "opened", "synchronize" ]
+    types: ["opened", "synchronize"]
+  push:
+    branches:
+      - main
 
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
@@ -15,111 +16,106 @@ on:
 # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
 permissions:
   id-token: write
-  contents: read  # This is required for actions/checkout
+  contents: read # This is required for actions/checkout
 
 jobs:
-    build:
-        name: Build Docker image
-        runs-on: ubuntu_2204_150gb  # this is a mzai-custom image on github actions runners.
+  build:
+    name: Build Docker image
+    runs-on: ubuntu_2204_150gb # this is a mzai-custom image on github actions runners.
+    env:
+      # head_ref: source branch of the pull request.
+      # only set on PRs; e.g., for a PR from branch `myname/amazing_model`, will be `myname/amazing_model`
+      # ref_name: short ref name of branch triggering runs. works for pushes to a development branch.
+      # assignment works starting with the head_ref
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+    # set up a local registry
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # gets full repo history
+          fetch-depth: 0
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
+        with:
+          short-length: 8 # Same as v3 and before
+
+      - name: Login to Coreweave Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud
+          username: ${{ secrets.CW_CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CW_CONTAINER_REGISTRY_PW }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+        with:
+          role-to-assume: arn:aws:iam::381492205691:role/GitHubAction-AssumeRoleWithAction
+          aws-region: us-east-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Initialize Pants
+        uses: pantsbuild/actions/init-pants@main
+        with:
+          # cache0 makes it easy to bust the cache if needed
+          gha-cache-key: pants-py3.10.13-v0
+          # The Python backend uses named_caches for Pip/PEX state,
+          # so it is appropriate to invalidate on lockfile changes.
+          named-caches-hash: ${{ hashFiles('platform/3rdparty/python/python_default.lock', '.python') }}
+          # If you're not using a fine-grained remote caching service (see https://www.pantsbuild.org/docs/remote-caching),
+          # then you may also want to preserve the local Pants cache (lmdb_store). However this must invalidate for
+          # changes to any file that can affect the build, so may not be practical in larger repos.
+          # A remote cache service integrates with Pants's fine-grained invalidation and avoids these problems.
+          cache-lmdb-store: "true" # defaults to 'false'
+          # Note that named_caches and lmdb_store falls back to partial restore keys which
+          # may give a useful partial result that will save time over completely clean state,
+          # but will cause the cache entry to grow without bound over time.
+          # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
+          # Alternatively you change gha-cache-key to ignore old caches.
+
+      - name: Set up Python
+        run: |
+          make bootstrap-python
+
+      - name: Lint
+        run: pants --changed-since=origin/main lint
+        continue-on-error: false
+
+      - name: Build and push
+        shell: bash
         env:
-          # head_ref: source branch of the pull request.
-          # only set on PRs; e.g., for a PR from branch `myname/amazing_model`, will be `myname/amazing_model`
-          # ref_name: short ref name of branch triggering runs. works for pushes to a development branch.
-          # assignment works starting with the head_ref
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        # set up a local registry
-        services:
-          registry:
-            image: registry:2
-            ports:
-              - 5000:5000
+          PANTS_CONFIG_FILES: pants_ci.toml
+          PANTS_DOCKER_BUILD_NO_CACHE: True
+        run: |
+          export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
+          make ci-publish-images
 
-        steps:
-
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            # gets full repo history
-            fetch-depth: 0
-
-        - name: Get branch name (merge)
-          if: github.event_name != 'pull_request'
-          shell: bash
-          run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
-
-        - name: Get branch name (pull request)
-          if: github.event_name == 'pull_request'
-          shell: bash
-          run: |
-            echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-
-
-        - name: Inject slug/short variables
-          uses: rlespinasse/github-slug-action@v4
-          with:
-            short-length: 8 # Same as v3 and before
-
-        - name: Login to Coreweave Container Registry
-          uses: docker/login-action@v3
-          with:
-            registry: docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud
-            username: ${{ secrets.CW_CONTAINER_REGISTRY_USERNAME }}
-            password: ${{ secrets.CW_CONTAINER_REGISTRY_PW }}
-
-
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-          with:
-            role-to-assume: arn:aws:iam::381492205691:role/GitHubAction-AssumeRoleWithAction 
-            aws-region: us-east-2
-
-
-        - name: Login to Amazon ECR
-          id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v2
-
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v2
-
-        - name: Initialize Pants
-          uses: pantsbuild/actions/init-pants@main
-          with:
-            # cache0 makes it easy to bust the cache if needed
-            gha-cache-key: pants-py3.10.13-v0
-            # The Python backend uses named_caches for Pip/PEX state,
-            # so it is appropriate to invalidate on lockfile changes.
-            named-caches-hash: ${{ hashFiles('platform/3rdparty/python/python_default.lock', '.python') }}
-            # If you're not using a fine-grained remote caching service (see https://www.pantsbuild.org/docs/remote-caching),
-            # then you may also want to preserve the local Pants cache (lmdb_store). However this must invalidate for
-            # changes to any file that can affect the build, so may not be practical in larger repos.
-            # A remote cache service integrates with Pants's fine-grained invalidation and avoids these problems.
-            cache-lmdb-store: 'true'  # defaults to 'false'
-            # Note that named_caches and lmdb_store falls back to partial restore keys which
-            # may give a useful partial result that will save time over completely clean state,
-            # but will cause the cache entry to grow without bound over time.
-            # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
-            # Alternatively you change gha-cache-key to ignore old caches.
-            
-        - name: Set up Python
-          run: |
-            make bootstrap-python
-
-        - name: Lint
-          run:
-            pants --changed-since=origin/main lint
-          continue-on-error: false
-
-        - name: Build and push
-          shell: bash
-          env:
-            PANTS_CONFIG_FILES: pants_ci.toml
-            PANTS_DOCKER_BUILD_NO_CACHE: True
-          run: |
-            export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
-            make ci-publish-images
-
-        - name: Upload pants log
-          uses: actions/upload-artifact@v2
-          with:
-            name: pants-ci-log
-            path: .pants.d/pants.log
+      - name: Upload pants log
+        uses: actions/upload-artifact@v2
+        with:
+          name: pants-ci-log
+          path: .pants.d/pants.log

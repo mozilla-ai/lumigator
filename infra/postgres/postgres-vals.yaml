@@ -1,0 +1,24 @@
+global:
+  storageClass: shared-nvme-lga1
+
+primary:
+  # https://artifacthub.io/packages/helm/bitnami/postgresql#differences-between-bitnami-postgresql-image-and-docker-official-image
+  initContainers:
+    - command:
+        - sh
+        - "-c"
+        - |
+          mkdir -p $VOLUME_DATA_DIR
+          chown -R 1001:1001 $VOLUME_DATA_DIR
+          echo 'Volume permissions OK ✓'
+      env:
+        - name: VOLUME_DATA_DIR
+          value: /bitnami/postgresql
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      name: volumepermissions
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: /bitnami/postgresql
+          name: data

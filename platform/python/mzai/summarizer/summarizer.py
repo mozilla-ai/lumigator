@@ -7,7 +7,7 @@ from ray.serve import Application
 from starlette.requests import Request
 from transformers import AutoModelForSeq2SeqLM, pipeline
 
-logger = logging.getLogger("ray.servesss")
+logger = logging.getLogger("ray.serve")
 
 
 class SummarizerArgs(BaseModel):

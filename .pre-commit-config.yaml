@@ -20,7 +20,7 @@ repos:
   - repo: local
     hooks:
       - id: pants-fmt-lint
-        name: pants fmt
+        name: pants fmt lint
         always_run: false
         description: runs ./pants fmt on all files
         entry: "pants --no-dynamic-ui fmt lint ::"

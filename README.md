@@ -25,7 +25,7 @@ run the app locally via docker compose:
 
 ```bash
 make local-up
-
+make local-logs # gets the logs from docker compose
 make local-down # shuts it down
 ```
 
@@ -60,6 +60,4 @@ Using a container, run the following from the root of this repo:
 make test-dev-setup
 ```
 
-This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers. 
-
-
+This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers.

@@ -1,12 +1,12 @@
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
-from mzai.backend.api.deployments.summarizer import app
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
 )
+from mzai.summarizer.summarizer import app
 
 
 class GroundTruthService:

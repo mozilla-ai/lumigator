@@ -47,4 +47,4 @@ class Summarizer:
 def app(args: SummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)
-    return Summarizer.bind(args.name, args.tokenizer, args.task, args.description)
+    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

@@ -2,3 +2,24 @@
 
 REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
 export REPOVERSION
+
+plat=$(uname -o)
+
+
+# echo "***bootstrapping pants***"
+
+if [[ "$plat" == "Darwin" ]]; then
+  # echo "Platform: Darwin"
+ indexes="+[]"
+elif [[ $(command -v nvcc >/dev/null 2>&1) ]]; then
+  echo "Running on Linux and found nvcc; setting env var to use the linux_cuda python lockfile."
+  echo "if you cannot use cuda in pytorch/etc., there might be an issue with how pants sees the resolves."
+  PANTS_PYTHON_RESOLVES="linux_cuda"
+  EXPORT $PANTS_PYTHON_RESOLVES
+  indexes="+['https://download.pytorch.org/whl/cuda118/']"
+else
+
+  indexes="+['https://download.pytorch.org/whl/cpu']"
+fi
+PANTS_PYTHON_REPOS_INDEXES=$indexes
+export PANTS_PYTHON_REPOS_INDEXES

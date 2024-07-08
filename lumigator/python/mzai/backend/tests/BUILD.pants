@@ -1,15 +1,9 @@
 python_sources(
     name="backend_tests_sources",
     sources=["**/*.py"],
-    dependencies=[
-        "lumigator/python/mzai/backend:backend_sources",
-    ],
 )
 
 python_tests(
     name="backend_tests",
     sources=["**/test_*.py"],
-    dependencies=[
-        ":backend_tests_sources",
-    ],
 )

@@ -5,15 +5,18 @@ import boto3
 from fastapi import Depends
 from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
+from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 from sqlalchemy.orm import Session
 
 from mzai.backend.db import session_manager
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.finetuning import FinetuningJobRepository
+from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
+from mzai.backend.services.groundtruth import GroundTruthService
 from mzai.backend.settings import settings
 
 
@@ -50,6 +53,13 @@ def get_experiment_service(session: DBSessionDep) -> ExperimentService:
     return ExperimentService(experiment_repo, result_repo, ray_client)
 
 
+def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
+    deployment_repo = GroundTruthDeploymentRepository(session)
+    ray_serve_client = ServeSubmissionClient(settings.RAY_DASHBOARD_URL)
+    return GroundTruthService(deployment_repo, ray_serve_client)
+
+
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
+GroundTruthServiceDep = Annotated[GroundTruthService, Depends(get_ground_truth_service)]

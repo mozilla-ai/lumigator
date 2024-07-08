@@ -28,7 +28,7 @@ repos:
         description: runs ./pants fmt on all files
         entry: "pants --no-dynamic-ui fmt ::"
         language: system
-        pass_filenames: true
+        pass_filenames: false
         types: [file]
 
       - id: pants-lint

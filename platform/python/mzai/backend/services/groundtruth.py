@@ -25,7 +25,7 @@ class GroundTruthService:
         deployment_description = conf.get_deployment_description()
 
         self.ray_client.deploy_applications(deployment_args)
-        app(deployment_args)
+        # app(deployment_args)
 
         record = self.deployment_repo.create(
             name=deployment_name, description=deployment_description

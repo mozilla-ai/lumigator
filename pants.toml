@@ -87,7 +87,7 @@ address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
 default = false
 
 [docker.registries.aws_ecr_temp]
-address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
+address = "198934536556.dkr.ecr.us-east-1.amazonaws.com"
 default = false
 
 [pytest]

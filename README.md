@@ -5,7 +5,7 @@ Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.a
 # Setup
 
 Install pants, tools, dev environment.
-This includes a standalone python interpreter, venv (`dist/export/python/virtualenvs/python_default/3.11.9/bin/activate`), precommit configs, and more.
+This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more.
 
 For VSCode users, activate the venv before opening your IDE; the `.env` file will be recognized automatically.
 

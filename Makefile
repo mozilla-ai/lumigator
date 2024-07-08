@@ -38,7 +38,7 @@ $(PYTHON):
 
 $(VENVNAME): $(PYTHON)
 	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
-	@echo "To use the environment, please run source $(VENVNAME)"
+	@echo "To use the environment, please run `source $(VENVNAME)`"
 
 bootstrap-python: $(VENVNAME)
 
@@ -125,7 +125,14 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 
 ########## CI targets #################
 # only meant to be used in github actions.
+ci-setup:
+	pants --version  # Bootstrap Pants.
 
+ci-lint: ci-setup
+	# this target uses git to sort out only running on changes since the last main.
+	pants --changed-since=origin/main \
+	update-build-files --check \
+	lint
 # the following target is meant to be used for changes made to the platform setup itself
 # and tests if we can get the basic install going correctly in a container.
 # this is meant to be 'alpha' ish and subject to change; will raise some potential issues

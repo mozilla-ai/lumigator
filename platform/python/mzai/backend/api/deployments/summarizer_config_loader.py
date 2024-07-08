@@ -51,7 +51,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         description="Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
-                        working_dir="https://github.com/mozilla-ai/lm-serve/archive/df938d36573bf0e333154c0d84f4270df6785dd0.zip",
+                        working_dir="/mzai/platform/python/mzai/backend/api/deployments",
                         pip=[
                             "transformers==4.38.0",
                             "torch==2.1.2",

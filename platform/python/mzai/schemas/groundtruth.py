@@ -1,15 +1,9 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from mzai.schemas.deployments import DeploymentStatus
-
-
-class GroundTruthDeploymentCreate(BaseModel):
-    name: str
-    description: str = ""
-    config: dict = Field(default_factory=dict)
 
 
 class GroundTruthDeploymentUpdate(BaseModel):

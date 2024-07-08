@@ -19,11 +19,11 @@ repos:
         exclude: requirements_lock.txt
   - repo: local
     hooks:
-      - id: pants-fmt
+      - id: pants-fmt-lint
         name: pants fmt
         always_run: false
         description: runs ./pants fmt on all files
-        entry: "pants --no-dynamic-ui fmt ::"
+        entry: "pants --no-dynamic-ui fmt lint ::"
         language: system
         pass_filenames: false
         types: [file]

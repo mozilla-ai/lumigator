@@ -1,6 +1,7 @@
 [GLOBAL]
 pants_version = "2.21.0"
 colors = true
+docker_execution = true
 
 backend_packages = [
   "pants.backend.docker",
@@ -14,8 +15,23 @@ backend_packages = [
   "pants.backend.experimental.helm"
 ]
 
+[environments-preview.names]
+local_darwin = "//:local_darwin"
+local_linux = "//:local_linux"
+docker_linux_cpu = "//:docker_linux_cpu"
+docker_linux_cuda = "//:docker_linux_cuda"
+
+
 [cli.alias]
 --debug-build = "--print-stacktrace -ldebug --keep-sandboxes=on_failure"
+run-cuda = "--python-default-resolve=linux_cuda run"
+run-cpu = "--python-default-resolve=linux_cpu run"
+
+
+
+[generate-lockfiles]
+diff = true
+
 
 [source]
 # Defines the "roots" for subprojects. anything with folders like
@@ -33,18 +49,22 @@ interpreter_constraints = ['CPython==3.11.9']
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-default_resolve = "python_default"
+default_resolve = "darwin"
 
 [python-repos]
 # these are required for nvidia's cuda libs etc.
 indexes.add = [
 "https://pypi.ngc.nvidia.com",
-"https://download.pytorch.org/whl/cu118/",
 ]
 
 
+find_links = ["%(env.HOME)s/workspace/wheelhouse"]
+path_mappings = ["WHEELS_DIR|%(env.HOME)s/workspace/wheelhouse"]
+
 [python.resolves]
-python_default = "lumigator/3rdparty/python/python_default.lock"
+darwin = "3rdparty/python/darwin.lock"
+linux_cpu = "3rdparty/python/linux_cpu.lock"
+linux_cuda = "3rdparty/python/linux_cuda.lock"
 
 
 [python-bootstrap]
@@ -87,7 +107,7 @@ address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
 default = false
 
 [docker.registries.aws_ecr_temp]
-address = "198934536556.dkr.ecr.us-east-1.amazonaws.com"
+address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
 default = false
 
 [pytest]

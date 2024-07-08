@@ -1,18 +1,19 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants
 
-VENVNAME:= dist/export/python/virtualenvs/python_default/3.11.9/bin/activate
+VENVNAME:= mzaivenv
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
 ifeq ($(UNAME), GNU/Linux)
+	PY_PATH:= /opt/python/install/bin
 	PYTHON:= /opt/python/install/bin/python3.11
-	PY_DEPS:= lumigator/3rdparty/python/requirements_linux.txt
+	PY_DEPS:= 3rdparty/python/requirements_python_linux.txt
 endif
 
 ifeq ($(UNAME), Darwin)
 	PY_PATH:= .python/python3.11.9/python/install/bin
 	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
-	PY_DEPS:= lumigator/3rdparty/python/requirements_darwin.txt
+	PY_DEPS:= 3rdparty/python/requirements_python_darwin.txt
 endif
 
 
@@ -22,6 +23,12 @@ PANTS_INSTALLED := $(shell pants --version 1>&2 2> /dev/null; echo $$?)
 install-pants:
 ifneq ($(PANTS_INSTALLED),0)
 	bash pants_tools/get-pants.sh
+endif
+ifeq ($(UNAME), GNU/Linux)
+		pip install uv
+endif
+ifeq ($(UNAME), Darwin)
+		brew install uv
 endif
 
 update-3rdparty-lockfiles:
@@ -34,13 +41,19 @@ $(PYTHON):
 	# uses python standalone - installs it in the repo by default under `./python`. has
 	#  considerations for platform, works on osx and debian / ubuntu linux
 	bash pants_tools/bootstrap_python.sh $(UNAME)
+	$(PYTHON) -m pip install uv pex
 
+bootstrap-python: $(PYTHON) $(VENVNAME)
 
 $(VENVNAME): $(PYTHON)
-	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
-	@echo "To use the environment, please run `source $(VENVNAME)`"
+	# use uv to create a venv from our lockfile.
+	pants run 3rdparty/python:gen_requirements_python_darwin
+	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON)
+	# $(PYTHON) -m uv pip install --require-hashes --no-cache --strict -r $(PY_DEPS)
+	uv pip install --python $(PYTHON) --require-hashes --no-cache --strict -r $(PY_DEPS)
+	$(PY_PATH)/pre-commit install --config ".pre-commit-config.yaml"
 
-bootstrap-python: $(VENVNAME)
+	echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
@@ -58,6 +71,7 @@ bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env
 LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
 
 local-up:
+	pants run 3rdparty/python:gen_requirements_python_linux
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 local-down:
@@ -90,23 +104,29 @@ show-pants-targets:
 
 
 ######### CLEANERS ###########
-clean-python:
-	rm -rf .python/
+clean-python-venv:
 	rm -rf mzaivenv/
 	rm -rf dist/export/python/
+
+clean-python: clean-python-venv
+	rm -rf .python/
 
 clean-pants:
 	# this level of clean removes the -build artifacts that pants makes. it doesn't remove the pants cache.
 	rm -rf ./dist/
 
 clean-pants-cache: clean-pants
+	@echo 'removing the cache dir at $HOME/.cache/pants'
 	rm -rf $(HOME)/.cache/pants
 	# the following resets the pants daemon
 	pants --no-pantsd --version
 	@echo 'if you see issues like:'
+	@echo '#############'
 	@echo "IntrinsicError: Could not identify a process to backtrack to for: Missing digest: Was not present in the local store"
+	@echo '#############'
 	@echo "run the following as a potential fix, then re-run your command again."
 	@echo 'PANTS_LOCAL_STORE_DIR=$$(mktemp -d) pants lint ::'
+	@echo '#############'
 
 clean-docker-buildcache:
 	docker builder prune --all -f
@@ -124,15 +144,7 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 
 
 ########## CI targets #################
-# only meant to be used in github actions.
-ci-setup:
-	pants --version  # Bootstrap Pants.
 
-ci-lint: ci-setup
-	# this target uses git to sort out only running on changes since the last main.
-	pants --changed-since=origin/main \
-	update-build-files --check \
-	lint
 # the following target is meant to be used for changes made to the platform setup itself
 # and tests if we can get the basic install going correctly in a container.
 # this is meant to be 'alpha' ish and subject to change; will raise some potential issues

@@ -39,7 +39,7 @@ pants package lumigator/python/mzai/backend:backend_image
 ```
 
 
-## 3rdparty dependencies
+## Rebuilding dependencies
 
 You may need to manually regenerate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
 To do so:

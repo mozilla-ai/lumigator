@@ -19,7 +19,6 @@ class RayServeDeploymentConfig(BaseModel):
 
 
 class RayServeRuntimeConfig(BaseModel):
-    working_dir: str
     pip: list[str]
 
 
@@ -51,7 +50,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         description="Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
-                        working_dir="/mzai/platform/python/mzai/backend/api/deployments",
+                        # working_dir="file://mzai/platform/python/mzai/backend/api/deployments",
                         pip=[
                             "transformers==4.38.0",
                             "torch==2.1.2",

@@ -23,13 +23,7 @@ if [[ $arch == "Darwin" ]]; then
   tar xzf "${tarbase}"
   rm cpython*
   cd "$REPOROOT"
-
-  echo "updating local platform tags file"
-  macos_tags_file="$REPOROOT/pants_tools/macosx_14_pex_platform_tags.json"
-	cat "$macos_tags_file" | jq '.path = "'"$INTERPRETER"'"' > "${macos_tags_file}.new"
-	mv "${macos_tags_file}.new" "$macos_tags_file"
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
-
 
 elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"

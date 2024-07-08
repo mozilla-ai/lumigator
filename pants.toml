@@ -36,7 +36,11 @@ default_resolve = "python_default"
 
 [python-repos]
 # these are required for nvidia's cuda libs etc.
-indexes.add = ["https://pypi.ngc.nvidia.com", "https://download.pytorch.org/whl/cu118/"]
+indexes.add = [
+"https://pypi.ngc.nvidia.com",
+"https://download.pytorch.org/whl/cu118/",
+]
+
 
 [python.resolves]
 python_default = "platform/3rdparty/python/python_default.lock"
@@ -44,9 +48,9 @@ python_default = "platform/3rdparty/python/python_default.lock"
 
 [python-bootstrap]
 search_path = [
-  "<PATH>",
-  "<PYENV>",
   "%(buildroot)s/.python/python3.11.9/python/install/bin",
+  "<PYENV>",
+  "<PATH>",
 ]
 
 [python-infer]
@@ -82,7 +86,7 @@ address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
 default = false
 
 [docker.registries.aws_ecr_temp]
-address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
+address = "381492205691.dkr.ecr.us-east-1.amazonaws.com"
 default = false
 
 [pytest]

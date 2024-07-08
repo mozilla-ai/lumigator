@@ -57,13 +57,7 @@ Using a container, run the following from the root of this repo:
 
 
 ```bash
-docker run --rm -it \
-  --volume .:/home/workspace/mzai-platform \
-  --privileged --pid=host \
-  --name devbox \
-  --entrypoint "/bin/bash" \
-  mzdotai/golden:base_latest  \
-  -c 'apt-get install -y jq curl make && cd /home/workspace/mzai-platform && make bootstrap-dev-environment'
+make test-dev-setup
 ```
 
 This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers. 

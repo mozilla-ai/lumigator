@@ -30,6 +30,7 @@
 //     "sqlalchemy[asyncio]==2.0.28",
 //     "starlette",
 //     "testcontainers",
+//     "transformers==4.41.2",
 //     "uvicorn[standard]==0.28.0"
 //   ],
 //   "manylinux": "manylinux2014",
@@ -1123,13 +1124,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "06ef8b4bd3b3cb5a9b9a4273a543b257be3304030978ba51516b576a65156c39",
-              "url": "https://files.pythonhosted.org/packages/27/6f/0f5bf76ef3967763ddecda42d894687780109d2d51b7b9eb22b6b3476564/botocore-1.34.132-py3-none-any.whl"
+              "hash": "c63fe9032091fb9e9477706a3ebfa4d0c109b807907051d892ed574f9b573e61",
+              "url": "https://files.pythonhosted.org/packages/a4/5b/202b72d5964fb9b806e684406e3b8f820da0e8049a316abc4e5d767b8de5/botocore-1.34.136-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "372a6cfce29e5de9bcf8c95af901d0bc3e27d8aa2295fadee295424f95f43f16",
-              "url": "https://files.pythonhosted.org/packages/1e/81/2340ab8930a14ccf5caf15c4383649ef83ce27f99a3487e97232b58a1fa3/botocore-1.34.132.tar.gz"
+              "hash": "7f7135178692b39143c8f152a618d2a3b71065a317569a7102d2306d4946f42f",
+              "url": "https://files.pythonhosted.org/packages/3c/ec/09d963aa91a1d09a87c21c014da5092a1eccde8b44cd51bbe8a27e3576fd/botocore-1.34.136.tar.gz"
             }
           ],
           "project_name": "botocore",
@@ -1141,19 +1142,19 @@
             "urllib3<1.27,>=1.25.4; python_version < \"3.10\""
           ],
           "requires_python": ">=3.8",
-          "version": "1.34.132"
+          "version": "1.34.136"
         },
         {
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "4054c0b702c9af1aeb6e1dbc5550ef7b51f4337645b5bf5855b7d833de1f2236",
-              "url": "https://files.pythonhosted.org/packages/b7/34/44df0ed6fe413c6dc3bff635e470fe1450e9cb461dabfa3f37a08f757c57/botocore_stubs-1.34.132-py3-none-any.whl"
+              "hash": "f8a8716d9f1b8387acce6ef35d9428ed4ef1584dbeb6cce3f2f95ba6ff8120f7",
+              "url": "https://files.pythonhosted.org/packages/b5/c4/369c8d396898a51434ec108cc177d27a1b718c3477887148a7a206ad9673/botocore_stubs-1.34.136-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "2c2a9a9b77982277889546e44534492ba207f15ba41feef36339e079ff3dac72",
-              "url": "https://files.pythonhosted.org/packages/d4/f3/e3ec1ea8da8a997edd63690a70db9247afc1425ab253e16336b38d2242eb/botocore_stubs-1.34.132.tar.gz"
+              "hash": "b97bece44abc9f16c1fcb022d3f03c22d411ea3dcb4730207a318eb8e6ef63e7",
+              "url": "https://files.pythonhosted.org/packages/54/92/32f7cc879c43488b0fdd7a9cb0e8d137f72b3df86272f6d2a3e80bc4fb18/botocore_stubs-1.34.136.tar.gz"
             }
           ],
           "project_name": "botocore-stubs",
@@ -1163,7 +1164,7 @@
             "typing-extensions>=4.1.0; python_version < \"3.9\""
           ],
           "requires_python": "<4.0,>=3.8",
-          "version": "1.34.132"
+          "version": "1.34.136"
         },
         {
           "artifacts": [
@@ -1644,6 +1645,127 @@
           "artifacts": [
             {
               "algorithm": "sha256",
+              "hash": "3cb443f8bcd2efb31295a5b9fdb02aee81d8452c80d28f97a6d0959e6cee101e",
+              "url": "https://files.pythonhosted.org/packages/5e/44/73bea497ac69bafde2ee4269292fa3b41f1198f4bb7bbaaabde30ad29d4a/fsspec-2024.6.1-py3-none-any.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "fad7d7e209dd4c1208e3bbfda706620e0da5142bebbd9c384afb95b07e798e49",
+              "url": "https://files.pythonhosted.org/packages/90/b6/eba5024a9889fcfff396db543a34bef0ab9d002278f163129f9f01005960/fsspec-2024.6.1.tar.gz"
+            }
+          ],
+          "project_name": "fsspec",
+          "requires_dists": [
+            "adlfs; extra == \"abfs\"",
+            "adlfs; extra == \"adl\"",
+            "adlfs; extra == \"full\"",
+            "adlfs; extra == \"test-full\"",
+            "aiobotocore<3.0.0,>=2.5.4; extra == \"test-downstream\"",
+            "aiohttp!=4.0.0a0,!=4.0.0a1; extra == \"full\"",
+            "aiohttp!=4.0.0a0,!=4.0.0a1; extra == \"http\"",
+            "aiohttp!=4.0.0a0,!=4.0.0a1; extra == \"test\"",
+            "aiohttp!=4.0.0a0,!=4.0.0a1; extra == \"test-full\"",
+            "cloudpickle; extra == \"test-full\"",
+            "dask-expr; extra == \"test-downstream\"",
+            "dask; extra == \"dask\"",
+            "dask; extra == \"full\"",
+            "dask; extra == \"test-full\"",
+            "dask[dataframe,test]; extra == \"test-downstream\"",
+            "distributed; extra == \"dask\"",
+            "distributed; extra == \"full\"",
+            "distributed; extra == \"test-full\"",
+            "dropbox; extra == \"dropbox\"",
+            "dropbox; extra == \"full\"",
+            "dropbox; extra == \"test-full\"",
+            "dropboxdrivefs; extra == \"dropbox\"",
+            "dropboxdrivefs; extra == \"full\"",
+            "dropboxdrivefs; extra == \"test-full\"",
+            "fastparquet; extra == \"test-full\"",
+            "fusepy; extra == \"full\"",
+            "fusepy; extra == \"fuse\"",
+            "fusepy; extra == \"test-full\"",
+            "gcsfs; extra == \"full\"",
+            "gcsfs; extra == \"gcs\"",
+            "gcsfs; extra == \"gs\"",
+            "gcsfs; extra == \"test-full\"",
+            "jinja2; extra == \"test-full\"",
+            "kerchunk; extra == \"test-full\"",
+            "libarchive-c; extra == \"full\"",
+            "libarchive-c; extra == \"libarchive\"",
+            "libarchive-c; extra == \"test-full\"",
+            "lz4; extra == \"test-full\"",
+            "moto[server]<5,>4; extra == \"test-downstream\"",
+            "notebook; extra == \"test-full\"",
+            "numpy; extra == \"test\"",
+            "numpy; extra == \"test-full\"",
+            "numpydoc; extra == \"doc\"",
+            "ocifs; extra == \"full\"",
+            "ocifs; extra == \"oci\"",
+            "ocifs; extra == \"test-full\"",
+            "pandas; extra == \"test-full\"",
+            "panel; extra == \"full\"",
+            "panel; extra == \"gui\"",
+            "panel; extra == \"test-full\"",
+            "paramiko; extra == \"full\"",
+            "paramiko; extra == \"sftp\"",
+            "paramiko; extra == \"ssh\"",
+            "paramiko; extra == \"test-full\"",
+            "pre-commit; extra == \"dev\"",
+            "pyarrow; extra == \"test-full\"",
+            "pyarrow>=1; extra == \"arrow\"",
+            "pyarrow>=1; extra == \"full\"",
+            "pyarrow>=1; extra == \"hdfs\"",
+            "pyarrow>=1; extra == \"test-full\"",
+            "pyftpdlib; extra == \"test-full\"",
+            "pygit2; extra == \"full\"",
+            "pygit2; extra == \"git\"",
+            "pygit2; extra == \"test-full\"",
+            "pytest-asyncio!=0.22.0; extra == \"test\"",
+            "pytest-asyncio!=0.22.0; extra == \"test-full\"",
+            "pytest-benchmark; extra == \"test\"",
+            "pytest-benchmark; extra == \"test-full\"",
+            "pytest-cov; extra == \"test\"",
+            "pytest-cov; extra == \"test-full\"",
+            "pytest-mock; extra == \"test\"",
+            "pytest-mock; extra == \"test-full\"",
+            "pytest-recording; extra == \"test\"",
+            "pytest-recording; extra == \"test-full\"",
+            "pytest-rerunfailures; extra == \"test\"",
+            "pytest-rerunfailures; extra == \"test-full\"",
+            "pytest-timeout; extra == \"test-downstream\"",
+            "pytest; extra == \"test\"",
+            "pytest; extra == \"test-full\"",
+            "python-snappy; extra == \"test-full\"",
+            "requests; extra == \"dropbox\"",
+            "requests; extra == \"full\"",
+            "requests; extra == \"github\"",
+            "requests; extra == \"test\"",
+            "requests; extra == \"test-full\"",
+            "ruff; extra == \"dev\"",
+            "s3fs; extra == \"full\"",
+            "s3fs; extra == \"s3\"",
+            "smbprotocol; extra == \"full\"",
+            "smbprotocol; extra == \"smb\"",
+            "smbprotocol; extra == \"test-full\"",
+            "sphinx-design; extra == \"doc\"",
+            "sphinx-rtd-theme; extra == \"doc\"",
+            "sphinx; extra == \"doc\"",
+            "tqdm; extra == \"full\"",
+            "tqdm; extra == \"test-full\"",
+            "tqdm; extra == \"tqdm\"",
+            "urllib3; extra == \"test-full\"",
+            "xarray; extra == \"test-downstream\"",
+            "yarl; extra == \"doc\"",
+            "zarr; extra == \"test-full\"",
+            "zstandard; extra == \"test-full\""
+          ],
+          "requires_python": ">=3.8",
+          "version": "2024.6.1"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
               "hash": "f12a9b8309b5e21d92483bbd47ce2c445861ec7d269ef6784ecc0ea8c1fa6125",
               "url": "https://files.pythonhosted.org/packages/44/99/daa3541e8ecd7d8b7907b714ba92126097a976b5b3dbabdb5febdcf08554/google_api_core-2.19.1-py3-none-any.whl"
             },
@@ -1970,6 +2092,127 @@
           ],
           "requires_python": ">=3.8",
           "version": "0.27.0"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
+              "hash": "3a0b957aa87150addf0cc7bd71b4d954b78e749850e1e7fb29ebbd2db64ca037",
+              "url": "https://files.pythonhosted.org/packages/69/d6/73f9d1b7c4da5f0544bc17680d0fa9932445423b90cd38e1ee77d001a4f5/huggingface_hub-0.23.4-py3-none-any.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "35d99016433900e44ae7efe1c209164a5a81dbbcd53a52f99c281dcd7ce22431",
+              "url": "https://files.pythonhosted.org/packages/9d/83/0c07c6e6de04b097a4dd474a30492a650e5845256c4e4eed4397316248e4/huggingface_hub-0.23.4.tar.gz"
+            }
+          ],
+          "project_name": "huggingface-hub",
+          "requires_dists": [
+            "InquirerPy==0.3.4; extra == \"all\"",
+            "InquirerPy==0.3.4; extra == \"cli\"",
+            "InquirerPy==0.3.4; extra == \"dev\"",
+            "InquirerPy==0.3.4; extra == \"testing\"",
+            "Jinja2; extra == \"all\"",
+            "Jinja2; extra == \"dev\"",
+            "Jinja2; extra == \"testing\"",
+            "Pillow; extra == \"all\"",
+            "Pillow; extra == \"dev\"",
+            "Pillow; extra == \"testing\"",
+            "aiohttp; extra == \"all\"",
+            "aiohttp; extra == \"dev\"",
+            "aiohttp; extra == \"inference\"",
+            "aiohttp; extra == \"testing\"",
+            "fastai>=2.4; extra == \"fastai\"",
+            "fastapi; extra == \"all\"",
+            "fastapi; extra == \"dev\"",
+            "fastapi; extra == \"testing\"",
+            "fastcore>=1.3.27; extra == \"fastai\"",
+            "filelock",
+            "fsspec>=2023.5.0",
+            "gradio; extra == \"all\"",
+            "gradio; extra == \"dev\"",
+            "gradio; extra == \"testing\"",
+            "graphviz; extra == \"tensorflow\"",
+            "hf-transfer>=0.1.4; extra == \"hf-transfer\"",
+            "jedi; extra == \"all\"",
+            "jedi; extra == \"dev\"",
+            "jedi; extra == \"testing\"",
+            "keras<3.0; extra == \"tensorflow-testing\"",
+            "minijinja>=1.0; extra == \"all\"",
+            "minijinja>=1.0; extra == \"dev\"",
+            "minijinja>=1.0; extra == \"inference\"",
+            "minijinja>=1.0; extra == \"testing\"",
+            "mypy==1.5.1; extra == \"all\"",
+            "mypy==1.5.1; extra == \"dev\"",
+            "mypy==1.5.1; extra == \"quality\"",
+            "numpy; extra == \"all\"",
+            "numpy; extra == \"dev\"",
+            "numpy; extra == \"testing\"",
+            "packaging>=20.9",
+            "pydot; extra == \"tensorflow\"",
+            "pytest-asyncio; extra == \"all\"",
+            "pytest-asyncio; extra == \"dev\"",
+            "pytest-asyncio; extra == \"testing\"",
+            "pytest-cov; extra == \"all\"",
+            "pytest-cov; extra == \"dev\"",
+            "pytest-cov; extra == \"testing\"",
+            "pytest-env; extra == \"all\"",
+            "pytest-env; extra == \"dev\"",
+            "pytest-env; extra == \"testing\"",
+            "pytest-rerunfailures; extra == \"all\"",
+            "pytest-rerunfailures; extra == \"dev\"",
+            "pytest-rerunfailures; extra == \"testing\"",
+            "pytest-vcr; extra == \"all\"",
+            "pytest-vcr; extra == \"dev\"",
+            "pytest-vcr; extra == \"testing\"",
+            "pytest-xdist; extra == \"all\"",
+            "pytest-xdist; extra == \"dev\"",
+            "pytest-xdist; extra == \"testing\"",
+            "pytest; extra == \"all\"",
+            "pytest; extra == \"dev\"",
+            "pytest; extra == \"testing\"",
+            "pyyaml>=5.1",
+            "requests",
+            "ruff>=0.3.0; extra == \"all\"",
+            "ruff>=0.3.0; extra == \"dev\"",
+            "ruff>=0.3.0; extra == \"quality\"",
+            "safetensors; extra == \"torch\"",
+            "soundfile; extra == \"all\"",
+            "soundfile; extra == \"dev\"",
+            "soundfile; extra == \"testing\"",
+            "tensorflow; extra == \"tensorflow\"",
+            "tensorflow; extra == \"tensorflow-testing\"",
+            "toml; extra == \"fastai\"",
+            "torch; extra == \"torch\"",
+            "tqdm>=4.42.1",
+            "types-PyYAML; extra == \"all\"",
+            "types-PyYAML; extra == \"dev\"",
+            "types-PyYAML; extra == \"typing\"",
+            "types-requests; extra == \"all\"",
+            "types-requests; extra == \"dev\"",
+            "types-requests; extra == \"typing\"",
+            "types-simplejson; extra == \"all\"",
+            "types-simplejson; extra == \"dev\"",
+            "types-simplejson; extra == \"typing\"",
+            "types-toml; extra == \"all\"",
+            "types-toml; extra == \"dev\"",
+            "types-toml; extra == \"typing\"",
+            "types-tqdm; extra == \"all\"",
+            "types-tqdm; extra == \"dev\"",
+            "types-tqdm; extra == \"typing\"",
+            "types-urllib3; extra == \"all\"",
+            "types-urllib3; extra == \"dev\"",
+            "types-urllib3; extra == \"typing\"",
+            "typing-extensions>=3.7.4.3",
+            "typing-extensions>=4.8.0; extra == \"all\"",
+            "typing-extensions>=4.8.0; extra == \"dev\"",
+            "typing-extensions>=4.8.0; extra == \"typing\"",
+            "urllib3<2.0; extra == \"all\"",
+            "urllib3<2.0; extra == \"dev\"",
+            "urllib3<2.0; extra == \"testing\""
+          ],
+          "requires_python": ">=3.8.0",
+          "version": "0.23.4"
         },
         {
           "artifacts": [
@@ -2432,13 +2675,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "d99b9d88cdf82d141612b0a0d85bd5f810b17470a95002b60b28027743f1b1e8",
-              "url": "https://files.pythonhosted.org/packages/39/7a/11a710aca8239f8781fc2aca5239a644f3b26fb3d552805ec2935f39e987/mypy_boto3_ec2-1.34.132-py3-none-any.whl"
+              "hash": "dd547e573a8ac16442a7816069fdddcdd7819e8af658388a81f4e32a292e02f7",
+              "url": "https://files.pythonhosted.org/packages/62/31/080ba4d6226e4af624fba675c1ff6b2a07b1852fba70d21266da572cfee9/mypy_boto3_ec2-1.34.133-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "e1022a3ab50ce51baee58bab20cf32faa73f5cf06d81dd8f937195845d02b6aa",
-              "url": "https://files.pythonhosted.org/packages/3f/14/94341c94ba056cc0846c57b3f61d4317254d29384bc1af658dee5196807d/mypy_boto3_ec2-1.34.132.tar.gz"
+              "hash": "acc1cd92f7d89efff07ff557578e8853dfa08ea0f663bbd2f9386b46c16eb0d1",
+              "url": "https://files.pythonhosted.org/packages/d6/ed/8dfe7a5f3a001cd51c6b01bb235ff17b0ef5aa9795fe15e59797baf2a14d/mypy_boto3_ec2-1.34.133.tar.gz"
             }
           ],
           "project_name": "mypy-boto3-ec2",
@@ -2446,7 +2689,7 @@
             "typing-extensions>=4.1.0; python_version < \"3.12\""
           ],
           "requires_python": ">=3.8",
-          "version": "1.34.132"
+          "version": "1.34.133"
         },
         {
           "artifacts": [
@@ -2472,13 +2715,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "820f105149714f0c8654ec2ce9a8676c792a250968f5b6ea34fce07490d1beec",
-              "url": "https://files.pythonhosted.org/packages/85/92/5090c723176bcf33acfe46a810a6491d424a1ab555586876aa25407a964a/mypy_boto3_rds-1.34.116-py3-none-any.whl"
+              "hash": "ce4872ee69cd10b895e11945b6c3255493b642e0410e48a2cfc6afe689cf6209",
+              "url": "https://files.pythonhosted.org/packages/ed/6a/0b5a843153150ceedc732c7b740cb9e2280d95518f76266b7c08586221f8/mypy_boto3_rds-1.34.135-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "964f25073d1219c611e2e4851ad4e05d30b2fbf5cfa0c1fd751318f8f71e489c",
-              "url": "https://files.pythonhosted.org/packages/89/7e/346f3a8cda14112b91617e68e6c455ae24df44bb984c504a119e7488dfde/mypy_boto3_rds-1.34.116.tar.gz"
+              "hash": "66b50037073434eb894b00f1597ba39f1e86789717ff9676c5a099f31bc39c9a",
+              "url": "https://files.pythonhosted.org/packages/76/99/90ba7c8edf2c381d9e4d5b9ced4e355f1ec218ce2f5a82caaec48d195200/mypy_boto3_rds-1.34.135.tar.gz"
             }
           ],
           "project_name": "mypy-boto3-rds",
@@ -2486,7 +2729,7 @@
             "typing-extensions>=4.1.0; python_version < \"3.12\""
           ],
           "requires_python": ">=3.8",
-          "version": "1.34.116"
+          "version": "1.34.135"
         },
         {
           "artifacts": [
@@ -2815,34 +3058,34 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "4ac7249a1530a2ed50e24201d6630125ced04b30619262f06224616e0030b6cf",
-              "url": "https://files.pythonhosted.org/packages/e3/ca/30e07cd0e2a12538ca864d055c6624ceea757aa79d9fab8ce38f5515fae6/protobuf-5.27.1-py3-none-any.whl"
+              "hash": "54330f07e4949d09614707c48b06d1a22f8ffb5763c159efd5c0928326a91470",
+              "url": "https://files.pythonhosted.org/packages/3a/fa/4c3ac5527ed2e5f3577167ecd5f8180ffcdc8bdd59c9f143409c19706456/protobuf-5.27.2-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "4e38fc29d7df32e01a41cf118b5a968b1efd46b9c41ff515234e794011c78b17",
-              "url": "https://files.pythonhosted.org/packages/1b/14/737d9d432893e75ae1fdaca96e97e8a9b0250c3769a459f44cb419eeaa5e/protobuf-5.27.1-cp38-abi3-macosx_10_9_universal2.whl"
+              "hash": "b848dbe1d57ed7c191dfc4ea64b8b004a3f9ece4bf4d0d80a367b76df20bf36e",
+              "url": "https://files.pythonhosted.org/packages/27/e4/8dc4546be46873f8950cb44cdfe19b79d66d26e53c4ee5e3440406257fcd/protobuf-5.27.2-cp38-abi3-manylinux2014_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "df5e5b8e39b7d1c25b186ffdf9f44f40f810bbcc9d2b71d9d3156fee5a9adf15",
-              "url": "https://files.pythonhosted.org/packages/20/5f/00d891817d4031bbf4e846a99834bf949a76714c10a726833aa184176772/protobuf-5.27.1.tar.gz"
+              "hash": "f3ecdef226b9af856075f28227ff2c90ce3a594d092c39bee5513573f25e2714",
+              "url": "https://files.pythonhosted.org/packages/71/a5/d61e4263e62e6db1990c120d682870e5c50a30fb6b26119a214c7a014847/protobuf-5.27.2.tar.gz"
             },
             {
               "algorithm": "sha256",
-              "hash": "917ed03c3eb8a2d51c3496359f5b53b4e4b7e40edfbdd3d3f34336e0eef6825a",
-              "url": "https://files.pythonhosted.org/packages/28/8b/b4a2c34922a4fc289ea1533331a4ad45ce539b69151bcc464f6e9ecab426/protobuf-5.27.1-cp38-abi3-manylinux2014_aarch64.whl"
+              "hash": "a109916aaac42bff84702fb5187f3edadbc7c97fc2c99c5ff81dd15dcce0d1e5",
+              "url": "https://files.pythonhosted.org/packages/75/44/6ae304790fad936bb4cf09907a05d669b7600458a02b6c960fdaaeeab06e/protobuf-5.27.2-cp38-abi3-macosx_10_9_universal2.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "ee52874a9e69a30271649be88ecbe69d374232e8fd0b4e4b0aaaa87f429f1631",
-              "url": "https://files.pythonhosted.org/packages/3d/50/85a4f42e14eebfc9091e8e38e77ba4874d52fae08984c97725ba3265a1e1/protobuf-5.27.1-cp38-abi3-manylinux2014_x86_64.whl"
+              "hash": "176c12b1f1c880bf7a76d9f7c75822b6a2bc3db2d28baa4d300e8ce4cde7409b",
+              "url": "https://files.pythonhosted.org/packages/cd/c7/a534268f9c3780be1ba50f5ed96243fa9cf6224a445de662c34e91ce0e61/protobuf-5.27.2-cp38-abi3-manylinux2014_aarch64.whl"
             }
           ],
           "project_name": "protobuf",
           "requires_dists": [],
           "requires_python": ">=3.8",
-          "version": "5.27.1"
+          "version": "5.27.2"
         },
         {
           "artifacts": [
@@ -3549,6 +3792,84 @@
           "artifacts": [
             {
               "algorithm": "sha256",
+              "hash": "119af6e56dce35e8dfb5222573b50c89e5508d94d55713c75126b753f834de68",
+              "url": "https://files.pythonhosted.org/packages/c3/ea/a4d91ae20f0b46aabfed25a251dfa53aa8ac040bfdca0dfe0476ad755812/regex-2024.5.15-cp311-cp311-musllinux_1_2_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "19dfb1c504781a136a80ecd1fff9f16dddf5bb43cec6871778c8a907a085bb3d",
+              "url": "https://files.pythonhosted.org/packages/05/59/3bc9904120829c33badf6ba320e7cbaeed752e40312d9c402c4db822b117/regex-2024.5.15-cp311-cp311-musllinux_1_2_s390x.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "0721931ad5fe0dda45d07f9820b90b2148ccdd8e45bb9e9b42a146cb4f695649",
+              "url": "https://files.pythonhosted.org/packages/1d/a4/d1f17f6ba68a6a926d067f847289576145aabaa18b9418f6ebc3a85e7881/regex-2024.5.15-cp311-cp311-musllinux_1_2_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "c6a2b494a76983df8e3d3feea9b9ffdd558b247e60b92f877f93a1ff43d26656",
+              "url": "https://files.pythonhosted.org/packages/2b/8b/1801c93783cc86bc72ed96f836ee81ea1e42c9f7bbf193aece9878c3fae5/regex-2024.5.15-cp311-cp311-macosx_10_9_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "3e507ff1e74373c4d3038195fdd2af30d297b4f0950eeda6f515ae3d84a1770f",
+              "url": "https://files.pythonhosted.org/packages/39/29/8158a6e69e97b9c72fab0b46fe4d57c789d07ef91fe4afde23721e7cac61/regex-2024.5.15-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "ec54d5afa89c19c6dd8541a133be51ee1017a38b412b1321ccb8d6ddbeb4cf7d",
+              "url": "https://files.pythonhosted.org/packages/3b/c5/4fea63c46a094d19a14b5b6f5fd4114e6da207ae154c227449d1fadfbf33/regex-2024.5.15-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "10e4ce0dca9ae7a66e6089bb29355d4432caed736acae36fef0fdd7879f0b0cb",
+              "url": "https://files.pythonhosted.org/packages/3f/51/36aa11beba9c2f3d1598dd40e4b9f7f2e755106e7ab1674d64b526b86d77/regex-2024.5.15-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "833616ddc75ad595dee848ad984d067f2f31be645d603e4d158bba656bbf516c",
+              "url": "https://files.pythonhosted.org/packages/59/49/2fc4ae9039b7f7b0905ea4080c29e64d0880aa4c169862210d0abac675fe/regex-2024.5.15-cp311-cp311-musllinux_1_2_i686.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "d3ee02d9e5f482cc8309134a91eeaacbdd2261ba111b0fef3748eeb4913e6a2c",
+              "url": "https://files.pythonhosted.org/packages/7a/db/5ddc89851e9cc003929c3b08b9b88b429459bf9acbf307b4556d51d9e49b/regex-2024.5.15.tar.gz"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "10002e86e6068d9e1c91eae8295ef690f02f913c57db120b58fdd35a6bb1af35",
+              "url": "https://files.pythonhosted.org/packages/7d/ba/cbbcdad38b40f1fa36eee1a130051d8e3cd2bd40d3a2a7bce4cf6ff82190/regex-2024.5.15-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "f5b1dff3ad008dccf18e652283f5e5339d70bf8ba7c98bf848ac33db10f7bc7a",
+              "url": "https://files.pythonhosted.org/packages/8b/3a/752689537c98613ea2386784d60f7c791f05eee7a61a02a0ba8aa6c515b4/regex-2024.5.15-cp311-cp311-macosx_10_9_universal2.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "287eb7f54fc81546346207c533ad3c2c51a8d61075127d7f6d79aaf96cdee890",
+              "url": "https://files.pythonhosted.org/packages/a9/e1/476dd75cfc338ca415adf1a85357f8e8c4d81a01555efa5ceaf6480a6c20/regex-2024.5.15-cp311-cp311-musllinux_1_2_ppc64le.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "a32b96f15c8ab2e7d27655969a23895eb799de3665fa94349f3b2fbfd547236f",
+              "url": "https://files.pythonhosted.org/packages/c3/43/29ef9c42ae1e764a98510af1c610bf9f4b90a97a04fabe9396d6b73b0cc4/regex-2024.5.15-cp311-cp311-macosx_11_0_arm64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "d1f059a4d795e646e1c37665b9d06062c62d0e8cc3c511fe01315973a6542e40",
+              "url": "https://files.pythonhosted.org/packages/f3/6b/60e12bdef54f4d937ffc45a0bdf53ffdc90b604dd170b7eabd603ad6e876/regex-2024.5.15-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl"
+            }
+          ],
+          "project_name": "regex",
+          "requires_dists": [],
+          "requires_python": ">=3.8",
+          "version": "2024.5.15"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
               "hash": "70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6",
               "url": "https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl"
             },
@@ -3662,79 +3983,84 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "338a64ef0748f8c3a80d7f05785930f7965d71ca260904a9321d13be24b79695",
-              "url": "https://files.pythonhosted.org/packages/d3/9e/11ae4e8587efe40aa083835665d0818626f8f4a10aa4ebc097cdbfae7624/ruff-0.4.10-py3-none-musllinux_1_2_x86_64.whl"
+              "hash": "46e193b36f2255729ad34a49c9a997d506e58f08555366b2108783b3064a0e1e",
+              "url": "https://files.pythonhosted.org/packages/3b/67/3203d56ee41d3dee8d94c7926b298b13a150f105a55fef38b75ccf5e0901/ruff-0.5.0-py3-none-musllinux_1_2_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "0f54c481b39a762d48f64d97351048e842861c6662d63ec599f67d515cb417f6",
-              "url": "https://files.pythonhosted.org/packages/11/c3/3f89b1e967a869642bd9198f27e2b89b8300862555d3e1e39b4ccaf92e8b/ruff-0.4.10-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+              "hash": "b1a321c4f68809fddd9b282fab6a8d8db796b270fff44722589a8b946925a2a8",
+              "url": "https://files.pythonhosted.org/packages/12/a1/5f45ab0948a202da7fe13c6e0678f907bd88caacc7e4f4909603d3774051/ruff-0.5.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "a79489607d1495685cdd911a323a35871abfb7a95d4f98fc6f85e799227ac46e",
-              "url": "https://files.pythonhosted.org/packages/46/5e/4ac799ffec39ef5012052c1f144a0f7a63a0322ebd328b802d64beb3d091/ruff-0.4.10-py3-none-macosx_11_0_arm64.whl"
+              "hash": "eb641b5873492cf9bd45bc9c5ae5320648218e04386a5f0c264ad6ccce8226a1",
+              "url": "https://files.pythonhosted.org/packages/28/9a/dde343d95ecd0747207e4e8d143c373ef961cbd6b78c61a659f67582dbd2/ruff-0.5.0.tar.gz"
             },
             {
               "algorithm": "sha256",
-              "hash": "9e9b6fb3a37b772628415b00c4fc892f97954275394ed611056a4b8a2631365e",
-              "url": "https://files.pythonhosted.org/packages/48/dc/2c057e7717a3eaaa89ea848a26ef085930a2509f9b66ceae55319668c03d/ruff-0.4.10-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+              "hash": "adc7012d6ec85032bc4e9065110df205752d64010bed5f958d25dbee9ce35de3",
+              "url": "https://files.pythonhosted.org/packages/34/54/ea77237405b7573298f5cc00045d1aceab609841d3cc88de3d7c3d2a6163/ruff-0.5.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "5c2c4d0859305ac5a16310eec40e4e9a9dec5dcdfbe92697acd99624e8638dac",
-              "url": "https://files.pythonhosted.org/packages/53/0d/134fdd72f566d37b0c59b6e55f60993c705f93a0fe3c1faa6f8a269057c7/ruff-0.4.10-py3-none-macosx_10_12_x86_64.whl"
+              "hash": "ee770ea8ab38918f34e7560a597cc0a8c9a193aaa01bfbd879ef43cb06bd9c4c",
+              "url": "https://files.pythonhosted.org/packages/55/5d/0d9510720d61df753df39bf24a96d6c141080c94fe6025568747fbea856a/ruff-0.5.0-py3-none-linux_armv6l.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "b1dd1681dfa90a41b8376a61af05cc4dc5ff32c8f14f5fe20dba9ff5deb80cd6",
-              "url": "https://files.pythonhosted.org/packages/78/6f/37af054d3ced5a6196201f6c248eeaec6b3b844136cf3da510d591dbfd89/ruff-0.4.10-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+              "hash": "d505fb93b0fabef974b168d9b27c3960714d2ecda24b6ffa6a87ac432905ea38",
+              "url": "https://files.pythonhosted.org/packages/56/db/3f74873bc0ca915f79d26575e549eb5e633022d56315d314e6f9c0fa596a/ruff-0.5.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "330421543bd3222cdfec481e8ff3460e8702ed1e58b494cf9d9e4bf90db52b9d",
-              "url": "https://files.pythonhosted.org/packages/b8/c1/5373bc5a4c3782c0a368ce5ca4ec3a689574daf71f68f55720a6a64321d4/ruff-0.4.10-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+              "hash": "9dc5cfd3558f14513ed0d5b70ce531e28ea81a8a3b1b07f0f48421a3d9e7d80a",
+              "url": "https://files.pythonhosted.org/packages/57/08/1052c80f3f44321631a8c1337e55883dd7a7b02b4efe5c9282258db42358/ruff-0.5.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "c75c53bb79d71310dc79fb69eb4902fba804a81f374bc86a9b117a8d077a1784",
-              "url": "https://files.pythonhosted.org/packages/c7/38/070baf0393ba0da9d85409bdd63874776926acfc372e8e9f0ed21957aeee/ruff-0.4.10-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+              "hash": "e589e27971c2a3efff3fadafb16e5aef7ff93250f0134ec4b52052b673cf988d",
+              "url": "https://files.pythonhosted.org/packages/67/34/fd7cd8be0d8cd4bcce0dbef807933f6c9685d5dc2549b729da7ee7a7a5cc/ruff-0.5.0-py3-none-musllinux_1_2_aarch64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "acfaaab59543382085f9eb51f8e87bac26bf96b164839955f244d07125a982ef",
-              "url": "https://files.pythonhosted.org/packages/cf/13/bc788b2e21d3e4db74d1375da22f50f944bc1fef064c4749f307b0c8794f/ruff-0.4.10-py3-none-musllinux_1_2_armv7l.whl"
+              "hash": "d2ffbc3715a52b037bcb0f6ff524a9367f642cdc5817944f6af5479bbb2eb50e",
+              "url": "https://files.pythonhosted.org/packages/7b/54/8a654417265fe91de3ff303274a9d4d64774496eaa2eadd7da8e88a48b82/ruff-0.5.0-py3-none-musllinux_1_2_armv7l.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "67fe086b433b965c22de0b4259ddfe6fa541c95bf418499bedb9ad5fb8d1c631",
-              "url": "https://files.pythonhosted.org/packages/d0/e6/734aed23112de8df5a2f3bc02e9e45cd3910fe83b0d2bb2456e200c52d98/ruff-0.4.10-py3-none-musllinux_1_2_aarch64.whl"
+              "hash": "2c4dfcd8d34b143916994b3876b63d53f56724c03f8c1a33a253b7b1e6bf2a7d",
+              "url": "https://files.pythonhosted.org/packages/7e/40/83f88d5bda41496a90871ec82dd82545def4c4683e1c2f4a42f5a168ae3e/ruff-0.5.0-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "18238c80ee3d9100d3535d8eb15a59c4a0753b45cc55f8bf38f38d6a597b9739",
-              "url": "https://files.pythonhosted.org/packages/e7/9d/bad51d81c918e1ce1648b24480a63f5605662efe69b55fad05825b5711ff/ruff-0.4.10-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl"
+              "hash": "cd096e23c6a4f9c819525a437fa0a99d1c67a1b6bb30948d46f33afbc53596cf",
+              "url": "https://files.pythonhosted.org/packages/86/39/564161e306b12ab40d2b6be0a0bc843c692a8295cc7101fa930db89e1e7e/ruff-0.5.0-py3-none-musllinux_1_2_i686.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "3aa4f2bc388a30d346c56524f7cacca85945ba124945fe489952aadb6b5cd804",
-              "url": "https://files.pythonhosted.org/packages/ea/04/b660bc832ebfa40e1788edf6934388340751cbc6f733d1f807edca9d96e6/ruff-0.4.10.tar.gz"
+              "hash": "db3ca35265de239a1176d56a464b51557fce41095c37d6c406e658cf80bbb362",
+              "url": "https://files.pythonhosted.org/packages/8f/a2/f7c01c4a02b87998c9e1379ec8d7345d6a45f8b34e326e8700c13da391c3/ruff-0.5.0-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "d8f71885bce242da344989cae08e263de29752f094233f932d4f5cfb4ef36a81",
-              "url": "https://files.pythonhosted.org/packages/ec/a4/1310b3d003cb67f3c86cb8cc5c5e475dab152b1eef88558abd11e55daaad/ruff-0.4.10-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl"
+              "hash": "81e5facfc9f4a674c6a78c64d38becfbd5e4f739c31fcd9ce44c849f1fad9e4c",
+              "url": "https://files.pythonhosted.org/packages/af/79/8a57016a761d11491b913460a3d1545cdbe96dca6acb1279102814c9147b/ruff-0.5.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "3cea07079962b2941244191569cf3a05541477286f5cafea638cd3aa94b56815",
-              "url": "https://files.pythonhosted.org/packages/f0/09/f3c6560f9d81a4c5d800996090c9cc54d794ea14ab8f8af46b7483005963/ruff-0.4.10-py3-none-musllinux_1_2_i686.whl"
+              "hash": "38f3b8327b3cb43474559d435f5fa65dacf723351c159ed0dc567f7ab735d1b6",
+              "url": "https://files.pythonhosted.org/packages/be/5a/7f466f5449dce168c2d956ad4a207d62dc7b76836d46f1c04249a4daaf34/ruff-0.5.0-py3-none-macosx_10_12_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "7594f8df5404a5c5c8f64b8311169879f6cf42142da644c7e0ba3c3f14130370",
+              "url": "https://files.pythonhosted.org/packages/e2/a2/afc6952d5a0199e7e6c0a2051d6f4780fb70376f5bd07f27838f8bc0cf47/ruff-0.5.0-py3-none-macosx_11_0_arm64.whl"
             }
           ],
           "project_name": "ruff",
           "requires_dists": [],
           "requires_python": ">=3.7",
-          "version": "0.4.10"
+          "version": "0.5.0"
         },
         {
           "artifacts": [
@@ -3756,6 +4082,103 @@
           ],
           "requires_python": ">=3.8",
           "version": "0.10.2"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
+              "hash": "befdf0167ad626f22f6aac6163477fcefa342224a22f11fdd05abb3995c1783c",
+              "url": "https://files.pythonhosted.org/packages/37/53/ccfd39b7d31b174f5317b8661ee49cff1045c865dd8dad678cf8bcd1fd99/safetensors-0.4.3-cp311-cp311-musllinux_1_1_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "e0b2104df1579d6ba9052c0ae0e3137c9698b2d85b0645507e6fd1813b70931a",
+              "url": "https://files.pythonhosted.org/packages/01/9d/f816257b83a7fe63894eb0bc3d880d857b28a4f19c24d01070d3cc034c4a/safetensors-0.4.3-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "faefeb3b81bdfb4e5a55b9bbdf3d8d8753f65506e1d67d03f5c851a6c87150e9",
+              "url": "https://files.pythonhosted.org/packages/2c/e8/72c8b84a06ff7e0e89329c7b223ae9e4f6fdb71f3c70e2a7dd6601d82ef2/safetensors-0.4.3-cp311-cp311-musllinux_1_1_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "585c9ae13a205807b63bef8a37994f30c917ff800ab8a1ca9c9b5d73024f97ee",
+              "url": "https://files.pythonhosted.org/packages/36/ff/77c8aa91569993a16796b241396638b76574af882580bec03fd207a3e332/safetensors-0.4.3-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "d8c5093206ef4b198600ae484230402af6713dab1bd5b8e231905d754022bec7",
+              "url": "https://files.pythonhosted.org/packages/81/72/46cd098a2ca289015001a51a51b34b3956c4abe083bb1b90bf0a88e36d19/safetensors-0.4.3-cp311-cp311-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "7c4fa560ebd4522adddb71dcd25d09bf211b5634003f015a4b815b7647d62ebe",
+              "url": "https://files.pythonhosted.org/packages/82/61/d4812330b32600972e92ef09a59dc54f9ab8ae570fdca28d8bdfc5577756/safetensors-0.4.3-cp311-cp311-macosx_11_0_arm64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "e9afd5358719f1b2cf425fad638fc3c887997d6782da317096877e5b15b2ce93",
+              "url": "https://files.pythonhosted.org/packages/85/f8/13934886b30f4429a480ee24be217cefc279f1d40e1cf0250b327404ab82/safetensors-0.4.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "2f85fc50c4e07a21e95c24e07460fe6f7e2859d0ce88092838352b798ce711c2",
+              "url": "https://files.pythonhosted.org/packages/9c/21/acd1b6dd9dad9708fd388fdbe6618e461108cdbd56ff4eab6094c6e61035/safetensors-0.4.3.tar.gz"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "22f3b5d65e440cec0de8edaa672efa888030802e11c09b3d6203bff60ebff05a",
+              "url": "https://files.pythonhosted.org/packages/9f/d9/1bd2c06c1e7aff0c6db4affff5c0b8d6b2fa421ee0d2de94408d43e6aa7c/safetensors-0.4.3-cp311-cp311-macosx_10_12_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "8cf18888606dad030455d18f6c381720e57fc6a4170ee1966adb7ebc98d4d6a3",
+              "url": "https://files.pythonhosted.org/packages/a7/fe/1944bfe51595222022d3309fdaed21662c4841f512ddbe02b1b106ff6c03/safetensors-0.4.3-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "0bf4f9d6323d9f86eef5567eabd88f070691cf031d4c0df27a40d3b4aaee755b",
+              "url": "https://files.pythonhosted.org/packages/d5/85/1e7d2804cbf82204cde462d16f1cb0ff5814b03f559fb46ceaa6b7020db4/safetensors-0.4.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ],
+          "project_name": "safetensors",
+          "requires_dists": [
+            "black==22.3; extra == \"quality\"",
+            "click==8.0.4; extra == \"quality\"",
+            "flake8>=3.8.3; extra == \"quality\"",
+            "flax>=0.6.3; extra == \"jax\"",
+            "h5py>=3.7.0; extra == \"testing\"",
+            "huggingface-hub>=0.12.1; extra == \"testing\"",
+            "hypothesis>=6.70.2; extra == \"testing\"",
+            "isort>=5.5.4; extra == \"quality\"",
+            "jax>=0.3.25; extra == \"jax\"",
+            "jaxlib>=0.3.25; extra == \"jax\"",
+            "mlx>=0.0.9; extra == \"mlx\"",
+            "numpy>=1.21.6; extra == \"numpy\"",
+            "paddlepaddle>=2.4.1; extra == \"paddlepaddle\"",
+            "pytest-benchmark>=4.0.0; extra == \"testing\"",
+            "pytest>=7.2.0; extra == \"testing\"",
+            "safetensors[all]; extra == \"dev\"",
+            "safetensors[jax]; extra == \"all\"",
+            "safetensors[numpy]; extra == \"all\"",
+            "safetensors[numpy]; extra == \"jax\"",
+            "safetensors[numpy]; extra == \"paddlepaddle\"",
+            "safetensors[numpy]; extra == \"pinned-tf\"",
+            "safetensors[numpy]; extra == \"tensorflow\"",
+            "safetensors[numpy]; extra == \"testing\"",
+            "safetensors[numpy]; extra == \"torch\"",
+            "safetensors[paddlepaddle]; extra == \"all\"",
+            "safetensors[pinned-tf]; extra == \"all\"",
+            "safetensors[quality]; extra == \"all\"",
+            "safetensors[testing]; extra == \"all\"",
+            "safetensors[torch]; extra == \"all\"",
+            "setuptools-rust>=1.5.2; extra == \"testing\"",
+            "tensorflow==2.11.0; extra == \"pinned-tf\"",
+            "tensorflow>=2.11.0; extra == \"tensorflow\"",
+            "torch>=1.10; extra == \"torch\""
+          ],
+          "requires_python": ">=3.7",
+          "version": "0.4.3"
         },
         {
           "artifacts": [
@@ -4019,17 +4442,18 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "043c556b96de308ed1af8965515eb9dfb3dffc96dea0a0e4e1c08968693d56ce",
-              "url": "https://files.pythonhosted.org/packages/5d/d4/b519a53e4333111a97f6ad4cd9b4a2200991e497fd94cf1493d1ef18750f/testcontainers-4.6.0-py3-none-any.whl"
+              "hash": "7c37dc610395940e5f0c67c97eeba1889ab7ec9b689f0c8b73d7fa7fe7baf3c9",
+              "url": "https://files.pythonhosted.org/packages/9c/1d/ca2fd88ae3ab69ea91d5e69cd30fc4c8d52bbf111ce1954fa47435e15a02/testcontainers-4.7.0-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "dbe8a6e6c5e7282d39cc26a0c294070461249dea21de42cc371c177420f38af8",
-              "url": "https://files.pythonhosted.org/packages/c1/b8/fa3cdfc2cbfdcd8169c6d09a6fb6b79e8575b5b9c8167bedb153020f2db4/testcontainers-4.6.0.tar.gz"
+              "hash": "89c11f02f98093e3811346556707209278a7b7a4d9e18170cdae80668909cb8b",
+              "url": "https://files.pythonhosted.org/packages/c1/c7/606f1ad2e58cf4e9cc29138962ff18f6af0b74f6e55570c2828c5a16d22f/testcontainers-4.7.0.tar.gz"
             }
           ],
           "project_name": "testcontainers",
           "requires_dists": [
+            "azure-cosmos; extra == \"cosmosdb\"",
             "azure-storage-blob<13.0,>=12.19; extra == \"azurite\"",
             "bcrypt; extra == \"registry\"",
             "boto3; extra == \"localstack\"",
@@ -4038,6 +4462,7 @@
             "docker",
             "google-cloud-datastore>=2; extra == \"google\"",
             "google-cloud-pubsub>=2; extra == \"google\"",
+            "httpx; extra == \"generic\" or extra == \"testmoduleimport\"",
             "influxdb-client; extra == \"influxdb\"",
             "influxdb; extra == \"influxdb\"",
             "kubernetes; extra == \"k3s\"",
@@ -4063,7 +4488,477 @@
             "wrapt"
           ],
           "requires_python": "<4.0,>=3.9",
-          "version": "4.6.0"
+          "version": "4.7.0"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
+              "hash": "16baac68651701364b0289979ecec728546133e8e8fe38f66fe48ad07996b88b",
+              "url": "https://files.pythonhosted.org/packages/25/50/8f8ad0bbdaf09d04b15e6502d1fa1c653754ed7e016e4ae009726aa1a4e4/tokenizers-0.19.1-cp311-cp311-musllinux_1_1_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "76951121890fea8330d3a0df9a954b3f2a37e3ec20e5b0530e9a0044ca2e11fe",
+              "url": "https://files.pythonhosted.org/packages/06/db/c0320c4798ac6bd12d2ef895bec9d10d216a3b4d6fff10e9d68883ea7edc/tokenizers-0.19.1-cp311-cp311-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "dfedf31824ca4915b511b03441784ff640378191918264268e6923da48104acc",
+              "url": "https://files.pythonhosted.org/packages/36/c6/537f22b57e6003904d35d07962dbde2f2e9bdd791d0241da976a4c7f8194/tokenizers-0.19.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "ee59e6680ed0fdbe6b724cf38bd70400a0c1dd623b07ac729087270caeac88e3",
+              "url": "https://files.pythonhosted.org/packages/48/04/2071c150f374aab6d5e92aaec38d0f3c368d227dd9e0469a1f0966ac68d1/tokenizers-0.19.1.tar.gz"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "b342d2ce8fc8d00f376af068e3274e2e8649562e3bc6ae4a67784ded6b99428d",
+              "url": "https://files.pythonhosted.org/packages/4c/8a/a166888d6cb14db55f5eb7ce0b1d4777d145aa27cbf4f945712cf6c29935/tokenizers-0.19.1-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "706a37cc5332f85f26efbe2bdc9ef8a9b372b77e4645331a405073e4b3a8c1c6",
+              "url": "https://files.pythonhosted.org/packages/5b/cd/0385e1026e1e03732fd398e964792a3a8433918b166748c82507e014d748/tokenizers-0.19.1-cp311-cp311-musllinux_1_1_aarch64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "ddf672ed719b4ed82b51499100f5417d7d9f6fb05a65e232249268f35de5ed14",
+              "url": "https://files.pythonhosted.org/packages/90/79/d17a0f491d10817cd30f1121a07aa09c8e97a81114b116e473baf1577f09/tokenizers-0.19.1-cp311-cp311-macosx_11_0_arm64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "d16ff18907f4909dca9b076b9c2d899114dd6abceeb074eca0c93e2353f943aa",
+              "url": "https://files.pythonhosted.org/packages/a7/03/fb50fc03f86016b227a967c8d474f90230c885c0d18f78acdfda7a96ce56/tokenizers-0.19.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "ac11016d0a04aa6487b1513a3a36e7bee7eec0e5d30057c9c0408067345c48d2",
+              "url": "https://files.pythonhosted.org/packages/af/ef/3c1deed14ec59b2c8e7e2fa27b2a53f7d101181277a43b89ab17d891ef2e/tokenizers-0.19.1-cp311-cp311-manylinux_2_17_armv7l.manylinux2014_armv7l.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "dadc509cc8a9fe460bd274c0e16ac4184d0958117cf026e0ea8b32b438171594",
+              "url": "https://files.pythonhosted.org/packages/c7/28/2d11c3ff94f9d42eceb2ea549a06e3f166fe391c5a025e5d96fac898a3ac/tokenizers-0.19.1-cp311-cp311-manylinux_2_12_i686.manylinux2010_i686.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "5c88d1481f1882c2e53e6bb06491e474e420d9ac7bdff172610c4f9ad3898059",
+              "url": "https://files.pythonhosted.org/packages/c8/d6/6e1d728d765eb4102767f071bf7f6439ab10d7f4a975c9217db65715207a/tokenizers-0.19.1-cp311-cp311-macosx_10_12_x86_64.whl"
+            }
+          ],
+          "project_name": "tokenizers",
+          "requires_dists": [
+            "black==22.3; extra == \"testing\"",
+            "datasets; extra == \"testing\"",
+            "huggingface-hub<1.0,>=0.16.4",
+            "numpy; extra == \"testing\"",
+            "pytest; extra == \"testing\"",
+            "requests; extra == \"testing\"",
+            "ruff; extra == \"testing\"",
+            "setuptools-rust; extra == \"docs\"",
+            "sphinx-rtd-theme; extra == \"docs\"",
+            "sphinx; extra == \"docs\"",
+            "tokenizers[testing]; extra == \"dev\""
+          ],
+          "requires_python": ">=3.7",
+          "version": "0.19.1"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
+              "hash": "b75ca56b413b030bc3f00af51fd2c1a1a5eac6a0c1cca83cbb37a5c52abce644",
+              "url": "https://files.pythonhosted.org/packages/18/eb/fdb7eb9e48b7b02554e1664afd3bd3f117f6b6d6c5881438a0b055554f9b/tqdm-4.66.4-py3-none-any.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "e4d936c9de8727928f3be6079590e97d9abfe8d39a590be678eb5919ffc186bb",
+              "url": "https://files.pythonhosted.org/packages/5a/c0/b7599d6e13fe0844b0cda01b9aaef9a0e87dbb10b06e4ee255d3fa1c79a2/tqdm-4.66.4.tar.gz"
+            }
+          ],
+          "project_name": "tqdm",
+          "requires_dists": [
+            "colorama; platform_system == \"Windows\"",
+            "ipywidgets>=6; extra == \"notebook\"",
+            "pytest-cov; extra == \"dev\"",
+            "pytest-timeout; extra == \"dev\"",
+            "pytest-xdist; extra == \"dev\"",
+            "pytest>=6; extra == \"dev\"",
+            "requests; extra == \"telegram\"",
+            "slack-sdk; extra == \"slack\""
+          ],
+          "requires_python": ">=3.7",
+          "version": "4.66.4"
+        },
+        {
+          "artifacts": [
+            {
+              "algorithm": "sha256",
+              "hash": "05555d20e43f808de1ef211ab64803cdb513170cef70d29a888b589caebefc67",
+              "url": "https://files.pythonhosted.org/packages/d9/b7/98f821d70102e2d38483bbb7013a689d2d646daa4495377bc910374ad727/transformers-4.41.2-py3-none-any.whl"
+            },
+            {
+              "algorithm": "sha256",
+              "hash": "80a4db216533d573e9cc7388646c31ed9480918feb7c55eb211249cb23567f87",
+              "url": "https://files.pythonhosted.org/packages/50/c9/b8acdf584f19558e29f46d36b5ed80954c2d3831811f129a5a6e84c4537b/transformers-4.41.2.tar.gz"
+            }
+          ],
+          "project_name": "transformers",
+          "requires_dists": [
+            "GitPython<3.1.19; extra == \"deepspeed-testing\"",
+            "GitPython<3.1.19; extra == \"dev\"",
+            "GitPython<3.1.19; extra == \"dev-tensorflow\"",
+            "GitPython<3.1.19; extra == \"dev-torch\"",
+            "GitPython<3.1.19; extra == \"quality\"",
+            "GitPython<3.1.19; extra == \"testing\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"agents\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"all\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"dev\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"dev-tensorflow\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"dev-torch\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"torch-vision\"",
+            "Pillow<=15.0,>=10.0.1; extra == \"vision\"",
+            "accelerate>=0.21.0; extra == \"accelerate\"",
+            "accelerate>=0.21.0; extra == \"agents\"",
+            "accelerate>=0.21.0; extra == \"all\"",
+            "accelerate>=0.21.0; extra == \"deepspeed\"",
+            "accelerate>=0.21.0; extra == \"deepspeed-testing\"",
+            "accelerate>=0.21.0; extra == \"dev\"",
+            "accelerate>=0.21.0; extra == \"dev-torch\"",
+            "accelerate>=0.21.0; extra == \"torch\"",
+            "av==9.2.0; extra == \"all\"",
+            "av==9.2.0; extra == \"dev\"",
+            "av==9.2.0; extra == \"video\"",
+            "beautifulsoup4; extra == \"deepspeed-testing\"",
+            "beautifulsoup4; extra == \"dev\"",
+            "beautifulsoup4; extra == \"dev-tensorflow\"",
+            "beautifulsoup4; extra == \"dev-torch\"",
+            "beautifulsoup4; extra == \"testing\"",
+            "codecarbon==1.2.0; extra == \"all\"",
+            "codecarbon==1.2.0; extra == \"codecarbon\"",
+            "codecarbon==1.2.0; extra == \"dev\"",
+            "codecarbon==1.2.0; extra == \"dev-torch\"",
+            "cookiecutter==1.7.3; extra == \"deepspeed-testing\"",
+            "cookiecutter==1.7.3; extra == \"dev\"",
+            "cookiecutter==1.7.3; extra == \"dev-tensorflow\"",
+            "cookiecutter==1.7.3; extra == \"dev-torch\"",
+            "cookiecutter==1.7.3; extra == \"modelcreation\"",
+            "cookiecutter==1.7.3; extra == \"testing\"",
+            "datasets!=2.5.0; extra == \"agents\"",
+            "datasets!=2.5.0; extra == \"deepspeed-testing\"",
+            "datasets!=2.5.0; extra == \"dev\"",
+            "datasets!=2.5.0; extra == \"dev-tensorflow\"",
+            "datasets!=2.5.0; extra == \"dev-torch\"",
+            "datasets!=2.5.0; extra == \"quality\"",
+            "datasets!=2.5.0; extra == \"retrieval\"",
+            "datasets!=2.5.0; extra == \"testing\"",
+            "decord==0.6.0; extra == \"all\"",
+            "decord==0.6.0; extra == \"dev\"",
+            "decord==0.6.0; extra == \"video\"",
+            "deepspeed>=0.9.3; extra == \"deepspeed\"",
+            "deepspeed>=0.9.3; extra == \"deepspeed-testing\"",
+            "diffusers; extra == \"agents\"",
+            "dill<0.3.5; extra == \"deepspeed-testing\"",
+            "dill<0.3.5; extra == \"dev\"",
+            "dill<0.3.5; extra == \"dev-tensorflow\"",
+            "dill<0.3.5; extra == \"dev-torch\"",
+            "dill<0.3.5; extra == \"testing\"",
+            "evaluate>=0.2.0; extra == \"deepspeed-testing\"",
+            "evaluate>=0.2.0; extra == \"dev\"",
+            "evaluate>=0.2.0; extra == \"dev-tensorflow\"",
+            "evaluate>=0.2.0; extra == \"dev-torch\"",
+            "evaluate>=0.2.0; extra == \"testing\"",
+            "faiss-cpu; extra == \"deepspeed-testing\"",
+            "faiss-cpu; extra == \"dev\"",
+            "faiss-cpu; extra == \"dev-tensorflow\"",
+            "faiss-cpu; extra == \"dev-torch\"",
+            "faiss-cpu; extra == \"retrieval\"",
+            "faiss-cpu; extra == \"testing\"",
+            "fastapi; extra == \"serving\"",
+            "filelock",
+            "filelock; extra == \"torchhub\"",
+            "flax<=0.7.0,>=0.4.1; extra == \"all\"",
+            "flax<=0.7.0,>=0.4.1; extra == \"dev\"",
+            "flax<=0.7.0,>=0.4.1; extra == \"flax\"",
+            "ftfy; extra == \"ftfy\"",
+            "fugashi>=1.0; extra == \"dev\"",
+            "fugashi>=1.0; extra == \"dev-torch\"",
+            "fugashi>=1.0; extra == \"ja\"",
+            "huggingface-hub<1.0,>=0.23.0",
+            "huggingface-hub<1.0,>=0.23.0; extra == \"torchhub\"",
+            "importlib-metadata; extra == \"torchhub\"",
+            "ipadic<2.0,>=1.0.0; extra == \"dev\"",
+            "ipadic<2.0,>=1.0.0; extra == \"dev-torch\"",
+            "ipadic<2.0,>=1.0.0; extra == \"ja\"",
+            "isort>=5.5.4; extra == \"dev\"",
+            "isort>=5.5.4; extra == \"dev-tensorflow\"",
+            "isort>=5.5.4; extra == \"dev-torch\"",
+            "isort>=5.5.4; extra == \"quality\"",
+            "jax<=0.4.13,>=0.4.1; extra == \"all\"",
+            "jax<=0.4.13,>=0.4.1; extra == \"dev\"",
+            "jax<=0.4.13,>=0.4.1; extra == \"flax\"",
+            "jaxlib<=0.4.13,>=0.4.1; extra == \"all\"",
+            "jaxlib<=0.4.13,>=0.4.1; extra == \"dev\"",
+            "jaxlib<=0.4.13,>=0.4.1; extra == \"flax\"",
+            "kenlm; extra == \"all\"",
+            "kenlm; extra == \"audio\"",
+            "kenlm; extra == \"dev\"",
+            "kenlm; extra == \"dev-tensorflow\"",
+            "kenlm; extra == \"dev-torch\"",
+            "kenlm; extra == \"flax-speech\"",
+            "kenlm; extra == \"speech\"",
+            "kenlm; extra == \"tf-speech\"",
+            "kenlm; extra == \"torch-speech\"",
+            "keras-nlp>=0.3.1; extra == \"all\"",
+            "keras-nlp>=0.3.1; extra == \"dev\"",
+            "keras-nlp>=0.3.1; extra == \"dev-tensorflow\"",
+            "keras-nlp>=0.3.1; extra == \"tf\"",
+            "keras-nlp>=0.3.1; extra == \"tf-cpu\"",
+            "keras<2.16,>2.9; extra == \"tf-cpu\"",
+            "librosa; extra == \"all\"",
+            "librosa; extra == \"audio\"",
+            "librosa; extra == \"dev\"",
+            "librosa; extra == \"dev-tensorflow\"",
+            "librosa; extra == \"dev-torch\"",
+            "librosa; extra == \"flax-speech\"",
+            "librosa; extra == \"speech\"",
+            "librosa; extra == \"tf-speech\"",
+            "librosa; extra == \"torch-speech\"",
+            "natten<0.15.0,>=0.14.6; extra == \"natten\"",
+            "nltk; extra == \"deepspeed-testing\"",
+            "nltk; extra == \"dev\"",
+            "nltk; extra == \"dev-tensorflow\"",
+            "nltk; extra == \"dev-torch\"",
+            "nltk; extra == \"testing\"",
+            "numpy>=1.17",
+            "numpy>=1.17; extra == \"torchhub\"",
+            "onnxconverter-common; extra == \"all\"",
+            "onnxconverter-common; extra == \"dev\"",
+            "onnxconverter-common; extra == \"dev-tensorflow\"",
+            "onnxconverter-common; extra == \"onnx\"",
+            "onnxconverter-common; extra == \"tf\"",
+            "onnxconverter-common; extra == \"tf-cpu\"",
+            "onnxruntime-tools>=1.4.2; extra == \"dev-tensorflow\"",
+            "onnxruntime-tools>=1.4.2; extra == \"dev-torch\"",
+            "onnxruntime-tools>=1.4.2; extra == \"onnx\"",
+            "onnxruntime-tools>=1.4.2; extra == \"onnxruntime\"",
+            "onnxruntime>=1.4.0; extra == \"dev-tensorflow\"",
+            "onnxruntime>=1.4.0; extra == \"dev-torch\"",
+            "onnxruntime>=1.4.0; extra == \"onnx\"",
+            "onnxruntime>=1.4.0; extra == \"onnxruntime\"",
+            "opencv-python; extra == \"agents\"",
+            "optax<=0.1.4,>=0.0.8; extra == \"all\"",
+            "optax<=0.1.4,>=0.0.8; extra == \"dev\"",
+            "optax<=0.1.4,>=0.0.8; extra == \"flax\"",
+            "optuna; extra == \"all\"",
+            "optuna; extra == \"deepspeed-testing\"",
+            "optuna; extra == \"dev\"",
+            "optuna; extra == \"dev-torch\"",
+            "optuna; extra == \"integrations\"",
+            "optuna; extra == \"optuna\"",
+            "packaging>=20.0",
+            "packaging>=20.0; extra == \"torchhub\"",
+            "parameterized; extra == \"deepspeed-testing\"",
+            "parameterized; extra == \"dev\"",
+            "parameterized; extra == \"dev-tensorflow\"",
+            "parameterized; extra == \"dev-torch\"",
+            "parameterized; extra == \"testing\"",
+            "phonemizer; extra == \"all\"",
+            "phonemizer; extra == \"audio\"",
+            "phonemizer; extra == \"dev\"",
+            "phonemizer; extra == \"dev-tensorflow\"",
+            "phonemizer; extra == \"dev-torch\"",
+            "phonemizer; extra == \"flax-speech\"",
+            "phonemizer; extra == \"speech\"",
+            "phonemizer; extra == \"tf-speech\"",
+            "phonemizer; extra == \"torch-speech\"",
+            "protobuf; extra == \"all\"",
+            "protobuf; extra == \"deepspeed-testing\"",
+            "protobuf; extra == \"dev\"",
+            "protobuf; extra == \"dev-tensorflow\"",
+            "protobuf; extra == \"dev-torch\"",
+            "protobuf; extra == \"sentencepiece\"",
+            "protobuf; extra == \"torchhub\"",
+            "psutil; extra == \"deepspeed-testing\"",
+            "psutil; extra == \"dev\"",
+            "psutil; extra == \"dev-tensorflow\"",
+            "psutil; extra == \"dev-torch\"",
+            "psutil; extra == \"testing\"",
+            "pyctcdecode>=0.4.0; extra == \"all\"",
+            "pyctcdecode>=0.4.0; extra == \"audio\"",
+            "pyctcdecode>=0.4.0; extra == \"dev\"",
+            "pyctcdecode>=0.4.0; extra == \"dev-tensorflow\"",
+            "pyctcdecode>=0.4.0; extra == \"dev-torch\"",
+            "pyctcdecode>=0.4.0; extra == \"flax-speech\"",
+            "pyctcdecode>=0.4.0; extra == \"speech\"",
+            "pyctcdecode>=0.4.0; extra == \"tf-speech\"",
+            "pyctcdecode>=0.4.0; extra == \"torch-speech\"",
+            "pydantic; extra == \"deepspeed-testing\"",
+            "pydantic; extra == \"dev\"",
+            "pydantic; extra == \"dev-tensorflow\"",
+            "pydantic; extra == \"dev-torch\"",
+            "pydantic; extra == \"serving\"",
+            "pydantic; extra == \"testing\"",
+            "pytest-rich; extra == \"deepspeed-testing\"",
+            "pytest-rich; extra == \"dev\"",
+            "pytest-rich; extra == \"dev-tensorflow\"",
+            "pytest-rich; extra == \"dev-torch\"",
+            "pytest-rich; extra == \"testing\"",
+            "pytest-timeout; extra == \"deepspeed-testing\"",
+            "pytest-timeout; extra == \"dev\"",
+            "pytest-timeout; extra == \"dev-tensorflow\"",
+            "pytest-timeout; extra == \"dev-torch\"",
+            "pytest-timeout; extra == \"testing\"",
+            "pytest-xdist; extra == \"deepspeed-testing\"",
+            "pytest-xdist; extra == \"dev\"",
+            "pytest-xdist; extra == \"dev-tensorflow\"",
+            "pytest-xdist; extra == \"dev-torch\"",
+            "pytest-xdist; extra == \"testing\"",
+            "pytest<8.0.0,>=7.2.0; extra == \"deepspeed-testing\"",
+            "pytest<8.0.0,>=7.2.0; extra == \"dev\"",
+            "pytest<8.0.0,>=7.2.0; extra == \"dev-tensorflow\"",
+            "pytest<8.0.0,>=7.2.0; extra == \"dev-torch\"",
+            "pytest<8.0.0,>=7.2.0; extra == \"testing\"",
+            "pyyaml>=5.1",
+            "ray[tune]>=2.7.0; extra == \"all\"",
+            "ray[tune]>=2.7.0; extra == \"dev\"",
+            "ray[tune]>=2.7.0; extra == \"dev-torch\"",
+            "ray[tune]>=2.7.0; extra == \"integrations\"",
+            "ray[tune]>=2.7.0; extra == \"ray\"",
+            "regex!=2019.12.17",
+            "regex!=2019.12.17; extra == \"torchhub\"",
+            "requests",
+            "requests; extra == \"torchhub\"",
+            "rhoknp<1.3.1,>=1.1.0; extra == \"dev\"",
+            "rhoknp<1.3.1,>=1.1.0; extra == \"dev-torch\"",
+            "rhoknp<1.3.1,>=1.1.0; extra == \"ja\"",
+            "rjieba; extra == \"deepspeed-testing\"",
+            "rjieba; extra == \"dev\"",
+            "rjieba; extra == \"dev-tensorflow\"",
+            "rjieba; extra == \"dev-torch\"",
+            "rjieba; extra == \"testing\"",
+            "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1; extra == \"deepspeed-testing\"",
+            "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1; extra == \"dev\"",
+            "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1; extra == \"dev-tensorflow\"",
+            "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1; extra == \"dev-torch\"",
+            "rouge-score!=0.0.7,!=0.0.8,!=0.1,!=0.1.1; extra == \"testing\"",
+            "ruff==0.1.5; extra == \"deepspeed-testing\"",
+            "ruff==0.1.5; extra == \"dev\"",
+            "ruff==0.1.5; extra == \"dev-tensorflow\"",
+            "ruff==0.1.5; extra == \"dev-torch\"",
+            "ruff==0.1.5; extra == \"quality\"",
+            "ruff==0.1.5; extra == \"testing\"",
+            "sacrebleu<2.0.0,>=1.4.12; extra == \"deepspeed-testing\"",
+            "sacrebleu<2.0.0,>=1.4.12; extra == \"dev\"",
+            "sacrebleu<2.0.0,>=1.4.12; extra == \"dev-tensorflow\"",
+            "sacrebleu<2.0.0,>=1.4.12; extra == \"dev-torch\"",
+            "sacrebleu<2.0.0,>=1.4.12; extra == \"testing\"",
+            "sacremoses; extra == \"deepspeed-testing\"",
+            "sacremoses; extra == \"dev\"",
+            "sacremoses; extra == \"dev-tensorflow\"",
+            "sacremoses; extra == \"dev-torch\"",
+            "sacremoses; extra == \"testing\"",
+            "safetensors>=0.4.1",
+            "sagemaker>=2.31.0; extra == \"sagemaker\"",
+            "scikit-learn; extra == \"dev\"",
+            "scikit-learn; extra == \"dev-tensorflow\"",
+            "scikit-learn; extra == \"dev-torch\"",
+            "scikit-learn; extra == \"sklearn\"",
+            "scipy<1.13.0; extra == \"all\"",
+            "scipy<1.13.0; extra == \"dev\"",
+            "scipy<1.13.0; extra == \"flax\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"agents\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"all\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"deepspeed-testing\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"dev\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"dev-tensorflow\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"dev-torch\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"sentencepiece\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"testing\"",
+            "sentencepiece!=0.1.92,>=0.1.91; extra == \"torchhub\"",
+            "sigopt; extra == \"all\"",
+            "sigopt; extra == \"dev\"",
+            "sigopt; extra == \"dev-torch\"",
+            "sigopt; extra == \"integrations\"",
+            "sigopt; extra == \"sigopt\"",
+            "starlette; extra == \"serving\"",
+            "sudachidict-core>=20220729; extra == \"dev\"",
+            "sudachidict-core>=20220729; extra == \"dev-torch\"",
+            "sudachidict-core>=20220729; extra == \"ja\"",
+            "sudachipy>=0.6.6; extra == \"dev\"",
+            "sudachipy>=0.6.6; extra == \"dev-torch\"",
+            "sudachipy>=0.6.6; extra == \"ja\"",
+            "tensorboard; extra == \"deepspeed-testing\"",
+            "tensorboard; extra == \"dev\"",
+            "tensorboard; extra == \"dev-tensorflow\"",
+            "tensorboard; extra == \"dev-torch\"",
+            "tensorboard; extra == \"testing\"",
+            "tensorflow-cpu<2.16,>2.9; extra == \"tf-cpu\"",
+            "tensorflow-probability<2.16; extra == \"tf-cpu\"",
+            "tensorflow-text<2.16; extra == \"all\"",
+            "tensorflow-text<2.16; extra == \"dev\"",
+            "tensorflow-text<2.16; extra == \"dev-tensorflow\"",
+            "tensorflow-text<2.16; extra == \"tf\"",
+            "tensorflow-text<2.16; extra == \"tf-cpu\"",
+            "tensorflow<2.16,>2.9; extra == \"all\"",
+            "tensorflow<2.16,>2.9; extra == \"dev\"",
+            "tensorflow<2.16,>2.9; extra == \"dev-tensorflow\"",
+            "tensorflow<2.16,>2.9; extra == \"tf\"",
+            "tf2onnx; extra == \"all\"",
+            "tf2onnx; extra == \"dev\"",
+            "tf2onnx; extra == \"dev-tensorflow\"",
+            "tf2onnx; extra == \"onnx\"",
+            "tf2onnx; extra == \"tf\"",
+            "tf2onnx; extra == \"tf-cpu\"",
+            "timeout-decorator; extra == \"deepspeed-testing\"",
+            "timeout-decorator; extra == \"dev\"",
+            "timeout-decorator; extra == \"dev-tensorflow\"",
+            "timeout-decorator; extra == \"dev-torch\"",
+            "timeout-decorator; extra == \"testing\"",
+            "timm; extra == \"all\"",
+            "timm; extra == \"dev\"",
+            "timm; extra == \"dev-torch\"",
+            "timm; extra == \"timm\"",
+            "tokenizers<0.20,>=0.19",
+            "tokenizers<0.20,>=0.19; extra == \"all\"",
+            "tokenizers<0.20,>=0.19; extra == \"dev\"",
+            "tokenizers<0.20,>=0.19; extra == \"dev-tensorflow\"",
+            "tokenizers<0.20,>=0.19; extra == \"dev-torch\"",
+            "tokenizers<0.20,>=0.19; extra == \"tokenizers\"",
+            "tokenizers<0.20,>=0.19; extra == \"torchhub\"",
+            "torch; extra == \"agents\"",
+            "torch; extra == \"all\"",
+            "torch; extra == \"dev\"",
+            "torch; extra == \"dev-torch\"",
+            "torch; extra == \"torch\"",
+            "torch; extra == \"torchhub\"",
+            "torchaudio; extra == \"all\"",
+            "torchaudio; extra == \"dev\"",
+            "torchaudio; extra == \"dev-torch\"",
+            "torchaudio; extra == \"speech\"",
+            "torchaudio; extra == \"torch-speech\"",
+            "torchvision; extra == \"all\"",
+            "torchvision; extra == \"dev\"",
+            "torchvision; extra == \"dev-torch\"",
+            "torchvision; extra == \"torch-vision\"",
+            "tqdm>=4.27",
+            "tqdm>=4.27; extra == \"torchhub\"",
+            "unidic-lite>=1.0.7; extra == \"dev\"",
+            "unidic-lite>=1.0.7; extra == \"dev-torch\"",
+            "unidic-lite>=1.0.7; extra == \"ja\"",
+            "unidic>=1.0.2; extra == \"dev\"",
+            "unidic>=1.0.2; extra == \"dev-torch\"",
+            "unidic>=1.0.2; extra == \"ja\"",
+            "urllib3<2.0.0; extra == \"dev\"",
+            "urllib3<2.0.0; extra == \"dev-tensorflow\"",
+            "urllib3<2.0.0; extra == \"dev-torch\"",
+            "urllib3<2.0.0; extra == \"quality\"",
+            "uvicorn; extra == \"serving\""
+          ],
+          "requires_python": ">=3.8.0",
+          "version": "4.41.2"
         },
         {
           "artifacts": [
@@ -4647,6 +5542,7 @@
     "sqlalchemy[asyncio]==2.0.28",
     "starlette",
     "testcontainers",
+    "transformers==4.41.2",
     "uvicorn[standard]==0.28.0"
   ],
   "requires_python": [

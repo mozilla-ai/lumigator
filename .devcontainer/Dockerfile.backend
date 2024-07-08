@@ -11,5 +11,5 @@ RUN sed '/^\/\//d' python_default.lock > requirements.json && \
     pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt
 
 WORKDIR /mzai
+CMD zip mzai/platform/python/mzai/backend/api/deployments mzai/platform/python/mzai/backend/api/deployments.zip
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
-

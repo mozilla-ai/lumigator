@@ -32,13 +32,13 @@ services:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block"
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block" #pragma: allowlist secret
     shm_size: 2g
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: '2g'
+          cpus: '2'
+          memory: '5g'
     environment:
       - HOST=localhost
       - RAY_IMAGE=raytest
@@ -48,6 +48,8 @@ services:
       - REDISPASSWORD=yourpassword
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
+    volumes:
+      - ../platform/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
 
   backend:
     build:
@@ -81,5 +83,3 @@ services:
 
 volumes:
     postgres-data:
-
-

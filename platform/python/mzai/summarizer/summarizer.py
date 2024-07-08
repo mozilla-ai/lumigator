@@ -1,8 +1,13 @@
+import logging
+from typing import Dict
+
 from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
 from starlette.requests import Request
 from transformers import AutoModelForSeq2SeqLM, pipeline
+
+logger = logging.getLogger("ray.serve")
 
 
 class SummarizerArgs(BaseModel):
@@ -38,5 +43,8 @@ class Summarizer:
         return {"result": summary}
 
 
+# def app(args: Dict[str, str]) -> Application:
 def app(args: SummarizerArgs) -> Application:
-    return Summarizer.bind(args.name, args.tokenizer, args.task, args.description)
+    logger.info("Hello world!")
+    logger.info(args)
+    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

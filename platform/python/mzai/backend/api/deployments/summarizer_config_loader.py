@@ -4,12 +4,12 @@ from loguru import logger
 from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
-from mzai.backend.api.deployments.summarizer import SummarizerArgs
+from mzai.summarizer.summarizer import SummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
     num_cpus: float
-    num_gpus: float
+    # num_gpus: float
 
 
 class RayServeDeploymentConfig(BaseModel):
@@ -62,7 +62,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         RayServeDeploymentConfig(
                             name="Summarizer",
                             num_replicas=1,
-                            ray_actor_options=RayServeActorConfig(num_cpus=1.0, num_gpus=1.0),
+                            ray_actor_options=RayServeActorConfig(num_cpus=1.0),  # num_gpus=1.0
                         )
                     ],
                 )

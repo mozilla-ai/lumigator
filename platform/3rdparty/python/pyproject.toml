@@ -13,6 +13,7 @@ dependencies = [
     "pex==2.3.0",
     "httpx==0.27.0",
     "python-multipart==0.0.9",
+    "pre-commit>=3.6",
     "sqlalchemy[asyncio]==2.0.28",
     "psycopg2-binary==2.9.9",
     "ray[default]==2.9.3",

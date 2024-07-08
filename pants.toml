@@ -33,7 +33,7 @@ interpreter_constraints = ['CPython==3.11.9']
 # This also adds the `generate-lockfiles` goal for Pants to generate the lockfile for you.
 enable_resolves = true
 resolver_manylinux = "manylinux2014"
-default_resolve = "python_default"
+default_resolve = "python_darwin"
 
 [python-repos]
 # these are required for nvidia's cuda libs etc.
@@ -43,8 +43,13 @@ indexes.add = [
 ]
 
 
+find_links = ["%(env.HOME)s/workspace/wheelhouse"]
+path_mappings = ["WHEELS_DIR|%(env.HOME)s/workspace/wheelhouse"]
+
 [python.resolves]
-python_default = "platform/3rdparty/python/python_default.lock"
+python_darwin = "platform/3rdparty/python/python_darwin.lock"
+python_linux = "platform/3rdparty/python/python_linux.lock"
+python_linux_cuda = "platform/3rdparty/python/python_linux_cuda.lock"
 
 
 [python-bootstrap]
@@ -87,7 +92,7 @@ address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
 default = false
 
 [docker.registries.aws_ecr_temp]
-address = "198934536556.dkr.ecr.us-east-1.amazonaws.com"
+address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
 default = false
 
 [pytest]

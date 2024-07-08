@@ -1,10 +1,94 @@
+# python_requirements(
+#    name = "3rdparty_linux",
+#    overrides = {
+#        "pex": {"dependencies": [":3rdparty#setuptools"]},
+#        "ray": {"dependencies": [":3rdparty#setuptools"]},
+#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
+#    },
+#    resolve = "python_linux",
+#    source = "pyproject.toml",
+# )
+#
+# python_requirements(
+#    name = "3rdparty_darwin",
+#    overrides = {
+#        "pex": {"dependencies": [":3rdparty#setuptools"]},
+#        "ray": {"dependencies": [":3rdparty#setuptools"]},
+#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
+#    },
+#    resolve = "python_darwin",
+#    source = "pyproject.toml",
+# )
+#
+# python_requirements(
+#    name = "3rdparty_linux_cuda",
+#    overrides = {
+#        "pex": {"dependencies": [":3rdparty#setuptools"]},
+#        "ray": {"dependencies": [":3rdparty#setuptools"]},
+#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
+#    },
+#    resolve = "python_linux_cuda",
+#    source = "pyproject.toml",
+# )
+#
+
 python_requirements(
     name="3rdparty",
-    overrides={
-        "pex": {"dependencies": [":3rdparty#setuptools"]},
-        "ray": {"dependencies": [":3rdparty#setuptools"]},
-        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
-    },
-    resolve="python_default",
+    resolve=parametrize("python_darwin", "python_linux", "python_linux_cuda"),
     source="pyproject.toml",
+)
+
+TORCH_VERSION = "2.3.1"
+
+CUDA_VERSION = "cu118"
+
+TORCH_DARWIN = (
+    "torch==" + TORCH_VERSION + ",!=" + TORCH_VERSION + "+cpu" + ",!=" + TORCH_VERSION + "+cu118"
+)
+
+python_requirement(
+    name="torch_linux_cuda",
+    requirements=[
+        "torch==2.3.1+cu118; sys_platform == 'linux'",
+    ],
+    resolve="python_linux_cuda",
+)
+
+# specific for fucking torch CPU as pants doesn't like the multiple indexes and we can't spec them there.
+# downloads the very specific package set for CPU only.
+python_requirement(
+    name="torch_linux_cpu",
+    requirements=[
+        "torch@https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp311-cp311-linux_x86_64.whl#sha256=a272defe305dbd944aa28a91cc3db0f0149495b3ebec2e39723a7224fa05dc57 ; sys_platform == 'linux'"
+    ],
+    resolve="python_linux",
+)
+
+python_requirement(
+    name="torch_darwin",
+    requirements=[TORCH_DARWIN + "; sys_platform == 'darwin'"],
+    resolve="python_darwin",
+)
+
+shell_sources(name="shell-scripts")
+
+files(
+    name="lockfile",
+    sources=[
+        "python_darwin.lock",
+        "python_linux.lock",
+        "python_linux_cuda.lock",
+    ],
+)
+
+run_shell_command(
+    name="make_requirements_file",
+    command="platform/3rdparty/python/convert_pants_lockfile_to_pip.sh",
+    execution_dependencies=[
+        ":shell-scripts",
+        ":lockfile",
+        "pants_tools:py311_linux_pex_platform_tags",
+        "pants_tools:py311_macos_14_pex_platform_tags",
+    ],
+    workdir="/",
 )

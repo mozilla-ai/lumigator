@@ -1,10 +1,11 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants
 
-VENVNAME:= dist/export/python/virtualenvs/python_default/3.11.9/bin/activate
+VENVNAME:= mzaivenv
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
 ifeq ($(UNAME), GNU/Linux)
+	PY_PATH:= /opt/python/install/bin
 	PYTHON:= /opt/python/install/bin/python3.11
 	PY_DEPS:= platform/3rdparty/python/requirements_linux.txt
 endif
@@ -23,6 +24,12 @@ install-pants:
 ifneq ($(PANTS_INSTALLED),0)
 	bash pants_tools/get-pants.sh
 endif
+ifeq ($(UNAME), GNU/Linux)
+		pip install uv
+endif
+ifeq ($(UNAME), Darwin)
+		brew install uv
+endif
 
 update-3rdparty-lockfiles:
 ### use this target when you add a new dependency to 3rdparty or change versions of a dep.
@@ -36,9 +43,15 @@ $(PYTHON):
 	bash pants_tools/bootstrap_python.sh $(UNAME)
 
 
-$(VENVNAME): $(PYTHON)
-	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
-	@echo "To use the environment, please run `source $(VENVNAME)`"
+$(VENVNAME)/bin/activate: $(PYTHON)
+	# use uv to create a venv from our lockfile.
+	$(PYTHON) -m pip install uv pex pre-commit
+	pants run platform/3rdparty/python:make_requirements_file
+	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON) && \
+		source ./$(VENVNAME)/bin/activate && \
+		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r $(PY_DEPS) && \
+		pre-commit install --config ".pre-commit-config.yaml"
+	@echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
 
 bootstrap-python: $(VENVNAME)
 

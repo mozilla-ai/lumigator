@@ -1,19 +1,21 @@
 FROM python:3.11.9-bookworm
+SHELL ["/bin/bash", "-c"]
 
 WORKDIR /tmp
 
 
-COPY ../platform/3rdparty/python/python_default.lock .
-RUN pip install pex
-# note the following is needed to convert the pants lockfile to a pip-installable file.
-# this is intentionally breaking DRY at the moment and will be fixed in a followup PR that improves 3rdparty dep handling
-# overall
-# CPU is specified for the torch wheels so we don't get a platform error if doing this locally without cuda
-RUN sed '/^\/\//d' python_default.lock > requirements.json && \
-    pex3 lock export requirements.json > requirements.txt && \
-    pip install --require-hashes --no-deps --no-cache-dir --upgrade  --extra-index-url "https://download.pytorch.org/whl/cpu" -r requirements.txt
+COPY ../platform/3rdparty/python/convert_pants_lockfile_to_pip.sh .
+COPY ../platform/3rdparty/python/python_linux.lock .
+COPY ../platform/3rdparty/python/python_darwin.lock .
+RUN pip install pex uv
+RUN sed '/^\/\//d' python_linux.lock >requirements.json && \
+    pex3 venv create --python=$(which python) --lock requirements.json --path-mapping 'WHEELS_DIR|/wheelhouse' -d 'venv'
+ENV PATH="/tmp/venv/bin:$PATH"
 
 
 WORKDIR /mzai
 CMD zip mzai/platform/python/mzai/backend/api/deployments mzai/platform/python/mzai/backend/api/deployments.zip
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
+# CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
+RUN source activate /tmp/venv/bin/activate
+ENV PYTHONPATH="/mzai"
+CMD ["/tmp/venv/bin/uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]

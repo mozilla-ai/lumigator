@@ -11,6 +11,7 @@ backend_packages = [
   "pants.backend.experimental.python.lint.ruff.check",
   "pants.backend.experimental.python.lint.ruff.format",
   "pants.backend.build_files.fmt.ruff",
+  "pants.backend.experimental.helm"
 ]
 
 [cli.alias]

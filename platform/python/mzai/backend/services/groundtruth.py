@@ -6,7 +6,6 @@ from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
 )
-from mzai.summarizer.summarizer import app
 
 
 class GroundTruthService:

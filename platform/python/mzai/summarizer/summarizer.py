@@ -1,6 +1,6 @@
 import logging
-from typing import Dict
 
+import torch
 from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
@@ -25,19 +25,30 @@ class Summarizer:
             pretrained_model_name_or_path=name,
             trust_remote_code=True,
         )
-        self.model = pipeline(task, model=model, tokenizer=tokenizer)
+        self.pipe = pipeline(
+            task,
+            model=model,
+            tokenizer=tokenizer,
+            device=0 if torch.cuda.is_available() else -1,
+        )
 
     def summarize(self, text: str) -> str:
-        # Run inference
-        model_output = self.model(text)
 
-        # Post-process output to return only the summary text
-        summary = model_output[0]["summary_text"]
+        #  A list or a list of list of `dict` with `summary_text` and `summary_token_ids` as keys
+        model_output: list[dict[str, str]] = self.pipe(text,min_length=30)
 
-        return summary
+        try:
+           summary = model_output[0]["summary_text"]
+           return summary
+        except Exception:
+           logger.error("No summary text")
+           return ""
+
+
 
     async def __call__(self, http_request: Request) -> dict[str, str]:
-        text: str = await http_request.json()
+        text: list[str] = await http_request.json()
+        # Assume input is list of text documents
         summary = self.summarize(text["text"])
 
         return {"result": summary}
@@ -47,4 +58,6 @@ class Summarizer:
 def app(args: SummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)
-    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused
+    return Summarizer.bind(
+        args.name, args.tokenizer, args.task
+    )  # args.description unused

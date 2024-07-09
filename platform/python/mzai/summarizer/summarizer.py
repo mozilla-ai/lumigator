@@ -33,18 +33,15 @@ class Summarizer:
         )
 
     def summarize(self, text: str) -> str:
-
         #  A list or a list of list of `dict` with `summary_text` and `summary_token_ids` as keys
-        model_output: list[dict[str, str]] = self.pipe(text,min_length=30)
+        model_output: list[dict[str, str]] = self.pipe(text, min_length=30)
 
         try:
-           summary = model_output[0]["summary_text"]
-           return summary
+            summary = model_output[0]["summary_text"]
+            return summary
         except Exception:
-           logger.error("No summary text")
-           return ""
-
-
+            logger.error("No summary text")
+            return ""
 
     async def __call__(self, http_request: Request) -> dict[str, str]:
         text: list[str] = await http_request.json()
@@ -58,6 +55,4 @@ class Summarizer:
 def app(args: SummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)
-    return Summarizer.bind(
-        args.name, args.tokenizer, args.task
-    )  # args.description unused
+    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

@@ -50,7 +50,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         description="Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
-                        # working_dir="file://mzai/platform/python/mzai/backend/api/deployments",
+                        working_dir="s3://mzai-ray-serve-apps/summarizer.zip",
                         pip=[
                             "transformers==4.38.0",
                             "torch==2.1.2",

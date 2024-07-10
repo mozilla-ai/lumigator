@@ -1,39 +1,14 @@
-# python_requirements(
-#    name = "3rdparty_linux",
-#    overrides = {
-#        "pex": {"dependencies": [":3rdparty#setuptools"]},
-#        "ray": {"dependencies": [":3rdparty#setuptools"]},
-#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
-#    },
-#    resolve = "python_linux",
-#    source = "pyproject.toml",
-# )
-#
-# python_requirements(
-#    name = "3rdparty_darwin",
-#    overrides = {
-#        "pex": {"dependencies": [":3rdparty#setuptools"]},
-#        "ray": {"dependencies": [":3rdparty#setuptools"]},
-#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
-#    },
-#    resolve = "python_darwin",
-#    source = "pyproject.toml",
-# )
-#
-# python_requirements(
-#    name = "3rdparty_linux_cuda",
-#    overrides = {
-#        "pex": {"dependencies": [":3rdparty#setuptools"]},
-#        "ray": {"dependencies": [":3rdparty#setuptools"]},
-#        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
-#    },
-#    resolve = "python_linux_cuda",
-#    source = "pyproject.toml",
-# )
-#
-
 python_requirements(
     name="3rdparty",
+    module_mapping={
+        # fixes annoying issue with pants not inferring the actual lib
+        "mypy-boto3-s3": ["mypy_boto3_s3"],
+    },
+    overrides={
+        "pex": {"dependencies": [":3rdparty#setuptools"]},
+        "ray": {"dependencies": [":3rdparty#setuptools"]},
+        "sqlalchemy": {"dependencies": [":3rdparty#psycopg2-binary"]},
+    },
     resolve=parametrize("python_darwin", "python_linux", "python_linux_cuda"),
     source="pyproject.toml",
 )
@@ -49,7 +24,7 @@ TORCH_DARWIN = (
 python_requirement(
     name="torch_linux_cuda",
     requirements=[
-        "torch==2.3.1+cu118; sys_platform == 'linux'",
+        "torch==" + TORCH_VERSION + "+" + CUDA_VERSION + "; sys_platform == 'linux'",
     ],
     resolve="python_linux_cuda",
 )
@@ -59,7 +34,7 @@ python_requirement(
 python_requirement(
     name="torch_linux_cpu",
     requirements=[
-        "torch@https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp311-cp311-linux_x86_64.whl#sha256=a272defe305dbd944aa28a91cc3db0f0149495b3ebec2e39723a7224fa05dc57 ; sys_platform == 'linux'"
+        "torch@https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp311-cp311-linux_x86_64.whl#sha256=a272defe305dbd944aa28a91cc3db0f0149495b3ebec2e39723a7224fa05dc57 ; sys_platform == 'linux'",
     ],
     resolve="python_linux",
 )
@@ -72,8 +47,18 @@ python_requirement(
 
 shell_sources(name="shell-scripts")
 
+file(
+    name="py311_linux_pex_platform_tags",
+    source="python_3_11_9_linux_pex_platform_tags.json",
+)
+
+file(
+    name="py311_macos_14_pex_platform_tags",
+    source="python_3_11_9_macosx_14_pex_platform_tags.json",
+)
+
 files(
-    name="lockfile",
+    name="lockfiles",
     sources=[
         "python_darwin.lock",
         "python_linux.lock",
@@ -81,14 +66,75 @@ files(
     ],
 )
 
-run_shell_command(
-    name="make_requirements_file",
-    command="platform/3rdparty/python/convert_pants_lockfile_to_pip.sh",
-    execution_dependencies=[
-        ":shell-scripts",
-        ":lockfile",
-        "pants_tools:py311_linux_pex_platform_tags",
-        "pants_tools:py311_macos_14_pex_platform_tags",
+
+def convert_lockfile_to_pip_targets(
+    platform, lockfile, tags, cuda=False, requirements=True, index_url=None
+):
+    basecmd = "convert_pants_lockfile_to_pip.sh"
+    index_url = "" if index_url == None else index_url
+    requirements = "--requirements"
+
+    prefix = "python_{}".format(platform)
+    if platform == "linux":
+        if not cuda:
+            index_url = "--extra-index-url https://download.pytorch.org/whl/cpu"
+        if cuda:
+            prefix = prefix + "_cuda"
+    if not requirements:
+        requirements = "-no-requirements"
+
+    output_path = "."
+
+    cmd = " ".join(["bash", basecmd, index_url, requirements, lockfile, tags, output_path, prefix])
+
+    return run_shell_command(
+        name="gen_requirements" + "_" + prefix,
+        command=cmd,
+        execution_dependencies=[
+            ":shell-scripts",
+            ":lockfiles",
+            ":py311_linux_pex_platform_tags"
+            if platform == "linux"
+            else ":py311_macos_14_pex_platform_tags",
+        ],
+        workdir=".",
+    )
+
+
+convert_lockfile_to_pip_targets(
+    "darwin",
+    "python_darwin.lock",
+    "python_3_11_9_macosx_14_pex_platform_tags.json",
+    cuda=False,
+    requirements=True,
+)
+
+convert_lockfile_to_pip_targets(
+    "linux",
+    "python_linux_cuda.lock",
+    "python_3_11_9_linux_pex_platform_tags.json",
+    cuda=True,
+    requirements=True,
+)
+
+convert_lockfile_to_pip_targets(
+    "linux",
+    "python_linux.lock",
+    "python_3_11_9_linux_pex_platform_tags.json",
+    cuda=False,
+    requirements=True,
+)
+
+# the following is how to generate the platform tag json files.
+docker_image(
+    name="gen_ubuntu_platform_tags",
+    build_platform=["linux/amd64"],
+    image_tags=[
+        "dev",
     ],
-    workdir="/",
+    instructions=[
+        "FROM mzdotai/golden:base_latest",
+        'CMD ["pex3", "interpreter", "inspect", "--markers", "--tags", "--interpreter-constraint", "CPython==3.11.9"]',
+    ],
+    source="Dockerfile.ubuntu_plat_tags",
 )

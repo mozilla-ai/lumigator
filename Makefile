@@ -7,13 +7,13 @@ UNAME:= $(shell uname -o)
 ifeq ($(UNAME), GNU/Linux)
 	PY_PATH:= /opt/python/install/bin
 	PYTHON:= /opt/python/install/bin/python3.11
-	PY_DEPS:= platform/3rdparty/python/requirements_linux.txt
+	PY_DEPS:= platform/3rdparty/python/requirements_python_linux.txt
 endif
 
 ifeq ($(UNAME), Darwin)
 	PY_PATH:= .python/python3.11.9/python/install/bin
 	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
-	PY_DEPS:= platform/3rdparty/python/requirements_darwin.txt
+	PY_DEPS:= platform/3rdparty/python/requirements_python_darwin.txt
 endif
 
 
@@ -42,18 +42,17 @@ $(PYTHON):
 	#  considerations for platform, works on osx and debian / ubuntu linux
 	bash pants_tools/bootstrap_python.sh $(UNAME)
 
+bootstrap-python: $(PYTHON) $(VENVNAME)
 
-$(VENVNAME)/bin/activate: $(PYTHON)
+$(VENVNAME): $(PYTHON)
 	# use uv to create a venv from our lockfile.
-	$(PYTHON) -m pip install uv pex pre-commit
-	pants run platform/3rdparty/python:make_requirements_file
-	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON) && \
-		source ./$(VENVNAME)/bin/activate && \
-		uv pip install --require-hashes --no-deps --no-cache-dir --upgrade -r $(PY_DEPS) && \
-		pre-commit install --config ".pre-commit-config.yaml"
-	@echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
+	$(PYTHON) -m pip install uv pex
+	pants run platform/3rdparty/python:gen_requirements_python_darwin
+	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON)
+	$(PYTHON) -m uv pip install --require-hashes --no-cache --strict -r $(PY_DEPS)
+	$(PY_PATH)/pre-commit install --config ".pre-commit-config.yaml"
 
-bootstrap-python: $(VENVNAME)
+	echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
@@ -71,6 +70,7 @@ bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env
 LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
 
 local-up:
+	pants run platform/3rdparty/python:gen_requirements_python_linux
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 local-down:
@@ -103,10 +103,12 @@ show-pants-targets:
 
 
 ######### CLEANERS ###########
-clean-python:
-	rm -rf .python/
+clean-python-venv:
 	rm -rf mzaivenv/
 	rm -rf dist/export/python/
+
+clean-python: clean-python-venv
+	rm -rf .python/
 
 clean-pants:
 	# this level of clean removes the -build artifacts that pants makes. it doesn't remove the pants cache.
@@ -146,6 +148,8 @@ ci-lint: ci-setup
 	pants --changed-since=origin/main \
 	update-build-files --check \
 	lint
+
+
 # the following target is meant to be used for changes made to the platform setup itself
 # and tests if we can get the basic install going correctly in a container.
 # this is meant to be 'alpha' ish and subject to change; will raise some potential issues

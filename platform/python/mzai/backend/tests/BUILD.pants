@@ -1,15 +1,16 @@
 python_sources(
     name="backend_tests_sources",
-    sources=["**/*.py"],
     dependencies=[
         "platform/python/mzai/backend:backend_sources",
     ],
+    resolve=parametrize("python_darwin", "python_linux"),
+    sources=["**/*.py"],
 )
 
 python_tests(
     name="backend_tests",
-    sources=["**/test_*.py"],
     dependencies=[
         ":backend_tests_sources",
     ],
+    sources=["**/test_*.py"],
 )

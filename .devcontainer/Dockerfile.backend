@@ -3,19 +3,17 @@ SHELL ["/bin/bash", "-c"]
 
 WORKDIR /tmp
 
-
-COPY ../platform/3rdparty/python/convert_pants_lockfile_to_pip.sh .
-COPY ../platform/3rdparty/python/python_linux.lock .
-COPY ../platform/3rdparty/python/python_darwin.lock .
+COPY ../platform/3rdparty/python/requirements_python_linux.txt .
+ENV PYTHONPATH="/mzai/platform/python/mzai"
 RUN pip install pex uv
-RUN sed '/^\/\//d' python_linux.lock >requirements.json && \
-    pex3 venv create --python=$(which python) --lock requirements.json --path-mapping 'WHEELS_DIR|/wheelhouse' -d 'venv'
-ENV PATH="/tmp/venv/bin:$PATH"
+
+# uv pip is erroring out on a weird issue, saying it can't install numpy's version as such. normal pip works as expected.
+# leaving these here for changing after sorting it out
+# RUN uv venv --seed --python $(which python)
+# RUN uv pip install --no-cache --no-deps -r requirements_python_linux.txt
+RUN pip install --no-cache --no-deps -r requirements_python_linux.txt
 
 
 WORKDIR /mzai
 CMD zip mzai/platform/python/mzai/backend/api/deployments mzai/platform/python/mzai/backend/api/deployments.zip
-# CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
-RUN source activate /tmp/venv/bin/activate
-ENV PYTHONPATH="/mzai"
-CMD ["/tmp/venv/bin/uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
+CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]

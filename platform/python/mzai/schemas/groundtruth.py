@@ -24,3 +24,8 @@ class GroundTruthDeploymentLogsResponse(BaseModel):
     id: UUID
     status: DeploymentStatus
     logs: list[str]
+
+
+class GroundTruthDeploymentQueryResponse(BaseModel):
+    id: UUID
+    text: str

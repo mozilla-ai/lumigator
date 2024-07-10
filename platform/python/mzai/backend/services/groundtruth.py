@@ -1,9 +1,11 @@
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
+from starlette import requests
 
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
+    GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
 )
 
@@ -24,7 +26,6 @@ class GroundTruthService:
         deployment_description = conf.get_deployment_description()
 
         self.ray_client.deploy_applications(deployment_args)
-        # app(deployment_args)
 
         record = self.deployment_repo.create(
             name=deployment_name, description=deployment_description
@@ -41,3 +42,13 @@ class GroundTruthService:
             total=total,
             items=[GroundTruthDeploymentResponse.model_validate(x) for x in records],
         )
+
+    def run_inference(self, query) -> GroundTruthDeploymentResponse:
+        base_url = "http://ray:8000"
+
+        response = requests.post(base_url, params={"text": query})
+        text = response.json()
+
+        response_object = GroundTruthDeploymentQueryResponse(text)
+
+        return response_object

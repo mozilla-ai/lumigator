@@ -19,7 +19,7 @@ class SummarizerArgs(BaseModel):
 @serve.deployment()
 class Summarizer:
     def __init__(self, name: str, tokenizer: str, task: str):
-        import torch
+        import torch  # Import torch here so it's not a dependency on the backend
 
         # Load model
         model = AutoModelForSeq2SeqLM.from_pretrained(

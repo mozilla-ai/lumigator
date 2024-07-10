@@ -1,6 +1,5 @@
 import logging
 
-import torch
 from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
@@ -20,6 +19,8 @@ class SummarizerArgs(BaseModel):
 @serve.deployment()
 class Summarizer:
     def __init__(self, name: str, tokenizer: str, task: str):
+        import torch  # Import torch here so it's not a dependency on the backend
+
         # Load model
         model = AutoModelForSeq2SeqLM.from_pretrained(
             pretrained_model_name_or_path=name,

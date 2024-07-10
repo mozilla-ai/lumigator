@@ -1,6 +1,6 @@
 python_sources(
     name="summarizer_sources",
-    dependencies=[],
+    dependencies=["platform/python/mzai/schemas:schemas_sources"],
     sources=[
         "**/*.py",
         "!tests",

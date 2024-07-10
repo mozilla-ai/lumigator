@@ -4,7 +4,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
-from mzai.summarizer.summarizer import SummarizerArgs
+from mzai.schemas.summarizer import SummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):

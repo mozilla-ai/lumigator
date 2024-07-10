@@ -1,20 +1,14 @@
 import logging
 from typing import Dict
 
-from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
 from starlette.requests import Request
 from transformers import AutoModelForSeq2SeqLM, pipeline
 
+from mzai.schemas.summarizer import SummarizerArgs
+
 logger = logging.getLogger("ray.serve")
-
-
-class SummarizerArgs(BaseModel):
-    name: str  # model name, but model is protected namespace in pydantic
-    tokenizer: str
-    task: str
-    description: str
 
 
 @serve.deployment()
@@ -45,6 +39,6 @@ class Summarizer:
 
 # def app(args: Dict[str, str]) -> Application:
 def app(args: SummarizerArgs) -> Application:
-    logger.info("Hello world!")
-    logger.info(args)
+    #    logger.info("Hello world!")
+    #    logger.info(args)
     return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

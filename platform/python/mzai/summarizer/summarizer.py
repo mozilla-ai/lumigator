@@ -39,6 +39,6 @@ class Summarizer:
 
 # def app(args: Dict[str, str]) -> Application:
 def app(args: SummarizerArgs) -> Application:
-    #    logger.info("Hello world!")
-    #    logger.info(args)
+    logger.info("Hello world!")
+    logger.info(args)
     return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

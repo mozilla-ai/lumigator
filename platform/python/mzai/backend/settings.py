@@ -28,6 +28,9 @@ class BackendSettings(BaseSettings):
     RAY_HEAD_NODE_HOST: str = "localhost"
     RAY_DASHBOARD_PORT: int = 8265
 
+    # Summarizer
+    SUMMARIZER_WORK_DIR: str | None = None
+
     @computed_field
     @property
     def S3_ENDPOINT_URL(self) -> str | None:  # noqa: N802

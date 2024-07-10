@@ -4,6 +4,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
+from mzai.backend.settings import settings
 from mzai.summarizer.summarizer import SummarizerArgs
 
 
@@ -50,7 +51,6 @@ class SummarizerConfigLoader(ConfigLoader):
                         description="Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
-                        # working_dir="file://mzai/platform/python/mzai/backend/api/deployments",
                         pip=[
                             "transformers==4.38.0",
                             "torch==2.1.2",
@@ -68,6 +68,8 @@ class SummarizerConfigLoader(ConfigLoader):
                 )
             ]
         )
+        if settings.SUMMARIZER_WORK_DIR is not None:
+            self.config.applications[0].runtime_env.working_dir = settings.SUMMARIZER_WORK_DIR
 
     def get_deployment_name(self) -> str:
         config = self.config

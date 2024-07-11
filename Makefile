@@ -41,15 +41,16 @@ $(PYTHON):
 	# uses python standalone - installs it in the repo by default under `./python`. has
 	#  considerations for platform, works on osx and debian / ubuntu linux
 	bash pants_tools/bootstrap_python.sh $(UNAME)
+	$(PYTHON) -m pip install uv pex
 
 bootstrap-python: $(PYTHON) $(VENVNAME)
 
 $(VENVNAME): $(PYTHON)
 	# use uv to create a venv from our lockfile.
-	$(PYTHON) -m pip install uv pex
 	pants run platform/3rdparty/python:gen_requirements_python_darwin
 	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON)
-	$(PYTHON) -m uv pip install --require-hashes --no-cache --strict -r $(PY_DEPS)
+	# $(PYTHON) -m uv pip install --require-hashes --no-cache --strict -r $(PY_DEPS)
+	uv pip install --python $(PYTHON) --require-hashes --no-cache --strict -r $(PY_DEPS)
 	$(PY_PATH)/pre-commit install --config ".pre-commit-config.yaml"
 
 	echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"

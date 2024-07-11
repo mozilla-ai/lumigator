@@ -22,8 +22,8 @@ KUBECONFIG = "kubeconfig"
 SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
 DATABASE_NAME = "db-name"
-DATABASE_USER = "db-user"
-DATABASE_PASSWORD = "db-pass"
+DATABASE_USER = "db-user"  # pragma: allowlist secret
+DATABASE_PASSWORD = "db-pass"  # pragma: allowlist secret
 BUCKET_ID = "bucket-id"
 
 stack_ref = pulumi.StackReference("mzai-mlrunner/pulumi-aws/dev")

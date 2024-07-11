@@ -1,10 +1,10 @@
 python_sources(
-    dependencies = [
+    dependencies=[
         "platform/3rdparty/python:torch_darwin",
         "platform/3rdparty/python:3rdparty#transformers",
     ],
-    resolve = parametrize("python_darwin", "python_linux", "python_linux_cuda"),
-    sources = [
+    resolve=parametrize("python_darwin", "python_linux", "python_linux_cuda"),
+    sources=[
         "**/*.py",
         "!tests",
     ],

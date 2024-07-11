@@ -17,7 +17,7 @@ services:
     ports:
       - ${S3_PORT}:${S3_PORT}
     environment:
-      - SERVICES=s3:${S3_PORT}      
+      - SERVICES=s3:${S3_PORT}
       - CREATE_BUCKETS=${S3_BUCKET}
     volumes:
       # Sync localstack startup scripts

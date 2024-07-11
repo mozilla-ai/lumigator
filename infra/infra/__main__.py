@@ -21,11 +21,11 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 BACKEND_REPOSITORY_URL = "backend-repo-url"
 JOB_RUNNER_REPOSITORY_URL = "jobrunner-repo-url"
 KUBECONFIG = "kubeconfig"
-SERVICE_ACCOUNT_NAME = "sa-name"
+SERVICE_ACCOUNT_NAME = "sa-name"  # pragma: allowlist secret
 DATABASE_URL = "db-url"
-DATABASE_NAME = "db-name"
-DATABASE_USER = "db-user"
-DATABASE_PASSWORD = "db-pass"
+DATABASE_NAME = "db-name"  # pragma: allowlist secret
+DATABASE_USER = "db-user"  # pragma: allowlist secret
+DATABASE_PASSWORD = "db-pass"  # pragma: allowlist secret
 BUCKET_ID = "bucket-id"
 
 backend_repository = awsx.ecr.Repository(
@@ -161,7 +161,8 @@ security_group = aws.ec2.SecurityGroup(
 
 db_name = "platform"
 db_user = "db_admin"
-db_pass = "password123"  # TODO Use Pulumi Secret
+#  TODO Use Pulumi Secret
+db_pass = "password123"  # pragma: allowlist secret
 
 ## Create a RDS instance
 db_instance = aws.rds.Instance(

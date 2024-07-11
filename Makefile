@@ -19,9 +19,12 @@ endif
 
 ######### developer (mostly) setup targets ##########
 PANTS_INSTALLED := $(shell pants --version 1>&2 2> /dev/null; echo $$?)
-=======
+
 ci-tests:
 	pants --filter-target-type=docker_image list lumigator/::
+
+ci-publish-images:
+	pants --filter-target-type=docker_image list lumigator/:: | xargs pants publish
 
 
 install-pants:
@@ -92,6 +95,33 @@ show-pants-targets:
 	pants --filter-target-type=archive list ::
 
 	@echo "this is not an exhaustive list, just a convenience."
+
+<<<<<<< HEAD
+=======
+ide-roots:
+	# From: https://www.pantsbuild.org/2.18/docs/using-pants/setting-up-an-ide
+	$(eval ROOTS=$(shell pants roots))
+	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+
+ide-venv: bootstrap-python
+	pants generate-lockfiles
+	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
+
+
+######### developer setup targets
+prep-devcontainer:
+	docker pull mzdotai/golden:base_latest
+	pants package lumigator/python/mzai/backend:backend_image
+	pants package lumigator/python/mzai/jobrunner:ray_jobrunner_image
+	@echo "now you can use the devcontainer file in the IDE of your choice"
+
+
+bootstrap-python:
+	# sets up the local python pod for development
+	bash pants_tools/bootstrap_python.sh $(PLAT)
+	pants package lumigator/python/mzai/backend:backend_image
+
+bootstrap-ide: ide-roots ide-venv
 
 
 ######### CLEANERS ###########

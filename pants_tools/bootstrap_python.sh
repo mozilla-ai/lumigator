@@ -23,14 +23,14 @@ if [[ $arch == "Darwin" ]]; then
   tar xzf "${tarbase}"
   rm cpython*
   cd "$REPOROOT"
-	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
+	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like\n" "$INTERPRETER"
 
 elif [[ $arch  == "GNU/Linux" ]]; then
   echo "installing debian interpreter"
   wget -nv "$URL/$DEBIAN"
   tar -axf "$DEBIAN"
   rm cpython* || true
-	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like" "$INTERPRETER"
+	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like\n" "$INTERPRETER"
 else
   echo "$arch was passed but isn't valid. exiting!"
 fi

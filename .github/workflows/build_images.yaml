@@ -128,6 +128,7 @@ jobs:
         with:
           name: docker-tag
           path: dist/platform.python.mzai.backend/backend_image.docker-info.json
+          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest

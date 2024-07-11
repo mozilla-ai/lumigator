@@ -5,31 +5,28 @@ Source code for the MZAI model builder platform.
 
 # Setup
 
-Install pants + dependencies:
+Install pants, tools, dev environment.
+This includes a standalone python interpreter, venv (`dist/export/python/virtualenvs/python_default/3.11.9/bin/activate`), precommit configs, and more.
+
+For VSCode users, activate the venv before opening your IDE; the `.env` file will be recognized automatically.
+
 
 ```shell
-brew install pantsbuild/tap/pants jq
-pants --version  # start the daemon
-```
-
-Setup:
-
-Will download a standalone interpreter for python.
-```bash
-make bootstrap-python
-```
-
-Code style is enforced using the [ruff](https://github.com/astral-sh/ruff) linter
-and a series of [pre-commit](https://pre-commit.com/) hooks. You can install them locally via:
-
-```
-pre-commit install --config ".pre-commit-config.yaml"
+make bootstrap-dev-env
 ```
 
 Show targets:
 
 ```bash
 make show-pants-targets
+```
+
+run the app locally via docker compose:
+
+```bash
+make local-up
+make local-logs # gets the logs from docker compose
+make local-down # shuts it down
 ```
 
 Compile targets manually:
@@ -42,36 +39,25 @@ pants package platform/python/mzai/backend --no-local-cache
 pants package platform/python/mzai/backend:backend_image
 ```
 
-Export a venv for your IDE:
 
-```bash
-make ide-roots # Sets PYTHONPATH for first-party directories in a .env file
-make ide-venv
-```
+## 3rdparty dependencies
 
-For VSCode users, should activate the venv before opening your IDE
-and it should be recognized automatically.
-
-## Rebuilding dependencies
-
-You may need to manually regenrate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
+You may need to manually regenerate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
 To do so:
 
-1. Add your new dependency to `platform/3rdparty/python/pyproject.toml`
-2. `pants generate-lockfiles --resolve=python_default`
-3. `pants package platform/python/mzai/backend`
+1. Add your new dependency to `platform/3rdparty/python/pyproject.toml`. This file respects system platform markers, and only very special cases need to be added as explicit `python_requirement` targets.
+2. `pants generate-lockfiles`
 
-And check to make sure your new dependency is included
+make sure to add the new lockfiles to the repo with your PR. You'll have to rebuild your dev environment if you haven't already.
 
-## Running locally with Docker Compose via pants
+
+## Testing the development setup
+
+Using a container, run the following from the root of this repo:
+
 
 ```bash
-# startup
-pants run platform:docker_compose_up
-# shutdown
-pants run platform:docker_compose_down
+make test-dev-setup
 ```
 
-This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers. 
-
-
+This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers.

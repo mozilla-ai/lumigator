@@ -21,7 +21,7 @@ class RayServeDeploymentConfig(BaseModel):
 
 class RayServeRuntimeConfig(BaseModel):
     pip: list[str]
-    working_dir: str
+    working_dir: str = None
 
 
 class RayAppConfig(BaseModel):

@@ -16,8 +16,13 @@ ifeq ($(UNAME), Darwin)
 endif
 
 
+<<<<<<< HEAD
 ######### developer (mostly) setup targets ##########
 PANTS_INSTALLED := $(shell pants --version 1>&2 2> /dev/null; echo $$?)
+=======
+ci-tests:
+	pants --filter-target-type=docker_image list lumigator/::
+>>>>>>> 3748955 (renaming to Lumigator)
 
 install-pants:
 ifneq ($(PANTS_INSTALLED),0)

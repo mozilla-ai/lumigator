@@ -30,6 +30,7 @@ update-3rdparty-lockfiles:
 
 
 $(PYTHON):
+	@echo "Installing python and configuring venv"
 	# uses python standalone - installs it in the repo by default under `./python`. has
 	#  considerations for platform, works on osx and debian / ubuntu linux
 	bash pants_tools/bootstrap_python.sh $(UNAME)
@@ -40,11 +41,11 @@ $(VENVNAME): $(PYTHON)
 	@echo "To use the environment, please run source $(VENVNAME)"
 
 bootstrap-python: $(VENVNAME)
-	@echo "Installing python and configuring venv at $(VENVNAME)"
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
-	$(eval ROOTS=$(shell pants roots)) && $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+	# ROOTS="$(shell pants roots)" $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$$ROOTS'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+	$(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env
 
@@ -127,16 +128,19 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 
 # the following target is meant to be used for changes made to the platform setup itself
 # and tests if we can get the basic install going correctly in a container.
-# this is meant to be 'alpha' ish and subject to change.
+# this is meant to be 'alpha' ish and subject to change; will raise some potential issues
+# that are likely bc of mounting the filesystem like this.
+# if you get a fresh copy of the repo it works as expected.
 test-dev-setup:
 	docker run --rm -it \
 	  --volume .:/home/workspace/mzai-platform \
 	  --privileged --pid=host \
 	  --name devbox \
 	  --entrypoint "/bin/bash" \
+	  -e PANTS_LOCAL_EXECUTION_ROOT_DIR=/workspace \
+	  -e PANTS_LOCAL_CACHE=False \
 	  mzdotai/golden:base_latest  \
-	  -c 'apt-get install -y jq curl make && cd /home/workspace/mzai-platform && rm -rf dist/* && mkdir -p /root/.cache/pants/ && chmod +w -R /root/ && make bootstrap-dev-environment'
-
+	  -c 'apt-get install -y jq curl make gh && cd /home/workspace/mzai-platform && rm -rf dist/* && mkdir -p /root/.cache/pants/ && chmod +w -R /root/ && make clean-python && mkdir -p /root/.cache/pants/lmdb_store && chmod +w -R /root/.cache && make bootstrap-dev-environment'
 
 ci-setup:
 	pants --version  # Bootstrap Pants.

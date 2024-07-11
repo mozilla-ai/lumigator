@@ -17,6 +17,8 @@ rayPort: ""
 
 serviceAccountName: ""
 
+summarizerWorkDir: ""
+
 image:
   repository: ""
   pullPolicy: IfNotPresent

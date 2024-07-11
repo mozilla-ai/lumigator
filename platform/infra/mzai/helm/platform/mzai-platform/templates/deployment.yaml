@@ -52,6 +52,8 @@ spec:
               value: {{ .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT
               value: {{ .Values.rayPort | quote }}
+            - name: SUMMARIZER_WORK_DIR
+              value: {{ .Values.summarizerWorkDir | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

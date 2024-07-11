@@ -1,4 +1,4 @@
-name: mzai-platform
+name: lumigator
 
 services:
   postgres:
@@ -11,7 +11,7 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=platform
+      - POSTGRES_DB=lumigator
 
   localstack:
     image: localstack/localstack:3.4.0
@@ -20,7 +20,7 @@ services:
       - 4566:4566
     environment:
       - SERVICES=s3:4566
-      - CREATE_BUCKETS=platform-storage
+      - CREATE_BUCKETS=lumigator-storage
     volumes:
       # Sync localstack startup scripts
       # https://docs.localstack.cloud/references/init-hooks/
@@ -49,7 +49,7 @@ services:
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
     volumes:
-      - ../platform/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
 
   backend:
     build:
@@ -67,7 +67,7 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=platform
+      - POSTGRES_DB=lumigator
       - RAY_HEAD_NODE_HOST=ray
       - RAY_DASHBOARD_PORT=8265
       - AWS_HOST=localstack
@@ -75,8 +75,8 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-2
       - S3_PORT=4566
-      - S3_BUCKET=platform-storage
-      - PYTHONPATH=/mzai/platform/python/mzai:/mzai/platform/python
+      - S3_BUCKET=lumigator-storage
+      - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
     volumes:
       - ../:/mzai
 

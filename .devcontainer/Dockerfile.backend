@@ -6,9 +6,13 @@ WORKDIR /tmp
 COPY ../platform/3rdparty/python/python_default.lock .
 RUN pip install pex
 # note the following is needed to convert the pants lockfile to a pip-installable file.
+# this is intentionally breaking DRY at the moment and will be fixed in a followup PR that improves 3rdparty dep handling
+# overall
+# CPU is specified for the torch wheels so we don't get a platform error if doing this locally without cuda
 RUN sed '/^\/\//d' python_default.lock > requirements.json && \
     pex3 lock export requirements.json > requirements.txt && \
-    pip install --require-hashes --no-deps --no-cache-dir --upgrade -r requirements.txt
+    pip install --require-hashes --no-deps --no-cache-dir --upgrade  --extra-index-url "https://download.pytorch.org/whl/cpu" -r requirements.txt
+
 
 WORKDIR /mzai
 CMD zip mzai/platform/python/mzai/backend/api/deployments mzai/platform/python/mzai/backend/api/deployments.zip

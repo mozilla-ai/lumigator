@@ -27,7 +27,7 @@ jobs:
         uses: pantsbuild/actions/init-pants@main
         with:
           # cache0 makes it easy to bust the cache if needed
-          gha-cache-key: pants-py3.10.13-v0
+          gha-cache-key: pants-py3.11.9-v0
           # The Python backend uses named_caches for Pip/PEX state,
           # so it is appropriate to invalidate on lockfile changes.
           named-caches-hash: ${{ hashFiles('platform/3rdparty/python/python_default.lock', '.python') }}

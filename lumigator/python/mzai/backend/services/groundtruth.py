@@ -1,9 +1,12 @@
+import requests
+from fastapi import HTTPException
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
+    GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
 )
 
@@ -41,3 +44,14 @@ class GroundTruthService:
             total=total,
             items=[GroundTruthDeploymentResponse.model_validate(x) for x in records],
         )
+
+    def run_inference(self, request) -> GroundTruthDeploymentResponse:
+        try:
+            base_url = "http://ray:8000"
+            headers = {"Content-Type": "application/json"}
+            response = requests.post(base_url, headers=headers, json={"text": [request.text]})
+            text = response.json()
+            response_object = GroundTruthDeploymentQueryResponse(text=text)
+            return response_object
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e)) from e

@@ -3,7 +3,7 @@ FROM python:3.11.9-bookworm
 WORKDIR /tmp
 
 
-COPY ../platform/3rdparty/python/python_default.lock .
+COPY ../lumigator/3rdparty/python/python_default.lock .
 RUN pip install pex
 # note the following is needed to convert the pants lockfile to a pip-installable file.
 # this is intentionally breaking DRY at the moment and will be fixed in a followup PR that improves 3rdparty dep handling
@@ -15,5 +15,5 @@ RUN sed '/^\/\//d' python_default.lock > requirements.json && \
 
 
 WORKDIR /mzai
-CMD zip mzai/platform/python/mzai/backend/api/deployments mzai/platform/python/mzai/backend/api/deployments.zip
+CMD zip mzai/lumigator/python/mzai/backend/api/deployments mzai/lumigator/python/mzai/backend/api/deployments.zip
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]

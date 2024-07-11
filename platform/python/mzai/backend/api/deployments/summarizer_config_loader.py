@@ -21,6 +21,7 @@ class RayServeDeploymentConfig(BaseModel):
 
 class RayServeRuntimeConfig(BaseModel):
     pip: list[str]
+    working_dir: str
 
 
 class RayAppConfig(BaseModel):

@@ -124,7 +124,7 @@ jobs:
 
       - name: Look for docker info from pants
         run: |
-          ls dist/platform.python.mzai.backend/
+          ls dist/
 
       - name: Upload docker info
         uses: actions/upload-artifact@v3

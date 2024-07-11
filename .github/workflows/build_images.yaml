@@ -122,6 +122,10 @@ jobs:
           name: pants-ci-log
           path: .pants.d/pants.log
 
+      - name: Look for docker info from pants
+        run: |
+          ls dist/platform.python.mzai.backend/
+
       - name: Upload docker info
         uses: actions/upload-artifact@v3
         with:

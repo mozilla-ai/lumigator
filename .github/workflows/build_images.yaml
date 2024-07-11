@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "platform/**"
+      - ".github/**"
     # synchronized is when you push new commits
     types: ["opened", "synchronize"]
   push:

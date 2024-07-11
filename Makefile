@@ -6,26 +6,18 @@ UNAME:= $(shell uname -o)
 
 ifeq ($(UNAME), GNU/Linux)
 	PYTHON:= /opt/python/install/bin/python3.11
-	PY_DEPS:= platform/3rdparty/python/requirements_linux.txt
+	PY_DEPS:= lumigator/3rdparty/python/requirements_linux.txt
 endif
 
 ifeq ($(UNAME), Darwin)
 	PY_PATH:= .python/python3.11.9/python/install/bin
 	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
-	PY_DEPS:= platform/3rdparty/python/requirements_darwin.txt
+	PY_DEPS:= lumigator/3rdparty/python/requirements_darwin.txt
 endif
-
 
 
 ######### developer (mostly) setup targets ##########
 PANTS_INSTALLED := $(shell pants --version 1>&2 2> /dev/null; echo $$?)
-
-ci-tests:
-	pants --filter-target-type=docker_image list lumigator/::
-
-ci-publish-images:
-	pants --filter-target-type=docker_image list lumigator/:: | xargs pants publish
-
 
 install-pants:
 ifneq ($(PANTS_INSTALLED),0)
@@ -96,33 +88,6 @@ show-pants-targets:
 
 	@echo "this is not an exhaustive list, just a convenience."
 
-<<<<<<< HEAD
-=======
-ide-roots:
-	# From: https://www.pantsbuild.org/2.18/docs/using-pants/setting-up-an-ide
-	$(eval ROOTS=$(shell pants roots))
-	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(ROOTS)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
-
-ide-venv: bootstrap-python
-	pants generate-lockfiles
-	pants export --py-resolve-format=mutable_virtualenv --resolve=python_default
-
-
-######### developer setup targets
-prep-devcontainer:
-	docker pull mzdotai/golden:base_latest
-	pants package lumigator/python/mzai/backend:backend_image
-	pants package lumigator/python/mzai/jobrunner:ray_jobrunner_image
-	@echo "now you can use the devcontainer file in the IDE of your choice"
-
-
-bootstrap-python:
-	# sets up the local python pod for development
-	bash pants_tools/bootstrap_python.sh $(PLAT)
-	pants package lumigator/python/mzai/backend:backend_image
-
-bootstrap-ide: ide-roots ide-venv
-
 
 ######### CLEANERS ###########
 clean-python:
@@ -168,14 +133,14 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 # if you get a fresh copy of the repo it works as expected.
 test-dev-setup:
 	docker run --rm -it \
-	  --volume .:/home/workspace/mzai-platform \
+	  --volume .:/home/workspace/lumigator \
 	  --privileged --pid=host \
 	  --name devbox \
 	  --entrypoint "/bin/bash" \
 	  -e PANTS_LOCAL_EXECUTION_ROOT_DIR=/workspace \
 	  -e PANTS_LOCAL_CACHE=False \
 	  mzdotai/golden:base_latest  \
-	  -c 'apt-get install -y jq curl make gh && cd /home/workspace/mzai-platform && rm -rf dist/* && mkdir -p /root/.cache/pants/ && chmod +w -R /root/ && make clean-python && mkdir -p /root/.cache/pants/lmdb_store && chmod +w -R /root/.cache && make bootstrap-dev-environment'
+	  -c 'apt-get install -y jq curl make gh && cd /home/workspace/lumigator && rm -rf dist/* && mkdir -p /root/.cache/pants/ && chmod +w -R /root/ && make clean-python && mkdir -p /root/.cache/pants/lmdb_store && chmod +w -R /root/.cache && make bootstrap-dev-environment'
 
 ci-setup:
 	pants --version  # Bootstrap Pants.
@@ -193,4 +158,4 @@ ci-tests:
 	pants test ::
 
 ci-publish-images:
-	pants --filter-target-type=docker_image list platform/:: | xargs pants package publish
+	pants --filter-target-type=docker_image list lumigator/:: | xargs pants package publish

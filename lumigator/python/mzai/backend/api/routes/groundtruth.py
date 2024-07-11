@@ -6,9 +6,6 @@ from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentCreate,
-    GroundTruthDeploymentQueryResponse,
-    GroundTruthDeploymentResponse,
-    GroundTruthQueryRequest,
 )
 from loguru import logger
 
@@ -36,8 +33,11 @@ def send_model_request(
 ) -> GroundTruthDeploymentQueryResponse:
     logger.info("Processing model inference request")
     return service.run_inference(request)
+<<<<<<< HEAD
 
 
 @router.delete("/deployments/{deployment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_deployment(service: GroundTruthServiceDep, deployment_id: UUID) -> None:
     service.delete_deployment(deployment_id)
+=======
+>>>>>>> c23739c (ground truth inference)

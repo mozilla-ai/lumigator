@@ -1,0 +1,17 @@
+postgresHost: platform-db5351f7d.chequokcq59d.us-east-2.rds.amazonaws.com
+postgresPort: 5432
+postgresUser: db_admin
+postgresPassword: password123 # pragma: allowlist secret
+postgresDb: platform
+
+rayAddress: raycluster-kuberay-head-svc
+rayPort: 8265
+
+summarizerWorkDir: ""
+
+serviceAccountName: s3
+
+s3Bucket: platform-data-485fdf9
+
+image:
+  repository: 381492205691.dkr.ecr.us-east-2.amazonaws.com/backend_image

@@ -1,7 +1,6 @@
 # Mozilla.ai Lumigator
 
-Source code for the Mozilla.ai Lumigator, a platform guiding LLM developers through the process of model selection.
-
+Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.ai/) for users guiding through the process of selecting the right LLM for their needs.
 
 # Setup
 

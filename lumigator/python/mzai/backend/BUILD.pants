@@ -44,7 +44,7 @@ pex_binary(
         "pants_tools:py311_linux_pex_platform_tags",
         "pants_tools:py311_macos_14_pex_platform_tags",
     ],
-    dependencies=[":backend_sources", "platform/python/mzai/summarizer:summarizer_sources"],
+    dependencies=[":backend_sources", "lumigator/python/mzai/summarizer:summarizer_sources"],
     execution_mode="venv",
     include_requirements=True,
     include_sources=True,

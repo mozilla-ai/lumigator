@@ -158,4 +158,4 @@ ci-tests:
 	pants test ::
 
 ci-publish-images:
-	pants --filter-target-type=docker_image list platform/:: | xargs pants publish
+	pants --filter-target-type=docker_image list platform/:: | xargs pants package publish

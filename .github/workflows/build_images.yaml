@@ -170,4 +170,4 @@ jobs:
           TAG=$(cat backend_image.docker-info.json | jq -r '.registries[0].tags[1].tag')
           echo $TAG
           helm template --debug lumigator lumigator/infra/mzai/helm/lumigator/mzai-platform -f platform/infra/mzai/helm/values.yaml --set image.tag=$TAG
-          helm upgrade platform platform/infra/mzai/helm/platform/mzai-platform -f platform/infra/mzai/helm/values.yaml --set image.tag=$TAG
+          helm upgrade lumigator lumigator/infra/mzai/helm/platform/mzai-platform -f platform/infra/mzai/helm/values.yaml --set image.tag=$TAG

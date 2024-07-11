@@ -30,7 +30,7 @@ MANIFEST
 # pants
 /.pants.d
 /dist/
-pants_tools/macosx_14_pex_lumigator_tags_local.json
+pants_tools/macosx_14_pex_platform_tags_local.json
 pants.toml.bak
 
 # PyInstaller

@@ -16,15 +16,7 @@ def create_app(engine: Engine) -> FastAPI:
         BaseRecord.metadata.create_all(engine)
         yield
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     app = FastAPI(title="Lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
-=======
-    app = FastAPI(title="lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
->>>>>>> 3748955 (renaming to Lumigator)
-=======
-    app = FastAPI(title="Lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
->>>>>>> e1b27d9 (caps)
     app.include_router(api_router)
     return app
 

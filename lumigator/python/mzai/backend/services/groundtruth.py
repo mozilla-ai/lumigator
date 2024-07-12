@@ -9,6 +9,7 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
 )
+from mzai.backend.settings import settings
 
 
 class GroundTruthService:
@@ -47,11 +48,9 @@ class GroundTruthService:
 
     def run_inference(self, request) -> GroundTruthDeploymentResponse:
         try:
-            base_url = "http://ray:8000"
+            base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
-            text = response.json()
-            response_object = GroundTruthDeploymentQueryResponse(text=text)
-            return response_object
+            return GroundTruthDeploymentQueryResponse(text=response.json())
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e

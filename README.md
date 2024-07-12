@@ -2,7 +2,6 @@
 
 Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.ai/) for guiding users through the process of selecting the right LLM for their needs.
 
-
 # Setup
 
 Install pants, tools, dev environment.

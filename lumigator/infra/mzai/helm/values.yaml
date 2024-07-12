@@ -13,5 +13,8 @@ serviceAccountName: s3
 
 s3Bucket: platform-data-485fdf9
 
+service:
+  type: LoadBalancer
+
 image:
   repository: 381492205691.dkr.ecr.us-east-2.amazonaws.com/backend_image

@@ -22,8 +22,7 @@ services:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
     volumes:
-      # Sync localstack startup scriptscurl -X GET http://127.0.0.1/api/v1/ground-truth/deployments/
-      # https://docs.localstack.cloud/references/init-hooks/
+      # Sync localstack startup scripts
       - ./localstack:/etc/localstack/init/ready.d
 
   ray:

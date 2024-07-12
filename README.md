@@ -57,6 +57,7 @@ Using a container, run the following from the root of this repo:
 
 ```bash
 make test-dev-setup
+
 ```
 
 This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers.

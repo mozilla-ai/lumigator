@@ -23,6 +23,7 @@ services:
       - CREATE_BUCKETS=lumigator-storage
     volumes:
       # Sync localstack startup scripts
+      # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
 
   ray:

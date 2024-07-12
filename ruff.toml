@@ -1,5 +1,5 @@
 
-src = ["platform"]
+src = ["lumigator"]
 target-version = "py310"
 # Group violations by containing file
 output-format = "grouped"

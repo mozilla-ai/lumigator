@@ -1,0 +1,25 @@
+python_sources(
+    name="jobrunner_sources",
+    dependencies=[
+        "lumigator/3rdparty/python:3rdparty#ray",
+        "lumigator/3rdparty/python:3rdparty#click",
+        "lumigator/3rdparty/python:3rdparty#requests",
+        "lumigator/python/mzai/schemas:schemas_sources",
+    ],
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
+)
+
+pex_binary(
+    name="jobrunner",
+    complete_platforms=[
+        "pants_tools:py311_linux_pex_platform_tags",
+        "pants_tools:py311_macos_14_pex_platform_tags",
+    ],
+    dependencies=[
+        ":jobrunner_sources",
+    ],
+    entry_point="main.py",
+)

@@ -25,7 +25,7 @@ SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
 DATABASE_NAME = "db-name"
 DATABASE_USER = "db-user"
-DATABASE_PASSWORD = "db-pass"
+DATABASE_PASSWORD = "db-pass"  # pragma: allowlist secret
 BUCKET_ID = "bucket-id"
 
 backend_repository = awsx.ecr.Repository(
@@ -56,7 +56,7 @@ vpc = awsx.ec2.Vpc("vpc")
 
 # Create an EKS cluster inside of the VPC.
 cluster = eks.Cluster(
-    "platform-cluster",
+    "lumigator-cluster",
     vpc_id=vpc.vpc_id,
     public_subnet_ids=vpc.public_subnet_ids,
     private_subnet_ids=vpc.private_subnet_ids,
@@ -78,7 +78,7 @@ cluster_provider = kubernetes.Provider(
 # Get the name of the default namespace
 namespace = "default"
 
-sa_name = "platform-sa"
+sa_name = "lumigator-sa"
 
 # https://www.pulumi.com/blog/eks-oidc/
 sub = cluster.core.oidc_provider.url.apply(lambda url: url + ":sub")
@@ -123,7 +123,7 @@ for policy_arn in managed_policy_arns:
 
 # Create a Kubernetes Service Account in the default namespace
 service_account = kubernetes.core.v1.ServiceAccount(
-    "platform-sa",
+    "lumigator-sa",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name=sa_name,
         namespace=namespace,
@@ -138,15 +138,15 @@ pulumi.export(SERVICE_ACCOUNT_NAME, service_account.metadata.name)
 
 # Just use private subnets from VPC, or create separate subnets for DB?
 db_subnet_group = aws.rds.SubnetGroup(
-    "platform-db-subnet-group",
+    "lumigator-db-subnet-group",
     subnet_ids=vpc.private_subnet_ids,
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
 )
 
-# Create a Security Group that allows inbound (ingress) traffic on Port 5432 (default PostgreSQL port)
+# Create a Security Group that allows inbound (ingress) traffic on Port 5432 (PostgreSQL)
 # TODO: Lock down to private subnets / kube nodes only
 security_group = aws.ec2.SecurityGroup(
-    "platform-db-sg",
+    "lumigator-db-sg",
     vpc_id=vpc.vpc_id,
     ingress=[
         {
@@ -159,13 +159,13 @@ security_group = aws.ec2.SecurityGroup(
     opts=pulumi.ResourceOptions(depends_on=[vpc]),
 )
 
-db_name = "platform"
+db_name = "lumigator"
 db_user = "db_admin"
-db_pass = "password123"  # TODO Use Pulumi Secret
+db_pass = "password123"  # pragma: allowlist secret
 
 ## Create a RDS instance
 db_instance = aws.rds.Instance(
-    "platform-db",
+    "lumigator-db",
     engine="postgres",
     instance_class="db.t3.small",
     allocated_storage=20,
@@ -196,6 +196,6 @@ kube_ray = Chart(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster, cluster_provider]),
 )
 
-bucket = aws.s3.Bucket("platform-data")
+bucket = aws.s3.Bucket("lumigator-data")
 
 pulumi.export(BUCKET_ID, bucket.id)

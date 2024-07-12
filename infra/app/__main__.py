@@ -23,7 +23,7 @@ SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
 DATABASE_NAME = "db-name"
 DATABASE_USER = "db-user"
-DATABASE_PASSWORD = "db-pass"
+DATABASE_PASSWORD = "db-pass"  # pragma: allowlist secret
 BUCKET_ID = "bucket-id"
 
 stack_ref = pulumi.StackReference("mzai-mlrunner/pulumi-aws/dev")
@@ -42,7 +42,7 @@ jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
 
 
 jobrunner_tag = config.require("jobrunner-tag")
-platform_tag = config.require("platform-tag")
+lumigator_tag = config.require("lumigator-tag")
 
 service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
 
@@ -84,33 +84,33 @@ kube_ray = Chart(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
 )
 
-image = pulumi.Output.format("{0}:{1}", backend_repository_url, platform_tag)
+image = pulumi.Output.format("{0}:{1}", backend_repository_url, lumigator_tag)
 
-platform_backend_deployment = kubernetes.apps.v1.Deployment(
-    "platform-api",
+lumigator_backend_deployment = kubernetes.apps.v1.Deployment(
+    "lumigator-api",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         labels={
-            "appClass": "platform-api",
+            "appClass": "lumigator-api",
         },
     ),
     spec=kubernetes.apps.v1.DeploymentSpecArgs(
         replicas=2,
         selector=kubernetes.meta.v1.LabelSelectorArgs(
             match_labels={
-                "appClass": "platform-api",
+                "appClass": "lumigator-api",
             },
         ),
         template=kubernetes.core.v1.PodTemplateSpecArgs(
             metadata=kubernetes.meta.v1.ObjectMetaArgs(
                 labels={
-                    "appClass": "platform-api",
+                    "appClass": "lumigator-api",
                 },
             ),
             spec=kubernetes.core.v1.PodSpecArgs(
                 service_account_name=service_account_name,
                 containers=[
                     kubernetes.core.v1.ContainerArgs(
-                        name="platform-api",
+                        name="lumigator-api",
                         image=image,
                         ports=[
                             kubernetes.core.v1.ContainerPortArgs(
@@ -140,7 +140,7 @@ platform_backend_deployment = kubernetes.apps.v1.Deployment(
     opts=pulumi.ResourceOptions(provider=cluster_provider, depends_on=[cluster_provider]),
 )
 
-platform_svc = kubernetes.core.v1.Service(
+lumigator_svc = kubernetes.core.v1.Service(
     "backend-service",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name="backend-svc",
@@ -164,4 +164,4 @@ platform_svc = kubernetes.core.v1.Service(
 )
 
 # Export the URL for the load balanced service.
-pulumi.export("svc-url", platform_svc.status.load_balancer.ingress[0].hostname)
+pulumi.export("svc-url", lumigator_svc.status.load_balancer.ingress[0].hostname)

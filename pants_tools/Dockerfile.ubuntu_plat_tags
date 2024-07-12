@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=platform/python/mzai/backend:backend_image
+ARG BASE_IMAGE=lumigator/python/mzai/backend:backend_image
 FROM $BASE_IMAGE
 
 RUN pip install pex==2.3.0

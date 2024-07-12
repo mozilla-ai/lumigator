@@ -1,7 +1,6 @@
-# MZAI Platform
+# Mozilla.ai Lumigator
 
-Source code for the MZAI model builder platform.
-
+Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.ai/) for guiding users through the process of selecting the right LLM for their needs.
 
 # Setup
 
@@ -34,9 +33,9 @@ Compile targets manually:
 ```bash
 pants package <target>
 # backend app
-pants package platform/python/mzai/backend --no-local-cache
+pants package lumigator/python/mzai/backend --no-local-cache
 # backend docker image
-pants package platform/python/mzai/backend:backend_image
+pants package lumigator/python/mzai/backend:backend_image
 ```
 
 
@@ -58,6 +57,7 @@ Using a container, run the following from the root of this repo:
 
 ```bash
 make test-dev-setup
+
 ```
 
 This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers.

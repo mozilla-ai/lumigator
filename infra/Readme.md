@@ -40,11 +40,8 @@ Create an Access key and put in .env file
 
 There are two main pulumi stacks in this folder:
 
-<<<<<<< HEAD
 `Infra` - This stack is the baseline infra needed for Lumigator to run
-=======
-`Infra` - This stack is the baseline infra needed for the lumigator
->>>>>>> 3748955 (renaming to Lumigator)
+
 
 `App` - This stack is the app itself, it can be run every time a new code version is deployed.
 

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, status
 from uuid import UUID
+
+from fastapi import APIRouter, status
 
 from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse

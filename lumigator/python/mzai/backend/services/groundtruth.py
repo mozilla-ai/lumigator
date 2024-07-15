@@ -1,3 +1,6 @@
+from uuid import UUID
+
+import loguru
 import requests
 from fastapi import HTTPException
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status
+from uuid import UUID
 
 from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse
@@ -31,3 +32,8 @@ def send_model_request(
     service: GroundTruthServiceDep, request: GroundTruthQueryRequest
 ) -> GroundTruthDeploymentQueryResponse:
     return service.run_inference(request)
+
+
+@router.delete("/deployments/{deployment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_deployment(service: GroundTruthServiceDep, deployment_id: UUID) -> None:
+    service.delete_deployment(deployment_id)

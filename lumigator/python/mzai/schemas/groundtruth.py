@@ -24,3 +24,11 @@ class GroundTruthDeploymentLogsResponse(BaseModel):
     id: UUID
     status: DeploymentStatus
     logs: list[str]
+
+
+class GroundTruthQueryRequest(BaseModel):
+    text: str
+
+
+class GroundTruthDeploymentQueryResponse(BaseModel):
+    deployment_response: dict[str, str]

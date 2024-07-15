@@ -52,6 +52,6 @@ class GroundTruthService:
             base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
-            return GroundTruthDeploymentQueryResponse(response.json())
+            return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e

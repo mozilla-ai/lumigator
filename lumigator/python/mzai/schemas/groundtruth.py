@@ -31,4 +31,4 @@ class GroundTruthQueryRequest(BaseModel):
 
 
 class GroundTruthDeploymentQueryResponse(BaseModel):
-    text: dict[str, str]
+    model_response: dict[str, str]

@@ -8,6 +8,7 @@ from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
+    GroundTruthQueryRequest,
 )
 from mzai.backend.settings import settings
 
@@ -46,11 +47,11 @@ class GroundTruthService:
             items=[GroundTruthDeploymentResponse.model_validate(x) for x in records],
         )
 
-    def run_inference(self, request) -> GroundTruthDeploymentResponse:
+    def run_inference(self, request: GroundTruthQueryRequest) -> GroundTruthDeploymentQueryResponse:
         try:
             base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
-            return GroundTruthDeploymentQueryResponse(text=response.json())
+            return GroundTruthDeploymentQueryResponse(response.json())
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e

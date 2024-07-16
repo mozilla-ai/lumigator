@@ -1,8 +1,12 @@
+from uuid import UUID
+
+import loguru
 import requests
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
+from mzai.backend.records.groundtruth import GroundTruthDeploymentRecord
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.backend.settings import settings
 from mzai.schemas.extras import ListingResponse
@@ -54,4 +58,14 @@ class GroundTruthService:
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e)) from e
+            raise HTTPException(status.INTERNAL_SERVER_ERROR, detail=str(e)) from e
+
+    def _get_deployment_record(self, deployment_id: UUID) -> GroundTruthDeploymentRecord:
+        record = self.deployment_repo.get(deployment_id)
+        if record is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Deployment {deployment_id} not found.")
+        return record
+
+    def delete_deployment(self, deployment_id: UUID) -> None:
+        self.deployment_repo.delete(deployment_id)
+        return loguru.logger.info(f"{deployment_id} deleted")

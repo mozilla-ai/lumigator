@@ -23,7 +23,7 @@ repos:
         name: pants fmt lint
         always_run: false
         description: runs ./pants fmt on all files
-        entry: "pants --no-dynamic-ui fmt lint ::"
+        entry: "pants --changed-since=origin/main lint"
         language: system
         pass_filenames: false
         types: [file]

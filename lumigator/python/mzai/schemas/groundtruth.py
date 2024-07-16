@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from mzai.schemas.deployments import DeploymentStatus
 
 
+class GroundTruthDeploymentCreate(BaseModel):
+    num_gpus: int | None = None
+
+
 class GroundTruthDeploymentUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
@@ -24,3 +28,11 @@ class GroundTruthDeploymentLogsResponse(BaseModel):
     id: UUID
     status: DeploymentStatus
     logs: list[str]
+
+
+class GroundTruthQueryRequest(BaseModel):
+    text: str
+
+
+class GroundTruthDeploymentQueryResponse(BaseModel):
+    deployment_response: dict[str, str]

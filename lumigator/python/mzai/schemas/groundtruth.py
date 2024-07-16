@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from mzai.schemas.deployments import DeploymentStatus
 
 
+class GroundTruthDeploymentCreate(BaseModel):
+    num_gpus: int | None = None
+
+
 class GroundTruthDeploymentUpdate(BaseModel):
     name: str | None = None
     description: str | None = None

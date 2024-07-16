@@ -4,13 +4,14 @@ from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from mzai.backend.settings import settings
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
+    GroundTruthDeploymentCreate,
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
-from mzai.backend.settings import settings
 
 
 class GroundTruthService:
@@ -22,14 +23,13 @@ class GroundTruthService:
         self.deployment_repo = deployment_repo
         self.ray_client = ray_serve_client
 
-    def create_deployment(self):
-        conf = SummarizerConfigLoader()
+    def create_deployment(self, request: GroundTruthDeploymentCreate):
+        conf = SummarizerConfigLoader(num_gpus=request.num_gpus)
         deployment_args = conf.get_config_dict()
         deployment_name = conf.get_deployment_name()
         deployment_description = conf.get_deployment_description()
 
         self.ray_client.deploy_applications(deployment_args)
-        # app(deployment_args)
 
         record = self.deployment_repo.create(
             name=deployment_name, description=deployment_description

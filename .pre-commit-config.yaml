@@ -23,7 +23,7 @@ repos:
         name: pants fmt lint
         always_run: false
         description: runs ./pants fmt on all files changed since origin/main
-        entry: "pants --changed-since=origin/main lint"
+        entry: "pants --changed-since=origin/main fmt lint"
         language: system
         pass_filenames: false
         types: [file]

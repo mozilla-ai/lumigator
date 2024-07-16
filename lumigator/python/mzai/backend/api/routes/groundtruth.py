@@ -3,6 +3,7 @@ from fastapi import APIRouter, status
 from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
+    GroundTruthDeploymentCreate,
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
@@ -13,9 +14,9 @@ router = APIRouter()
 
 @router.post("/deployments", status_code=status.HTTP_201_CREATED)
 def create_groundtruth_deployment(
-    service: GroundTruthServiceDep,
+    service: GroundTruthServiceDep, request: GroundTruthDeploymentCreate
 ) -> GroundTruthDeploymentResponse:
-    return service.create_deployment()
+    return service.create_deployment(request)
 
 
 @router.get("/deployments")

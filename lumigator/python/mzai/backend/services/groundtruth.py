@@ -16,6 +16,7 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
+from fastapi import status
 
 
 class GroundTruthService:
@@ -58,15 +59,14 @@ class GroundTruthService:
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e)) from e
+            raise HTTPException(status.INTERNAL_SERVER_ERROR, detail=str(e)) from e
 
     def _get_deployment_record(self, deployment_id: UUID) -> GroundTruthDeploymentRecord:
         record = self.deployment_repo.get(deployment_id)
         if record is None:
-            self._raise_not_found(deployment_id)
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Deployment {deployment_id} not found.")
         return record
 
     def delete_deployment(self, deployment_id: UUID) -> None:
-        loguru.logger.info(f"{deployment_id}")
         self.deployment_repo.delete(deployment_id)
         return loguru.logger.info(f"{deployment_id} deleted")

@@ -64,7 +64,9 @@ class SummarizerConfigLoader(ConfigLoader):
                         RayServeDeploymentConfig(
                             name="Summarizer",
                             num_replicas=num_replicas,
-                            ray_actor_options=RayServeActorConfig(num_cpus=1.0, num_gpus=num_gpus),
+                            ray_actor_options=RayServeActorConfig(
+                                num_cpus=1.0, num_gpus=num_gpus, num_replicas=num_replicas
+                            ),
                         )
                     ],
                 )

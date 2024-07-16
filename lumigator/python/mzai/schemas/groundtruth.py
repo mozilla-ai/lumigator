@@ -8,7 +8,7 @@ from mzai.schemas.deployments import DeploymentStatus
 
 class GroundTruthDeploymentCreate(BaseModel):
     num_gpus: float | None = None
-    num_instances: int | None = None
+    num_replicas: int | None = None
 
 
 class GroundTruthDeploymentUpdate(BaseModel):

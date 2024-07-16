@@ -16,7 +16,6 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
-from fastapi import status
 
 
 class GroundTruthService:

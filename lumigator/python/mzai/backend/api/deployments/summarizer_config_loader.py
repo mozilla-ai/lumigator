@@ -10,7 +10,7 @@ from mzai.summarizer.summarizer import SummarizerArgs
 
 class RayServeActorConfig(BaseModel):
     num_cpus: float
-    # num_gpus: float
+    num_gpus: float | None = None
 
 
 class RayServeDeploymentConfig(BaseModel):

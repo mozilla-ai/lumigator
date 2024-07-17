@@ -87,6 +87,7 @@ class DatasetService:
     def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
+        self.s3_filesystem = s3fs.S3FileSystem()
 
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
@@ -130,10 +131,8 @@ class DatasetService:
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
 
-            s3 = s3fs.S3FileSystem()
-
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
-            dataset_hf.save_to_disk(dataset_path, fs=s3)
+            dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
 
         finally:
             # Cleanup temp file

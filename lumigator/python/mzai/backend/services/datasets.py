@@ -132,14 +132,19 @@ class DatasetService:
 
             # Upload to S3
 
-            warnings.warn(f"AWS_ACCESS_KEY_ID: {os.environ['AWS_ACCESS_KEY_ID']}")
-            warnings.warn(f"AWS_SECRET_ACCESS_KEY: {os.environ['AWS_SECRET_ACCESS_KEY']}")
-            warnings.warn(f"AWS_ENDPOINT_URL: {os.environ['AWS_ENDPOINT_URL']}")
-            warnings.warn(f"LOCAL_FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}")
-            warnings.warn(f"LOCAL_FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}")
+            warnings.warn(f"AWS_ACCESS_KEY_ID: {os.environ['AWS_ACCESS_KEY_ID']}", 
+                          stacklevel=2)
+            warnings.warn(f"AWS_SECRET_ACCESS_KEY: {os.environ['AWS_SECRET_ACCESS_KEY']}", 
+                          stacklevel=2))
+            warnings.warn(f"AWS_ENDPOINT_URL: {os.environ['AWS_ENDPOINT_URL']}", 
+                          stacklevel=2)
+            warnings.warn(f"LOCAL_FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}", 
+                          stacklevel=2)
+            warnings.warn(f"LOCAL_FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}", 
+                          stacklevel=2)
             warnings.warn(
-                f"LOCAL_FSSPEC_S3_ENDPOINT_URL: {os.environ['LOCAL_FSSPEC_S3_ENDPOINT_URL']}"
-            )
+                f"LOCAL_FSSPEC_S3_ENDPOINT_URL: {os.environ['LOCAL_FSSPEC_S3_ENDPOINT_URL']}", 
+                stacklevel=2)
 
             dataset_key = self._get_s3_key(record.id, record.filename)
 

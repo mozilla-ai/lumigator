@@ -73,6 +73,9 @@ def setup_aws(localstack_container: LocalStackContainer):
     os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
     os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"
     os.environ["FSSPEC_S3_ENDPOINT_URL"] = localstack_container.get_url()
+    os.environ["AWS_ACCESS_KEY_ID"] = "testcontainers-localstack"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack"
+    os.environ["AWS_ENDPOINT_URL"] = localstack_container.get_url()
 
 
 @pytest.fixture(scope="function")

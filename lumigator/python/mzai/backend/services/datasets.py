@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile
 from typing import BinaryIO
 from uuid import UUID
 
+import s3fs
+from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
 from mypy_boto3_s3.client import S3Client
@@ -122,9 +124,16 @@ class DatasetService:
                 size=actual_size,
             )
 
+            # Load the CSV file as HF dataset
+            dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
+
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
-            self.s3_client.upload_file(temp.name, settings.S3_BUCKET, dataset_key)
+
+            s3 = s3fs.S3FileSystem()
+
+            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_hf.save_to_disk(dataset_path, fs=s3)
 
         finally:
             # Cleanup temp file

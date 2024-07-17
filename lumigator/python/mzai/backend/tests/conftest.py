@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -67,6 +69,13 @@ def setup_aws(localstack_container: LocalStackContainer):
         Bucket=settings.S3_BUCKET,
         CreateBucketConfiguration={"LocationConstraint": localstack_container.region_name},
     )
+    # add ENV vars for FSSPEC access to S3 (s3fs + HuggingFace datasets)
+    os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
+    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"
+    os.environ["FSSPEC_S3_ENDPOINT_URL"] = localstack_container.get_url()
+    os.environ["AWS_ACCESS_KEY_ID"] = "testcontainers-localstack"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack"
+    os.environ["AWS_ENDPOINT_URL"] = localstack_container.get_url()
 
 
 @pytest.fixture(scope="function")

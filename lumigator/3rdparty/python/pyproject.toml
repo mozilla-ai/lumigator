@@ -28,4 +28,6 @@ dependencies = [
     "setuptools==69.5.1",
     "numpy<2.0.0",
     "transformers==4.41.2",
+    "s3fs==2024.5.0",
+    "datasets==2.20.0"
 ]

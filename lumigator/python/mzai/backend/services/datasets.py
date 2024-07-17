@@ -131,15 +131,7 @@ class DatasetService:
             dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
 
             # Upload to S3
-            warnings.warn(f"FSSPEC_S3_KEY: {os.environ['FSSPEC_S3_KEY']}", stacklevel=2)
-            warnings.warn(f"FSSPEC_S3_SECRET: {os.environ['FSSPEC_S3_SECRET']}", stacklevel=2)
-            warnings.warn(
-                f"FSSPEC_S3_ENDPOINT_URL: {os.environ['FSSPEC_S3_ENDPOINT_URL']}",
-                stacklevel=2,
-            )
-
             dataset_key = self._get_s3_key(record.id, record.filename)
-
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
 

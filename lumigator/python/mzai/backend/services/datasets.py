@@ -1,4 +1,6 @@
 import csv
+import os
+import warnings
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -129,6 +131,16 @@ class DatasetService:
             dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
 
             # Upload to S3
+
+            warnings.warn(f"AWS_ACCESS_KEY_ID: {os.environ['AWS_ACCESS_KEY_ID']}")
+            warnings.warn(f"AWS_SECRET_ACCESS_KEY: {os.environ['AWS_SECRET_ACCESS_KEY']}")
+            warnings.warn(f"AWS_ENDPOINT_URL: {os.environ['AWS_ENDPOINT_URL']}")
+            warnings.warn(f"LOCAL_FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}")
+            warnings.warn(f"LOCAL_FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}")
+            warnings.warn(
+                f"LOCAL_FSSPEC_S3_ENDPOINT_URL: {os.environ['LOCAL_FSSPEC_S3_ENDPOINT_URL']}"
+            )
+
             dataset_key = self._get_s3_key(record.id, record.filename)
 
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"

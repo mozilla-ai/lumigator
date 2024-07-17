@@ -131,12 +131,6 @@ class DatasetService:
             dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
 
             # Upload to S3
-
-            warnings.warn(f"AWS_ACCESS_KEY_ID: {os.environ['AWS_ACCESS_KEY_ID']}", stacklevel=2)
-            warnings.warn(
-                f"AWS_SECRET_ACCESS_KEY: {os.environ['AWS_SECRET_ACCESS_KEY']}", stacklevel=2
-            )
-            warnings.warn(f"AWS_ENDPOINT_URL: {os.environ['AWS_ENDPOINT_URL']}", stacklevel=2)
             warnings.warn(f"LOCAL_FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}", stacklevel=2)
             warnings.warn(
                 f"LOCAL_FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}", stacklevel=2

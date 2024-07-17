@@ -131,12 +131,10 @@ class DatasetService:
             dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
 
             # Upload to S3
-            warnings.warn(f"LOCAL_FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}", stacklevel=2)
+            warnings.warn(f"FSSPEC_S3_KEY: {os.environ['LOCAL_FSSPEC_S3_KEY']}", stacklevel=2)
+            warnings.warn(f"FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}", stacklevel=2)
             warnings.warn(
-                f"LOCAL_FSSPEC_S3_SECRET: {os.environ['LOCAL_FSSPEC_S3_SECRET']}", stacklevel=2
-            )
-            warnings.warn(
-                f"LOCAL_FSSPEC_S3_ENDPOINT_URL: {os.environ['LOCAL_FSSPEC_S3_ENDPOINT_URL']}",
+                f"FSSPEC_S3_ENDPOINT_URL: {os.environ['LOCAL_FSSPEC_S3_ENDPOINT_URL']}",
                 stacklevel=2,
             )
 

@@ -1,7 +1,7 @@
 [project]
 name = "3rdparty-python-dependencies"
 version = "0.0.1"
-requires-python = ">3.10,<=3.11"
+requires-python = ">3.11,<=3.12"
 
 dependencies = [
     "uvicorn[standard]==0.28.0",
@@ -16,7 +16,7 @@ dependencies = [
     "pre-commit>=3.6",
     "sqlalchemy[asyncio]==2.0.28",
     "psycopg2-binary==2.9.9",
-    "ray[default]==2.9.3",
+    "ray[default]==2.30.0",
     "boto3==1.34.105",
     "boto3-stubs[essential]==1.34.105",
     "starlette",

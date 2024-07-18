@@ -68,8 +68,6 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
-      - RAY_HEAD_NODE_HOST=ray
-      - RAY_DASHBOARD_PORT=8265
       - AWS_HOST=localstack
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
@@ -77,9 +75,13 @@ services:
       - S3_PORT=4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
+      - RAY_DASHBOARD_PORT=8265
+      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
+      - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
+      - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}
     volumes:
       - ../:/mzai
-
 
 volumes:
     postgres-data:

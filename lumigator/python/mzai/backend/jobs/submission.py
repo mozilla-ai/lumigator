@@ -1,3 +1,4 @@
+import json
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
@@ -17,7 +18,7 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        return f"./jobrunner.pex --config '{self.config.model_dump_json()}'"
+        return f"lm-buddy evaluate huggingface --config '{json.dumps(self.config.args)}'"
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

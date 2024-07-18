@@ -17,8 +17,8 @@ from mzai.backend.tests.fakes.groundtruth_service import FakeGroundTruthService
 
 
 @pytest.fixture(scope="function", autouse=True)
-def finetuning_service_override(app: FastAPI) -> None:
-    """Override the FastAPI dependency injection with a fake finetuning service.
+def groundtruth_service_override(app: FastAPI) -> None:
+    """Override the FastAPI dependency injection with a fake groundtruth service.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
     """

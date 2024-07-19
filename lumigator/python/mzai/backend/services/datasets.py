@@ -1,6 +1,4 @@
 import csv
-import os
-import warnings
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO

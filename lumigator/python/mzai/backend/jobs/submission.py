@@ -10,9 +10,7 @@ from mzai.schemas.jobs import JobConfig
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
-    """
-    A RayJobEntrypoint boils down to a command which is passed a given config
-    and submitted as a ray job.
+    """A generic command which is passed a config and submitted as a ray job.
 
     Currently the only command we run is `lm-buddy evaluate`, but this can
     be parametrised to support both different parameters (e.g. `lm-buddy
@@ -27,9 +25,7 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        """
-        The command ran by the ray job, which is passed a JSON-serialized config
-        """
+        """The command ran by the ray job, which is passed a JSON-serialized config."""
         return f"lm-buddy evaluate huggingface --config '{json.dumps(self.config.args)}'"
 
 

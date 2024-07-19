@@ -1,59 +1,68 @@
 .PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants
 
-VENVNAME:= mzaivenv
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
+PY_VERSION := 3.11.9
+CUDA_AVAILABLE := @$(shell nvidia-smi 2> /dev/null; echo $$?)
+PANTS_INSTALLED := @$(shell pants --version 2> /dev/null; echo $$?)
+PYTHON_INSTALLED := $(shell python --version 2> /dev/null; echo $$?)
+UV_INSTALLED := $(shell command -v uv; echo $$?)
 
-ifeq ($(UNAME), GNU/Linux)
-	PY_PATH:= /opt/python/install/bin
-	PYTHON:= /opt/python/install/bin/python3.11
-	PY_DEPS:= 3rdparty/python/requirements_python_linux.txt
+ifeq ($(INSTALLED_PY_VERSION), 0)
+	ifeq ($(shell python --version), Python $(PY_VERSION))
+		PYTHON := $(shell which python)
+	endif
+else
+	ifeq ($(UNAME), GNU/Linux)
+		PYTHON_INSTALL_DIR=/opt/python
+		PYTHON := /opt/python/cpython-3.11.9-linux-x86_64-gnu/bin/python3
+		PY_DEPS:= 3rdparty/python/requirements_python_linux.txt
+		ifeq ($(CUDA_AVAILABLE), 0)
+			EXTRA_INDEX="https://download.pytorch.org/whl/cu118"
+			PARAMETRIZE:= linux_cuda
+		else
+			EXTRA_INDEX="https://download.pytorch.org/whl/cpu"
+			PARAMETRIZE:= linux_cpu
+		endif
+	else
+		PYTHON_INSTALL_DIR=.python
+		PYTHON := .python/cpython-3.11.9-macos-aarch64-none/bin/python3
+		PY_DEPS:= 3rdparty/python/requirements_python_darwin.txt
+		EXTRA_INDEX="https://pypi.org/simple"
+		PARAMETRIZE:= darwin
+	endif
 endif
 
-ifeq ($(UNAME), Darwin)
-	PY_PATH:= .python/python3.11.9/python/install/bin
-	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
-	PY_DEPS:= 3rdparty/python/requirements_python_darwin.txt
-endif
 
+export UV_PYTHON_INSTALL_DIR = $(PYTHON_INSTALL_DIR)
+
+VENVNAME:= mzaivenv
 
 ######### developer (mostly) setup targets ##########
-PANTS_INSTALLED := $(shell pants --version 1>&2 2> /dev/null; echo $$?)
+print_my_env:
+	echo $$UV_PYTHON_INSTALL_DIR
 
 install-pants:
 ifneq ($(PANTS_INSTALLED),0)
 	bash pants_tools/get-pants.sh
-endif
-ifeq ($(UNAME), GNU/Linux)
-		pip install uv
-endif
-ifeq ($(UNAME), Darwin)
-		brew install uv
 endif
 
 update-3rdparty-lockfiles:
 ### use this target when you add a new dependency to 3rdparty or change versions of a dep.
 	pants generate-lockfiles
 
-
 $(PYTHON):
+ifeq ($(UV_INSTALLED), 1)
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+endif
 	@echo "Installing python and configuring venv"
-	# uses python standalone - installs it in the repo by default under `./python`. has
-	#  considerations for platform, works on osx and debian / ubuntu linux
-	bash pants_tools/bootstrap_python.sh $(UNAME)
-	$(PYTHON) -m pip install uv pex
+	uv python install $(PY_VERSION) --python-preference only-managed
 
 bootstrap-python: $(PYTHON) $(VENVNAME)
 
 $(VENVNAME): $(PYTHON)
-	# use uv to create a venv from our lockfile.
-	pants run 3rdparty/python:gen_requirements_python_darwin
-	$(PYTHON) -m uv venv $(VENVNAME) --seed --python $(PYTHON)
-	# $(PYTHON) -m uv pip install --require-hashes --no-cache --strict -r $(PY_DEPS)
-	uv pip install --python $(PYTHON) --require-hashes --no-cache --strict -r $(PY_DEPS)
-	$(PY_PATH)/pre-commit install --config ".pre-commit-config.yaml"
-
-	echo "To use the environment, please run `source $(VENVNAME)/bin/activate`"
+	uv venv $(VENVNAME) --seed --python $(PYTHON)
+	cd 3rdparty/python && VIRTUAL_ENV=$$(git rev-parse --show-toplevel)/$(VENVNAME) uv pip install . --extra-index-url $(EXTRA_INDEX)
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
@@ -174,7 +183,8 @@ ci-fmt: ci-lint
 	pants --changed-since=origin/main fmt
 
 ci-tests:
-	pants test ::
+	@echo "running tests with parametrized platform: $(PARAMETRIZE)"
+	pants test lumigator/python/mzai/backend/tests:backend_tests@parametrize=$(PARAMETRIZE)
 
 ci-publish-images:
 	pants --filter-target-type=docker_image list lumigator/:: | xargs pants package publish

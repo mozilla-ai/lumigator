@@ -107,6 +107,8 @@ jobs:
       - name: Set up Python
         run: |
           make bootstrap-python
+          # uses uv; adds it to the right env/path vars
+          echo "VIRTUAL_ENV=$(git rev-parse --show-toplevel)/mzaivenv" >> $GITHUB_ENV
 
       - name: Lint
         env:

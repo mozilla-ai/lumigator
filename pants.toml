@@ -69,7 +69,9 @@ linux_cuda = "3rdparty/python/linux_cuda.lock"
 
 [python-bootstrap]
 search_path = [
-  "%(buildroot)s/.python/python3.11.9/python/install/bin",
+  "%(buildroot)s/.python/cpython-3.11.9-macos-aarch64-none/bin",
+  "%(buildroot)s/.python/cpython-3.11.9-linux-x86_64-gnu/bin",
+  "/opt/python/cpython-3.11.9-linux-x86_64-gnu",
   "<PYENV>",
   "<PATH>",
 ]

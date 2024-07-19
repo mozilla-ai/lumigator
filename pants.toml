@@ -92,4 +92,3 @@ default = false
 
 [pytest]
 args = ["-v"]
-

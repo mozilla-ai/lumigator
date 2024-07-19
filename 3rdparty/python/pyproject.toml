@@ -46,7 +46,7 @@ dependencies = [
     "pytest-cov",
     "python-multipart==0.0.9",
     "ray[default]==2.30.0",
-    "requests>=2.18.0",
+    "requests>=2,<3",
     "ruff>=0.2",
     "setuptools>=69.5.1",
     "sqlalchemy[asyncio]==2.0.28",

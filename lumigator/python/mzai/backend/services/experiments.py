@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -6,6 +7,7 @@ from ray.job_submission import JobSubmissionClient
 from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from mzai.backend.settings import settings
 from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.jobs import JobConfig, JobStatus, JobType
@@ -40,13 +42,38 @@ class ExperimentService:
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
+        eval_config_dict = {
+            "name": request.name,
+            "model": {"path": request.model},
+            "dataset": {"path": request.dataset},
+            "evaluation": {
+                "metrics": ["rouge", "meteor", "bertscore"],
+                "use_pipeline": True,
+                "max_samples": request.max_samples,
+                "return_input_data": True,
+                "return_predictions": True,
+                "storage_path": "s3://lumigator-storage/experiments/results/",
+            },
+        }
+
         # Submit the job to Ray
-        config = JobConfig(
+        ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,
-            args={"name": request.name},
+            args=eval_config_dict,
         )
-        entrypoint = RayJobEntrypoint(config=config)
+
+        runtime_env = {
+            "pip": ["lm-buddy==0.10.10"],
+            "env_vars": {
+                "MZAI_JOB_ID": str(record.id),
+                "MZAI_HOST": "",
+                "LOCAL_FSSPEC_S3_KEY": os.environ.get("LOCAL_FSSPEC_S3_KEY", ""),
+                "LOCAL_FSSPEC_S3_SECRET": os.environ.get("LOCAL_FSSPEC_S3_SECRET", ""),
+                "LOCAL_FSSPEC_S3_ENDPOINT_URL": os.environ.get("LOCAL_FSSPEC_S3_ENDPOINT_URL", ""),
+            },
+        }
+        entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)
         submit_ray_job(self.ray_client, entrypoint)
 
         return ExperimentResponse.model_validate(record)

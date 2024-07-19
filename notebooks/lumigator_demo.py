@@ -7,14 +7,16 @@ from pathlib import Path
 
 import requests
 import s3fs
+import os
 
 # URL where the API can be reached
-API_HOST = "localhost"
+API_HOST = os.environ['LUMIGATOR_SERVICE_HOST']
 API_URL = f"http://{API_HOST}/api/v1"
 
 # URL of the Ray server
 # (this should not be directly available for the demo)
-RAY_SERVER_URL="http://10.144.20.102:8265"
+RAY_HEAD_HOST = os.environ['RAYCLUSTER_KUBERAY_HEAD_SVC_PORT_8265_TCP_ADDR']
+RAY_SERVER_URL = f"http://{RAY_HEAD_HOST}:8265"
 
 # base S3 path
 S3_BASE_PATH="lumigator-storage/experiments/results/"

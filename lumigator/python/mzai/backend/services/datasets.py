@@ -93,7 +93,13 @@ class DatasetService:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
-        record = self.dataset_repo.get(dataset_id)
+        try:
+            record = self.dataset_repo.get(dataset_id)
+        except Exception:
+            # instead of breaking for any SQL error, we just return None
+            # which results in a 404 "Dataset not found"
+            record = None
+
         if record is None:
             self._raise_not_found(dataset_id)
         return record
@@ -142,6 +148,12 @@ class DatasetService:
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse:
         record = self._get_dataset_record(dataset_id)
         return DatasetResponse.model_validate(record)
+
+    def get_dataset_s3_path(self, dataset_id: UUID) -> str:
+        record = self._get_dataset_record(dataset_id)
+        dataset_key = self._get_s3_key(record.id, record.filename)
+        dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        return dataset_path
 
     def delete_dataset(self, dataset_id: UUID) -> None:
         record = self._get_dataset_record(dataset_id)

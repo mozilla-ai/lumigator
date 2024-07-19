@@ -96,9 +96,9 @@ class DatasetService:
         try:
             record = self.dataset_repo.get(dataset_id)
         except Exception:
-            # instead of breaking for any SQL error, we just return None
+            # instead of breaking for any SQL error, we just call _raise_not_found
             # which results in a 404 "Dataset not found"
-            record = None
+            self._raise_not_found(dataset_id)
 
         if record is None:
             self._raise_not_found(dataset_id)

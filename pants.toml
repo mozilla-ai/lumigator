@@ -21,7 +21,7 @@ backend_packages = [
 # Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
 # Will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["python", "infra", "frontend"]
+root_patterns = ["python", "infra"]
 
 [tailor]
 build_file_name = "BUILD.pants"

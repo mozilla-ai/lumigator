@@ -48,7 +48,7 @@ class ExperimentService:
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
         eval_config_dict = {
-            "name": request.name,
+            "name": f"{request.name}/{str(record.id)}",
             "model": {"path": request.model},
             "dataset": {"path": dataset_s3_path},
             "evaluation": {

@@ -76,7 +76,7 @@ services:
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
       - RAY_DASHBOARD_PORT=8265
-      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
+      - RAY_HEAD_NODE_HOST=ray
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
       - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
       - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}

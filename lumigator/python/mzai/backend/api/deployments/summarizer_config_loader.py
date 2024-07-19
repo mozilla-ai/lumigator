@@ -11,12 +11,11 @@ from mzai.summarizer.summarizer import SummarizerArgs
 class RayServeActorConfig(BaseModel):
     num_cpus: float
     num_gpus: float | None = None
-    num_replicas: float | None = None
+    num_replicas: int | None = None
 
 
 class RayServeDeploymentConfig(BaseModel):
     name: str
-    num_replicas: int
     ray_actor_options: RayServeActorConfig
 
 

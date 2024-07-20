@@ -91,7 +91,10 @@ local_environment(
     # note that selecting CUDA here is going to be annoying. :(
     name="local_linux",
     compatible_platforms=["linux_x86_64"],
-    subprocess_environment_env_vars=["PANTS_PYTHON_RESOLVES=linux_cpu"],  # pragma: allowlist secret
+    subprocess_environment_env_vars=[
+        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.python_resolve}"
+    ],  # pragma: allowlist secret
+    # want to move this to `docker_linux` when that is available - blocked by a bug with testcontainers.
     fallback_environment="local_darwin",
     # should fall back to docker if requested on another arch
     docker_env_vars=["DOCKER_HOST"],
@@ -100,10 +103,17 @@ local_environment(
 local_environment(
     name="local_darwin",
     compatible_platforms=["macos_arm64"],
-    # fallback_environment="docker_linux_cpu",
+    # expected - auto paramaterized targets for darwin/linux should get ignored on noncompatible platforms.
+    fallback_environment="local_linux",
     subprocess_environment_env_vars=[f"PANTS_PYTHON_RESOLVES={DARWIN.python_resolve}"],
 )
 
+# these basically don't work for us yet
+# there's a conflict with testcontainers
+# and we either have to mount the docker socket file to it to allow a
+# docker-in-docker approach for building while on macos
+# or do a socat workaround to make the docker daemon accessible
+# in the container here to then run testcontainers
 docker_environment(
     name="docker_linux_cpu",
     docker_env_vars=[

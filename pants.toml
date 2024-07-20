@@ -72,6 +72,7 @@ search_path = [
   "%(buildroot)s/.python/cpython-3.11.9-macos-aarch64-none/bin",
   "%(buildroot)s/.python/cpython-3.11.9-linux-x86_64-gnu/bin",
   "/opt/python/cpython-3.11.9-linux-x86_64-gnu/bin",
+  "/opt/python/install/bin/",
   "<PYENV>",
   "<PATH>",
 ]

@@ -10,7 +10,7 @@ class ExperimentCreate(BaseModel):
     name: str
     description: str = ""
     model: str
-    dataset: str
+    dataset: UUID
     max_samples: int | None = None
 
 

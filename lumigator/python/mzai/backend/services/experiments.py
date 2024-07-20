@@ -44,7 +44,7 @@ class ExperimentService:
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
-        # get dataset S3 path from UUID (will return 404 if SQL error / dataset not found)
+        # get dataset S3 path from UUID
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
         eval_config_dict = {

@@ -3,10 +3,11 @@
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 PY_VERSION := 3.11.9
-CUDA_AVAILABLE := @$(shell nvidia-smi 2> /dev/null; echo $$?)
-PANTS_INSTALLED := @$(shell pants --version 2> /dev/null; echo $$?)
+CUDA_AVAILABLE := $(shell nvidia-smi 2> /dev/null; echo $$?)
+PANTS_INSTALLED := $(shell pants --version 2> /dev/null; echo $$?)
 PYTHON_INSTALLED := $(shell python --version 2> /dev/null; echo $$?)
 UV_INSTALLED := $(shell command -v uv; echo $$?)
+OVERRIDES :=
 
 ifeq ($(INSTALLED_PY_VERSION), 0)
 	ifeq ($(shell python --version), Python $(PY_VERSION))
@@ -18,17 +19,20 @@ else
 		PYTHON := /opt/python/cpython-3.11.9-linux-x86_64-gnu/bin/python3
 		PY_DEPS:= 3rdparty/python/requirements_python_linux.txt
 		ifeq ($(CUDA_AVAILABLE), 0)
-			EXTRA_INDEX="https://download.pytorch.org/whl/cu118"
+			# unsafe-best match is required to make UV resolve
+			# more closely to PIP - it's confused by the multiple idnexes
+			EXTRA_INDEX=--extra-index-url https://download.pytorch.org/whl/cu118 --index-strategy=unsafe-best-match
 			PARAMETRIZE:= linux_cuda
 		else
-			EXTRA_INDEX="https://download.pytorch.org/whl/cpu"
+			EXTRA_INDEX=--extra-index-url https://download.pytorch.org/whl/cpu --index-strategy=unsafe-best-match
+			OVERRIDES := --override tmp_overrides.txt
 			PARAMETRIZE:= linux_cpu
 		endif
 	else
 		PYTHON_INSTALL_DIR=.python
 		PYTHON := .python/cpython-3.11.9-macos-aarch64-none/bin/python3
 		PY_DEPS:= 3rdparty/python/requirements_python_darwin.txt
-		EXTRA_INDEX="https://pypi.org/simple"
+		EXTRA_INDEX=--extra-index-url https://pypi.org/simple
 		PARAMETRIZE:= darwin
 	endif
 endif
@@ -62,7 +66,18 @@ bootstrap-python: $(PYTHON) $(VENVNAME)
 
 $(VENVNAME): $(PYTHON)
 	uv venv $(VENVNAME) --seed --python $(PYTHON)
-	cd 3rdparty/python && VIRTUAL_ENV=$$(git rev-parse --show-toplevel)/$(VENVNAME) uv pip install . --extra-index-url $(EXTRA_INDEX)
+ifeq ($(UNAME), GNU/Linux)
+ifneq ($(CUDA_AVAILABLE), 0)  # return code is 127 if it's not found
+	echo "torch==2.3.0+cpu" > tmp_overrides.txt
+endif
+endif
+	VIRTUAL_ENV=$$(git rev-parse --show-toplevel)/$(VENVNAME) uv pip install \
+	-r 3rdparty/python/pyproject.toml \
+	 $(OVERRIDES)  $(EXTRA_INDEX)
+ifdef OVERRIDES
+	rm tmp_overrides.txt
+endif
+
 
 .env: $(PYTHON)
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide

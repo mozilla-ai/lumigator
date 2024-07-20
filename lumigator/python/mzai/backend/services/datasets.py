@@ -93,12 +93,7 @@ class DatasetService:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
-        try:
-            record = self.dataset_repo.get(dataset_id)
-        except Exception:
-            # instead of breaking for any SQL error, we just call _raise_not_found
-            # which results in a 404 "Dataset not found"
-            self._raise_not_found(dataset_id)
+        record = self.dataset_repo.get(dataset_id)
 
         if record is None:
             self._raise_not_found(dataset_id)

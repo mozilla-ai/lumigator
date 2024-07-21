@@ -202,4 +202,4 @@ ci-tests:
 	pants test lumigator/python/mzai/backend/tests:backend_tests@parametrize=$(PARAMETRIZE)
 
 ci-publish-images:
-	pants --filter-target-type=docker_image list lumigator/:: | xargs pants package publish
+	pants package publish lumigator/python/mzai/backend:backend_image

@@ -13,50 +13,55 @@
 # this is _NOT_ optimal code and would love to sort out how to do more like ParamGroup(...) defined here to make the
 # defaults settings a lot cleaner.
 
+## Note that also this _has_ to be repeated from the `parametrize_platforms.py` file.
+# Pants Macros are *not* available when setting up Environment targets.
+# this code is explicitly copied into here for consistency.
+
 
 class ParameterGroup:
-    def __init__(self, name, python_resolve, default_environment, complete_platforms):
+    def __init__(self, name, resolve, environment, complete_platforms):
         self.name = name
-        self.python_resolve = {"resolve": python_resolve}
-        self.default_environment = {"environment": default_environment}
-        self.complete_platforms = {"complete_platforms": complete_platforms}
+        self.resolve = resolve
+        self.environment = environment
+        self.complete_platforms = complete_platforms
 
     def pex(self):
         pex_kwargs: dict = {
-            **self.python_resolve,
-            **self.default_environment,
-            **self.complete_platforms,
+            "resolve": self.resolve,
+            "environment": self.environment,
+            "complete_platforms": self.complete_platforms,
         }
         return parametrize(self.name, **pex_kwargs)
 
     def python_sources(self):
-        py_kwargs: dict = {**self.python_resolve}
+        py_kwargs: dict = {"resolve": self.resolve}
         return parametrize(self.name, **py_kwargs)
 
     def python_tests(self):
-        pytest_kwargs: dict = {**self.python_resolve, **self.default_environment}
+        pytest_kwargs: dict = {"resolve": self.resolve, "environment": self.environment}
         return parametrize(self.name, **pytest_kwargs)
 
 
 LINUX_CUDA = ParameterGroup(
     name="linux_cuda",
-    python_resolve="linux_cuda",
-    default_environment="local_linux",
+    resolve="linux_cuda",
+    environment="local_linux",
     complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
 )
 LINUX_CPU = ParameterGroup(
     name="linux_cpu",
-    python_resolve="linux_cpu",
-    default_environment="local_linux",
+    resolve="linux_cpu",
+    environment="local_linux",
     complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
 )
 DARWIN = ParameterGroup(
     name="darwin",
-    python_resolve="darwin",
-    default_environment="local_darwin",
+    resolve="darwin",
+    environment="local_darwin",
     complete_platforms=["//3rdparty/python:py311_macos_14_pex_platform_tags"],
 )
 
+p_groups = (LINUX_CUDA, LINUX_CPU, DARWIN)
 
 LOCAL_LINUX = "local_linux"
 
@@ -92,7 +97,7 @@ local_environment(
     name="local_linux",
     compatible_platforms=["linux_x86_64"],
     subprocess_environment_env_vars=[
-        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.python_resolve}"
+        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.resolve}"
     ],  # pragma: allowlist secret
     # want to move this to `docker_linux` when that is available - blocked by a bug with testcontainers.
     fallback_environment="local_darwin",
@@ -105,7 +110,7 @@ local_environment(
     compatible_platforms=["macos_arm64"],
     # expected - auto paramaterized targets for darwin/linux should get ignored on noncompatible platforms.
     fallback_environment="local_linux",
-    subprocess_environment_env_vars=[f"PANTS_PYTHON_RESOLVES={DARWIN.python_resolve}"],
+    subprocess_environment_env_vars=[f"PANTS_PYTHON_RESOLVES={DARWIN.resolve}"],
 )
 
 # these basically don't work for us yet
@@ -117,7 +122,7 @@ local_environment(
 docker_environment(
     name="docker_linux_cpu",
     docker_env_vars=[
-        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.python_resolve}",
+        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.resolve}",
         "DOCKER_HOST=tcp://docker:2375",
         "REPOVERSION=%(env.REPOVERSION)s",
         "DOCKER_BUILDKIT=1",
@@ -131,7 +136,7 @@ docker_environment(
 docker_environment(
     name="docker_linux_cuda",
     docker_env_vars=[
-        f"PANTS_PYTHON_RESOLVES={LINUX_CUDA.python_resolve}",
+        f"PANTS_PYTHON_RESOLVES={LINUX_CUDA.resolve}",
         "DOCKER_HOST=tcp://docker:2375",
     ],  # pragma: allowlist secret
     image="mzdotai/golden:base_gpu_latest",

@@ -15,6 +15,10 @@ backend_packages = [
   "pants.backend.experimental.helm"
 ]
 
+# pants macros are loaded as 'headers' to the build files. files in the list below will get added as macros.
+build_file_prelude_globs = ["pants-plugins/parametrize_platforms.py"]
+
+
 [environments-preview.names]
 local_darwin = "//:local_darwin"
 local_linux = "//:local_linux"
@@ -91,6 +95,7 @@ use_buildx = true
 # without it, it requires you to add an explict
 # local registry to pants.
 build_args = ["--output=type=docker", "REPOVERSION"]
+run_args = ["--platform=linux/amd64"]
 env_vars = [
   "REPOVERSION=%(env.REPOVERSION)s",
   "DOCKER_BUILDKIT=1",

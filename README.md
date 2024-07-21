@@ -4,14 +4,16 @@ Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.a
 
 # Setup
 
-Install pants, tools, dev environment.
-This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more.
+Install pants, tools, and dev environment.
+This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is
+handled by `uv`; pants maintains lockfiles for different platforms. Currently, only `python 3.11.9` is valid for this project; if a compatible interpreter
+is found `uv` will not download a standalone python interpreter for you.
 
 For VSCode users, activate the venv before opening your IDE; the `.env` file will be recognized automatically.
 
 
 ```shell
-make bootstrap-dev-env
+make bootstrap-dev-environment
 ```
 
 Show targets:
@@ -41,11 +43,11 @@ pants package lumigator/python/mzai/backend:backend_image
 
 ## Rebuilding dependencies
 
-You may need to manually regenerate the lockfile [Pants recommends using](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
+You may need to manually regenerate the [lockfiles](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
 To do so:
 
-1. Add your new dependency to `platform/3rdparty/python/pyproject.toml`. This file respects system platform markers, and only very special cases need to be added as explicit `python_requirement` targets.
-2. `pants generate-lockfiles`
+1. Add your new dependency to `3rdparty/python/pyproject.toml`. This file respects system platform markers, and only very special cases need to be added as explicit `python_requirement` targets.
+2. run `pants generate-lockfiles`. This will take a while - 5-10 minutes in some cases and require access to pypi.
 
 make sure to add the new lockfiles to the repo with your PR. You'll have to rebuild your dev environment if you haven't already.
 
@@ -59,5 +61,3 @@ Using a container, run the following from the root of this repo:
 make test-dev-setup
 
 ```
-
-This will build docker-compose locally. To develop, bring up docker-compose, then open VSCode and it should prompt you to open in devcontainers.

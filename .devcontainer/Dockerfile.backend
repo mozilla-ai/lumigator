@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 FROM python:3.11.9-bookworm
 SHELL ["/bin/bash", "-c"]
 
@@ -9,17 +10,20 @@ RUN pip install pex uv
 
 # uv pip is erroring out on a weird issue, saying it can't install numpy's version as such. normal pip works as expected.
 # leaving these here for changing after sorting it out
-# RUN uv venv --seed --python $(which python)
-RUN uv python install 3.11.9
-RUN uv lock --python-preference only-managed --extra-index-url=https://download.pytorch.org/whl/cpu
-RUN uv sync
-#E RUN uv pip install --system --no-cache -r uv.lock
-# RUN pip install --no-cache --no-deps -r requirements_python_linux.txt
+RUN uv python install 3.11.9 --python-preference only-managed
+RUN	<<EOF
+    echo "torch==2.3.0+cpu" > tmp_overrides.txt
+    uv pip install \
+        --system \
+        --no-cache \
+        -r pyproject.toml \
+        --extra-index-url https://download.pytorch.org/whl/cpu \
+        --override tmp_overrides.txt \
+        --index-strategy=unsafe-best-match # required. see UV docs for details
+EOF
 
 
 WORKDIR /mzai
-# RUN source activate /tmp/venv/bin/activate
 ENV PYTHONPATH="/mzai"
 CMD zip lumigator/python/mzai/backend/api/deployments lumigator/python/mzai/backend/api/deployments.zip
-# CMD ["/tmp/venv/bin/uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]

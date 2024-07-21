@@ -1,8 +1,8 @@
 class ParameterGroup:
-    def __init__(self, name, python_resolve, default_environment, complete_platforms):
+    def __init__(self, name, resolve, environment, complete_platforms):
         self.name = name
-        self.resolve = python_resolve
-        self.environment = default_environment
+        self.resolve = resolve
+        self.environment = environment
         self.complete_platforms = complete_platforms
 
     def pex(self):
@@ -24,20 +24,20 @@ class ParameterGroup:
 
 LINUX_CUDA = ParameterGroup(
     name="linux_cuda",
-    python_resolve="linux_cuda",
-    default_environment="local_linux",
+    resolve="linux_cuda",
+    environment="local_linux",
     complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
 )
 LINUX_CPU = ParameterGroup(
     name="linux_cpu",
-    python_resolve="linux_cpu",
-    default_environment="local_linux",
+    resolve="linux_cpu",
+    environment="local_linux",
     complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
 )
 DARWIN = ParameterGroup(
     name="darwin",
-    python_resolve="darwin",
-    default_environment="local_darwin",
+    resolve="darwin",
+    environment="local_darwin",
     complete_platforms=["//3rdparty/python:py311_macos_14_pex_platform_tags"],
 )
 

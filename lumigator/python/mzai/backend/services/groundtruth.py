@@ -56,7 +56,7 @@ class GroundTruthService:
     def run_inference(self, request: GroundTruthQueryRequest) -> GroundTruthDeploymentQueryResponse:
         logger.info("Running model inference on ray ")
         try:
-            base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
+            base_url = f"http://{settings.RAY_HEAD_NODE_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
             logger.info(f"Running model inference on ray @ {base_url}, {request.text} ")

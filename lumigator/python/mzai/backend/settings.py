@@ -29,8 +29,7 @@ class BackendSettings(BaseSettings):
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
     RAY_DASHBOARD_PORT: int = 8265
-    RAY_INTERNAL_HOST: str = "http://ray"
-    RAY_SERVE_INFERENCE_PORT: int = 8000
+        RAY_SERVE_INFERENCE_PORT: int = 8000
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None

@@ -40,17 +40,28 @@ def get_dataset_service(session: DBSessionDep, s3_client: S3ClientDep) -> Datase
     return DatasetService(dataset_repo, s3_client)
 
 
+DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
+
+
 def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
     job_repo = FinetuningJobRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
     return FinetuningService(job_repo, ray_client)
 
 
-def get_experiment_service(session: DBSessionDep) -> ExperimentService:
+FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]
+
+
+def get_experiment_service(
+    session: DBSessionDep, dataset_service: DatasetServiceDep
+) -> ExperimentService:
     experiment_repo = ExperimentRepository(session)
     result_repo = ExperimentResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return ExperimentService(experiment_repo, result_repo, ray_client)
+    return ExperimentService(experiment_repo, result_repo, ray_client, dataset_service)
+
+
+ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
 def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
@@ -59,7 +70,4 @@ def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
     return GroundTruthService(deployment_repo, ray_serve_client)
 
 
-DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
-FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]
-ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 GroundTruthServiceDep = Annotated[GroundTruthService, Depends(get_ground_truth_service)]

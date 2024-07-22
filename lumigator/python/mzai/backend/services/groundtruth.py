@@ -72,4 +72,4 @@ class GroundTruthService:
 
     def delete_deployment(self, deployment_id: UUID) -> None:
         self.deployment_repo.delete(deployment_id)
-        return logger.logger.info(f"{deployment_id} deleted")
+        return logger.info(f"{deployment_id} deleted")

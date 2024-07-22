@@ -1,6 +1,4 @@
 import contextlib
-import logging
-
 from fastapi import FastAPI
 from sqlalchemy import Engine
 

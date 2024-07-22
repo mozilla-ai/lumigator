@@ -7,7 +7,7 @@ from ray.job_submission import JobSubmissionClient
 from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from mzai.backend.settings import settings
+from mzai.backend.services.datasets import DatasetService
 from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.jobs import JobConfig, JobStatus, JobType
@@ -19,10 +19,12 @@ class ExperimentService:
         experiment_repo: ExperimentRepository,
         result_repo: ExperimentResultRepository,
         ray_client: JobSubmissionClient,
+        data_service: DatasetService,
     ):
         self.experiment_repo = experiment_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
+        self.data_service = data_service
 
     def _raise_not_found(self, experiment_id: UUID):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Experiment {experiment_id} not found.")
@@ -42,10 +44,13 @@ class ExperimentService:
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
+        # get dataset S3 path from UUID
+        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+
         eval_config_dict = {
-            "name": request.name,
+            "name": f"{request.name}/{str(record.id)}",
             "model": {"path": request.model},
-            "dataset": {"path": request.dataset},
+            "dataset": {"path": dataset_s3_path},
             "evaluation": {
                 "metrics": ["rouge", "meteor", "bertscore"],
                 "use_pipeline": True,

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import loguru
 import requests
 from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
@@ -16,6 +15,10 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GroundTruthService:
@@ -55,6 +58,7 @@ class GroundTruthService:
         try:
             base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
+            logger.info(request)
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
@@ -68,4 +72,4 @@ class GroundTruthService:
 
     def delete_deployment(self, deployment_id: UUID) -> None:
         self.deployment_repo.delete(deployment_id)
-        return loguru.logger.info(f"{deployment_id} deleted")
+        return logger.logger.info(f"{deployment_id} deleted")

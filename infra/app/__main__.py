@@ -17,7 +17,6 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 config = pulumi.Config()
 
 BACKEND_REPOSITORY_URL = "backend-repo-url"
-JOB_RUNNER_REPOSITORY_URL = "jobrunner-repo-url"
 KUBECONFIG = "kubeconfig"
 SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
@@ -38,10 +37,7 @@ db_pass = stack_ref.get_output(DATABASE_PASSWORD)
 
 
 backend_repository_url = stack_ref.get_output(BACKEND_REPOSITORY_URL)
-jobrunner_repository_url = stack_ref.get_output(JOB_RUNNER_REPOSITORY_URL)
 
-
-jobrunner_tag = config.require("jobrunner-tag")
 lumigator_tag = config.require("lumigator-tag")
 
 service_account_name = stack_ref.get_output(SERVICE_ACCOUNT_NAME)
@@ -69,10 +65,7 @@ kube_ray = Chart(
             repo="https://ray-project.github.io/kuberay-helm/",
         ),
         values={
-            "image": {
-                "repository": jobrunner_repository_url,
-                "tag": jobrunner_tag,
-            },
+            "image": {"repository": "rayproject/ray", "tag": "ray:2.30.0-py310"},
             "common": {
                 "containerEnv": [
                     {"name": "BACKEND_HOST", "value": "backend-svc"},

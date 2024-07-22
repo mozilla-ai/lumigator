@@ -19,7 +19,6 @@ from pulumi_kubernetes.helm.v3 import Chart, ChartOpts, FetchOpts
 
 # TODO Move to module
 BACKEND_REPOSITORY_URL = "backend-repo-url"
-JOB_RUNNER_REPOSITORY_URL = "jobrunner-repo-url"
 KUBECONFIG = "kubeconfig"
 SERVICE_ACCOUNT_NAME = "sa-name"
 DATABASE_URL = "db-url"
@@ -34,13 +33,6 @@ backend_repository = awsx.ecr.Repository(
 )
 
 pulumi.export(BACKEND_REPOSITORY_URL, backend_repository.url)
-
-jobrunner_repository = awsx.ecr.Repository(
-    "job-runner-repo",
-    awsx.ecr.RepositoryArgs(force_delete=True),
-)
-
-pulumi.export(JOB_RUNNER_REPOSITORY_URL, backend_repository.url)
 
 # Create a VPC for our cluster.
 vpc = awsx.ec2.Vpc("vpc")

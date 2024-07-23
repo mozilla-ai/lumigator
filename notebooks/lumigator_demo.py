@@ -1,13 +1,13 @@
 """Common definitions and methods for the lumigator demo notebook."""
 
 import json
+import os
+from pathlib import Path
 from typing import Any, Dict  # noqa: UP035
 from uuid import UUID
-from pathlib import Path
 
+import pandas as pd
 import requests
-import s3fs
-import os
 
 # URL where the API can be reached
 API_HOST = os.environ['LUMIGATOR_SERVICE_HOST']
@@ -21,7 +21,7 @@ RAY_SERVER_URL = f"http://{RAY_HEAD_HOST}:8265"
 # base S3 path
 S3_BASE_PATH="lumigator-storage/experiments/results/"
 
-# ---------------------------------------------------------------------
+# - BASE --------------------------------------------------------------
 
 def make_request(
     url: str,
@@ -32,6 +32,7 @@ def make_request(
     headers: Dict[str, str] = None,  # noqa: UP006
     json_: Dict[str, str] = None,  # noqa: UP006
     timeout: int = 10,
+    verbose: bool = True,
     *args, **kwargs
 ) -> requests.Response:
     """Make an HTTP request using the requests library.
@@ -64,7 +65,8 @@ def make_request(
             *args, **kwargs  # noqa: B026
         )
         response.raise_for_status()
-        print(f"{json.dumps(response.json(), indent = 2)}")
+        if verbose:
+            print(f"{json.dumps(response.json(), indent = 2)}")
     except requests.RequestException as e:
         print(f"Request failed: {e}")
         raise
@@ -77,6 +79,8 @@ def get_resource_id(response: requests.Response) -> UUID:
     if response.status_code == requests.codes.created:
         return json.loads(response.text).get("id")
 
+# - DATASETS ----------------------------------------------------------
+
 def dataset_upload(filename: str) -> requests.Response:
     files = {'dataset': open(filename, 'rb')}
     payload = {'format': 'experiment'}
@@ -87,11 +91,14 @@ def dataset_info(dataset_id: UUID) -> requests.Response:
     r = make_request(f"{API_URL}/datasets/{dataset_id}")
     return r
 
+# - EXPERIMENTS -------------------------------------------------------
+
 def experiments_submit(
         model_name: str,
         name: str, 
         description: str | None,
-        dataset_id: UUID
+        dataset_id: UUID,
+        max_samples: int = 10
 ) -> requests.Response:
     
     payload = {
@@ -99,7 +106,7 @@ def experiments_submit(
       "description": description,
       "model": model_name,
       "dataset": dataset_id,
-      "max_samples": 100
+      "max_samples": max_samples
     }
 
     r = make_request(f"{API_URL}/experiments", method="POST", data=json.dumps(payload))
@@ -109,23 +116,45 @@ def experiments_info(experiment_id: UUID) -> requests.Response:
     r = make_request(f"{API_URL}/experiments/{experiment_id}")
     return r
 
-def experiments_result(
+# - RESULTS -----------------------------------------------------------
+
+def experiments_result_download(
         experiment_id: UUID
 ) -> str:
+    r = make_request(f"{API_URL}/experiments/{experiment_id}/result/download", verbose=False)
+    download_url = json.loads(r.text)['download_url']
+    # boto3 returns download URLs with default port, CW does not have it
+    # (this is ugly but does not affect local or AWS setups)
+    download_url = download_url.replace("object.lga1.coreweave.com:4566",
+                                        "object.lga1.coreweave.com")
 
-    exp_info = experiments_info(experiment_id)
-    if exp_info.status_code == requests.codes.ok:
-        exp_json = json.loads(exp_info.text)
-        exp_id = exp_json.get("id")
-        exp_name = exp_json.get("name")
+    download_r = make_request(download_url, verbose=False)
+    exp_results = json.loads(download_r.text)
+    return exp_results
 
-        s3_path = Path(S3_BASE_PATH) / exp_name / exp_id / "eval_results.json"
+def eval_results_to_table(models, eval_results):
 
-        s3 = s3fs.S3FileSystem()
-        with s3.open(s3_path, 'rb') as f:
-            results = f.read()
-    else:
-        results = json.dumps( {"Error": exp_info.status_code} )
+    eval_table = []
+    for i, model in enumerate(models):
+        results = eval_results[i]
+        model = model.replace("hf://","")
+        eval_row = [model]
+        eval_row.append(results['meteor']['meteor_mean'])
+        eval_row.append(results['bertscore']['precision_mean'])
+        eval_row.append(results['bertscore']['recall_mean'])
+        eval_row.append(results['bertscore']['f1_mean'])
+        eval_row.append(results['rouge']['rouge1_mean'])
+        eval_row.append(results['rouge']['rouge2_mean'])
+        eval_row.append(results['rouge']['rougeL_mean'])
+        eval_table.append(eval_row)
 
-    return results
-
+    return pd.DataFrame(eval_table,
+                        columns=['Model',
+                                 'Meteor',
+                                 'BERT Precision',
+                                 'BERT Recall',
+                                 'BERT F1',
+                                 'ROUGE-1',
+                                 'ROUGE-2',
+                                 'ROUGE-L',
+                                 ])

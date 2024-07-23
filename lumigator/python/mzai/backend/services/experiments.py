@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -8,7 +9,13 @@ from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.services.datasets import DatasetService
-from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
+from mzai.backend.settings import settings
+from mzai.schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
+    ExperimentResultResponse,
+)
 from mzai.schemas.extras import ListingResponse
 from mzai.schemas.jobs import JobConfig, JobStatus, JobType
 
@@ -41,11 +48,34 @@ class ExperimentService:
             self._raise_not_found(job_id)
         return record
 
+    def _get_results_s3_key(self, experiment_id: UUID) -> str:
+        """Given an experiment ID, returns the S3 key for the experiment results.
+
+        The S3 key is built from:
+        - settings.S3_EXPERIMENT_RESULTS_PREFIX: the path where experiments are stored
+        - settings.S3_EXPERIMENT_RESULTS_FILENAME: a filename template that is to be
+          formatted with some of the experiment record's metadata (e.g. exp name/id)
+
+        The returned string contains the S3 key *excluding the bucket / s3 prefix*,
+        as it is to be used by the boto3 client which accepts them separately.
+        """
+        record = self._get_experiment_record(experiment_id)
+
+        return str(
+            Path(settings.S3_EXPERIMENT_RESULTS_PREFIX)
+            / settings.S3_EXPERIMENT_RESULTS_FILENAME.format(
+                experiment_name=record.name, experiment_id=record.id
+            )
+        )
+
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
         # get dataset S3 path from UUID
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+
+        # set storage path
+        storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
 
         eval_config_dict = {
             "name": f"{request.name}/{str(record.id)}",
@@ -57,7 +87,7 @@ class ExperimentService:
                 "max_samples": request.max_samples,
                 "return_input_data": True,
                 "return_predictions": True,
-                "storage_path": "s3://lumigator-storage/experiments/results/",
+                "storage_path": storage_path,
             },
         }
 
@@ -108,6 +138,7 @@ class ExperimentService:
         return ExperimentResponse.model_validate(record)
 
     def get_experiment_result(self, experiment_id: UUID) -> ExperimentResultResponse:
+        """Return experiment results metadata if available in the DB."""
         experiment_record = self._get_experiment_record(experiment_id)
         result_record = self.result_repo.get_by_experiment_id(experiment_id)
         if result_record is None:
@@ -119,3 +150,20 @@ class ExperimentService:
                 ),
             )
         return ExperimentResultResponse.model_validate(result_record)
+
+    def get_experiment_result_download(
+        self, experiment_id: UUID
+    ) -> ExperimentResultDownloadResponse:
+        """Return experiment results file URL for downloading."""
+        # Generate presigned download URL for the object
+        result_key = self._get_results_s3_key(experiment_id)
+        download_url = self.data_service.s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.S3_BUCKET,
+                "Key": result_key,
+            },
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+        return ExperimentResultDownloadResponse(id=experiment_id, download_url=download_url)

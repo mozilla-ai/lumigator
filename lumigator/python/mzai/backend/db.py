@@ -41,5 +41,6 @@ class DatabaseSessionManager:
             session.close()
 
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
+# TODO: Override echo param with WARN at the app logging level
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=False)
 session_manager = DatabaseSessionManager(engine)

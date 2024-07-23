@@ -23,6 +23,8 @@ class BackendSettings(BaseSettings):
     S3_BUCKET: str = "lumigator-storage"
     S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
     S3_DATASETS_PREFIX: str = "datasets"
+    S3_EXPERIMENT_RESULTS_PREFIX: str = "experiments/results"
+    S3_EXPERIMENT_RESULTS_FILENAME: str = "{experiment_name}/{experiment_id}/eval_results.json"
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"

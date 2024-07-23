@@ -3,7 +3,12 @@ from uuid import UUID
 from fastapi import APIRouter, status
 
 from mzai.backend.api.deps import ExperimentServiceDep
-from mzai.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse
+from mzai.schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
+    ExperimentResultResponse,
+)
 from mzai.schemas.extras import ListingResponse
 
 router = APIRouter()
@@ -36,4 +41,14 @@ def get_experiment_result(
     service: ExperimentServiceDep,
     experiment_id: UUID,
 ) -> ExperimentResultResponse:
+    """Return experiment results metadata if available in the DB."""
     return service.get_experiment_result(experiment_id)
+
+
+@router.get("/{experiment_id}/result/download")
+def get_experiment_result_download(
+    service: ExperimentServiceDep,
+    experiment_id: UUID,
+) -> ExperimentResultDownloadResponse:
+    """Return experiment results file URL for downloading."""
+    return service.get_experiment_result_download(experiment_id)

@@ -16,6 +16,8 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
+from mzai.backend.settings import settings
+from loguru import logger
 
 
 class GroundTruthService:
@@ -52,10 +54,12 @@ class GroundTruthService:
         )
 
     def run_inference(self, request: GroundTruthQueryRequest) -> GroundTruthDeploymentQueryResponse:
+        logger.info("Running model inference on ray ")
         try:
             base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
+            logger.info(f"Running model inference on ray @ {base_url}, {request.text} ")
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
@@ -68,4 +72,4 @@ class GroundTruthService:
 
     def delete_deployment(self, deployment_id: UUID) -> None:
         self.deployment_repo.delete(deployment_id)
-        return loguru.logger.info(f"{deployment_id} deleted")
+        return logger.info(f"{deployment_id} deleted")

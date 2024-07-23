@@ -10,6 +10,7 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
+from loguru import logger
 
 router = APIRouter()
 
@@ -18,6 +19,7 @@ router = APIRouter()
 def create_groundtruth_deployment(
     service: GroundTruthServiceDep, request: GroundTruthDeploymentCreate
 ) -> GroundTruthDeploymentResponse:
+    logger.info("Creating new deployment")
     return service.create_deployment(request)
 
 
@@ -32,6 +34,7 @@ def list_groundtruth_deployments(
 def send_model_request(
     service: GroundTruthServiceDep, request: GroundTruthQueryRequest
 ) -> GroundTruthDeploymentQueryResponse:
+    logger.info("Processing model inference request")
     return service.run_inference(request)
 
 

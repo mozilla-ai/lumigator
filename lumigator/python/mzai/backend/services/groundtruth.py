@@ -62,8 +62,7 @@ class GroundTruthService:
             logger.info(f"Running model inference on ray @ {base_url}, {request.text} ")
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
-            # raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
-            return loguru.logger.info(f"{request.text} unprocessed")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
 
     def _get_deployment_record(self, deployment_id: UUID) -> GroundTruthDeploymentRecord:
         record = self.deployment_repo.get(deployment_id)

@@ -7,8 +7,8 @@ from mzai.schemas.extras import ListingResponse
 from mzai.schemas.groundtruth import (
     GroundTruthDeploymentCreate,
     GroundTruthDeploymentQueryResponse,
-    GroundTruthQueryRequest,
     GroundTruthDeploymentResponse,
+    GroundTruthQueryRequest,
 )
 from loguru import logger
 

@@ -27,6 +27,8 @@ dependencies = [
     "testcontainers",
     "setuptools==69.5.1",
     "numpy<2.0.0",
+    "torch==2.3.1,!=2.3.1+cu118,!=2.3.1+cu121; platform_system == 'darwin'",
+    "torch[cuda]==2.3.1+cu118; platform_system == 'linux'",
     "transformers==4.41.2",
     "s3fs==2024.5.0",
     "datasets==2.20.0",

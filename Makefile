@@ -6,13 +6,13 @@ UNAME:= $(shell uname -o)
 
 ifeq ($(UNAME), GNU/Linux)
 	PYTHON:= /opt/python/install/bin/python3.11
-	PY_DEPS:= lumigator/3rdparty/python/requirements_linux.txt
+	PY_DEPS:= 3rdparty/python/requirements_linux.txt
 endif
 
 ifeq ($(UNAME), Darwin)
 	PY_PATH:= .python/python3.11.9/python/install/bin
 	PYTHON:= .python/python3.11.9/python/install/bin/python3.11
-	PY_DEPS:= lumigator/3rdparty/python/requirements_darwin.txt
+	PY_DEPS:= 3rdparty/python/requirements_darwin.txt
 endif
 
 

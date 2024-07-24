@@ -44,7 +44,7 @@ indexes.add = [
 
 
 [python.resolves]
-python_default = "lumigator/3rdparty/python/python_default.lock"
+python_default = "3rdparty/python/python_default.lock"
 
 
 [python-bootstrap]

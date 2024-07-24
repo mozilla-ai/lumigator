@@ -3,7 +3,7 @@ FROM python:3.11.9-bookworm
 WORKDIR /tmp
 
 
-COPY ../lumigator/3rdparty/python/python_default.lock .
+COPY ../3rdparty/python/python_default.lock .
 RUN pip install pex
 # note the following is needed to convert the pants lockfile to a pip-installable file.
 # this is intentionally breaking DRY at the moment and will be fixed in a followup PR that improves 3rdparty dep handling

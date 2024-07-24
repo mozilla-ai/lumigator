@@ -1,6 +1,6 @@
 image:
   repository": "rayproject/ray-ml"
-  tag: "2.30.0-py310-gpu"
+  tag: "2.30.0-py311-gpu"
 
 head:
   serviceAccountName: s3

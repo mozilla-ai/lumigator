@@ -39,7 +39,7 @@ class Summarizer:
             self.model_class = AutoModelForSeq2SeqLM
 
         # Load model
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(
+        self.model = self.model_class.from_pretrained(
             pretrained_model_name_or_path=name,
             trust_remote_code=True,
         )

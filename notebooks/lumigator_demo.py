@@ -82,9 +82,10 @@ def get_resource_id(response: requests.Response) -> UUID:
 # - DATASETS ----------------------------------------------------------
 
 def dataset_upload(filename: str) -> requests.Response:
-    files = {'dataset': open(filename, 'rb')}
-    payload = {'format': 'experiment'}
-    r = make_request(f"{API_URL}/datasets", method="POST", data=payload, files=files)
+    with Path(filename).open("rb") as f:
+        files = {'dataset': f}
+        payload = {'format': 'experiment'}
+        r = make_request(f"{API_URL}/datasets", method="POST", data=payload, files=files)
     return r
 
 def dataset_info(dataset_id: UUID) -> requests.Response:
@@ -128,33 +129,42 @@ def experiments_result_download(
     download_url = download_url.replace("object.lga1.coreweave.com:4566",
                                         "object.lga1.coreweave.com")
 
-    download_r = make_request(download_url, verbose=False)
-    exp_results = json.loads(download_r.text)
+    download_response = make_request(download_url, verbose=False)
+    exp_results = json.loads(download_response.text)
     return exp_results
 
+
 def eval_results_to_table(models, eval_results):
+    """Format evaluation results jsons into one pandas dataframe."""
+    # metrics dict format is
+    # "column name": [list of keys to get val in nested results dict]
+    metrics = {
+        "Meteor": ["meteor", "meteor_mean"],
+        "BERT Precision": ["bertscore", "precision_mean"],
+        "BERT Recall": ["bertscore", "recall_mean"],
+        "BERT F1": ["bertscore", "f1_mean"],
+        "ROUGE-1": ["rouge", "rouge1_mean"],
+        "ROUGE-2": ["rouge", "rouge2_mean"],
+        "ROUGE-L": ["rouge", "rougeL_mean"],
+    }
+
+    def parse_model_results(model, results):
+        row = {}
+        row["Model"] = model.replace("hf://", "")
+
+        for column, metric in metrics.items():
+            temp_results = results
+            for key in metric:
+                value = temp_results.get(key)
+                if value is None:
+                    break
+                temp_results = value
+
+            row[column] = value
+        return row
 
     eval_table = []
-    for i, model in enumerate(models):
-        results = eval_results[i]
-        model = model.replace("hf://","")
-        eval_row = [model]
-        eval_row.append(results['meteor']['meteor_mean'])
-        eval_row.append(results['bertscore']['precision_mean'])
-        eval_row.append(results['bertscore']['recall_mean'])
-        eval_row.append(results['bertscore']['f1_mean'])
-        eval_row.append(results['rouge']['rouge1_mean'])
-        eval_row.append(results['rouge']['rouge2_mean'])
-        eval_row.append(results['rouge']['rougeL_mean'])
-        eval_table.append(eval_row)
+    for model, results in zip(models, eval_results, strict=True):
+        eval_table.append(parse_model_results(model, results))
 
-    return pd.DataFrame(eval_table,
-                        columns=['Model',
-                                 'Meteor',
-                                 'BERT Precision',
-                                 'BERT Recall',
-                                 'BERT F1',
-                                 'ROUGE-1',
-                                 'ROUGE-2',
-                                 'ROUGE-L',
-                                 ])
+    return pd.DataFrame(eval_table)

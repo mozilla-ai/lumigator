@@ -1,10 +1,10 @@
+from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import BaseModel,Field
-from typing import Optional,Literal, Union
-from datetime import datetime
+from pydantic import BaseModel, Field
+
 
 class JobType(str, Enum):
     EXPERIMENT = "experiment"
@@ -30,6 +30,7 @@ class JobEvent(BaseModel):
     status: JobStatus
     detail: str | None = None
 
+
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     job_id: Optional[str] = None
@@ -37,7 +38,7 @@ class JobSubmissionResponse(BaseModel):
     driver_info: Optional[str] = None
     status: str | None = None
     entrypoint: str | None = None
-    message:str | None = None
+    message: str | None = None
     error_type: Optional[str] = None
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None

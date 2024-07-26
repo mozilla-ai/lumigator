@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from uuid import UUID
@@ -5,6 +6,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from mzai.backend import config_templates
 from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
@@ -77,19 +79,41 @@ class ExperimentService:
         # set storage path
         storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
 
-        eval_config_dict = {
-            "name": f"{request.name}/{str(record.id)}",
-            "model": {"path": request.model},
-            "dataset": {"path": dataset_s3_path},
-            "evaluation": {
-                "metrics": ["rouge", "meteor", "bertscore"],
-                "use_pipeline": True,
-                "max_samples": request.max_samples,
-                "return_input_data": True,
-                "return_predictions": True,
-                "storage_path": storage_path,
-            },
+        # fill up model url with default openai url
+        if request.model.startswith("oai://"):
+            model_url = settings.OAI_API_URL
+        else:
+            model_url = request.model_url
+
+        # provide a reasonable system prompt for services where none was specified
+        if request.system_prompt is None and (
+            request.model.startswith("oai://") or request.model.startswith("http://")
+        ):
+            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+
+        config_params = {
+            "experiment_name": request.name,
+            "experiment_id": record.id,
+            "model_path": request.model,
+            "dataset_path": dataset_s3_path,
+            "max_samples": request.max_samples,
+            "storage_path": storage_path,
+            "model_url": model_url,
+            "system_prompt": request.system_prompt,
         }
+
+        # load a config template and fill it up with config_params
+        if request.config_template is not None:
+            config_template = request.config_template
+        elif request.model in config_templates.config_template:
+            # if no config template is provided, get the default one for the model
+            config_template = config_templates.config_template[request.model]
+        else:
+            # if no default config template is provided, get the causal template
+            # (which works with seq2seq models too except it does not use pipeline)
+            config_template = config_templates.causal_template
+
+        eval_config_dict = json.loads(config_template.format(**config_params))
 
         # Submit the job to Ray
         ray_config = JobConfig(
@@ -98,17 +122,26 @@ class ExperimentService:
             args=eval_config_dict,
         )
 
+        # build runtime ENV for workers
+        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+        for env_var_name in settings.RAY_WORKER_ENV_VARS:
+            env_var = os.environ.get(env_var_name, None)
+            if env_var is not None:
+                runtime_env_vars[env_var_name] = env_var
+
+        # set num_gpus per worker (zero if we are just hitting a service)
+        if request.model.startswith("oai://") or request.model.startswith("http://"):
+            worker_gpus = 0
+        else:
+            worker_gpus = int(os.environ.get(settings.RAY_WORKER_NUM_GPUS_ENV_VAR, 0))
+
         runtime_env = {
             "pip": ["lm-buddy==0.10.10"],
-            "env_vars": {
-                "MZAI_JOB_ID": str(record.id),
-                "MZAI_HOST": "",
-                "LOCAL_FSSPEC_S3_KEY": os.environ.get("LOCAL_FSSPEC_S3_KEY", ""),
-                "LOCAL_FSSPEC_S3_SECRET": os.environ.get("LOCAL_FSSPEC_S3_SECRET", ""),
-                "LOCAL_FSSPEC_S3_ENDPOINT_URL": os.environ.get("LOCAL_FSSPEC_S3_ENDPOINT_URL", ""),
-            },
+            "env_vars": runtime_env_vars,
         }
-        entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)
+        entrypoint = RayJobEntrypoint(
+            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+        )
         submit_ray_job(self.ray_client, entrypoint)
 
         return ExperimentResponse.model_validate(record)

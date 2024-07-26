@@ -12,6 +12,9 @@ class ExperimentCreate(BaseModel):
     model: str
     dataset: UUID
     max_samples: int | None = None
+    model_url: str | None = None
+    system_prompt: str | None = None
+    config_template: str | None = None
 
 
 class ExperimentResponse(BaseModel, from_attributes=True):

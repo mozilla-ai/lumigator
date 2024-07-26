@@ -9,7 +9,7 @@ from transformers import AutoModelForSeq2SeqLM, pipeline
 logger = logging.getLogger("ray.serve")
 
 
-class SummarizerArgs(BaseModel):
+class BARTSummarizerArgs(BaseModel):
     name: str  # model name, but model is protected namespace in pydantic
     tokenizer: str
     task: str
@@ -52,7 +52,7 @@ class BARTSummarizer:
         return {"result": summary}
 
 
-def app(args: SummarizerArgs) -> Application:
+def app(args: BARTSummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)
     return BARTSummarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

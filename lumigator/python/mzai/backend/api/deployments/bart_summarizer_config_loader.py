@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
-from mzai.bart_summarizer.bart_summarizer import SummarizerArgs
+from mzai.bart_summarizer.bart_summarizer import BARTSummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
@@ -28,7 +28,7 @@ class RayAppConfig(BaseModel):
     name: str
     route_prefix: str
     import_path: str
-    args: SummarizerArgs
+    args: BARTSummarizerArgs
     runtime_env: RayServeRuntimeConfig
     deployments: list[RayServeDeploymentConfig]
 
@@ -45,7 +45,7 @@ class BartSummarizerConfigLoader(ConfigLoader):
                     name="bart_summarizer",
                     route_prefix="/",
                     import_path="bart_summarizer:app",
-                    args=SummarizerArgs(
+                    args=BARTSummarizerArgs(
                         name="facebook/bart-large-cnn",
                         tokenizer="facebook/bart-large-cnn",
                         task="summarization",

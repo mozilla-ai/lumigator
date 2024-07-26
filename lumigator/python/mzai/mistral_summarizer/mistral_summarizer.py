@@ -9,7 +9,7 @@ from transformers import AutoModelForCausalLM, pipeline, AutoTokenizer
 logger = logging.getLogger("ray.serve")
 
 
-class SummarizerArgs(BaseModel):
+class MistralSummarizerArgs(BaseModel):
     name: str  # model name, but model is protected namespace in pydantic
     tokenizer: str
     description: str
@@ -57,7 +57,7 @@ class MistralSummarizer:
 
 
 # def app(args: Dict[str, str]) -> Application:
-def app(args: SummarizerArgs) -> Application:
+def app(args: MistralSummarizerArgs) -> Application:
     logger.info("Mistral Summarizer is running")
     logger.info(args)
     return MistralSummarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

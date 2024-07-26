@@ -45,6 +45,9 @@ class GroundTruthService:
             )
         else:
             logger.error("Model type not found, defaulting to BART")
+            conf = BartSummarizerConfigLoader(
+                num_gpus=request.num_gpus, num_replicas=request.num_replicas
+            )
 
         deployment_args = conf.get_config_dict()
         deployment_name = conf.get_deployment_name()

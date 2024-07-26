@@ -1,10 +1,16 @@
-#common:
-#  containerEnv:
-#    - name: HF_TOKEN
-#      valueFrom:
-#        secretKeyRef:
-#          name: hf-token
-#          key: HF_TOKEN
+# helm upgrade raycluster kuberay/ray-cluster --install --version 1.1.1 -f ray-cluster.yaml
+common:
+  containerEnv:
+    - name: HF_TOKEN # kubectl create secret generic hf-token --from-literal HF_TOKEN=value
+      valueFrom:
+        secretKeyRef:
+          name: hf-token
+          key: HF_TOKEN
+    - name: OPENAI_API_KEY # kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
+      valueFrom:
+        secretKeyRef:
+          name: oai-key
+          key: OPENAI_API_KEY
 
 image:
   repository": "rayproject/ray-ml"
@@ -17,10 +23,10 @@ head:
     limits:
       #"nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
-      ephemeral-storage: 20Gi
+      ephemeral-storage: 30Gi
       # cpu: 4
 worker:
-  replicas: 10
+  replicas: 2
   maxReplicas: 10
   serviceAccountName: s3
   rayStartParams:
@@ -29,5 +35,5 @@ worker:
     limits:
       "nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
-      ephemeral-storage: 20Gi
+      ephemeral-storage: 30Gi
       # cpu: 4

@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from uuid import UUID
@@ -5,6 +6,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
+from mzai.backend import config_templates
 from mzai.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
 from mzai.backend.records.experiments import ExperimentRecord
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
@@ -77,19 +79,35 @@ class ExperimentService:
         # set storage path
         storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
 
-        eval_config_dict = {
-            "name": f"{request.name}/{str(record.id)}",
-            "model": {"path": request.model},
-            "dataset": {"path": dataset_s3_path},
-            "evaluation": {
-                "metrics": ["rouge", "meteor", "bertscore"],
-                "use_pipeline": True,
-                "max_samples": request.max_samples,
-                "return_input_data": True,
-                "return_predictions": True,
-                "storage_path": storage_path,
-            },
+        config_template = request.config_template
+        # if no config template is provided, get the default one for the model
+        if config_template is None:
+            config_template = config_templates.config_template.get(request.model)
+        # if no default config template is provided, get the causal template
+        # (which works with seq2seq models too except it does not use pipeline)
+        if config_template is None:
+            config_template = config_templates.causal_template
+
+        # fill up model url with default openai url
+        if request.model.startswith("oai://"):
+            model_url = settings.OAI_API_URL
+        else:
+            model_url = request.model_url
+
+        config_params = {
+            "experiment_name": request.name,
+            "experiment_id": record.id,
+            "model_path": request.model,
+            "dataset_path": dataset_s3_path,
+            "max_samples": request.max_samples,
+            "storage_path": storage_path,
+            "model_url": model_url,
+            "system_prompt": request.system_prompt,
         }
+
+        print(config_template.format(**config_params))
+        eval_config_dict = json.loads(config_template.format(**config_params))
+        print(eval_config_dict)
 
         # Submit the job to Ray
         ray_config = JobConfig(
@@ -98,15 +116,16 @@ class ExperimentService:
             args=eval_config_dict,
         )
 
+        # build runtime ENV for workers
+        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+        for env_var_name in settings.RAY_WORKER_ENV_VARS:
+            env_var = os.environ.get(env_var_name, None)
+            if env_var is not None:
+                runtime_env_vars[env_var_name] = env_var
+
         runtime_env = {
             "pip": ["lm-buddy==0.10.10"],
-            "env_vars": {
-                "MZAI_JOB_ID": str(record.id),
-                "MZAI_HOST": "",
-                "LOCAL_FSSPEC_S3_KEY": os.environ.get("LOCAL_FSSPEC_S3_KEY", ""),
-                "LOCAL_FSSPEC_S3_SECRET": os.environ.get("LOCAL_FSSPEC_S3_SECRET", ""),
-                "LOCAL_FSSPEC_S3_ENDPOINT_URL": os.environ.get("LOCAL_FSSPEC_S3_ENDPOINT_URL", ""),
-            },
+            "env_vars": runtime_env_vars,
         }
         entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)
         submit_ray_job(self.ray_client, entrypoint)

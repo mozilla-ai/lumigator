@@ -10,18 +10,19 @@ import pandas as pd
 import requests
 
 # URL where the API can be reached
-API_HOST = os.environ['LUMIGATOR_SERVICE_HOST']
+API_HOST = os.environ["LUMIGATOR_SERVICE_HOST"]
 API_URL = f"http://{API_HOST}/api/v1"
 
 # URL of the Ray server
 # (this should not be directly available for the demo)
-RAY_HEAD_HOST = os.environ['RAYCLUSTER_KUBERAY_HEAD_SVC_PORT_8265_TCP_ADDR']
+RAY_HEAD_HOST = os.environ["RAYCLUSTER_KUBERAY_HEAD_SVC_PORT_8265_TCP_ADDR"]
 RAY_SERVER_URL = f"http://{RAY_HEAD_HOST}:8265"
 
 # base S3 path
-S3_BASE_PATH="lumigator-storage/experiments/results/"
+S3_BASE_PATH = "lumigator-storage/experiments/results/"
 
 # - BASE --------------------------------------------------------------
+
 
 def make_request(
     url: str,
@@ -33,7 +34,8 @@ def make_request(
     json_: Dict[str, str] = None,  # noqa: UP006
     timeout: int = 10,
     verbose: bool = True,
-    *args, **kwargs
+    *args,
+    **kwargs,
 ) -> requests.Response:
     """Make an HTTP request using the requests library.
 
@@ -62,7 +64,8 @@ def make_request(
             headers=headers,
             timeout=timeout,
             json=json_,
-            *args, **kwargs  # noqa: B026
+            *args,
+            **kwargs,  # noqa: B026
         )
         response.raise_for_status()
         if verbose:
@@ -72,62 +75,92 @@ def make_request(
         raise
     return response
 
+
 def get_ray_link(job_id: UUID, RAY_SERVER_URL: str) -> str:
     return f"{RAY_SERVER_URL}/#/jobs/{job_id}"
+
 
 def get_resource_id(response: requests.Response) -> UUID:
     if response.status_code == requests.codes.created:
         return json.loads(response.text).get("id")
 
+
+def get_job_status(response: requests.Response) -> UUID:
+    if response.status_code == requests.codes.ok:
+        return json.loads(response.text).get("status")
+
+
 # - DATASETS ----------------------------------------------------------
+
 
 def dataset_upload(filename: str) -> requests.Response:
     with Path(filename).open("rb") as f:
-        files = {'dataset': f}
-        payload = {'format': 'experiment'}
+        files = {"dataset": f}
+        payload = {"format": "experiment"}
         r = make_request(f"{API_URL}/datasets", method="POST", data=payload, files=files)
     return r
+
 
 def dataset_info(dataset_id: UUID) -> requests.Response:
     r = make_request(f"{API_URL}/datasets/{dataset_id}")
     return r
 
+
 # - EXPERIMENTS -------------------------------------------------------
 
+
 def experiments_submit(
-        model_name: str,
-        name: str, 
-        description: str | None,
-        dataset_id: UUID,
-        max_samples: int = 10
+    model_name: str,
+    name: str,
+    description: str | None,
+    dataset_id: UUID,
+    max_samples: int = 10,
+    system_prompt: str | None = None,
 ) -> requests.Response:
-    
     payload = {
-      "name": name,
-      "description": description,
-      "model": model_name,
-      "dataset": dataset_id,
-      "max_samples": max_samples
+        "name": name,
+        "description": description,
+        "model": model_name,
+        "dataset": dataset_id,
+        "max_samples": max_samples,
+        "system_prompt": system_prompt,
     }
 
     r = make_request(f"{API_URL}/experiments", method="POST", data=json.dumps(payload))
     return r
 
+
 def experiments_info(experiment_id: UUID) -> requests.Response:
     r = make_request(f"{API_URL}/experiments/{experiment_id}")
     return r
 
+
+def experiments_status(experiment_id: UUID) -> str:
+    r = make_request(f"{API_URL}/health/jobs/{experiment_id}", verbose=False)
+    return get_job_status(r)
+
+
+def show_experiment_statuses(job_ids):
+    still_running = False
+    for job_id in job_ids:
+        job_status = experiments_status(job_id)
+        print(f"{job_id}: {job_status}")
+        if job_status == "PENDING" or job_status == "RUNNING":
+            still_running = True
+    return still_running
+
+
 # - RESULTS -----------------------------------------------------------
 
-def experiments_result_download(
-        experiment_id: UUID
-) -> str:
+
+def experiments_result_download(experiment_id: UUID) -> str:
     r = make_request(f"{API_URL}/experiments/{experiment_id}/result/download", verbose=False)
-    download_url = json.loads(r.text)['download_url']
+    download_url = json.loads(r.text)["download_url"]
     # boto3 returns download URLs with default port, CW does not have it
     # (this is ugly but does not affect local or AWS setups)
-    download_url = download_url.replace("object.lga1.coreweave.com:4566",
-                                        "object.lga1.coreweave.com")
+    download_url = download_url.replace(
+        "object.lga1.coreweave.com:4566", "object.lga1.coreweave.com"
+    )
 
     download_response = make_request(download_url, verbose=False)
     exp_results = json.loads(download_response.text)
@@ -150,7 +183,13 @@ def eval_results_to_table(models, eval_results):
 
     def parse_model_results(model, results):
         row = {}
-        row["Model"] = model.replace("hf://", "")
+
+        # remove prefix from model name
+        model_name = model.split("://")
+        if len(model_name) > 0:
+            model_name = model_name[1]
+
+        row["Model"] = model_name
 
         for column, metric in metrics.items():
             temp_results = results

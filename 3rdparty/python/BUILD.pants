@@ -22,7 +22,6 @@ python_requirements(
     },
 )
 
-shell_sources(name="shell-scripts")
 
 file(
     name="py311_linux_pex_platform_tags",

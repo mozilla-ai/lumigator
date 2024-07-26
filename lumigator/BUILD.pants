@@ -36,6 +36,10 @@ pex_binary(
         "//lumigator/python/mzai/backend:backend_sources",
         # Dependencies on code to be packaged into the distribution.
     ],
+    complete_platforms=[
+        "3rdparty/python:py311_linux_pex_platform_tags",
+        "3rdparty/python:py311_macos_14_pex_platform_tags",
+    ],
     execution_mode="venv",
     include_requirements=True,
     include_sources=True,

@@ -6,9 +6,8 @@ from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.bart_summarizer_config_loader import BartSummarizerConfigLoader
-from mzai.backend.api.deployments.mistral_summarizer_config_loader import (
-    MistralSummarizerConfigLoader,
-)
+from mzai.backend.api.deployments.mistral_summarizer_config_loader import MistralSummarizerConfigLoader
+
 
 from mzai.backend.records.groundtruth import GroundTruthDeploymentRecord
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository

@@ -1,0 +1,8 @@
+python_sources(
+    name="mistral_summarizer_sources",
+    dependencies=[],
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
+)

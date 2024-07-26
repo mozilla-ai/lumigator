@@ -17,7 +17,7 @@ class SummarizerArgs(BaseModel):
 
 
 @serve.deployment()
-class Summarizer:
+class BARTSummarizer:
     def __init__(self, name: str, tokenizer: str, task: str):
         import torch  # Import torch here so it's not a dependency on the backend
 
@@ -56,4 +56,4 @@ class Summarizer:
 def app(args: SummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)
-    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused
+    return BARTSummarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused

@@ -5,7 +5,10 @@ import requests
 from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
-from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
+from mzai.backend.api.deployments.bart_summarizer_config_loader import BartSummarizerConfigLoader
+from mzai.backend.api.deployments.mistral_summarizer_config_loader import (
+    MistralSummarizerConfigLoader,
+)
 from mzai.backend.records.groundtruth import GroundTruthDeploymentRecord
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.backend.settings import settings
@@ -18,6 +21,7 @@ from mzai.schemas.groundtruth import (
 )
 from mzai.backend.settings import settings
 from loguru import logger
+from typing import Literal
 
 
 class GroundTruthService:
@@ -29,8 +33,18 @@ class GroundTruthService:
         self.deployment_repo = deployment_repo
         self.ray_client = ray_serve_client
 
-    def create_deployment(self, request: GroundTruthDeploymentCreate):
-        conf = SummarizerConfigLoader(num_gpus=request.num_gpus, num_replicas=request.num_replicas)
+    def create_deployment(self, request: GroundTruthDeploymentCreate, model_type: str):
+        if model_type == "bart":
+            conf = BartSummarizerConfigLoader(
+                num_gpus=request.num_gpus, num_replicas=request.num_replicas
+            )
+        elif model_type == "mistral":
+            conf = MistralSummarizerConfigLoader(
+                num_gpus=request.num_gpus, num_replicas=request.num_replicas
+            )
+        else:
+            logger.error("Model type not found, defaulting to BART")
+
         deployment_args = conf.get_config_dict()
         deployment_name = conf.get_deployment_name()
         deployment_description = conf.get_deployment_description()

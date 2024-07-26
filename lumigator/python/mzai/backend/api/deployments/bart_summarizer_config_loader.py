@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
-from mzai.summarizer.summarizer import SummarizerArgs
+from mzai.bart_summarizer.bart_summarizer import SummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
@@ -37,19 +37,19 @@ class RayConfig(BaseModel):
     applications: list[RayAppConfig]
 
 
-class SummarizerConfigLoader(ConfigLoader):
+class BartSummarizerConfigLoader(ConfigLoader):
     def __init__(self, num_gpus: float, num_replicas: int):
         self.config = RayConfig(
             applications=[
                 RayAppConfig(
-                    name="summarizer",
+                    name="bart_summarizer",
                     route_prefix="/",
-                    import_path="summarizer:app",
+                    import_path="bart_summarizer:app",
                     args=SummarizerArgs(
                         name="facebook/bart-large-cnn",
                         tokenizer="facebook/bart-large-cnn",
                         task="summarization",
-                        description="Text summarization model",
+                        description="BART Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
                         pip=[
@@ -61,7 +61,7 @@ class SummarizerConfigLoader(ConfigLoader):
                     ),
                     deployments=[
                         RayServeDeploymentConfig(
-                            name="Summarizer",
+                            name="BART Summarizer",
                             num_replicas=num_replicas,
                             ray_actor_options=RayServeActorConfig(
                                 num_cpus=1.0, num_gpus=num_gpus, num_replicas=num_replicas

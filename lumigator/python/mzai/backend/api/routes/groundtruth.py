@@ -11,16 +11,19 @@ from mzai.schemas.groundtruth import (
     GroundTruthQueryRequest,
 )
 from loguru import logger
+from typing import Literal
 
 router = APIRouter()
 
 
-@router.post("/deployments", status_code=status.HTTP_201_CREATED)
+@router.post("/deployments/create/{model_type}", status_code=status.HTTP_201_CREATED)
 def create_groundtruth_deployment(
-    service: GroundTruthServiceDep, request: GroundTruthDeploymentCreate
+    service: GroundTruthServiceDep,
+    request: GroundTruthDeploymentCreate,
+    model_type: Literal["bart", "mistral"],
 ) -> GroundTruthDeploymentResponse:
     logger.info("Creating new deployment")
-    return service.create_deployment(request)
+    return service.create_deployment(request, model_type)
 
 
 @router.get("/deployments")

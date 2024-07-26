@@ -79,20 +79,17 @@ class ExperimentService:
         # set storage path
         storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
 
-        config_template = request.config_template
-        # if no config template is provided, get the default one for the model
-        if config_template is None:
-            config_template = config_templates.config_template.get(request.model)
-        # if no default config template is provided, get the causal template
-        # (which works with seq2seq models too except it does not use pipeline)
-        if config_template is None:
-            config_template = config_templates.causal_template
-
         # fill up model url with default openai url
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
         else:
             model_url = request.model_url
+
+        # provide a reasonable system prompt for services where none was specified
+        if request.system_prompt is None and (
+            request.model.startswith("oai://") or request.model.startswith("http://")
+        ):
+            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
         config_params = {
             "experiment_name": request.name,
@@ -105,9 +102,18 @@ class ExperimentService:
             "system_prompt": request.system_prompt,
         }
 
-        print(config_template.format(**config_params))
+        # load a config template and fill it up with config_params
+        if request.config_template is not None:
+            config_template = request.config_template
+        elif request.model in config_templates.config_template:
+            # if no config template is provided, get the default one for the model
+            config_template = config_templates.config_template[request.model]
+        else:
+            # if no default config template is provided, get the causal template
+            # (which works with seq2seq models too except it does not use pipeline)
+            config_template = config_templates.causal_template
+
         eval_config_dict = json.loads(config_template.format(**config_params))
-        print(eval_config_dict)
 
         # Submit the job to Ray
         ray_config = JobConfig(
@@ -123,11 +129,19 @@ class ExperimentService:
             if env_var is not None:
                 runtime_env_vars[env_var_name] = env_var
 
+        # set num_gpus per worker (zero if we are just hitting a service)
+        if request.model.startswith("oai://") or request.model.startswith("http://"):
+            worker_gpus = 0
+        else:
+            worker_gpus = int(os.environ.get(settings.RAY_WORKER_NUM_GPUS_ENV_VAR, 0))
+
         runtime_env = {
             "pip": ["lm-buddy==0.10.10"],
             "env_vars": runtime_env_vars,
         }
-        entrypoint = RayJobEntrypoint(config=ray_config, runtime_env=runtime_env)
+        entrypoint = RayJobEntrypoint(
+            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+        )
         submit_ray_job(self.ray_client, entrypoint)
 
         return ExperimentResponse.model_validate(record)

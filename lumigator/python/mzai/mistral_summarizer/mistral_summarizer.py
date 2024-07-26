@@ -32,7 +32,7 @@ class MistralSummarizer:
 
     def summarize(self, text: str) -> str:
         try:
-            logger.info(f"Using HF model invocation. Model: {self.name}")
+            logger.info(f"Using HF model invocation. ")
             inputs = self.tokenizer(
                 f"Please summarize the following {text}",
                 truncation=True,

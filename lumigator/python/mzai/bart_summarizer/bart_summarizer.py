@@ -52,7 +52,6 @@ class BARTSummarizer:
         return {"result": summary}
 
 
-# def app(args: Dict[str, str]) -> Application:
 def app(args: SummarizerArgs) -> Application:
     logger.info("Hello world!")
     logger.info(args)

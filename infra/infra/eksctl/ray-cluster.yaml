@@ -1,0 +1,18 @@
+image:
+  repository": "rayproject/ray-ml"
+  tag: "2.30.0-py311-gpu"
+
+head:
+  serviceAccountName: s3
+  rayStartParams:
+    object-store-memory: "200000000" # 200mb
+  resources:
+    limits:
+      "nvidia.com/gpu": 1 # Required to use GPU.
+      memory: 16G # Defaults to 2GB
+      ephemeral-storage: 20Gi
+      # cpu: 4
+worker:
+  serviceAccountName: s3
+  rayStartParams:
+    object-store-memory: "200000000" # 200mb

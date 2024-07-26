@@ -131,6 +131,18 @@ clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
 # this is meant to be 'alpha' ish and subject to change; will raise some potential issues
 # that are likely bc of mounting the filesystem like this.
 # if you get a fresh copy of the repo it works as expected.
+dist/lumigator/lumigator_bin.pex:
+	pants package lumigator:lumigator_bin
+
+run-sdk-test: local-up dist/lumigator/lumigator_bin.pex
+	# this should really go in a bash file or something.
+	# eventually pants can run the shell tests directly.
+	# this should also be phony and could modify the local-up to have a file to indicate it's running that gets torn down
+	LUMIGATOR_SERVICE_HOST=127.0.0.1 \
+	RAYCLUSTER_KUBERAY_HEAD_SVC_PORT_8265_TCP_ADDR=localhost \
+	dist/lumigator/lumigator_bin.pex groundtruth --list
+
+
 test-dev-setup:
 	docker run --rm -it \
 	  --volume .:/home/workspace/lumigator \

@@ -13,6 +13,12 @@ from mzai.schemas.finetuning import (
 
 router = APIRouter()
 
+__all__ = [
+    "create_finetuning_job",
+    "get_finetuning_job",
+    "get_finetuning_job_logs",
+]
+
 
 @router.post("/jobs", status_code=status.HTTP_201_CREATED)
 def create_finetuning_job(

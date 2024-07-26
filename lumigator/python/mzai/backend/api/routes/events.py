@@ -5,6 +5,8 @@ from loguru import logger
 from mzai.backend.api.deps import ExperimentServiceDep, FinetuningServiceDep
 from mzai.schemas.jobs import JobEvent, JobType
 
+__all__ = ["process_job_event"]
+
 router = APIRouter()
 
 

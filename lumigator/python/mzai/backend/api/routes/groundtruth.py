@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
+from loguru import logger
 
 from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse
@@ -10,9 +11,15 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
-from loguru import logger
 
 router = APIRouter()
+
+__all__ = [
+    "create_groundtruth_deployment",
+    "list_groundtruth_deployments",
+    "send_model_request",
+    "delete_deployment",
+]
 
 
 @router.post("/deployments", status_code=status.HTTP_201_CREATED)

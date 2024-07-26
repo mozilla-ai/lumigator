@@ -11,6 +11,14 @@ from mzai.schemas.experiments import (
 )
 from mzai.schemas.extras import ListingResponse
 
+__all__ = [
+    "create_experiment",
+    "get_experiment",
+    "list_experiments",
+    "get_experiment_result",
+    "get_experiment_result_download",
+]
+
 router = APIRouter()
 
 

@@ -28,3 +28,36 @@ run_shell_command(
     ],
     workdir=workdir,
 )
+
+pex_binary(
+    name="lumigator_bin",
+    dependencies=[
+        "//lumigator/python/mzai/schemas:schemas_sources",
+        "//lumigator/python/mzai/backend:backend_sources",
+        # Dependencies on code to be packaged into the distribution.
+    ],
+    execution_mode="venv",
+    include_requirements=True,
+    include_sources=True,
+    include_tools=True,
+    entry_point="mzai.schemas.main:cli",
+)
+
+python_distribution(
+    name="lumigator_sdk",
+    dependencies=[
+        "//lumigator/python/mzai/schemas:schemas_sources",
+        "//lumigator/python/mzai/backend:backend_sources",
+        # Dependencies on code to be packaged into the distribution.
+    ],
+    provides=python_artifact(
+        name="lumigator_sdk",
+        version="0.1",
+        description="Client lib for lumigator based on pydantic schemas",
+        author="Mozilla.ai",
+        classifiers=[
+            "Programming Language :: Python :: 3.11",
+        ],
+    ),
+    wheel_config_settings={"--global-option": ["--python-tag", "py311"]},
+)

@@ -5,6 +5,8 @@ from mzai.schemas.extras import HealthResponse
 
 router = APIRouter()
 
+__all__ = ["get_health"]
+
 
 @router.get("/")
 async def get_health() -> HealthResponse:

@@ -1,8 +1,8 @@
 from uuid import UUID
 
-import loguru
 import requests
 from fastapi import HTTPException, status
+from loguru import logger
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
@@ -16,8 +16,6 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
-from mzai.backend.settings import settings
-from loguru import logger
 
 
 class GroundTruthService:

@@ -7,6 +7,14 @@ from mzai.backend.api.deps import DatasetServiceDep
 from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from mzai.schemas.extras import ListingResponse
 
+__all__ = [
+    "upload_dataset",
+    "get_dataset",
+    "delete_dataset",
+    "list_datasets",
+    "get_dataset_download",
+]
+
 router = APIRouter()
 
 

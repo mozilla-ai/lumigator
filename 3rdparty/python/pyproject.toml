@@ -22,6 +22,7 @@ dependencies = [
     "starlette",
     "requests",
     "ruff",
+    "pandas",
     "pytest",
     "pytest-cov",
     "testcontainers",

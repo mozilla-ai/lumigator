@@ -30,6 +30,19 @@ class BackendSettings(BaseSettings):
     RAY_HEAD_NODE_HOST: str = "localhost"
     RAY_DASHBOARD_PORT: int = 8265
     RAY_SERVE_INFERENCE_PORT: int = 8000
+    # the following vars will be copied, if present, from Ray head to workers
+    RAY_WORKER_ENV_VARS: list[str] = [
+        "LOCAL_FSSPEC_S3_KEY",
+        "LOCAL_FSSPEC_S3_SECRET",
+        "LOCAL_FSSPEC_S3_ENDPOINT_URL",
+        "HF_TOKEN",
+        "OPENAI_API_KEY",
+    ]
+    RAY_WORKER_NUM_GPUS_ENV_VAR: str = "RAY_WORKER_NUM_GPUS"
+
+    # Served models
+    OAI_API_URL: str = "https://api.openai.com/v1"
+    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None

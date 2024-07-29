@@ -43,7 +43,6 @@ There are two main pulumi stacks in this folder:
 `Infra` - This stack is the baseline infra needed for Lumigator to run
 
 
-
 # Running Pulumi
 
 ```

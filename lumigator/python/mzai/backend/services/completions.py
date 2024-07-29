@@ -1,6 +1,7 @@
 import mistralai.client
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
+from openai import OpenAI
 from abc import ABC, abstractmethod
 import os
 
@@ -21,17 +22,46 @@ class MistralCompletionService(CompletionService):
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
-
         return response
 
-    def get_completions_response(self, prompt: str) -> str:
-        prompt = f"Summarize the following text: {prompt}"
-
+    def get_completions_response(self, text: str) -> str:
         response = self.client.chat(
             model=self.model,
-            messages=[ChatMessage(role="user", content=f"Summarize the following: {prompt}")],
+            messages=[ChatMessage(role="user", content=f"Summarize the following: {text}")],
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             top_p=self.top_p,
         )
         return response.choices[0].message.content
+
+
+class OpenAICompletionService(CompletionService):
+    def __init__(self):
+        self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        self.model = "gpt-4o-mini"
+        self.max_tokens = 256
+        self.temperature = 0.7
+        self.top_p = 1
+
+    def get_models(self) -> mistralai.client.ModelList:
+        response = self.client.list_models()
+
+        return response
+
+    def get_completions_response(self, text: str) -> str:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "system", "content": f"Summarize the following: {text}"}],
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            top_p=self.top_p,
+        )
+        return response.choices[0].message.content
+
+
+mc = MistralCompletionService()
+print(
+    mc.get_completions_response(
+        "Please summarize the following email I'm having issues with my router"
+    )
+)

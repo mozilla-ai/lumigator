@@ -133,7 +133,7 @@ class ExperimentService:
         if request.model.startswith("oai://") or request.model.startswith("http://"):
             worker_gpus = 0
         else:
-            worker_gpus = int(os.environ.get(settings.RAY_WORKER_NUM_GPUS_ENV_VAR, 1))
+            worker_gpus = int(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 0))
 
         runtime_env = {
             "pip": ["lm-buddy==0.10.10"],

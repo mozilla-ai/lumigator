@@ -54,6 +54,8 @@ spec:
               value: {{ .Values.rayPort | quote }}
             - name: SUMMARIZER_WORK_DIR
               value: {{ .Values.summarizerWorkDir | quote }}
+            - name: RAY_WORKER_GPUS
+              value: {{ .Values.rayWorkerGPUs | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

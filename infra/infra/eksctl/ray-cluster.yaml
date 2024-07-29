@@ -11,7 +11,11 @@ common:
         secretKeyRef:
           name: oai-key
           key: OPENAI_API_KEY
-
+    #- name: MISTRAL # kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
+    #  valueFrom:
+    #    secretKeyRef:
+    #      name: mistral-key
+    #      key: MISTRAL
 image:
   repository": "rayproject/ray-ml"
   tag: "2.30.0-py311-gpu" # Needs to match ray version in lm-buddy
@@ -24,10 +28,13 @@ head:
       #"nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
       ephemeral-storage: 30Gi
-      # cpu: 4
+      # cpu: 3
+    #requests:
+    #  memory: 15G
+
 worker:
   replicas: 2
-  maxReplicas: 10
+  maxReplicas: 25
   serviceAccountName: s3
   rayStartParams:
     object-store-memory: "200000000" # 200mb
@@ -36,4 +43,6 @@ worker:
       "nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
       ephemeral-storage: 30Gi
-      # cpu: 4
+      cpu: 3
+    requests:
+      memory: 13G

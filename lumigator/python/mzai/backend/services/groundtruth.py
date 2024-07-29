@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
 from mzai.backend.api.deployments.bart_summarizer_config_loader import BartSummarizerConfigLoader
-from mzai.backend.api.deployments.mistral_summarizer_config_loader import (
-    MistralSummarizerConfigLoader,
+from mzai.backend.api.deployments.causal_summarizer_config_loader import (
+    CausalSummarizerConfigLoader,
 )
 
 
@@ -40,8 +40,8 @@ class GroundTruthService:
             conf = BartSummarizerConfigLoader(
                 num_gpus=request.num_gpus, num_replicas=request.num_replicas
             )
-        elif model_type == "mistral":
-            conf = MistralSummarizerConfigLoader(
+        elif model_type == "causal":
+            conf = CausalSummarizerConfigLoader(
                 num_gpus=request.num_gpus, num_replicas=request.num_replicas
             )
         else:

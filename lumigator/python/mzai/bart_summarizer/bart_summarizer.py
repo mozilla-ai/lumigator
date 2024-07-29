@@ -6,6 +6,7 @@ from ray.serve import Application
 from starlette.requests import Request
 from transformers import AutoModelForSeq2SeqLM, pipeline
 
+
 logger = logging.getLogger("ray.serve")
 
 
@@ -19,7 +20,8 @@ class BARTSummarizerArgs(BaseModel):
 @serve.deployment()
 class BARTSummarizer:
     def __init__(self, name: str, tokenizer: str, task: str):
-        import torch  # Import torch here so it's not a dependency on the backend
+        # Import torch here so it's not a dependency on the backend
+        import torch
 
         # Load model
         model = AutoModelForSeq2SeqLM.from_pretrained(

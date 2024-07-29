@@ -20,7 +20,7 @@ router = APIRouter()
 def create_groundtruth_deployment(
     service: GroundTruthServiceDep,
     request: GroundTruthDeploymentCreate,
-    model_type: Literal["bart", "mistral"],
+    model_type: Literal["bart", "causal"],
 ) -> GroundTruthDeploymentResponse:
     logger.info("Creating new deployment")
     return service.create_deployment(request, model_type)

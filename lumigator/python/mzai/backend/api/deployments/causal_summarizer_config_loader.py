@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
-from mzai.mistral_summarizer.mistral_summarizer import MistralSummarizerArgs
+from mzai.causal_summarizer.causal_summarizer import CausalSummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
@@ -28,7 +28,7 @@ class RayAppConfig(BaseModel):
     name: str
     route_prefix: str
     import_path: str
-    args: MistralSummarizerArgs
+    args: CausalSummarizerArgs
     runtime_env: RayServeRuntimeConfig
     deployments: list[RayServeDeploymentConfig]
 
@@ -37,19 +37,19 @@ class RayConfig(BaseModel):
     applications: list[RayAppConfig]
 
 
-class MistralSummarizerConfigLoader(ConfigLoader):
+class CausalSummarizerConfigLoader(ConfigLoader):
     def __init__(self, num_gpus: float, num_replicas: int):
         self.config = RayConfig(
             applications=[
                 RayAppConfig(
-                    name="mistral_summarizer",
+                    name="causal_summarizer",
                     route_prefix="/",
-                    import_path="mistral_summarizer:app",
-                    args=MistralSummarizerArgs(
-                        name="mistralai/Mistral-7B-Instruct-v0.3",
-                        tokenizer="mistralai/Mistral-7B-Instruct-v0.3",
-                        task="summarization",
-                        description="Mistral Text summarization model",
+                    import_path="causal_summarizer:app",
+                    args=CausalSummarizerArgs(
+                        name="microsoft/Phi-3-mini-4k-instruct",
+                        tokenizer="microsoft/Phi-3-mini-4k-instruct",
+                        task="text-generation",
+                        description="Causal Text summarization model",
                     ),
                     runtime_env=RayServeRuntimeConfig(
                         pip=[
@@ -61,7 +61,7 @@ class MistralSummarizerConfigLoader(ConfigLoader):
                     ),
                     deployments=[
                         RayServeDeploymentConfig(
-                            name="MistralSummarizer",
+                            name="CausalSummarizer",
                             num_replicas=num_replicas,
                             ray_actor_options=RayServeActorConfig(
                                 num_cpus=1.0, num_gpus=num_gpus, num_replicas=num_replicas

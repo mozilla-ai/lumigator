@@ -5,6 +5,10 @@ from openai import OpenAI
 from abc import ABC, abstractmethod
 import os
 
+from mzai.schemas.completions import (
+    CompletionResponse,
+)
+
 
 class CompletionService(ABC):
     @abstractmethod
@@ -24,7 +28,7 @@ class MistralCompletionService(CompletionService):
         response = self.client.list_models()
         return response
 
-    def get_completions_response(self, text: str) -> str:
+    def get_completions_response(self, text: str) -> CompletionResponse:
         response = self.client.chat(
             model=self.model,
             messages=[ChatMessage(role="user", content=f"Summarize the following: {text}")],
@@ -57,11 +61,3 @@ class OpenAICompletionService(CompletionService):
             top_p=self.top_p,
         )
         return response.choices[0].message.content
-
-
-mc = MistralCompletionService()
-print(
-    mc.get_completions_response(
-        "Please summarize the following email I'm having issues with my router"
-    )
-)

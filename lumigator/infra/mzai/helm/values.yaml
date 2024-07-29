@@ -6,6 +6,7 @@ postgresDb: platform
 
 rayAddress: raycluster-kuberay-head-svc
 rayPort: 8265
+rayWorkerGPUs: 1
 
 summarizerWorkDir: "s3://mzai-ray-serve-apps/summarizer-1.zip"
 

@@ -38,7 +38,7 @@ class BackendSettings(BaseSettings):
         "HF_TOKEN",
         "OPENAI_API_KEY",
     ]
-    RAY_WORKER_NUM_GPUS_ENV_VAR: str = "RAY_WORKER_NUM_GPUS"
+    RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
 
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"

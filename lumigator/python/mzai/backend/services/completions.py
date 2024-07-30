@@ -19,7 +19,7 @@ class MistralCompletionService(CompletionService):
         self.client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
         self.model = "open-mistral-7b"
         self.max_tokens = 256
-        self.temperature = 0.7
+        self.temperature = 1
         self.top_p = 1
 
     def get_models(self) -> mistralai.client.ModelList:
@@ -43,7 +43,7 @@ class OpenAICompletionService(CompletionService):
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
         self.model = "gpt-4o-mini"
         self.max_tokens = 256
-        self.temperature = 0.7
+        self.temperature = 1
         self.top_p = 1
 
     def get_models(self) -> mistralai.client.ModelList:

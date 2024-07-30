@@ -11,11 +11,11 @@ common:
         secretKeyRef:
           name: oai-key
           key: OPENAI_API_KEY
-    #- name: MISTRAL # kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
-    #  valueFrom:
-    #    secretKeyRef:
-    #      name: mistral-key
-    #      key: MISTRAL
+    - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
+      valueFrom:
+        secretKeyRef:
+          name: mistral-key
+          key: MISTRAL_API_KEY
 image:
   repository": "rayproject/ray-ml"
   tag: "2.30.0-py311-gpu" # Needs to match ray version in lm-buddy

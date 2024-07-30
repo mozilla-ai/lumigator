@@ -82,13 +82,13 @@ class ExperimentService:
         # fill up model url with default openai url
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
+        elif request.model.startswith("mistral://"):
+            model_url = settings.MISTRAL_API_URL
         else:
             model_url = request.model_url
 
         # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and (
-            request.model.startswith("oai://") or request.model.startswith("http://")
-        ):
+        if request.system_prompt is None and not request.model.startswith("hf://"):
             request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
         config_params = {
@@ -136,7 +136,7 @@ class ExperimentService:
             worker_gpus = int(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 0))
 
         runtime_env = {
-            "pip": ["lm-buddy==0.10.10"],
+            "pip": ["lm-buddy[jobs]==0.12.0"],
             "env_vars": runtime_env_vars,
         }
         entrypoint = RayJobEntrypoint(

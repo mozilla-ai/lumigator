@@ -5,9 +5,7 @@ from openai import OpenAI
 from abc import ABC, abstractmethod
 import os
 
-from mzai.schemas.completions import (
-    CompletionResponse,
-)
+from mzai.schemas.completions import CompletionResponse, CompletionRequest
 
 
 class CompletionService(ABC):
@@ -28,15 +26,16 @@ class MistralCompletionService(CompletionService):
         response = self.client.list_models()
         return response
 
-    def get_completions_response(self, text: str) -> CompletionResponse:
+    def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:
         response = self.client.chat(
             model=self.model,
-            messages=[ChatMessage(role="user", content=f"Summarize the following: {text}")],
+            messages=[ChatMessage(role="user", content=f"Summarize the following: {request.text}")],
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             top_p=self.top_p,
         )
-        return response.choices[0].message.content
+        response = response.choices[0].message.content
+        return CompletionResponse(text=response)
 
 
 class OpenAICompletionService(CompletionService):
@@ -52,12 +51,13 @@ class OpenAICompletionService(CompletionService):
 
         return response
 
-    def get_completions_response(self, text: str) -> str:
+    def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "system", "content": f"Summarize the following: {text}"}],
+            messages=[{"role": "system", "content": f"Summarize the following: {request.text}"}],
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             top_p=self.top_p,
         )
-        return response.choices[0].message.content
+        response = response.choices[0].message.content
+        return CompletionResponse(text=response)

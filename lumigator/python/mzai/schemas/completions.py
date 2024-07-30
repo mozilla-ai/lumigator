@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class CompletionResponse(BaseModel):
-    completion_response: str
+    text: str
 
 
 class CompletionRequest(BaseModel):

@@ -17,6 +17,7 @@ from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.services.groundtruth import GroundTruthService
+from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
 from mzai.backend.settings import settings
 
 
@@ -71,3 +72,21 @@ def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
 
 
 GroundTruthServiceDep = Annotated[GroundTruthService, Depends(get_ground_truth_service)]
+
+
+def get_mistral_completion_service() -> MistralCompletionService:
+    return MistralCompletionService()
+
+
+MistralCompletionServiceDep = Annotated[
+    MistralCompletionService, Depends(get_mistral_completion_service)
+]
+
+
+def get_openai_completion_service() -> OpenAICompletionService:
+    return OpenAICompletionService()
+
+
+OpenAICompletionServiceDep = Annotated[
+    OpenAICompletionService, Depends(get_mistral_completion_service)
+]

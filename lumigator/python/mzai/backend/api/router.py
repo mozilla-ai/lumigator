@@ -20,4 +20,4 @@ api_router.include_router(finetuning.router, prefix="/finetuning", tags=[Tags.FI
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(events.router, prefix="/events", tags=[Tags.EVENTS])
 api_router.include_router(groundtruth.router, prefix="/ground-truth", tags=[Tags.GROUNDTRUTH])
-api_router.include_router(groundtruth.router, prefix="/completions", tags=[Tags.COMPLETIONS])
+api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])

@@ -55,4 +55,5 @@ config_template = {
     "oai://gpt-4o-mini": oai_template,
     "oai://gpt-4-turbo": oai_template,
     "oai://gpt-3.5-turbo-0125": oai_template,
+    "mistral://open-mistral-7b": oai_template,
 }

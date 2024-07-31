@@ -9,13 +9,13 @@ from mzai.summarizer.summarizer import SummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
-    num_cpus: float
+    num_cpus: float | None = None
     num_gpus: float | None = None
-    num_replicas: int | None = None
 
 
 class RayServeDeploymentConfig(BaseModel):
     name: str
+    num_replicas: int | None = None
     ray_actor_options: RayServeActorConfig
 
 
@@ -63,9 +63,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         RayServeDeploymentConfig(
                             name="Summarizer",
                             num_replicas=num_replicas,
-                            ray_actor_options=RayServeActorConfig(
-                                num_cpus=1.0, num_gpus=num_gpus, num_replicas=num_replicas
-                            ),
+                            ray_actor_options=RayServeActorConfig(num_cpus=1.0, num_gpus=num_gpus),
                         )
                     ],
                 )

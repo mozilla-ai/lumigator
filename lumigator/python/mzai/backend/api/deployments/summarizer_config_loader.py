@@ -23,6 +23,7 @@ class RayServeDeploymentConfig(BaseModel):
 class RayServeRuntimeConfig(BaseModel):
     pip: list[str]
     working_dir: str = None
+    env_vars = dict[str, str]
 
 
 class RayAppConfig(BaseModel):
@@ -59,6 +60,7 @@ class SummarizerConfigLoader(ConfigLoader):
                             "starlette==0.37.2",
                             "PyYAML==6.0.1",
                         ],
+                        env_vars={"CUDA_LAUNCH_BLOCKING": "1"},
                     ),
                     deployments=[
                         RayServeDeploymentConfig(

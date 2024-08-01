@@ -23,7 +23,7 @@ class RayServeDeploymentConfig(BaseModel):
 class RayServeRuntimeConfig(BaseModel):
     pip: list[str]
     working_dir: str = None
-    env_vars = dict[str, str]
+    env_vars: dict[str, str]
 
 
 class RayAppConfig(BaseModel):

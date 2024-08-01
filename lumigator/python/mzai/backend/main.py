@@ -11,6 +11,8 @@ from mzai.backend.records.base import BaseRecord
 from loguru import logger
 import sys
 import os
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 
 def create_app(engine: Engine) -> FastAPI:
@@ -21,6 +23,10 @@ def create_app(engine: Engine) -> FastAPI:
         yield
 
     app = FastAPI(title="Lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
+
+    app.mount(
+        "/", StaticFiles(directory=str(Path(__file__).parent / "static"), html=True), name="static"
+    )
 
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()

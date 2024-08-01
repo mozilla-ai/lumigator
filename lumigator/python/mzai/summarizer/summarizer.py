@@ -6,7 +6,6 @@ from ray.serve import Application
 from starlette.requests import Request
 from transformers import AutoModelForSeq2SeqLM, pipeline
 
-
 logger = logging.getLogger("ray.serve")
 
 

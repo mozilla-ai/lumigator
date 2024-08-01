@@ -1,3 +1,4 @@
+import uuid
 from uuid import UUID
 
 import loguru
@@ -31,15 +32,16 @@ class GroundTruthService:
 
     def create_deployment(self, request: GroundTruthDeploymentCreate):
         conf = SummarizerConfigLoader(num_gpus=request.num_gpus, num_replicas=request.num_replicas)
-        deployment_args = conf.get_config_dict()
         deployment_name = conf.get_deployment_name()
-        deployment_description = conf.get_deployment_description()
-
-        self.ray_client.deploy_applications(deployment_args)
+        deployment_id = uuid.uuid4()
+        conf.set_deployment_description(deployment_id)
+        deployment_args = conf.get_config_dict()
 
         record = self.deployment_repo.create(
-            name=deployment_name, description=deployment_description
+            name=deployment_name, description=deployment_id, id=deployment_id
         )
+
+        self.ray_client.deploy_applications(deployment_args)
 
         return GroundTruthDeploymentResponse.model_validate(record)
 

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import loguru
 import requests
 from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
@@ -31,15 +30,12 @@ class GroundTruthService:
 
     def create_deployment(self, request: GroundTruthDeploymentCreate):
         conf = SummarizerConfigLoader(num_gpus=request.num_gpus, num_replicas=request.num_replicas)
-        deployment_args = conf.get_config_dict()
         deployment_name = conf.get_deployment_name()
-        deployment_description = conf.get_deployment_description()
+        record = self.deployment_repo.create(name=deployment_name)
+        conf.set_deployment_description(record.id)
+        deployment_args = conf.get_config_dict()
 
         self.ray_client.deploy_applications(deployment_args)
-
-        record = self.deployment_repo.create(
-            name=deployment_name, description=deployment_description
-        )
 
         return GroundTruthDeploymentResponse.model_validate(record)
 

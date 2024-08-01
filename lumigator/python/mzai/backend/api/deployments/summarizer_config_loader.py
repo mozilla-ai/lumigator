@@ -2,6 +2,7 @@ from typing import Any
 
 from loguru import logger
 from pydantic import BaseModel
+from uuid import UUID
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
@@ -49,7 +50,7 @@ class SummarizerConfigLoader(ConfigLoader):
                         name="facebook/bart-large-cnn",
                         tokenizer="facebook/bart-large-cnn",
                         task="summarization",
-                        description="Text summarization model",
+                        description="",
                     ),
                     runtime_env=RayServeRuntimeConfig(
                         pip=[
@@ -76,6 +77,10 @@ class SummarizerConfigLoader(ConfigLoader):
         config = self.config
         name: str = config.applications[0].name
         return name
+
+    def set_deployment_description(self, uuid: UUID):
+        """set the description to the Lumigator UUID."""
+        self.config.applications[0].args.description = str(uuid)
 
     def get_deployment_description(self) -> str:
         config = self.config

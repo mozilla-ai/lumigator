@@ -7,7 +7,6 @@ class Tags(str, Enum):
     EXPERIMENTS = "experiments"
     GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
-    HOME = "home"
 
 
 TAGS_METADATA = [
@@ -30,10 +29,6 @@ TAGS_METADATA = [
     {
         "name": Tags.COMPLETIONS,
         "description": "Access models via external vendor endpoints",
-    },
-    {
-        "name": Tags.HOME,
-        "description": "Hello world!",
     },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.

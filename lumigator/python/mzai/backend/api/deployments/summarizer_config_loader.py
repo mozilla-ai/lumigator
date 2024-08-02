@@ -40,7 +40,7 @@ class RayConfig(BaseModel):
 
 
 class SummarizerConfigLoader(ConfigLoader):
-    def __init__(self, num_gpus: float, num_replicas: int):
+    def __init__(self, num_cpus: float, num_gpus: float, num_replicas: int):
         self.config = RayConfig(
             applications=[
                 RayAppConfig(
@@ -66,7 +66,9 @@ class SummarizerConfigLoader(ConfigLoader):
                         RayServeDeploymentConfig(
                             name="Summarizer",
                             num_replicas=num_replicas,
-                            ray_actor_options=RayServeActorConfig(num_cpus=1.0, num_gpus=num_gpus),
+                            ray_actor_options=RayServeActorConfig(
+                                num_cpus=num_cpus, num_gpus=num_gpus
+                            ),
                         )
                     ],
                 )

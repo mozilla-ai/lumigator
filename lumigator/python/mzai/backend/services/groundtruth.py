@@ -29,7 +29,9 @@ class GroundTruthService:
         self.ray_client = ray_serve_client
 
     def create_deployment(self, request: GroundTruthDeploymentCreate):
-        conf = SummarizerConfigLoader(num_gpus=request.num_gpus, num_replicas=request.num_replicas)
+        conf = SummarizerConfigLoader(
+            num_cpus=request.num_cpus, num_gpus=request.num_gpus, num_replicas=request.num_replicas
+        )
         deployment_name = conf.get_deployment_name()
         record = self.deployment_repo.create(name=deployment_name)
         conf.set_deployment_description(record.id)

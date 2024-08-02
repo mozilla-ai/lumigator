@@ -21,6 +21,8 @@ class MistralCompletionService(CompletionService):
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
+        self.prompt = """You are a helpful assistant, expert in text summarization.
+        For every prompt you receive, provide a summary of its contents in at most two sentences."""
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
@@ -54,7 +56,7 @@ class OpenAICompletionService(CompletionService):
     def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "system", "content": f"Summarize the following: {request.text}"}],
+            messages=[{"role": "system", "content": f"{self.prompt}: {request.text}"}],
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             top_p=self.top_p,

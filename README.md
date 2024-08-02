@@ -11,7 +11,7 @@ For VSCode users, activate the venv before opening your IDE; the `.env` file wil
 
 
 ```shell
-make bootstrap-dev-env
+make bootstrap-dev-environment
 ```
 
 Show targets:

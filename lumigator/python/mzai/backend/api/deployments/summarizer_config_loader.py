@@ -55,8 +55,8 @@ class SummarizerConfigLoader(ConfigLoader):
                     ),
                     runtime_env=RayServeRuntimeConfig(
                         pip=[
-                            "transformers==4.38.0",
-                            "torch==2.1.2",
+                            "transformers==4.41.2",
+                            "torch==2.3.1",
                             "starlette==0.37.2",
                             "PyYAML==6.0.1",
                         ],

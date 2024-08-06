@@ -35,7 +35,10 @@ class Summarizer:
 
     def summarize(self, text: str) -> str:
         #  A list or a list of list of `dict` with `summary_text` and `summary_token_ids` as keys
-        model_output: list[dict[str, str]] = self.pipe(text, min_length=30)
+        # Setting max length of 1024 per bart context window size
+        model_output: list[dict[str, str]] = self.pipe(
+            text, min_length=30, max_length=1024, truncation=True, do_sample=False
+        )
 
         try:
             summary = model_output[0]["summary_text"]

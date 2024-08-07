@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
 from starlette.requests import Request
-from transformers import AutoModelForSeq2SeqLM, pipeline
+from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
 
 logger = logging.getLogger("ray.serve")
 
@@ -26,10 +26,13 @@ class Summarizer:
             pretrained_model_name_or_path=name,
             trust_remote_code=True,
         )
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer, model_max_length=1024, truncate=True
+        )
         self.pipe = pipeline(
             task,
             model=model,
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             device=0 if torch.cuda.is_available() else -1,
         )
 

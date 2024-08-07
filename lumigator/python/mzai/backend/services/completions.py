@@ -32,7 +32,7 @@ class MistralCompletionService(CompletionService):
         response = self.client.chat(
             model=self.model,
             messages=[
-                ChatMessage(role="system", content="Summarize the following"),
+                ChatMessage(role="system", content=f"{self.prompt}"),
                 ChatMessage(role="user", content=f"{request.text}"),
             ],
             temperature=self.temperature,

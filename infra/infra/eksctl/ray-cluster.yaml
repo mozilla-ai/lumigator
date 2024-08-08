@@ -36,8 +36,8 @@ head:
 
 worker:
   replicas: 8
-  maxReplicas: 25
-  serviceAccountName: s3
+  maxReplicas: 25 # TODO: Autoscaling https://docs.ray.io/en/latest/cluster/kubernetes/user-guides/configuring-autoscaling.html#kuberay-autoscaling-configurations
+  serviceAccountName: s3 # Matches kube service account with permissions to access s3
   rayStartParams:
     object-store-memory: "200000000" # 200mb
   resources:

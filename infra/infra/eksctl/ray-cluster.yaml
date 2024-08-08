@@ -23,17 +23,19 @@ head:
   serviceAccountName: s3
   rayStartParams:
     object-store-memory: "200000000" # 200mb
+    num-cpus: 0 # Force ray to not do any jobs on the head node
   resources:
     limits:
       #"nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
       ephemeral-storage: 30Gi
-      # cpu: 3
-    #requests:
-    #  memory: 15G
+      cpu: 4
+    requests:
+      memory: 4G
+      cpu: 2
 
 worker:
-  replicas: 2
+  replicas: 8
   maxReplicas: 25
   serviceAccountName: s3
   rayStartParams:

@@ -131,9 +131,9 @@ class ExperimentService:
 
         # set num_gpus per worker (zero if we are just hitting a service)
         if not request.model.startswith("hf://"):
-            worker_gpus = int(os.environ.get(settings.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 0))
+            worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
         else:
-            worker_gpus = int(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 0))
+            worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 1.0))
 
         runtime_env = {
             "pip": ["lm-buddy[jobs]==0.12.1"],

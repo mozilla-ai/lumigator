@@ -29,7 +29,7 @@ head:
       #"nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
       ephemeral-storage: 30Gi
-      cpu: 4
+      cpu: 4 # Current nodes have 4 CPUs max
     requests:
       memory: 4G
       cpu: 2
@@ -44,7 +44,7 @@ worker:
     limits:
       "nvidia.com/gpu": 1 # Required to use GPU.
       memory: 16G # Defaults to 2GB
-      ephemeral-storage: 30Gi
+      ephemeral-storage: 30Gi # Allow for model download
       cpu: 3
     requests:
-      memory: 13G
+      memory: 13G # Nodes have 16GB ram, 13G allows worker to be scheduled given other pods on the node

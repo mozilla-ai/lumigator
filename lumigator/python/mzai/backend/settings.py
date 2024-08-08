@@ -40,6 +40,7 @@ class BackendSettings(BaseSettings):
         "MISTRAL_API_KEY",
     ]
     RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
+    RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
 
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"

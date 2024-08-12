@@ -2,37 +2,66 @@
 name = "3rdparty-python-dependencies"
 version = "0.0.1"
 requires-python = ">=3.11.0"
+authors = [
+    { name = "Aaron Gonzales", email = "aaron@mozilla.ai" },
+    { name = "Vicki Boykis", email = "vicki@mozilla.ai" },
+    { name = "Kyle White", email = "kyle@mozilla.ai" },
+    { name = "Imtihan Ahmed", email = "imtihan@mozilla.ai" },
+]
 
+# this has to be an array of pep 508 strings, not the map style
 dependencies = [
-    "uvicorn[standard]==0.28.0",
+    "accelerate>=0.25.0",
+    "boto3==1.34.105",
+    "boto3-stubs[essential,s3]==1.34.105",
+    "click==8.1.7",
     "fastapi[all]==0.110.0",
+    "httpx==0.27.0",
+    "lm-buddy[dev]==0.11.0",
+    ## local lm-buddy can be made with the following url spec.
+    ## You have to build the wheel manually and clean out the other wheels that
+    ## are built there - e.g.,
+    #
+    ## pushd $WORKSPACE/lm-buddy && \
+    #    # pip wheel . --wheel-dir=$WORKSPACE/wheelhouse  && \
+    #    # cd $WORKSPACE/wheelhouse &&  \
+    #    # mv lm_buddy-<VERSION>-py3-none-any.whl lm_buddy-<VERSION>-py3-none-any.bak && \
+    #    # rm *.whl && mv lm_buddy-<VERSION>-py3-none-any.bak  lm_buddy-<VERSION>-py3-none-any.whl && \
+    #    # popd
+    ## after that you can uncomment the following:
+    ## "lm-buddy[dev] @ $WHEELS_DIR/",
+
+    ## warning - if you're developing with a copy of this in your system under $WHEELS_DIR,
+    ## in pants.toml, pants will use the local version even without the local URI
+    ## and things will break. make sure to clean it up before building; this is more a note for followups
+    "loguru==0.7.2",
+    "mypy-boto3==1.34.105",
+    "numpy<2.0.0, >=1.3.0",
+    "pex>=2.8.0",
+    "pre-commit>=3.6",
+    "psycopg2-binary==2.9.9",
     "pydantic==2.6.4",
     "pydantic-settings==2.2.1",
-    "click==8.1.7",
-    "loguru==0.7.2",
-    "pex==2.3.0",
-    "httpx==0.27.0",
-    "python-multipart==0.0.9",
-    "pre-commit>=3.6",
-    "sqlalchemy[asyncio]==2.0.28",
-    "psycopg2-binary==2.9.9",
-    "ray[default]==2.30.0",
-    "boto3==1.34.105",
-    "boto3-stubs[essential]==1.34.105",
-    "starlette",
-    "requests",
-    "ruff",
-    "pytest",
+    "pytest!=8.1.*,>6",
     "pytest-cov",
-    "testcontainers",
-    "setuptools==69.5.1",
-    "numpy<2.0.0",
-    "torch==2.3.1,!=2.3.1+cu118,!=2.3.1+cu121; platform_system == 'darwin'",
-    "torch[cuda]==2.3.1+cu118; platform_system == 'linux'",
+    "python-multipart==0.0.9",
+    "ray[default]==2.30.0",
+    "requests>=2,<3",
+    "ruff>=0.2",
+    "setuptools>=69.5.1",
+    "sqlalchemy[asyncio]==2.0.28",
+    "starlette",
+    "testcontainers>=4.7.1",
+    ### Torch is handled in the actual build file. leaving these here for reference:
+    "torch",
+#    "torch==2.3.1,!=2.3.1+cu118,!=2.3.1+cu121; platform_system == 'darwin'",
+#    "torch[cuda]==2.3.1+cu118; platform_system == 'linux'",
     "transformers==4.41.2",
+
+    "uvicorn[standard]==0.28.0",
+    "websocket-client>=0.32.0,<1",
     "s3fs==2024.5.0",
     "datasets==2.20.0",
-    "mistralai==0.4.2",
-    "openai==1.37.1"
-
+    # notebook-only deps
+    "matplotlib==3.9.1",
 ]

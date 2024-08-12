@@ -1,13 +1,37 @@
 python_sources(
     name="backend_sources",
+    dependencies=[
+        "lumigator/python/mzai/schemas:schemas_sources",
+        "lumigator/3rdparty/python:3rdparty#pydantic",
+        "lumigator/3rdparty/python:3rdparty#pex",
+        "lumigator/3rdparty/python:3rdparty#boto3",
+        "lumigator/3rdparty/python:3rdparty#boto3-stubs",
+        "lumigator/3rdparty/python:3rdparty#fastapi",
+        "lumigator/3rdparty/python:3rdparty#httpx",
+        "lumigator/3rdparty/python:3rdparty#loguru",
+        "lumigator/3rdparty/python:3rdparty#pex",
+        "lumigator/3rdparty/python:3rdparty#psycopg2-binary",
+        "lumigator/3rdparty/python:3rdparty#pydantic",
+        "lumigator/3rdparty/python:3rdparty#pydantic-settings",
+        "lumigator/3rdparty/python:3rdparty#pytest",
+        "lumigator/3rdparty/python:3rdparty#pytest-cov",
+        "lumigator/3rdparty/python:3rdparty#python-multipart",
+        "lumigator/3rdparty/python:3rdparty#ray",
+        "lumigator/3rdparty/python:3rdparty#requests",
+        "lumigator/3rdparty/python:3rdparty#ruff",
+        "lumigator/3rdparty/python:3rdparty#setuptools",
+        "lumigator/3rdparty/python:3rdparty#sqlalchemy",
+        "lumigator/3rdparty/python:3rdparty#starlette",
+        "lumigator/3rdparty/python:3rdparty#testcontainers",
+        "lumigator/3rdparty/python:3rdparty#uvicorn",
+    ],
     sources=[
         "**/*.py",
         "!tests",
     ],
 )
 
-
-pex_binary(
+crossplatform_pex(
     name="backend_app",
     args=[
         "mzai.backend.main:app",
@@ -16,20 +40,72 @@ pex_binary(
         "--port",
         "80",
     ],
-    dependencies=[
-        ":backend_sources",
-    ],
     execution_mode="venv",
     include_requirements=True,
     include_sources=True,
     include_tools=True,
     script="uvicorn",
+    unparametrized_deps=[":backend_sources"],
 )
 
+## leaving this code here for now explicitly.
+# the above macro function effectively generates this for you.
+
+# pex_binary(
+#     name="backend_app",
+#     args=[
+#         "mzai.backend.main:app",
+#         "--host",
+#         "0.0.0.0",
+#         "--port",
+#         "80",
+#     ],
+#     execution_mode="venv",
+#     include_requirements=True,
+#     include_sources=True,
+#     include_tools=True,
+#     script="uvicorn",
+#     **parametrize(
+#         "linux_cuda",
+#         complete_platforms=[
+#             "//3rdparty/python:py311_linux_pex_platform_tags",
+#         ],
+#         dependencies=[
+#             ":backend_sources@parametrize=linux_cuda",
+#             "3rdparty/python:3rdparty#uvicorn@parametrize=linux_cuda",
+#         ],
+#         environment="docker_linux_cuda",
+#         resolve="linux_cuda",
+#     ),
+#     **parametrize(
+#         "linux_cpu",
+#         complete_platforms=[
+#             "3rdparty/python:py311_linux_pex_platform_tags",
+#         ],
+#         dependencies=[
+#             ":backend_sources@parametrize=linux_cpu",
+#             "3rdparty/python:3rdparty#uvicorn@parametrize=linux_cpu",
+#         ],
+#         resolve="linux_cpu",
+#     ),
+#     **parametrize(
+#         "darwin",
+#         complete_platforms=[
+#             "3rdparty/python:py311_macos_14_pex_platform_tags",
+#         ],
+#         dependencies=[
+#             ":backend_sources@parametrize=darwin",
+#             "3rdparty/python:3rdparty#uvicorn@parametrize=darwin",
+#         ],
+#         environment="local_darwin",
+#         resolve="darwin",
+#     ),
+# )
+#
 docker_image(
     name="backend_image",
     build_platform=["linux/amd64"],
-    dependencies=[":backend_app"],
+    dependencies=[":backend_app@parametrize=linux_cpu"],
     image_tags=[
         "backend_dev_{build_args.REPOVERSION}",
         "backend_dev",

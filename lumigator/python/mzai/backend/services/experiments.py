@@ -136,7 +136,7 @@ class ExperimentService:
             worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 1.0))
 
         runtime_env = {
-            "pip": ["lm-buddy[jobs]==0.12.1"],
+            "pip": ["nltk==3.8.1, lm-buddy[jobs]==0.12.1"],
             "env_vars": runtime_env_vars,
         }
         entrypoint = RayJobEntrypoint(

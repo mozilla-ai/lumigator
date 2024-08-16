@@ -4,9 +4,7 @@ from enum import Enum
 class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
-    FINETUNING = "finetuning"
     EXPERIMENTS = "experiments"
-    EVENTS = "events"
     GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
 
@@ -21,16 +19,8 @@ TAGS_METADATA = [
         "description": "Upload and download datasets.",
     },
     {
-        "name": Tags.FINETUNING,
-        "description": "Create and manage finetuning jobs.",
-    },
-    {
         "name": Tags.EXPERIMENTS,
         "description": "Create and manage evaluation experiments.",
-    },
-    {
-        "name": Tags.EVENTS,
-        "description": "Send a job event to the application.",
     },
     {
         "name": Tags.GROUNDTRUTH,

@@ -11,11 +11,9 @@ from sqlalchemy.orm import Session
 from mzai.backend.db import session_manager
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from mzai.backend.repositories.finetuning import FinetuningJobRepository
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
-from mzai.backend.services.finetuning import FinetuningService
 from mzai.backend.services.groundtruth import GroundTruthService
 from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
 from mzai.backend.settings import settings
@@ -42,15 +40,6 @@ def get_dataset_service(session: DBSessionDep, s3_client: S3ClientDep) -> Datase
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
-
-
-def get_finetuning_service(session: DBSessionDep) -> FinetuningService:
-    job_repo = FinetuningJobRepository(session)
-    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return FinetuningService(job_repo, ray_client)
-
-
-FinetuningServiceDep = Annotated[FinetuningService, Depends(get_finetuning_service)]
 
 
 def get_experiment_service(

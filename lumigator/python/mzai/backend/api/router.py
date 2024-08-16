@@ -2,9 +2,7 @@ from fastapi import APIRouter
 
 from mzai.backend.api.routes import (
     datasets,
-    events,
     experiments,
-    finetuning,
     groundtruth,
     health,
     completions,

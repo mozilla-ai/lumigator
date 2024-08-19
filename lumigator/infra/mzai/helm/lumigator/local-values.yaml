@@ -1,0 +1,36 @@
+postgresHost: localhost
+postgresPort: 5432
+postgresUser: db_admin
+postgresPassword: password123 # pragma: allowlist secret
+postgresDb: platform
+
+rayAddress: kind-local-ray
+rayPort: 8265
+rayWorkerGPUs: 0
+
+summarizerWorkDir: "s3://mzai-ray-serve-apps/summarizer-3.zip"
+
+serviceAccountName: s3
+
+s3Bucket: lumigator-storage
+
+image:
+  repository: localhost:5000/backend_image
+
+service:
+  annotations:
+    # dummy
+    service.fake/special-protocol: "tcp"
+  type: LoadBalancer
+  https: true
+
+
+podAnnotations:
+  app.kubernetes.io/name: worker
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

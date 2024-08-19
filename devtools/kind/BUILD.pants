@@ -1,0 +1,15 @@
+shell_source(name="kind", source="./kind_setup.sh")
+
+kind_conf_file = "kind-config.yaml"
+
+run_shell_command(
+    name="create_kind_cluster",
+    command=f"./kind_setup.sh --clean --create-cluster && kind get kubeconfig > {kind_conf_file}",
+    execution_dependencies=[":kind"],
+)
+
+run_shell_command(
+    name="gen_kind_kubeconfig",
+    command=f"kind get kubeconfig > {kind_conf_file}",
+    execution_dependencies=[":kind"],
+)

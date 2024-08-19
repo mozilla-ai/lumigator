@@ -5,7 +5,8 @@ SHELL ["/bin/bash", "-c"]
 WORKDIR /tmp
 
 
-COPY ../3rdparty/python/* .
+# this is set in the compose setup; the build context is from the root of the repo
+COPY 3rdparty/python/* .
 RUN pip install pex uv
 
 # uv pip is erroring out on a weird issue, saying it can't install numpy's version as such. normal pip works as expected.

@@ -49,12 +49,14 @@ services:
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
     volumes:
-      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+      - ../../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
 
   backend:
     build:
-      context: ..
-      dockerfile: ".devcontainer/Dockerfile.backend"
+      # note that we sent the context to the repo root and from there have to say that
+      # the dockerfile lives in a path relative to that context.
+      context: ../..
+      dockerfile: "devtools/docker-compose/Dockerfile.backend"
     platform: linux/amd64
     depends_on:
       - postgres
@@ -85,7 +87,7 @@ services:
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
-      - ../:/mzai
+      - ../../:/mzai
 
 volumes:
     postgres-data:

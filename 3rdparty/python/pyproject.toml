@@ -17,7 +17,7 @@ dependencies = [
     "click==8.1.7",
     "fastapi[all]==0.110.0",
     "httpx==0.27.0",
-    "lm-buddy[dev]==0.11.0",
+    "lm-buddy[dev]==0.12.1",
     ## local lm-buddy can be made with the following url spec.
     ## You have to build the wheel manually and clean out the other wheels that
     ## are built there - e.g.,
@@ -56,7 +56,7 @@ dependencies = [
     "torch",
 #    "torch==2.3.1,!=2.3.1+cu118,!=2.3.1+cu121; platform_system == 'darwin'",
 #    "torch[cuda]==2.3.1+cu118; platform_system == 'linux'",
-    "transformers==4.41.2",
+    "transformers>=4.3",
 
     "uvicorn[standard]==0.28.0",
     "websocket-client>=0.32.0,<1",

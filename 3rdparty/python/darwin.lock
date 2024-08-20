@@ -22,6 +22,7 @@
 //     "mistralai==0.4.2",
 //     "mypy-boto3==1.34.105",
 //     "numpy<2.0.0,>=1.3.0",
+//     "openai==1.38.0",
 //     "pex>=2.8.0",
 //     "pre-commit",
 //     "psycopg2-binary==2.9.9",
@@ -9526,13 +9527,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "f2bfcce7ae1784d90b04c57c2802e8649e1976530bb25dc72c2b078d3ecf4864",
-              "url": "https://files.pythonhosted.org/packages/09/e3/93b516fab8b8f420acc7bb75e29759d009df26c093d8de1c70993b13bf25/setuptools-73.0.0-py3-none-any.whl"
+              "hash": "b208925fcb9f7af924ed2dc04708ea89791e24bde0d3020b27df0e116088b34e",
+              "url": "https://files.pythonhosted.org/packages/07/6a/0270e295bf30c37567736b7fca10167640898214ff911273af37ddb95770/setuptools-73.0.1-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "3c08705fadfc8c7c445cf4d98078f0fafb9225775b2b4e8447e40348f82597c0",
-              "url": "https://files.pythonhosted.org/packages/98/0b/56dabcf2b37d9152090bcd5d42e28ad312c9ba54fb1446b22dcc809dd84a/setuptools-73.0.0.tar.gz"
+              "hash": "d59a3e788ab7e012ab2c4baed1b376da6366883ee20d7a5fc426816e3d7b1193",
+              "url": "https://files.pythonhosted.org/packages/8d/37/f4d4ce9bc15e61edba3179f9b0f763fc6d439474d28511b11f0d95bab7a2/setuptools-73.0.1.tar.gz"
             }
           ],
           "project_name": "setuptools",
@@ -9590,7 +9591,7 @@
             "wheel>=0.44.0; extra == \"test\""
           ],
           "requires_python": ">=3.8",
-          "version": "73.0.0"
+          "version": "73.0.1"
         },
         {
           "artifacts": [
@@ -12339,6 +12340,7 @@
     "mistralai==0.4.2",
     "mypy-boto3==1.34.105",
     "numpy<2.0.0,>=1.3.0",
+    "openai==1.38.0",
     "pex>=2.8.0",
     "pre-commit",
     "psycopg2-binary==2.9.9",

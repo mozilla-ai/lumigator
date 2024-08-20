@@ -11,13 +11,10 @@
 ## this should stay very stable; note that requirements can be used with a direct URL for testing or if we assume that's stable forever
 ## to update torch versions, make sure to go to the actual pytorch repo and find the link to the wheel you want, with sha.
 
-TORCH_VERSION = "2.3.1"
-
+TORCH_VERSION = "2.4.0"
 CUDA_VERSION = "cu118"
-
-TORCH_CUDA_WHEEL_URL = "https://download.pytorch.org/whl/cu118/torch-2.3.1%2Bcu118-cp311-cp311-linux_x86_64.whl#sha256=5b0d531814886573cbe8c8ca91d17676f96bbaa33b569dd37ea235f124314e97"
-
-TORCH_LINUX_CPU_WHEEL_URL = "https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp311-cp311-linux_x86_64.whl#sha256=a272defe305dbd944aa28a91cc3db0f0149495b3ebec2e39723a7224fa05dc57"
+TORCH_CUDA_WHEEL_URL = "https://download.pytorch.org/whl/cu118/torch-2.4.0%2Bcu118-cp311-cp311-linux_x86_64.whl#sha256=6acd608416b12211e21dfe5b92ffb1c82126ee8d037dd119f45d8b28ed80a0d2"
+TORCH_LINUX_CPU_WHEEL_URL = "https://download.pytorch.org/whl/cpu/torch-2.4.0%2Bcpu-cp311-cp311-linux_x86_64.whl#sha256=14a7a8b595347dddca594f9e448b93ce68ce4f871acbd32cf04bda7c03664c0c"
 
 python_requirement(
     name="torch_manual",

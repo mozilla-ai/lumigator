@@ -19,7 +19,6 @@ crossplatform_pex(
     execution_mode="venv",
     include_requirements=True,
     include_sources=True,
-    include_tools=True,
     script="uvicorn",
     unparametrized_deps=[":backend_sources"],
 )

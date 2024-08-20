@@ -35,6 +35,7 @@ dependencies = [
     ## in pants.toml, pants will use the local version even without the local URI
     ## and things will break. make sure to clean it up before building; this is more a note for followups
     "loguru==0.7.2",
+    "mistralai==0.4.2",
     "mypy-boto3==1.34.105",
     "numpy<2.0.0, >=1.3.0",
     "pex>=2.8.0",
@@ -56,7 +57,7 @@ dependencies = [
     "torch",
 #    "torch==2.3.1,!=2.3.1+cu118,!=2.3.1+cu121; platform_system == 'darwin'",
 #    "torch[cuda]==2.3.1+cu118; platform_system == 'linux'",
-    "transformers>=4.1.0",
+    "transformers==4.41.2",
     "uvicorn[standard]==0.28.0",
     "websocket-client>=0.32.0,<1",
     "s3fs==2024.5.0",

@@ -78,6 +78,7 @@ python_requirements(
     ),
 )
 
+shell_sources(name="shell-scripts")
 
 file(
     name="py311_linux_pex_platform_tags",
@@ -97,8 +98,6 @@ files(
         "linux_cuda.lock",
     ],
 )
-
-shell_sources(name="lockfile_to_pip_format")
 
 
 def convert_lockfile_to_pip_targets(
@@ -127,7 +126,7 @@ def convert_lockfile_to_pip_targets(
         name="gen_requirements" + "_" + prefix,
         command=cmd,
         execution_dependencies=[
-            ":lockfile_to_pip_format",
+            ":shell-scripts",
             ":lockfiles",
             ":py311_linux_pex_platform_tags"
             if platform == "linux"

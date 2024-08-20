@@ -1,0 +1,52 @@
+# helm upgrade raycluster kuberay/ray-cluster --install --version 1.1.1 -f ray-cluster.yaml
+common:
+  containerEnv:
+    - name: HF_TOKEN # kubectl create secret generic hf-token --from-literal HF_TOKEN=value
+      valueFrom:
+        secretKeyRef:
+          name: hf-token
+          key: HF_TOKEN
+    # kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: oai-key
+          key: OPENAI_API_KEY
+    # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
+    - name: MISTRAL_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: mistral-key
+          key: MISTRAL_API_KEY
+image:
+  repository": "rayproject/ray-ml"
+  tag: "2.30.0-py311-gpu" # Needs to match ray version in lm-buddy
+head:
+  serviceAccountName: s3
+  rayStartParams:
+    object-store-memory: "200000000" # 200mb
+    num-cpus: 0 # Force ray to not do any jobs on the head node
+  resources:
+    limits:
+      #"nvidia.com/gpu": 1 # Required to use GPU.
+      memory: 16G # Defaults to 2GB
+      ephemeral-storage: 30Gi
+      cpu: 4 # Current nodes have 4 CPUs max
+    requests:
+      memory: 4G
+      cpu: 2
+
+worker:
+  replicas: 8
+  maxReplicas: 25 # TODO: Autoscaling https://docs.ray.io/en/latest/cluster/kubernetes/user-guides/configuring-autoscaling.html#kuberay-autoscaling-configurations
+  serviceAccountName: s3 # Matches kube service account with permissions to access s3
+  rayStartParams:
+    object-store-memory: "200000000" # 200mb
+  resources:
+    limits:
+      "nvidia.com/gpu": 1 # Required to use GPU.
+      memory: 16G # Defaults to 2GB
+      ephemeral-storage: 30Gi # Allow for model download
+      cpu: 3
+    requests:
+      memory: 13G # Nodes have 16GB ram, 13G allows worker to be scheduled given other pods on the node

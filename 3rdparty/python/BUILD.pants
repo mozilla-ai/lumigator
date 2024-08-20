@@ -24,21 +24,18 @@ python_requirement(
     modules=["_dummy_torch"],
     **parametrize(
         "linux_cuda",
-        requirements=["torch @ {}".format(TORCH_CUDA_WHEEL_URL)],
+        requirements=[f"torch @ {TORCH_CUDA_WHEEL_URL}"],
         resolve="linux_cuda",
     ),
     **parametrize(
         "linux_cpu",
-        requirements=["torch @ {}".format(TORCH_LINUX_CPU_WHEEL_URL)],
+        requirements=[f"torch @ {TORCH_LINUX_CPU_WHEEL_URL}"],
         resolve="linux_cpu",
     ),
     **parametrize(
         "darwin",
         requirements=[
-            "torch=={v},!={v}+cpu,!={v}+{cuda}".format(
-                cuda=CUDA_VERSION,
-                v=TORCH_VERSION,
-            ),
+            f"torch=={TORCH_VERSION},!={TORCH_VERSION}+cpu,!={TORCH_VERSION}+{CUDA_VERSION}",
         ],
         resolve="darwin",
     ),
@@ -81,7 +78,6 @@ python_requirements(
     ),
 )
 
-shell_sources(name="shell-scripts")
 
 file(
     name="py311_linux_pex_platform_tags",
@@ -102,6 +98,8 @@ files(
     ],
 )
 
+shell_sources(name="lockfile_to_pip_format")
+
 
 def convert_lockfile_to_pip_targets(
     platform, lockfile, tags, cuda=False, requirements=True, index_url=None
@@ -110,7 +108,7 @@ def convert_lockfile_to_pip_targets(
     index_url = "" if index_url == None else index_url
     requirements = "--requirements"
 
-    prefix = "python_{}".format(platform)
+    prefix = f"python_{platform}"
     if platform == "linux":
         if not cuda:
             index_url = "--extra-index-url https://download.pytorch.org/whl/cpu"
@@ -129,7 +127,7 @@ def convert_lockfile_to_pip_targets(
         name="gen_requirements" + "_" + prefix,
         command=cmd,
         execution_dependencies=[
-            ":shell-scripts",
+            ":lockfile_to_pip_format",
             ":lockfiles",
             ":py311_linux_pex_platform_tags"
             if platform == "linux"

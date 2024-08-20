@@ -2,6 +2,7 @@ from typing import Any
 
 from loguru import logger
 from pydantic import BaseModel
+from uuid import UUID
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
@@ -9,19 +10,20 @@ from mzai.summarizer.summarizer import SummarizerArgs
 
 
 class RayServeActorConfig(BaseModel):
-    num_cpus: float
+    num_cpus: float | None = None
     num_gpus: float | None = None
-    num_replicas: int | None = None
 
 
 class RayServeDeploymentConfig(BaseModel):
     name: str
+    num_replicas: int | None = None
     ray_actor_options: RayServeActorConfig
 
 
 class RayServeRuntimeConfig(BaseModel):
     pip: list[str]
     working_dir: str = None
+    env_vars: dict[str, str]
 
 
 class RayAppConfig(BaseModel):
@@ -38,7 +40,7 @@ class RayConfig(BaseModel):
 
 
 class SummarizerConfigLoader(ConfigLoader):
-    def __init__(self, num_gpus: float, num_replicas: int):
+    def __init__(self, num_cpus: float, num_gpus: float, num_replicas: int):
         self.config = RayConfig(
             applications=[
                 RayAppConfig(
@@ -49,22 +51,23 @@ class SummarizerConfigLoader(ConfigLoader):
                         name="facebook/bart-large-cnn",
                         tokenizer="facebook/bart-large-cnn",
                         task="summarization",
-                        description="Text summarization model",
+                        description="",
                     ),
                     runtime_env=RayServeRuntimeConfig(
                         pip=[
-                            "transformers==4.38.0",
-                            "torch==2.1.2",
+                            "transformers==4.41.2",
+                            "torch==2.3.1",
                             "starlette==0.37.2",
                             "PyYAML==6.0.1",
                         ],
+                        env_vars={"CUDA_LAUNCH_BLOCKING": "1"},
                     ),
                     deployments=[
                         RayServeDeploymentConfig(
                             name="Summarizer",
                             num_replicas=num_replicas,
                             ray_actor_options=RayServeActorConfig(
-                                num_cpus=1.0, num_gpus=num_gpus, num_replicas=num_replicas
+                                num_cpus=num_cpus, num_gpus=num_gpus
                             ),
                         )
                     ],
@@ -78,6 +81,10 @@ class SummarizerConfigLoader(ConfigLoader):
         config = self.config
         name: str = config.applications[0].name
         return name
+
+    def set_deployment_description(self, uuid: UUID):
+        """set the description to the Lumigator UUID."""
+        self.config.applications[0].args.description = str(uuid)
 
     def get_deployment_description(self) -> str:
         config = self.config

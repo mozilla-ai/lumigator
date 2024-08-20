@@ -23,12 +23,29 @@ class BackendSettings(BaseSettings):
     S3_BUCKET: str = "lumigator-storage"
     S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
     S3_DATASETS_PREFIX: str = "datasets"
+    S3_EXPERIMENT_RESULTS_PREFIX: str = "experiments/results"
+    S3_EXPERIMENT_RESULTS_FILENAME: str = "{experiment_name}/{experiment_id}/eval_results.json"
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
     RAY_DASHBOARD_PORT: int = 8265
-    RAY_INTERNAL_HOST: str = "http://ray"
     RAY_SERVE_INFERENCE_PORT: int = 8000
+    # the following vars will be copied, if present, from Ray head to workers
+    RAY_WORKER_ENV_VARS: list[str] = [
+        "LOCAL_FSSPEC_S3_KEY",
+        "LOCAL_FSSPEC_S3_SECRET",
+        "LOCAL_FSSPEC_S3_ENDPOINT_URL",
+        "HF_TOKEN",
+        "OPENAI_API_KEY",
+        "MISTRAL_API_KEY",
+    ]
+    RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
+    RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
+
+    # Served models
+    OAI_API_URL: str = "https://api.openai.com/v1"
+    MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
+    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None

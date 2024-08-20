@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
 from starlette.requests import Request
-from transformers import AutoModelForSeq2SeqLM, pipeline
+from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
 
 logger = logging.getLogger("ray.serve")
 
@@ -26,16 +26,22 @@ class Summarizer:
             pretrained_model_name_or_path=name,
             trust_remote_code=True,
         )
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer, model_max_length=1024, truncate=True
+        )
         self.pipe = pipeline(
             task,
             model=model,
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             device=0 if torch.cuda.is_available() else -1,
         )
 
     def summarize(self, text: str) -> str:
         #  A list or a list of list of `dict` with `summary_text` and `summary_token_ids` as keys
-        model_output: list[dict[str, str]] = self.pipe(text, min_length=30)
+        # Setting max length of 1024 per bart context window size
+        model_output: list[dict[str, str]] = self.pipe(
+            text, min_length=30, max_length=1024, truncation=True, do_sample=False
+        )
 
         try:
             summary = model_output[0]["summary_text"]
@@ -52,8 +58,7 @@ class Summarizer:
         return {"result": summary}
 
 
-# def app(args: Dict[str, str]) -> Application:
 def app(args: SummarizerArgs) -> Application:
-    logger.info("Hello world!")
+    logger.info("Launching summarizer")
     logger.info(args)
-    return Summarizer.bind(args.name, args.tokenizer, args.task)  # args.description unused
+    return Summarizer.bind(args.name, args.tokenizer, args.task)

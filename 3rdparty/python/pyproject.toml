@@ -9,6 +9,23 @@ authors = [
     { name = "Imtihan Ahmed", email = "imtihan@mozilla.ai" },
 ]
 
+## local lm-buddy can be made with the following url spec.
+## You have to build the wheel manually and clean out the other wheels that
+## are built there - e.g.,
+#
+## pushd $WORKSPACE/lm-buddy && \
+#    # pip wheel . --wheel-dir=$WORKSPACE/wheelhouse  && \
+#    # cd $WORKSPACE/wheelhouse &&  \
+#    # mv lm_buddy-<VERSION>-py3-none-any.whl lm_buddy-<VERSION>-py3-none-any.bak && \
+#    # rm *.whl && mv lm_buddy-<VERSION>-py3-none-any.bak  lm_buddy-<VERSION>-py3-none-any.whl && \
+#    # popd
+## after that you can uncomment the following and put it in the `dependencies` map:
+## "lm-buddy[dev] @ $WHEELS_DIR/",
+
+## warning - if you're developing with a copy of this in your system under $WHEELS_DIR,
+## in pants.toml, pants will use the local version even without the local URI
+## and things will break. make sure to clean it up before building; this is more a note for followups
+
 # this has to be an array of pep 508 strings, not the map style
 dependencies = [
     "accelerate>=0.25.0",
@@ -18,26 +35,11 @@ dependencies = [
     "fastapi[all]==0.110.0",
     "httpx==0.27.0",
     "lm-buddy[dev]==0.13.0",
-    ## local lm-buddy can be made with the following url spec.
-    ## You have to build the wheel manually and clean out the other wheels that
-    ## are built there - e.g.,
-    #
-    ## pushd $WORKSPACE/lm-buddy && \
-    #    # pip wheel . --wheel-dir=$WORKSPACE/wheelhouse  && \
-    #    # cd $WORKSPACE/wheelhouse &&  \
-    #    # mv lm_buddy-<VERSION>-py3-none-any.whl lm_buddy-<VERSION>-py3-none-any.bak && \
-    #    # rm *.whl && mv lm_buddy-<VERSION>-py3-none-any.bak  lm_buddy-<VERSION>-py3-none-any.whl && \
-    #    # popd
-    ## after that you can uncomment the following:
-    ## "lm-buddy[dev] @ $WHEELS_DIR/",
-
-    ## warning - if you're developing with a copy of this in your system under $WHEELS_DIR,
-    ## in pants.toml, pants will use the local version even without the local URI
-    ## and things will break. make sure to clean it up before building; this is more a note for followups
     "loguru==0.7.2",
     "mistralai==0.4.2",
     "mypy-boto3==1.34.105",
     "numpy<2.0.0, >=1.3.0",
+    "openai==1.38.0",
     "pex>=2.8.0",
     "pre-commit",
     "psycopg2-binary==2.9.9",

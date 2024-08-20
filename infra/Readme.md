@@ -42,8 +42,6 @@ There are two main pulumi stacks in this folder:
 
 `Infra` - This stack is the baseline infra needed for Lumigator to run
 
-`App` - This stack is the app itself, it can be run every time a new code version is deployed.
-
 
 # Running Pulumi
 

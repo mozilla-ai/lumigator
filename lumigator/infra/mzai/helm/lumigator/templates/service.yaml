@@ -4,6 +4,10 @@ metadata:
   name: {{ include "lumigator.fullname" . }}
   labels:
     {{- include "lumigator.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -11,5 +15,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if .Values.service.https }}
+    - port: 443
+      targetPort: http
+      protocol: TCP
+      name: https
+    {{- end }}
   selector:
     {{- include "lumigator.selectorLabels" . | nindent 4 }}

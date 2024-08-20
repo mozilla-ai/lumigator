@@ -54,6 +54,15 @@ spec:
               value: {{ .Values.rayPort | quote }}
             - name: SUMMARIZER_WORK_DIR
               value: {{ .Values.summarizerWorkDir | quote }}
+            - name: RAY_WORKER_GPUS
+              value: {{ .Values.rayWorkerGPUs | quote }}
+              # kubectl create secret generic mistral-key --from-literal pragma: allowlist secret
+              # MISTRAL_API_KEY=<value>  pragma: allowlist secret
+            - name: MISTRAL_API_KEY  # pragma: allowlist secret
+              valueFrom:
+                secretKeyRef:
+                  name: mistral-key
+                  key: MISTRAL_API_KEY
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

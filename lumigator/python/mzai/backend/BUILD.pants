@@ -6,7 +6,6 @@ python_sources(
     ],
 )
 
-
 crossplatform_pex(
     name="backend_app",
     args=[

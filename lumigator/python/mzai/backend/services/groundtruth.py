@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import loguru
 import requests
 from fastapi import HTTPException, status
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
@@ -16,6 +15,8 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
+from mzai.backend.settings import settings
+from loguru import logger
 
 
 class GroundTruthService:
@@ -28,16 +29,15 @@ class GroundTruthService:
         self.ray_client = ray_serve_client
 
     def create_deployment(self, request: GroundTruthDeploymentCreate):
-        conf = SummarizerConfigLoader(num_gpus=request.num_gpus, num_replicas=request.num_replicas)
-        deployment_args = conf.get_config_dict()
+        conf = SummarizerConfigLoader(
+            num_cpus=request.num_cpus, num_gpus=request.num_gpus, num_replicas=request.num_replicas
+        )
         deployment_name = conf.get_deployment_name()
-        deployment_description = conf.get_deployment_description()
+        record = self.deployment_repo.create(name=deployment_name)
+        conf.set_deployment_description(record.id)
+        deployment_args = conf.get_config_dict()
 
         self.ray_client.deploy_applications(deployment_args)
-
-        record = self.deployment_repo.create(
-            name=deployment_name, description=deployment_description
-        )
 
         return GroundTruthDeploymentResponse.model_validate(record)
 
@@ -52,10 +52,12 @@ class GroundTruthService:
         )
 
     def run_inference(self, request: GroundTruthQueryRequest) -> GroundTruthDeploymentQueryResponse:
+        logger.info("Running model inference on ray ")
         try:
-            base_url = f"{settings.RAY_INTERNAL_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
+            base_url = f"http://{settings.RAY_HEAD_NODE_HOST}:{settings.RAY_SERVE_INFERENCE_PORT}"
             headers = {"Content-Type": "application/json"}
             response = requests.post(base_url, headers=headers, json={"text": [request.text]})
+            logger.info(f"Running model inference on ray @ {base_url}, {request.text} ")
             return GroundTruthDeploymentQueryResponse(deployment_response=response.json())
         except Exception as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e
@@ -68,4 +70,4 @@ class GroundTruthService:
 
     def delete_deployment(self, deployment_id: UUID) -> None:
         self.deployment_repo.delete(deployment_id)
-        return loguru.logger.info(f"{deployment_id} deleted")
+        return logger.info(f"{deployment_id} deleted")

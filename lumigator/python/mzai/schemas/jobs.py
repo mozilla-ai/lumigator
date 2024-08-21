@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 class JobType(str, Enum):
     EXPERIMENT = "experiment"
-    FINETUNING = "finetuning"
 
 
 class JobStatus(str, Enum):

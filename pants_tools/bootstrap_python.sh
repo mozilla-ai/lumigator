@@ -9,28 +9,28 @@ DARWIN="cpython-${PY_VERSION}+${TAG}-aarch64-apple-darwin-pgo+lto-full.tar.zst"
 REPOROOT=$(git rev-parse --show-toplevel)
 LOCAL_PYTHON_PATH="$REPOROOT/.python/python${PY_VERSION}"
 INTERPRETER="${LOCAL_PYTHON_PATH}/python/install/bin/python3"
+echo "cleaning previous installation at $LOCAL_PYTHON_PATH"
+rm -r "$LOCAL_PYTHON_PATH" || true # hack for make to have this  always return true.
 mkdir -p "$LOCAL_PYTHON_PATH"
 pushd "$LOCAL_PYTHON_PATH"
-echo "cleaning previous installation at $LOCAL_PYTHON_PATH"
-rm -r ./*python* || true  # hack for make to have this  always return true.
 
 arch=${1:-Darwin}
 if [[ $arch == "Darwin" ]]; then
-  echo "installing macos interpreter from $URL/$DARWIN"
-  wget -nv "$URL/$DARWIN"
-  tarbase=${DARWIN%.*}
-  zstd -d "$DARWIN"
-  tar xzf "${tarbase}"
-  rm cpython*
-  cd "$REPOROOT"
+	echo "installing macos interpreter from $URL/$DARWIN"
+	wget -nv "$URL/$DARWIN"
+	tarbase=${DARWIN%.*}
+	zstd -d "$DARWIN"
+	tar xzf "${tarbase}"
+	rm cpython*
+	cd "$REPOROOT"
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like\n" "$INTERPRETER"
 
-elif [[ $arch  == "GNU/Linux" ]]; then
-  echo "installing debian interpreter"
-  wget -nv "$URL/$DEBIAN"
-  tar -axf "$DEBIAN"
-  rm cpython* || true
+elif [[ $arch == "GNU/Linux" ]]; then
+	echo "installing debian interpreter"
+	wget -nv "$URL/$DEBIAN"
+	tar -axf "$DEBIAN"
+	rm cpython* || true
 	printf "interpreter is available at\n%s\n and is not on your PATH. use it explicitly if you'd like\n" "$INTERPRETER"
 else
-  echo "$arch was passed but isn't valid. exiting!"
+	echo "$arch was passed but isn't valid. exiting!"
 fi

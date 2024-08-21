@@ -1,10 +1,10 @@
-workdir = "/platform/infra/mzai/docker"
+workdir = "/lumigator/infra/mzai/docker"
 
 run_shell_command(
     name="docker_compose_config",
     command="/docker-compose.sh config",
     execution_dependencies=[
-        "platform/infra/mzai/docker:docker_compose_shell_scripts",
+        "lumigator/infra/mzai/docker:docker_compose_shell_scripts",
     ],
     workdir=workdir,
 )
@@ -13,9 +13,9 @@ run_shell_command(
     name="docker_compose_up",
     command="./docker-compose.sh up",
     execution_dependencies=[
-        "platform/infra/mzai/docker:docker_compose_shell_scripts",
-        "platform/python/mzai/backend:backend_image",
-        "platform/python/mzai/jobrunner:ray_jobrunner_image",
+        "lumigator/infra/mzai/docker:docker_compose_shell_scripts",
+        "lumigator/python/mzai/backend:backend_image",
+        "lumigator/python/mzai/jobrunner:ray_jobrunner_image",
     ],
     workdir=workdir,
 )
@@ -24,7 +24,7 @@ run_shell_command(
     name="docker_compose_down",
     command="./docker-compose.sh down",
     execution_dependencies=[
-        "platform/infra/mzai/docker:docker_compose_shell_scripts",
+        "lumigator/infra/mzai/docker:docker_compose_shell_scripts",
     ],
     workdir=workdir,
 )

@@ -1,4 +1,49 @@
 #!/bin/bash
+#####
+#  This file serves to pre-populate the shell pants uses with
+# env vars, etc.
+# Use and modify with caution - this is executed every time pants
+# is ran.
+#
+# Primarily it's used to make available a "REPOVERSION" env var with the latest
+# git hash and state for docker images
+# and to do platform/cuda specific setup.
+#####
 
 REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
 export REPOVERSION
+
+plat=$(uname -o)
+
+
+# echo "***bootstrapping pants***"
+
+###
+if [[ "$plat" == "Darwin" ]]; then
+ indexes="+[]"
+else
+  # these are required to work on virtualservers and likely other non-github action linux builds.
+  # docker for mac doesn't use them and
+  # pants.toml will complain that they don't exist there.
+  # this var isn't available to set via Environments either, and
+  # it'd be annoying to set this in env vars on the container or at runtime.
+
+  if [ -z ${CI+x} ]; then
+    # Github actions should always have $CI set to 'true'.
+    # if it's set, we're in CI, and we don't need these tools.
+    docker_tools="+['pass','docker-credential-pass']"
+    export PANTS_DOCKER_TOOLS="$docker_tools"
+  fi
+  if [[ $(command -v nvcc >/dev/null 2>&1) ]]; then
+    echo "Running on Linux and found nvcc; setting env var to use the linux_cuda python lockfile."
+    echo "if you cannot use cuda in pytorch/etc., there might be an issue with how pants sees the resolves."
+    PANTS_PYTHON_RESOLVES="linux_cuda"
+    export PANTS_PYTHON_RESOLVES
+    # TODO - dynamic cuda version
+    indexes="+['https://download.pytorch.org/whl/cuda118/']"
+  else
+    indexes="+['https://download.pytorch.org/whl/cpu']"
+  fi
+fi
+PANTS_PYTHON_REPOS_INDEXES=$indexes
+export PANTS_PYTHON_REPOS_INDEXES

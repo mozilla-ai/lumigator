@@ -1,19 +1,26 @@
+# syntax=docker/dockerfile:1.4
 FROM python:3.11.9-bookworm
+SHELL ["/bin/bash", "-c"]
 
 WORKDIR /tmp
 
 
-COPY ../3rdparty/python/python_default.lock .
-RUN pip install pex
-# note the following is needed to convert the pants lockfile to a pip-installable file.
-# this is intentionally breaking DRY at the moment and will be fixed in a followup PR that improves 3rdparty dep handling
-# overall
-# CPU is specified for the torch wheels so we don't get a platform error if doing this locally without cuda
-RUN sed '/^\/\//d' python_default.lock > requirements.json && \
-    pex3 lock export requirements.json > requirements.txt && \
-    pip install --require-hashes --no-deps --no-cache-dir --upgrade  --extra-index-url "https://download.pytorch.org/whl/cpu" -r requirements.txt
+COPY ../3rdparty/python/* .
+RUN pip install pex uv
+
+# uv pip is erroring out on a weird issue, saying it can't install numpy's version as such. normal pip works as expected.
+# leaving these here for changing after sorting it out
+RUN uv python install 3.11.9 --python-preference only-managed
+RUN	<<EOF
+    uv pip install \
+        --system \
+        --no-cache \
+        -r requirements_python_linux_cpu.txt \
+        --index-strategy=unsafe-best-match # required. see UV docs for details
+EOF
 
 
 WORKDIR /mzai
-CMD zip mzai/lumigator/python/mzai/backend/api/deployments mzai/lumigator/python/mzai/backend/api/deployments.zip
+ENV PYTHONPATH="/mzai"
+CMD zip lumigator/python/mzai/backend/api/deployments lumigator/python/mzai/backend/api/deployments.zip
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]

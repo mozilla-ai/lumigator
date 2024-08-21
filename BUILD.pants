@@ -1,0 +1,145 @@
+### Pants top-level build file.
+### used to set both Environments and Default options.
+
+
+###
+# here we set three basic parametrized groups for our
+# three main platform / gpu sets - darwin, linux, and linux with cuda.
+# consistency across these names helps pants resolve the deps correctly,
+# as `parametrize sets up a generated target for a given source like
+# <path>:app_pex_binary -> <path>:app_pex_binary@parametrize=<linux_cuda|linux_cpu|darwin
+# the `resolve` field is specific to python targets - it's the lockfile for a given set of deps.
+#
+# this is _NOT_ optimal code and would love to sort out how to do more like ParamGroup(...) defined here to make the
+# defaults settings a lot cleaner.
+
+## Note that also this _has_ to be repeated from the `parametrize_platforms.py` file.
+# Pants Macros are *not* available when setting up Environment targets.
+# this code is explicitly copied into here for consistency.
+
+
+class ParameterGroup:
+    def __init__(self, name, resolve, environment, complete_platforms):
+        self.name = name
+        self.resolve = resolve
+        self.environment = environment
+        self.complete_platforms = complete_platforms
+
+    def pex(self):
+        pex_kwargs: dict = {
+            "resolve": self.resolve,
+            "environment": self.environment,
+            "complete_platforms": self.complete_platforms,
+        }
+        return parametrize(self.name, **pex_kwargs)
+
+    def python_sources(self):
+        py_kwargs: dict = {"resolve": self.resolve}
+        return parametrize(self.name, **py_kwargs)
+
+    def python_tests(self):
+        pytest_kwargs: dict = {"resolve": self.resolve, "environment": self.environment}
+        return parametrize(self.name, **pytest_kwargs)
+
+
+LINUX_CUDA = ParameterGroup(
+    name="linux_cuda",
+    resolve="linux_cuda",
+    environment="local_linux",
+    complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
+)
+LINUX_CPU = ParameterGroup(
+    name="linux_cpu",
+    resolve="linux_cpu",
+    environment="local_linux",
+    complete_platforms=["//3rdparty/python:py311_linux_pex_platform_tags"],
+)
+DARWIN = ParameterGroup(
+    name="darwin",
+    resolve="darwin",
+    environment="local_darwin",
+    complete_platforms=["//3rdparty/python:py311_macos_14_pex_platform_tags"],
+)
+
+p_groups = (LINUX_CUDA, LINUX_CPU, DARWIN)
+
+LOCAL_LINUX = "local_linux"
+
+### Actually set the defaults below.
+__defaults__(
+    {
+        docker_image: dict(build_platform=["linux/amd64"]),
+        (python_sources, python_source): {
+            **LINUX_CUDA.python_sources(),
+            **LINUX_CPU.python_sources(),
+            **DARWIN.python_sources(),
+        },
+        (python_test, python_tests): {
+            **LINUX_CUDA.python_tests(),
+            **LINUX_CPU.python_tests(),
+            **DARWIN.python_tests(),
+        },
+        (pex_binary, pex_binaries): {
+            **LINUX_CUDA.pex(),
+            **LINUX_CPU.pex(),
+            **DARWIN.pex(),
+        },
+    },
+)
+
+
+# The environments defined below allow pants to
+# run platform-specific settings - including custom docker containers for envs
+# the resolve fo
+local_environment(
+    # just in case anyone does work on a linux box natively or in a remote container
+    # note that selecting CUDA here is going to be annoying. :(
+    name="local_linux",
+    compatible_platforms=["linux_x86_64"],
+    subprocess_environment_env_vars=[
+        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.resolve}"
+    ],  # pragma: allowlist secret
+    # want to move this to `docker_linux` when that is available - blocked by a bug with testcontainers.
+    fallback_environment="local_darwin",
+    # should fall back to docker if requested on another arch
+    docker_env_vars=["DOCKER_HOST"],
+)
+
+local_environment(
+    name="local_darwin",
+    compatible_platforms=["macos_arm64"],
+    # expected - auto paramaterized targets for darwin/linux should get ignored on noncompatible platforms.
+    fallback_environment="local_linux",
+    subprocess_environment_env_vars=[f"PANTS_PYTHON_RESOLVES={DARWIN.resolve}"],
+)
+
+# these basically don't work for us yet
+# there's a conflict with testcontainers
+# and we either have to mount the docker socket file to it to allow a
+# docker-in-docker approach for building while on macos
+# or do a socat workaround to make the docker daemon accessible
+# in the container here to then run testcontainers
+docker_environment(
+    name="docker_linux_cpu",
+    docker_env_vars=[
+        f"PANTS_PYTHON_RESOLVES={LINUX_CPU.resolve}",
+        "DOCKER_HOST=tcp://docker:2375",
+        "REPOVERSION=%(env.REPOVERSION)s",
+        "DOCKER_BUILDKIT=1",
+        "DOCKER_CONFIG=%(homedir)s/.docker",
+    ],  # pragma: allowlist secret
+    image="mzdotai/golden:base_latest",
+    platform="linux_x86_64",
+    python_bootstrap_search_path=["<PATH>"],
+)
+
+docker_environment(
+    name="docker_linux_cuda",
+    docker_env_vars=[
+        f"PANTS_PYTHON_RESOLVES={LINUX_CUDA.resolve}",
+        "DOCKER_HOST=tcp://docker:2375",
+    ],  # pragma: allowlist secret
+    image="mzdotai/golden:base_gpu_latest",
+    platform="linux_x86_64",
+    python_bootstrap_search_path=["<PATH>"],
+)

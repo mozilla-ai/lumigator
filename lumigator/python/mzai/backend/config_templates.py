@@ -43,7 +43,7 @@ causal_template = """{{
 
 oai_template = """{{
     "name": "{experiment_name}/{experiment_id}",
-    "model": {{ 
+    "model": {{
         "inference": {{
             "base_url": "{model_url}",
             "engine": "{model_path}",

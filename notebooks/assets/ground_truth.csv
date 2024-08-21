@@ -1,0 +1,304 @@
+original,bart_response,mistral_response
+"Hello Mozillians and friends of Thunderbird,
+
+The next Thunderbird Council election is coming up. As in previous years, people eligible to vote and to stand as candidates need to be on an electoral roll. Contributors are eligible to be an elector if they have contributed 10 or more hours per year of involvement in the Thunderbird project. To illustrate this, if a contributor first became involved three years ago then the expected contribution is at least 30 hours, if two years ago then at least 20 hours, and if one year ago or less then at least 10 hours. Contributors may self-nominate, and on request must submit examples that illustrate their level of involvement.
+
+Contribution can be any of the following:
+
+triaging bugs;
+fixing, or reviewing code changes;
+providing support on SUMO or other forums;
+localizing Thunderbird, related websites, or extensions;
+testing, writing, or reviewing add-ons;
+furthering the Thunderbird cause by constructive contributions to tb-planning;
+or public relations, including writing blog posts, posting on social media, artwork, etc.
+People working for Mozilla who dedicate time to Thunderbird are also eligible.
+
+This simple rule will spare us any complicated metric, such as “x number of patches submitted”, “x bugs submitted” or “x SUMO comments written”, etc. If we have missed a group of contributors, or if you are unsure if your contribution qualifies, please reach out to the Council (at council@thunderbird.net), or me personally.
+
+Since we already know some of the people who are dedicating time, their most precious asset, to Thunderbird, we have prepared a preliminary electoral roll based on previous years. The roll is available on GItHub. New additions are listed at the bottom under ""(new for 2022)"".
+We ask voters who were previously added to the electoral roll to check for themselves whether they still fulfill the criteria mentioned above and inform us if they are no longer contributing to the Thunderbird project at the required level or do not wish to participate in the election. We also kindly ask you to notify others who may be eligible to self-nominate if you notice someone is missing from the electoral roll.
+To reiterate, people who are not on the preliminary electoral roll can contact any member of the Council (at council@thunderbird.net), mentioning their contribution and asking to be added to the electoral roll. The idea is not to make it hard to be on the electoral roll.
+
+In general, the election process will work as in past years (as documented in the bylaws), follow-up emails will include more instructions on the exact timeline, but you will have until at least November 28th, 2022 to be added to the electoral roll.
+The election itself will be run by neutral 3rd parties: Peter Saint-Andre, with G. Matthew Rice helping to moderate the list.
+
+Thanks,
+Andrei Hajdukewycz
+Thunderbird Council Secretary",,"The Thunderbird Council election is approaching, and eligible voters and candidates must be on an electoral roll. Contribuitors who have contributed 10 or more hours annually to Thunderbird over the past three years are eligible to vote and stand as candidates. The Council has prepared a preliminary electoral roll based on previous years, which is available on GitHub. Anyone eligible but not on the roll can contact the Council to be added. Contribution can be in various forms, including triaging bugs, providing support, localization, testing, writing blog posts, and public relations. The election process will follow past years' bylaws, and a neutral third party will run the election."
+"Hi all, Well I think everything is in the title. We have an extension that shows pdf thumbs in the message pane (faster than openning them). We used to provide PDF.js. Is this still needed? Regards, We usually do not encourage add-ons to depend on files shipped with Thunderbird, because the file could be moved/renamed, which will break your add-on. Ship your own version, so your add-on always uses a known version and stays compatible, even if Thunderbird updates its internal file, which might include API changes which could break your add-on as well. John",,"The message is from a developer who has created an extension that displays thumbnails of PDF files in Thunderbird's message pane, allowing for faster viewing than opening the actual PDFs. Previously, they were using PDF.js for this functionality. The developer is asking if this dependency on a file shipped with Thunderbird is still necessary, as it could potentially cause issues if the file is moved or renamed in future Thunderbird updates. John, another developer, advises against depending on files shipped with Thunderbird due to the risk of compatibility issues. He suggests that the developer should instead ship their own version of the dependency to ensure compatibility even if Thunderbird's internal file is updated and potentially changes its API."
+"I recently added a beta release, version 7.0b1, of my extension, Clippings for Thunderbird, and selected the option to self-host it so that I can make it available to testers separately while regular users continue to see version 6.3.5, the current release version. However, the beta release is now incorrectly appearing in the Add-ons for Thunderbird public listing. URL to ATN listing: https://addons.thunderbird.net/en-US/thunderbird/addon/clippings-tb/. Thanks for the report, it is best to file an issue with the addons-server: https://github.com/thunderbird/addons-server I have not looked at it in detail, but self-hosted add-ons need an update_url entry in their manifest and that should prevent it from being accepted on ATN. Since we do not sign add-ons, self-hosted add-ons do not need to be submitted to ATN at all.My best-practice advice is:
+- remove the beta version from ATN,
+- create a dedicated branch/repo which holds the update information (either a branch in each add-on repo you want to self-host, or a single update-repo with the information for all your add-ons)
+- host the XPI files either as an ""beta"" asset in a ""github release"", or directly as a file in the repo (I think the asset is the better choice),
+- make sure that the manifest of your self-hosted XPI points to the correct update.json. John I've removed the beta version of my extension from ATN, and the listing for my extension now shows the current stable release. Thanks for your help!",,"The user shared that they released a beta version (7.0b1) of their Thunderbird extension, Clippings for Thunderbird, but wanted to make it available only to testers separately. They self-hosted the beta version to achieve this, while keeping the current stable version 6.3.5 on the Thunderbird Add-ons public listing for regular users. Unfortunately, the beta version ended up appearing on the public listing as well.
+
+The user was advised to file an issue with the addons-server, as self-hosted add-ons should not appear on the ATN listing if they do not have an update_url entry in their manifest. Since add-ons are not signated, they do not need to be submitted to ATN at all.
+
+The best practice advice provided was to:
+1. Remove the beta version from ATN.
+2. Create a dedicated branch or repo for update information, either for each add-on you want to self-host or in a single update-repo for all add-ons.
+3. Host XPI files as a ""beta"" asset in a GitHub release or directly as a file in the repo. The asset method is"
+"I think this is going to require some expertise from someone who knows how Thunderbird works internally, but I thought I would ask anyway.
+
+When you set mail.tabs.drawInTitlebar=true in the Config Editor, the OS-supplied titlebar -- with the window title and the minimize/maximize/restore/close buttons -- is hidden, and Thunderbird-supplied equivalents for the buttons are added instead.  This is great.
+
+Another thing that happens is that you can DRAG in the toolbox/toolbars at the top of the window to move the Thunderbird window around, as the titlebar is no longer available for this purpose.  This is also great.
+
+I have been trying to implement the same behavior for an extension I have been working on.  I can hide the OS-supplied titlebar and add my own buttons, and that is working well, but I cannot figure out how to make it so I can drag on my extension's toolbox/toolbars to make the windows for my extension's move.
+
+I seem to have isolated what triggers this behavior for Thunderbird's main window (and the message view and compose windows.)  Using the Developer Toolbox, I just add Attribute chromemargin=""0,2,2,2"" (or chromemargin with ANY values, actually) to the <html> tag in the HTML/XUL for the Thunderbird window.  It's like magic.  Add the chromemargin Attribute, and the titlebar disappears, and you can drag the window around using the toolbox/toolbars at the top of the window.  Remove the chromemargin Attribute and the titlebar re-appears and you CANNOT drag the window around using the toolbox/toolbars at the top of the window.
+
+This does not work for the windows for my extension.  Dragging on the toolbox/toolbars does nothing.
+
+I have looked to see what event listeners might be attached to the Toolbox/toolbars that would respond to mouse drags and I cannot see anything.  Perhaps it's something in the source code for the app itself?  Or some other value stored somewhere, some toolbox or toolbar ID, or CSS class, or attribute or something.  I just don't know.
+
+I have tried looking at the Thunderbird source code, and I understand it a bit, but not well enough to figure this out.
+
+If you have any knowledge of this, could you please give me some help?
+
+Many thanks in advance,
+---Mark
+Just in case anyone is interested in this, user morat provided the answer in this article on mozillaZine:
+
+http://forums.mozillazine.org/viewtopic.php?t=3121128&sid=d068573e2643604e638528cdb09a5a63",,"The user Mark is trying to replicate the behavior in Thunderbird where the OS-supplied titlebar is hidden and replaced with Thunderbird-supplied equivalents, allowing for dragging of the window using the toolbar at the top. This behavior is achieved by adding the 'chromemargin' attribute to the <html> tag in Thunderbird's HTML/XUL. However, this doesn't work for the windows in Mark's extension. Mark has looked at Thunderbird's source code but is having trouble figuring out the specific event listeners or values that would enable this drag behavior in their extension. User morat provided a solution in a MozillaZine forum post."
+"I'm a long time TB user, and programmer by trade, but have never done any TB or add-on coding.
+I'm intested to get an idea of if what I would like to develop as an extension is possible, as I don't know what the limitations of add-on capabilities are.
+My thought was to create a basic CRM - client relationship managment add-on.
+Please let me know if any of this is not possible with an add-on so that I'm not wasting my time coding until I hit a wall.
+
+New button on received email (like where delete/spam buttons are) for create folder - this would create a new mail folder under some designated existing folder. Prompt for Folder Name, and creates a mail filter which will store sent emails and incoming emails in the new folder based on domain name (or other entered text).
+If a matching config exists already for the received email (using the mail filter), the button would be to send this email there instead (like when done reviewing in inbox).
+Another button for schedule response - when clicked, would prompt for a date and title/desc (can schedule be in TB directly or utilize calendar features?). Once added and the date/time arrives, TB will pop up the text entered. ""Check back with client regarding..."" Most likely, an upcoming list of scheduled items could appear where the current 'task' list would be (when using the calendar in TB).
+
+So, that is the jist of it. Super basic way to manage when the user wants to respond/check back to a clients email. Probably more stuff later, but this would improve my process enough I would not need the hassle of an entirely different CRM software.
+
+Thanks, Wes
+Hi Wes,
+
+I have seen a few CRM add-ons passing through review, for example
+
+* https://addons.thunderbird.net/addon/rt-archive-emails-to-crm/
+* https://addons.thunderbird.net/addon/kundenmeister-mail-export/
+
+Those seem to work only with specific systems, but they might give an impression of what is possible.
+
+You can:
+* have a button in the message header area
+* you can create folders
+* you can prompt the user in popus or in the options page for configuration data
+* you cannot yet create a ""real"" email filter (one which shows up in Thunderbirds filters), but you can react on incoming email and do something with new mail
+* you can implement a reminder functionality, or use https://addons.thunderbird.net/addon/mailmindr/ (or cooperate with that add-on: add-ons can communicate with other add-ons if they implement a public API)
+
+Hope that helps,
+John",,"Wes is a long-time Thunderbird user and a programmer who is interested in developing a basic CRM add-on for Thunderbird. He wants to know the limitations of add-on capabilities before starting to code. He proposes two main features for the CRM add-on:
+
+1. A new button on received email that creates a new mail folder with a prompt for a folder name and creates a mail filter based on domain name or other entered text. If a matching configuration exists, the button sends the email to that folder instead.
+2. Another button for scheduling responses, which prompts for a date and title/description and schedules a response to be sent at that time. The scheduled items could appear where the current task list is in Thunderbird.
+
+John, a Thunderbird developer, responds to Wes, providing some insights into the capabilities of Thunderbird add-ons. He mentions that there are CRM add-ons available for Thunderbird, but they work only with specific systems. John confirms that it is possible to have a button in the message header area, create folders, and prompt the user for configuration data in popups or on an options page. However,"
+"I'm studying how to develop addons. So, I'm sorry if my question is noob.
+
+My code is here: https://github.com/gersonjferreira/Zulip-Thunderbird
+
+The extension adds an icon to open the Zulip team chat on a Thunderbird tab. The purpose is to concentrate all chat/email apps into a single window. It is a simple extension and it is working fine... but...
+
+Within the Zulip chats (same for Slack or other examples), there are external links, or links to PDF files, etc... when I left-click on these, the Thunderbird internal browser breaks and stays black. Probably because it cannot show the ""save as"" dialog or ""open with"", and so on...
+
+But I if right-click and select ""open in browser"", it works fine. It takes me to Firefox and opens the desired link, or downloads the PDF, and so on...
+
+Is there a way to fix this, so that the left-click takes me to Firefox? Or to make it all work within Thunderbird?
+
+PS: my extension is quite simple and I'm still learning a lot of details. Please feel free to give feedback and tips on what I should improve. I have no idea how many people would be interested in using it.
+
+Best regards,
+Gerson
+
+Hm,
+
+I do not know if it is related: Do all those ""broken"" a-tags have a target=""_blank"" attribute? It appears those do not work as expected in Thunderbird. Filed a bug for it:
+https://bugzilla.mozilla.org/show_bug.cgi?id=1905616
+
+The link handler of Thunderbird content tabs will always open links of the same site in the same Thunderbird tab. Links to other sites will open in the default browser.
+
+To change this behaviour, you can use a content script.  Add this to your manifest:
+
+""content_scripts"": [ { ""matches"": [""<all_urls>""], ""js"": [""content-script.js""] } ],
+
+You may limit the content script to a more strict match, if you know which pages you are going to use with your extension. In the content script define a global clickhandler:
+
+window.addEventListener(""click"", clickhandler);
+
+function clickhandler(event) {
+event.preventDefault();
+event.stopPropagation();
+
+const anchor = event.target.closest(""a"");
+if (!anchor) return;
+browser.windows.openDefaultBrowser(anchor.getAttribute('href'));
+}
+
+Does this help?
+
+John
+
+Yes, at the moment I confirm that all links that fail have target=""_blank"", so it seems related to the bug you are reporting.
+
+Regarding you suggestion, it sounds promising, but I have a busy day of work today. I'll test this changes later tonight and I'll reply here if it works.
+
+I've just tested your suggestion, and it helped me identify some details:
+
+First, indeed the links that need to be fixed are the ones with target=""_blank"" for sure, but not all of then. In zulip, there are links that start with /user_uploads, like /user_uploads/bla_bla.pdf, and these are the broken ones in my addon. To make these work, I need to add the Zulip prefix ""https://my_org.zulipchat.com/"" + ""/user_uploads/bla_bla.pdf"".
+
+To make this work, I had to split your suggestion into a background and a content-script code like this:
+// background.js
+browser.runtime.onMessage.addListener(function (message) {
+  prefix = browser.storage.sync.get('zulip_url');
+  prefix.then(function(result) {
+    let prefix = result.zulip_url;
+    href = message.data;
+    if (href.startsWith(""/user_uploads"")) {
+      href = prefix + href;
+    }
+    browser.windows.openDefaultBrowser(href);
+  });
+});
+and
+// content-script.js
+window.addEventListener(""click"", clickhandler);
+
+function clickhandler(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const anchor = event.target.closest(""a"");
+    if (!anchor) return;
+    browser.runtime.sendMessage({
+        data: anchor.getAttribute('href')
+    });
+};
+
+I'll try this for a couple of days to see if I spot other issues. If you have any suggestion on how I can improve this code, please let me know.
+
+Thanks for the help,
+Best regards,
+Gerson",,"Gerson is developing an addon for Thunderbird that allows users to open Zulip team chats in a new tab within Thunderbird rather than launching a separate browser window. While the addon is functioning well, there is an issue with external links or PDF files in Zulip chats. Clicking on these links within Thunderbird results in the internal browser breaking and displaying a black screen. However, if the user right-clicks and selects ""open in browser,"" the link opens properly in Firefox.
+
+John suggested addressing this issue by using a content script and adding the following code to the manifest:
+
+```json
+""content_scripts"": [
+  {
+    ""matches"": [""<all_urls>""],
+    ""js"": [""content-script.js""]
+  }
+],
+```
+
+In the content script, a global clickhandler function should be defined:
+
+```javascript
+window.addEventListener(""click"", clickhandler);
+
+function clickhandler(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const anchor = event.target.closest(""a"");
+    if (!anchor) return;"
+"My extension uses a third-party script which offers the option of using web workers during some phases of processing.    I would like to attempt to use this option since they may offer performance improvements; however, when constructing the Worker object a content security policy exception is generated to the effect of:
+
+Content-Security-Policy: The page’s settings blocked the loading of a resource at blob:moz-extension://95dccb93-c83d-4a14-a837-e4c30420784f/74bc237c-be9c-4ff4-b846-1a87ee995454 (“script-src”).
+
+I am guessing that a meta tag needs to be added in the popup page, but I am not sure of the exact content of the tag, assuming I am on the right track and any of this is permissible in the first place.
+
+The relevant documentation that I could locate is below.
+
+developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers#content_security_policy
+
+Thank you.
+Can you provide a link to the add-on, so we could have a more detailed look?
+
+John
+Here is a link to the repository:
+
+https://github.com/tmccoid-tech/extract-em
+
+I checked in a change that produces the error (main branch).
+
+The background on this is that I am switching from the JSZip library for producing .zip files to zip.js since the former was not reliably able to handle larger (~750 MB) output files.
+
+zip.js offers Web Workers for generating the .zip files, but it is not mandatory.  No error is produced if the ww option isn't used.
+
+If I am not mistaken, the error is incurred in the getWebWorker method of the code file zip.js (line 2276) where the Worker object is constructed.  It is difficult to trace though presumably due to async execution and the fact that this is not a trappable error.
+
+Please see the screenshot of the error message presented in the debugger:
+
+https://github.com/tmccoid-tech/extract-em/issues/5
+
+Thanks,
+Tom
+Please ignore this for the time being -- the developer of the zip library reached out to me with a possible solution.",,"The user is experiencing an issue with their Chrome extension, specifically with the use of web workers in a third-party script for performance improvements. The error originates from a Content Security Policy (CSP) block, preventing the loading of a resource from the extension's blob URL. The user suspects that adding a meta tag to the popup page may resolve the issue, but is unsure about the exact content.
+
+The user provides a link to their extension's repository and mentions switching from JSZip to zip.js for handling larger file outputs. The issue appears in the getWebWorker method of zip.js's code, while constructing the Worker object, though the exact cause remains challenging to trace due to asynchronous execution and non-trappable errors. The user is currently working on a potential solution provided by the developer of the zip library."
+"Notes:
+* FIXED indicates resolved in DAILY development builds in last 24 hours. May take a week or more to be fixed beta.   https://www.thunderbird.net/notes/beta lists issues definitely resolved in BETA.
+* A bug may change from FIXED to some other resolution in the time period, so this report might list bugs whose current resolution is something other than fixed.
+* Excludes bugs whose version field is 115 at the time this bug list was generated.
+* Includes bugs reported as version 128 and future versions, as these may also exist in beta.
+* PINNED 📌 posts at https://thunderbird.topicbox.com/groups/beta has links to more bug lists.
+* Report runs at 11am UTC and includes the following, but may be empty if no activity in the 24 hour period:
+** New bugs in last 24 hours
+** Resolved bugs in last 24 hours
+
+This search was scheduled by vseerror@fastmail.com.
+
+New bugs in last 24 hours
+ID	Type	Sev	Pri	Plt	Assignee	Status	Resolution	Summary
+1907113	defect	--	--	x86_64	ishikawa@yk.rim.or.jp	REOPENED	---	Many C-C TB xpcshell tests fail, Hit MOZ_CRASH(assertion `left != right` failed: src and dst must not alias ) at mozilla/netwerk/base/idna_glue/src/lib.rs:66
+1907115	defect	--	--	Unspecified	nobody@mozilla.org	NEW	---	Two Factor OAuth (for text and email) not working - Office365
+1907245	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	ExceptionCode: c0000005 (Access violation)
+1907248	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Sending format ""Only Plain Text"" should switch off HTML editor
+1907249	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Refresh Calendar drop-down items not rendered while editing remote calendars
+1907255	enhancement	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Allow calendar invitations to be encrypted
+1907262	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Scrolling hides date headers in Calendar Week view
+1907270	defect	S3	--	Desktop	nobody@mozilla.org	NEW	---	Cannot delete emails using the DEL button while word search mode is activated
+1907282	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	RNP failed to parse signature in certificate breaking OpenPGP support
+Resolved bugs in last 24 hours
+ID	Type	Sev	Pri	Plt	Assignee	Status	Resolution	Summary
+1906835	defect	--	--	Unspecified	geoff@thunderbird.net	RESOLVED	FIXED	nsMsgDBFolder backup database isn't closed if the normal database is already closed",,"The provided text appears to be a summary of new and resolved bug reports for Thunderbird Beta. Here's a summarized version:
+
+**New Bugs in Last 24 Hours**
+- ID 1907113: A defect in many C-C TB xpcshell tests causing an 'assertion' failure. Assigned to ishikawa@yk.rim.or.jp. Status is REOPENED.
+- ID 1907115: Two-Factor OAuth for text and email not working with Office365. Reported by nobody@mozilla.org. New issue.
+- ID 1907245: An exception code c0000005 (Access violation) occurred. Unspecified platform. Reported by nobody@mozilla.org. Unconfirmed.
+- ID 1907248: Sending format as ""Only Plain Text"" should switch off HTML editor, but it's not functioning as expected. Reported by nobody@mozilla.org. Unconfirmed.
+- ID 1907249: Items in"
+"So, I have a content script that I'm writing, but calls to console.log() do not appear on the debug console launched with the inspect button. Messages from the background script and a popup.js I registered via the manifest appear fine. If it matters, the script is a message display script that is invoked by injecting the script the same way it is done in the message-content-script example - not via manifest. Do I need to set something in the debug console or manifest to see these messages?
+The script has registered an onMessage listener, but on sending a message from the background script I get ""Error: Could not establish connection. Receiving end does not exist"" thrown form the sending (background) code. The script definitely runs when I select the message, as I can see the redboxed text that was used in the message-content-script example. I just can't get it to react to a message form the background. I understand that the script will be sleeping/inactive normally, but shouldn't it wake on receipt of an onMessage? Is it even possible to listen to messages from the background in a content script? Or should I be injecting the code freshly somehow?",,"It seems like you're having trouble with a content script that's not receiving messages from a background script. Here's a summary of your situation:
+
+1. You're writing a content script that uses console.log(), but the messages aren't showing up in the debug console when you use the inspect button.
+2. Messages from the background script and a popup.js registered via the manifest are working fine.
+3. You're using the same injection method as in the message-content-script example.
+4. You've registered an onMessage listener in the content script, but when you send a message from the background script, you're getting an ""Error: Could not establish connection. Receiving end does not exist.""
+5. The script does run when you select the message, as you can see the red-boxed text used in the message-content-script example.
+6. You're unsure if you need to set something in the debug console or manifest, or if there's a problem with the script listening to messages from the background.
+7. You're wondering if it's possible to listen to messages from the background in a content script, or"
+"the Thunderbird team is preparing the next big release: Thunderbird 128 ESR. Now is a good time to check if your add-ons are compatible. Thunderbird 128 is currently being shipped through the beta release channel. If you have not already installed Thunderbird Beta, you can get it from Thunderbird's download page [1]: Select the desired language, your operating system, and switch the ""release channel"" selection to ""Beta"".
+
+A list of known required changes to make add-ons compatible with Thunderbird 128 can be found on developer.thunderbird.net [2]. These changes mostly affect Experiment add-ons, which directly interact with Thunderbird code. WebExtensions usually do not need updates, but the add-ons team had to introduce the messagesUpdate permission, and browser.messages.update() will stop working, if the new permission has not been requested.
+Another notably change is the official support of Manifest Version 3 in Thunderbird 128. The add-ons team removed deprecated elements and made additional changes to resolve inconsistencies in the APIs. The full list of changes can be found on webextension-api.thunderbird.net [3].
+
+Starting with Thunderbird 128, the API documentation on webextension-api.thunderbird.net [4] not only includes the WebExtension APIs added by Thunderbird, but also those inherited from Firefox (Thunderbird and Firefox share a significant amount of code). We are listing only methods, which are actually supported and working.
+
+Do not hesitate to reach out for help [5]. Looking forward to see your add-ons running in Thunderbird 128!
+
+John
+
+
+[1] : https://www.thunderbird.net/thunderbird/all/
+[2] : https://developer.thunderbird.net/add-ons/updating/tb128
+[3] : https://webextension-api.thunderbird.net/en/128-esr-mv3/changes/esr128.html
+[4] : https://webextension-api.thunderbird.net/en/stable/
+[5] : https://developer.thunderbird.net/add-ons/community",,"Thunderbird is preparing to release Thunderbird 128 ESR, and developers should check the compatibility of their add-ons. The new version is currently available in the beta release channel on Thunderbird's download page. Compatibility changes primarily affect Experiment add-ons, with changes to the MessagesUpdate permission and support for Manifest Version 3. The full list of updates can be found on webextension-api.thunderbird.net. Thunderbird's API documentation now includes WebExtension APIs from both Thunderbird and Firefox. Developers are encouraged to consult the documentation and reach out for assistance as needed."

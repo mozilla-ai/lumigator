@@ -56,6 +56,7 @@ spec:
               value: {{ .Values.summarizerWorkDir | quote }}
             - name: RAY_WORKER_GPUS
               value: {{ .Values.rayWorkerGPUs | quote }}
+              # pragma: allowlist-nextline secret
             - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
               valueFrom:
                 secretKeyRef:

@@ -1,13 +1,6 @@
 # this file is only for overrides during CI. pants will primarily process
 # from the normal `pants.toml` file.
 
-[python-bootstrap]
-search_path = [
-  "%(buildroot)s/.python/python3.11.9/python/install/bin",
-  "/opt/python/install/bin/",
-  "<PATH>",
-]
-
 [docker]
 use_buildx = true
 build_args = ["--output=type=docker", "HOME", "REPOVERSION"]

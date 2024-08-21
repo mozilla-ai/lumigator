@@ -6,12 +6,12 @@ common:
         secretKeyRef:
           name: hf-token
           key: HF_TOKEN
-    - name: OPENAI_API_KEY # kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
+    - name: OPENAI_API_KEY # pragma: allowlist secret kubectl create secret generic oai-key --from-literal OPENAI_API_KEY=value
       valueFrom:
         secretKeyRef:
           name: oai-key
           key: OPENAI_API_KEY
-    - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
+    - name: MISTRAL_API_KEY # pragma: allowlist secret kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
       valueFrom:
         secretKeyRef:
           name: mistral-key

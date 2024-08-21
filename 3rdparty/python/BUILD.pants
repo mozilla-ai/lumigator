@@ -108,6 +108,7 @@ def convert_lockfile_to_pip_targets(
     if platform == "linux":
         if not cuda:
             index_url = "--extra-index-url https://download.pytorch.org/whl/cpu"
+            prefix = prefix + "_cpu"
         if cuda:
             prefix = prefix + "_cuda"
     if not requirements:

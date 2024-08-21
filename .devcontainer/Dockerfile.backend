@@ -12,13 +12,10 @@ RUN pip install pex uv
 # leaving these here for changing after sorting it out
 RUN uv python install 3.11.9 --python-preference only-managed
 RUN	<<EOF
-    echo "torch==2.3.0+cpu" > tmp_overrides.txt
     uv pip install \
         --system \
         --no-cache \
-        -r pyproject.toml \
-        --extra-index-url https://download.pytorch.org/whl/cpu \
-        --override tmp_overrides.txt \
+        -r requirements_python_linux_cpu.txt \
         --index-strategy=unsafe-best-match # required. see UV docs for details
 EOF
 

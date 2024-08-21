@@ -1,13 +1,7 @@
 [project]
-name = "3rdparty-python-dependencies"
+name = "lumigator-3rdparty-python-dependencies"
 version = "0.0.1"
-requires-python = ">=3.11.0"
-authors = [
-    { name = "Aaron Gonzales", email = "aaron@mozilla.ai" },
-    { name = "Vicki Boykis", email = "vicki@mozilla.ai" },
-    { name = "Kyle White", email = "kyle@mozilla.ai" },
-    { name = "Imtihan Ahmed", email = "imtihan@mozilla.ai" },
-]
+requires-python = "==3.11.9"
 
 ## local lm-buddy can be made with the following url spec.
 ## You have to build the wheel manually and clean out the other wheels that
@@ -43,7 +37,7 @@ dependencies = [
     "pex>=2.8.0",
     "pre-commit",
     "psycopg2-binary==2.9.9",
-    "pydantic==2.6.4",
+    "pydantic>=2.8.0",
     "pydantic-settings==2.2.1",
     "pytest!=8.1.*,>6",
     "pytest-cov",

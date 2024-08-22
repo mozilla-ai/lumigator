@@ -1,3 +1,20 @@
+###
+# here we set three basic parametrized groups for our
+# three main platform / gpu sets - darwin, linux, and linux with cuda.
+# consistency across these names helps pants resolve the deps correctly,
+# as `parametrize sets up a generated target for a given source like
+# <path>:app_pex_binary -> <path>:app_pex_binary@parametrize=<linux_cuda|linux_cpu|darwin
+# the `resolve` field is specific to python targets - it's the lockfile for a given set of deps.
+#
+# this is _NOT_ optimal code and would love to sort out how to do more like ParamGroup(...) defined here to make the
+# defaults settings a lot cleaner.
+
+## Note that also this _has_ to be partially repeated from the root `BUILD.pants` file.
+# Pants Macros are *not* available when setting up Environment targets.
+# that code is explicitly copied into here for consistency, and hopefully a more elegant
+# solution can be made in the future.
+
+
 class ParameterGroup:
     def __init__(self, name, resolve, environment, complete_platforms):
         self.name = name
@@ -46,10 +63,14 @@ p_groups = (LINUX_CUDA, LINUX_CPU, DARWIN)
 LOCAL_LINUX = "local_linux"
 
 
+def merge_dicts(dict1, dict2):
+    return {**dict1, **dict2}
+
+
 def crossplatform_pex(unparametrized_deps: list = None, group_names=None, **kwargs):
     """Parmetrizes the pex binary deps according to the three platforms we
     might want to build for. By default, explicit deps are not parametrized automatically and
-    must be manually done for now.
+    must be handled like this to make the parametrization work correctly.
     """
     if group_names is None:
         groups = p_groups
@@ -76,12 +97,11 @@ def crossplatform_pex(unparametrized_deps: list = None, group_names=None, **kwar
             )
         )
 
-    merge = lambda x, y: {**x, **y}
     d = {}
     for dict_ in pgs:
-        d = merge(d, dict_)
+        d = merge_dicts(d, dict_)
 
-    d = merge({"name": _name}, d)
-    d = merge(d, kwargs)
+    d = merge_dicts({"name": _name}, d)
+    d = merge_dicts(d, kwargs)
 
     pex_binary(**d)

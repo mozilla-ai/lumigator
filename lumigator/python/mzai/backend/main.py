@@ -24,10 +24,6 @@ def create_app(engine: Engine) -> FastAPI:
 
     app = FastAPI(title="Lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
 
-    app.mount(
-        "/", StaticFiles(directory=str(Path(__file__).parent / "static"), html=True), name="static"
-    )
-
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()
     logger.add(
@@ -45,6 +41,11 @@ def create_app(engine: Engine) -> FastAPI:
     )
 
     app.include_router(api_router)
+
+    @app.get("/")
+    def get_root():
+        return {"Hello": "Lumigator!🐊"}
+
     return app
 
 

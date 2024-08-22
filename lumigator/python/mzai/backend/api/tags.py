@@ -7,6 +7,7 @@ class Tags(str, Enum):
     EXPERIMENTS = "experiments"
     GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
+    ROOT = "root"
 
 
 TAGS_METADATA = [

@@ -1,0 +1,13 @@
+model_name,RAM_MiB,RAM_GB
+hf://facebook/bart-large-cnn,2709MiB,2.71
+hf://mikeadimech/longformer-qmsum-meeting-summarization,2027MiB,2.03
+hf://mrm8488/t5-base-finetuned-summarize-news,3085MiB,3.09
+hf://Falconsai/text_summarization,1423MiB,1.43
+hf://mistralai/Mistral-7B-Instruct-v0.3,30645MiB,30.65
+mistral://open-mistral-7b,30645MiB,30.65
+llamafile://TheBloke/Mistral-7B-Instruct-v0.2-GGUF,5382MiB,7.63
+hf://meta-llama/Meta-Llama-3-8B,34189MiB,34.19
+hf://microsoft/Phi-3-mini-4k-instruct,19455MiB,19.46
+oai://gpt-4o-mini,,
+oai://gpt-4-turbo,,
+oai://gpt-3.5-turbo-0125,,

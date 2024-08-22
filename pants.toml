@@ -120,4 +120,4 @@ address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
 default = false
 
 [pytest]
-args = ["-v"]
+args = ["-v", "--show-capture", "stderr"]

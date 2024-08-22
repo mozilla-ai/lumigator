@@ -123,7 +123,6 @@ local-up: 3rdparty/python/requirements_python_linux_cpu.txt
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
-	rm 3rdparty/python/requirements_python_linux_cpu.txt
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
@@ -166,9 +165,9 @@ clean-pants:
 clean-pants-cache: clean-pants
 	@echo 'removing the cache dir at $HOME/.cache/pants'
 	rm -rf $(HOME)/.cache/pants
-	# the following resets the pants daemon
+	@echo 'resetting the pants daemon:'
 	pants --no-pantsd --version
-	@echo 'if you see issues like:'
+	@echo 'removed the basic cache; if you see issues like:'
 	@echo '#############'
 	@echo "IntrinsicError: Could not identify a process to backtrack to for: Missing digest: Was not present in the local store"
 	@echo '#############'
@@ -187,7 +186,7 @@ clean-docker-images:
 
 clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-images
 
-clean-all: clean-more-pants clean-docker-buildcache clean-docker-containers
+clean-all: clean-pants-pants clean-docker-buildcache clean-docker-containers
 
 
 

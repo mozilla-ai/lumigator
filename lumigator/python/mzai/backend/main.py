@@ -11,8 +11,6 @@ from mzai.backend.records.base import BaseRecord
 from loguru import logger
 import sys
 import os
-from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
 
 def create_app(engine: Engine) -> FastAPI:

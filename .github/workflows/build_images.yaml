@@ -46,6 +46,7 @@ jobs:
           # gets full repo history
           fetch-depth: 0
 
+      # TODO: Remove this redundant fetch (seems to be required to get lint checks to pass in CI)
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v44

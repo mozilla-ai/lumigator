@@ -186,7 +186,7 @@ clean-docker-images:
 
 clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-images
 
-clean-all: clean-pants-pants clean-docker-buildcache clean-docker-containers
+clean-all: clean-pants-cache clean-docker-buildcache clean-docker-containers
 
 
 

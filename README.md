@@ -14,6 +14,7 @@ For VSCode users, activate the venv before opening your IDE; the `.env` file wil
 
 ```shell
 make bootstrap-dev-environment
+source mzaivenv/bin/activate
 ```
 
 Show targets:

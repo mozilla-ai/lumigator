@@ -39,6 +39,11 @@ def create_app(engine: Engine) -> FastAPI:
     )
 
     app.include_router(api_router)
+
+    @app.get("/")
+    def get_root():
+        return {"Hello": "Lumigator!🐊"}
+
     return app
 
 

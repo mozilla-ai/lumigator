@@ -14,6 +14,22 @@ TestContainers provides a simple interface for spinning up a Docker container ru
 as part of the testing lifecycle.This is configured in the `conftest.py` file
 that contains fixtures for the entire test suite.
 
+## Running Tests
+
+Tests run through pants. To see all available tests:
+
+```pants --filter-target-type=experimental_test_shell_command,helm_unittest_test,python_test,shunit2_test list ::```
+
+Running all tests:
+
+``pants test ::``
+
+Tests are parametrized through Pants. See more on parametrization in the [Pants guide.](/PANTS_GUIDE.md). Running a single test on Mac:
+`pants test <target>@parametrize=darwin`
+
+Example:
+``
+
 ## Test Settings
 
 The main settings for the backend application are defined in the
@@ -28,7 +44,8 @@ In cases where a test requires a different dependency than defined by the `Backe
 (e.g., for constructing a test client for some faked out service),
 a test dependency override can be specified in the `conftest.py` fixture.
 
-### TODO (MZPLATFORM-89)
+### Global Dependency Injection
+## TODO: Resolve
 
 Currently a global instance of this class is defined in the `mzai.backend.settings.settings` variable
 and imported throughout the application. This means that settings are read for the environment

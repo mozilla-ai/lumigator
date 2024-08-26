@@ -5,52 +5,29 @@ UNAME:= $(shell uname -o)
 PY_VERSION := 3.11.9
 CUDA_AVAILABLE := $(shell nvidia-smi &> /dev/null; echo $$?)
 PANTS_INSTALLED := $(shell pants --version &> /dev/null; echo $$?)
-PYTHON_INSTALLED := $(shell python --version &> /dev/null; echo $$?)
-UV_INSTALLED := $(shell command -v uv &> /dev/null; echo $$?)
-OVERRIDES :=
 PYTHON :=
-UV_BIN :=
 
-
-ifeq ($(UV_INSTALLED), 0)
-	UV_BIN := $(shell which uv)
-endif
-
-
-ifeq ($(PYTHON_INSTALLED), 0)
-	PY_INSTALLED_VERSION := $(shell python --version)
-	ifeq ($(PY_INSTALLED_VERSION), Python $(PY_VERSION))
-		PYTHON := $(shell which python)
-	endif
-endif
 
 ifndef PYTHON
 	ifeq ($(UNAME), GNU/Linux)
 		PYTHON_INSTALL_DIR:= /opt/python
 		# UV's installation path post /opt/python
-		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-3.11.9-linux-x86_64-gnu/bin/python3
+		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-x86_64-gnu/bin/python3
 		ifeq ($(CUDA_AVAILABLE), 0)
-			# unsafe-best match is required to make UV resolve
-			# more closely to PIP - it's confused by the multiple indexes
-			EXTRA_INDEX := --extra-index-url https://download.pytorch.org/whl/cu118 --index-strategy=unsafe-best-match
 			PARAMETRIZE := linux_cuda
 		else
-			EXTRA_INDEX =--extra-index-url https://download.pytorch.org/whl/cpu --index-strategy=unsafe-best-match
-			OVERRIDES = --override tmp_overrides.txt
 			PARAMETRIZE = linux_cpu
 		endif
 	else
 		PYTHON_INSTALL_DIR:=.python
-		PYTHON := .python/cpython-3.11.9-macos-aarch64-none/bin/python3
-		EXTRA_INDEX := --extra-index-url https://pypi.org/simple
+		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-macos-aarch64-none/bin/python3
 		PARAMETRIZE := darwin
 	endif
 export UV_PYTHON_INSTALL_DIR = $(PYTHON_INSTALL_DIR)
 endif
 
 
-
-VENVNAME:= mzaivenv
+VENV:= mzaivenv/bin/activate
 
 ######### developer (mostly) setup targets ##########
 print_my_env:
@@ -62,36 +39,13 @@ ifneq ($(PANTS_INSTALLED),0)
 endif
 
 
-install-uv:
-ifeq ($(UV_INSTALLED), 1)
-	curl -LsSf https://astral.sh/uv/install.sh | sh
-    $(eval UV_BIN := ~/.cargo/bin/uv)
-else
-	$(eval UV_BIN := $(shell which uv))
-endif
-
-
-$(PYTHON): install-uv
+$(PYTHON):
 	@echo "Installing python and configuring venv"
-	$(UV_BIN) python install $(PY_VERSION) --python-preference only-managed
+	bash pants_tools/bootstrap_python.sh
 
+$(VENV): $(PYTHON)
 
-$(VENVNAME): $(PYTHON)
-	$(UV_BIN) venv $(VENVNAME) --seed --python $(PYTHON)
-ifeq ($(UNAME), GNU/Linux)
-ifdef OVERRIDES
-	echo "torch==2.3.0+cpu" > tmp_overrides.txt
-endif
-endif
-	VIRTUAL_ENV=$$(pwd)/$(VENVNAME) $(UV_BIN) pip install \
-	-r 3rdparty/python/pyproject.toml $(OVERRIDES)  $(EXTRA_INDEX)
-ifdef OVERRIDES
-	rm tmp_overrides.txt
-endif
-
-
-bootstrap-python: $(PYTHON) $(VENVNAME)
-
+bootstrap-python: $(PYTHON) $(VENV)
 
 .env: $(PYTHON) install-pants
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide

@@ -9,10 +9,14 @@
 # this is _NOT_ optimal code and would love to sort out how to do more like ParamGroup(...) defined here to make the
 # defaults settings a lot cleaner.
 
-## Note that also this _has_ to be partially repeated from the root `BUILD.pants` file.
+# Note that also this _has_ to be partially repeated from the root `BUILD.pants` file.
 # Pants Macros are *not* available when setting up Environment targets.
 # that code is explicitly copied into here for consistency, and hopefully a more elegant
 # solution can be made in the future.
+
+
+def merge_dicts(dict1, dict2):
+    return {**dict1, **dict2}
 
 
 class ParameterGroup:
@@ -63,10 +67,6 @@ p_groups = (LINUX_CUDA, LINUX_CPU, DARWIN)
 LOCAL_LINUX = "local_linux"
 
 
-def merge_dicts(dict1, dict2):
-    return {**dict1, **dict2}
-
-
 def crossplatform_pex(unparametrized_deps: list = None, group_names=None, **kwargs):
     """Parmetrizes the pex binary deps according to the three platforms we
     might want to build for. By default, explicit deps are not parametrized automatically and
@@ -104,4 +104,5 @@ def crossplatform_pex(unparametrized_deps: list = None, group_names=None, **kwar
     d = merge_dicts({"name": _name}, d)
     d = merge_dicts(d, kwargs)
 
+    # return the `pex_binary` target which will be visible to pants
     pex_binary(**d)

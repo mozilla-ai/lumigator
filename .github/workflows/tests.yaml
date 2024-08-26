@@ -23,7 +23,7 @@ jobs:
         uses: tj-actions/changed-files@v44
         with:
           # gets full repo history
-          fetch-depth: 0
+          fetch_depth: 0
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main

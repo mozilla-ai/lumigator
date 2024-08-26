@@ -32,13 +32,13 @@ if [[ $PLAT == 'gnu/linux' ]]; then
 		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
-		UV_ARGS="--extra-index-url https://download.pytorch.org/whl/${TORCH_CUDA_VERSION} --index-strategy=unsafe-best-match --override tmp_overrides.txt"
+		UV_ARGS=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}" "--index-strategy=unsafe-best-match" "--override tmp_overrides.txt")
 	else
 		PYTHON_INSTALL_DIR=/opt/python
 		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 		echo "torch==2.4.0+cpu" >tmp_overrides.txt
-		UV_ARGS="--extra-index-url https://download.pytorch.org/whl/cpu --index-strategy=unsafe-best-match --override tmp_overrides.txt"
+		UV_ARGS=("--extra-index-url" "https://download.pytorch.org/whl/cpu" "--index-strategy=unsafe-best-match" "--override tmp_overrides.txt")
 	fi
 else
 	echo "Darwin setup"
@@ -46,7 +46,7 @@ else
 	PY_NAME=cpython-3.11.9-macos-aarch64-none
 	PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 	echo "torch==2.4.0" >tmp_overrides.txt
-	UV_ARGS="--strict"
+	UV_ARGS=("--strict")
 fi
 
 function install_uv() {
@@ -82,7 +82,8 @@ function install_venv() {
 		"$UV_BIN" venv "$VENVNAME" --seed --python "$PYTHON"
 		# shellcheck source=/dev/null
 		source "$VENVNAME/bin/activate"
-		"$UV_BIN" pip install -r 3rdparty/python/pyproject.toml "$UV_ARGS"
+		pip_cmd=("$UV_BIN" "pip" "install" "-r" "3rdparty/python/pyproject.toml" "${UV_ARGS[@]}")
+		"${pip_cmd[@]}"
 		rm tmp_overrides.txt || true
 	else
 		echo "found a directory where the venv is supposed to be - remove it if you want to install there."

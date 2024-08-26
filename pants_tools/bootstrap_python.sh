@@ -25,7 +25,7 @@ VENVNAME="mzaivenv"
 
 if [[ $PLAT == 'gnu/linux' ]]; then
 	echo "linux platform detected"
-	UV_ARGS=("--index-strategy=unsafe-best-match" "--strict" "--override" "tmp_overrides.txt")
+	UV_ARGS=("--index-strategy=unsafe-best-match" "--override" "tmp_overrides.txt")
 	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
 		echo "nvcc found; configuring with CUDA"
 		PYTHON_INSTALL_DIR=/opt/python
@@ -46,7 +46,7 @@ else
 	PY_NAME=cpython-3.11.9-macos-aarch64-none
 	PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 	echo "torch==2.4.0" >tmp_overrides.txt
-	UV_ARGS=("--strict")
+	UV_ARGS=("--index-strategy=unsafe-best-match")
 fi
 
 function install_uv() {
@@ -83,6 +83,8 @@ function install_venv() {
 		# shellcheck source=/dev/null
 		source "$VENVNAME/bin/activate"
 		pip_cmd=("$UV_BIN" "pip" "install" "-r" "3rdparty/python/pyproject.toml" "${UV_ARGS[@]}")
+		echo "running the following:"
+		echo "${pip_cmd[@]}"
 		"${pip_cmd[@]}"
 		rm tmp_overrides.txt || true
 	else

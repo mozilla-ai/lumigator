@@ -25,20 +25,20 @@ VENVNAME="mzaivenv"
 
 if [[ $PLAT == 'gnu/linux' ]]; then
 	echo "linux platform detected"
-
+	UV_ARGS=("--index-strategy=unsafe-best-match" "--strict" "--override" "tmp_overrides.txt")
 	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
 		echo "nvcc found; configuring with CUDA"
 		PYTHON_INSTALL_DIR=/opt/python
 		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
-		UV_ARGS=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}" "--index-strategy=unsafe-best-match" "--override tmp_overrides.txt")
+		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
 	else
 		PYTHON_INSTALL_DIR=/opt/python
 		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 		echo "torch==2.4.0+cpu" >tmp_overrides.txt
-		UV_ARGS=("--extra-index-url" "https://download.pytorch.org/whl/cpu" "--index-strategy=unsafe-best-match" "--override tmp_overrides.txt")
+		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
 	fi
 else
 	echo "Darwin setup"

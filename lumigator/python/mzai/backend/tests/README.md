@@ -27,8 +27,6 @@ Running all tests:
 Tests are parametrized through Pants. See more on parametrization in the [Pants guide.](/PANTS_GUIDE.md). Running a single test on Mac:
 `pants test <target>@parametrize=darwin`
 
-Example:
-``
 
 ## Test Settings
 

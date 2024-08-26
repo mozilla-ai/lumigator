@@ -12,7 +12,7 @@ ifndef PYTHON
 	ifeq ($(UNAME), GNU/Linux)
 		PYTHON_INSTALL_DIR:= /opt/python
 		# UV's installation path post /opt/python
-		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-3.11.9-linux-x86_64-gnu/bin/python3
+		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-x86_64-gnu/bin/python3
 		ifeq ($(CUDA_AVAILABLE), 0)
 			PARAMETRIZE := linux_cuda
 		else
@@ -20,7 +20,7 @@ ifndef PYTHON
 		endif
 	else
 		PYTHON_INSTALL_DIR:=.python
-		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-3.11.9-macos-aarch64-none/bin/python3
+		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-macos-aarch64-none/bin/python3
 		PARAMETRIZE := darwin
 	endif
 export UV_PYTHON_INSTALL_DIR = $(PYTHON_INSTALL_DIR)

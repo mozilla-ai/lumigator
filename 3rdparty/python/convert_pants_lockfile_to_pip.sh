@@ -114,7 +114,10 @@ assign_positional_args 1 "${_positionals[@]}"
 if command -v pex3 >/dev/null 2>&1; then
 	PEXBIN=pex3
 else
-	PEXBIN="$HOME/workspace/lumigator/.python/python3.11.9/python/install/bin/pex3"
+	echo "cannot find the pex binary; aborting. if you have ran bootstrap-python, "
+	echo "try activating the project's venv like:"
+	echo "source mzaivenv/bin/activate"
+	exit 1
 fi
 
 wheels="WHEELS_DIR|${HOME}/workspace/wheelhouse"

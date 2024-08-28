@@ -20,7 +20,8 @@ You can run `make local-down` to spin down the server. The code is automatically
 ```
 
 so if you configure your IDE to do so,
-you can develop right within the Docker container and have the application immediately reflect the changes.
+you can develop right within the Docker container and have the application immediately reflect the changes via
+`CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]`
 
 The main dockerfile is `Dockerfile.backend`, which ships the deployment code to the Ray cluster, and the application itself,
 which is bundled as a `pex` executable.

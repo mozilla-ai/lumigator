@@ -45,8 +45,6 @@ jobs:
           make bootstrap-python
 
       - name: Lint
-        env:
-          PANTS_CONFIG_FILES: pants_ci.toml
         run: pants --changed-since=origin/main lint
         continue-on-error: false
 

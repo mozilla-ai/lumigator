@@ -65,7 +65,8 @@ p_groups = (LINUX_CUDA, LINUX_CPU, DARWIN)
 
 LOCAL_LINUX = "local_linux"
 
-### Actually set the defaults below.
+# Actually set the defaults below.
+
 __defaults__(
     {
         docker_image: dict(build_platform=["linux/amd64"]),

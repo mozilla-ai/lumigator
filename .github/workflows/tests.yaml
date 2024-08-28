@@ -18,13 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
-        with:
-          # gets full repo history
-          fetch-depth: 0
-
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main
         with:
@@ -49,8 +42,9 @@ jobs:
           make bootstrap-python
 
       - name: Lint
-        run:
-          pants --changed-since=origin/main lint
+        env:
+          PANTS_CONFIG_FILES: pants_ci.toml
+        run: pants --changed-since=origin/main lint
         continue-on-error: false
 
       - name: Test

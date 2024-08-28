@@ -16,7 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+        with:
+          # gets full repo history
+          fetch-depth: 0
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main

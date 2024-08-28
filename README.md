@@ -56,7 +56,8 @@ It consists of:
 + Artifact management (S3 in the cloud, localstack locally )
 + A Postgres database to track platform-level tasks and dataset metadata
 
-You can build and install it locally using `docker-compose` or into a distributed environment using Kubernetes `Helm charts`.
+You can build and install Lumigator locally using `docker-compose` or into a distributed environment using Kubernetes `Helm charts`.
+For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md)
 
 The application is built using Pants.
 For more on Pants, read the [Pants guide](PANTS_GUIDE.md).
@@ -67,9 +68,9 @@ For more on Pants, read the [Pants guide](PANTS_GUIDE.md).
 
 Currently, developers are able to build the local project using docker-compose.
 
-1. git clone repo
+1. `git clone` repo
 2. install development environment and pants
-3. run dev setup to install docker-compose
+3. run dev setup (below) to install docker-compose version
 
 ### Install pants, tools, and dev environment.
 This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is

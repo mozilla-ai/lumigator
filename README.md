@@ -37,7 +37,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for full platform API walkt
 + BERTScore - Generates embeddings of ground truth input and model output and compares their cosine similarity
 
 
-> [!Info]
+> [!NOTE]
 >
 > Lumigator is in the early stages of development.
 > It is missing important features and documentation.

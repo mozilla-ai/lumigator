@@ -13,13 +13,13 @@
 REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
 export REPOVERSION
 
-plat=$(uname -o)
+PLAT=$(uname -o)
 
 
 # echo "***bootstrapping pants***"
 
 ###
-if [[ "$plat" == "Darwin" ]]; then
+if [[ "$PLAT" == "Darwin" ]]; then
  indexes="+[]"
 else
   # these are required to work on virtualservers and likely other non-github action linux builds.

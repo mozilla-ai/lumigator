@@ -38,6 +38,23 @@ spec:
           env:
             - name: S3_BUCKET
               value: {{ .Values.s3Bucket | quote }}
+            {{- if .Values.postgresql.enabled }}
+            # Questions: Can I use subchart template (name)
+            # Set Default in chart
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.auth.database }}
+            - name: POSTGRES_HOST
+              value: "{{ .Release.Name }}-postgresql"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: {{.Values.postgresql.auth.username}}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "" #releasename-postgresql
+                  key: postgres-password
+            {{- else }}
             - name: POSTGRES_DB
               value: {{ .Values.postgresDb | quote }}
             - name: POSTGRES_HOST
@@ -48,6 +65,7 @@ spec:
               value: {{ .Values.postgresUser | quote }}
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresPassword | quote }}
+            {{- end }}
             - name: RAY_HEAD_NODE_HOST
               value: {{ .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT
@@ -57,6 +75,7 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
+              # TODO Make Mistral Key optional
             - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
               valueFrom:
                 secretKeyRef:

@@ -85,8 +85,6 @@ docker_image(
         "backend_dev_{build_args.REPOVERSION}",
         "backend_dev",
     ],
-    registries=[
-        "@aws_ecr_temp",
-    ],
+    registries=[],
     repository="",
 )

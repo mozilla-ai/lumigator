@@ -110,8 +110,6 @@ jobs:
           echo "VIRTUAL_ENV=$(git rev-parse --show-toplevel)/mzaivenv" >> $GITHUB_ENV
 
       - name: Lint
-        env:
-          PANTS_CONFIG_FILES: pants_ci.toml
         run: pants --changed-since=origin/main lint
         continue-on-error: false
 
@@ -123,12 +121,6 @@ jobs:
         run: |
           export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
           make ci-publish-images
-
-      - name: Upload pants log
-        uses: actions/upload-artifact@v2
-        with:
-          name: pants-ci-log
-          path: .pants.d/pants.log
 
       - name: Upload docker info
         uses: actions/upload-artifact@v3

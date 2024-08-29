@@ -14,7 +14,7 @@ function check_if_installed() {
 }
 
 plat=$(uname -o)
-PLAT=${plat,,} # lowercase
+PLAT=${plat}
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)
@@ -23,7 +23,7 @@ TORCH_CUDA_VERSION="cu121"
 UV_INSTALLED=$(check_if_installed uv)
 VENVNAME="mzaivenv"
 
-if [[ $PLAT == 'gnu/linux' ]]; then
+if [[ $PLAT == 'GNU/Linux' ]]; then
 	echo "linux platform detected"
 	UV_ARGS=("--index-strategy=unsafe-best-match" "--override" "tmp_overrides.txt")
 	if [[ "$CUDA_AVAILABLE" != 0 ]]; then

@@ -35,12 +35,12 @@ In the near future, a new version of this chart will be released, which will be 
 | rayWorkerGPUs | `""` | Amount of GPUs that each Ray worker is going to use |
 | replicaCount | `1` | Lumigator API replicas |
 | resources | `{}` | Resources assigned to the Lumigator pod |
-| s3Bucket | `""` | URL of the S3 bucket |
+| s3Bucket | `""` | URL of the S3-compatible storage system |
 | securityContext | `{}` | Security settings applied to the Lumigator container |
 | service.annotations | `{}` | LoadBalancer annotations that Kubernetes will use for the service. This will configure load balancer if service.type is LoadBalancer | 
 | service.https | `false` | Enables https traffic for the service on port 443 |
 | service.port | `80` | Port for the http service |
 | service.type | `"ClusterIP"` | Type of the [Kubernetes service](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) to use |
 | serviceAccountName | `""` | ServiceAccount that the Pod will use to access the Kubernetes API and other resources |
-| summarizerWorkDir | `""` | S3 folder where the summarizer is located |
+| summarizerWorkDir | `""` | S3-compatible storage system folder where the summarizer is located |
 | tolerations | `[]` | Configurable Kubernetes [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) |

@@ -4,7 +4,7 @@
 
 This Helm chart is the official way to deploy the Lumigator application in cloud environments with Kubernetes
 
-At this moment this Helm chart only deploys Lumigator, we don't provide any default solution for 3rd party tools needed for the correct behavior of Lumigator (like S3 buckets, relational databases, etc).
+At this moment this Helm chart only deploys the Lumigator core REST API. We don't provide support for Ray, S3-compatible storage, or Postgres which are required for the full application to run. 
 
 > [!WARNING]  
 > Lumigator needs an existent: S3 bucket, a relational database and a Ray cluster in order to work as expected.

@@ -33,7 +33,7 @@ In the near future, a new version of this chart will be released, which will be 
 | rayAddress | `""` | URL of the Ray cluster |
 | rayPort | `""` | Port of the Ray cluster |
 | rayWorkerGPUs | `""` | Amount of GPUs that each Ray worker is going to use |
-| replicaCount | `1` | Lumigator replicas |
+| replicaCount | `1` | Lumigator API replicas |
 | resources | `{}` | Resources assigned to the Lumigator pod |
 | s3Bucket | `""` | URL of the S3 bucket |
 | securityContext | `{}` | Security settings applied to the Lumigator container |

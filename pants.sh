@@ -3,13 +3,25 @@
 # most targets will take a parametrize argument and this will ensure
 # that a command is used with a _single_ parametrization, not multiple.
 
-plat=$(uname -o)
-PLAT=${plat,,}  # lowercase
+function check_if_installed() {
+	tool=$1
+	test=$(command -v "$tool")
+	# return a 0 if this is not found; command output is nil if the tool isn't there
+	if [[ -z $test ]]; then
+		echo "0"
+	else
+		echo "$test"
+	fi
+}
 
-if [[ "$PLAT" == "darwin" ]]; then
+
+CUDA_AVAILABLE=$(check_if_installed nvcc)
+PLAT=$(uname -o)
+
+if [[ "$PLAT" == "Darwin" ]]; then
  PARAMETRIZE="darwin"
 else
-  if [[ $(command -v nvcc >/dev/null 2>&1) ]]; then
+  if [[ "$CUDA_AVAILABLE" != 0  ]]; then
     echo "Running on Linux and found nvcc; setting env var to use the linux_cuda python lockfile."
     echo "if you cannot use cuda in pytorch/etc., there might be an issue with how pants sees the resolves."
     PARAMETRIZE="linux_cuda"

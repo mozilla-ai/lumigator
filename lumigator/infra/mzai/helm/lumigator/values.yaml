@@ -8,12 +8,13 @@ s3Bucket: ""
 
 postgresDb: ""
 postgresHost: ""
-postgresPost: ""
+postgresPort: ""
 postgresUser: ""
 postgresPassword: ""
 
 rayAddress: ""
 rayPort: ""
+rayWorkerGPUs: ""
 
 serviceAccountName: ""
 
@@ -47,6 +48,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
+  https: false
 
 resources:
   {}

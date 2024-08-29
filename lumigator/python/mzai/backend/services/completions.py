@@ -27,7 +27,6 @@ class MistralCompletionService(CompletionService):
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
-        blah
         return response
 
     def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:

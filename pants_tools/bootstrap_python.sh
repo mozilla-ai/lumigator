@@ -23,6 +23,9 @@ TORCH_CUDA_VERSION="cu121"
 UV_INSTALLED=$(check_if_installed uv)
 VENVNAME="mzaivenv"
 
+echo "$PLAT"
+uname -o
+
 if [[ $PLAT == 'GNU/linux' ]]; then
 	echo "linux platform detected"
 	UV_ARGS=("--index-strategy=unsafe-best-match" "--override" "tmp_overrides.txt")

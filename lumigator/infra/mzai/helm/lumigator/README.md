@@ -25,6 +25,8 @@ In the near future, a new version of this chart will be released, which will be 
 | nodeSelector | `{}` | Configurable [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) so that you can target specific nodes |
 | podAnnotations | `{}` | Configurable [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) applied to all pods |
 | podSecurityContext | `{}` | Security settings applied to the pod |
+| mistralSecretName | `` | Name of secret which contains the Mistral key |
+| mistralSecretKey | `` | Name of the key inside the secret which contains the Mistral key |
 | postgresDb | `""` | Name of the database |
 | postgresHost | `""` | URL of the database |
 | postgresPassword | `""` | Password of the user used to connect to the database |

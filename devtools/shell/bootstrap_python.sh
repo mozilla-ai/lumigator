@@ -1,28 +1,25 @@
 #!/usr/bin/env bash
-set -eou pipefail
-
 # Requires curl.
+set -eou pipefail
+# note that this is mostly ran from the repo root, so this is a relative path from there.
+if [[ -f "devtools/shell/common.sh" ]]; then
+  source devtools/shell/common.sh
+elif [[ -f "common.sh" ]]; then
+  source common.sh
+else
+  echo "cannot find common.sh; exiting"
+  exit 1
+fi
 
-function check_if_installed() {
-	tool=$1
-	test=$(command -v "$tool")
-	if [[ -z $test ]]; then
-		echo "0"
-	else
-		echo "$test"
-	fi
-}
 
 PLAT=$(uname -o)
-
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
+# from common.sh
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)
-TORCH_VERSION="2.4.0"
-TORCH_CUDA_VERSION="cu121"
 UV_INSTALLED=$(check_if_installed uv)
 VENVNAME="mzaivenv"
-UV_ARGS=("--override" "tmp_overrides.txt")
+UV_ARGS=("--override" "tmp_overrides.txt" "--index-strategy=unsafe-best-match")
 
 if [[ $PLAT == 'Darwin' ]]; then
 	echo "Darwin setup"
@@ -35,6 +32,7 @@ else
 	PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
 		echo "nvcc found; configuring with CUDA"
+		# versions found in common.sh
 		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
 		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
 	else

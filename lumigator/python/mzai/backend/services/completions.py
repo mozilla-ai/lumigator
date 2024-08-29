@@ -1,11 +1,12 @@
+import os
+from abc import ABC, abstractmethod
+
 import mistralai.client
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
-from abc import ABC, abstractmethod
-import os
 
-from mzai.schemas.completions import CompletionResponse, CompletionRequest
+from mzai.schemas.completions import CompletionRequest, CompletionResponse
 
 
 class CompletionService(ABC):
@@ -26,6 +27,7 @@ class MistralCompletionService(CompletionService):
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
+        blah
         return response
 
     def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:

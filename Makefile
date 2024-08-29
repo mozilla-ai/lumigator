@@ -41,7 +41,7 @@ endif
 
 $(PYTHON):
 	@echo "Installing python and configuring venv"
-	bash pants_tools/bootstrap_python.sh
+	bash devtools/shell/bootstrap_python.sh
 
 $(VENV): $(PYTHON)
 

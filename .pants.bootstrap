@@ -9,16 +9,9 @@
 # git hash and state for docker images
 # and to do platform/cuda specific setup.
 #####
-
-REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
-export REPOVERSION
-
-PLAT=$(uname -o)
+. ./devtools/shell/common.sh
 
 
-# echo "***bootstrapping pants***"
-
-###
 if [[ "$PLAT" == "Darwin" ]]; then
  indexes="+[]"
 else
@@ -34,16 +27,19 @@ else
     docker_tools="+['pass','docker-credential-pass']"
     export PANTS_DOCKER_TOOLS="$docker_tools"
   fi
-  if [[ $(command -v nvcc >/dev/null 2>&1) ]]; then
+	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
     echo "Running on Linux and found nvcc; setting env var to use the linux_cuda python lockfile."
     echo "if you cannot use cuda in pytorch/etc., there might be an issue with how pants sees the resolves."
     PANTS_PYTHON_RESOLVES="linux_cuda"
     export PANTS_PYTHON_RESOLVES
     # TODO - dynamic cuda version
-    indexes="+['https://download.pytorch.org/whl/cuda118/']"
+    indexes="+['https://download.pytorch.org/whl/cuda${TORCH_CUDA_VERSION}']"
   else
     indexes="+['https://download.pytorch.org/whl/cpu']"
   fi
 fi
+
 PANTS_PYTHON_REPOS_INDEXES=$indexes
 export PANTS_PYTHON_REPOS_INDEXES
+REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
+export REPOVERSION

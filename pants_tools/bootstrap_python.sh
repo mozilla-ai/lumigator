@@ -14,7 +14,7 @@ function check_if_installed() {
 }
 
 plat=$(uname -o)
-PLAT=${plat,,} # lowercase
+PLAT=${plat} # lowercase
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)

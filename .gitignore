@@ -1,7 +1,6 @@
 
 # kind local config file
-./devtools/kind/kind-kubeconfig.yaml
-
+devtools/kind/kind-kubeconfig.yaml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

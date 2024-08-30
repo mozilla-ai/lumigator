@@ -1,6 +1,6 @@
 shell_source(name="kind", source="./kind_setup.sh")
 
-kind_conf_file = "kind-config.yaml"
+kind_conf_file = "kind-kubeconfig.yaml"
 
 run_shell_command(
     name="create_kind_cluster",

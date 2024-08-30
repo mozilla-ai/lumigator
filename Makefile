@@ -53,11 +53,11 @@ bootstrap-python: $(PYTHON) $(VENV)
 	$(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 
-kind-config.yaml:
-	pants run pants_tools:ensure_create_kindconf
+kind-kubeconfig.yaml:
+	pants run devtools/kind:gen_kind_kubeconfig
 
 
-bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env kind-config.yaml
+bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env kind-kubeconfig.yaml
 
 
 update-3rdparty-lockfiles:

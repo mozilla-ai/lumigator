@@ -131,12 +131,6 @@ jobs:
           export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
           make ci-publish-images
 
-      - name: Upload pants log
-        uses: actions/upload-artifact@v2
-        with:
-          name: pants-ci-log
-          path: .pants.d/pants.log
-
       - name: Upload docker info
         uses: actions/upload-artifact@v3
         with:

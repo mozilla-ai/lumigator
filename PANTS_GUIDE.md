@@ -1,4 +1,4 @@
-# How things are built and managed in this project
+# Building Lumigator with Pants
 
 [Pants](https://www.pantsbuild.org/) is a polyglot build system for monorepos. It uses a combination of special
 files (`BUILD`, or `BUILD.pants` in this repo) to denote meta instructions about what types of code you have and

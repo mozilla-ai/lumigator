@@ -10,6 +10,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for full platform API walkt
 
 + **Building Lumigator**
   + [Pants guide](PANTS_GUIDE.md)
+  +
 + **Using Lumigator:**
   + [Platform Examples](/notebooks/walkthrough.ipynb)
   + [Lumigator API](/lumigator/README.md)
@@ -67,23 +68,17 @@ It consists of:
 + Artifact management (S3 in the cloud, localstack locally )
 + A Postgres database to track platform-level tasks and dataset metadata
 
-You can build and install Lumigator locally using `docker-compose` or into a distributed environment using Kubernetes `Helm charts`.
-For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md)
-
-The application is built using Pants.
-For more on Pants, read the [Pants guide](PANTS_GUIDE.md).
-
 # Get Started
 
+You can build the local project using `pants` and `docker-compose`,  or into a distributed environment using Kubernetes `Helm charts`.
+
 ## Local Development Setup
-
-Currently, developers are able to build the local project using docker-compose.
-
 1. `git clone` repo
-2. install development environment and pants
-3. run dev setup (below) to install docker-compose version
+2. install development environment and pants. For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
+3. `make bootstrap-dev-environment`
+4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
 
-### Install pants, tools, and dev environment.
+### Dev Environment Details
 This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is
 handled by `uv`; pants maintains lockfiles for different platforms. Currently, only `python 3.11.9` is valid for this project; if a compatible interpreter
 is found `uv` will not download a standalone python interpreter for you.

@@ -25,3 +25,8 @@ you can develop right within the Docker container and have the application immed
 
 The main dockerfile is `Dockerfile.backend`, which ships the deployment code to the Ray cluster, and the application itself,
 which is bundled as a `pex` executable.
+
+In order to use the API-based vendor ground truth generation and evaluation, you'll need to add environment variable credentials for:
++ `MISTRAL_API_KEY`
++ `OPENAI_API_KEY`
+into the docker container.

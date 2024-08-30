@@ -8,21 +8,27 @@ See [example notebook](/notebooks/walkthrough.ipynb) for full platform API walkt
 
 ## Docs:
 
-+ **Building Lumigator**
-  + [Pants guide](PANTS_GUIDE.md)
-  +
++ **Installing Lumigator**
+  + Building
+    + [Pants guide](PANTS_GUIDE.md)
+  + Using/Testing
+    + [Kubernetes Helm Charts](lumigator/infra/mzai/helm/lumigator/README.md)
+    + [local install documentation.](/.devcontainer/README.md)
 + **Using Lumigator:**
   + [Platform Examples](/notebooks/walkthrough.ipynb)
   + [Lumigator API](/lumigator/README.md)
-  + [Lm-buddy](https://github.com/mozilla-ai/lm-buddy)
-  + Ray Serve Deployments
-+ [Evaluating Large Language Models](/EVALUATION_GUIDE.md)
+  + Offline Evaluations with [lm-buddy](https://github.com/mozilla-ai/lm-buddy)
+  + Online Evaluations with [Ray Serve Deployments](lumigator/python/mzai/summarizer/README.md)
++ **Understanding Evaluation**
+  + [Evaluating Large Language Models](/EVALUATION_GUIDE.md)
 
-## Available Machine Learning Tasks:
+## Platform Setup
+
+## Available Machine Learning Tasks
 
  - Summarization
 
-## Available Models for Online Ground Truth Generation:
+## Available Models for Online Ground Truth Generation
 
 | Model Type | Model                                        | via HuggingFace | via API |
 |------------|----------------------------------------------|-----------------|---------|
@@ -70,7 +76,7 @@ It consists of:
 
 # Get Started
 
-You can build the local project using `pants` and `docker-compose`,  or into a distributed environment using Kubernetes `Helm charts`.
+You can build the local project using `pants` and `docker-compose`,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
 
 ## Local Development Setup
 1. `git clone` repo

@@ -8,16 +8,20 @@ s3Bucket: ""
 
 postgresDb: ""
 postgresHost: ""
-postgresPost: ""
+postgresPort: ""
 postgresUser: ""
 postgresPassword: ""
 
 rayAddress: ""
 rayPort: ""
+rayWorkerGPUs: ""
 
 serviceAccountName: ""
 
 summarizerWorkDir: ""
+
+mistralSecretName: mistral-key
+mistralSecretKey: MISTRAL_API_KEY
 
 image:
   repository: ""
@@ -47,6 +51,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
+  https: false
 
 resources:
   {}

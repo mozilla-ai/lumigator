@@ -47,4 +47,4 @@ In the near future, a new version of this chart will be released, which will be 
 | summarizerWorkDir | `""` | S3-compatible storage system folder where the summarizer is located |
 | tolerations | `[]` | Configurable Kubernetes [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) |
 
-This list of variables was generated with `helm-docs` (only the list, not the descriptions)
+This list of variables was generated with [`helm-docs`](https://github.com/norwoodj/helm-docs) (only the list, not the descriptions)

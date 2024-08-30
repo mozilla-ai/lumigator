@@ -17,13 +17,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v44
         with:
           # gets full repo history
-          fetch_depth: 0
+          fetch-depth: 0
 
       - name: Initialize Pants
         uses: pantsbuild/actions/init-pants@main
@@ -49,9 +45,18 @@ jobs:
           make bootstrap-python
 
       - name: Lint
-        run:
-          pants --changed-since=origin/main lint
+        env:
+          PANTS_CONFIG_FILES: pants_ci.toml
+        run: |
+          if [ "$GITHUB_BASE_REF" ]; then
+            BASE_REF="origin/${GITHUB_BASE_REF}"
+            git fetch --no-tags --depth=1 origin "$GITHUB_BASE_REF"
+          else
+            BASE_REF="HEAD~1"
+          fi
+          pants lint --changed-since="$BASE_REF" lint
         continue-on-error: false
+
 
       - name: Test
         run:

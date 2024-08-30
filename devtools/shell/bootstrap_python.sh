@@ -1,53 +1,47 @@
 #!/usr/bin/env bash
-set -eou pipefail
-
 # Requires curl.
+set -eou pipefail
+# note that this is mostly ran from the repo root, so this is a relative path from there.
+if [[ -f "devtools/shell/common.sh" ]]; then
+  source devtools/shell/common.sh
+elif [[ -f "common.sh" ]]; then
+  source common.sh
+else
+  echo "cannot find common.sh; exiting"
+  exit 1
+fi
 
-function check_if_installed() {
-	tool=$1
-	test=$(command -v "$tool")
-	if [[ -z $test ]]; then
-		echo "0"
-	else
-		echo "$test"
-	fi
-}
 
-plat=$(uname -o)
-PLAT=${plat,,} # lowercase
+PLAT=$(uname -o)
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
+# from common.sh
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)
-TORCH_VERSION="2.4.0"
-TORCH_CUDA_VERSION="cu121"
 UV_INSTALLED=$(check_if_installed uv)
 VENVNAME="mzaivenv"
+UV_ARGS=("--override" "tmp_overrides.txt" "--index-strategy=unsafe-best-match")
 
-if [[ $PLAT == 'gnu/linux' ]]; then
-	echo "linux platform detected"
-	UV_ARGS=("--index-strategy=unsafe-best-match" "--override" "tmp_overrides.txt")
-	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
-		echo "nvcc found; configuring with CUDA"
-		PYTHON_INSTALL_DIR=/opt/python
-		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
-		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
-		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
-		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
-	else
-		PYTHON_INSTALL_DIR=/opt/python
-		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
-		PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
-		echo "torch==2.4.0+cpu" >tmp_overrides.txt
-		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
-	fi
-else
+if [[ $PLAT == 'Darwin' ]]; then
 	echo "Darwin setup"
 	PYTHON_INSTALL_DIR=.python
 	PY_NAME=cpython-3.11.9-macos-aarch64-none
-	PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
-	echo "torch==2.4.0" >tmp_overrides.txt
-	UV_ARGS=("--index-strategy=unsafe-best-match")
+	echo "torch==${TORCH_VERSION}" >tmp_overrides.txt
+else
+	echo "linux setup"
+	PYTHON_INSTALL_DIR=/opt/python
+	PY_NAME=cpython-3.11.9-linux-x86_64-gnu
+	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
+		echo "nvcc found; configuring with CUDA"
+		# versions found in common.sh
+		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
+		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
+	else
+		echo "torch==${TORCH_VERSION}+cpu" >tmp_overrides.txt
+		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
+	fi
 fi
+
+PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
 
 function install_uv() {
 	if [[ "$UV_INSTALLED" == 0 ]]; then
@@ -86,7 +80,9 @@ function install_venv() {
 		echo "running the following:"
 		echo "${pip_cmd[@]}"
 		"${pip_cmd[@]}"
-		rm tmp_overrides.txt || true
+		if [[ -f tmp_overrides.txt ]]; then
+			rm tmp_overrides.txt
+		fi
 	else
 		echo "found a directory where the venv is supposed to be - remove it if you want to install there."
 	fi

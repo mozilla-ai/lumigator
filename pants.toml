@@ -112,7 +112,7 @@ tools = [
 ]
 
 [docker.registries.dockerhub]
-address = "docker.io/mzdotai/lumigator"
+address = "docker.io/mzdotai"
 default = false
 
 [pytest]

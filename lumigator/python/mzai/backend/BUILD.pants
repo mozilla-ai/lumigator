@@ -86,7 +86,7 @@ docker_image(
         "backend_dev",
     ],
     registries=[
-        "@aws_ecr_temp",
+        "@dockerhub",
     ],
     repository="",
 )

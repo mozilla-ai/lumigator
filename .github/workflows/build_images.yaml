@@ -120,13 +120,9 @@ jobs:
           export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
           make ci-publish-images
 
-      - name : machine ls dist
-        working-directory : "."
-        run : "ls -la dist/lumigator.python.mzai.backend"
-
       - name: Upload docker info
         uses: actions/upload-artifact@v3
         with:
           name: docker-tag
-          path: dist/lumigator.python.mzai.backend/backend_image.docker-info.json
+          path: dist/lumigator.python.mzai.backend/lumigator.docker-info.json
           if-no-files-found: error

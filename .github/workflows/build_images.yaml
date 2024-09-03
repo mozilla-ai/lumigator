@@ -122,7 +122,7 @@ jobs:
 
       - name : machine ls dist
         working-directory : "."
-        run : "ls -la dist"
+        run : "ls -la dist/lumigator.python.mzai.backend"
 
       - name: Upload docker info
         uses: actions/upload-artifact@v3

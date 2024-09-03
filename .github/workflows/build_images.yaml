@@ -120,6 +120,10 @@ jobs:
           export PANTS_DOCKER_BUILD_NO_CACHE=TRUE
           make ci-publish-images
 
+      - name : machine ls $HOME
+        working-directory : "."
+        run : "ls -la $HOME"
+        
       - name: Upload docker info
         uses: actions/upload-artifact@v3
         with:

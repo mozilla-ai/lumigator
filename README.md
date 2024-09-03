@@ -13,7 +13,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for full platform API walkt
     + [Pants guide](PANTS_GUIDE.md)
   + Using/Testing
     + [Kubernetes Helm Charts](lumigator/infra/mzai/helm/lumigator/README.md)
-    + [local install documentation.](/.devcontainer/README.md)
+    + [Local install documentation](/.devcontainer/README.md)
 + **Using Lumigator:**
   + [Platform Examples](/notebooks/walkthrough.ipynb)
   + [Lumigator API](/lumigator/README.md)

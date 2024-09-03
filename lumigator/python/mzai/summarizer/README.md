@@ -10,13 +10,13 @@ the ability to systematically perform batch model inference for evaluation.
 
  Our initial architecture sketches for both lm-buddy and Lumigator included an inference server and evaluation library that hits the server for evaluation, which has since evolved into the evaluation job and deployment serving endpoints in Lumigator.
 
-As an evaluation platform, we will always need a way for users to test out models by typing some prompts in a test box for their use-cases, just to see if initial results are good before they move onto systematic evaluation. In evaluating large language models, people need an interactive way to work with the data, a hypothesis that’s been proven out by the success of chatbot apps like ChatGPT/Claude/Gemini, interactive local lools like Ollama, and LmSys Chatbot arena, which allows for visual inspection of prompts.
+As an evaluation platform, we will always need a way for users to test out models by typing some prompts in a test box for their use-cases, just to see if initial results are good before they move onto systematic evaluation. In evaluating large language models, people need an interactive way to work with the data, a hypothesis that’s been proven out by the success of chatbot apps like ChatGPT/Claude/Gemini, interactive local tools like Ollama, and LmSys Chatbot arena, which allows for visual inspection of prompts.
 
 ## How Does Ray Serve Work?
 
 Ray Serve allows you the ability to serve a model with code that gets sent using bundled Ray actors known as deployments. A Deployment is served usually on top of Kubernetes, on top of Ray, within a cluster.
 
-It’s made up of several Ray Actors, which are stateful services run and managed by the Ray control plane. The Controller acts as the entrypoint for the deployment , tied to a proxy on the head node of a Ray cluster, and forwards it to replicas which serve a request with an instantiated model. In order to serve a deployment, you can use the pattern of specifying a YAML-base config, which then gets passed when the deployment is instantiated.
+It’s made up of several Ray Actors, which are stateful services run and managed by the Ray control plane. The Controller acts as the entrypoint for the deployment, tied to a proxy on the head node of a Ray cluster, and forwards it to replicas which serve a request with an instantiated model. In order to serve a deployment, you can use the pattern of specifying a YAML-base config, which then gets passed when the deployment is instantiated.
 
 ## Specifics
 

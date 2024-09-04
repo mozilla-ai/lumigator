@@ -32,6 +32,10 @@ class BackendSettings(BaseSettings):
     RAY_SERVE_INFERENCE_PORT: int = 8000
     # the following vars will be copied, if present, from Ray head to workers
     RAY_WORKER_ENV_VARS: list[str] = [
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_ENDPOINT_URL",
+        "AWS_HOST",
         "LOCAL_FSSPEC_S3_KEY",
         "LOCAL_FSSPEC_S3_SECRET",
         "LOCAL_FSSPEC_S3_ENDPOINT_URL",

@@ -129,6 +129,10 @@ class ExperimentService:
             if env_var is not None:
                 runtime_env_vars[env_var_name] = env_var
 
+        runtime_env_vars[
+            "LD_PRELOAD"
+        ] = "/tmp/ray/session_latest/runtime_resources/pip/96de31139e548d3e8200d1e4b2575b77d5695312/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0"
+
         # set num_gpus per worker (zero if we are just hitting a service)
         if not request.model.startswith("hf://"):
             worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))

@@ -14,6 +14,9 @@ services:
       - POSTGRES_DB=lumigator
 
   localstack:
+    # if you want to enable S3 data persistence, use the following
+    # image and set LOCALSTACK_AUTH_TOKEN in your env
+    # image: localstack/localstack-pro:3.4.0
     image: localstack/localstack:3.4.0
     platform: linux/amd64
     ports:
@@ -21,10 +24,14 @@ services:
     environment:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - PERSISTENCE=1
+      - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
       # Sync localstack startup scripts
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
+      - localstack-data:/var/lib/localstack
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu-aarch64
@@ -94,3 +101,5 @@ services:
 
 volumes:
     postgres-data:
+
+    localstack-data:

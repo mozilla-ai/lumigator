@@ -80,9 +80,9 @@ It consists of:
 
 You can build the local project using `pants` and `docker-compose`,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
 
-## Local Development Setup
+## Local Development Setup (Currently targeting Mac)
 1. `git clone` repo
-2. install development environment and pants. For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
+2.  Install pants using homebrew `brew install pantsbuild/tap/pants` . For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
 3. `make bootstrap-dev-environment`
 4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
 
@@ -134,12 +134,3 @@ To do so:
 
 make sure to add the new lockfiles to the repo with your PR. You'll have to rebuild your dev environment if you haven't already.
 
-
-## Testing the development setup
-
-Using a container, run the following from the root of this repo:
-
-```bash
-make test-dev-setup
-
-```

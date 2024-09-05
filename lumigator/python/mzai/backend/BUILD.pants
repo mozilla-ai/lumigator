@@ -78,7 +78,7 @@ crossplatform_pex(
 # )
 #
 docker_image(
-    name="backend_image",
+    name="lumigator",
     build_platform=["linux/amd64"],
     dependencies=[":backend_app@parametrize=linux_cpu"],
     image_tags=[
@@ -86,7 +86,7 @@ docker_image(
         "backend_dev",
     ],
     registries=[
-        "@aws_ecr_temp",
+        "@dockerhub",
     ],
     repository="",
 )

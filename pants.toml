@@ -111,12 +111,8 @@ tools = [
   "bash",
 ]
 
-[docker.registries.coreweave_default]
-address = "docker-registry.tenant-d43f85-prod.lga1.ingress.coreweave.cloud"
-default = false
-
-[docker.registries.aws_ecr_temp]
-address = "381492205691.dkr.ecr.us-east-2.amazonaws.com"
+[docker.registries.dockerhub]
+address = "docker.io/mzdotai"
 default = false
 
 [pytest]

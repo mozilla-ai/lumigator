@@ -180,4 +180,4 @@ ci-tests:
 	pants test lumigator/python/mzai/backend/tests:backend_tests@parametrize=$(PARAMETRIZE)
 
 ci-publish-images:
-	pants package publish lumigator/python/mzai/backend:backend_image
+	pants package publish lumigator/python/mzai/backend:lumigator

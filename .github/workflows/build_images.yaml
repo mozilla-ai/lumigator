@@ -124,5 +124,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: docker-tag
-          path: dist/lumigator.python.mzai.lumigator/backend_image.docker-info.json
+          path: dist/lumigator.python.mzai.backend/lumigator.docker-info.json
           if-no-files-found: error

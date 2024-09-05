@@ -14,7 +14,7 @@ services:
       - POSTGRES_DB=lumigator
 
   localstack:
-    # if you want to enable S3 data persistence, use the following
+    # if you want to enable local S3-style data persistence, use the following
     # image and set LOCALSTACK_AUTH_TOKEN in your env
     # image: localstack/localstack-pro:3.4.0
     image: localstack/localstack:3.4.0

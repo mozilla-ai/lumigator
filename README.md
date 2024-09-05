@@ -78,13 +78,19 @@ It consists of:
 
 # Get Started
 
-You can build the local project using `pants` and `docker-compose`,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
+You can build the local project using `pants` and `docker-compose` on Mac,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
+
+## Local Requirements
+
++ Docker (e.g. Docker desktop on your Mac)
++ System Python
 
 ## Local Development Setup (Currently targeting Mac)
-1. `git clone` repo
+1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2.  Install pants using homebrew `brew install pantsbuild/tap/pants` . For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
-3. `make bootstrap-dev-environment`
+3. `make bootstrap-dev-environment` and `source mzaivenv/bin/activate` to activate the virtualenv
 4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
+5. To shut down app, `make local-down`
 
 ### Dev Environment Details
 This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is

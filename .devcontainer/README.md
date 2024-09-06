@@ -5,12 +5,12 @@ This creates four container services networked together to make up all the compo
 
 - `postgres`, SQL database holding metadata for datasets and experiments.
 - `localstack`, local storage for datasets that mimics S3-API compatible functionality. 
-- `backend`, the lumigator REST API. Lumigator’s FastAPI backend.
+- `backend`, Lumigator’s FastAPI REST API.
 - `ray`, a Ray cluster for submitting lm-buddy jobs and serving Ray Serve.
 
 `docker-compose` automatically creates a network between these four containers.
 
-Despite the fact this is a local setup, it lends itself to more distributed scenarios: e.g. one could provide different AWS_* env vars to the backend container to connect to any provider's S3-compatible service instead of localstack, a different `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on.
+Despite the fact this is a local setup, it lends itself to more distributed scenarios: e.g. one could provide different `AWS_*` env vars to the backend container to connect to any provider's S3-compatible service instead of localstack, a different `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on.
 
 
 ## Testing the services

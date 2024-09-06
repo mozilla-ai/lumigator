@@ -74,7 +74,7 @@ It consists of:
 + a FastAPI-based huggingface's `evaluate` library for those metrics, but we are considering using lm-harness that manages platform activity backed by Postgres
 + online evaluation of models using **Ray Serve** deployments
 + a **Ray cluster** to run offline evaluation jobs using [lm-buddy](https://github.com/mozilla-ai/lm-buddy), our in-house eval framework
-    + LM buddy spins up a vLLM deployment using Ray Serve for inference/evalution jobs and the core of evaluation happens using huggingface's `evaluate` library for those metrics, but we are evaluating lm-eval-harness, as well
+    + LM buddy runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
 + Artifact management (S3 in the cloud, localstack locally )
 + A Postgres database to track platform-level tasks and dataset metadata
 

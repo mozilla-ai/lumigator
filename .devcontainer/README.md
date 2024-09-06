@@ -17,7 +17,7 @@ The four services are:
     alias s5='s5cmd --endpoint-url $AWS_ENDPOINT_URL'
    ```
   - Check out the storage: `s5 ls`
-  - Check out the lumigator bucket: s5 ls s3://lumigator-storage (this will be created only after some action is performed on S3, e.g. uploading a dataset)
+  - Check out the lumigator bucket: `s5 ls s3://lumigator-storage` (this will be created only after some action is performed on S3, e.g. uploading a dataset)
 
 
  - `backend` - the lumigator REST API. Lumigator’s FastAPI backend. You can directly connect to its [OpenAPI spec at localhost](http://localhost/docs#), see the available endpoints, and interactively run commands.

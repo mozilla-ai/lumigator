@@ -83,14 +83,14 @@ You can build the local project using `pants` and `docker-compose` on Mac,  or i
 ## Local Requirements
 
 + Docker (e.g. Docker desktop on your Mac)
-+ System Python
++ System Python (that is, no version manager, such as pyenv, should be active)
 
 ## Local Development Setup (Currently targeting Mac)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2.  Install pants using homebrew `brew install pantsbuild/tap/pants` . For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
 3. `make bootstrap-dev-environment` and `source mzaivenv/bin/activate` to activate the virtualenv
 4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
-5. To shut down app, `make local-down`
+5. To shut down app, `make local-down` and `deactivate`to deactivate the virtualenv
 
 ### Dev Environment Details
 This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is

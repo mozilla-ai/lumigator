@@ -1,7 +1,8 @@
 # Lumigator API
 
 ## Uploading a dataset
-Lumigator does not directly access data on your disk, but expects you to first import your data on its object storage and then saves experiment outputs in the same place. Localstack takes care of this abstraction by creating an S3-compatible local object storage on your disk, so you can seamlessly access data locally, on AWS, or on CoreWeave’s compatible S3 storage.
+Lumigator expects you to first import your data on its object storage and then saves experiment outputs in the same place. 
+Localstack takes care of this abstraction by creating a local object storage on disk that can be accessed via AWS or any S3-compatible storage.  
 
 The simplest way you can test a dataset upload to the platform is by directly accessing the API at the [OpenAPI doc URL](http://localhost/docs). 
 Expand the Upload dataset section, click on Try it out, provide a dataset (you can browse and get it from disk) and click on Execute. 

@@ -49,9 +49,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "lumigator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{- define "lumigator.consts" -}}
-{{- $_ := set . "Consts" (dict)  -}}
-{{- $_ := set .Consts "mistralSecretName" "mistral-key" -}}
-{{- $_ := set .Consts "mistralSecretKey" "MISTRAL_API_KEY" -}}
-{{- end -}}

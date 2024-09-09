@@ -1,4 +1,3 @@
-{{ include "lumigator.consts" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -58,14 +57,13 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
-            - name: MISTRAL_API_KEY
+            {{- if .Values.mistralSecretName }}
+            - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
               valueFrom:
                 secretKeyRef:
-                  {{- /* Note that a one-line comments needs THIS precise layout {{- }} to avoid breaking flow... */}}
-                  {{- /* Note the lack of - at the if and end on each line */}}
-                  {{- /* Otherwise the blankspace will not be preserved */}}
-                  name: {{ if .Values.mistralSecret }}{{ .Values.mistralSecret.name }}{{- else -}}{{ .Consts.mistralSecretName }}{{- end }}
-                  key: {{ if .Values.mistralSecret }}{{ .Values.mistralSecret.key }}{{- else -}}{{ .Consts.mistralSecretKey }}{{- end }}
+                  name: {{ .Values.mistralSecretName }}
+                  key: {{ .Values.mistralSecretKey }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

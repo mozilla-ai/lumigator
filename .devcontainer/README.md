@@ -45,6 +45,8 @@ you can develop right within the Docker container and have the application immed
 The main dockerfile is `Dockerfile.backend`, which ships the deployment code to the Ray cluster via a mounted volume, and the application itself,
 which is shipped directly as a dir via Docker.
 
+The LocalStack S3 implementation requires some environment variables as required in the [overall README](../README.md#environment-variable-reference).
+
 In order to use the API-based vendor ground truth generation and evaluation, you'll need to pass the following environment variables for credentials:
 + `MISTRAL_API_KEY`
 + `OPENAI_API_KEY`

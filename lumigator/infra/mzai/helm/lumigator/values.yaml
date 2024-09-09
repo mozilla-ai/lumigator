@@ -24,8 +24,8 @@ serviceAccountName: ""
 
 summarizerWorkDir: ""
 
-mistralSecretName: mistral-key
-mistralSecretKey: MISTRAL_API_KEY
+mistralSecretName: ""
+mistralKey: ""
 
 image:
   repository: "mzdotai/lumigator"

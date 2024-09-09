@@ -20,8 +20,7 @@ serviceAccountName: ""
 
 summarizerWorkDir: ""
 
-mistralSecretName: mistral-key
-mistralSecretKey: MISTRAL_API_KEY
+mistralSecret: {}
 
 image:
   repository: ""

@@ -131,6 +131,25 @@ pants package lumigator/python/mzai/backend --no-local-cache
 pants package lumigator/python/mzai/backend:backend_image
 ```
 
+### Environment variable reference
+
+The `docker-compose` setup described in the [corresponding README](./.devcontainer/README.md) needs several environment variables to work appropriately.
+
+If the S3 storage service is used, the endpoint, key and secret are needed. The LocalStack implementation used also requires an authentication token.
+
+| Environment variable name | Default value | Description |
+| --- | :-: | --- |
+| LOCAL_FSSPEC_S3_ENDPOINT_URL | "" | Endpoint URL for the S3 data storage service |
+| LOCAL_FSSPEC_S3_KEY | "" | Key for the S3 data storage service |
+| LOCAL_FSSPEC_S3_SECRET | "" | Secret for the S3 data storage service |
+| LOCALSTACK_AUTH_TOKEN | "" | Authentication token for the LocalStack service |
+
+ Models from Mistral or OpenAI can be used via API instead of instantiating them within Lumigator. In this case, the corresponding key is needed.
+
+| Environment variable name | Default value | Description |
+| --- | :-: | --- |
+| MISTRAL_API_KEY | "" | Key for Mistral API models |
+| OPENAI_API_KEY | "" | Key for OpenAI API models |
 
 ## Rebuilding dependencies
 

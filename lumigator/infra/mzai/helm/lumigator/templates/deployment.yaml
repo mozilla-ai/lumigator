@@ -66,6 +66,7 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
+            {{- if or .Values.mistralKey .Values.mistralSecretName }}
             - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -74,6 +75,7 @@ spec:
                   {{- /* Otherwise the blankspace will not be preserved */}}
                   name: {{ if .Values.mistralSecretName }}{{ .Values.mistralSecretName }}{{- else -}}{{ include "lumigator.fullname" . }}{{- end }}
                   key: {{ .Consts.mistralSecretKey }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

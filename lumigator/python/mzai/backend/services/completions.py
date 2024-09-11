@@ -4,6 +4,7 @@ from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
 from abc import ABC, abstractmethod
 import os
+from mzai.backend.settings import settings
 
 from mzai.schemas.completions import CompletionResponse, CompletionRequest
 
@@ -16,7 +17,7 @@ class CompletionService(ABC):
 
 class MistralCompletionService(CompletionService):
     def __init__(self):
-        self.client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
+        self.client = MistralClient(api_key=settings.MISTRAL_API_KEY)
         self.model = "open-mistral-7b"
         self.max_tokens = 256
         self.temperature = 1
@@ -45,7 +46,7 @@ class MistralCompletionService(CompletionService):
 
 class OpenAICompletionService(CompletionService):
     def __init__(self):
-        self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        self.client = OpenAI(api_key=settings.OAI_API_KEY)
         self.model = "gpt-4o-mini"
         self.max_tokens = 256
         self.temperature = 1

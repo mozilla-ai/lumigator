@@ -124,16 +124,13 @@ class ExperimentService:
 
         # build runtime ENV for workers
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        for env_var_name in settings.RAY_WORKER_ENV_VARS:
-            env_var = os.environ.get(env_var_name, None)
-            if env_var is not None:
-                runtime_env_vars[env_var_name] = env_var
+        settings.inherit_ray_env(runtime_env_vars)
 
         # set num_gpus per worker (zero if we are just hitting a service)
         if not request.model.startswith("hf://"):
-            worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
+            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
         else:
-            worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 1.0))
+            worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
             "pip": settings.PIP_REQS,

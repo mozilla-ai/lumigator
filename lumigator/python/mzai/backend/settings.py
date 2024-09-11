@@ -2,7 +2,10 @@ from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
 from pathlib import Path
+import os
+
 from mzai.schemas.extras import DeploymentType
+from collections.abc import Mapping
 
 
 class BackendSettings(BaseSettings):
@@ -52,6 +55,26 @@ class BackendSettings(BaseSettings):
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None
+
+    def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
+        for env_var_name in self.RAY_WORKER_ENV_VARS:
+            env_var = os.environ.get(env_var_name, None)
+            if env_var is not None:
+                runtime_env_vars[env_var_name] = env_var
+
+    OAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+
+    MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY", "")
+
+    @computed_field
+    @property
+    def RAY_WORKER_GPUS(self) -> float:  # noqa: N802
+        return float(os.environ.get(self.RAY_WORKER_GPUS_ENV_VAR, 1.0))
+
+    @computed_field
+    @property
+    def RAY_WORKER_GPUS_FRACTION(self) -> float:  # noqa: N802
+        return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
 
     # evaluator path - relative to experiment call site
     # open lumigator pip reqs and split into string to pass into Ray

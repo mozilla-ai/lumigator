@@ -24,10 +24,10 @@ mistralSecretName: mistral-key
 mistralSecretKey: MISTRAL_API_KEY
 
 image:
-  repository: ""
+  repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

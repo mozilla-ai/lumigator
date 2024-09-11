@@ -70,9 +70,6 @@ spec:
             - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
-                  {{- /* Note that a one-line comments needs THIS precise layout {{- }} to avoid breaking flow... */}}
-                  {{- /* Note the lack of - at the if and end on each line */}}
-                  {{- /* Otherwise the blankspace will not be preserved */}}
                   name: {{ if .Values.mistralSecretName }}{{ .Values.mistralSecretName }}{{- else -}}{{ include "lumigator.fullname" . }}{{- end }}
                   key: {{ .Consts.mistralSecretKey }}
             {{- end }}

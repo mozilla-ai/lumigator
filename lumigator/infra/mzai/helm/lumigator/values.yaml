@@ -10,7 +10,17 @@ postgresDb: ""
 postgresHost: ""
 postgresPort: ""
 postgresUser: ""
+
+# The password of the postgres database to connect to.
+# A secret will be created for you.
+# Set this OR 'existingPostgresPasswordSecretName'
 postgresPassword: ""
+
+# Use an existing secret, set this value OR use 'postgresPassword'
+existingPostgresPasswordSecretName: ""
+
+# The key in the secret used to reference the postgresPassword in the secret
+postgresPasswordSecretKey: postgres-password
 
 rayAddress: ""
 rayPort: ""

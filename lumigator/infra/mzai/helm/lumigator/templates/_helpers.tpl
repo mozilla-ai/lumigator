@@ -49,3 +49,14 @@ Selector labels
 app.kubernetes.io/name: {{ include "lumigator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Postgresql password secret name
+*/}}
+{{- define "lumigator.postgresqlPasswordSecretName" -}}
+{{- if .Values.existingPostgresPasswordSecretName }}
+{{- .Values.existingPostgresPasswordSecretName }}
+{{- else }}
+{{- include "lumigator.fullname" . }}-postgresql
+{{- end}}
+{{- end }}

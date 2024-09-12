@@ -61,6 +61,7 @@ services:
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/43b9b8b429ea9ef2b7b388371c223b0dacf13906/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+      - ../lumigator/python/mzai/backend/lm-buddy:/home/ray/lm-buddy
 
   backend:
     build:

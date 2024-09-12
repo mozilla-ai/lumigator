@@ -7,7 +7,6 @@ from ray.job_submission import JobSubmissionClient
 
 from mzai.schemas.jobs import JobConfig
 
-
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
     """A generic command which is passed a config and submitted as a ray job.
@@ -25,8 +24,10 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        """The command ran by the ray job, which is passed a JSON-serialized config."""
-        return f"lm-buddy evaluate huggingface --config '{json.dumps(self.config.args)}'"
+
+        """The command passed to the Ray job, which includes a JSON-serialized config."""
+        return f"python -m lm_buddy.cli huggingface --config '{json.dumps(self.config.args)}'"
+
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

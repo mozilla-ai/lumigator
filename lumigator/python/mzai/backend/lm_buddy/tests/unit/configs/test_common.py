@@ -2,7 +2,7 @@ import pytest
 import torch
 from pydantic import ValidationError
 
-from lm_buddy.configs.common import LMBuddyConfig, SerializableTorchDtype
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig, SerializableTorchDtype
 
 
 def test_config_settings():

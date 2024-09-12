@@ -16,7 +16,6 @@ from mzai.schemas.groundtruth import (
     GroundTruthQueryRequest,
 )
 from mzai.backend.settings import settings
-from loguru import logger
 
 
 class GroundTruthService:

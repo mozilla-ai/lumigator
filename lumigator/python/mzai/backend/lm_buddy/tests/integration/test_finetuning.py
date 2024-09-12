@@ -1,11 +1,11 @@
 import pytest
 
-from lm_buddy import LMBuddy
-from lm_buddy.configs.huggingface import AutoModelConfig, DatasetConfig, TrainerConfig
-from lm_buddy.configs.jobs.finetuning import FinetuningJobConfig, FinetuningRayConfig
-from lm_buddy.configs.wandb import WandbRunConfig
-from lm_buddy.paths import format_file_path
-from lm_buddy.tracking.artifact_utils import ArtifactType
+from lumigator.python.mzai.backend.lm_buddy import LMBuddy
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig, DatasetConfig, TrainerConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.finetuning import FinetuningJobConfig, FinetuningRayConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.wandb import WandbRunConfig
+from lumigator.python.mzai.backend.lm_buddy.paths import format_file_path
+from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import ArtifactType
 
 
 @pytest.fixture

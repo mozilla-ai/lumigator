@@ -1,12 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from lm_buddy.configs.jobs.lm_harness import (
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,
     LMHarnessJobConfig,
     LocalChatCompletionsConfig,
 )
-from lm_buddy.configs.vllm import InferenceServerConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.vllm import InferenceServerConfig
 from tests.test_utils import copy_pydantic_json
 
 

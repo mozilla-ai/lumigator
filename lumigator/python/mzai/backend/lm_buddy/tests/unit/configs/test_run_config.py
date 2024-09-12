@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from pydantic import ValidationError
 
-from lm_buddy.configs.wandb import WandbRunConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.wandb import WandbRunConfig
 from tests.test_utils import copy_pydantic_json
 
 

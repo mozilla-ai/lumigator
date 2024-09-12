@@ -5,8 +5,8 @@ from peft import PeftConfig, PeftType, TaskType
 from pydantic import field_validator, model_validator
 from transformers import BitsAndBytesConfig
 
-from lm_buddy.configs.common import LMBuddyConfig, SerializableTorchDtype
-from lm_buddy.paths import AssetPath, PathPrefix
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig, SerializableTorchDtype
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix
 
 DEFAULT_TEXT_FIELD: str = "text"
 

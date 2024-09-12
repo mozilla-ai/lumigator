@@ -5,7 +5,7 @@ from urllib.parse import ParseResult, urlparse
 import pandas as pd
 import wandb
 
-from lm_buddy.paths import PathPrefix
+from lumigator.python.mzai.backend.lm_buddy.paths import PathPrefix
 
 
 class ArtifactType(str, Enum):

@@ -1,0 +1,34 @@
+# Core dependencies
+click>=8.1.7
+scipy==1.13.1
+numpy<2.0.0
+wandb>=0.16.3
+protobuf>=3.20.2
+urllib3>=1.26.18,<2
+pydantic>=2.6.4
+pydantic-yaml>=1.2.0
+ray[default]==2.30.0
+loguru==0.2.0
+s3fs==2024.5.0
+
+# Optional dependencies - ruff
+ruff==0.5.5
+
+# Optional dependencies - jobs
+torch==2.4.0
+datasets>=2.20.0
+transformers==4.43.4
+accelerate==0.33.0
+peft==0.12.0
+trl==0.9.6
+bitsandbytes==0.42.0
+bert_score==0.3.13
+lm-eval==0.4.3
+einops==0.8.0
+openai==1.38.0
+ragas==0.1.12
+langchain-community==0.2.11
+langchain_openai==0.1.20
+sentencepiece==0.2.0
+evaluate==0.4.2
+mistralai==0.4.2

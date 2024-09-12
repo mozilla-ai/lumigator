@@ -1,5 +1,5 @@
-from lm_buddy.configs.common import LMBuddyConfig
-from lm_buddy.paths import AssetPath
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath
 
 
 class InferenceServerConfig(LMBuddyConfig):

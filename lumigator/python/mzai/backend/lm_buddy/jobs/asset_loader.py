@@ -19,14 +19,14 @@ from transformers.models.auto.modeling_auto import (
     MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES,
 )
 
-from lm_buddy.configs.huggingface import (
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
-from lm_buddy.tracking.artifact_utils import get_artifact_directory, get_artifact_from_api
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
+from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import get_artifact_directory, get_artifact_from_api
 
 
 class HuggingFaceAssetLoader:

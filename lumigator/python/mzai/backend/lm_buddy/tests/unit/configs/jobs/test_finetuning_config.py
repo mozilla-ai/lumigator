@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from lm_buddy.configs.huggingface import DatasetConfig
-from lm_buddy.configs.jobs.finetuning import FinetuningJobConfig, FinetuningRayConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import DatasetConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.finetuning import FinetuningJobConfig, FinetuningRayConfig
 from tests.test_utils import copy_pydantic_json
 
 

@@ -7,11 +7,11 @@ from lm_eval.models.huggingface import HFLM
 from lm_eval.models.openai_completions import OpenaiCompletionsLM
 from loguru import logger
 
-from lm_buddy.configs.huggingface import AutoModelConfig
-from lm_buddy.configs.jobs.lm_harness import LMHarnessJobConfig, LocalChatCompletionsConfig
-from lm_buddy.jobs.asset_loader import HuggingFaceModelLoader
-from lm_buddy.jobs.common import EvaluationResult
-from lm_buddy.tracking.artifact_utils import (
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import LMHarnessJobConfig, LocalChatCompletionsConfig
+from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import HuggingFaceModelLoader
+from lumigator.python.mzai.backend.lm_buddy.jobs.common import EvaluationResult
+from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
     ArtifactType,
     build_table_artifact,
     default_artifact_name,

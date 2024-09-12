@@ -2,11 +2,11 @@ from typing import Literal, get_args
 
 from pydantic import Field, field_validator
 
-from lm_buddy.configs.common import LMBuddyConfig
-from lm_buddy.configs.huggingface import AutoModelConfig, DatasetConfig
-from lm_buddy.configs.jobs.common import JobConfig
-from lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lm_buddy.paths import AssetPath
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig, DatasetConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.common import JobConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath
 
 RagasEvaluationMetric = Literal[
     "faithfulness",

@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from lm_buddy.configs.huggingface import QuantizationConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import QuantizationConfig
 from tests.test_utils import copy_pydantic_json
 
 

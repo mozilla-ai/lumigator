@@ -58,7 +58,7 @@ class BackendSettings(BaseSettings):
     @property
     def S3_ENDPOINT_URL(self) -> str | None:  # noqa: N802
         # Live AWS doesn't require this but LocalStack testing does, so it's optional
-        if self.AWS_HOST is not None:
+        if self.AWS_HOST == "localstack":
             return f"http://{self.AWS_HOST}:{self.S3_PORT}"
 
     @computed_field

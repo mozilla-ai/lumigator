@@ -36,6 +36,14 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
+            - name: AWS_ACCESS_KEY
+              value: {{ .Values.AWSAccessKey | quote }}
+            - name: AWS_SECRET_KEY
+              value: {{ .Values.AWSSecretKey | quote }}
+            - name: AWS_HOST
+              value: {{ .Values.AWSHost | quote }}
+            - name: AWS_ENDPOINT_URL
+              value: {{ .Values.AWSEndpointURL | quote }}
             - name: S3_BUCKET
               value: {{ .Values.s3Bucket | quote }}
             - name: POSTGRES_DB

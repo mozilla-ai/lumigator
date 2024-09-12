@@ -11,6 +11,16 @@ At this moment this Helm chart only deploys the Lumigator core REST API. We don'
 
 In the near future, a new version of this chart will be released, which will be able to deploy a minimal version of all the required tools.
 
+## Mistral API key management
+
+If the Mistral API is used, there are two ways to provide it to Lumigator:
+
+* Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
+* Using an explicit Mistral key in property `mistralAPIKey`, which will be added in a new Secret
+
+> [!NOTE]
+> Both properties cannot be set at the same time.
+
 ## Values
 
 | Key | Default | Description |
@@ -25,8 +35,8 @@ In the near future, a new version of this chart will be released, which will be 
 | nodeSelector | `{}` | Configurable [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) so that you can target specific nodes |
 | podAnnotations | `{}` | Configurable [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) applied to all pods |
 | podSecurityContext | `{}` | Security settings applied to the pod |
-| mistralSecretName | `` | Name of secret which contains the Mistral key |
-| mistralSecretKey | `` | Name of the key inside the secret which contains the Mistral key |
+| existingMistralAPISecret | `` | Name of an existing Secret that contains the Mistral key |
+| mistralAPIKey | `` | Mistral key to be added as a Secret |
 | postgresDb | `""` | Name of the database |
 | postgresHost | `""` | URL of the database |
 | postgresPassword | `""` | Password of the user used to connect to the database |

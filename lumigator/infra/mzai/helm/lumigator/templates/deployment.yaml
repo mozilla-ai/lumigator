@@ -1,4 +1,4 @@
-{{ include "lumigator.consts" . }}
+{{ include "lumigator.mistral-default-secret" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,11 +66,11 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
-            {{- if or .Values.mistralKey .Values.mistralSecretName }}
+            {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
             - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.mistralSecretName }}{{ .Values.mistralSecretName }}{{- else -}}{{ include "lumigator.fullname" . }}{{- end }}
+                  name: {{ include "lumigator.mistral-secret-ref" . }}
                   key: {{ .Consts.mistralSecretKey }}
             {{- end }}
           resources:

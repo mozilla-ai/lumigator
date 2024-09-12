@@ -4,12 +4,12 @@ from tempfile import NamedTemporaryFile
 from typing import BinaryIO
 from uuid import UUID
 
-import s3fs
 from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
 from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
+from s3fs import S3FileSystem
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
@@ -84,10 +84,12 @@ def validate_experiment_dataset(filename: str):
 
 
 class DatasetService:
-    def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client):
+    def __init__(
+        self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem
+    ):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
-        self.s3_filesystem = s3fs.S3FileSystem()
+        self.s3_filesystem = s3_filesystem
 
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")

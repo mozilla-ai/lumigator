@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  storageClass: shared-nvme-lga1
+
 replicaCount: 1
 
 s3Bucket: ""
@@ -10,18 +13,17 @@ AWSSecretKey: ""
 s3EndpointURL: ""
 AWSEndpointURL: ""
 
-postgresDb: ""
-postgresHost: ""
-postgresPort: ""
-postgresUser: ""
+postgresDb: "postgres"
+postgresUser: "postgres"
+postgresHost: "lumigator-postgresql" # Releasename postgres
+postgresPort: "5432"
 postgresPassword: ""
 
-rayAddress: ""
-rayPort: ""
+rayAddress: "blah"
+rayPort: "5432"
 rayWorkerGPUs: ""
 
 serviceAccountName: ""
-
 
 existingMistralAPISecret: ""
 mistralAPIKey: ""
@@ -30,7 +32,7 @@ image:
   repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "backend_dev"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -76,4 +78,29 @@ tolerations: []
 affinity: {}
 
 postgresql:
-  enabled: false
+  enabled: true
+  #  auth:
+  #    username: lumigator
+  #    database: lumigator
+
+  primary:
+    initContainers:
+      - command:
+          - sh
+          - -c
+          - |
+            uid
+            mkdir -p $VOLUME_DATA_DIR
+            chown -R 1001:1001 $VOLUME_DATA_DIR
+            echo 'Volume permissions OK ✓'
+        env:
+          - name: VOLUME_DATA_DIR
+            value: /bitnami/postgresql
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        name: volumepermissions
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+          - mountPath: /bitnami/postgresql
+            name: data

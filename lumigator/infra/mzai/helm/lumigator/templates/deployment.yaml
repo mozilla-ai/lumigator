@@ -56,7 +56,10 @@ spec:
             - name: POSTGRES_USER
               value: {{ required "Missing PostgreSQL user" .Values.postgresUser | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ required "Missing PostgreSQL password" .Values.postgresPassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: lumigator-postgresql # Releasename-postgresql
+                  key: postgres-password
             - name: RAY_HEAD_NODE_HOST
               value: {{ required "Missing Ray head node hostname" .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT

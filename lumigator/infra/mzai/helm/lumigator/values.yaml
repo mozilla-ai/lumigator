@@ -7,17 +7,17 @@ replicaCount: 1
 s3Bucket: ""
 AWSAccessKey: ""
 AWSSecretKey: ""
-AWSHost: ""
+s3EndpointURL: ""
 AWSEndpointURL: ""
 
 postgresDb: ""
 postgresHost: ""
-postgresPort: ""
+postgresPort: "3306"
 postgresUser: ""
 postgresPassword: ""
 
 rayAddress: ""
-rayPort: ""
+rayPort: "3306"
 rayWorkerGPUs: ""
 
 serviceAccountName: ""
@@ -31,7 +31,7 @@ image:
   repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "backend_dev"
 
 imagePullSecrets: []
 nameOverride: ""

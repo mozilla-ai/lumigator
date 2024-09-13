@@ -79,12 +79,11 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
-      - AWS_HOST=localstack
+      - S3_ENDPOINT_URL=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localstack:4566
-      - S3_PORT=4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
       - RAY_DASHBOARD_PORT=8265

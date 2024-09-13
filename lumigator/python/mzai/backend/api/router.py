@@ -1,11 +1,12 @@
 from fastapi import APIRouter
 
 from mzai.backend.api.routes import (
+    completions,
     datasets,
     experiments,
     groundtruth,
     health,
-    completions,
+    tasks,
 )
 from mzai.backend.api.tags import Tags
 
@@ -17,3 +18,4 @@ api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASE
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(groundtruth.router, prefix="/ground-truth", tags=[Tags.GROUNDTRUTH])
 api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
+api_router.include_router(tasks.router, prefix="/tasks", tags=[Tags.TASKS])

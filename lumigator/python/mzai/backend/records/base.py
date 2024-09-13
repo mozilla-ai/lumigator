@@ -16,4 +16,4 @@ class BaseRecord(DeclarativeBase, PrimaryKeyMixin):
     """
 
     # Additional mappings from Python type to SQLAlchemy type
-    type_annotation_map = {dict[str, Any]: JSON}
+    type_annotation_map = {dict[str, Any]: JSON, list[str]: JSON}

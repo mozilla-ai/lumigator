@@ -12,10 +12,12 @@ from mzai.backend.db import session_manager
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from mzai.backend.repositories.tasks import TaskRepository
+from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
 from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.groundtruth import GroundTruthService
-from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
+from mzai.backend.services.tasks import TaskService
 from mzai.backend.settings import settings
 
 
@@ -79,3 +81,11 @@ def get_openai_completion_service() -> OpenAICompletionService:
 OpenAICompletionServiceDep = Annotated[
     OpenAICompletionService, Depends(get_mistral_completion_service)
 ]
+
+
+def get_task_service(session: DBSessionDep) -> TaskService:
+    task_repo = TaskRepository(session)
+    return TaskService(task_repo)
+
+
+TaskServiceDep = Annotated[TaskService, Depends(get_task_service)]

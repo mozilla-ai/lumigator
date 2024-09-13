@@ -7,6 +7,7 @@ class Tags(str, Enum):
     EXPERIMENTS = "experiments"
     GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
+    TASKS = "tasks"
 
 
 TAGS_METADATA = [
@@ -29,6 +30,10 @@ TAGS_METADATA = [
     {
         "name": Tags.COMPLETIONS,
         "description": "Access models via external vendor endpoints",
+    },
+    {
+        "name": Tags.TASKS,
+        "description": "Mapping model lists to tasks.",
     },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.

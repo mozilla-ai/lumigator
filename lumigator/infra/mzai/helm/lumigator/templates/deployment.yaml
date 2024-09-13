@@ -47,7 +47,10 @@ spec:
             - name: POSTGRES_USER
               value: {{ .Values.postgresUser | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgresPassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "lumigator.postgresqlPasswordSecretName" . }}
+                  key: {{ .Values.postgresPasswordSecretKey }}
             - name: RAY_HEAD_NODE_HOST
               value: {{ .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT

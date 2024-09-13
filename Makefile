@@ -6,7 +6,12 @@ PY_VERSION := 3.11.9
 CUDA_AVAILABLE := $(shell nvidia-smi &> /dev/null; echo $$?)
 PANTS_INSTALLED := $(shell pants --version &> /dev/null; echo $$?)
 PYTHON :=
+#used in docker-compose to choose the right Ray image
+ARCH := 
 
+ifeq ($(UNAME), Darwin)
+	ARCH := -aarch64
+endif
 
 ifndef PYTHON
 	ifeq ($(UNAME), GNU/Linux)
@@ -72,7 +77,7 @@ LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
 	pants run 3rdparty/python:gen_requirements_python_linux_cpu
 
 local-up: 3rdparty/python/requirements_python_linux_cpu.txt
-	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	ARCH=$(ARCH) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 	rm 3rdparty/python/requirements_python_linux_cpu.txt
 
 local-down:

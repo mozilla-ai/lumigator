@@ -34,7 +34,7 @@ services:
       - localstack-data:/var/lib/localstack
 
   ray:
-    image: rayproject/ray:2.30.0-py311-cpu-aarch64
+    image: rayproject/ray:2.30.0-py311-cpu${ARCH}
     ports:
       - "6379:6379"
       - "8265:8265"

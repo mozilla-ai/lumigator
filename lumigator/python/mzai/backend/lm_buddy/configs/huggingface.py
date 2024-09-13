@@ -1,12 +1,14 @@
 import dataclasses
 from typing import Any
 
+from lumigator.python.mzai.backend.lm_buddy.configs.common import (
+    LMBuddyConfig,
+    SerializableTorchDtype,
+)
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix
 from peft import PeftConfig, PeftType, TaskType
 from pydantic import field_validator, model_validator
 from transformers import BitsAndBytesConfig
-
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig, SerializableTorchDtype
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix
 
 DEFAULT_TEXT_FIELD: str = "text"
 
@@ -47,8 +49,7 @@ class DatasetConfig(LMBuddyConfig):
 
     @model_validator(mode="after")
     def validate_split_if_huggingface_path(cls, config: "DatasetConfig"):
-        """
-        Ensure a  `split` is provided when loading a HuggingFace dataset directly from HF Hub.
+        """Ensure a  `split` is provided when loading a HuggingFace dataset directly from HF Hub.
         This makes it such that the `load_dataset` function returns the type `Dataset`
         instead of `DatasetDict`, which makes some of the downstream logic easier.
         """

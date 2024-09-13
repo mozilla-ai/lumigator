@@ -25,8 +25,7 @@ def strip_path_prefix(path: str) -> str:
 
 
 def is_valid_huggingface_repo_id(s: str):
-    """
-    Simple test to check if an HF model is valid using HuggingFace's tools.
+    """Simple test to check if an HF model is valid using HuggingFace's tools.
     Sadly, theirs throws an exception and has no return.
 
     Args:

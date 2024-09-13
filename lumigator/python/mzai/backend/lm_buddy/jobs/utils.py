@@ -5,8 +5,7 @@ from loguru import logger
 
 
 def timer(func):
-    """
-    Decorator which times the execution of the wrapped func.
+    """Decorator which times the execution of the wrapped func.
     Execution time is logged and also returned together with func's returned value
     (output will be a tuple).
     """

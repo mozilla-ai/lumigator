@@ -3,20 +3,21 @@ from abc import abstractmethod
 
 import torch
 from loguru import logger
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import (
+    HuggingFaceModelLoader,
+    HuggingFaceTokenizerLoader,
+)
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion
 from transformers import pipeline
 
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import HuggingFaceModelLoader, HuggingFaceTokenizerLoader
-
 
 class BaseModelClient:
-    """
-    Abstract class for a model client, used to provide a uniform interface
+    """Abstract class for a model client, used to provide a uniform interface
     (currentnly just a simple predict method) to models served in different
     ways (e.g. HF models loaded locally, OpenAI endpoints, vLLM inference
     servers, llamafile).
@@ -24,22 +25,17 @@ class BaseModelClient:
 
     @abstractmethod
     def __init__(self, model: str, config: LMBuddyConfig):
-        """
-        Used to initialize the model / inference service.
-        """
+        """Used to initialize the model / inference service."""
         pass
 
     @abstractmethod
     def predict(self, prompt: str) -> str:
-        """
-        Given a prompt, return a prediction.
-        """
+        """Given a prompt, return a prediction."""
         pass
 
 
 class SummarizationPipelineModelClient(BaseModelClient):
-    """
-    Model client for the huggingface summarization pipeline
+    """Model client for the huggingface summarization pipeline
     (model is loaded locally).
     """
 
@@ -65,8 +61,7 @@ class SummarizationPipelineModelClient(BaseModelClient):
 
 
 class HuggingFaceModelClient(BaseModelClient):
-    """
-    Model client for HF models (model is loaded locally, both Seq2SeqLM
+    """Model client for HF models (model is loaded locally, both Seq2SeqLM
     and CausalLM are supported).
     - Provide model path to load the model locally
     - Make sure you add quantization details if the model is too large
@@ -136,8 +131,7 @@ class APIModelClient(BaseModelClient):
 
 
 class OpenAIModelClient(APIModelClient):
-    """
-    Model client for models served via openai-compatible API.
+    """Model client for models served via openai-compatible API.
     For OpenAI models:
     - The base_url is fixed
     - Choose an engine name (see https://platform.openai.com/docs/models)
@@ -163,7 +157,6 @@ class OpenAIModelClient(APIModelClient):
         """Connects to a remote OpenAI-API-compatible endpoint
         and returns a chat completion holding the model's response.
         """
-
         return client.chat.completions.create(
             model=self._engine,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
@@ -175,8 +168,7 @@ class OpenAIModelClient(APIModelClient):
 
 
 class MistralModelClient(APIModelClient):
-    """
-    Model client for models served via Mistral API.
+    """Model client for models served via Mistral API.
     - The base_url is fixed
     - Choose an engine name (see https://docs.mistral.ai/getting-started/models/)
     - Customize the system prompt if needed
@@ -196,7 +188,6 @@ class MistralModelClient(APIModelClient):
         """Connects to a Mistral endpoint
         and returns a chat completion holding the model's response.
         """
-
         return client.chat(
             model=self._engine,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],

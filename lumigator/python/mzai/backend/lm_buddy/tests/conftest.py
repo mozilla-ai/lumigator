@@ -1,11 +1,12 @@
-"""
-This file is used to provide fixtures for the test session accessible to all LM Buddy submodules.
-"""
+"""This file is used to provide fixtures for the test session accessible to all LM Buddy submodules."""
+
 from pathlib import Path
 
 import pytest
-
-from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import ArtifactType, build_directory_artifact
+from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
+    ArtifactType,
+    build_directory_artifact,
+)
 
 
 @pytest.fixture(scope="session")

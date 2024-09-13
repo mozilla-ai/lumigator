@@ -1,11 +1,10 @@
 import os
 import warnings
 
+from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
 from pydantic import model_validator
 from wandb.apis.public import Run
 from wandb.util import random_string
-
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
 
 
 class WandbRunConfig(LMBuddyConfig):
@@ -33,7 +32,8 @@ class WandbRunConfig(LMBuddyConfig):
         if not os.environ.get("WANDB_API_KEY", None):
             warnings.warn(
                 "Cannot find `WANDB_API_KEY` in your environment. "
-                "Tracking will fail if a default key does not exist on the Ray cluster."
+                "Tracking will fail if a default key does not exist on the Ray cluster.",
+                stacklevel=2
             )
         return values
 

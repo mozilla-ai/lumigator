@@ -4,6 +4,17 @@ import torch
 from accelerate import Accelerator
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from loguru import logger
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
+    AutoModelConfig,
+    AutoTokenizerConfig,
+    DatasetConfig,
+    QuantizationConfig,
+)
+from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
+from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
+    get_artifact_directory,
+    get_artifact_from_api,
+)
 from peft import PeftConfig
 from transformers import (
     AutoConfig,
@@ -18,15 +29,6 @@ from transformers.models.auto.modeling_auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
     MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES,
 )
-
-from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
-    AutoModelConfig,
-    AutoTokenizerConfig,
-    DatasetConfig,
-    QuantizationConfig,
-)
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
-from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import get_artifact_directory, get_artifact_from_api
 
 
 class HuggingFaceAssetLoader:
@@ -86,7 +88,8 @@ class HuggingFaceModelLoader(HuggingFaceAssetLoader):
         except ValueError as e:
             warnings.warn(
                 f"Unable to load model as adapter: {e}. "
-                "This is expected if the checkpoint does not contain adapter weights."
+                "This is expected if the checkpoint does not contain adapter weights.",
+                stacklevel=2
             )
             return resolved_path, None
 
@@ -133,9 +136,9 @@ class HuggingFaceModelLoader(HuggingFaceAssetLoader):
         # load config first to get the model type
         model_config = self.load_pretrained_config(config)
 
-        if getattr(model_config, "model_type") in MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES:
+        if model_config.model_type in MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES:
             automodel_class = AutoModelForSeq2SeqLM
-        elif getattr(model_config, "model_type") in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES:
+        elif model_config.model_type in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES:
             automodel_class = AutoModelForCausalLM
         else:
             logger.info("Model type not supported. Trying AutoModelForCausalLM")

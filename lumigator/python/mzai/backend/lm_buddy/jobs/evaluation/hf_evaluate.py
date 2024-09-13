@@ -1,6 +1,4 @@
-"""
-lm-buddy entrypoint to run summary evaluation using huggingface eval
-"""
+"""lm-buddy entrypoint to run summary evaluation using huggingface eval"""
 
 import json
 from collections.abc import Iterable
@@ -8,8 +6,6 @@ from pathlib import Path
 
 import s3fs
 from loguru import logger
-from tqdm import tqdm
-
 from lumigator.python.mzai.backend.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
 from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
 from lumigator.python.mzai.backend.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
@@ -27,6 +23,7 @@ from lumigator.python.mzai.backend.lm_buddy.jobs.model_clients import (
     SummarizationPipelineModelClient,
 )
 from lumigator.python.mzai.backend.lm_buddy.jobs.utils import timer
+from tqdm import tqdm
 
 
 @timer

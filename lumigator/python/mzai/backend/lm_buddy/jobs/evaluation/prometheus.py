@@ -1,5 +1,4 @@
-"""
-lm-buddy entrypoint to run evaluations using a Prometheus inference server
+"""lm-buddy entrypoint to run evaluations using a Prometheus inference server
 see https://github.com/kaistAI/prometheus/blob/main/evaluation/benchmark/run_absolute_scoring.py
 """
 
@@ -10,10 +9,6 @@ from typing import Any
 
 from datasets import Dataset
 from loguru import logger
-from openai import OpenAI, OpenAIError
-from openai.types import Completion
-from tqdm import tqdm
-
 from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoTokenizerConfig
 from lumigator.python.mzai.backend.lm_buddy.configs.jobs.prometheus import PrometheusJobConfig
 from lumigator.python.mzai.backend.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
@@ -30,6 +25,9 @@ from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
     build_directory_artifact,
     default_artifact_name,
 )
+from openai import OpenAI, OpenAIError
+from openai.types import Completion
+from tqdm import tqdm
 
 
 @dataclass
@@ -45,7 +43,6 @@ def openai_completion(
     """Connects to a remote OpenAI-API-compatible Prometheus endpoint
     and returns a Completion holding the model's response.
     """
-
     return client.completions.create(
         model=engine,
         prompt=prompt,
@@ -61,7 +58,6 @@ def parse_response(config: PrometheusJobConfig, response: Completion) -> tuple[s
     """Given a Prometheus eval response as returned by the OpenAI API
     endpoint (i.e. in Completion format), extract feedback and score.
     """
-
     if response is None:
         raise BadResponseError("Server returned an empty response")
 
@@ -74,7 +70,7 @@ def parse_response(config: PrometheusJobConfig, response: Completion) -> tuple[s
         if score not in [str(s) for s in config.evaluation.scores]:
             raise BadResponseError(f"Score {score} is not in range")
     except (ValueError, BadResponseError) as e:
-        raise BadResponseError(f"Server returned a malformed response ({e})", e)
+        raise BadResponseError(f"Server returned a malformed response ({e})", e) from e
 
     return feedback, score
 

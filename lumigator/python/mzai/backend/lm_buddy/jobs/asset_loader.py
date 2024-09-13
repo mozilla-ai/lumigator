@@ -89,7 +89,7 @@ class HuggingFaceModelLoader(HuggingFaceAssetLoader):
             warnings.warn(
                 f"Unable to load model as adapter: {e}. "
                 "This is expected if the checkpoint does not contain adapter weights.",
-                stacklevel=2
+                stacklevel=2,
             )
             return resolved_path, None
 

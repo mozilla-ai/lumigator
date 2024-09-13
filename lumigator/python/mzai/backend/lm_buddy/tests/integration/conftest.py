@@ -3,6 +3,7 @@ LM Buddy integration test suite.
 
 These tests generally require a running Ray cluster/W&B environment.
 """
+
 import os
 import tempfile
 from pathlib import Path

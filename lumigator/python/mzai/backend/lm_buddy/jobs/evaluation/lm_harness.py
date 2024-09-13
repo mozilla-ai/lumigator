@@ -8,7 +8,10 @@ from lm_eval.models.openai_completions import OpenaiCompletionsLM
 from loguru import logger
 
 from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import LMHarnessJobConfig, LocalChatCompletionsConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import (
+    LMHarnessJobConfig,
+    LocalChatCompletionsConfig,
+)
 from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import HuggingFaceModelLoader
 from lumigator.python.mzai.backend.lm_buddy.jobs.common import EvaluationResult
 from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (

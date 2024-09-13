@@ -3,7 +3,10 @@ from typing import Literal
 from pydantic import conlist, model_validator
 
 from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig, QuantizationConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
+    AutoModelConfig,
+    QuantizationConfig,
+)
 from lumigator.python.mzai.backend.lm_buddy.configs.jobs.common import JobConfig
 from lumigator.python.mzai.backend.lm_buddy.configs.vllm import InferenceServerConfig
 from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath

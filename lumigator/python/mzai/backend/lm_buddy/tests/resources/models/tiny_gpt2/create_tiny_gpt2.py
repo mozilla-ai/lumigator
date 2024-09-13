@@ -1,4 +1,5 @@
 """Script to generate the `tiny_gpt2` model and tokenizer files."""
+
 import json
 from pathlib import Path
 

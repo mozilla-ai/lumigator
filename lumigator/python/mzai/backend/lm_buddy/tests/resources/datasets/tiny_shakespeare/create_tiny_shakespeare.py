@@ -1,4 +1,5 @@
 """Script to generate the `tiny_shakespeare` dataset files."""
+
 from pathlib import Path
 
 from datasets import load_dataset

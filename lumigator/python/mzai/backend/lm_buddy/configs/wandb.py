@@ -33,7 +33,7 @@ class WandbRunConfig(LMBuddyConfig):
             warnings.warn(
                 "Cannot find `WANDB_API_KEY` in your environment. "
                 "Tracking will fail if a default key does not exist on the Ray cluster.",
-                stacklevel=2
+                stacklevel=2,
             )
         return values
 

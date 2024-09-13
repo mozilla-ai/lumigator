@@ -2,7 +2,10 @@ import pytest
 
 from lumigator.python.mzai.backend.lm_buddy import LMBuddy
 from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AutoModelConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import LMHarnessEvaluationConfig, LMHarnessJobConfig
+from lumigator.python.mzai.backend.lm_buddy.configs.jobs.lm_harness import (
+    LMHarnessEvaluationConfig,
+    LMHarnessJobConfig,
+)
 from lumigator.python.mzai.backend.lm_buddy.configs.wandb import WandbRunConfig
 from lumigator.python.mzai.backend.lm_buddy.paths import format_file_path
 

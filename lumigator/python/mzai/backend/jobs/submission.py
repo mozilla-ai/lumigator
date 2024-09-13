@@ -26,8 +26,10 @@ class RayJobEntrypoint(ABC):
     @property
     def command(self) -> str:
         # lm-buddy passed as a module to Ray using a JSON-serialized config.
-        return (f"python -m lumigator.python.mzai.backend.lm_buddy evaluate huggingface "
-                f"--config '{json.dumps(self.config.args)}'")
+        return (
+            f"python -m lumigator.python.mzai.backend.lm_buddy evaluate huggingface "
+            f"--config '{json.dumps(self.config.args)}'"
+        )
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
@@ -37,7 +39,5 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
         entrypoint_num_gpus=entrypoint.num_gpus,
         entrypoint_memory=entrypoint.memory,
         runtime_env=entrypoint.runtime_env,
-        submission_id=str(
-            entrypoint.config.job_id
-        ),  # Use the record ID for the Ray submission
+        submission_id=str(entrypoint.config.job_id),  # Use the record ID for the Ray submission
     )

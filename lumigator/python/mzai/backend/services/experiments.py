@@ -137,9 +137,13 @@ class ExperimentService:
 
         runtime_env = {
 <<<<<<< HEAD
+<<<<<<< HEAD
             "pip": ["nltk==3.8.1", "datasets==2.20.0", "lm-buddy[jobs]==0.12.1"],
 =======
             "pip": ["wandb", "evaluate","pydantic_yaml", "torch", "peft","s3fs","loguru","mistralai","openai","lm-eval","langchain_community"],
+=======
+            "pip": ["wandb", "evaluate","pydantic_yaml", "torch", "peft","s3fs","loguru","mistralai","openai","lm-eval","langchain_community","langchain_openai","ragas","trl"],
+>>>>>>> 4e74369 (tested working eval)
             "working_dir": "./",
 >>>>>>> cb8dfc2 (change paths to reflect entire lib)
             "env_vars": runtime_env_vars,

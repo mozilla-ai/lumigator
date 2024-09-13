@@ -12,12 +12,12 @@ AWSEndpointURL: ""
 
 postgresDb: ""
 postgresHost: ""
-postgresPort: "3306"
+postgresPort: ""
 postgresUser: ""
 postgresPassword: ""
 
 rayAddress: ""
-rayPort: "3306"
+rayPort: ""
 rayWorkerGPUs: ""
 
 serviceAccountName: ""
@@ -31,7 +31,7 @@ image:
   repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "backend_dev"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

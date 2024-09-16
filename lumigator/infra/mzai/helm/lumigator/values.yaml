@@ -5,6 +5,10 @@
 replicaCount: 1
 
 s3Bucket: ""
+AWSAccessKey: ""
+AWSSecretKey: ""
+s3EndpointURL: ""
+AWSEndpointURL: ""
 
 postgresDb: ""
 postgresHost: ""

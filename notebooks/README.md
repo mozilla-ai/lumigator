@@ -12,28 +12,3 @@ The notebook runs on Jupyter. If you don't yet have Jupyter set up:
 
 A new browser window will open pointing at your new jupyterlab. From there, open the `walkthrough.ipynb` file.
 
-
-## Running through the notebook
-
-The notebook currently has some references to dataset/job UUIDs which are stale. 
-The easiest way to get started with an evaluation job is the following:
-
-+ all cells until the Generating Data for Ground Truth Evaluation section are tested and working 
-+ when you get to the point where the input dataset is loaded from the platform, use an alternative one. One example could be `knkarthick/dialogsum` which contains some short dialogues summarized in the ground truth. You can load it as follows:
-
-```python
-dataset='knkarthick/dialogsum'
-ds = load_dataset(dataset, split='validation')
-ds = ds.remove_columns(["id", "topic"])
-ds = ds.rename_column("dialogue", "examples")
-ds = ds.rename_column("summary", "ground_truth")
-dataset_name = "dialogsum_converted.csv"
-ds.to_csv(dataset_name)
-```
-and then save it on Lumigator with:
-
-```python
-r = ld.dataset_upload(dataset_name)
-# show ds info
-dataset_id = ld.get_resource_id(r)
-```

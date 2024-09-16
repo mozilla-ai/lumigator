@@ -138,8 +138,7 @@ class ExperimentService:
         runtime_env = {
             "pip": [
                 "wandb",
-                "nltk==3.8.1"
-                "datasets==2.20.0",
+                "nltk==3.8.1" "datasets==2.20.0",
                 "evaluate",
                 "pydantic_yaml",
                 "torch",

@@ -31,6 +31,20 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Return lumigator repo
+*/}}
+{{- define "lumigator.repo" -}}
+{{- required "The repository for the Lumigator image is missing" .Values.image.repository }}
+{{- end }}
+
+{{/*
+Return lumigator tag
+*/}}
+{{- define "lumigator.tag" -}}
+{{- .Values.image.tag | default .Chart.AppVersion | required "The tag for the Lumigator image is missing" }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "lumigator.labels" -}}

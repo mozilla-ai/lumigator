@@ -63,3 +63,23 @@ Selector labels
 app.kubernetes.io/name: {{ include "lumigator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Generated Secret name for Mistral
+*/}}
+{{- define "lumigator.mistral-secret-name" -}}
+{{- include "lumigator.name" . -}}-mistral
+{{- end }}
+
+{{- define "lumigator.mistral-secret-ref" -}}
+  {{ if .Values.existingMistralAPISecret }}
+    {{- .Values.existingMistralAPISecret }}
+  {{- else -}}
+    {{- include "lumigator.mistral-secret-name" . }}
+  {{- end }}
+{{- end }}
+
+{{- define "lumigator.mistral-default-secret" -}}
+{{- $_ := set . "Consts" (dict)  -}}
+{{- $_ := set .Consts "mistralSecretKey" "MISTRAL_API_KEY" -}}
+{{- end -}}

@@ -1,3 +1,4 @@
+{{ include "lumigator.mistral-default-secret" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -65,12 +66,12 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ required "Missing Ray Worker GPU number" .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
-            {{- if .Values.mistralSecretName }}
-            - name: MISTRAL_API_KEY # kubectl create secret generic mistral-key --from-literal MISTRAL_API_KEY=value
+            {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
+            - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.mistralSecretName }}
-                  key: {{ .Values.mistralSecretKey }}
+                  name: {{ include "lumigator.mistral-secret-ref" . }}
+                  key: {{ .Consts.mistralSecretKey }}
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

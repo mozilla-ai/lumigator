@@ -4,14 +4,14 @@ import torch
 from accelerate import Accelerator
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from loguru import logger
-from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
+from lumigator.python.mzai.lm_buddy.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
-from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
+from lumigator.python.mzai.lm_buddy.paths import AssetPath, PathPrefix, strip_path_prefix
+from lumigator.python.mzai.lm_buddy.tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )

@@ -1,6 +1,6 @@
 import wandb
 
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs import (
+from lumigator.python.mzai.lm_buddy.configs.jobs import (
     EvaluationJobConfig,
     FinetuningJobConfig,
     HuggingFaceEvalJobConfig,
@@ -9,18 +9,18 @@ from lumigator.python.mzai.backend.lm_buddy.configs.jobs import (
     PrometheusJobConfig,
     RagasJobConfig,
 )
-from lumigator.python.mzai.backend.lm_buddy.jobs.common import (
+from lumigator.python.mzai.lm_buddy.jobs.common import (
     EvaluationResult,
     FinetuningResult,
     JobType,
 )
-from lumigator.python.mzai.backend.lm_buddy.jobs.evaluation.hf_evaluate import run_hf_evaluation
-from lumigator.python.mzai.backend.lm_buddy.jobs.evaluation.lm_harness import run_lm_harness
-from lumigator.python.mzai.backend.lm_buddy.jobs.evaluation.prometheus import run_prometheus
-from lumigator.python.mzai.backend.lm_buddy.jobs.evaluation.ragas import run_ragas
-from lumigator.python.mzai.backend.lm_buddy.jobs.finetuning import run_finetuning
-from lumigator.python.mzai.backend.lm_buddy.paths import strip_path_prefix
-from lumigator.python.mzai.backend.lm_buddy.tracking.run_utils import WandbResumeMode
+from lumigator.python.mzai.lm_buddy.jobs.evaluation.hf_evaluate import run_hf_evaluation
+from lumigator.python.mzai.lm_buddy.jobs.evaluation.lm_harness import run_lm_harness
+from lumigator.python.mzai.lm_buddy.jobs.evaluation.prometheus import run_prometheus
+from lumigator.python.mzai.lm_buddy.jobs.evaluation.ragas import run_ragas
+from lumigator.python.mzai.lm_buddy.jobs.finetuning import run_finetuning
+from lumigator.python.mzai.lm_buddy.paths import strip_path_prefix
+from lumigator.python.mzai.lm_buddy.tracking.run_utils import WandbResumeMode
 
 
 class LMBuddy:

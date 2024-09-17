@@ -2,7 +2,7 @@ import pytest
 from peft import PeftType, TaskType
 from pydantic import ValidationError
 
-from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import AdapterConfig
+from lumigator.python.mzai.lm_buddy.configs.huggingface import AdapterConfig
 
 
 def test_enum_sanitzation():

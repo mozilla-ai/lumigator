@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from lumigator.python.mzai.backend.lm_buddy.tracking.artifact_utils import (
+from lumigator.python.mzai.lm_buddy.tracking.artifact_utils import (
     ArtifactType,
     build_directory_artifact,
 )

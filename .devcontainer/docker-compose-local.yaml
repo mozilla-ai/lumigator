@@ -58,7 +58,7 @@ services:
       # NOTE: the following path contains a hash which needs to be updated whenever
       # the list of libraries installed in backend/services/experiments.py changes.
       # This is a temporary solution, see https://github.com/mozilla-ai/lumigator/pull/186
-      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/2b258edbe79c9be2bb813e301619caa20219d310/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
+      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/3aad1b9393df933f711013a7d9650bb9821e891c/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
 
@@ -95,6 +95,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
+      - EVALUATOR_DIR=/mzai/lumigator/python/mzai/lm_buddy
     volumes:
       - ../:/mzai
 

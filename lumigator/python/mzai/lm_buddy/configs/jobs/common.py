@@ -6,9 +6,9 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.wandb import WandbRunConfig
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix
+from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.lm_buddy.configs.wandb import WandbRunConfig
+from lumigator.python.mzai.lm_buddy.paths import AssetPath, PathPrefix
 
 
 class JobConfig(LMBuddyConfig):

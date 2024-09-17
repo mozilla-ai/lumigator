@@ -1,7 +1,7 @@
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, strip_path_prefix
+from lumigator.python.mzai.lm_buddy.paths import AssetPath, strip_path_prefix
 
 
 def test_asset_path_validation():

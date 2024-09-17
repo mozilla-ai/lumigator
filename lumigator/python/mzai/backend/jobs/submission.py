@@ -27,7 +27,7 @@ class RayJobEntrypoint(ABC):
     def command(self) -> str:
         # lm-buddy passed as a module to Ray using a JSON-serialized config.
         return (
-            f"python -m lumigator.python.mzai.backend.lm_buddy evaluate huggingface "
+            f"python -m lumigator.python.mzai.lm_buddy evaluate huggingface "
             f"--config '{json.dumps(self.config.args)}'"
         )
 

@@ -3,10 +3,10 @@ from abc import abstractmethod
 
 import torch
 from loguru import logger
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import (
+from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from lumigator.python.mzai.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from lumigator.python.mzai.lm_buddy.jobs.asset_loader import (
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )

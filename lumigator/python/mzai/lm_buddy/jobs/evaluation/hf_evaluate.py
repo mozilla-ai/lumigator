@@ -6,23 +6,23 @@ from pathlib import Path
 
 import s3fs
 from loguru import logger
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lumigator.python.mzai.backend.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
-from lumigator.python.mzai.backend.lm_buddy.jobs.asset_loader import (
+from lumigator.python.mzai.lm_buddy.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from lumigator.python.mzai.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from lumigator.python.mzai.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
+from lumigator.python.mzai.lm_buddy.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from lumigator.python.mzai.backend.lm_buddy.jobs.common import EvaluationResult
-from lumigator.python.mzai.backend.lm_buddy.jobs.evaluation.metrics import EvaluationMetrics
-from lumigator.python.mzai.backend.lm_buddy.jobs.model_clients import (
+from lumigator.python.mzai.lm_buddy.jobs.common import EvaluationResult
+from lumigator.python.mzai.lm_buddy.jobs.evaluation.metrics import EvaluationMetrics
+from lumigator.python.mzai.lm_buddy.jobs.model_clients import (
     BaseModelClient,
     HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
     SummarizationPipelineModelClient,
 )
-from lumigator.python.mzai.backend.lm_buddy.jobs.utils import timer
+from lumigator.python.mzai.lm_buddy.jobs.utils import timer
 from tqdm import tqdm
 
 

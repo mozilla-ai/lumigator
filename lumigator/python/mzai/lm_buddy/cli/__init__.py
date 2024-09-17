@@ -1,6 +1,6 @@
 import click
 
-from lumigator.python.mzai.backend.lm_buddy.cli import evaluate, finetune
+from lumigator.python.mzai.lm_buddy.cli import evaluate, finetune
 
 
 @click.group(name="LM Buddy CLI", help="Entrypoints for the LM Buddy.")

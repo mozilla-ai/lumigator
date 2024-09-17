@@ -1,8 +1,8 @@
 import click
 
-from lumigator.python.mzai.backend.lm_buddy import LMBuddy
-from lumigator.python.mzai.backend.lm_buddy.cli.utils import parse_config_option
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs import FinetuningJobConfig
+from lumigator.python.mzai.lm_buddy import LMBuddy
+from lumigator.python.mzai.lm_buddy.cli.utils import parse_config_option
+from lumigator.python.mzai.lm_buddy.configs.jobs import FinetuningJobConfig
 
 
 @click.command(name="finetune", help="Run an LM Buddy finetuning job.")

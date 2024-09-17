@@ -1,15 +1,15 @@
 from pydantic import Field, conlist, field_validator, model_validator
 
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.huggingface import (
+from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.lm_buddy.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from lumigator.python.mzai.backend.lm_buddy.configs.jobs.common import JobConfig
-from lumigator.python.mzai.backend.lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath
+from lumigator.python.mzai.lm_buddy.configs.jobs.common import JobConfig
+from lumigator.python.mzai.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from lumigator.python.mzai.lm_buddy.paths import AssetPath
 
 
 class HuggingFaceEvaluationConfig(LMBuddyConfig):

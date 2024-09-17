@@ -1,11 +1,11 @@
 import dataclasses
 from typing import Any
 
-from lumigator.python.mzai.backend.lm_buddy.configs.common import (
+from lumigator.python.mzai.lm_buddy.configs.common import (
     LMBuddyConfig,
     SerializableTorchDtype,
 )
-from lumigator.python.mzai.backend.lm_buddy.paths import AssetPath, PathPrefix
+from lumigator.python.mzai.lm_buddy.paths import AssetPath, PathPrefix
 from peft import PeftConfig, PeftType, TaskType
 from pydantic import field_validator, model_validator
 from transformers import BitsAndBytesConfig

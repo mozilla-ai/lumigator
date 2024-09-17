@@ -4,7 +4,7 @@ from typing import Any
 import wandb
 from wandb.apis.public import Run as ApiRun
 
-from lumigator.python.mzai.backend.lm_buddy.configs.wandb import WandbRunConfig
+from lumigator.python.mzai.lm_buddy.configs.wandb import WandbRunConfig
 
 
 class WandbResumeMode(str, Enum):

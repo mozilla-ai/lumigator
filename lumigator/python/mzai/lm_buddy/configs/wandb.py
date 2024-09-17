@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from lumigator.python.mzai.backend.lm_buddy.configs.common import LMBuddyConfig
+from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
 from pydantic import model_validator
 from wandb.apis.public import Run
 from wandb.util import random_string

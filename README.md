@@ -85,7 +85,7 @@ You can build the local project using `pants` and `docker-compose` on Mac or Lin
 ## Local Requirements
 
 + [Docker](https://docs.docker.com/engine/install/)
-    + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/)
+    + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 + System Python (that is: no version manager, such as pyenv, should be active).
 
 ## Local Development Setup (either Mac or Linux)

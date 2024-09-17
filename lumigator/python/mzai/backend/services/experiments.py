@@ -135,28 +135,6 @@ class ExperimentService:
         else:
             worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 1.0))
 
-        # runtime_env = {
-        #     "pip": ["wandb",
-        #         "nltk==3.8.1",
-        #         "datasets==2.20.0",
-        #         "evaluate",
-        #         "pydantic_yaml",
-        #         "torch",
-        #         "peft",
-        #         "s3fs",
-        #         "loguru",
-        #         "mistralai",
-        #         "openai",
-        #         "lm-eval",
-        #         "langchain_community",
-        #         "langchain_openai",
-        #         "ragas",
-        #         "trl",],
-        #     "working_dir": "./",
-        #     "env_vars": runtime_env_vars,
-        # }
-        #     "pip": [f"-r ../../lm_buddy/requirements.txt"],
-
         runtime_env = {
             "pip": settings.PIP_REQS,
             "working_dir": "./",

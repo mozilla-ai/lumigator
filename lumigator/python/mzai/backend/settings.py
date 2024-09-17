@@ -23,9 +23,7 @@ class BackendSettings(BaseSettings):
     S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
     S3_DATASETS_PREFIX: str = "datasets"
     S3_EXPERIMENT_RESULTS_PREFIX: str = "experiments/results"
-    S3_EXPERIMENT_RESULTS_FILENAME: str = (
-        "{experiment_name}/{experiment_id}/eval_results.json"
-    )
+    S3_EXPERIMENT_RESULTS_FILENAME: str = "{experiment_name}/{experiment_id}/eval_results.json"
 
     # Ray
     RAY_HEAD_NODE_HOST: str = "localhost"
@@ -50,9 +48,7 @@ class BackendSettings(BaseSettings):
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
-    DEFAULT_SUMMARIZER_PROMPT: str = (
-        "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
-    )
+    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None

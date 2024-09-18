@@ -109,6 +109,25 @@ class DatasetService:
         """
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
+    def _save_dataset_to_s3(self, temp_fname, record):
+        """Loads a dataset, converts it to HF dataset format, and saves it on S3."""
+        try:
+            # Load the CSV file as HF dataset
+            dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
+
+            # Upload to S3
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
+        except Exception as e:
+            # if a record was already created, delete it from the DB
+            if record:
+                self.dataset_repo.delete(record.id)
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
+
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
         temp = NamedTemporaryFile(delete=False)
         try:
@@ -128,22 +147,7 @@ class DatasetService:
                 size=actual_size,
             )
 
-            # Load the CSV file as HF dataset
-            dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
-
-            # Upload to S3
-            dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
-            dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
-
-        except Exception as e:
-            # if a record was already created, delete it from the DB
-            if record is not None:
-                self.dataset_repo.delete(record.id)
-
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-            ) from e
+            self._save_dataset_to_s3(temp.name, record)
 
         finally:
             # Cleanup temp file

@@ -7,8 +7,10 @@ If you want to customize lumigator with your own custom endpoints / jobs this is
 
 The diagram below shows the current architecture of Lumigator. The larger
 containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lumigator relies on (for more info, check
-[Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md))
-The components inside Backend, instead, are the different abstraction layers the backend itself relies on:
+[Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md)).
+
+
+The components inside Backend, shown in the image below, are the different abstraction layers the backend itself relies on:
 
 * The **API** makes backend functionalities available to the UI (or whatever front-end you want to develop) through
   different **routes** (code

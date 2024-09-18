@@ -27,4 +27,4 @@ langchain_openai==0.1.20
 sentencepiece==0.2.0
 evaluate==0.4.2
 mistralai==0.4.2
-nltk==3.8.1
+nltk==3.9

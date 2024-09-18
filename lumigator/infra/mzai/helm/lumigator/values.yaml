@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 global:
-  storageClass: shared-nvme-lga1
+  storageClass: shared-nvme-lga1 # For Postgresql
 
 replicaCount: 1
 
@@ -77,12 +77,14 @@ tolerations: []
 
 affinity: {}
 
+# Sets up PVC which does not get deleted on helm delete..
 postgresql:
   enabled: true
   #  auth:
   #    username: lumigator
   #    database: lumigator
 
+  # TODO Double check user ID set here is correct..
   primary:
     initContainers:
       - command:

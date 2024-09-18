@@ -1,13 +1,13 @@
 # Creating a new Lumigator endpoint
 
-This document shows how current endpoints in lumigator work and describes the process needed to create a new one. This
-might or might not become part of the public documentation - I think it might be useful for users to expand the tool
-with their own use cases and would allow us to grow more easily, but I am happy to collect feedback about it here first.
+This document shows how current endpoints in lumigator work and describes the process needed to create a new one.
+If you want to customize lumigator with your own custom endpoints / jobs this is a good place to start!
 
 ## Lumigator's architecture
 
 The diagram below shows the current architecture of Lumigator. The larger
-containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lumigator relies on.
+containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lumigator relies on (for more info, check
+[Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md))
 The components inside Backend, instead, are the different abstraction layers the backend itself relies on:
 
 * The **API** makes backend functionalities available to the UI (or whatever front-end you want to develop) through
@@ -27,7 +27,7 @@ The components inside Backend, instead, are the different abstraction layers the
   to actual records on the DB.
 
 <p style="text-align: center;">
-<img src="assets/Lumigator%20Architecture%20-%2020240902.jpg" alt="Lumigator's architecture" >
+<img src="/docs/assets/Lumigator%20Architecture%20-%2020240902.jpg" alt="Lumigator's architecture" >
 Lumigator's architecture
 </p>
 
@@ -48,17 +48,17 @@ together with a metadata tag (defined
 provide a short description of the route:
 
 <p style="text-align: center;">
-<img src="assets/image-20240909-091307.png" alt="Definition of the current routes in Lumigator" >
+<img src="/docs/assets/image-20240909-091307.png" alt="Definition of the current routes in Lumigator" >
 Definition of the current routes in Lumigator
 </p>
 
 <p style="text-align: center;">
-<img src="assets/image-20240909-091142.png" alt="Description tag for the Health endpoint" >
+<img src="/docs/assets/image-20240909-091142.png" alt="Description tag for the Health endpoint" >
 Description tag for the Health endpoint
 </p>
 
 <p style="text-align: center;">
-<img src="assets/image-20240909-091157.png" alt="Description appearing in the API docs" >
+<img src="/docs/assets/image-20240909-091157.png" alt="Description appearing in the API docs" >
 Description appearing in the API docs
 </p>
 
@@ -154,13 +154,13 @@ see how the fields in the datasets table are defined).
 
 
 <p style="text-align: center;">
-<img src="assets/Lumigator records inheritance.jpg" alt="Definition of the fields appearing in DatasetRecord" >
+<img src="/docs/assets/Lumigator records inheritance.jpg" alt="Definition of the fields appearing in DatasetRecord" >
 Definition of the fields appearing in DatasetRecord
 </p>
 
 
 <p style="text-align: center;">
-<img src="assets/image-20240909-103820.png" alt="Table schema on the DB" >
+<img src="/docs/assets/image-20240909-103820.png" alt="Table schema on the DB" >
 Table schema on the DB
 </p>
 
@@ -304,7 +304,7 @@ TAGS_METADATA = [
 Connect to [http://localhost/docs](http://localhost/docs) and you should see the following:
 
 <p style="text-align: center;">
-<img src="assets/image-20240912-144405.png" alt="Your newly created tasks endpoint" >
+<img src="/docs/assets/image-20240912-144405.png" alt="Your newly created tasks endpoint" >
 Your newly created tasks endpoint
 </p>
 
@@ -312,7 +312,7 @@ If you click on `Try it out`, add any value for `task_id` and then click on `Exe
 response:
 
 <p style="text-align: center;">
-<img src="assets/image-20240912-135149.png" alt="Example response from the tasks endpoint" >
+<img src="/docs/assets/image-20240912-135149.png" alt="Example response from the tasks endpoint" >
 Example response from the tasks endpoint
 </p>
 
@@ -540,30 +540,31 @@ def list_tasks(
 
 #### 2.6. Test
 
-To test your new endpoint, connect to [http://localhost/docs](http://localhost/docs). You should see a new section like
+To test your new endpoint, connect to [http://localhost/docs](http://localhost/docs) (you can find instructions for setting up local testing [here](https://docs.google.com/document/d/1ykFlD71QPa9OGNG_G0T9GCWePBhT6jRYlEzInJ323Nw/edit)). 
+You should see a new section like
 the following one:
 
 <p style="text-align: center;">
-<img src="assets/image-20240913-083603.png" alt="List of new methods in the tasks endpoint" >
+<img src="/docs/assets/image-20240913-083603.png" alt="List of new methods in the tasks endpoint" >
 List of new methods in the tasks endpoint
 </p>
 
 Here is an example for the creation of a new task:
 
 <p style="text-align: center;">
-<img src="assets/image-20240913-083904.png" alt="New task creation" >
+<img src="/docs/assets/image-20240913-083904.png" alt="New task creation" >
 New task creation
 </p>
 
 And here is the format of a task list (to which we have also added a `summarization_eval` task):
 
 <p style="text-align: center;">
-<img src="assets/image-20240913-084103.png" alt="The current list of tasks on the system" >
+<img src="/docs/assets/image-20240913-084103.png" alt="The current list of tasks on the system" >
 The current list of tasks on the system
 </p>
 
 
-## Conclusions
+## Final checks and reference code
 
 Creating a new endpoint in Lumigator requires some prior knowledge about the system and due to how the code is
 structured you will have to edit many different files (see the picture below). Once you get the gist of it, though, the
@@ -571,7 +572,7 @@ task can be quite straightforward (albeit a bit repetitive), especially if the e
 operations.
 
 <p style="text-align: center;">
-<img src="assets/image-20240913-084623.png" alt="The list of new and updated files for the tasks endpoint" >
+<img src="/docs/assets/image-20240913-084623.png" alt="The list of new and updated files for the tasks endpoint" >
 The list of new and updated files for the tasks endpoint
 </p>
 

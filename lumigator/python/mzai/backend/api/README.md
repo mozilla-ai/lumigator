@@ -10,7 +10,7 @@ containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lu
 [Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md)).
 
 <p style="text-align: center;">
-<img src="/docs/assets/platform.jpg" alt="Lumigator's architecture" >
+<img src="/docs/assets/platform.png" alt="Lumigator's architecture" >
 Lumigator's architecture
 </p>
 

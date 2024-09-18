@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: pants-fmt-lint
         name: pants fmt lint
-        always_run: false
+        always_run: true
         description: runs ./pants fmt on all files changed since origin/main
         entry: "pants --changed-since=origin/main fmt lint"
         language: system

@@ -1,7 +1,7 @@
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
-
+from pathlib import Path
 from mzai.schemas.extras import DeploymentType
 
 
@@ -52,6 +52,22 @@ class BackendSettings(BaseSettings):
 
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None
+
+    # evaluator path - relative to experiment call site
+    # open lumigator pip reqs and split into string to pass into Ray
+    # Ray has the capability to pass a requirements file to `pip
+    # See `python/ray/_private/runtime_env/pip.py#L364`
+    # However, reading relative paths across Docker plus Ray makes it hard to get the file
+    # We hardcode the path for now as a workaround
+    # TODO: refactor requirements into Ray TOML.
+    @computed_field
+    @property
+    def PIP_REQS(self) -> list:  # noqa: N802
+        return [
+            line.strip()
+            for line in Path.open("lumigator/python/mzai/lm_buddy/requirements.txt")
+            if line.strip() and not line.startswith("#")
+        ]
 
     @computed_field
     @property

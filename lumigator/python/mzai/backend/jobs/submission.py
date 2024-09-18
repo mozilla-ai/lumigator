@@ -25,8 +25,11 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        """The command ran by the ray job, which is passed a JSON-serialized config."""
-        return f"lm-buddy evaluate huggingface --config '{json.dumps(self.config.args)}'"
+        # lm-buddy passed as a module to Ray using a JSON-serialized config.
+        return (
+            f"python -m lumigator.python.mzai.lm_buddy evaluate huggingface "
+            f"--config '{json.dumps(self.config.args)}'"
+        )
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

@@ -135,12 +135,12 @@ class ExperimentService:
         else:
             worker_gpus = float(os.environ.get(settings.RAY_WORKER_GPUS_ENV_VAR, 1.0))
 
-        # NOTE: Whenever the list of libraries below change, the LD_PRELOAD line in
-        # `docker-compose-local.yaml` has to be updated with a new hash value
         runtime_env = {
-            "pip": ["nltk==3.8.1", "datasets==2.20.0", "lm-buddy[jobs]==0.12.1"],
+            "pip": settings.PIP_REQS,
+            "working_dir": "./",
             "env_vars": runtime_env_vars,
         }
+
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )

@@ -9,6 +9,10 @@ The diagram below shows the current architecture of Lumigator. The larger
 containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lumigator relies on (for more info, check
 [Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md)).
 
+<p style="text-align: center;">
+<img src="/docs/assets/platform.jpg" alt="Lumigator's architecture" >
+Lumigator's architecture
+</p>
 
 The components inside Backend, shown in the image below, are the different abstraction layers the backend itself relies on:
 
@@ -29,8 +33,8 @@ The components inside Backend, shown in the image below, are the different abstr
   to actual records on the DB.
 
 <p style="text-align: center;">
-<img src="/docs/assets/backend_architecture.jpg" alt="Lumigator's architecture" >
-Lumigator's architecture
+<img src="/docs/assets/backend_architecture.jpg" alt="Lumigator's backend" >
+Lumigator's backend
 </p>
 
 ## Notation

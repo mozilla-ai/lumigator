@@ -136,6 +136,15 @@ class DatasetService:
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
 
+        except Exception as e:
+            # if a record was already created, delete it from the DB
+            if record is not None:
+                self.dataset_repo.delete(record.id)
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
+
         finally:
             # Cleanup temp file
             Path(temp.name).unlink()

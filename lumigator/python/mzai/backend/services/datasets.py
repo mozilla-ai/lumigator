@@ -1,4 +1,5 @@
 import csv
+import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -94,6 +95,9 @@ class DatasetService:
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
+    def _raise_unhandled_exception(self, e: Exception) -> None:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
+
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
         record = self.dataset_repo.get(dataset_id)
 
@@ -124,9 +128,7 @@ class DatasetService:
             if record:
                 self.dataset_repo.delete(record.id)
 
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-            ) from e
+            self._raise_unhandled_exception(e)
 
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
         temp = NamedTemporaryFile(delete=False)
@@ -180,25 +182,40 @@ class DatasetService:
             self.dataset_repo.delete(record.id)
 
         except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-            ) from e
+            self._raise_unhandled_exception(e)
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
+        """Generate presigned download URLs for dataset files."""
         record = self._get_dataset_record(dataset_id)
-
-        # Generate presigned download URL for the object
         dataset_key = self._get_s3_key(dataset_id, record.filename)
-        download_url = self.s3_client.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": settings.S3_BUCKET,
-                "Key": dataset_key,
-            },
-            ExpiresIn=settings.S3_URL_EXPIRATION,
-        )
 
-        return DatasetDownloadResponse(id=dataset_id, download_url=download_url)
+        try:
+            # Call list_objects_v2 to get all objects whose key names start with `dataset_key`
+            s3_response = self.s3_client.list_objects_v2(
+                Bucket=settings.S3_BUCKET, Prefix=dataset_key
+            )
+
+            if s3_response.get("KeyCount") == 0:
+                raise HTTPException(
+                    status.HTTP_404_NOT_FOUND, f"No files found with prefix '{dataset_key}'."
+                )
+
+            download_urls = []
+            for s3_object in s3_response["Contents"]:
+                download_url = self.s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={
+                        "Bucket": settings.S3_BUCKET,
+                        "Key": s3_object["Key"],
+                    },
+                    ExpiresIn=settings.S3_URL_EXPIRATION,
+                )
+                download_urls.append(download_url)
+
+        except Exception as e:
+            self._raise_unhandled_exception(e)
+
+        return DatasetDownloadResponse(id=dataset_id, download_urls=download_urls)
 
     def list_datasets(self, skip: int = 0, limit: int = 100) -> ListingResponse[DatasetResponse]:
         total = self.dataset_repo.count()

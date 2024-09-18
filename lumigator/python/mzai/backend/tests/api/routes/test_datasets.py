@@ -93,10 +93,11 @@ def test_presigned_download(app_client: TestClient, valid_experiment_dataset):
     download_model = DatasetDownloadResponse.model_validate(download_response.json())
     assert download_model.id == created_dataset.id
 
-    # Original filename is included in the presigned download URL
+    # Original filename is included in all the presigned download URLs
     # (not as a content disposition header)
-    parse_result = urlparse(download_model.download_url)
-    assert parse_result.path.endswith(upload_filename)
+    for download_url in download_model.download_urls:
+        parse_result = urlparse(download_url)
+        assert upload_filename in parse_result.path
 
 
 def test_experiment_format_validation(

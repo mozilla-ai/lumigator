@@ -10,20 +10,20 @@ from ray.train.torch import TorchTrainer
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
-from lumigator.python.mzai.lm_buddy.configs.jobs.finetuning import FinetuningJobConfig
-from lumigator.python.mzai.lm_buddy.jobs.asset_loader import (
+from mzai.lm_buddy.configs.jobs.finetuning import FinetuningJobConfig
+from mzai.lm_buddy.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )
-from lumigator.python.mzai.lm_buddy.jobs.common import FinetuningResult, JobType
-from lumigator.python.mzai.lm_buddy.preprocessing import format_dataset_with_prompt
-from lumigator.python.mzai.lm_buddy.tracking.artifact_utils import (
+from mzai.lm_buddy.jobs.common import FinetuningResult, JobType
+from mzai.lm_buddy.preprocessing import format_dataset_with_prompt
+from mzai.lm_buddy.tracking.artifact_utils import (
     ArtifactType,
     build_directory_artifact,
     default_artifact_name,
 )
-from lumigator.python.mzai.lm_buddy.tracking.run_utils import WandbResumeMode
+from mzai.lm_buddy.tracking.run_utils import WandbResumeMode
 
 
 def is_tracking_enabled(config: FinetuningJobConfig):

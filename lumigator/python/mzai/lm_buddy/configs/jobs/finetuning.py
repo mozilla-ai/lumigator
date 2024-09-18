@@ -1,7 +1,7 @@
 from pydantic import Field, field_validator, model_validator
 
-from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.lm_buddy.configs.huggingface import (
+from mzai.lm_buddy.configs.common import LMBuddyConfig
+from mzai.lm_buddy.configs.huggingface import (
     AdapterConfig,
     AutoModelConfig,
     AutoTokenizerConfig,
@@ -9,8 +9,8 @@ from lumigator.python.mzai.lm_buddy.configs.huggingface import (
     QuantizationConfig,
     TrainerConfig,
 )
-from lumigator.python.mzai.lm_buddy.configs.jobs.common import JobConfig
-from lumigator.python.mzai.lm_buddy.paths import AssetPath
+from mzai.lm_buddy.configs.jobs.common import JobConfig
+from mzai.lm_buddy.paths import AssetPath
 
 
 class FinetuningRayConfig(LMBuddyConfig):

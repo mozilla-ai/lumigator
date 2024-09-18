@@ -1,15 +1,15 @@
 import torch
 from datasets import Dataset, DatasetDict
 
-from lumigator.python.mzai.lm_buddy.configs.huggingface import (
+from mzai.lm_buddy.configs.huggingface import (
     AutoModelConfig,
     DatasetConfig,
 )
-from lumigator.python.mzai.lm_buddy.jobs.asset_loader import (
+from mzai.lm_buddy.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from lumigator.python.mzai.lm_buddy.paths import format_file_path
+from mzai.lm_buddy.paths import format_file_path
 
 
 def test_dataset_loading(xyz_dataset_path):

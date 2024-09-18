@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import TypeVar
 
-from lumigator.python.mzai.lm_buddy.configs.jobs.common import JobConfig
+from mzai.lm_buddy.configs.jobs.common import JobConfig
 
 ConfigType = TypeVar("ConfigType", bound=JobConfig)
 

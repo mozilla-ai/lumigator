@@ -2,7 +2,7 @@ import pytest
 import torch
 from pydantic import ValidationError
 
-from lumigator.python.mzai.lm_buddy.configs.common import (
+from mzai.lm_buddy.configs.common import (
     LMBuddyConfig,
     SerializableTorchDtype,
 )

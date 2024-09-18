@@ -147,6 +147,7 @@ class DatasetService:
                 size=actual_size,
             )
 
+            # convert the dataset to HF format and save it to S3
             self._save_dataset_to_s3(temp.name, record)
 
         finally:
@@ -168,13 +169,20 @@ class DatasetService:
     def delete_dataset(self, dataset_id: UUID) -> None:
         record = self._get_dataset_record(dataset_id)
 
-        # Delete from S3
-        # S3 delete is called first, since if this fails the DB delete won't take place
-        dataset_key = self._get_s3_key(record.id, record.filename)
-        self.s3_client.delete_object(Bucket=settings.S3_BUCKET, Key=dataset_key)
+        try:
+            # Delete from S3
+            # S3 delete is called first => if this fails the DB delete won't take place
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            self.s3_filesystem.rm(dataset_path, recursive=True)
 
-        # Delete DB record
-        self.dataset_repo.delete(record.id)
+            # Delete DB record
+            self.dataset_repo.delete(record.id)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            ) from e
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
         record = self._get_dataset_record(dataset_id)

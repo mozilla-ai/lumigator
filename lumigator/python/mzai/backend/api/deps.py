@@ -6,16 +6,17 @@ from fastapi import Depends
 from mypy_boto3_s3.client import S3Client
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 from ray.job_submission import JobSubmissionClient
+from s3fs import S3FileSystem
 from sqlalchemy.orm import Session
 
 from mzai.backend.db import session_manager
 from mzai.backend.repositories.datasets import DatasetRepository
 from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
 from mzai.backend.services.datasets import DatasetService
 from mzai.backend.services.experiments import ExperimentService
 from mzai.backend.services.groundtruth import GroundTruthService
-from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
 from mzai.backend.settings import settings
 
 
@@ -34,9 +35,19 @@ def get_s3_client() -> Generator[S3Client, None, None]:
 S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
 
 
-def get_dataset_service(session: DBSessionDep, s3_client: S3ClientDep) -> DatasetService:
+def get_s3_filesystem() -> Generator[S3FileSystem, None, None]:
+    return S3FileSystem()
+
+
+S3FileSystemDep = Annotated[S3FileSystem, Depends(get_s3_filesystem)]
+
+
+def get_dataset_service(
+    session: DBSessionDep, s3_client: S3ClientDep, s3_filesystem: S3FileSystemDep
+) -> DatasetService:
     dataset_repo = DatasetRepository(session)
-    return DatasetService(dataset_repo, s3_client)
+    dataset_repo = DatasetRepository(session)
+    return DatasetService(dataset_repo, s3_client, s3_filesystem)
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]

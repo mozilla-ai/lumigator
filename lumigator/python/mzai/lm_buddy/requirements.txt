@@ -1,7 +1,7 @@
 click>=8.1.7
 scipy==1.13.1
 numpy<2.0.0
-wandb==0.16.3
+wandb==0.16.3 # pants: no-infer-dep
 protobuf>=3.20.2
 urllib3>=1.26.18,<2
 pydantic>=2.6.4

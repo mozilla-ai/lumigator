@@ -1,9 +1,9 @@
 python_sources(
-    name="evaluator_tests_sources",
+    name="lm_buddy_tests_sources",
     sources=["**/*.py"],
 )
 
 python_tests(
-    name="evaluator_tests",
+    name="lm_buddy_tests",
     sources=["**/test_*.py"],
 )

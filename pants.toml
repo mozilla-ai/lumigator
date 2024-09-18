@@ -84,6 +84,7 @@ search_path = [
 
 [python-infer]
 use_rust_parser = true
+string_imports = true
 
 [ruff]
 config = "ruff.toml"

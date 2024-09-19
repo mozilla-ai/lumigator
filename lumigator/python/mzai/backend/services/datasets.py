@@ -1,5 +1,4 @@
 import csv
-import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO

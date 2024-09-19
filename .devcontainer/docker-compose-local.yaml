@@ -13,8 +13,6 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
 
-
-
   localstack:
     # if you want to enable local S3-style data persistence, use the following
     # image and set LOCALSTACK_AUTH_TOKEN in your env
@@ -34,8 +32,6 @@ services:
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
       - localstack-data:/var/lib/localstack
-
-
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -65,7 +61,6 @@ services:
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/3aad1b9393df933f711013a7d9650bb9821e891c/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
-
 
   backend:
     build:

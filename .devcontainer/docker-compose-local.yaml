@@ -13,6 +13,8 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
 
+
+
   localstack:
     # if you want to enable local S3-style data persistence, use the following
     # image and set LOCALSTACK_AUTH_TOKEN in your env
@@ -20,7 +22,7 @@ services:
     image: localstack/localstack:3.4.0
     platform: linux/amd64
     ports:
-      - 4566:4566
+      - "0.0.0.0:4566:4566"
     environment:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
@@ -32,6 +34,8 @@ services:
       # https://docs.localstack.cloud/references/init-hooks/
       - ./localstack:/etc/localstack/init/ready.d
       - localstack-data:/var/lib/localstack
+
+
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -62,6 +66,7 @@ services:
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
 
+
   backend:
     build:
       context: ..
@@ -79,11 +84,11 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
-      - S3_ENDPOINT_URL=http://localstack:4566
+      - S3_ENDPOINT_URL=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
       - RAY_DASHBOARD_PORT=8265
@@ -97,6 +102,8 @@ services:
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
       - ../:/mzai
+    extra_hosts:
+      - "localhost:host-gateway"
 
 volumes:
     postgres-data:

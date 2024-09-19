@@ -373,18 +373,18 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "c1b2d8f46a8a812513012e1107cb0e68c17159a7a594208005a57dc776e1bdc7",
-              "url": "https://files.pythonhosted.org/packages/7b/a2/10639a79341f6c019dedc95bd48a4928eed9f1d1197f4c04f546fc7ae0ff/anyio-4.4.0-py3-none-any.whl"
+              "hash": "fdeb095b7cc5a5563175eedd926ec4ae55413bb4be5770c424af0ba46ccb4a78",
+              "url": "https://files.pythonhosted.org/packages/3b/68/f9e9bf6324c46e6b8396610aef90ad423ec3e18c9079547ceafea3dce0ec/anyio-4.5.0-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "5aadc6a1bbb7cdb0bede386cac5e2940f5e2ff3aa20277e991cf028e0585ce94",
-              "url": "https://files.pythonhosted.org/packages/e6/e3/c4c8d473d6780ef1853d630d581f70d655b4f8d7553c6997958c283039a2/anyio-4.4.0.tar.gz"
+              "hash": "c5a275fe5ca0afd788001f58fca1e69e29ce706d746e317d660e21f70c530ef9",
+              "url": "https://files.pythonhosted.org/packages/a0/44/66874c5256e9fbc30103b31927fd9341c8da6ccafd4721b2b3e81e6ef176/anyio-4.5.0.tar.gz"
             }
           ],
           "project_name": "anyio",
           "requires_dists": [
-            "Sphinx>=7; extra == \"doc\"",
+            "Sphinx~=7.4; extra == \"doc\"",
             "anyio[trio]; extra == \"test\"",
             "coverage[toml]>=7; extra == \"test\"",
             "exceptiongroup>=1.0.2; python_version < \"3.11\"",
@@ -398,13 +398,13 @@
             "sniffio>=1.1",
             "sphinx-autodoc-typehints>=1.2.0; extra == \"doc\"",
             "sphinx-rtd-theme; extra == \"doc\"",
-            "trio>=0.23; extra == \"trio\"",
+            "trio>=0.26.1; extra == \"trio\"",
             "trustme; extra == \"test\"",
             "typing-extensions>=4.1; python_version < \"3.11\"",
-            "uvloop>=0.17; (platform_python_implementation == \"CPython\" and platform_system != \"Windows\") and extra == \"test\""
+            "uvloop>=0.21.0b1; (platform_python_implementation == \"CPython\" and platform_system != \"Windows\") and extra == \"test\""
           ],
           "requires_python": ">=3.8",
-          "version": "4.4.0"
+          "version": "4.5.0"
         },
         {
           "artifacts": [
@@ -1314,13 +1314,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "ae3a0810110e831bf29f73772fbd137f37444e12b0945583cd18e0a12d809e6f",
-              "url": "https://files.pythonhosted.org/packages/d9/04/3c65ac86e40c9fa5c6915d7a290e8a7bae5e738135114c4b93fd1e3cc93d/botocore_stubs-1.35.21-py3-none-any.whl"
+              "hash": "dae8cc433df3044ece464f4985e67a154bab51fd042757d0c59e4a9ea26d0376",
+              "url": "https://files.pythonhosted.org/packages/72/c0/eecdea3a64904b3b7a6d95cefe6a6b61ecd4c2bcfb97da7176e2c7d70443/botocore_stubs-1.35.22-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "4859206b5766907ecfeff42c25d6596ffaa0b0528b0b41d7eaa081f59dc591fc",
-              "url": "https://files.pythonhosted.org/packages/42/18/66ff3d159ff06f6d78a63a480f40e11ae2b4a5f6557a61d1c68528c4e3bc/botocore_stubs-1.35.21.tar.gz"
+              "hash": "14dec6b00d974dce4747d6917a791bcea0d8efd1c8959821d8ce6ca69ce40d70",
+              "url": "https://files.pythonhosted.org/packages/fb/dd/d4bd4dbf0d3f226f5a11fe8f0bf1e6cf6fc0c0598e4d31084e7d4ed8e919/botocore_stubs-1.35.22.tar.gz"
             }
           ],
           "project_name": "botocore-stubs",
@@ -1330,7 +1330,7 @@
             "typing-extensions>=4.1.0; python_version < \"3.9\""
           ],
           "requires_python": ">=3.8",
-          "version": "1.35.21"
+          "version": "1.35.22"
         },
         {
           "artifacts": [
@@ -4117,13 +4117,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "e837a1415e65fddad288de6e8b2209a0bca5a7e369cd0c20d02509364890c2ef",
-              "url": "https://files.pythonhosted.org/packages/9e/f3/4898a35e7963dae109710aa6dd19c929d72e93a017aa736ec79f1be0e1cc/pex-2.19.1-py2.py3-none-any.whl"
+              "hash": "2c55c0127af8688e42f9b10f58611c7f60655644a8078cc913ca22a3328b616a",
+              "url": "https://files.pythonhosted.org/packages/a5/cd/3951446d195118c481473483cf1aeaf3a7435cf8075c80cbda3b56552a30/pex-2.20.0-py2.py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "9416ff00002a9eb21c725c67caf914cf387ea94c01329437328a9655d76b8311",
-              "url": "https://files.pythonhosted.org/packages/94/41/5d8a0bf2193f54a32a693185334e40064717f25a32b75fdc7820bd24420c/pex-2.19.1.tar.gz"
+              "hash": "46e31405f500510db3857d37aba302c9ccfc4f96ae9a5bbaa4f1c87d88243146",
+              "url": "https://files.pythonhosted.org/packages/6d/ea/890780d103d671931e3fc7be955afcdcb17260ee0bdfd3cd03434471deba/pex-2.20.0.tar.gz"
             }
           ],
           "project_name": "pex",
@@ -4132,7 +4132,7 @@
             "subprocess32>=3.2.7; python_version < \"3\" and extra == \"subprocess\""
           ],
           "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.14,>=2.7",
-          "version": "2.19.1"
+          "version": "2.20.0"
         },
         {
           "artifacts": [
@@ -4329,34 +4329,34 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "c529535e5c0effcf417682563719e5d8ac8d2b93de07a56108b4c2d436d7a29a",
-              "url": "https://files.pythonhosted.org/packages/51/3d/71fae0078424ba8ea70b222b6fa56ef771a9918ab91cee806c2abc9d57fa/protobuf-5.28.1-py3-none-any.whl"
+              "hash": "52235802093bd8a2811abbe8bf0ab9c5f54cca0a751fdd3f6ac2a21438bffece",
+              "url": "https://files.pythonhosted.org/packages/9b/55/f24e3b801d2e108c48aa2b1b59bb791b5cffba89465cbbf66fc98de89270/protobuf-5.28.2-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "42597e938f83bb7f3e4b35f03aa45208d49ae8d5bcb4bc10b9fc825e0ab5e423",
-              "url": "https://files.pythonhosted.org/packages/3c/0b/7a997c8939f698d72bdea14d57116e43d3051fffb3b2964c30938c4a08e6/protobuf-5.28.1.tar.gz"
+              "hash": "5e8a95246d581eef20471b5d5ba010d55f66740942b95ba9b872d918c459452f",
+              "url": "https://files.pythonhosted.org/packages/23/08/a1ce0415a115c2b703bfa798f06f0e43ca91dbe29d6180bf86a9287b15e2/protobuf-5.28.2-cp38-abi3-manylinux2014_x86_64.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "4304e4fceb823d91699e924a1fdf95cde0e066f3b1c28edb665bda762ecde10f",
-              "url": "https://files.pythonhosted.org/packages/99/80/46b61e647a9386f5dc836e9660818f79afd80a4d5802535ec07a7c6aa16e/protobuf-5.28.1-cp38-abi3-macosx_10_9_universal2.whl"
+              "hash": "a8b9403fc70764b08d2f593ce44f1d2920c5077bf7d311fefec999f8c40f78b7",
+              "url": "https://files.pythonhosted.org/packages/37/45/d2a760580f8f2ed2825ba44cb370e0a4011ddef85e728f46ea3dd565a8a5/protobuf-5.28.2-cp38-abi3-macosx_10_9_universal2.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "0dfd86d2b5edf03d91ec2a7c15b4e950258150f14f9af5f51c17fa224ee1931f",
-              "url": "https://files.pythonhosted.org/packages/b3/21/33dbf04427a11c2de5fb835bb37c5d1522e9d5556a92df0acd13644860a9/protobuf-5.28.1-cp38-abi3-manylinux2014_aarch64.whl"
+              "hash": "59379674ff119717404f7454647913787034f03fe7049cbef1d74a97bb4593f0",
+              "url": "https://files.pythonhosted.org/packages/b1/a4/4579a61de526e19005ceeb93e478b61d77aa38c8a85ad958ff16a9906549/protobuf-5.28.2.tar.gz"
             },
             {
               "algorithm": "sha256",
-              "hash": "51f09caab818707ab91cf09cc5c156026599cf05a4520779ccbf53c1b352fb25",
-              "url": "https://files.pythonhosted.org/packages/c0/be/bac52549cab1aaab112d380b3f2a80a348ba7083a80bf4ff4be4fb5a6729/protobuf-5.28.1-cp38-abi3-manylinux2014_x86_64.whl"
+              "hash": "35cfcb15f213449af7ff6198d6eb5f739c37d7e4f1c09b5d0641babf2cc0c68f",
+              "url": "https://files.pythonhosted.org/packages/e6/23/ed718dc18e6a561445ece1e7a17d2dda0c634ad9cf663102b47f10005d8f/protobuf-5.28.2-cp38-abi3-manylinux2014_aarch64.whl"
             }
           ],
           "project_name": "protobuf",
           "requires_dists": [],
           "requires_python": ">=3.8",
-          "version": "5.28.1"
+          "version": "5.28.2"
         },
         {
           "artifacts": [
@@ -5901,13 +5901,13 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "c51d75517712f1aed280d4ce58506a4a88d635d6b5dd48b39102a7ae1f3fcfe9",
-              "url": "https://files.pythonhosted.org/packages/c1/f9/6845bf8fca0eaf847da21c5d5bc6cd92797364662824a11d3f836423a1a5/sympy-1.13.2-py3-none-any.whl"
+              "hash": "54612cf55a62755ee71824ce692986f23c88ffa77207b30c1368eda4a7060f73",
+              "url": "https://files.pythonhosted.org/packages/99/ff/c87e0622b1dadea79d2fb0b25ade9ed98954c9033722eb707053d310d4f3/sympy-1.13.3-py3-none-any.whl"
             },
             {
               "algorithm": "sha256",
-              "hash": "401449d84d07be9d0c7a46a64bd54fe097667d5e7181bfe67ec777be9e01cb13",
-              "url": "https://files.pythonhosted.org/packages/94/15/4a041424c7187f41cce678f5a02189b244e9aac61a18b45cd415a3a470f3/sympy-1.13.2.tar.gz"
+              "hash": "b27fd2c6530e0ab39e275fc9b683895367e51d5da91baa8d3d64db2565fec4d9",
+              "url": "https://files.pythonhosted.org/packages/11/8a/5a7fd6284fa8caac23a26c9ddf9c30485a48169344b4bd3b0f02fef1890f/sympy-1.13.3.tar.gz"
             }
           ],
           "project_name": "sympy",
@@ -5917,7 +5917,7 @@
             "pytest>=7.1.0; extra == \"dev\""
           ],
           "requires_python": ">=3.8",
-          "version": "1.13.2"
+          "version": "1.13.3"
         },
         {
           "artifacts": [

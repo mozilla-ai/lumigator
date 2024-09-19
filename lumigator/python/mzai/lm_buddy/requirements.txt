@@ -7,7 +7,7 @@ urllib3>=1.26.18,<2
 pydantic>=2.6.4
 pydantic-yaml>=1.2.0
 ray[default]==2.30.0
-loguru==0.2.0
+loguru==0.7.2
 s3fs==2024.5.0
 ruff==0.5.5
 torch==2.4.0

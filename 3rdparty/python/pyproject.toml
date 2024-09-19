@@ -42,5 +42,4 @@ dependencies = [
     "datasets==2.20.0",
     # notebook-only deps
     "matplotlib==3.9.2",
-    "wandb==0.16.3"
 ]

@@ -51,3 +51,10 @@ In order to use the API-based vendor ground truth generation and evaluation, you
 + `MISTRAL_API_KEY`
 + `OPENAI_API_KEY`
 into the docker container.
+
+## Image documentation
+
+The following documentation on the images used in the containers is available:
+
+* PostgreSQL: https://hub.docker.com/_/postgres
+* LocalStack: https://docs.localstack.cloud/references/configuration/

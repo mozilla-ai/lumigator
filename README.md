@@ -142,17 +142,37 @@ If the S3 storage service is used, the endpoint, key and secret are needed. The 
 
 | Environment variable name | Default value | Description |
 | --- | :-: | --- |
-| LOCAL_FSSPEC_S3_ENDPOINT_URL | "" | Endpoint URL for the S3 data storage service |
-| LOCAL_FSSPEC_S3_KEY | "" | Key for the S3 data storage service |
-| LOCAL_FSSPEC_S3_SECRET | "" | Secret for the S3 data storage service |
-| LOCALSTACK_AUTH_TOKEN | "" | Authentication token for the LocalStack service |
+| AWS_HOST | "" | Host where S3 is located. Currently pointing at `services.localstack`. |
+| AWS_ENDPOINT_URL | "" | Endpoint URL for the S3 data storage service. |
+| AWS_ACCESS_KEY_ID | "" | Key for the S3 data storage service. |
+| AWS_SECRET_ACCESS_KEY | "" | Secret for the S3 data storage service. |
+| AWS_DEFAULT_REGION | "" | Default region for the S3 service. |
+| LOCALSTACK_AUTH_TOKEN | "" | Authentication token for the LocalStack service. |
+| S3_BUCKET | lumigator-storage | "" | Bucket name to be used for S3 storage. |
 
  Models from Mistral or OpenAI can be used via API instead of instantiating them within Lumigator. In this case, the corresponding key is needed.
 
 | Environment variable name | Default value | Description |
 | --- | :-: | --- |
-| MISTRAL_API_KEY | "" | Key for Mistral API models |
-| OPENAI_API_KEY | "" | Key for OpenAI API models |
+| MISTRAL_API_KEY | "" | Key for Mistral API models. |
+| OPENAI_API_KEY | "" | Key for OpenAI API models. |
+
+Lumigator uses a database to store its structured data. It needs a database user, a password and a default database.
+
+| Environment variable name | Default value | Description |
+| --- | :-: | --- |
+| POSTGRES_HOST | "" | Host where the postgres db is available.  Currently pointing at `services.postgres`. |
+| POSTGRES_PORT | "" | Port where the postgres db is available (usually 5432). |
+| POSTGRES_USER | "" | Database user holding the lumigator structured data. Needs to match `postgres.environment.POSTGRES_DB`. |
+| POSTGRES_DB | "" | Database name holding the lumigator structured data. Needs to match `postgres.environment.POSTGRES_DB`. |
+
+The Ray cluster used for computing allows several settings through the following variables.
+
+| Environment variable name | Default value | Description |
+| --- | :-: | --- |
+| RAY_DASHBOARD_PORT | "" | Port for accessing the Ray dashboards (usually 8265). |
+| RAY_WORKER_GPUS | "" | Number of GPUs available for worker nodes. |
+| RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
 
 ## Rebuilding dependencies
 

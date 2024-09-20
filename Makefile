@@ -2,21 +2,28 @@
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
+$(info uname: $(UNAME))
+ARCH := $(shell uname -m)
+$(info arch: $(ARCH))
 PY_VERSION := 3.11.9
 CUDA_AVAILABLE := $(shell nvidia-smi &> /dev/null; echo $$?)
 PANTS_INSTALLED := $(shell pants --version &> /dev/null; echo $$?)
 PYTHON :=
-
+EUID:=$(shell echo $${EUID})
 
 ifndef PYTHON
 	ifeq ($(UNAME), GNU/Linux)
 		PYTHON_INSTALL_DIR:= /opt/python
 		# UV's installation path post /opt/python
-		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-x86_64-gnu/bin/python3
+		ifeq ($(ARCH), x86_64)
+			PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-x86_64-gnu/bin/python3
+		else
+			PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-aarch64-gnu/bin/python3
+		endif
 		ifeq ($(CUDA_AVAILABLE), 0)
 			PARAMETRIZE := linux_cuda
 		else
-			PARAMETRIZE = linux_cpu
+			PARAMETRIZE := linux_cpu
 		endif
 	else
 		PYTHON_INSTALL_DIR:=.python
@@ -35,13 +42,17 @@ print_my_env:
 
 install-pants:
 ifneq ($(PANTS_INSTALLED),0)
+ifeq ($(EUID),0)
+	bash pants_tools/get-pants.sh -d /usr/local/bin
+else
 	bash pants_tools/get-pants.sh
+endif
 endif
 
 
 $(PYTHON):
 	@echo "Installing python and configuring venv"
-	bash devtools/shell/bootstrap_python.sh
+	XX_PYTHON=$(PYTHON) bash devtools/shell/bootstrap_python.sh
 
 $(VENV): $(PYTHON)
 
@@ -50,7 +61,8 @@ bootstrap-python: $(PYTHON) $(VENV)
 .env: $(PYTHON) install-pants
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
 	# ROOTS="$(shell pants roots)" $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$$ROOTS'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
-	$(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+	# $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+	python3 -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
 
 bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env
 

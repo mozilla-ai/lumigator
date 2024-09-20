@@ -5,12 +5,13 @@ SHELL ["/bin/bash", "-c"]
 WORKDIR /tmp
 
 
-COPY ../3rdparty/python/* .
+COPY 3rdparty/python/* .
 RUN pip install pex uv
 
 # uv pip is erroring out on a weird issue, saying it can't install numpy's version as such. normal pip works as expected.
 # leaving these here for changing after sorting it out
 RUN uv python install 3.11.9 --python-preference only-managed
+RUN ls -la
 RUN	<<EOF
     uv pip install \
         --system \

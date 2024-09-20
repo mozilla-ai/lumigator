@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Requires curl.
-set -eou pipefail
+set -eoux pipefail
 # note that this is mostly ran from the repo root, so this is a relative path from there.
 if [[ -f "devtools/shell/common.sh" ]]; then
   source devtools/shell/common.sh
@@ -13,6 +13,7 @@ fi
 
 
 PLAT=$(uname -o)
+ARCH=$(uname -m)
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
 # from common.sh
 PYTHON_INSTALLED=$(check_if_installed python)
@@ -28,20 +29,40 @@ if [[ $PLAT == 'Darwin' ]]; then
 	echo "torch==${TORCH_VERSION}" >tmp_overrides.txt
 else
 	echo "linux setup"
-	PYTHON_INSTALL_DIR=/opt/python
-	PY_NAME=cpython-3.11.9-linux-x86_64-gnu
-	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
-		echo "nvcc found; configuring with CUDA"
-		# versions found in common.sh
-		echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
-		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
+	if [[ $ARCH == 'aarch64' ]]; then
+		PYTHON_INSTALL_DIR=/opt/python
+		PY_NAME=cpython-3.11.9-linux-aarch64-gnu
+		if [[ "$CUDA_AVAILABLE" != 0 ]]; then
+			echo "nvcc found; configuring with CUDA"
+			# versions found in common.sh
+			echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
+			UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
+		else
+			echo "torch==${TORCH_VERSION}" >tmp_overrides.txt
+			UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
+		fi
 	else
-		echo "torch==${TORCH_VERSION}+cpu" >tmp_overrides.txt
-		UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
+		PYTHON_INSTALL_DIR=/opt/python
+		PY_NAME=cpython-3.11.9-linux-x86_64-gnu
+		if [[ "$CUDA_AVAILABLE" != 0 ]]; then
+			echo "nvcc found; configuring with CUDA"
+			# versions found in common.sh
+			echo "torch[cuda]==${TORCH_VERSION}+${TORCH_CUDA_VERSION}" >tmp_overrides.txt
+			UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/${TORCH_CUDA_VERSION}")
+		else
+			echo "torch==${TORCH_VERSION}" >tmp_overrides.txt
+			UV_ARGS+=("--extra-index-url" "https://download.pytorch.org/whl/cpu")
+		fi
 	fi
 fi
 
 PYTHON=${PYTHON_INSTALL_DIR}/${PY_NAME}/bin/python3
+
+echo "compare:"
+echo "PYTHON: ${PYTHON}"
+echo "XX_PYTHON: ${XX_PYTHON}"
+echo "PYTHON_INSTALLED: ${PYTHON_INSTALLED}"
+echo "cmd: $(command -v python)"
 
 function install_uv() {
 	if [[ "$UV_INSTALLED" == 0 ]]; then
@@ -77,6 +98,7 @@ function install_venv() {
 		# shellcheck source=/dev/null
 		source "$VENVNAME/bin/activate"
 		pip_cmd=("$UV_BIN" "pip" "install" "-r" "3rdparty/python/pyproject.toml" "${UV_ARGS[@]}")
+		cat tmp_overrides.txt
 		echo "running the following:"
 		echo "${pip_cmd[@]}"
 		"${pip_cmd[@]}"

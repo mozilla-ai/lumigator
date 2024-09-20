@@ -1,0 +1,25 @@
+# syntax=docker/dockerfile:1.4
+
+# Build env
+
+# FROM ubuntu AS build
+FROM python:3.11.9-bookworm AS build
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /tmp
+
+COPY . .
+
+RUN uname -a
+
+RUN apt update
+
+RUN make bootstrap-dev-environment
+
+RUN cat 3rdparty/python/pyproject.toml
+
+RUN source mzaivenv/bin/activate && make 3rdparty/python/requirements_python_linux_cpu.txt
+
+RUN source .devcontainer/install_minio.sh
+
+RUN source .devcontainer/install_postgres.sh

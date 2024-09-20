@@ -1,0 +1,71 @@
+# syntax=docker/dockerfile:1.4
+
+# Build env
+
+# FROM ubuntu AS build
+FROM python:3.11.9-bookworm AS build
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /tmp
+
+COPY . .
+
+RUN uname -a
+
+RUN make bootstrap-dev-environment
+
+RUN cat 3rdparty/python/pyproject.toml
+
+RUN source mzaivenv/bin/activate && make 3rdparty/python/requirements_python_linux_cpu.txt
+
+RUN ls -la /tmp/lumigator
+
+# End target
+FROM python:3.11.9-bookworm
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /tmp
+
+RUN apt update
+
+RUN apt install zip
+
+COPY  --from=build /tmp/.devcontainer/ /etc/lumigator/startup
+RUN chmod a+x /etc/lumigator/startup/install_minio.sh
+RUN chmod a+x /etc/lumigator/startup/install_postgres.sh
+RUN chmod a+x /etc/lumigator/startup/start_postgres.sh
+RUN chmod a+x /etc/lumigator/startup/start_minio.sh
+RUN chmod a+x /etc/lumigator/startup/start_ray.sh
+RUN chmod a+x /etc/lumigator/startup/start_jupyter.sh
+RUN chmod a+x /etc/lumigator/startup/entrypoint.sh
+
+RUN bash /etc/lumigator/startup/install_ray.sh
+RUN bash /etc/lumigator/startup/install_jupyter.sh
+RUN bash /etc/lumigator/startup/install_postgres.sh
+RUN bash /etc/lumigator/startup/install_minio.sh
+
+RUN pwd
+
+RUN ls -la
+
+COPY  --from=build /tmp/3rdparty/python/* .
+COPY  --from=build /tmp/lumigator /mzai/lumigator
+
+RUN pip install pex uv
+
+RUN uv python install 3.11.9 --python-preference only-managed
+RUN	<<EOF
+    uv pip install \
+        --system \
+        --no-cache \
+        -r requirements_python_linux_cpu.txt \
+        --index-strategy=unsafe-best-match # required. see UV docs for details
+EOF
+
+# -p 15432:5432 -p 14566:4566 -p 16379:6379 -p 18265:8265 -p 10001:10001 -p 18080:80
+# docker container run -it --init -v <host datadir>:/etc/lumigator/data --env-file .devcontainer/single-env.list -p 15432:5432 -p 14566:4566 -p 16379:6379 -p 18265:8265 -p 20001:10001 -p 18080:80 --entrypoint /bin/bash lumigator-test:0.1.0-alpha.1
+# start all services
+
+WORKDIR /mzai
+# ENV PYTHONPATH=/mzai:/mzai/lumigator/python/mzai:/mzai/lumigator/python
+ENTRYPOINT ["/etc/lumigator/startup/entrypoint.sh"]

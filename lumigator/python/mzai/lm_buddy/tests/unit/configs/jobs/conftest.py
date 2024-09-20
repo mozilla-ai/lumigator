@@ -1,15 +1,15 @@
 import pytest
 from peft import PeftType, TaskType
 
-from lumigator.python.mzai.lm_buddy.configs.huggingface import (
+from mzai.lm_buddy.configs.huggingface import (
     AdapterConfig,
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from lumigator.python.mzai.lm_buddy.configs.vllm import InferenceServerConfig
-from lumigator.python.mzai.lm_buddy.configs.wandb import WandbRunConfig
+from mzai.lm_buddy.configs.vllm import InferenceServerConfig
+from mzai.lm_buddy.configs.wandb import WandbRunConfig
 
 
 @pytest.fixture

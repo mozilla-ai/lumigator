@@ -1,10 +1,10 @@
 from pydantic import Field
 
-from lumigator.python.mzai.lm_buddy.configs.common import LMBuddyConfig
-from lumigator.python.mzai.lm_buddy.configs.huggingface import DatasetConfig
-from lumigator.python.mzai.lm_buddy.configs.jobs.common import JobConfig
-from lumigator.python.mzai.lm_buddy.configs.vllm import VLLMCompletionsConfig
-from lumigator.python.mzai.lm_buddy.paths import AssetPath
+from mzai.lm_buddy.configs.common import LMBuddyConfig
+from mzai.lm_buddy.configs.huggingface import DatasetConfig
+from mzai.lm_buddy.configs.jobs.common import JobConfig
+from mzai.lm_buddy.configs.vllm import VLLMCompletionsConfig
+from mzai.lm_buddy.paths import AssetPath
 
 
 class PrometheusEvaluationConfig(LMBuddyConfig):

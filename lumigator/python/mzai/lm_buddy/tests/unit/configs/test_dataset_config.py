@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from lumigator.python.mzai.lm_buddy.configs.huggingface import DatasetConfig
-from lumigator.python.mzai.lm_buddy.paths import format_huggingface_path
+from mzai.lm_buddy.configs.huggingface import DatasetConfig
+from mzai.lm_buddy.paths import format_huggingface_path
 
 
 def test_split_is_required():

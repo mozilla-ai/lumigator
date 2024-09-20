@@ -9,18 +9,18 @@ from typing import Any
 
 from datasets import Dataset
 from loguru import logger
-from lumigator.python.mzai.lm_buddy.configs.huggingface import AutoTokenizerConfig
-from lumigator.python.mzai.lm_buddy.configs.jobs.prometheus import PrometheusJobConfig
-from lumigator.python.mzai.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
-from lumigator.python.mzai.lm_buddy.jobs.asset_loader import (
+from mzai.lm_buddy.configs.huggingface import AutoTokenizerConfig
+from mzai.lm_buddy.configs.jobs.prometheus import PrometheusJobConfig
+from mzai.lm_buddy.constants import LM_BUDDY_RESULTS_PATH
+from mzai.lm_buddy.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )
-from lumigator.python.mzai.lm_buddy.jobs.common import EvaluationResult
-from lumigator.python.mzai.lm_buddy.jobs.evaluation.conversation import get_conv_template
-from lumigator.python.mzai.lm_buddy.preprocessing import format_dataset_with_prompt
-from lumigator.python.mzai.lm_buddy.tracking.artifact_utils import (
+from mzai.lm_buddy.jobs.common import EvaluationResult
+from mzai.lm_buddy.jobs.evaluation.conversation import get_conv_template
+from mzai.lm_buddy.preprocessing import format_dataset_with_prompt
+from mzai.lm_buddy.tracking.artifact_utils import (
     ArtifactType,
     build_directory_artifact,
     default_artifact_name,

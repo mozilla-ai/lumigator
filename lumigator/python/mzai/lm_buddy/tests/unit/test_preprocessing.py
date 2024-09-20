@@ -1,7 +1,7 @@
 import pytest
 from datasets import load_from_disk
 
-from lumigator.python.mzai.lm_buddy.preprocessing import format_dataset_with_prompt
+from mzai.lm_buddy.preprocessing import format_dataset_with_prompt
 
 
 def test_prompt_formatting(resources_dir):

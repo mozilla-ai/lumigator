@@ -1,0 +1,11 @@
+python_sources(
+    name="lm_buddy_sources",
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
+)
+
+python_requirements(
+    name="reqs",
+)

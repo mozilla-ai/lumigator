@@ -6,7 +6,7 @@ from mzai.lm_buddy.configs.jobs.finetuning import (
     FinetuningJobConfig,
     FinetuningRayConfig,
 )
-from tests.test_utils import copy_pydantic_json
+from mzai.lm_buddy.tests.test_utils import copy_pydantic_json
 
 
 @pytest.fixture

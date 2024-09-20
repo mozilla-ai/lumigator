@@ -65,7 +65,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
 + METEOR - Looks at the harmonic mean of precision and recall
 + BERTScore - Generates embeddings of ground truth input and model output and compares their cosine similarity
 
-[Check this link](notebooks/assets/metrics.png) for a list of pros and cons of each metric and an example of how they work
+[Check this link](docs/assets/metrics.png) for a list of pros and cons of each metric and an example of how they work
 
 
 # Technical Overview

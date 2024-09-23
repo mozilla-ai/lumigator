@@ -20,7 +20,7 @@ services:
     image: localstack/localstack:3.4.0
     platform: linux/amd64
     ports:
-      - 4566:4566
+      - "0.0.0.0:4566:4566"
     environment:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
@@ -79,11 +79,11 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
-      - S3_ENDPOINT_URL=http://localstack:4566
+      - S3_ENDPOINT_URL=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
       - RAY_DASHBOARD_PORT=8265
@@ -97,6 +97,8 @@ services:
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
       - ../:/mzai
+    extra_hosts:
+      - "localhost:host-gateway"
 
 volumes:
     postgres-data:

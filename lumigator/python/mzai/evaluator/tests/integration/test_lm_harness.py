@@ -24,7 +24,7 @@ def job_config(llm_model_path) -> LMHarnessJobConfig:
 
 
 def test_lm_harness_job(job_config):
-    buddy = Evaluator()
-    result = buddy.evaluate(job_config)
+    evaluator = Evaluator()
+    result = evaluator.evaluate(job_config)
     assert len(result.tables) == 10
     assert len(result.artifacts) == 1  # One table artifact

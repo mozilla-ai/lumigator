@@ -5,8 +5,6 @@ from mzai.evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     JobConfig,
     LMHarnessJobConfig,
-    PrometheusJobConfig,
-    RagasJobConfig,
 )
 from mzai.evaluator.jobs.common import (
     EvaluationResult,
@@ -15,7 +13,6 @@ from mzai.evaluator.jobs.common import (
 )
 from mzai.evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
 from mzai.evaluator.jobs.evaluation.lm_harness import run_lm_harness
-from mzai.evaluator.jobs.evaluation.ragas import run_ragas
 from mzai.evaluator.paths import strip_path_prefix
 from mzai.evaluator.tracking.run_utils import WandbResumeMode
 
@@ -59,10 +56,6 @@ class Evaluator:
         match config:
             case LMHarnessJobConfig() as lm_harness_config:
                 result = run_lm_harness(lm_harness_config)
-            case PrometheusJobConfig() as prometheus_config:
-                result = run_prometheus(prometheus_config)
-            case RagasJobConfig() as ragas_config:
-                result = run_ragas(ragas_config)
             case HuggingFaceEvalJobConfig() as hf_eval_config:
                 result = run_hf_evaluation(hf_eval_config)
             case _:

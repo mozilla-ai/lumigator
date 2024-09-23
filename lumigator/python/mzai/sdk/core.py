@@ -41,7 +41,7 @@ class LumigatorClient():
             requests.RequestException
         """
         try:
-            response = requests.request(
+            response = requests.request(self,
                 method=method.upper(),
                 url=url,
                 params=params,

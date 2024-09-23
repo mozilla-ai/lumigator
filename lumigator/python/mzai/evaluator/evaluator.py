@@ -2,7 +2,6 @@ import wandb
 
 from mzai.evaluator.configs.jobs import (
     EvaluationJobConfig,
-    FinetuningJobConfig,
     HuggingFaceEvalJobConfig,
     JobConfig,
     LMHarnessJobConfig,
@@ -18,7 +17,6 @@ from mzai.evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
 from mzai.evaluator.jobs.evaluation.lm_harness import run_lm_harness
 from mzai.evaluator.jobs.evaluation.prometheus import run_prometheus
 from mzai.evaluator.jobs.evaluation.ragas import run_ragas
-from mzai.evaluator.jobs.finetuning import run_finetuning
 from mzai.evaluator.paths import strip_path_prefix
 from mzai.evaluator.tracking.run_utils import WandbResumeMode
 

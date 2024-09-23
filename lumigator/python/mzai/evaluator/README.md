@@ -8,17 +8,25 @@ The package currently exposes an evaluation job using HuggingFace `evaluate` or 
 
 Evaluator's commands are intended to be used as the entrypoints for jobs on a Ray compute cluster. 
 The suggested method for submitting an evaluator job to Ray is by using the Ray Python SDK within a local Python driver script. 
-The ultimate configuration passed to Ray via the Lumigator web API within the `experiments` service `create_experiment` method looks like this: 
+The ultimate configuration passed to Ray via the Lumigator web API within the `experiments` service `create_experiment` [method](https://github.com/mozilla-ai/lumigator/blob/ddf40ee48fe0ab64ec36918844cfcfd26753b753/lumigator/python/mzai/backend/services/experiments.py#L73) follows this Ray pattern:
 
 ```python
 from ray.job_submission import JobSubmissionClient
 
-client.submit_job(
-    entrypoint="lm_buddy finetune <job-name> --config config.yaml", 
-    runtime_env=runtime_env,
-    entrypoint_num_gpus=1
-)
+runtime_env = {
+            "pip": settings.PIP_REQS, #evaluator-specific requirements
+            "working_dir": "./",
+            "env_vars": runtime_env_vars,
+        }
+
+def command(self) -> str:
+        # evaluator passed as a module to Ray using a JSON-serialized config.
+        return (
+            f"python -m lumigator.python.mzai.evaluator evaluate huggingface "
+            f"--config '{json.dumps(self.config.args)}'"
+        )
+
 ```
-
-
+and are populated from [these config templates.](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/config_templates.py)
+Via [submission run here](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/jobs/submission.py). 
 

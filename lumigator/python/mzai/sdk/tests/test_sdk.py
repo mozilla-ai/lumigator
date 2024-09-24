@@ -1,15 +1,22 @@
-import pytest
-
-from pytest import raises, fail
-
+import importlib.resources
 import json
 import unittest.mock as mock
+from pathlib import Path
 
+import pytest
+from pytest import fail, raises
 from requests.exceptions import HTTPError
 
+from mzai.schemas.datasets import DatasetResponse
 from mzai.sdk.core import LumigatorClient
 
-from mzai.schemas.datasets import DatasetResponse
+
+class MockResponse:
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+    def json(self):
+        return self.json_data
 
 @pytest.fixture(scope="function")
 def mock_requests_response():

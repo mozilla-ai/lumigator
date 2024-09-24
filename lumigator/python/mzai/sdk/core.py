@@ -1,8 +1,10 @@
 from typing import Any, Dict  # noqa: UP035
 import json
+from requests.exceptions import HTTPError
 
 import requests
 from mzai.sdk.healthcheck import HealthCheck
+from loguru import logger
 
 class LumigatorClient():
 
@@ -24,7 +26,6 @@ class LumigatorClient():
             **kwargs,
     ) -> requests.Response:
         """HTTP Request using requests
-
         Args:
             url (str)
             method (str, optional): The HTTP method to use. Defaults to "GET".
@@ -33,15 +34,13 @@ class LumigatorClient():
             files (Dict[str, Any], optional): Files to send in the request body.
             headers (Dict[str, str], optional): Headers to include in the request.
             timeout (int, optional): Timeout for the request in seconds. Defaults to 10.
-
         Returns:
             requests.Response: The response object from the request.
-
         Raises:
             requests.RequestException
         """
         try:
-            response = requests.request(self,
+            response = requests.request(
                 method=method.upper(),
                 url=url,
                 params=params,
@@ -54,7 +53,6 @@ class LumigatorClient():
                 **kwargs,  # noqa: B026
             )
             response.raise_for_status()
-            print(f'2-> {response}')
             if verbose:
                 print(f"{json.dumps(response.json(), indent=2)}")
         except requests.RequestException as e:
@@ -63,22 +61,26 @@ class LumigatorClient():
         return response
 
     def get_response(self, verbose: bool = True)-> requests.Response:
-        response = self._make_request(self._api_url, verbose=verbose)
-        if response.status_code == 200:
-            data = response.json()
-            return
-        elif response.status_code == 404:
-            return
-        else:
-            print("Either status is not OK or deployment type is not local")
-            
+
+        try:
+            response = self._make_request(self._api_url, verbose=verbose)
+            if response.status_code == 200:
+                return response
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                return e.response
+            else:
+                # Re-raise the exception if it's not a 404 error
+                raise
+        except requests.RequestException as e:
+            logger.error(f"An error occurred: {e}")
+            raise
+
     def healthcheck(self)->HealthCheck:
         check = HealthCheck()
         response = self.get_response(self._api_url)
-        if response:
-            data = response.json()
-            check.status = data.get('status')
-            check.deployment_type = data.get('deployment_type')
+        data = response.json()
+        check.status = data.get('status')
+        check.deployment_type = data.get('deployment_type')
 
         return response
-

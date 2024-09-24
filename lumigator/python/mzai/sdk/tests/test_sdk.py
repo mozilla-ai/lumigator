@@ -4,9 +4,6 @@ import requests
 
 import unittest.mock as mock
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
 from mzai.sdk.core import LumigatorClient
 
 @pytest.fixture(scope="function")

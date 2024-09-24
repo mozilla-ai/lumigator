@@ -2,7 +2,7 @@ from typing import Any, Dict  # noqa: UP035
 import json
 
 import requests
-from sdk.healthcheck import HealthCheck
+from mzai.sdk.healthcheck import HealthCheck
 
 class LumigatorClient():
 
@@ -10,6 +10,7 @@ class LumigatorClient():
         self.api_host = api_host
         self._api_url = f"http://{self.api_host}/api/v1"
     def _make_request(
+            self,
             url: str,
             method: str = "GET",
             params: Dict[str, Any] = None,  # noqa: UP006

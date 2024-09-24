@@ -1,8 +1,5 @@
 import requests
 
-from sdk.core import LumigatorClient as cl
-
-
 class HealthCheck():
 
     def __init__(self):

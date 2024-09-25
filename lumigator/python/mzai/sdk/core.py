@@ -55,9 +55,9 @@ class LumigatorClient:
             )
             response.raise_for_status()
             if verbose:
-                print(f"{json.dumps(response.json(), indent=2)}")
+                logger.info(f"{json.dumps(response.json(), indent=2)}")
         except requests.RequestException as e:
-            print(f"Request failed: {e}")
+            logger.error(f"Request failed: {e}")
             raise
         return response
 
@@ -79,8 +79,9 @@ class LumigatorClient:
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
         response = self.get_response(self._api_url)
-        data = response.json()
-        check.status = data.get("status")
-        check.deployment_type = data.get("deployment_type")
+        if response:
+            data = response.json()
+            check.status = data.get("status")
+            check.deployment_type = data.get("deployment_type")
 
-        return response
+        return check

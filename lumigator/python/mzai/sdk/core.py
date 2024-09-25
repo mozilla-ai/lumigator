@@ -54,6 +54,7 @@ class LumigatorClient():
                 **kwargs,  # noqa: B026
             )
             response.raise_for_status()
+            print(f'2-> {response}')
             if verbose:
                 print(f"{json.dumps(response.json(), indent=2)}")
         except requests.RequestException as e:
@@ -65,18 +66,19 @@ class LumigatorClient():
         response = self._make_request(self._api_url, verbose=verbose)
         if response.status_code == 200:
             data = response.json()
-
             return
         elif response.status_code == 404:
             return
         else:
             print("Either status is not OK or deployment type is not local")
+            
     def healthcheck(self)->HealthCheck:
         check = HealthCheck()
         response = self.get_response(self._api_url)
-        data = response.json()
-        check.status = data.get('status')
-        check.deployment_type = data.get('deployment_type')
+        if response:
+            data = response.json()
+            check.status = data.get('status')
+            check.deployment_type = data.get('deployment_type')
 
         return response
 

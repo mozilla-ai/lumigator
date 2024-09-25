@@ -20,7 +20,7 @@ services:
     image: localstack/localstack:3.4.0
     platform: linux/amd64
     ports:
-      - "0.0.0.0:4566:4566"
+      - 4566:4566
     environment:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
@@ -61,6 +61,13 @@ services:
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/3aad1b9393df933f711013a7d9650bb9821e891c/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
+    extra_hosts:
+      - "localhost:host-gateway"
 
   backend:
     build:
@@ -97,6 +104,11 @@ services:
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
       - ../:/mzai
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
 

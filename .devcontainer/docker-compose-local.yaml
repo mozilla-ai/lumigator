@@ -61,6 +61,13 @@ services:
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/3aad1b9393df933f711013a7d9650bb9821e891c/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
+    extra_hosts:
+      - "localhost:host-gateway"
 
   backend:
     build:
@@ -79,11 +86,11 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
-      - S3_ENDPOINT_URL=http://localstack:4566
+      - S3_ENDPOINT_URL=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
       - RAY_DASHBOARD_PORT=8265
@@ -97,6 +104,13 @@ services:
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
       - ../:/mzai
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
+    extra_hosts:
+      - "localhost:host-gateway"
 
 volumes:
     postgres-data:

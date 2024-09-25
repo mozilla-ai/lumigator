@@ -4,12 +4,12 @@ from tempfile import NamedTemporaryFile
 from typing import BinaryIO
 from uuid import UUID
 
-import s3fs
 from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
 from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
+from s3fs import S3FileSystem
 
 from mzai.backend.records.datasets import DatasetRecord
 from mzai.backend.repositories.datasets import DatasetRepository
@@ -84,13 +84,18 @@ def validate_experiment_dataset(filename: str):
 
 
 class DatasetService:
-    def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client):
+    def __init__(
+        self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem
+    ):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
-        self.s3_filesystem = s3fs.S3FileSystem()
+        self.s3_filesystem = s3_filesystem
 
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
+
+    def _raise_unhandled_exception(self, e: Exception) -> None:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
         record = self.dataset_repo.get(dataset_id)
@@ -106,6 +111,23 @@ class DatasetService:
         when downloading the object from S3.
         """
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
+
+    def _save_dataset_to_s3(self, temp_fname, record):
+        """Loads a dataset, converts it to HF dataset format, and saves it on S3."""
+        try:
+            # Load the CSV file as HF dataset
+            dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
+
+            # Upload to S3
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
+        except Exception as e:
+            # if a record was already created, delete it from the DB
+            if record:
+                self.dataset_repo.delete(record.id)
+
+            self._raise_unhandled_exception(e)
 
     def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
         temp = NamedTemporaryFile(delete=False)
@@ -126,13 +148,8 @@ class DatasetService:
                 size=actual_size,
             )
 
-            # Load the CSV file as HF dataset
-            dataset_hf = load_dataset("csv", data_files=temp.name, split="train")
-
-            # Upload to S3
-            dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
-            dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
+            # convert the dataset to HF format and save it to S3
+            self._save_dataset_to_s3(temp.name, record)
 
         finally:
             # Cleanup temp file
@@ -153,29 +170,51 @@ class DatasetService:
     def delete_dataset(self, dataset_id: UUID) -> None:
         record = self._get_dataset_record(dataset_id)
 
-        # Delete from S3
-        # S3 delete is called first, since if this fails the DB delete won't take place
-        dataset_key = self._get_s3_key(record.id, record.filename)
-        self.s3_client.delete_object(Bucket=settings.S3_BUCKET, Key=dataset_key)
+        try:
+            # Delete from S3
+            # S3 delete is called first => if this fails the DB delete won't take place
+            dataset_key = self._get_s3_key(record.id, record.filename)
+            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            self.s3_filesystem.rm(dataset_path, recursive=True)
 
-        # Delete DB record
-        self.dataset_repo.delete(record.id)
+            # Delete DB record
+            self.dataset_repo.delete(record.id)
+
+        except Exception as e:
+            self._raise_unhandled_exception(e)
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
+        """Generate presigned download URLs for dataset files."""
         record = self._get_dataset_record(dataset_id)
-
-        # Generate presigned download URL for the object
         dataset_key = self._get_s3_key(dataset_id, record.filename)
-        download_url = self.s3_client.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": settings.S3_BUCKET,
-                "Key": dataset_key,
-            },
-            ExpiresIn=settings.S3_URL_EXPIRATION,
-        )
 
-        return DatasetDownloadResponse(id=dataset_id, download_url=download_url)
+        try:
+            # Call list_objects_v2 to get all objects whose key names start with `dataset_key`
+            s3_response = self.s3_client.list_objects_v2(
+                Bucket=settings.S3_BUCKET, Prefix=dataset_key
+            )
+
+            if s3_response.get("KeyCount") == 0:
+                raise HTTPException(
+                    status.HTTP_404_NOT_FOUND, f"No files found with prefix '{dataset_key}'."
+                )
+
+            download_urls = []
+            for s3_object in s3_response["Contents"]:
+                download_url = self.s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={
+                        "Bucket": settings.S3_BUCKET,
+                        "Key": s3_object["Key"],
+                    },
+                    ExpiresIn=settings.S3_URL_EXPIRATION,
+                )
+                download_urls.append(download_url)
+
+        except Exception as e:
+            self._raise_unhandled_exception(e)
+
+        return DatasetDownloadResponse(id=dataset_id, download_urls=download_urls)
 
     def list_datasets(self, skip: int = 0, limit: int = 100) -> ListingResponse[DatasetResponse]:
         total = self.dataset_repo.count()

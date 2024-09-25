@@ -11,7 +11,7 @@ class DatasetFormat(str, Enum):
 
 class DatasetDownloadResponse(BaseModel):
     id: UUID
-    download_url: str
+    download_urls: list[str]
 
 
 class DatasetResponse(BaseModel, from_attributes=True):

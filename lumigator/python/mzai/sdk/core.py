@@ -6,24 +6,25 @@ import requests
 from mzai.sdk.healthcheck import HealthCheck
 from loguru import logger
 
-class LumigatorClient():
 
-    def __init__(self, api_host:str):
+class LumigatorClient:
+    def __init__(self, api_host: str):
         self.api_host = api_host
         self._api_url = f"http://{self.api_host}/api/v1"
+
     def _make_request(
-            self,
-            url: str,
-            method: str = "GET",
-            params: Dict[str, Any] = None,  # noqa: UP006
-            data: Dict[str, Any] = None,  # noqa: UP006
-            files: Dict[str, Any] = None,  # noqa: UP006
-            headers: Dict[str, str] = None,  # noqa: UP006
-            json_: Dict[str, str] = None,  # noqa: UP006
-            timeout: int = 10,
-            verbose: bool = True,
-            *args,
-            **kwargs,
+        self,
+        url: str,
+        method: str = "GET",
+        params: Dict[str, Any] = None,  # noqa: UP006
+        data: Dict[str, Any] = None,  # noqa: UP006
+        files: Dict[str, Any] = None,  # noqa: UP006
+        headers: Dict[str, str] = None,  # noqa: UP006
+        json_: Dict[str, str] = None,  # noqa: UP006
+        timeout: int = 10,
+        verbose: bool = True,
+        *args,
+        **kwargs,
     ) -> requests.Response:
         """HTTP Request using requests
         Args:
@@ -49,7 +50,7 @@ class LumigatorClient():
                 headers=headers,
                 timeout=timeout,
                 json=json_,
-                *args,
+                *args,  # noqa: B026
                 **kwargs,  # noqa: B026
             )
             response.raise_for_status()
@@ -60,8 +61,7 @@ class LumigatorClient():
             raise
         return response
 
-    def get_response(self, verbose: bool = True)-> requests.Response:
-
+    def get_response(self, verbose: bool = True) -> requests.Response:
         try:
             response = self._make_request(self._api_url, verbose=verbose)
             if response.status_code == 200:
@@ -76,11 +76,11 @@ class LumigatorClient():
             logger.error(f"An error occurred: {e}")
             raise
 
-    def healthcheck(self)->HealthCheck:
+    def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
         response = self.get_response(self._api_url)
         data = response.json()
-        check.status = data.get('status')
-        check.deployment_type = data.get('deployment_type')
+        check.status = data.get("status")
+        check.deployment_type = data.get("deployment_type")
 
         return response

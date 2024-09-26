@@ -117,3 +117,8 @@ default = false
 
 [pytest]
 args = ["-v", "--show-capture", "stderr"]
+
+[test]
+extra_env_vars = [
+  'SQLALCHEMY_DATABASE_URL=sqlite:///local.db'
+]

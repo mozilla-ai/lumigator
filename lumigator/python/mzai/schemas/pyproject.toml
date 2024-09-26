@@ -1,0 +1,16 @@
+[project]
+name = "schemas"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.9.2",
+]
+
+[project.scripts]
+hello = "schemas:hello"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

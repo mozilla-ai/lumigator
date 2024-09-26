@@ -25,7 +25,6 @@ build/
 develop-eggs/
 downloads/
 eggs/
-dist/
 lib/
 lib64/
 parts/

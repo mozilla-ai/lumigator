@@ -4,9 +4,12 @@ from collections.abc import Mapping
 # from mzai.schemas.extras import DeploymentType
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
+
+load_dotenv()
 
 
 class BackendSettings(BaseSettings):

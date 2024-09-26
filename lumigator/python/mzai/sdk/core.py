@@ -4,8 +4,15 @@ from requests.exceptions import HTTPError
 
 import requests
 from mzai.sdk.healthcheck import HealthCheck
+from mzai.schemas.datasets import DatasetResponse
 from loguru import logger
 
+# TODO: move these definitions to an "upper" level to be imported
+# by both the SDK client and the backend (the openapi definition
+# should be developed first, and then the data classes in both sides
+# could be generated)
+HEALTH_ROUTE = "health"
+DATASETS_ROUTE = "datasets"
 
 class LumigatorClient:
     def __init__(self, api_host: str):
@@ -78,10 +85,16 @@ class LumigatorClient:
 
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
-        response = self.get_response(self._api_url)
+        response = self.get_response(self._api_url / HEALTH_ROUTE)
         if response:
             data = response.json()
             check.status = data.get("status")
             check.deployment_type = data.get("deployment_type")
 
         return check
+
+    def datasets(self) -> list[DatasetResponse]:
+        response = self.get_response(self._api_url / DATASETS_ROUTE)
+        if response:
+            return [DatasetResponse(**args) for args in json.loads(response.json())]
+        return []

@@ -1,6 +1,6 @@
 import pytest
 
-from pytest import raises
+from pytest import raises, fail
 
 import json
 import unittest.mock as mock
@@ -8,6 +8,8 @@ import unittest.mock as mock
 from requests.exceptions import HTTPError
 
 from mzai.sdk.core import LumigatorClient
+
+# from mzai.schemas.datasets import DatasetResponse
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -50,3 +52,17 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
     check = lumi_client.healthcheck()
     assert check.status == status
     assert check.deployment_type == None
+
+def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
+    datasets = [
+        DatasetResponse(id="daab39ac-be9f-4de9-87c0-c4c94b297a97",filename="ds1.hf",format="experiment",size=16,created_at="2024-09-26T11:52:05"),
+        DatasetResponse(id="e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",filename="ds2.hf",format="experiment",size=16,created_at="2024-09-26T11:52:05"),
+        DatasetResponse(id="1e23ed9f-b193-444e-8427-e2119a08b0d8",filename="ds3.hf",format="experiment",size=16,created_at="2024-09-26T11:52:05")
+    ]
+    datasets_json = json.dumps(datasets)
+    print(datasets_json)
+    mock_requests_response.status_code = 200
+    mock_requests_response.json = lambda: datasets_json
+    check = lumi_client.healthcheck()
+    fail
+

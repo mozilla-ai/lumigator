@@ -70,6 +70,7 @@ services:
       - "localhost:host-gateway"
 
   backend:
+    # TODO: Change back to build
     image: lumiuv:1
     command: ["uv", "run", "uvicorn", "--host", "0.0.0.0", "app.main:app"]
     # platform: linux/amd64

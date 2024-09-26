@@ -86,6 +86,9 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
+      # The local file needs to be available through a mount,
+      # if persistence is needed
+      - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
       - S3_ENDPOINT_URL=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test

@@ -1,6 +1,6 @@
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
-from sqlalchemy.engine import URL
+from sqlalchemy.engine import URL, make_url
 from pathlib import Path
 import os
 
@@ -96,14 +96,7 @@ class BackendSettings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
-        return URL.create(
-            drivername="postgresql",
-            host=self.POSTGRES_HOST,
-            port=self.POSTGRES_PORT,
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            database=self.POSTGRES_DB,
-        )
+        return make_url(os.environ.get("SQLALCHEMY_DATABASE_URL", None))
 
 
 settings = BackendSettings()

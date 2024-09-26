@@ -102,6 +102,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
+    # TODO: Change back to mounted volume
     #volumes:
     #  - ../:/mzai
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system

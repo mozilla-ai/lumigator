@@ -1,21 +1,17 @@
-import datetime
 import json
 from pathlib import Path
-
-# from mzai.schemas.experiments import (
-#    ExperimentCreate,
-#    ExperimentResponse,
-#    ExperimentResultDownloadResponse,
-#    ExperimentResultResponse,
-# )
-# from mzai.schemas.extras import ListingResponse
-# from mzai.schemas.jobs import JobConfig, JobStatus, JobType
-from typing import Generic, TypeVar
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
+from schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
+    ExperimentResultResponse,
+)
+from schemas.extras import ListingResponse
+from schemas.jobs import JobConfig, JobStatus, JobType
 
 from app import config_templates
 from app.jobs.submission import RayJobEntrypoint, submit_ray_job
@@ -23,51 +19,6 @@ from app.records.experiments import ExperimentRecord
 from app.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from app.services.datasets import DatasetService
 from app.settings import settings
-
-ItemType = TypeVar("ItemType")
-from enum import Enum
-
-
-class JobStatus(str, Enum):
-    CREATED = "created"
-    RUNNING = "running"
-    FAILED = "failed"
-    SUCCEEDED = "succeeded"
-
-
-class ListingResponse(BaseModel, Generic[ItemType]):
-    total: int
-    items: list[ItemType]
-
-
-class ExperimentCreate(BaseModel):
-    name: str
-    description: str = ""
-    model: str
-    dataset: UUID
-    max_samples: int | None = None
-    model_url: str | None = None
-    system_prompt: str | None = None
-    config_template: str | None = None
-
-
-class ExperimentResponse(BaseModel, from_attributes=True):
-    id: UUID
-    name: str
-    description: str
-    status: JobStatus
-    created_at: datetime.datetime
-    updated_at: datetime.datetime | None
-
-
-class ExperimentResultResponse(BaseModel, from_attributes=True):
-    id: UUID
-    experiment_id: UUID
-
-
-class ExperimentResultDownloadResponse(BaseModel):
-    id: UUID
-    download_url: str
 
 
 class ExperimentService:

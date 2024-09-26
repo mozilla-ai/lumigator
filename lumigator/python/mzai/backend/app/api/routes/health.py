@@ -1,53 +1,14 @@
 import json
-from enum import Enum
 from typing import List
 from uuid import UUID
 
 import requests
 from fastapi import APIRouter
 from pydantic import BaseModel
+from schemas.extras import HealthResponse
+from schemas.jobs import JobSubmissionResponse
 
 from app.settings import settings
-
-
-class DeploymentType(str, Enum):
-    LOCAL = "local"
-    DEVELOPMENT = "development"
-    STAGING = "staging"
-    PRODUCTION = "production"
-
-
-# from mzai.schemas.extras import HealthResponse
-# from mzai.schemas.jobs import JobSubmissionResponse
-
-from datetime import datetime
-from typing import Any, Optional
-
-from pydantic import BaseModel, Field
-
-
-class JobSubmissionResponse(BaseModel):
-    type: str | None = None
-    job_id: Optional[str] = None
-    submission_id: str | None = None
-    driver_info: Optional[str] = None
-    status: str | None = None
-    entrypoint: str | None = None
-    message: str | None = None
-    error_type: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    metadata: dict = Field(default_factory=dict)
-    runtime_env: dict = Field(default_factory=dict)
-    driver_agent_http_address: str | None = None
-    driver_node_id: str | None = None
-    driver_exit_code: int | None = None
-
-
-class HealthResponse(BaseModel):
-    status: str
-    deployment_type: DeploymentType
-
 
 router = APIRouter()
 

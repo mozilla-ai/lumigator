@@ -1,26 +1,10 @@
 import datetime
 import uuid
-from enum import Enum
 
+from schemas.deployments import DeploymentStatus
+from schemas.jobs import JobStatus
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
-
-# from mzai.schemas.deployments import DeploymentStatus
-# from mzai.schemas.jobs import JobStatus
-
-
-class JobStatus(str, Enum):
-    CREATED = "created"
-    RUNNING = "running"
-    FAILED = "failed"
-    SUCCEEDED = "succeeded"
-
-
-class DeploymentStatus(str, Enum):
-    CREATED = "created"
-    RUNNING = "running"
-    FAILED = "failed"
-    SUCCEEDED = "succeeded"
 
 
 @declarative_mixin

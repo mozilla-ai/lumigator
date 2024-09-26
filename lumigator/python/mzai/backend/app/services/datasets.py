@@ -1,49 +1,21 @@
 import csv
-import datetime
-from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import BinaryIO, Generic, TypeVar
+from typing import BinaryIO
 from uuid import UUID
 
 from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
 from mypy_boto3_s3.client import S3Client
-
-# from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-# from mzai.schemas.extras import ListingResponse
 from pydantic import BaseModel, ByteSize
 from s3fs import S3FileSystem
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from schemas.extras import ListingResponse
 
 from app.records.datasets import DatasetRecord
 from app.repositories.datasets import DatasetRepository
 from app.settings import settings
-
-ItemType = TypeVar("ItemType")
-
-
-class ListingResponse(BaseModel, Generic[ItemType]):
-    total: int
-    items: list[ItemType]
-
-
-class DatasetFormat(str, Enum):
-    EXPERIMENT = "experiment"
-
-
-class DatasetDownloadResponse(BaseModel):
-    id: UUID
-    download_urls: list[str]
-
-
-class DatasetResponse(BaseModel, from_attributes=True):
-    id: UUID
-    filename: str
-    format: DatasetFormat
-    size: int
-    created_at: datetime.datetime
-
 
 ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}

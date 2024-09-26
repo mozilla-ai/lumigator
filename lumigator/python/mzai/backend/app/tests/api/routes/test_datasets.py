@@ -5,8 +5,7 @@ from urllib.parse import urlparse
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-
-from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
 def format_dataset(data: list[list[str]]) -> str:

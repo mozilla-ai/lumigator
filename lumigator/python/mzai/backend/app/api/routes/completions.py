@@ -1,15 +1,9 @@
 from fastapi import APIRouter
-
-# from mzai.schemas.completions import CompletionRequest
 from loguru import logger
 from pydantic import BaseModel
+from schemas.completions import CompletionRequest
 
 from app.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
-
-
-class CompletionRequest(BaseModel):
-    text: str
-
 
 router = APIRouter()
 

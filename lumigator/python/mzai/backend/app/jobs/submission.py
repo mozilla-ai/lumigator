@@ -7,17 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
-
-
-class JobType(str, Enum):
-    EXPERIMENT = "experiment"
-
-
-# from mzai.schemas.jobs import JobConfig
-class JobConfig(BaseModel):
-    job_id: UUID
-    job_type: JobType
-    args: dict[str, Any]
+from schemas.jobs import JobConfig, JobType
 
 
 @dataclass(kw_only=True)

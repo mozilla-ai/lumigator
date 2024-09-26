@@ -211,7 +211,7 @@ list which is task-specific.
 
 ```
 from fastapi import APIRouter
-from mzai.schemas.extras import ListingResponse
+from schemas.extras import ListingResponse
 
 router = APIRouter()
 
@@ -425,10 +425,10 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 
-from mzai.backend.records.tasks import TaskRecord
-from mzai.backend.repositories.tasks import TaskRepository
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.tasks import TaskCreate, TaskResponse
+from app.records.tasks import TaskRecord
+from app.repositories.tasks import TaskRepository
+from schemas.extras import ListingResponse
+from schemas.tasks import TaskCreate, TaskResponse
 
 
 class TaskService:
@@ -513,9 +513,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from mzai.backend.api.deps import TaskServiceDep
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.tasks import TaskCreate, TaskResponse
+from app.api.deps import TaskServiceDep
+from schemas.extras import ListingResponse
+from schemas.tasks import TaskCreate, TaskResponse
 
 router = APIRouter()
 

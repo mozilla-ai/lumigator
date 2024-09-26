@@ -2,10 +2,10 @@ import uuid
 from math import exp
 
 import pytest
+from schemas.jobs import JobStatus
 from sqlalchemy.exc import IntegrityError
 
-from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from mzai.schemas.jobs import JobStatus
+from app.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 
 
 @pytest.fixture

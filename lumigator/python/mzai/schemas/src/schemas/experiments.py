@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from mzai.schemas.jobs import JobStatus
+from schemas.jobs import JobStatus
 
 
 class ExperimentCreate(BaseModel):

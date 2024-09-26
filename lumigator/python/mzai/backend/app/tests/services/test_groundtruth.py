@@ -1,13 +1,12 @@
 import pytest
+from schemas.extras import ListingResponse
 
-
-from mzai.backend.repositories.groundtruth import (
-    GroundTruthDeploymentRepository,
+from app.api.routes import groundtruth
+from app.repositories.groundtruth import (
     GroundTruthDeploymentRecord,
+    GroundTruthDeploymentRepository,
 )
-from mzai.backend.tests.fakes.groundtruth_service import FakeGroundTruthService
-from mzai.schemas.extras import ListingResponse
-from mzai.backend.api.routes import groundtruth
+from app.tests.fakes.groundtruth_service import FakeGroundTruthService
 
 
 @pytest.fixture

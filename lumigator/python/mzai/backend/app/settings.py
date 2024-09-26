@@ -1,7 +1,7 @@
 import os
 from collections.abc import Mapping
 
-# from mzai.schemas.extras import DeploymentType
+# from schemas.extras import DeploymentType
 from pathlib import Path
 
 from dotenv import load_dotenv

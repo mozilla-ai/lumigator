@@ -4,68 +4,17 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 from pydantic import BaseModel
+from schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
+    ExperimentResultResponse,
+)
+from schemas.extras import ListingResponse
 
 from app.api.deps import ExperimentServiceDep
 
-
-class JobStatus(str, Enum):
-    CREATED = "created"
-    RUNNING = "running"
-    FAILED = "failed"
-    SUCCEEDED = "succeeded"
-
-
-from enum import Enum
-from typing import Generic, TypeVar
-
-from pydantic import BaseModel
-
-ItemType = TypeVar("ItemType")
-# from mzai.schemas.experiments import (
-#     ExperimentCreate,
-#     ExperimentResponse,
-#     ExperimentResultDownloadResponse,
-#     ExperimentResultResponse,
-# )
-# from mzai.schemas.extras import ListingResponse
-
-
-class ListingResponse(BaseModel, Generic[ItemType]):
-    total: int
-    items: list[ItemType]
-
-
 router = APIRouter()
-
-
-class ExperimentCreate(BaseModel):
-    name: str
-    description: str = ""
-    model: str
-    dataset: UUID
-    max_samples: int | None = None
-    model_url: str | None = None
-    system_prompt: str | None = None
-    config_template: str | None = None
-
-
-class ExperimentResponse(BaseModel, from_attributes=True):
-    id: UUID
-    name: str
-    description: str
-    status: JobStatus
-    created_at: datetime.datetime
-    updated_at: datetime.datetime | None
-
-
-class ExperimentResultResponse(BaseModel, from_attributes=True):
-    id: UUID
-    experiment_id: UUID
-
-
-class ExperimentResultDownloadResponse(BaseModel):
-    id: UUID
-    download_url: str
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

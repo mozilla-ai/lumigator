@@ -1,23 +1,13 @@
-import os
 from abc import ABC, abstractmethod
 
 import mistralai.client
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
-
-# from mzai.schemas.completions import CompletionRequest, CompletionResponse
 from pydantic import BaseModel
+from schemas.completions import CompletionRequest, CompletionResponse
 
 from app.settings import settings
-
-
-class CompletionResponse(BaseModel):
-    text: str
-
-
-class CompletionRequest(BaseModel):
-    text: str
 
 
 class CompletionService(ABC):

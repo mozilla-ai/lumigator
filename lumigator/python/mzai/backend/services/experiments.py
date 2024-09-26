@@ -134,7 +134,7 @@ class ExperimentService:
 
         runtime_env = {
             "pip": settings.PIP_REQS,
-            "working_dir": "./",
+            "working_dir": "../..",
             "env_vars": runtime_env_vars,
         }
 

@@ -13,16 +13,11 @@ ruff==0.5.5
 datasets==2.20.0
 transformers==4.43.4
 accelerate==0.33.0
-peft==0.12.0
-trl==0.9.6
 bitsandbytes==0.42.0
 bert_score==0.3.13
 lm-eval==0.4.3
 einops==0.8.0
 openai==1.38.0
-ragas==0.1.12
-langchain-community==0.2.11
-langchain_openai==0.1.20
 sentencepiece==0.2.0
 evaluate==0.4.2
 mistralai==0.4.2

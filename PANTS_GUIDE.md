@@ -7,7 +7,7 @@ as native packaging formats, e.g., a python wheel, pex, zip/tar bundle, etc.
 
 The benefits here are achieved over time as a system adds more services, meta-code, and more. Pants 'knows' what each system depends on
 and will ensure that if a target has an implicit dep on another target, e.g., package `A` depends on `B`, but `B` depends on `C, & Z`, that packages `C, Z, B` and then `A`
-will be built. It handles 3rd party dependencies and has support for packaging software into containers.
+will be built. It handles 3rd-party dependencies and has support for packaging software into containers.
 
 # Important bits to know
 At a high level, this is how Pants' important / special files work together.
@@ -24,7 +24,7 @@ special cases, mostly related to linux/macos and cuda/noncuda setup that pants c
 The following files are less specific to pants but useful to know about.
 
 - `Makefile` - sets some specific Make targets for convenience, including developer environment setup and provides a simple alias for CI targets.
-- `//3rdparty/python` - location of 3rd party python dependencies for the entire repo. This can change, though it's easier to make everything
+- `//3rdparty/python` - location of 3rd-party python dependencies for the entire repo. This can change, though it's easier to make everything
 work with a common set of external deps. Will cover more in a distinct section.
 - `//lumigator/` - main location of code directly related to the Lumigator platform - e.g., application code.
 - `.github/` - github actions
@@ -40,7 +40,7 @@ So when you run a command like: `pants run <some-docker-target>`, pants (at a hi
 
 
 
-## Handling 3rd party deps
+## Handling 3rd-party deps
 
 We (and many others) have a special issue with Torch. Torch has several version specifiers and pypi indexes for its variations -
 e.g., Cuda is not required to run torch, but if it uses Cuda, it'll pull in many nvidia cuda wheels as dependencies. Problem is,

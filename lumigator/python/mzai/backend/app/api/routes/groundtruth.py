@@ -2,8 +2,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 from loguru import logger
-from pydantic import BaseModel
-from schemas.deployments import DeploymentStatus
 from schemas.extras import ListingResponse
 from schemas.groundtruth import (
     GroundTruthDeploymentCreate,

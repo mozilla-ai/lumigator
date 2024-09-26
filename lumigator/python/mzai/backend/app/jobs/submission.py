@@ -1,13 +1,10 @@
 import json
 from abc import ABC
 from dataclasses import dataclass
-from enum import Enum
 from typing import Any
-from uuid import UUID
 
-from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
-from schemas.jobs import JobConfig, JobType
+from schemas.jobs import JobConfig
 
 
 @dataclass(kw_only=True)

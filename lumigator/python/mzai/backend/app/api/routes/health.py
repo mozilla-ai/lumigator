@@ -4,7 +4,6 @@ from uuid import UUID
 
 import requests
 from fastapi import APIRouter
-from pydantic import BaseModel
 from schemas.extras import HealthResponse
 from schemas.jobs import JobSubmissionResponse
 

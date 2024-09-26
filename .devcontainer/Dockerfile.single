@@ -50,6 +50,7 @@ RUN ls -la
 
 COPY  --from=build /tmp/3rdparty/python/* .
 COPY  --from=build /tmp/lumigator /mzai/lumigator
+COPY  --from=build /tmp/notebooks /mzai/notebooks
 
 RUN pip install pex uv
 
@@ -63,7 +64,7 @@ RUN	<<EOF
 EOF
 
 # -p 15432:5432 -p 14566:4566 -p 16379:6379 -p 18265:8265 -p 10001:10001 -p 18080:80
-# docker container run -it --init -v <host datadir>:/etc/lumigator/data --env-file .devcontainer/single-env.list -p 15432:5432 -p 14566:4566 -p 16379:6379 -p 18265:8265 -p 20001:10001 -p 18080:80 --entrypoint /bin/bash lumigator-test:0.1.0-alpha.1
+# docker container run -it --init -v <shared host dir>:/etc/lumigator/data --env-file .devcontainer/single-env.list -p 15432:5432 -p 14566:4566 -p 16379:6379 -p 18265:8265 -p 20001:10001 -p 18080:80 --entrypoint /bin/bash lumigator-test:0.1.0-alpha.1
 # start all services
 
 WORKDIR /mzai

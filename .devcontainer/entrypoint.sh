@@ -1,3 +1,4 @@
+chmod 777 /etc/lumigator/data
 su -c /etc/lumigator/startup/start_postgres.sh postgres
 su -c /etc/lumigator/startup/start_minio.sh minio
 su -c /etc/lumigator/startup/start_ray.sh ray

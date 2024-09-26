@@ -26,9 +26,9 @@ dependencies = [
 ]
 
 # For Docker
-[tool.uv.sources]
-schemas = { path = "dist/schemas-0.1.0-py3-none-any.whl" }
+# [tool.uv.sources]
+# schemas = { path = "dist/schemas-0.1.0-py3-none-any.whl" }
 
 # For Development
-# [tool.uv.sources]
-# schemas = { path = "../schemas", editable = true }
+[tool.uv.sources]
+schemas = { path = "../schemas", editable = true }

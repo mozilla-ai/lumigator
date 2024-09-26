@@ -70,15 +70,14 @@ services:
       - "localhost:host-gateway"
 
   backend:
-    build:
-      context: ..
-      dockerfile: ".devcontainer/Dockerfile.backend"
-    platform: linux/amd64
+    image: lumiuv:1
+    command: ["uv", "run", "uvicorn", "--host", "0.0.0.0", "app.main:app"]
+    # platform: linux/amd64
     depends_on:
       - postgres
       - localstack
     ports:
-      - 80:80
+      - 8000:8000
     environment:
       - DEPLOYMENT_TYPE=local
       - POSTGRES_HOST=postgres
@@ -102,8 +101,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
-    volumes:
-      - ../:/mzai
+    #volumes:
+    #  - ../:/mzai
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking

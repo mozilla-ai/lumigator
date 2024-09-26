@@ -185,7 +185,7 @@ requires-dist = [
     { name = "ray", extras = ["client"], specifier = "==2.30.0" },
     { name = "requests", specifier = ">=2,<3" },
     { name = "s3fs", specifier = "==2024.5.0" },
-    { name = "schemas", editable = "../schemas" },
+    { name = "schemas", path = "dist/schemas-0.1.0-py3-none-any.whl" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = "==2.0.28" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.28.0" },
 ]
@@ -1512,9 +1512,12 @@ wheels = [
 [[package]]
 name = "schemas"
 version = "0.1.0"
-source = { editable = "../schemas" }
+source = { path = "dist/schemas-0.1.0-py3-none-any.whl" }
 dependencies = [
     { name = "pydantic" },
+]
+wheels = [
+    { filename = "schemas-0.1.0-py3-none-any.whl", hash = "sha256:12235328eb47de9450a2030cdc2839dc9d81a5729c5c45fe165798cefe1c9fd7" },
 ]
 
 [package.metadata]

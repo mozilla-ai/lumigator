@@ -77,9 +77,8 @@ LOCAL_DOCKERCOMPOSE_FILE:= .devcontainer/docker-compose-local.yaml
 3rdparty/python/requirements_python_linux_cpu.txt: install-pants
 	pants run 3rdparty/python:gen_requirements_python_linux_cpu
 
-local-up: 3rdparty/python/requirements_python_linux_cpu.txt
+local-up:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
-	rm 3rdparty/python/requirements_python_linux_cpu.txt
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down

@@ -140,6 +140,7 @@ class ExperimentService:
 
         entrypoint = RayJobEntrypoint(
             raw_command="python -m lumigator.python.mzai.lm_buddy evaluate huggingface",
+            config_keyword="config",
             config=ray_config,
             runtime_env=runtime_env,
             num_gpus=worker_gpus,

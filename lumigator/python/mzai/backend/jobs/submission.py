@@ -22,14 +22,17 @@ class RayJobEntrypoint(ABC):
     num_cpus: int | float | None = None
     num_gpus: int | float | None = None
     memory: int | float | None = None
-    raw_command: str | None = None
 
     @property
     def command(self) -> str:
+        # The reasoning is: if the user wants to dump a full command with some flags (not necessarily ray configs
+        # or some such), they dump it on raw_command. If they do want to provide configuration, they can make use
+        # of `config_keyword` (to keep this naming flexible) and `config.args` to pass the fields on.
         full_command = self.raw_command
 
         if self.config.args != "":
-            full_command += f"--config '{json.dumps(self.config.args)}'"
+            # TODO: This is a hack to get around the fact that the args are passed as a string.
+            full_command += f" --{self.config_keyword} '{json.dumps(self.config.args)}'"
 
         return full_command
 

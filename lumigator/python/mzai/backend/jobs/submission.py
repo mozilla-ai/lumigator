@@ -12,9 +12,9 @@ from mzai.schemas.jobs import JobConfig
 class RayJobEntrypoint(ABC):
     """A generic command which is passed a config and submitted as a ray job.
 
-    Currently the only command we run is `lm-buddy evaluate`, but this can
-    be parametrised to support both different parameters (e.g. `lm-buddy
-    evaluate lm-harness`, `lm-buddy finetune`, etc) or even different commands.
+    Currently the only command we run is `evaluator evaluate`, but this can
+    be parametrised to support both different parameters (e.g. `evaluator
+    evaluate lm-harness`) or even different commands.
     """
 
     config: JobConfig
@@ -27,7 +27,7 @@ class RayJobEntrypoint(ABC):
     def command(self) -> str:
         # lm-buddy passed as a module to Ray using a JSON-serialized config.
         return (
-            f"python -m lumigator.python.mzai.lm_buddy evaluate huggingface "
+            f"python -m lumigator.python.mzai.evaluator evaluate huggingface "
             f"--config '{json.dumps(self.config.args)}'"
         )
 

@@ -8,7 +8,7 @@ from ragas import evaluate as ragas_evaluate
 from ragas.metrics import answer_relevancy, context_precision, context_recall, faithfulness
 
 from mzai.evaluator.configs.jobs.ragas import RagasJobConfig
-from mzai.evaluator.constants import LM_BUDDY_RESULTS_PATH
+from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
 from mzai.evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,

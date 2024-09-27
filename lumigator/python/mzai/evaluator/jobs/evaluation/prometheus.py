@@ -11,7 +11,7 @@ from datasets import Dataset
 from loguru import logger
 from mzai.evaluator.configs.huggingface import AutoTokenizerConfig
 from mzai.evaluator.configs.jobs.prometheus import PrometheusJobConfig
-from mzai.evaluator.constants import LM_BUDDY_RESULTS_PATH
+from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
 from mzai.evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,

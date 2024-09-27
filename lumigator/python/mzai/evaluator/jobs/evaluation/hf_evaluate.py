@@ -62,7 +62,7 @@ def save_outputs(config: HuggingFaceEvalJobConfig, evaluation_results: dict) -> 
 
     # generate local temp file ANYWAY
     # (we don't want to lose all eval data if there is an issue wth s3)
-    local_path = Path(LM_BUDDY_RESULTS_PATH) / config.name / "eval_results.json"
+    local_path = Path(EVALUATOR_RESULTS_PATH) / config.name / "eval_results.json"
 
     try:
         save_to_disk(local_path)

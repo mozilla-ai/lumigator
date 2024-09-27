@@ -88,7 +88,7 @@ class BackendSettings(BaseSettings):
     def PIP_REQS(self) -> list:  # noqa: N802
         return [
             line.strip()
-            for line in Path.open("lumigator/python/mzai/evaluator/requirements.txt")
+            for line in Path.open("requirements.txt")
             if line.strip() and not line.startswith("#")
         ]
 

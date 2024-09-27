@@ -8,7 +8,7 @@ import s3fs
 from loguru import logger
 from mzai.evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
 from mzai.evaluator.configs.vllm import VLLMCompletionsConfig
-from mzai.evaluator.constants import LM_BUDDY_RESULTS_PATH
+from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
 from mzai.evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,

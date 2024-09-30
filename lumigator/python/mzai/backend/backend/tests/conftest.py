@@ -15,6 +15,8 @@ from backend.main import create_app
 from backend.records.base import BaseRecord
 from backend.settings import settings
 
+from botocore.exceptions import ClientError
+
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
 
@@ -65,10 +67,16 @@ def setup_aws(localstack_container: LocalStackContainer):
     """Setup env vars/AWS resources for use with the LocalStack container."""
     # Initialize S3
     s3 = localstack_container.get_client("s3")
-    s3.create_bucket(
-        Bucket=settings.S3_BUCKET,
-        CreateBucketConfiguration={"LocationConstraint": localstack_container.region_name},
-    )
+    try:
+        s3.create_bucket(
+            Bucket=settings.S3_BUCKET,
+            CreateBucketConfiguration={"LocationConstraint": localstack_container.region_name},
+        )
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "BucketAlreadyOwnedByYou":
+            print("Bucket already created, continue")
+        else:
+            raise e
     # add ENV vars for FSSPEC access to S3 (s3fs + HuggingFace datasets)
     os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
     os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"

@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from uuid import UUID
 
@@ -133,7 +132,9 @@ class ExperimentService:
             worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
-            "pip": settings.PIP_REQS,
+            # "pip": settings.PIP_REQS,
+            "pip": "requirements.txt",
+            # "working_dir": "lumigator/python/mzai/evaluator/",
             "working_dir": "lumigator/python/mzai/evaluator/",
             "env_vars": runtime_env_vars,
         }

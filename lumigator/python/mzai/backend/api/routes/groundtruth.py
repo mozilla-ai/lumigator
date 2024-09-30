@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
+from loguru import logger
 
 from mzai.backend.api.deps import GroundTruthServiceDep
 from mzai.schemas.extras import ListingResponse
@@ -10,7 +11,6 @@ from mzai.schemas.groundtruth import (
     GroundTruthDeploymentResponse,
     GroundTruthQueryRequest,
 )
-from loguru import logger
 
 router = APIRouter()
 

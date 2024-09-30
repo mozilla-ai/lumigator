@@ -1,13 +1,12 @@
+import json
+from uuid import UUID
+
+import requests
 from fastapi import APIRouter
 
 from mzai.backend.settings import settings
 from mzai.schemas.extras import HealthResponse
 from mzai.schemas.jobs import JobSubmissionResponse
-import requests
-import json
-from uuid import UUID
-from mzai.backend.settings import settings
-from typing import List
 
 router = APIRouter()
 
@@ -33,12 +32,12 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
 
 
 @router.get("/jobs/")
-def get_all_jobs() -> List[JobSubmissionResponse]:
+def get_all_jobs() -> list[JobSubmissionResponse]:
     resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/")
     if resp.status_code == 200:
         try:
             metadata = json.loads(resp.text)
-            submissions: List[JobSubmissionResponse] = [
+            submissions: list[JobSubmissionResponse] = [
                 JobSubmissionResponse(**item) for item in metadata
             ]
             return submissions

@@ -1,8 +1,8 @@
 import pytest
 import torch
+from tests.test_utils import copy_pydantic_json
 
 from mzai.evaluator.configs.huggingface import QuantizationConfig
-from tests.test_utils import copy_pydantic_json
 
 
 @pytest.fixture

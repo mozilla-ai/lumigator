@@ -1,8 +1,8 @@
 from typing import Any
+from uuid import UUID
 
 from loguru import logger
 from pydantic import BaseModel
-from uuid import UUID
 
 from mzai.backend.api.deployments.configloader import ConfigLoader
 from mzai.backend.settings import settings
@@ -83,7 +83,7 @@ class SummarizerConfigLoader(ConfigLoader):
         return name
 
     def set_deployment_description(self, uuid: UUID):
-        """set the description to the Lumigator UUID."""
+        """Set the description to the Lumigator UUID."""
         self.config.applications[0].args.description = str(uuid)
 
     def get_deployment_description(self) -> str:

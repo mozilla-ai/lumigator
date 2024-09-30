@@ -1,11 +1,12 @@
+import os
+from collections.abc import Mapping
+from pathlib import Path
+
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL
-from pathlib import Path
-import os
 
 from mzai.schemas.extras import DeploymentType
-from collections.abc import Mapping
 
 
 class BackendSettings(BaseSettings):

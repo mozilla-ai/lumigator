@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from ray import serve
 from ray.serve import Application
 from starlette.requests import Request
-from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 logger = logging.getLogger("ray.serve")
 

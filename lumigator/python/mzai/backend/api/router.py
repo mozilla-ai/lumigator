@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
 from mzai.backend.api.routes import (
+    completions,
     datasets,
     experiments,
     groundtruth,
     health,
-    completions,
 )
 from mzai.backend.api.tags import Tags
 

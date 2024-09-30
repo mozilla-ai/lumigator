@@ -1,16 +1,15 @@
 import contextlib
+import os
+import sys
 
 from fastapi import FastAPI
+from loguru import logger
 from sqlalchemy import Engine
 
 from mzai.backend.api.router import api_router
 from mzai.backend.api.tags import TAGS_METADATA
 from mzai.backend.db import engine
 from mzai.backend.records.base import BaseRecord
-
-from loguru import logger
-import sys
-import os
 
 
 def create_app(engine: Engine) -> FastAPI:

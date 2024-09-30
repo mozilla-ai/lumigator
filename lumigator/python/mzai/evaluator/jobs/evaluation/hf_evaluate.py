@@ -6,6 +6,8 @@ from pathlib import Path
 
 import s3fs
 from loguru import logger
+from tqdm import tqdm
+
 from mzai.evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
 from mzai.evaluator.configs.vllm import VLLMCompletionsConfig
 from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
@@ -23,7 +25,6 @@ from mzai.evaluator.jobs.model_clients import (
     SummarizationPipelineModelClient,
 )
 from mzai.evaluator.jobs.utils import timer
-from tqdm import tqdm
 
 
 @timer

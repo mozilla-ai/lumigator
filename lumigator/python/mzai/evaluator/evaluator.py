@@ -8,7 +8,6 @@ from mzai.evaluator.configs.jobs import (
 )
 from mzai.evaluator.jobs.common import (
     EvaluationResult,
-    FinetuningResult,
     JobType,
 )
 from mzai.evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation

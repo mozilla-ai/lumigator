@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -32,15 +32,15 @@ class JobEvent(BaseModel):
 
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
-    job_id: Optional[str] = None
+    job_id: str | None = None
     submission_id: str | None = None
-    driver_info: Optional[str] = None
+    driver_info: str | None = None
     status: str | None = None
     entrypoint: str | None = None
     message: str | None = None
-    error_type: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    error_type: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
     metadata: dict = Field(default_factory=dict)
     runtime_env: dict = Field(default_factory=dict)
     driver_agent_http_address: str | None = None

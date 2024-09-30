@@ -1,14 +1,15 @@
 import dataclasses
 from typing import Any
 
+from peft import PeftConfig, PeftType, TaskType
+from pydantic import field_validator, model_validator
+from transformers import BitsAndBytesConfig
+
 from mzai.evaluator.configs.common import (
     EvaluatorConfig,
     SerializableTorchDtype,
 )
 from mzai.evaluator.paths import AssetPath, PathPrefix
-from peft import PeftConfig, PeftType, TaskType
-from pydantic import field_validator, model_validator
-from transformers import BitsAndBytesConfig
 
 DEFAULT_TEXT_FIELD: str = "text"
 

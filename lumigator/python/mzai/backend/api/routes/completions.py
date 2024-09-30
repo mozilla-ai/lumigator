@@ -1,7 +1,7 @@
 from fastapi import APIRouter
+
 from mzai.backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
 from mzai.schemas.completions import CompletionRequest
-from loguru import logger
 
 router = APIRouter()
 

@@ -1,6 +1,6 @@
 import click
 
-from mzai.evaluator import Evaluator
+from run_evaluator import Evaluator
 from cli.utils import parse_config_option
 from configs.jobs import (
     HuggingFaceEvalJobConfig,

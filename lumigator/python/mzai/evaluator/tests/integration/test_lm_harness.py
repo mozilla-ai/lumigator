@@ -1,6 +1,6 @@
 import pytest
 
-from mzai.evaluator import Evaluator
+from run_evaluator import Evaluator
 from configs.huggingface import AutoModelConfig
 from configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,

@@ -25,7 +25,6 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        print("hello!")
         # evaluator passed as a module to Ray using a JSON-serialized config.
         return (
             f"python -m run_evaluator evaluate huggingface "

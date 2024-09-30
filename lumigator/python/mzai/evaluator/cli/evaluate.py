@@ -5,8 +5,6 @@ from mzai.evaluator.cli.utils import parse_config_option
 from mzai.evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
-    PrometheusJobConfig,
-    RagasJobConfig,
 )
 
 
@@ -19,22 +17,6 @@ def group() -> None:
 @click.option("--config", type=str)
 def lm_harness_command(config: str) -> None:
     config = parse_config_option(LMHarnessJobConfig, config)
-    evaluate = Evaluator()
-    evaluate.evaluate(config)
-
-
-@group.command("prometheus", help="Run the prometheus evaluation job.")
-@click.option("--config", type=str)
-def prometheus_command(config: str) -> None:
-    config = parse_config_option(PrometheusJobConfig, config)
-    evaluate = Evaluator()
-    evaluate.evaluate(config)
-
-
-@group.command("ragas", help="Run the ragas evaluation job.")
-@click.option("--config", type=str)
-def ragas_command(config: str) -> None:
-    config = parse_config_option(RagasJobConfig, config)
     evaluate = Evaluator()
     evaluate.evaluate(config)
 

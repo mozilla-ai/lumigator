@@ -1,8 +1,8 @@
 import click
 
 from mzai.evaluator import Evaluator
-from mzai.evaluator.cli.utils import parse_config_option
-from mzai.evaluator.configs.jobs import (
+from cli.utils import parse_config_option
+from configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
 )

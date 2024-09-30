@@ -6,23 +6,23 @@ from pathlib import Path
 
 import s3fs
 from loguru import logger
-from mzai.evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from mzai.evaluator.configs.vllm import VLLMCompletionsConfig
-from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
-from mzai.evaluator.jobs.asset_loader import (
+from configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from configs.vllm import VLLMCompletionsConfig
+from constants import EVALUATOR_RESULTS_PATH
+from jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from mzai.evaluator.jobs.common import EvaluationResult
-from mzai.evaluator.jobs.evaluation.metrics import EvaluationMetrics
-from mzai.evaluator.jobs.model_clients import (
+from jobs.common import EvaluationResult
+from jobs.evaluation.metrics import EvaluationMetrics
+from jobs.model_clients import (
     BaseModelClient,
     HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
     SummarizationPipelineModelClient,
 )
-from mzai.evaluator.jobs.utils import timer
+from jobs.utils import timer
 from tqdm import tqdm
 
 

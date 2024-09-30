@@ -7,14 +7,14 @@ from lm_eval.models.huggingface import HFLM
 from lm_eval.models.openai_completions import OpenaiCompletionsLM
 from loguru import logger
 
-from mzai.evaluator.configs.huggingface import AutoModelConfig
-from mzai.evaluator.configs.jobs.lm_harness import (
+from configs.huggingface import AutoModelConfig
+from configs.jobs.lm_harness import (
     LMHarnessJobConfig,
     LocalChatCompletionsConfig,
 )
-from mzai.evaluator.jobs.asset_loader import HuggingFaceModelLoader
-from mzai.evaluator.jobs.common import EvaluationResult
-from mzai.evaluator.tracking.artifact_utils import (
+from jobs.asset_loader import HuggingFaceModelLoader
+from jobs.common import EvaluationResult
+from tracking.artifact_utils import (
     ArtifactType,
     build_table_artifact,
     default_artifact_name,

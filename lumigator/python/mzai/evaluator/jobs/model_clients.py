@@ -3,10 +3,10 @@ from abc import abstractmethod
 
 import torch
 from loguru import logger
-from mzai.evaluator.configs.common import EvaluatorConfig
-from mzai.evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from mzai.evaluator.configs.vllm import VLLMCompletionsConfig
-from mzai.evaluator.jobs.asset_loader import (
+from configs.common import EvaluatorConfig
+from configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from configs.vllm import VLLMCompletionsConfig
+from jobs.asset_loader import (
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )

@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from mzai.evaluator.configs.huggingface import QuantizationConfig
+from configs.huggingface import QuantizationConfig
 from tests.test_utils import copy_pydantic_json
 
 

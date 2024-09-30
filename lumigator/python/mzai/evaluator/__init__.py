@@ -1,3 +1,3 @@
-from mzai.evaluator.evaluator import Evaluator
+from run_evaluator import Evaluator
 
 __all__ = ["Evaluator"]

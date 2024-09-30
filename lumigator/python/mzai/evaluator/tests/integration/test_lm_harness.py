@@ -1,13 +1,13 @@
 import pytest
 
 from mzai.evaluator import Evaluator
-from mzai.evaluator.configs.huggingface import AutoModelConfig
-from mzai.evaluator.configs.jobs.lm_harness import (
+from configs.huggingface import AutoModelConfig
+from configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,
     LMHarnessJobConfig,
 )
-from mzai.evaluator.configs.wandb import WandbRunConfig
-from mzai.evaluator.paths import format_file_path
+from configs.wandb import WandbRunConfig
+from paths import format_file_path
 
 
 @pytest.fixture
@@ -25,6 +25,6 @@ def job_config(llm_model_path) -> LMHarnessJobConfig:
 
 def test_lm_harness_job(job_config):
     evaluator = Evaluator()
-    result = evaluator.evaluate(job_config)
+    result = evaluate(job_config)
     assert len(result.tables) == 10
     assert len(result.artifacts) == 1  # One table artifact

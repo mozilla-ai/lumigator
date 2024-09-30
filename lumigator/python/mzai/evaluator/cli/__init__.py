@@ -1,9 +1,9 @@
 import click
 
-from mzai.evaluator.cli import evaluate
+from cli import evaluate
 
 
-@click.group(name="Evaluator CLI", help="Entrypoints for the evaluator.")
+@click.group(name="Evaluator CLI", help="Entrypoints for the ")
 def cli():
     pass
 

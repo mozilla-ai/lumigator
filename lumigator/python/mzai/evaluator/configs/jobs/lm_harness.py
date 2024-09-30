@@ -2,14 +2,14 @@ from typing import Literal
 
 from pydantic import conlist, model_validator
 
-from mzai.evaluator.configs.common import EvaluatorConfig
-from mzai.evaluator.configs.huggingface import (
+from configs.common import EvaluatorConfig
+from configs.huggingface import (
     AutoModelConfig,
     QuantizationConfig,
 )
-from mzai.evaluator.configs.jobs.common import JobConfig
-from mzai.evaluator.configs.vllm import InferenceServerConfig
-from mzai.evaluator.paths import AssetPath
+from configs.jobs.common import JobConfig
+from configs.vllm import InferenceServerConfig
+from paths import AssetPath
 
 
 class LocalChatCompletionsConfig(EvaluatorConfig):

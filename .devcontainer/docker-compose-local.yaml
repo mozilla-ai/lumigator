@@ -58,7 +58,7 @@ services:
       # NOTE: the following path contains a hash which needs to be updated whenever
       # the list of libraries installed in backend/services/experiments.py changes.
       # This is a temporary solution, see https://github.com/mozilla-ai/lumigator/pull/186
-      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/3aad1b9393df933f711013a7d9650bb9821e891c/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
+      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9//virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system

@@ -4,14 +4,14 @@ import torch
 from accelerate import Accelerator
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from loguru import logger
-from mzai.evaluator.configs.huggingface import (
+from configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from mzai.evaluator.paths import AssetPath, PathPrefix, strip_path_prefix
-from mzai.evaluator.tracking.artifact_utils import (
+from paths import AssetPath, PathPrefix, strip_path_prefix
+from tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )

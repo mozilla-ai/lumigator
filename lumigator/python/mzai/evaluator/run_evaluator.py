@@ -1,20 +1,19 @@
 import wandb
 
-from mzai.evaluator.configs.jobs import (
+from configs.jobs import (
     EvaluationJobConfig,
     HuggingFaceEvalJobConfig,
     JobConfig,
     LMHarnessJobConfig,
 )
-from mzai.evaluator.jobs.common import (
+from jobs.common import (
     EvaluationResult,
-    FinetuningResult,
     JobType,
 )
-from mzai.evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
-from mzai.evaluator.jobs.evaluation.lm_harness import run_lm_harness
-from mzai.evaluator.paths import strip_path_prefix
-from mzai.evaluator.tracking.run_utils import WandbResumeMode
+from jobs.evaluation.hf_evaluate import run_hf_evaluation
+from jobs.evaluation.lm_harness import run_lm_harness
+from paths import strip_path_prefix
+from tracking.run_utils import WandbResumeMode
 
 
 class Evaluator:
@@ -23,7 +22,7 @@ class Evaluator:
     Simple wrapper around executable functions for tasks available in the library.
     """
 
-    # TODO: Store some configuration (e.g., tracking info, name) globally on the buddy
+    # TODO: Store some configuration (e.g., tracking info, name) globally
     def __init__(self):
         pass
 
@@ -59,6 +58,6 @@ class Evaluator:
             case HuggingFaceEvalJobConfig() as hf_eval_config:
                 result = run_hf_evaluation(hf_eval_config)
             case _:
-                raise ValueError(f"Invlid configuration for evaluation: {type(config)}")
+                raise ValueError(f"Invalid configuration for evaluation: {type(config)}")
         self._generate_artifact_lineage(config, result.artifacts, JobType.EVALUATION)
         return result

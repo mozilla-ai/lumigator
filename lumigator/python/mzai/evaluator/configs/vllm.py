@@ -1,5 +1,5 @@
-from mzai.evaluator.configs.common import EvaluatorConfig
-from mzai.evaluator.paths import AssetPath
+from configs.common import EvaluatorConfig
+from paths import AssetPath
 
 
 class InferenceServerConfig(EvaluatorConfig):

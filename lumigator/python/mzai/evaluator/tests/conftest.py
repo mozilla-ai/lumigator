@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from mzai.evaluator.tracking.artifact_utils import (
+from tracking.artifact_utils import (
     ArtifactType,
     build_directory_artifact,
 )

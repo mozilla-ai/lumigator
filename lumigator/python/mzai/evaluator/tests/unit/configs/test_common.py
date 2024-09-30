@@ -2,7 +2,7 @@ import pytest
 import torch
 from pydantic import ValidationError
 
-from mzai.evaluator.configs.common import (
+from configs.common import (
     EvaluatorConfig,
     SerializableTorchDtype,
 )

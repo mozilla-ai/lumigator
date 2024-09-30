@@ -1,12 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from mzai.evaluator.configs.jobs.lm_harness import (
+from configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,
     LMHarnessJobConfig,
     LocalChatCompletionsConfig,
 )
-from mzai.evaluator.configs.vllm import InferenceServerConfig
+from configs.vllm import InferenceServerConfig
 from tests.test_utils import copy_pydantic_json
 
 

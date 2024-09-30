@@ -5,7 +5,7 @@ from urllib.parse import ParseResult, urlparse
 import pandas as pd
 import wandb
 
-from mzai.evaluator.paths import PathPrefix
+from paths import PathPrefix
 
 
 class ArtifactType(str, Enum):

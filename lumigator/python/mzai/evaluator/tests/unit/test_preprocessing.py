@@ -1,7 +1,7 @@
 import pytest
 from datasets import load_from_disk
 
-from mzai.evaluator.preprocessing import format_dataset_with_prompt
+from preprocessing import format_dataset_with_prompt
 
 
 def test_prompt_formatting(resources_dir):

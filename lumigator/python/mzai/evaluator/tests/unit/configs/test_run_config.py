@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from pydantic import ValidationError
 
-from mzai.evaluator.configs.wandb import WandbRunConfig
+from configs.wandb import WandbRunConfig
 from tests.test_utils import copy_pydantic_json
 
 

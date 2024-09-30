@@ -1,6 +1,6 @@
 import click
 
-from evaluator import Evaluator
+from entrypoint import Evaluator
 from cli.utils import parse_config_option
 from configs.jobs import (
     HuggingFaceEvalJobConfig,

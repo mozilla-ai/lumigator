@@ -1,6 +1,6 @@
 import pytest
 
-from evaluator import Evaluator
+from entrypoint import Evaluator
 from configs.huggingface import AutoModelConfig
 from configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,

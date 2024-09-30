@@ -5,5 +5,11 @@ python_sources(
 
 python_tests(
     name="backend_tests",
-    sources=["**/test_*.py"],
+    sources=[
+        "api/routes/test_datasets.py",
+        "api/routes/test_health.py",
+        "api/routes/test_main.py",
+        "repositories/test_experiments.py",
+        "services/test_groundtruth.py",
+    ],
 )

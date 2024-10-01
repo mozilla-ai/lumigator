@@ -1,3 +1,7 @@
 python_sources(
     name="sdk_sources",
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
 )

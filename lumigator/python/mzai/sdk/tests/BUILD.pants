@@ -1,4 +1,7 @@
-python_sources(name="sdk_test_sources", sources=["**/*.py"])
+python_sources(
+    name="sdk_test_sources",
+    sources=["**/*.py"]
+)
 
 python_tests(
     name="sdk_tests",

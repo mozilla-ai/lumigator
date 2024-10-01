@@ -14,11 +14,10 @@ from jobs.evaluation.hf_evaluate import run_hf_evaluation
 from jobs.evaluation.lm_harness import run_lm_harness
 from paths import strip_path_prefix
 from tracking.run_utils import WandbResumeMode
-
+from loguru import logger
 
 class Evaluator:
-    """Your buddy in the (L)LM space.
-
+    """
     Simple wrapper around executable functions for tasks available in the library.
     """
 
@@ -47,11 +46,13 @@ class Evaluator:
                     artifact = run.log_artifact(artifact)
                     artifact.wait()
 
-    def evaluate(self, config: EvaluationJobConfig) -> EvaluationResult:
+    def run_eval(self, config: EvaluationJobConfig) -> EvaluationResult:
         """Run an evaluation job with the provided configuration.
 
         The underlying evaluation framework is determined by the configuration type.
         """
+        print("evaluating...")
+        logger.info("evaluating config: %s", config)
         match config:
             case LMHarnessJobConfig() as lm_harness_config:
                 result = run_lm_harness(lm_harness_config)

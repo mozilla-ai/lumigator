@@ -1,4 +1,4 @@
-"""Main entrypoint to the LM Buddy CLI.
+"""Main entrypoint to the Evaluator CLI.
 
 Makes the Evaluator CLI executable via `python -m evaluator`.
 """

@@ -1,9 +1,9 @@
 import click
 
-from cli import evaluate
+from evaluator.cli import evaluate
 
 
-@click.group(name="Evaluator CLI", help="Entrypoints for the ")
+@click.group(name="Evaluator CLI", help="Entrypoints for the evaluator CLI ")
 def cli():
     pass
 

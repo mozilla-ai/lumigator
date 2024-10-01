@@ -1,3 +1,5 @@
+import loguru
+
 import json
 from abc import ABC
 from dataclasses import dataclass
@@ -25,14 +27,16 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        # evaluator passed as a module to Ray using a JSON-serialized config.
+
+        # evaluator entrypoint passed as a module to Ray using a JSON-serialized config.
         return (
-            f"python -m entrypoint evaluate huggingface "
+            f"python -m entrypoint evaluate huggingface"
             f"--config '{json.dumps(self.config.args)}'"
         )
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
+    loguru.logger.info(f"Submitting {entrypoint.command}...{entrypoint.runtime_env}")
     return client.submit_job(
         entrypoint=entrypoint.command,
         entrypoint_num_cpus=entrypoint.num_cpus,

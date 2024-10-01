@@ -8,7 +8,7 @@ from configs.jobs import (
 )
 
 
-@click.group(name="evaluate", help="Run an LM Buddy evaluation job.")
+@click.group(name="evaluate", help="Run an evaluation job.")
 def group() -> None:
     pass
 

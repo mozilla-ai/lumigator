@@ -7,6 +7,8 @@ from mzai.sdk.healthcheck import HealthCheck
 from mzai.schemas.datasets import DatasetResponse
 from loguru import logger
 
+from pathlib import Path
+
 # TODO: move these definitions to an "upper" level to be imported
 # by both the SDK client and the backend (the openapi definition
 # should be developed first, and then the data classes in both sides
@@ -85,7 +87,7 @@ class LumigatorClient:
 
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
-        response = self.get_response(self._api_url / HEALTH_ROUTE)
+        response = self.get_response(Path(self._api_url) / HEALTH_ROUTE)
         if response:
             data = response.json()
             check.status = data.get("status")
@@ -94,7 +96,7 @@ class LumigatorClient:
         return check
 
     def datasets(self) -> list[DatasetResponse]:
-        response = self.get_response(self._api_url / DATASETS_ROUTE)
+        response = self.get_response(Path(self._api_url) / DATASETS_ROUTE)
         if response:
             return [DatasetResponse(**args) for args in json.loads(response.json())]
         return []

@@ -9,7 +9,7 @@ from requests.exceptions import HTTPError
 
 from mzai.sdk.core import LumigatorClient
 
-# from mzai.schemas.datasets import DatasetResponse
+from mzai.schemas.datasets import DatasetResponse
 
 @pytest.fixture(scope="function")
 def mock_requests_response():

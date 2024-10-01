@@ -17,13 +17,14 @@ def group() -> None:
 @click.option("--config", type=str)
 def lm_harness_command(config: str) -> None:
     config = parse_config_option(LMHarnessJobConfig, config)
-    evaluate = Evaluator()
-    evaluate.evaluate(config)
+    evaluator = Evaluator()
+    evaluator.evaluate(config)
 
 
 @group.command("huggingface", help="Run the HuggingFace evaluation job.")
 @click.option("--config", type=str)
 def huggingface_command(config: str) -> None:
+    print("starting HF eval...")
     config = parse_config_option(HuggingFaceEvalJobConfig, config)
-    evaluate = Evaluator()
-    evaluate.evaluate(config)
+    evaluator = Evaluator()
+    evaluator.evaluate(config)

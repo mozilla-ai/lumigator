@@ -1,3 +1,3 @@
-from mzai.evaluator.entrypoint import Evaluator
+from evaluator.entrypoint import Evaluator
 
 __all__ = ["Evaluator"]

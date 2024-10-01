@@ -1,11 +1,11 @@
 import dataclasses
 from typing import Any
 
-from configs.common import (
+from evaluator.configs.common import (
     EvaluatorConfig,
     SerializableTorchDtype,
 )
-from paths import AssetPath, PathPrefix
+from evaluator.paths import AssetPath, PathPrefix
 from peft import PeftConfig, PeftType, TaskType
 from pydantic import field_validator, model_validator
 from transformers import BitsAndBytesConfig

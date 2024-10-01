@@ -1,5 +1,5 @@
-from configs.common import EvaluatorConfig
-from paths import AssetPath
+from evaluator.configs.common import EvaluatorConfig
+from evaluator.paths import AssetPath
 
 
 class InferenceServerConfig(EvaluatorConfig):

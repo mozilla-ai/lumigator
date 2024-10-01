@@ -1,11 +1,10 @@
 import click
-
-from entrypoint import Evaluator
-from cli.utils import parse_config_option
-from configs.jobs import (
+from evaluator.cli.utils import parse_config_option
+from evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
 )
+from evaluator.entrypoint import Evaluator
 
 
 @click.group(name="evaluate", help="Run an evaluation job.")

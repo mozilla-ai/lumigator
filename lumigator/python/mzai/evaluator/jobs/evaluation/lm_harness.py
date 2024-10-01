@@ -3,22 +3,21 @@ from typing import Any
 import lm_eval
 import pandas as pd
 import torch
-from lm_eval.models.huggingface import HFLM
-from lm_eval.models.openai_completions import OpenaiCompletionsLM
-from loguru import logger
-
-from configs.huggingface import AutoModelConfig
-from configs.jobs.lm_harness import (
+from evaluator.configs.huggingface import AutoModelConfig
+from evaluator.configs.jobs.lm_harness import (
     LMHarnessJobConfig,
     LocalChatCompletionsConfig,
 )
-from jobs.asset_loader import HuggingFaceModelLoader
-from jobs.common import EvaluationResult
-from tracking.artifact_utils import (
+from evaluator.jobs.asset_loader import HuggingFaceModelLoader
+from evaluator.jobs.common import EvaluationResult
+from evaluator.tracking.artifact_utils import (
     ArtifactType,
     build_table_artifact,
     default_artifact_name,
 )
+from lm_eval.models.huggingface import HFLM
+from lm_eval.models.openai_completions import OpenaiCompletionsLM
+from loguru import logger
 
 
 def get_per_task_dataframes(

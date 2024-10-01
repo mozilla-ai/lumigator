@@ -1,20 +1,20 @@
 import wandb
-
-from configs.jobs import (
+from evaluator.configs.jobs import (
     EvaluationJobConfig,
     HuggingFaceEvalJobConfig,
     JobConfig,
     LMHarnessJobConfig,
 )
-from jobs.common import (
+from evaluator.jobs.common import (
     EvaluationResult,
     JobType,
 )
-from jobs.evaluation.hf_evaluate import run_hf_evaluation
-from jobs.evaluation.lm_harness import run_lm_harness
-from paths import strip_path_prefix
-from tracking.run_utils import WandbResumeMode
+from evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
+from evaluator.jobs.evaluation.lm_harness import run_lm_harness
+from evaluator.paths import strip_path_prefix
+from evaluator.tracking.run_utils import WandbResumeMode
 from loguru import logger
+
 
 class Evaluator:
     """
@@ -46,7 +46,7 @@ class Evaluator:
                     artifact = run.log_artifact(artifact)
                     artifact.wait()
 
-    def run_eval(self, config: EvaluationJobConfig) -> EvaluationResult:
+    def evaluate(self, config: EvaluationJobConfig) -> EvaluationResult:
         """Run an evaluation job with the provided configuration.
 
         The underlying evaluation framework is determined by the configuration type.

@@ -1,15 +1,14 @@
 from typing import Literal
 
-from pydantic import conlist, model_validator
-
-from configs.common import EvaluatorConfig
-from configs.huggingface import (
+from evaluator.configs.common import EvaluatorConfig
+from evaluator.configs.huggingface import (
     AutoModelConfig,
     QuantizationConfig,
 )
-from configs.jobs.common import JobConfig
-from configs.vllm import InferenceServerConfig
-from paths import AssetPath
+from evaluator.configs.jobs.common import JobConfig
+from evaluator.configs.vllm import InferenceServerConfig
+from evaluator.paths import AssetPath
+from pydantic import conlist, model_validator
 
 
 class LocalChatCompletionsConfig(EvaluatorConfig):

@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from configs.common import EvaluatorConfig
+from evaluator.configs.common import EvaluatorConfig
 from pydantic import model_validator
 from wandb.apis.public import Run
 from wandb.util import random_string

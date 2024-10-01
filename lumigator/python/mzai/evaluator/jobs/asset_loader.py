@@ -2,19 +2,19 @@ import warnings
 
 import torch
 from accelerate import Accelerator
-from datasets import DatasetDict, DatasetDict, load_dataset, load_from_disk
-from loguru import logger
-from configs.huggingface import (
+from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
+from evaluator.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from paths import AssetPath, PathPrefix, strip_path_prefix
-from tracking.artifact_utils import (
+from evaluator.paths import AssetPath, PathPrefix, strip_path_prefix
+from evaluator.tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )
+from loguru import logger
 from peft import PeftConfig
 from transformers import (
     AutoConfig,
@@ -177,7 +177,7 @@ class HuggingFaceTokenizerLoader(HuggingFaceAssetLoader):
 class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
     """Helper class for loading HuggingFace datasets from LM Buddy configurations."""
 
-    def load_dataset(self, config: DatasetConfig) -> DatasetDict:
+    def load_dataset(self, config: DatasetConfig) -> Dataset:
         """Load a HuggingFace `Dataset` from the dataset configuration.
 
         This method always returns a single `Dataset` object.
@@ -190,7 +190,7 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
             return load_dataset(dataset_path, split=config.split)
         else:
             match load_from_disk(dataset_path):
-                case DatasetDict() as dataset:
+                case Dataset() as dataset:
                     return dataset
                 case other:
                     raise ValueError(

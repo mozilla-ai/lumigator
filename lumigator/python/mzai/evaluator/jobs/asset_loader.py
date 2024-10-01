@@ -204,7 +204,7 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
         The split is performed when a `test_size` is specified on the configuration.
         """
         match self.load_dataset(config):
-            case DatasetDict() as dataset if config.test_size is not None:
+            case Dataset() as dataset if config.test_size is not None:
                 # We need to specify a fixed seed to load the datasets on each worker
                 # Under the hood, HuggingFace uses `accelerate` to create a data loader shards
                 # If the datasets are not seeded here, the ordering will be inconsistent
@@ -212,4 +212,4 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
                 split_seed = config.seed or 0
                 return dataset.train_test_split(test_size=config.test_size, seed=split_seed)
             case dataset:
-                return DatasetDict({"train": dataset})
+                return Dataset({"train": dataset})

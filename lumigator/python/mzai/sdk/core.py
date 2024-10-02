@@ -8,7 +8,7 @@ from loguru import logger
 from mzai.sdk.healthcheck import HealthCheck
 from mzai.schemas.datasets import DatasetResponse
 from mzai.schemas.deployments import DeploymentEvent
-from mzai.sdk.dtos.health import Job
+from mzai.schemas.jobs import JobSubmissionResponse
 
 
 from pathlib import Path
@@ -121,7 +121,7 @@ class LumigatorClient:
 
         return [DeploymentEvent(**args) for args in response.json()]
 
-    def get_jobs(self) -> list[Job]:
+    def get_jobs(self) -> list[JobSubmissionResponse]:
         """Returns information on all job submissions."""
         endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/"
         response = self.get_response(endpoint)
@@ -129,9 +129,9 @@ class LumigatorClient:
         if not response:
             return []
 
-        return [Job(**job) for job in response.json()]
+        return [JobSubmissionResponse(**job) for job in response.json()]
 
-    def get_job(self, job_id: str) -> Job | None:
+    def get_job(self, job_id: str) -> JobSubmissionResponse | None:
         """Returns information on the job submission for the specified ID."""
         endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/{job_id}"
         response = self.get_response(endpoint)
@@ -140,4 +140,4 @@ class LumigatorClient:
             return None
 
         data = response.json()
-        return Job(**data)
+        return JobSubmissionResponse(**data)

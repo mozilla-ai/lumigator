@@ -11,11 +11,11 @@ from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
 from s3fs import S3FileSystem
 
-from mzai.backend.records.datasets import DatasetRecord
-from mzai.backend.repositories.datasets import DatasetRepository
-from mzai.backend.settings import settings
-from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from mzai.schemas.extras import ListingResponse
+from backend.records.datasets import DatasetRecord
+from backend.repositories.datasets import DatasetRepository
+from backend.settings import settings
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from schemas.extras import ListingResponse
 
 ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}

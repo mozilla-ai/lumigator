@@ -9,11 +9,11 @@ from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
 from testcontainers.postgres import PostgresContainer
 
-from mzai.backend.api.deps import get_db_session, get_s3_client
-from mzai.backend.api.router import API_V1_PREFIX
-from lumigator.python.mzai.backend.src.backend.main import create_app
-from mzai.backend.records.base import BaseRecord
-from mzai.backend.settings import settings
+from backend.api.deps import get_db_session, get_s3_client
+from backend.api.router import API_V1_PREFIX
+from lumigator.python.backend.src.backend.main import create_app
+from backend.records.base import BaseRecord
+from backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
@@ -93,7 +93,7 @@ def app(db_engine: Engine):
 @pytest.fixture(scope="function")
 def app_client(app: FastAPI):
     """Create a test client for calling the FastAPI app."""
-    base_url = f"http://mzai.dev{API_V1_PREFIX}"  # Fake base URL for the app
+    base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
 

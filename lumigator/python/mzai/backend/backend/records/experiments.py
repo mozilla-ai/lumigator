@@ -4,8 +4,8 @@ from typing import Any
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from mzai.backend.records.base import BaseRecord
-from mzai.backend.records.mixins import DateTimeMixin, JobStatusMixin, NameDescriptionMixin
+from backend.records.base import BaseRecord
+from backend.records.mixins import DateTimeMixin, JobStatusMixin, NameDescriptionMixin
 
 
 class ExperimentRecord(BaseRecord, NameDescriptionMixin, JobStatusMixin, DateTimeMixin):

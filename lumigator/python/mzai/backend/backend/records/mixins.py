@@ -4,8 +4,8 @@ import uuid
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
-from mzai.schemas.deployments import DeploymentStatus
-from mzai.schemas.jobs import JobStatus
+from schemas.deployments import DeploymentStatus
+from schemas.jobs import JobStatus
 
 
 @declarative_mixin

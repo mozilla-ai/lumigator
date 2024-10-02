@@ -10,7 +10,7 @@ python_sources(
 crossplatform_pex(
     name="backend_app",
     args=[
-        "mzai.backend.main:app",
+        "backend.main:app",
         "--host",
         "0.0.0.0",
         "--port",
@@ -29,7 +29,7 @@ crossplatform_pex(
 # pex_binary(
 #     name="backend_app",
 #     args=[
-#         "mzai.backend.main:app",
+#         "backend.main:app",
 #         "--host",
 #         "0.0.0.0",
 #         "--port",

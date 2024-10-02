@@ -4,8 +4,8 @@ from math import exp
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from mzai.schemas.jobs import JobStatus
+from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from schemas.jobs import JobStatus
 
 
 @pytest.fixture

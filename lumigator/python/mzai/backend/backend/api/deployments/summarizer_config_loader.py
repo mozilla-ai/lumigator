@@ -4,10 +4,15 @@ from loguru import logger
 from pydantic import BaseModel
 from uuid import UUID
 
-from mzai.backend.api.deployments.configloader import ConfigLoader
-from mzai.backend.settings import settings
-from mzai.summarizer.summarizer import SummarizerArgs
+from backend.api.deployments.configloader import ConfigLoader
+from backend.settings import settings
 
+# Note: this class is duplicated in lumigator/python/mzai/summarizer/summarizer.py
+class SummarizerArgs(BaseModel):
+    name: str  # model name, but model is protected namespace in pydantic
+    tokenizer: str
+    task: str
+    description: str
 
 class RayServeActorConfig(BaseModel):
     num_cpus: float | None = None

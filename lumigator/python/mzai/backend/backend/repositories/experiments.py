@@ -2,8 +2,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from mzai.backend.records.experiments import ExperimentRecord, ExperimentResultRecord
-from mzai.backend.repositories.base import BaseRepository
+from backend.records.experiments import ExperimentRecord, ExperimentResultRecord
+from backend.repositories.base import BaseRepository
 
 
 class ExperimentRepository(BaseRepository[ExperimentRecord]):

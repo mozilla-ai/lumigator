@@ -1,5 +1,5 @@
-from mzai.backend.services.groundtruth import GroundTruthService
-from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from backend.services.groundtruth import GroundTruthService
+from backend.repositories.groundtruth import GroundTruthDeploymentRepository
 
 
 class FakeRayServe:

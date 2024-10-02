@@ -7,7 +7,7 @@ from backend.api.routes import (
     health,
     completions,
 )
-from mzai.backend.api.tags import Tags
+from backend.api.tags import Tags
 
 API_V1_PREFIX = "/api/v1"
 

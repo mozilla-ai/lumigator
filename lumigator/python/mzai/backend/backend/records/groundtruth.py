@@ -1,5 +1,5 @@
-from mzai.backend.records.base import BaseRecord
-from mzai.backend.records.mixins import DateTimeMixin, DeploymentStatusMixin, NameDescriptionMixin
+from backend.records.base import BaseRecord
+from backend.records.mixins import DateTimeMixin, DeploymentStatusMixin, NameDescriptionMixin
 
 
 class GroundTruthDeploymentRecord(

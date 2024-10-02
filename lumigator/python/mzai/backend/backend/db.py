@@ -4,7 +4,7 @@ from collections.abc import Generator
 from sqlalchemy import Connection, Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from mzai.backend.settings import settings
+from backend.settings import settings
 
 
 class DatabaseSessionManager:

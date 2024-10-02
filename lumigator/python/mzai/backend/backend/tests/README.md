@@ -31,7 +31,7 @@ Tests are parametrized through Pants. See more on parametrization in the [Pants 
 ## Test Settings
 
 The main settings for the backend application are defined in the
-`mzai.backend.settings.BackendSettings` class.
+`backend.settings.BackendSettings` class.
 This class inherits from the
 [Pydantic BaseSettings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 class and reads its values from the envrionment when instantiated.
@@ -45,7 +45,7 @@ a test dependency override can be specified in the `conftest.py` fixture.
 ### Global Dependency Injection
 ## TODO: Resolve
 
-Currently a global instance of this class is defined in the `mzai.backend.settings.settings` variable
+Currently a global instance of this class is defined in the `backend.settings.settings` variable
 and imported throughout the application. This means that settings are read for the environment
 one time as soon as the settings class is imported.
 This means that settings for the TestContainers services that are defined in the `conftest.py` fixtures

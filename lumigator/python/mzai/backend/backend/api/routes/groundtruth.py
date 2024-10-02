@@ -2,9 +2,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from mzai.backend.api.deps import GroundTruthServiceDep
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.groundtruth import (
+from backend.api.deps import GroundTruthServiceDep
+from schemas.extras import ListingResponse
+from schemas.groundtruth import (
     GroundTruthDeploymentCreate,
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,

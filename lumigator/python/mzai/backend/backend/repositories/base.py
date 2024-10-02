@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from mzai.backend.records.base import BaseRecord
+from backend.records.base import BaseRecord
 
 RecordType = TypeVar("RecordType", bound=BaseRecord)
 

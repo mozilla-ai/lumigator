@@ -9,15 +9,15 @@ from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.orm import Session
 
-from mzai.backend.db import session_manager
-from mzai.backend.repositories.datasets import DatasetRepository
-from mzai.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
-from mzai.backend.services.completions import MistralCompletionService, OpenAICompletionService
-from mzai.backend.services.datasets import DatasetService
-from mzai.backend.services.experiments import ExperimentService
-from mzai.backend.services.groundtruth import GroundTruthService
-from mzai.backend.settings import settings
+from backend.db import session_manager
+from backend.repositories.datasets import DatasetRepository
+from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from backend.services.completions import MistralCompletionService, OpenAICompletionService
+from backend.services.datasets import DatasetService
+from backend.services.experiments import ExperimentService
+from backend.services.groundtruth import GroundTruthService
+from backend.settings import settings
 
 
 def get_db_session() -> Generator[Session, None, None]:

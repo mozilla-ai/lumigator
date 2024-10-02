@@ -5,12 +5,12 @@ from fastapi import HTTPException, status
 from loguru import logger
 from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 
-from mzai.backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
-from mzai.backend.records.groundtruth import GroundTruthDeploymentRecord
-from mzai.backend.repositories.groundtruth import GroundTruthDeploymentRepository
-from mzai.backend.settings import settings
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.groundtruth import (
+from backend.api.deployments.summarizer_config_loader import SummarizerConfigLoader
+from backend.records.groundtruth import GroundTruthDeploymentRecord
+from backend.repositories.groundtruth import GroundTruthDeploymentRepository
+from backend.settings import settings
+from schemas.extras import ListingResponse
+from schemas.groundtruth import (
     GroundTruthDeploymentCreate,
     GroundTruthDeploymentQueryResponse,
     GroundTruthDeploymentResponse,

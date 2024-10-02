@@ -4,7 +4,7 @@ from sqlalchemy.engine import URL
 from pathlib import Path
 import os
 
-from mzai.schemas.extras import DeploymentType
+from schemas.extras import DeploymentType
 from collections.abc import Mapping
 
 

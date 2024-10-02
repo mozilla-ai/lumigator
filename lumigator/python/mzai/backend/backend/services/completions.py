@@ -4,9 +4,9 @@ from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
 from abc import ABC, abstractmethod
 import os
-from mzai.backend.settings import settings
+from backend.settings import settings
 
-from mzai.schemas.completions import CompletionResponse, CompletionRequest
+from schemas.completions import CompletionResponse, CompletionRequest
 
 
 class CompletionService(ABC):

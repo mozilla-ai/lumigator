@@ -211,7 +211,7 @@ list which is task-specific.
 
 ```
 from fastapi import APIRouter
-from mzai.schemas.extras import ListingResponse
+from schemas.extras import ListingResponse
 
 router = APIRouter()
 
@@ -239,7 +239,7 @@ comments next to the two lines marked below as **NEW**:
 ```
 from fastapi import APIRouter
 
-from mzai.backend.api.routes import (
+from backend.api.routes import (
     completions,
     datasets,
     experiments,
@@ -247,7 +247,7 @@ from mzai.backend.api.routes import (
     health,
     tasks, ### NEW
 )
-from mzai.backend.api.tags import Tags
+from backend.api.tags import Tags
 
 API_V1_PREFIX = "/api/v1"
 
@@ -369,8 +369,8 @@ The code for a new repository (to be stored in `backend/repositories/tasks.py`) 
 ```
 from sqlalchemy.orm import Session
 
-from mzai.backend.records.tasks import TaskRecord
-from mzai.backend.repositories.base import BaseRepository
+from backend.records.tasks import TaskRecord
+from backend.repositories.base import BaseRepository
 
 
 class TaskRepository(BaseRepository[TaskRecord]):
@@ -387,8 +387,8 @@ defined by `TaskRecord`. You can define a `TaskRecord` in `backend/records/tasks
 ```
 from sqlalchemy.orm import Mapped, mapped_column
 
-from mzai.backend.records.base import BaseRecord
-from mzai.backend.records.mixins import CreatedAtMixin, NameDescriptionMixin
+from backend.records.base import BaseRecord
+from backend.records.mixins import CreatedAtMixin, NameDescriptionMixin
 
 
 class TaskRecord(BaseRecord, NameDescriptionMixin, CreatedAtMixin):
@@ -425,10 +425,10 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 
-from mzai.backend.records.tasks import TaskRecord
-from mzai.backend.repositories.tasks import TaskRepository
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.tasks import TaskCreate, TaskResponse
+from backend.records.tasks import TaskRecord
+from backend.repositories.tasks import TaskRepository
+from schemas.extras import ListingResponse
+from schemas.tasks import TaskCreate, TaskResponse
 
 
 class TaskService:
@@ -513,9 +513,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from mzai.backend.api.deps import TaskServiceDep
-from mzai.schemas.extras import ListingResponse
-from mzai.schemas.tasks import TaskCreate, TaskResponse
+from backend.api.deps import TaskServiceDep
+from schemas.extras import ListingResponse
+from schemas.tasks import TaskCreate, TaskResponse
 
 router = APIRouter()
 

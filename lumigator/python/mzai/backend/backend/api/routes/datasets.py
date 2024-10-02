@@ -3,9 +3,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Form, UploadFile, status
 
-from mzai.backend.api.deps import DatasetServiceDep
-from mzai.schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from mzai.schemas.extras import ListingResponse
+from backend.api.deps import DatasetServiceDep
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from schemas.extras import ListingResponse
 
 router = APIRouter()
 

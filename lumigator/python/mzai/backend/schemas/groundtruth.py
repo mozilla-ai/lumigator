@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from mzai.schemas.deployments import DeploymentStatus
+from schemas.deployments import DeploymentStatus
 
 
 class GroundTruthDeploymentCreate(BaseModel):

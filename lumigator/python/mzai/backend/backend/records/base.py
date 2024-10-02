@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy import JSON
 from sqlalchemy.orm import DeclarativeBase
 
-from mzai.backend.records.mixins import PrimaryKeyMixin
+from backend.records.mixins import PrimaryKeyMixin
 
 
 class BaseRecord(DeclarativeBase, PrimaryKeyMixin):

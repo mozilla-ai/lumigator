@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from mzai.backend.records.datasets import DatasetRecord
-from mzai.backend.repositories.base import BaseRepository
+from backend.records.datasets import DatasetRecord
+from backend.repositories.base import BaseRepository
 
 
 class DatasetRepository(BaseRepository[DatasetRecord]):

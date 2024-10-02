@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
-from mzai.backend.settings import settings
-from mzai.schemas.extras import HealthResponse
-from mzai.schemas.jobs import JobSubmissionResponse
+from backend.settings import settings
+from schemas.extras import HealthResponse
+from schemas.jobs import JobSubmissionResponse
 import requests
 import json
 from uuid import UUID
-from mzai.backend.settings import settings
+from backend.settings import settings
 from typing import List
 
 router = APIRouter()

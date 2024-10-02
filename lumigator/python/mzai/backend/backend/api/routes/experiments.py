@@ -2,14 +2,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from mzai.backend.api.deps import ExperimentServiceDep
-from mzai.schemas.experiments import (
+from backend.api.deps import ExperimentServiceDep
+from schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
 )
-from mzai.schemas.extras import ListingResponse
+from schemas.extras import ListingResponse
 
 router = APIRouter()
 

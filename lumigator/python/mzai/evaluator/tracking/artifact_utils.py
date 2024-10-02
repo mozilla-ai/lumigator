@@ -4,6 +4,7 @@ from urllib.parse import ParseResult, urlparse
 
 import pandas as pd
 import wandb
+
 from evaluator.paths import PathPrefix
 
 

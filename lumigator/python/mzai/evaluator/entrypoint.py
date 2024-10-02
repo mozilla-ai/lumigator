@@ -1,4 +1,5 @@
 import wandb
+
 from evaluator.configs.jobs import (
     EvaluationJobConfig,
     HuggingFaceEvalJobConfig,

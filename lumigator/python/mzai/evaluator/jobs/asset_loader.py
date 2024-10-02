@@ -194,7 +194,7 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
                     return dataset
                 case other:
                     raise ValueError(
-                        "LM Buddy currently only supports loading `Dataset` objects from disk, "
+                        "Evaluator currently only supports loading `Dataset` objects from disk, "
                         f"instead found a {type(other)}."
                     )
 

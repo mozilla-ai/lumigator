@@ -1,5 +1,6 @@
 import importlib.resources
 import json
+from pydantic_core import to_json
 import unittest.mock as mock
 from pathlib import Path
 
@@ -10,13 +11,8 @@ from requests.exceptions import HTTPError
 from mzai.schemas.datasets import DatasetResponse
 from mzai.sdk.core import LumigatorClient
 
-
-class MockResponse:
-    def __init__(self, json_data, status_code):
-        self.json_data = json_data
-        self.status_code = status_code
-    def json(self):
-        return self.json_data
+from mzai.schemas.datasets import DatasetResponse, DatasetResponseList
+from mzai.schemas.deployments import DeploymentEvent, DeploymentEventList, DeploymentType, DeploymentStatus
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -29,17 +25,23 @@ def mock_requests(mock_requests_response):
     """Mocks calls to `requests.request`."""
     with mock.patch("requests.request") as req_mock:
         req_mock.return_value = mock_requests_response
+        # TODO write a side effect to check the url
         yield req_mock
 
 @pytest.fixture(scope="session")
 def lumi_client() -> LumigatorClient:
     return LumigatorClient("localhost")
 
+def check_url(check_url, **kwargs):
+    print(f'the url used is {check_url} vs {kwargs["url"]}')
+    return mock.DEFAULT
+
 def test_sdk_healthcheck_ok(mock_requests_response, mock_requests, lumi_client):
     deployment_type = "local"
     status = "ok"
     mock_requests_response.status_code = 200
     mock_requests_response.json = lambda: json.loads(f'{{"deployment_type": "{deployment_type}", "status": "{status}"}}')
+    mock_requests.side_effect = lambda **kwargs: check_url("/health", **kwargs)
     check = lumi_client.healthcheck()
     assert check.status == status
     assert check.deployment_type == deployment_type
@@ -66,12 +68,25 @@ def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
         DatasetResponse(id="e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",filename="ds2.hf",format="experiment",size=16,created_at="2024-09-26T11:52:05"),
         DatasetResponse(id="1e23ed9f-b193-444e-8427-e2119a08b0d8",filename="ds3.hf",format="experiment",size=16,created_at="2024-09-26T11:52:05")
     ]
-    datasets_json = json.dumps(datasets)
-    print(datasets_json)
+    datasets_list_json = DatasetResponseList(datasets).model_dump_json()
+    print(f'datasets: {datasets_list_json}')
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: datasets_json
-    check = lumi_client.healthcheck()
-    fail
+    mock_requests_response.json = lambda: json.loads(datasets_list_json)
+    datasets_ret = lumi_client.get_datasets()
+    assert datasets_ret is not None
+
+def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
+    deployments = [
+        DeploymentEvent(deployment_id="daab39ac-be9f-4de9-87c0-c4c94b297a97",deployment_type=DeploymentType.GROUNDTRUTH,status=DeploymentStatus.CREATED, detail="some details"),
+        DeploymentEvent(deployment_id="e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",deployment_type=DeploymentType.GROUNDTRUTH,status=DeploymentStatus.RUNNING),
+        DeploymentEvent(deployment_id="1e23ed9f-b193-444e-8427-e2119a08b0d8",deployment_type=DeploymentType.GROUNDTRUTH,status=DeploymentStatus.SUCCEEDED)
+    ]
+    deployments_list_json = DeploymentEventList(deployments).model_dump_json()
+    print(f'datasets: {deployments_list_json}')
+    mock_requests_response.status_code = 200
+    mock_requests_response.json = lambda: json.loads(deployments_list_json)
+    deployments_ret = lumi_client.get_deployments()
+    assert deployments_ret is not None
 
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200

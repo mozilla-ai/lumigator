@@ -7,6 +7,7 @@ from loguru import logger
 
 from mzai.sdk.healthcheck import HealthCheck
 from mzai.schemas.datasets import DatasetResponse
+from mzai.schemas.deployments import DeploymentEvent
 from mzai.sdk.dtos.health import Job
 
 
@@ -18,6 +19,7 @@ from pathlib import Path
 # could be generated)
 HEALTH_ROUTE = "health"
 DATASETS_ROUTE = "datasets"
+DEPLOYMENTS_ROUTE = "deployments"
 
 
 class LumigatorClient:
@@ -75,9 +77,9 @@ class LumigatorClient:
             raise
         return response
 
-    def get_response(self, verbose: bool = True) -> requests.Response:
+    def get_response(self, path, verbose: bool = True) -> requests.Response:
         try:
-            response = self._make_request(self._api_url, verbose=verbose)
+            response = self._make_request(path, verbose=verbose)
             if response.status_code == 200:
                 return response
         except HTTPError as e:
@@ -95,7 +97,7 @@ class LumigatorClient:
 
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
-        response = self.get_response(Path(self._api_url) / HEALTH_ROUTE)
+        response = self.get_response(str(Path(self._api_url) / HEALTH_ROUTE))
         if response:
             data = response.json()
             check.status = data.get("status")
@@ -103,11 +105,21 @@ class LumigatorClient:
 
         return check
 
-    def datasets(self) -> list[DatasetResponse]:
-        response = self.get_response(Path(self._api_url) / DATASETS_ROUTE)
-        if response:
-            return [DatasetResponse(**args) for args in json.loads(response.json())]
-        return []
+    def get_datasets(self) -> list[DatasetResponse]:
+        response = self.get_response(str(Path(self._api_url) / DATASETS_ROUTE))
+
+        if not response:
+            return []
+
+        return [DatasetResponse(**args) for args in response.json()]
+
+    def get_deployments(self) -> list[DeploymentEvent]:
+        response = self.get_response(str(Path(self._api_url) / HEALTH_ROUTE / DEPLOYMENTS_ROUTE))
+
+        if not response:
+            return []
+
+        return [DeploymentEvent(**args) for args in response.json()]
 
     # get_jobs returns information on all job submissions.
     def get_jobs(self) -> list[Job]:

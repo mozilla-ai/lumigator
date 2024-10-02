@@ -109,8 +109,9 @@ class LumigatorClient:
             return [DatasetResponse(**args) for args in json.loads(response.json())]
         return []
 
-    # get_jobs returns information on all job submissions.
+
     def get_jobs(self) -> list[Job]:
+        """ Returns information on all job submissions. """
         endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/'
         response = self.get_response(endpoint)
 
@@ -120,8 +121,8 @@ class LumigatorClient:
         return [Job(**job) for job in response.json()]
 
 
-    # get_job returns information on the job submission specified by ID.
     def get_job(self, job_id: str) -> Job | None:
+        """ Returns information on the job submission for the specified ID. """
         endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/{job_id}'
         response = self.get_response(endpoint)
 

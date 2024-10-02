@@ -1,7 +1,7 @@
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from mzai.backend.main import app
+from lumigator.python.mzai.backend.src.backend.main import app
 
 # We invoke the app directly since the main route is outside the router
 client = TestClient(app)

@@ -1,8 +1,8 @@
 python_sources(
     name="backend_sources",
     sources=[
-        "backend/*.py",
-        "!tests",
+        "**/*.py",
+        "!backend/tests",
     ],
 )
 

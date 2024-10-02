@@ -11,7 +11,7 @@ from testcontainers.postgres import PostgresContainer
 
 from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
-from lumigator.python.backend.src.backend.main import create_app
+from backend.main import create_app
 from backend.records.base import BaseRecord
 from backend.settings import settings
 

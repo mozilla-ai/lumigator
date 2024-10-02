@@ -6,7 +6,7 @@ from typing import Any
 import loguru
 from ray.job_submission import JobSubmissionClient
 
-from mzai.schemas.jobs import JobConfig
+from schemas.jobs import JobConfig
 
 
 @dataclass(kw_only=True)

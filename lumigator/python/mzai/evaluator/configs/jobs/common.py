@@ -11,7 +11,7 @@ from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
 
 class JobConfig(EvaluatorConfig):
-    """Configuration that comprises the entire input to an LM Buddy job.
+    """Configuration that comprises the entire input to an evaluation job.
 
     This class implements helper methods for de/serializing the configuration from file.
 

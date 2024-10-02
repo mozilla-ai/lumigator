@@ -1,18 +1,22 @@
 import importlib.resources
 import json
-from pydantic_core import to_json
 import unittest.mock as mock
 from pathlib import Path
 
 import pytest
+from pydantic_core import to_json
 from pytest import fail, raises
 from requests.exceptions import HTTPError
 
-from mzai.schemas.datasets import DatasetResponse
+from mzai.schemas.datasets import DatasetResponse, DatasetResponseList
+from mzai.schemas.deployments import (
+    DeploymentEvent,
+    DeploymentEventList,
+    DeploymentStatus,
+    DeploymentType,
+)
 from mzai.sdk.core import LumigatorClient
 
-from mzai.schemas.datasets import DatasetResponse, DatasetResponseList
-from mzai.schemas.deployments import DeploymentEvent, DeploymentEventList, DeploymentType, DeploymentStatus
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -60,7 +64,7 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
     mock_requests_response.json = lambda: json.loads(f'{{"status": "{status}"}}')
     check = lumi_client.healthcheck()
     assert check.status == status
-    assert check.deployment_type == None
+    assert check.deployment_type is None
 
 def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
     datasets = [

@@ -92,7 +92,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
-      - PYTHONPATH=/mzai/lumigator/python/mzai:/mzai/lumigator/python
+      - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - RAY_DASHBOARD_PORT=8265
       - RAY_HEAD_NODE_HOST=ray
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}

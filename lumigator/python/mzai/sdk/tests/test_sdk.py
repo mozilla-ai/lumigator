@@ -91,9 +91,10 @@ def test_get_job_ok(mock_requests_response, mock_requests, lumi_client):
             data = json.load(file)
             mock_requests_response.json = lambda: data
 
-    job = lumi_client.get_job("123")
+    job_id = "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"
+    job = lumi_client.get_job(job_id)
 
     # Test some properties
     assert job is not None
     assert job.type == "SUBMISSION"
-    assert job.submission_id == "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"
+    assert job.submission_id == job_id

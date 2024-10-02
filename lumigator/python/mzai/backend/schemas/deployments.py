@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Any
+from typing import Any, List
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
 class DeploymentType(str, Enum):
@@ -28,3 +28,6 @@ class DeploymentEvent(BaseModel):
     deployment_type: DeploymentType
     status: DeploymentStatus
     detail: str | None = None
+
+class DeploymentEventList(RootModel):
+    root: List[DeploymentEvent]

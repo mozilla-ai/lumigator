@@ -1,8 +1,7 @@
 import pytest
+from evaluator.configs.huggingface import DatasetConfig
+from evaluator.paths import format_huggingface_path
 from pydantic import ValidationError
-
-from configs.huggingface import DatasetConfig
-from paths import format_huggingface_path
 
 
 def test_split_is_required():

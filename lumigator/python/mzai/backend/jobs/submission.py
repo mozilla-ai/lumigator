@@ -1,10 +1,9 @@
-import loguru
-
 import json
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
+import loguru
 from ray.job_submission import JobSubmissionClient
 
 from mzai.schemas.jobs import JobConfig
@@ -27,7 +26,6 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-
         # evaluator entrypoint passed as a module to Ray using a JSON-serialized config.
         return (
             f"python -m evaluator evaluate huggingface "

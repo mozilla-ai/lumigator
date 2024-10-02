@@ -1,5 +1,3 @@
-from pydantic import Field, conlist, field_validator, model_validator
-
 from evaluator.configs.common import EvaluatorConfig
 from evaluator.configs.huggingface import (
     AutoModelConfig,
@@ -10,6 +8,7 @@ from evaluator.configs.huggingface import (
 from evaluator.configs.jobs.common import JobConfig
 from evaluator.configs.vllm import VLLMCompletionsConfig
 from evaluator.paths import AssetPath
+from pydantic import Field, conlist, field_validator, model_validator
 
 
 class HuggingFaceEvaluationConfig(EvaluatorConfig):

@@ -1,0 +1,21 @@
+name: "lm-buddy-lm-harness"
+
+# Model to evaluate
+model:
+  path: "hf://distilgpt2"
+  torch_dtype: "bfloat16"
+
+# Settings specific to lm_harness.evaluate
+evaluation:
+  tasks: ["hellaswag"]
+  num_fewshot: 5
+  limit: 10
+
+quantization:
+  load_in_4bit: True
+  bnb_4bit_quant_type: "fp4"
+
+# Tracking info for where to log the run results
+tracking:
+  project: "lm-buddy-examples"
+  entity: "sample"

@@ -5,7 +5,6 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import s3fs
-from loguru import logger
 from evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
 from evaluator.configs.vllm import VLLMCompletionsConfig
 from evaluator.constants import EVALUATOR_RESULTS_PATH
@@ -23,6 +22,7 @@ from evaluator.jobs.model_clients import (
     SummarizationPipelineModelClient,
 )
 from evaluator.jobs.utils import timer
+from loguru import logger
 from tqdm import tqdm
 
 

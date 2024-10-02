@@ -6,6 +6,7 @@ from evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
 )
+from evaluator.entrypoint import Evaluator
 
 
 @click.group(name="evaluate", help="Run an evaluation job.")

@@ -2,10 +2,9 @@ import os
 from unittest import mock
 
 import pytest
+from evaluator.configs.wandb import WandbRunConfig
+from evaluator.tests.test_utils import copy_pydantic_json
 from pydantic import ValidationError
-
-from configs.wandb import WandbRunConfig
-from tests.test_utils import copy_pydantic_json
 
 
 @pytest.fixture

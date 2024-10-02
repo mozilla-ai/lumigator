@@ -3,7 +3,6 @@ import warnings
 import torch
 from accelerate import Accelerator
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
-from loguru import logger
 from evaluator.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
@@ -15,6 +14,7 @@ from evaluator.tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )
+from loguru import logger
 from peft import PeftConfig
 from transformers import (
     AutoConfig,

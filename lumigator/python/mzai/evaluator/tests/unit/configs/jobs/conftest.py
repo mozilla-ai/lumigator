@@ -1,15 +1,14 @@
 import pytest
-from peft import PeftType, TaskType
-
-from configs.huggingface import (
+from evaluator.configs.huggingface import (
     AdapterConfig,
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from configs.vllm import InferenceServerConfig
-from configs.wandb import WandbRunConfig
+from evaluator.configs.vllm import InferenceServerConfig
+from evaluator.configs.wandb import WandbRunConfig
+from peft import PeftType, TaskType
 
 
 @pytest.fixture

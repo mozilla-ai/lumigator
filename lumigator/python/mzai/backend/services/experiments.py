@@ -1,10 +1,9 @@
-import loguru
-
 import json
 import os
 from pathlib import Path
 from uuid import UUID
 
+import loguru
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
@@ -148,7 +147,6 @@ class ExperimentService:
         )
         loguru.logger.info(f"Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
-
 
         loguru.logger.info(f"Getting response...")
         return ExperimentResponse.model_validate(record)

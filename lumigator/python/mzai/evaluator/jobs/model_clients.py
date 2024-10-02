@@ -2,7 +2,6 @@ import os
 from abc import abstractmethod
 
 import torch
-from loguru import logger
 from evaluator.configs.common import EvaluatorConfig
 from evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
 from evaluator.configs.vllm import VLLMCompletionsConfig
@@ -10,6 +9,7 @@ from evaluator.jobs.asset_loader import (
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )
+from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion

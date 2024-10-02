@@ -2,16 +2,16 @@ import warnings
 
 import torch
 from accelerate import Accelerator
-from datasets import DatasetDict, DatasetDict, load_dataset, load_from_disk
+from datasets import DatasetDict, load_dataset, load_from_disk
 from loguru import logger
-from configs.huggingface import (
+from evaluator.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from paths import AssetPath, PathPrefix, strip_path_prefix
-from tracking.artifact_utils import (
+from evaluator.paths import AssetPath, PathPrefix, strip_path_prefix
+from evaluator.tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )

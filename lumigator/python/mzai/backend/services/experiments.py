@@ -136,7 +136,7 @@ class ExperimentService:
 
         runtime_env = {
             "pip": settings.PIP_REQS,
-            "working_dir": "/mzai/lumigator/python/mzai/evaluator",
+            "working_dir": "/mzai/lumigator/python/mzai",
             "env_vars": runtime_env_vars,
         }
 

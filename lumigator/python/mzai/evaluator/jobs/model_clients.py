@@ -3,10 +3,10 @@ from abc import abstractmethod
 
 import torch
 from loguru import logger
-from configs.common import EvaluatorConfig
-from configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from configs.vllm import VLLMCompletionsConfig
-from jobs.asset_loader import (
+from evaluator.configs.common import EvaluatorConfig
+from evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from evaluator.configs.vllm import VLLMCompletionsConfig
+from evaluator.jobs.asset_loader import (
     HuggingFaceModelLoader,
     HuggingFaceTokenizerLoader,
 )

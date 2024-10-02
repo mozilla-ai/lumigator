@@ -6,23 +6,23 @@ from pathlib import Path
 
 import s3fs
 from loguru import logger
-from configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from configs.vllm import VLLMCompletionsConfig
-from constants import EVALUATOR_RESULTS_PATH
-from jobs.asset_loader import (
+from evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from evaluator.configs.vllm import VLLMCompletionsConfig
+from evaluator.constants import EVALUATOR_RESULTS_PATH
+from evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from jobs.common import EvaluationResult
-from jobs.evaluation.metrics import EvaluationMetrics
-from jobs.model_clients import (
+from evaluator.jobs.common import EvaluationResult
+from evaluator.jobs.evaluation.metrics import EvaluationMetrics
+from evaluator.jobs.model_clients import (
     BaseModelClient,
     HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
     SummarizationPipelineModelClient,
 )
-from jobs.utils import timer
+from evaluator.jobs.utils import timer
 from tqdm import tqdm
 
 

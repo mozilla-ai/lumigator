@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import TypeVar
 
-from configs.jobs.common import JobConfig
+from evaluator.configs.jobs.common import JobConfig
 
 ConfigType = TypeVar("ConfigType", bound=JobConfig)
 

@@ -4,7 +4,7 @@ from typing import Any
 import wandb
 from wandb.apis.public import Run as ApiRun
 
-from configs.wandb import WandbRunConfig
+from evaluator.configs.wandb import WandbRunConfig
 
 
 class WandbResumeMode(str, Enum):

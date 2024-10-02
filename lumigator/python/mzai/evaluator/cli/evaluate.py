@@ -1,8 +1,8 @@
 import click
 
-from entrypoint import Evaluator
-from cli.utils import parse_config_option
-from configs.jobs import (
+from evaluator.entrypoint import Evaluator
+from evaluator.cli.utils import parse_config_option
+from evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
 )

@@ -66,3 +66,25 @@ def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
     check = lumi_client.healthcheck()
     fail
 
+def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
+    mock_requests_response.status_code = 200
+    with open('data/jobs.json', 'r') as file:
+        data = json.load(file)
+        mock_requests_response.json = lambda: data
+    jobs = lumi_client.get_jobs()
+    assert jobs is not None
+    assert len(jobs) == 2
+    assert jobs[0].message == "I am the message"
+    assert jobs[1].message == "I am another message"
+
+def test_get_job_ok(mock_requests_response, mock_requests, lumi_client):
+    mock_requests_response.status_code = 200
+    with open('data/job.json', 'r') as file:
+        data = json.load(file)
+        mock_requests_response.json = lambda: data
+    job = lumi_client.get_job("123")
+
+    # Test some properties
+    assert job is not None
+    assert job.type == "SUBMISSION"
+    assert job.submission_id == "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"

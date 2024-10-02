@@ -1,11 +1,14 @@
-from typing import Any, Dict  # noqa: UP035
+from typing import Any, Dict, Optional  # noqa: UP035
 import json
 from requests.exceptions import HTTPError
-
 import requests
+
+from loguru import logger
+
 from mzai.sdk.healthcheck import HealthCheck
 from mzai.schemas.datasets import DatasetResponse
-from loguru import logger
+from mzai.sdk.dtos.health import Job
+
 
 from pathlib import Path
 
@@ -16,9 +19,11 @@ from pathlib import Path
 HEALTH_ROUTE = "health"
 DATASETS_ROUTE = "datasets"
 
+
 class LumigatorClient:
     def __init__(self, api_host: str):
         self.api_host = api_host
+        # NOTE: do we only support HTTP?
         self._api_url = f"http://{self.api_host}/api/v1"
 
     def _make_request(
@@ -85,6 +90,9 @@ class LumigatorClient:
             logger.error(f"An error occurred: {e}")
             raise
 
+    def get_api_url(self, endpoint: str) -> str:
+        return self._api_url / endpoint
+
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
         response = self.get_response(Path(self._api_url) / HEALTH_ROUTE)
@@ -100,3 +108,25 @@ class LumigatorClient:
         if response:
             return [DatasetResponse(**args) for args in json.loads(response.json())]
         return []
+
+    # get_jobs returns information on all job submissions.
+    def get_jobs(self) -> list[Job]:
+        endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/'
+        response = self.get_response(endpoint)
+
+        if not response:
+            return []
+
+        return [Job(**job) for job in response.json()]
+
+
+    # get_job returns information on the job submission specified by ID.
+    def get_job(self, job_id: str) -> Job | None:
+        endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/{job_id}'
+        response = self.get_response(endpoint)
+
+        if not response:
+            return None
+
+        data = response.json()
+        return Job(**data)

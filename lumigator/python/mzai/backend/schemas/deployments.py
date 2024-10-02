@@ -29,5 +29,6 @@ class DeploymentEvent(BaseModel):
     status: DeploymentStatus
     detail: str | None = None
 
+
 class DeploymentEventList(RootModel):
     root: List[DeploymentEvent]

@@ -6,5 +6,8 @@ python_sources(
 python_tests(
     name="backend_tests",
     sources=["**/test_*.py"],
-    dependencies=["3rdparty/python:3rdparty#pydantic", "lumigator/python/mzai/schemas/deployments.py:schemas_sources"]
+    dependencies=[
+        "3rdparty/python:3rdparty#pydantic",
+        "lumigator/python/mzai/schemas/deployments.py:schemas_sources",
+    ],
 )

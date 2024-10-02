@@ -1,9 +1,9 @@
-"""Main entrypoint to the LM Buddy CLI.
+"""Main entrypoint to the Evaluator CLI.
 
-Makes the LM Buddy CLI executable via `python -m evaluator`.
+Makes the Evaluator CLI executable via `python -m evaluator`.
 """
 
-from mzai.evaluator.cli import cli
+from evaluator.cli import cli
 
 if __name__ == "__main__":
     cli()

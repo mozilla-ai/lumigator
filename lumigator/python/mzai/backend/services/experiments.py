@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from uuid import UUID
 
+import loguru
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
@@ -134,15 +135,20 @@ class ExperimentService:
 
         runtime_env = {
             "pip": settings.PIP_REQS,
-            "working_dir": "lumigator/python/mzai/evaluator/",
+            "working_dir": "/mzai/lumigator/python/mzai",
             "env_vars": runtime_env_vars,
         }
+
+        loguru.logger.info("runtime env setup...")
+        loguru.logger.info(f"{runtime_env}")
 
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )
+        loguru.logger.info(f"Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
+        loguru.logger.info(f"Getting response...")
         return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:

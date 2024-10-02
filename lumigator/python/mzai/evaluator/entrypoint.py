@@ -1,29 +1,26 @@
 import wandb
 
-from mzai.evaluator.configs.jobs import (
+from evaluator.configs.jobs import (
     EvaluationJobConfig,
     HuggingFaceEvalJobConfig,
     JobConfig,
     LMHarnessJobConfig,
 )
-from mzai.evaluator.jobs.common import (
+from evaluator.jobs.common import (
     EvaluationResult,
-    FinetuningResult,
     JobType,
 )
-from mzai.evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
-from mzai.evaluator.jobs.evaluation.lm_harness import run_lm_harness
-from mzai.evaluator.paths import strip_path_prefix
-from mzai.evaluator.tracking.run_utils import WandbResumeMode
+from evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
+from evaluator.jobs.evaluation.lm_harness import run_lm_harness
+from evaluator.paths import strip_path_prefix
+from evaluator.tracking.run_utils import WandbResumeMode
+from loguru import logger
 
 
 class Evaluator:
-    """Your buddy in the (L)LM space.
+    """Simple wrapper around executable functions for tasks available in the library."""
 
-    Simple wrapper around executable functions for tasks available in the library.
-    """
-
-    # TODO: Store some configuration (e.g., tracking info, name) globally on the buddy
+    # TODO: Store some configuration (e.g., tracking info, name) globally
     def __init__(self):
         pass
 
@@ -53,12 +50,14 @@ class Evaluator:
 
         The underlying evaluation framework is determined by the configuration type.
         """
+        print("evaluating...")
+        logger.info("evaluating config: %s", config)
         match config:
             case LMHarnessJobConfig() as lm_harness_config:
                 result = run_lm_harness(lm_harness_config)
             case HuggingFaceEvalJobConfig() as hf_eval_config:
                 result = run_hf_evaluation(hf_eval_config)
             case _:
-                raise ValueError(f"Invlid configuration for evaluation: {type(config)}")
+                raise ValueError(f"Invalid configuration for evaluation: {type(config)}")
         self._generate_artifact_lineage(config, result.artifacts, JobType.EVALUATION)
         return result

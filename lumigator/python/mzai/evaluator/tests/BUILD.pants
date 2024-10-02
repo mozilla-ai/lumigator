@@ -1,9 +1,0 @@
-python_sources(
-    name="lm_buddy_tests_sources",
-    sources=["**/*.py"],
-)
-
-python_tests(
-    name="lm_buddy_tests",
-    sources=["**/test_*.py"],
-)

@@ -1,13 +1,12 @@
 import pytest
-
-from mzai.evaluator import Evaluator
-from mzai.evaluator.configs.huggingface import AutoModelConfig
-from mzai.evaluator.configs.jobs.lm_harness import (
+from evaluator.configs.huggingface import AutoModelConfig
+from evaluator.configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,
     LMHarnessJobConfig,
 )
-from mzai.evaluator.configs.wandb import WandbRunConfig
-from mzai.evaluator.paths import format_file_path
+from evaluator.configs.wandb import WandbRunConfig
+from evaluator.entrypoint import Evaluator
+from evaluator.paths import format_file_path
 
 
 @pytest.fixture

@@ -3,18 +3,18 @@ import warnings
 import torch
 from accelerate import Accelerator
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
-from loguru import logger
-from mzai.evaluator.configs.huggingface import (
+from evaluator.configs.huggingface import (
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from mzai.evaluator.paths import AssetPath, PathPrefix, strip_path_prefix
-from mzai.evaluator.tracking.artifact_utils import (
+from evaluator.paths import AssetPath, PathPrefix, strip_path_prefix
+from evaluator.tracking.artifact_utils import (
     get_artifact_directory,
     get_artifact_from_api,
 )
+from loguru import logger
 from peft import PeftConfig
 from transformers import (
     AutoConfig,
@@ -194,7 +194,7 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
                     return dataset
                 case other:
                     raise ValueError(
-                        "LM Buddy currently only supports loading `Dataset` objects from disk, "
+                        "Evaluator currently only supports loading `Dataset` objects from disk, "
                         f"instead found a {type(other)}."
                     )
 
@@ -212,4 +212,4 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
                 split_seed = config.seed or 0
                 return dataset.train_test_split(test_size=config.test_size, seed=split_seed)
             case dataset:
-                return DatasetDict({"train": dataset})
+                return Dataset({"train": dataset})

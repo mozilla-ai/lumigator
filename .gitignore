@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# test datasets cache files
+cache-*.arrow
+
 # Distribution / packaging
 mzaivenv/
 .python

@@ -1,8 +1,7 @@
 import pytest
+from evaluator.configs.huggingface import AdapterConfig
 from peft import PeftType, TaskType
 from pydantic import ValidationError
-
-from mzai.evaluator.configs.huggingface import AdapterConfig
 
 
 def test_enum_sanitzation():

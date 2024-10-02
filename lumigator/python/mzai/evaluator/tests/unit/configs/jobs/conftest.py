@@ -1,15 +1,14 @@
 import pytest
-from peft import PeftType, TaskType
-
-from mzai.evaluator.configs.huggingface import (
+from evaluator.configs.huggingface import (
     AdapterConfig,
     AutoModelConfig,
     AutoTokenizerConfig,
     DatasetConfig,
     QuantizationConfig,
 )
-from mzai.evaluator.configs.vllm import InferenceServerConfig
-from mzai.evaluator.configs.wandb import WandbRunConfig
+from evaluator.configs.vllm import InferenceServerConfig
+from evaluator.configs.wandb import WandbRunConfig
+from peft import PeftType, TaskType
 
 
 @pytest.fixture

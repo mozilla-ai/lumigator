@@ -1,0 +1,39 @@
+name: "lm-buddy-hf-evaluate"
+
+# Input dataset path
+dataset:
+  path: "s3://platform-storage/datasets/dialogsum"
+
+# Settings specific to the hf_evaluate entrypoint
+evaluation:
+  # metrics to be used for the evaluation
+  # (you can add "rouge", "meteor", and "bertscore" atm)
+  metrics: ["rouge", "meteor", "bertscore"]
+  # enable/disable tqdm to track eval progress
+  # (useful when running interactively, noisy on ray logs)
+  enable_tqdm: True
+  # rely on HF pipeline for summarization (ignored if using OAI API)
+  use_pipeline: True
+  # perform inference / evaluation on the first max_samples only
+  max_samples: 10
+  # output file path
+  # - if you provide a path complete with a filename, results will be stored in it
+  # - if you provide a dir, results will be stored in <dir>/<config.name>/eval_results.json
+  # - if you don't provide a storage path, results will be stored locally (see ~/.lm-buddy/results)
+  # storage_path: "s3://platform-storage/experiments/results/"
+  # return input data in the output file
+  return_input_data: True
+  # return predictions in the output file
+  return_predictions: True
+
+# Model to evaluate (local).
+# - Provide model path to load the model locally
+# - Make sure you add quantization details (see below) if the model is too large
+# - Optionally, add a tokenizer (the one matching the specified model name is the default)
+model:
+  path: "hf://facebook/bart-large-cnn"
+
+# Quantization (use it if you are dealing with models too large to fit in RAM)
+# quantization:
+#   load_in_4bit: True
+#   bnb_4bit_quant_type: "fp4"

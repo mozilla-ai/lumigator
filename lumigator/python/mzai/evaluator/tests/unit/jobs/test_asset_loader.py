@@ -1,15 +1,14 @@
 import torch
 from datasets import Dataset, DatasetDict
-
-from mzai.evaluator.configs.huggingface import (
+from evaluator.configs.huggingface import (
     AutoModelConfig,
     DatasetConfig,
 )
-from mzai.evaluator.jobs.asset_loader import (
+from evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from mzai.evaluator.paths import format_file_path
+from evaluator.paths import format_file_path
 
 
 def test_dataset_loading(xyz_dataset_path):

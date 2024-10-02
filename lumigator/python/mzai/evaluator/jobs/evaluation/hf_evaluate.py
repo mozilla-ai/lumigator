@@ -5,24 +5,24 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import s3fs
-from loguru import logger
-from mzai.evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
-from mzai.evaluator.configs.vllm import VLLMCompletionsConfig
-from mzai.evaluator.constants import EVALUATOR_RESULTS_PATH
-from mzai.evaluator.jobs.asset_loader import (
+from evaluator.configs.jobs.hf_evaluate import HuggingFaceEvalJobConfig
+from evaluator.configs.vllm import VLLMCompletionsConfig
+from evaluator.constants import EVALUATOR_RESULTS_PATH
+from evaluator.jobs.asset_loader import (
     HuggingFaceDatasetLoader,
     HuggingFaceModelLoader,
 )
-from mzai.evaluator.jobs.common import EvaluationResult
-from mzai.evaluator.jobs.evaluation.metrics import EvaluationMetrics
-from mzai.evaluator.jobs.model_clients import (
+from evaluator.jobs.common import EvaluationResult
+from evaluator.jobs.evaluation.metrics import EvaluationMetrics
+from evaluator.jobs.model_clients import (
     BaseModelClient,
     HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
     SummarizationPipelineModelClient,
 )
-from mzai.evaluator.jobs.utils import timer
+from evaluator.jobs.utils import timer
+from loguru import logger
 from tqdm import tqdm
 
 

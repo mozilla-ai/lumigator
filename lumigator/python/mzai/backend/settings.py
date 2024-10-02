@@ -85,12 +85,8 @@ class BackendSettings(BaseSettings):
     # TODO: refactor requirements into Ray TOML.
     @computed_field
     @property
-    def PIP_REQS(self) -> list:  # noqa: N802
-        return [
-            line.strip()
-            for line in Path.open("requirements.txt")
-            if line.strip() and not line.startswith("#")
-        ]
+    def PIP_REQS(self) -> str:  # noqa: N802
+        return f"lumigator/python/mzai/evaluator/requirements.txt"
 
     @computed_field
     @property

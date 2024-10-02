@@ -6,4 +6,18 @@ python_sources(
 python_tests(
     name="sdk_tests",
     sources=["**/test_*.py"],
+     dependencies=[
+        ":data-job",
+        ":data-jobs"
+    ],
+)
+
+resource(
+    name="data-job",
+    source="data/job.json",
+)
+
+resource(
+    name="data-jobs",
+    source="data/jobs.json",
 )

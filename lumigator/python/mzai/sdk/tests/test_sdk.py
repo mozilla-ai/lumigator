@@ -1,15 +1,15 @@
-import pytest
-
-from pytest import raises, fail
-
+import importlib.resources
 import json
 import unittest.mock as mock
+from pathlib import Path
 
+import pytest
+from pytest import fail, raises
 from requests.exceptions import HTTPError
 
+from mzai.schemas.datasets import DatasetResponse
 from mzai.sdk.core import LumigatorClient
 
-from mzai.schemas.datasets import DatasetResponse
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -68,10 +68,15 @@ def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
 
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200
-    with open('data/jobs.json', 'r') as file:
-        data = json.load(file)
-        mock_requests_response.json = lambda: data
+
+    ref = importlib.resources.files('mzai.sdk.tests') / 'data/jobs.json'
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            data = json.load(file)
+            mock_requests_response.json = lambda: data
+
     jobs = lumi_client.get_jobs()
+
     assert jobs is not None
     assert len(jobs) == 2
     assert jobs[0].message == "I am the message"
@@ -79,9 +84,13 @@ def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
 
 def test_get_job_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200
-    with open('data/job.json', 'r') as file:
-        data = json.load(file)
-        mock_requests_response.json = lambda: data
+
+    ref = importlib.resources.files('mzai.sdk.tests') / 'data/job.json'
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            data = json.load(file)
+            mock_requests_response.json = lambda: data
+
     job = lumi_client.get_job("123")
 
     # Test some properties

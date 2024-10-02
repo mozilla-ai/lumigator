@@ -2,7 +2,7 @@ import warnings
 
 import torch
 from accelerate import Accelerator
-from datasets import DatasetDict, load_dataset, load_from_disk
+from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from loguru import logger
 from evaluator.configs.huggingface import (
     AutoModelConfig,
@@ -177,7 +177,7 @@ class HuggingFaceTokenizerLoader(HuggingFaceAssetLoader):
 class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
     """Helper class for loading HuggingFace datasets from LM Buddy configurations."""
 
-    def load_dataset(self, config: DatasetConfig) -> DatasetDict:
+    def load_dataset(self, config: DatasetConfig) -> Dataset:
         """Load a HuggingFace `Dataset` from the dataset configuration.
 
         This method always returns a single `Dataset` object.
@@ -190,11 +190,11 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
             return load_dataset(dataset_path, split=config.split)
         else:
             match load_from_disk(dataset_path):
-                case DatasetDict() as dataset:
+                case Dataset() as dataset:
                     return dataset
                 case other:
                     raise ValueError(
-                        "LM Buddy currently only supports loading `Dataset` objects from disk, "
+                        "Evaluator currently only supports loading `Dataset` objects from disk, "
                         f"instead found a {type(other)}."
                     )
 
@@ -204,7 +204,7 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
         The split is performed when a `test_size` is specified on the configuration.
         """
         match self.load_dataset(config):
-            case DatasetDict() as dataset if config.test_size is not None:
+            case Dataset() as dataset if config.test_size is not None:
                 # We need to specify a fixed seed to load the datasets on each worker
                 # Under the hood, HuggingFace uses `accelerate` to create a data loader shards
                 # If the datasets are not seeded here, the ordering will be inconsistent
@@ -212,4 +212,4 @@ class HuggingFaceDatasetLoader(HuggingFaceAssetLoader):
                 split_seed = config.seed or 0
                 return dataset.train_test_split(test_size=config.test_size, seed=split_seed)
             case dataset:
-                return DatasetDict({"train": dataset})
+                return Dataset({"train": dataset})

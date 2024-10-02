@@ -1,16 +1,9 @@
-python_sources(
-    name="sdk_test_sources",
-    sources=["**/*.py"]
-)
+python_sources(name="sdk_test_sources", sources=["**/*.py"])
 
 python_tests(
     name="sdk_tests",
     sources=["**/test_*.py"],
-     dependencies=[
-        ":data-job",
-        ":data-jobs"
-        "3rdparty/python:3rdparty#pydantic"
-    ],
+    dependencies=[":data-job", ":data-jobs" "3rdparty/python:3rdparty#pydantic"],
 )
 
 resource(

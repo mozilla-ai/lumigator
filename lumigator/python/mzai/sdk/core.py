@@ -121,10 +121,9 @@ class LumigatorClient:
 
         return [DeploymentEvent(**args) for args in response.json()]
 
-
     def get_jobs(self) -> list[Job]:
-        """ Returns information on all job submissions. """
-        endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/'
+        """Returns information on all job submissions."""
+        endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/"
         response = self.get_response(endpoint)
 
         if not response:
@@ -132,10 +131,9 @@ class LumigatorClient:
 
         return [Job(**job) for job in response.json()]
 
-
     def get_job(self, job_id: str) -> Job | None:
-        """ Returns information on the job submission for the specified ID. """
-        endpoint = Path(self._api_url) / f'{HEALTH_ROUTE}/jobs/{job_id}'
+        """Returns information on the job submission for the specified ID."""
+        endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/{job_id}"
         response = self.get_response(endpoint)
 
         if not response:

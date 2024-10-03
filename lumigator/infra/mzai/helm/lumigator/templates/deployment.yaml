@@ -66,12 +66,19 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ required "Missing Ray Worker GPU number" .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
-            {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
+            {{- if or .Values.mistralAPIKey .Values.existingSecret }}
             - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "lumigator.mistral-secret-ref" . }}
+                  name: {{ include "lumigator.lumigator-secret-ref" . }}
                   key: {{ .Consts.mistralSecretKey }}
+            {{- end }}
+            {{- if or .Values.openaiAPIKey .Values.existingSecret }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "lumigator.lumigator-secret-ref" . }}
+                  key: {{ .Consts.openaiSecretKey }}
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

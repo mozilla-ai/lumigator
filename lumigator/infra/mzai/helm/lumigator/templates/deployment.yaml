@@ -1,4 +1,4 @@
-{{ include "lumigator.lumigator-default-secret" . }}
+{{ include "lumigator.mistral-default-secret" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,18 +66,18 @@ spec:
             - name: RAY_WORKER_GPUS
               value: {{ required "Missing Ray Worker GPU number" .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret
-            {{- if or .Values.mistralAPIKey .Values.existingSecret }}
+            {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
             - name: MISTRAL_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "lumigator.lumigator-secret-ref" . }}
+                  name: {{ include "lumigator.mistral-secret-ref" . }}
                   key: {{ .Consts.mistralSecretKey }}
             {{- end }}
-            {{- if or .Values.openaiAPIKey .Values.existingSecret }}
+            {{- if or .Values.openaiAPIKey .Values.existingOpenaiAPISecret }}
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "lumigator.lumigator-secret-ref" . }}
+                  name: {{ include "lumigator.openai-secret-ref" . }}
                   key: {{ .Consts.openaiSecretKey }}
             {{- end }}
           resources:

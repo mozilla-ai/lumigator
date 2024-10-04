@@ -28,8 +28,7 @@ class RayJobEntrypoint(ABC):
     def command(self) -> str:
         # evaluator entrypoint passed as a module to Ray using a JSON-serialized config.
         return (
-            f"python -m evaluator evaluate huggingface "
-            f"--config '{json.dumps(self.config.args)}'"
+            f"python -m evaluator.evaluate huggingface_command {json.dumps(self.config.args)}"
         )
 
 

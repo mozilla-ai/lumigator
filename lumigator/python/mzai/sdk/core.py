@@ -2,19 +2,22 @@ import json
 from http import HTTPStatus
 from pathlib import Path
 from typing import Any, Dict  # noqa: UP035
+from uuid import UUID
 
 import requests
 from loguru import logger
 from requests.exceptions import HTTPError
+from schemas.extras import ListingResponse
 
-from uuid import UUID
-
-from mzai.sdk.healthcheck import HealthCheck
 from mzai.backend.schemas.datasets import DatasetResponse
 from mzai.backend.schemas.deployments import DeploymentEvent
-from mzai.backend.schemas.jobs import JobSubmissionResponse
-from mzai.backend.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse, ExperimentResultDownloadResponse
-
+from mzai.backend.schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
+    ExperimentResultResponse,
+)
+from mzai.sdk.healthcheck import HealthCheck
 
 # TODO: move these definitions to an "upper" level to be imported
 # by both the SDK client and the backend (the openapi definition
@@ -122,9 +125,6 @@ class LumigatorClient:
             logger.error(f"An error occurred: {e}")
             raise
 
-    def get_api_url(self, endpoint: str) -> str:
-        return self._api_url / endpoint
-
     def healthcheck(self) -> HealthCheck:
         """Returns healthcheck information."""
         check = HealthCheck()
@@ -152,40 +152,11 @@ class LumigatorClient:
 
         return [DeploymentEvent(**args) for args in response.json()]
 
-    def get_jobs(self) -> list[JobSubmissionResponse]:
-        """Returns information on all job submissions."""
-        endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/"
-        response = self.__get_response(endpoint)
 
-        if not response:
-            return []
-
-        return [JobSubmissionResponse(**job) for job in response.json()]
-
-    def get_job(self, job_id: str) -> JobSubmissionResponse | None:
-        """Returns information on the job submission for the specified ID."""
-        endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/{job_id}"
-        response = self.__get_response(endpoint)
-
-        if not response or response.status_code != HTTPStatus.OK:
-            return None
-
-        data = response.json()
-        return JobSubmissionResponse(**data)
-
-    def get_vendors(self) -> list[str]:
-        """Returns the list of supported external vendors."""
-        endpoint = Path(self._api_url) / COMPLETIONS_ROUTE
-        response = self.__get_response(endpoint)
-
-        if not response:
-            return []
-
-        return [str(vendor) for vendor in response.json()]
     
     def create_experiment(self, experiment: ExperimentCreate) -> ExperimentResponse:
         """Creates a new experiment."""
-        response = self.__post_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE / f''), experiment.model_dump_json())
+        response = self.__post_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE / ''), experiment.model_dump_json())
 
         if not response:
             return []

@@ -9,13 +9,6 @@ from schemas.jobs import JobConfig
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
-    """A generic command which is passed a config and submitted as a ray job.
-
-    Currently the command is passed as a parameter. It likely will be a ptyhon module used via cli
-    (e.g. `lm-buddy evaluate lm-harness`, `lm-buddy finetune`, etc) or even different commands.
-    Note parameters of this command can either be passed in a config file, or left empty.
-    """
-
     config: JobConfig
     runtime_env: dict[str, Any] | None = None
     num_cpus: int | float | None = None
@@ -24,6 +17,14 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
+        """A generic command which is passed some optional args and submitted as a ray job.
+
+        It likely will be a ptyhon module used via cli (e.g. `python -m evaluator evaluate ...`)
+        or a different kind of command as long as it is executable.
+        Note that parameters can either be passed as config.args (a dictionary containing
+        parameter names as keys and parameter values as values) or directly with the command
+        string.
+        """
         full_command = self.config.command
 
         if self.config.args:

@@ -12,5 +12,5 @@ def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
             data = json.load(file)
             mock_requests_response.json = lambda: data
 
-    datasets_ret = lumi_client.get_datasets()
+    datasets_ret = lumi_client.datasets.get_datasets()
     assert datasets_ret is not None

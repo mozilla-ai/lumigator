@@ -24,4 +24,3 @@ def mock_requests(mock_requests_response):
 @pytest.fixture(scope="session")
 def lumi_client() -> LumigatorClient:
     return LumigatorClient(LUMI_HOST)
-

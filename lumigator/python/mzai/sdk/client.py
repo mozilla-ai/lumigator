@@ -69,7 +69,7 @@ class ApiClient:
         """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.
         """
-        path = Path(self._api_url) / api_path
+        path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
             response = _make_request(path, verbose=verbose)

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from schemas.datasets import DatasetResponse
 
-from sdk.core import ApiClient
+from sdk.client import ApiClient
 
 
 class Datasets:

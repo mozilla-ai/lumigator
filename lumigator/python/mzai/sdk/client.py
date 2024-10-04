@@ -7,12 +7,6 @@ import requests
 from loguru import logger
 from requests.exceptions import HTTPError
 
-from sdk.completions import Completions
-from sdk.datasets import Datasets
-from sdk.experiements import Experiments
-from sdk.health import Health
-
-
 def _make_request(
         url: str,
         method: str = "GET",
@@ -114,11 +108,4 @@ class ApiClient:
             raise
 
 
-class LumigatorClient:
-    def __init__(self, api_host: str):
-        self.client = ApiClient(api_host)
 
-        self.completions = Completions(self.client)
-        self.datasets = Datasets(self.client)
-        self.experiments = Experiments(self.client)
-        self.health = Health(self.client)

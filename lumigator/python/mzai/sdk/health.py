@@ -3,7 +3,7 @@ from http import HTTPStatus
 from schemas.deployments import DeploymentEvent
 
 from mzai.backend.schemas.jobs import JobSubmissionResponse
-from sdk.core import ApiClient
+from sdk.client import ApiClient
 from sdk.healthcheck import HealthCheck
 
 

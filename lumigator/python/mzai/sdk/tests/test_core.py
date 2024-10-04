@@ -2,7 +2,7 @@ import unittest.mock as mock
 
 import pytest
 
-from sdk.core import LumigatorClient
+from sdk.lumigator import LumigatorClient
 
 LUMI_HOST="localhost"
 

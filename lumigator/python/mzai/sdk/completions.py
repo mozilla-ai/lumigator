@@ -1,5 +1,5 @@
 
-from sdk.core import ApiClient
+from sdk.client import ApiClient
 
 
 class Completions:

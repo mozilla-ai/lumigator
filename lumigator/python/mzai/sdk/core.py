@@ -7,10 +7,14 @@ import requests
 from loguru import logger
 from requests.exceptions import HTTPError
 
+from uuid import UUID
+
+from mzai.sdk.healthcheck import HealthCheck
 from mzai.backend.schemas.datasets import DatasetResponse
 from mzai.backend.schemas.deployments import DeploymentEvent
 from mzai.backend.schemas.jobs import JobSubmissionResponse
-from mzai.sdk.healthcheck import HealthCheck
+from mzai.backend.schemas.experiments import ExperimentCreate, ExperimentResponse, ExperimentResultResponse, ExperimentResultDownloadResponse
+
 
 # TODO: move these definitions to an "upper" level to be imported
 # by both the SDK client and the backend (the openapi definition
@@ -20,6 +24,7 @@ COMPLETIONS_ROUTE = "completions"
 DATASETS_ROUTE = "datasets"
 DEPLOYMENTS_ROUTE = "deployments"
 HEALTH_ROUTE = "health"
+EXPERIMENTS_ROUTE = "experiments"
 
 
 class LumigatorClient:
@@ -102,10 +107,26 @@ class LumigatorClient:
             logger.error(f"An error occurred: {e}")
             raise
 
+    def post_response(self, path, data=None, verbose: bool = True) -> requests.Response:
+        try:
+            response = self._make_request(path, data, method="PUT", verbose=verbose)
+            if response.status_code == 200:
+                return response
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                return e.response
+            else:
+                # Re-raise the exception if it's not a 404 error
+                raise
+        except requests.RequestException as e:
+            logger.error(f"An error occurred: {e}")
+            raise
+
     def get_api_url(self, endpoint: str) -> str:
         return self._api_url / endpoint
 
     def healthcheck(self) -> HealthCheck:
+        """Returns healthcheck information."""
         check = HealthCheck()
         response = self.__get_response(str(Path(self._api_url) / HEALTH_ROUTE))
         if response:
@@ -161,3 +182,52 @@ class LumigatorClient:
             return []
 
         return [str(vendor) for vendor in response.json()]
+    
+    def create_experiment(self, experiment: ExperimentCreate) -> ExperimentResponse:
+        """Creates a new experiment."""
+        response = self.__post_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE / f''), experiment.model_dump_json())
+
+        if not response:
+            return []
+
+        data = response.json()
+        return ExperimentResponse(**data)
+
+    def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
+        """Returns information on the experiment for the specified ID."""
+        response = self.__get_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE))
+
+        if not response:
+            return []
+
+        data = response.json()
+        return ExperimentResponse(**data)
+
+    def get_experiments(self, skip: int = 0, limit: int = 100) -> ListingResponse[ExperimentResponse]:
+        """Returns information on all experiments."""
+        response = self.__get_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE))
+
+        if not response:
+            return []
+
+        return [ExperimentResponse(**args) for args in response.json()]
+
+    def get_experiment_result(self, experiment_id: UUID) -> ExperimentResultResponse:
+        """Returns the result of the experiment for the specified ID."""
+        response = self.__get_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE / f'{experiment_id}' / "result"))
+
+        if not response:
+            return []
+
+        data = response.json()
+        return ExperimentResultResponse(**data)
+
+    def get_experiment_result_download(self, experiment_id: UUID) -> ExperimentResultDownloadResponse:
+        """Returns the result of the experiment for the specified ID."""
+        response = self.__get_response(str(Path(self._api_url) / EXPERIMENTS_ROUTE / f'{experiment_id}' / "result" / "download"))
+
+        if not response:
+            return []
+
+        data = response.json()
+        return ExperimentResultDownloadResponse(**data)

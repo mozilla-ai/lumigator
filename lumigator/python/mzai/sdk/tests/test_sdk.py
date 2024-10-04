@@ -5,6 +5,7 @@ from http import HTTPStatus
 from pathlib import Path
 
 import pytest
+from pydantic_core import to_json
 from pytest import fail, raises
 from requests.exceptions import HTTPError
 
@@ -17,6 +18,7 @@ from mzai.backend.schemas.deployments import (
 )
 from mzai.sdk.core import LumigatorClient
 
+LUMI_HOST="localhost"
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -36,11 +38,12 @@ def mock_requests(mock_requests_response):
 
 @pytest.fixture(scope="session")
 def lumi_client() -> LumigatorClient:
-    return LumigatorClient("localhost")
+    return LumigatorClient()
 
 
 def check_url(check_url, **kwargs):
     print(f'the url used is {check_url} vs {kwargs["url"]}')
+    assert check_url == kwargs["url"]
     return mock.DEFAULT
 
 
@@ -76,60 +79,27 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
 
 
 def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
-    datasets = [
-        DatasetResponse(
-            id="daab39ac-be9f-4de9-87c0-c4c94b297a97",
-            filename="ds1.hf",
-            format="experiment",
-            size=16,
-            created_at="2024-09-26T11:52:05",
-        ),
-        DatasetResponse(
-            id="e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",
-            filename="ds2.hf",
-            format="experiment",
-            size=16,
-            created_at="2024-09-26T11:52:05",
-        ),
-        DatasetResponse(
-            id="1e23ed9f-b193-444e-8427-e2119a08b0d8",
-            filename="ds3.hf",
-            format="experiment",
-            size=16,
-            created_at="2024-09-26T11:52:05",
-        ),
-    ]
-    datasets_list_json = DatasetResponseList(datasets).model_dump_json()
-    print(f"datasets: {datasets_list_json}")
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(datasets_list_json)
+
+    ref = importlib.resources.files("mzai.sdk.tests") / "data/datasets.json"
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            data = json.load(file)
+            mock_requests_response.json = lambda: data
+
     datasets_ret = lumi_client.get_datasets()
     assert datasets_ret is not None
 
 
 def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
-    deployments = [
-        DeploymentEvent(
-            deployment_id="daab39ac-be9f-4de9-87c0-c4c94b297a97",
-            deployment_type=DeploymentType.GROUNDTRUTH,
-            status=DeploymentStatus.CREATED,
-            detail="some details",
-        ),
-        DeploymentEvent(
-            deployment_id="e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",
-            deployment_type=DeploymentType.GROUNDTRUTH,
-            status=DeploymentStatus.RUNNING,
-        ),
-        DeploymentEvent(
-            deployment_id="1e23ed9f-b193-444e-8427-e2119a08b0d8",
-            deployment_type=DeploymentType.GROUNDTRUTH,
-            status=DeploymentStatus.SUCCEEDED,
-        ),
-    ]
-    deployments_list_json = DeploymentEventList(deployments).model_dump_json()
-    print(f"datasets: {deployments_list_json}")
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(deployments_list_json)
+
+    ref = importlib.resources.files("mzai.sdk.tests") / "data/deployments.json"
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            data = json.load(file)
+            mock_requests_response.json = lambda: data
+
     deployments_ret = lumi_client.get_deployments()
     assert deployments_ret is not None
 

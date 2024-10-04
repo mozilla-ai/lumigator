@@ -8,9 +8,9 @@ from typing import Any, Dict, Optional  # noqa: UP035
 from loguru import logger
 
 from mzai.sdk.healthcheck import HealthCheck
-from mzai.schemas.datasets import DatasetResponse
-from mzai.schemas.deployments import DeploymentEvent
-from mzai.schemas.jobs import JobSubmissionResponse
+from mzai.backend.schemas.datasets import DatasetResponse
+from mzai.backend.schemas.deployments import DeploymentEvent
+from mzai.backend.schemas.jobs import JobSubmissionResponse
 
 
 # TODO: move these definitions to an "upper" level to be imported

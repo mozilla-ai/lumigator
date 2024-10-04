@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 from typing import BinaryIO
 from uuid import UUID
 
+import mlflow
 from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
@@ -147,6 +148,19 @@ class DatasetService:
                 format=format,
                 size=actual_size,
             )
+
+            mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
+
+            try:
+                experiment_id = mlflow.create_experiment("datasets")
+            except mlflow.MlflowException as e:
+                experiment_id = mlflow.get_experiment_by_name("datasets").experiment_id
+
+            with mlflow.start_run(
+                experiment_id=experiment_id,
+                run_name=str(record.id),
+            ):
+                mlflow.log_artifact(local_path=temp.name, artifact_path=dataset.filename)
 
             # convert the dataset to HF format and save it to S3
             self._save_dataset_to_s3(temp.name, record)

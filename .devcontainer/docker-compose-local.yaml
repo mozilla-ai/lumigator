@@ -79,6 +79,7 @@ services:
       - localstack
     ports:
       - 80:80
+      - 8080:8080
     environment:
       - DEPLOYMENT_TYPE=local
       - POSTGRES_HOST=postgres

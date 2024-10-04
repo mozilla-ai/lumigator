@@ -1,9 +1,9 @@
 import json
-import os
 from pathlib import Path
 from uuid import UUID
 
 import loguru
+import mlflow
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
@@ -74,82 +74,104 @@ class ExperimentService:
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         record = self.experiment_repo.create(name=request.name, description=request.description)
 
-        # get dataset S3 path from UUID
-        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+        mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 
-        # set storage path
-        storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
+        try:
+            experiment_id = mlflow.create_experiment(request.name)
+        except mlflow.MlflowException as e:
+            print(
+                f"[w] An experiment with name {request.name} already exists. Storing our run there!"
+            )
+            experiment_id = mlflow.get_experiment_by_name(request.name).experiment_id
 
-        # fill up model url with default openai url
-        if request.model.startswith("oai://"):
-            model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
-            model_url = settings.MISTRAL_API_URL
-        else:
-            model_url = request.model_url
+        with mlflow.start_run(
+            experiment_id=experiment_id,
+            run_name=str(record.id),
+        ):
+            # get dataset S3 path from UUID
+            dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
-        # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
-            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+            # set storage path
+            storage_path = (
+                f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
+            )
 
-        config_params = {
-            "experiment_name": request.name,
-            "experiment_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-        }
+            # fill up model url with default openai url
+            if request.model.startswith("oai://"):
+                model_url = settings.OAI_API_URL
+            elif request.model.startswith("mistral://"):
+                model_url = settings.MISTRAL_API_URL
+            else:
+                model_url = request.model_url
 
-        # load a config template and fill it up with config_params
-        if request.config_template is not None:
-            config_template = request.config_template
-        elif request.model in config_templates.config_template:
-            # if no config template is provided, get the default one for the model
-            config_template = config_templates.config_template[request.model]
-        else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = config_templates.causal_template
+            # provide a reasonable system prompt for services where none was specified
+            if request.system_prompt is None and not request.model.startswith("hf://"):
+                request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-        eval_config_dict = json.loads(config_template.format(**config_params))
+            config_params = {
+                "experiment_name": request.name,
+                "experiment_id": record.id,
+                "model_path": request.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": storage_path,
+                "model_url": model_url,
+                "system_prompt": request.system_prompt,
+            }
 
-        # Submit the job to Ray
-        ray_config = JobConfig(
-            job_id=record.id,
-            job_type=JobType.EXPERIMENT,
-            args=eval_config_dict,
-        )
+            # load a config template and fill it up with config_params
+            if request.config_template is not None:
+                config_template = request.config_template
+            elif request.model in config_templates.config_template:
+                # if no config template is provided, get the default one for the model
+                config_template = config_templates.config_template[request.model]
+            else:
+                # if no default config template is provided, get the causal template
+                # (which works with seq2seq models too except it does not use pipeline)
+                config_template = config_templates.causal_template
 
-        # build runtime ENV for workers
-        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        settings.inherit_ray_env(runtime_env_vars)
+            eval_config_dict = json.loads(config_template.format(**config_params))
 
-        # set num_gpus per worker (zero if we are just hitting a service)
-        if not request.model.startswith("hf://"):
-            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
-        else:
-            worker_gpus = settings.RAY_WORKER_GPUS
+            mlflow.log_dict(eval_config_dict, "config.json")
 
-        runtime_env = {
-            "pip": settings.PIP_REQS,
-            "working_dir": "/mzai/lumigator/python/mzai",
-            "env_vars": runtime_env_vars,
-        }
+            # Submit the job to Ray
+            ray_config = JobConfig(
+                job_id=record.id,
+                job_type=JobType.EXPERIMENT,
+                args=eval_config_dict,
+            )
 
-        loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
+            # build runtime ENV for workers
+            runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+            settings.inherit_ray_env(runtime_env_vars)
 
-        entrypoint = RayJobEntrypoint(
-            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
-        )
-        loguru.logger.info(f"Submitting Ray job...")
-        submit_ray_job(self.ray_client, entrypoint)
+            # set num_gpus per worker (zero if we are just hitting a service)
+            if not request.model.startswith("hf://"):
+                worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
+            else:
+                worker_gpus = settings.RAY_WORKER_GPUS
 
-        loguru.logger.info(f"Getting response...")
-        return ExperimentResponse.model_validate(record)
+            runtime_env = {
+                "pip": settings.PIP_REQS,
+                "working_dir": "/mzai/lumigator/python/mzai",
+                "env_vars": runtime_env_vars,
+            }
+
+            mlflow.log_dict(runtime_env, "runtime_env.json")
+            mlflow.log_text(dataset_s3_path, "dataset_s3_path.txt")
+            mlflow.log_param("dataset_path", dataset_s3_path)
+
+            loguru.logger.info("runtime env setup...")
+            loguru.logger.info(f"{runtime_env}")
+
+            entrypoint = RayJobEntrypoint(
+                config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+            )
+            loguru.logger.info("Submitting Ray job...")
+            submit_ray_job(self.ray_client, entrypoint)
+
+            loguru.logger.info("Getting response...")
+            return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
         record = self._get_experiment_record(experiment_id)

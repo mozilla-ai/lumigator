@@ -1,11 +1,9 @@
-import json
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
 import loguru
 from ray.job_submission import JobSubmissionClient
-
 from schemas.jobs import JobConfig
 
 
@@ -13,9 +11,9 @@ from schemas.jobs import JobConfig
 class RayJobEntrypoint(ABC):
     """A generic command which is passed a config and submitted as a ray job.
 
-    Currently the only command we run is `evaluator evaluate`, but this can
-    be parametrised to support both different parameters (e.g. `evaluator
-    evaluate lm-harness`) or even different commands.
+    Currently the command is passed as a parameter. It likely will be a ptyhon module used via cli
+    (e.g. `lm-buddy evaluate lm-harness`, `lm-buddy finetune`, etc) or even different commands.
+    Note parameters of this command can either be passed in a config file, or left empty.
     """
 
     config: JobConfig
@@ -26,11 +24,13 @@ class RayJobEntrypoint(ABC):
 
     @property
     def command(self) -> str:
-        # evaluator entrypoint passed as a module to Ray using a JSON-serialized config.
-        return (
-            f"python -m evaluator evaluate huggingface "
-            f"--config '{json.dumps(self.config.args)}'"
-        )
+        full_command = self.config.command
+
+        if self.config.args:
+            for k in self.config.args.keys():
+                full_command += f" {k} '{self.config.args[k]}'"
+
+        return full_command
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:

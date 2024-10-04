@@ -6,13 +6,6 @@ from uuid import UUID
 import loguru
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
-
-from backend import config_templates
-from backend.jobs.submission import RayJobEntrypoint, submit_ray_job
-from backend.records.experiments import ExperimentRecord
-from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from backend.services.datasets import DatasetService
-from backend.settings import settings
 from schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
@@ -21,6 +14,13 @@ from schemas.experiments import (
 )
 from schemas.extras import ListingResponse
 from schemas.jobs import JobConfig, JobStatus, JobType
+
+from backend import config_templates
+from backend.jobs.submission import RayJobEntrypoint, submit_ray_job
+from backend.records.experiments import ExperimentRecord
+from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from backend.services.datasets import DatasetService
+from backend.settings import settings
 
 
 class ExperimentService:
@@ -114,13 +114,19 @@ class ExperimentService:
             # (which works with seq2seq models too except it does not use pipeline)
             config_template = config_templates.causal_template
 
-        eval_config_dict = json.loads(config_template.format(**config_params))
+        eval_config_args = {
+            "--config": config_template.format(**config_params),
+        }
 
-        # Submit the job to Ray
+        # Prepare the job configuration that will be sent to submit the ray job.
+        # This includes both the command that is going to be executed and its
+        # arguments (a dict where keys are parameter names and the values are
+        # strings that will be provided after the parameters)
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,
-            args=eval_config_dict,
+            command="python -m evaluator evaluate huggingface",
+            args=eval_config_args,
         )
 
         # build runtime ENV for workers

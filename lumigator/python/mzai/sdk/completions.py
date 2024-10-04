@@ -1,15 +1,29 @@
-from pathlib import Path
 
-from sdk.core import COMPLETIONS_ROUTE
+from sdk.core import ApiClient
 
 
-def get_vendors(self) -> list[str]:
-    """Returns the list of supported external vendors."""
-    endpoint = Path(self._api_url) / COMPLETIONS_ROUTE
-    response = self.__get_response(endpoint)
+class Completions:
+    COMPLETIONS_ROUTE = "completions"
 
-    if not response:
-        return []
+    def __init__(self, c:ApiClient):
+        self.client = c
 
-    return [str(vendor) for vendor in response.json()]
+    def get_vendors(self) -> list[str]:
+        """Returns the list of supported external vendors."""
+        response = self.client.get_response(self.COMPLETIONS_ROUTE)
 
+        if not response:
+            return []
+
+        return [str(vendor) for vendor in response.json()]
+
+
+    # def get_completion(self, vendor: str, text: str) -> CompletionResponse:
+    #     vendor = vendor.lower
+    #     if vendor not in ["mistral", "openai"]:
+    #         # TODO: invalid vendor
+    #         raise
+    #
+    #     endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
+    #     self.client.post_response()
+       # response = self.__post_response(endpoint), experiment.model_dump_json())

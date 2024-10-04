@@ -16,11 +16,9 @@ class RayJobEntrypoint(ABC):
     memory: int | float | None = None
 
     @property
-    def command(self) -> str:
+    def command_with_params(self) -> str:
         """A generic command which is passed some optional args and submitted as a ray job.
 
-        It likely will be a ptyhon module used via cli (e.g. `python -m evaluator evaluate ...`)
-        or a different kind of command as long as it is executable.
         Note that parameters can either be passed as config.args (a dictionary containing
         parameter names as keys and parameter values as values) or directly with the command
         string.
@@ -35,9 +33,9 @@ class RayJobEntrypoint(ABC):
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
-    loguru.logger.info(f"Submitting {entrypoint.command}...{entrypoint.runtime_env}")
+    loguru.logger.info(f"Submitting {entrypoint.command_with_params}...{entrypoint.runtime_env}")
     return client.submit_job(
-        entrypoint=entrypoint.command,
+        entrypoint=entrypoint.command_with_params,
         entrypoint_num_cpus=entrypoint.num_cpus,
         entrypoint_num_gpus=entrypoint.num_gpus,
         entrypoint_memory=entrypoint.memory,

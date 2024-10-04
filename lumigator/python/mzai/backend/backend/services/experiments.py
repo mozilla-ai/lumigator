@@ -114,14 +114,17 @@ class ExperimentService:
             # (which works with seq2seq models too except it does not use pipeline)
             config_template = config_templates.causal_template
 
+        # eval_config_args is used to map input configuration parameters with
+        # command parameters provided via command line to the ray job.
+        # To do this, we use a dict where keys are parameter names as they'd
+        # appear on the command line and the values are the respective params.
         eval_config_args = {
             "--config": config_template.format(**config_params),
         }
 
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
-        # arguments (a dict where keys are parameter names and the values are
-        # strings that will be provided after the parameters)
+        # arguments defined in eval_config_args
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,

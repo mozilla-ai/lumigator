@@ -1,5 +1,5 @@
 import json
-from http import HTTPStatus
+from http import HTTPStatus, HTTPMethod
 from pathlib import Path
 from typing import Any, Dict  # noqa: UP035
 
@@ -65,14 +65,14 @@ class ApiClient:
         # NOTE: do we only support HTTP?
         self._api_url = f"http://{self.api_host}/api/v1"
 
-    def get_response(self, api_path, verbose: bool = True) -> requests.Response:
+    def get_response(self, api_path, method: HTTPMethod=HTTPMethod.GET, data=None, verbose: bool = True) -> requests.Response:
         """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.
         """
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
-            response = _make_request(path, verbose=verbose)
+            response = _make_request(path, data, method=method, verbose=verbose)
             # Support returning a response for 200-204 status codes.
             # NOTE: Other status codes that are returned without an HTTP error aren't supported.
             # e.g. 307 - Temporary Redirect
@@ -89,24 +89,4 @@ class ApiClient:
             # TODO: Don't log and raise
             logger.error(f"An error occurred: {e}")
             raise
-
-    def post_response(self, api_path, data=None, verbose: bool = True) -> requests.Response:
-
-        path = Path(self._api_url) / api_path
-
-        try:
-            response = _make_request(path, data, method="PUT", verbose=verbose)
-            if response.status_code == 200:
-                return response
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                return e.response
-            else:
-                # Re-raise the exception if it's not a 404 error
-                raise
-        except requests.RequestException as e:
-            logger.error(f"An error occurred: {e}")
-            raise
-
-
 

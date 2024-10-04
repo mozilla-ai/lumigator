@@ -1,3 +1,7 @@
+import json
+from http import HTTPMethod, HTTPStatus
+
+from schemas.completions import CompletionResponse
 
 from sdk.client import ApiClient
 
@@ -18,12 +22,17 @@ class Completions:
         return [str(vendor) for vendor in response.json()]
 
 
-    # def get_completion(self, vendor: str, text: str) -> CompletionResponse:
-    #     vendor = vendor.lower
-    #     if vendor not in ["mistral", "openai"]:
-    #         # TODO: invalid vendor
-    #         raise
-    #
-    #     endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
-    #     self.client.post_response()
-       # response = self.__post_response(endpoint), experiment.model_dump_json())
+    def get_completion(self, vendor: str, text: str) -> CompletionResponse | None:
+        vendor = vendor.lower
+        if vendor not in ["mistral", "openai"]:
+            # TODO: invalid vendor
+            raise
+
+        endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
+        response = self.client.get_response(endpoint, HTTPMethod.POST, json.load('{"text":"foo"}'))
+
+        if not response or response.status_code != HTTPStatus.OK:
+            return None
+
+        data = response.json()
+        return CompletionResponse(**data)

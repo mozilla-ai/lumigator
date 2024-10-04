@@ -1,6 +1,5 @@
 import json
-from http import HTTPStatus, HTTPMethod
-from pathlib import Path
+from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict  # noqa: UP035
 
 import requests

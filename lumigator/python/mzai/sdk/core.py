@@ -1,25 +1,25 @@
-from http import HTTPStatus
 import json
+from http import HTTPStatus
 from pathlib import Path
+from typing import Any, Dict  # noqa: UP035
+
 import requests
-from requests.exceptions import HTTPError
-from typing import Any, Dict, Optional  # noqa: UP035
-
 from loguru import logger
+from requests.exceptions import HTTPError
 
-from mzai.sdk.healthcheck import HealthCheck
 from mzai.backend.schemas.datasets import DatasetResponse
 from mzai.backend.schemas.deployments import DeploymentEvent
 from mzai.backend.schemas.jobs import JobSubmissionResponse
-
+from mzai.sdk.healthcheck import HealthCheck
 
 # TODO: move these definitions to an "upper" level to be imported
 # by both the SDK client and the backend (the openapi definition
 # should be developed first, and then the data classes in both sides
 # could be generated)
-HEALTH_ROUTE = "health"
+COMPLETIONS_ROUTE = "completions"
 DATASETS_ROUTE = "datasets"
 DEPLOYMENTS_ROUTE = "deployments"
+HEALTH_ROUTE = "health"
 
 
 class LumigatorClient:
@@ -51,8 +51,10 @@ class LumigatorClient:
             files (Dict[str, Any], optional): Files to send in the request body.
             headers (Dict[str, str], optional): Headers to include in the request.
             timeout (int, optional): Timeout for the request in seconds. Defaults to 10.
+
         Returns:
             requests.Response: The response object from the request.
+
         Raises:
             requests.RequestException
         """
@@ -78,8 +80,7 @@ class LumigatorClient:
         return response
 
     def __get_response(self, path, verbose: bool = True) -> requests.Response:
-        """
-        Makes a request to the specified path and attempts to return the response.
+        """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.
         """
         try:
@@ -150,3 +151,13 @@ class LumigatorClient:
 
         data = response.json()
         return JobSubmissionResponse(**data)
+
+    def get_vendors(self) -> list[str]:
+        """Returns the list of supported external vendors."""
+        endpoint = Path(self._api_url) / COMPLETIONS_ROUTE
+        response = self.__get_response(endpoint)
+
+        if not response:
+            return []
+
+        return [str(vendor) for vendor in response.json()]

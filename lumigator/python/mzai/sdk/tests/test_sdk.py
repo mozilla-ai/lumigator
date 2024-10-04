@@ -1,8 +1,8 @@
 import importlib.resources
-from http import HTTPStatus
 import json
-from pathlib import Path
 import unittest.mock as mock
+from http import HTTPStatus
+from pathlib import Path
 
 import pytest
 from pytest import fail, raises
@@ -187,3 +187,24 @@ def test_get_job_id_does_not_exist(mock_requests_response, mock_requests, lumi_c
     # We expect the SDK to handle the 404 and return None.
     job = lumi_client.get_job("6f6487ac-7170-4a11-af7a-0f6db1ec9a74")
     assert job is None
+
+
+def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client):
+    mock_requests_response.status_code = 200
+    mock_requests_response.json = lambda: json.loads('["openai", "mistral"]')
+
+    vendors = lumi_client.get_vendors()
+
+    assert vendors is not None
+    assert len(vendors) == 2
+    assert vendors[0] == "openai"
+    assert vendors[1] == "mistral"
+
+
+def test_get_vendors_none(mock_requests_response, mock_requests, lumi_client):
+    mock_requests_response.status_code = 200
+    mock_requests_response.json = lambda: json.loads("[]")
+
+    vendors = lumi_client.get_vendors()
+    assert vendors is not None
+    assert vendors == []

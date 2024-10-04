@@ -1,7 +1,9 @@
-from typing import Any, Dict, Optional  # noqa: UP035
+from http import HTTPStatus
 import json
-from requests.exceptions import HTTPError
+from pathlib import Path
 import requests
+from requests.exceptions import HTTPError
+from typing import Any, Dict, Optional  # noqa: UP035
 
 from loguru import logger
 
@@ -10,8 +12,6 @@ from mzai.schemas.datasets import DatasetResponse
 from mzai.schemas.deployments import DeploymentEvent
 from mzai.schemas.jobs import JobSubmissionResponse
 
-
-from pathlib import Path
 
 # TODO: move these definitions to an "upper" level to be imported
 # by both the SDK client and the backend (the openapi definition
@@ -77,18 +77,27 @@ class LumigatorClient:
             raise
         return response
 
-    def get_response(self, path, verbose: bool = True) -> requests.Response:
+    def __get_response(self, path, verbose: bool = True) -> requests.Response:
+        """
+        Makes a request to the specified path and attempts to return the response.
+        Raises an exception for any error other than 404 - NOT FOUND.
+        """
         try:
             response = self._make_request(path, verbose=verbose)
-            if response.status_code == 200:
+            # Support returning a response for 200-204 status codes.
+            # NOTE: Other status codes that are returned without an HTTP error aren't supported.
+            # e.g. 307 - Temporary Redirect
+            if HTTPStatus.OK <= response.status_code <= HTTPStatus.NO_CONTENT:
                 return response
         except HTTPError as e:
-            if e.response.status_code == 404:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
                 return e.response
             else:
                 # Re-raise the exception if it's not a 404 error
+                # This happens for status codes such as 400 - Bad Request etc.
                 raise
         except requests.RequestException as e:
+            # TODO: Don't log and raise
             logger.error(f"An error occurred: {e}")
             raise
 
@@ -97,7 +106,7 @@ class LumigatorClient:
 
     def healthcheck(self) -> HealthCheck:
         check = HealthCheck()
-        response = self.get_response(str(Path(self._api_url) / HEALTH_ROUTE))
+        response = self.__get_response(str(Path(self._api_url) / HEALTH_ROUTE))
         if response:
             data = response.json()
             check.status = data.get("status")
@@ -106,7 +115,7 @@ class LumigatorClient:
         return check
 
     def get_datasets(self) -> list[DatasetResponse]:
-        response = self.get_response(str(Path(self._api_url) / DATASETS_ROUTE))
+        response = self.__get_response(str(Path(self._api_url) / DATASETS_ROUTE))
 
         if not response:
             return []
@@ -114,7 +123,7 @@ class LumigatorClient:
         return [DatasetResponse(**args) for args in response.json()]
 
     def get_deployments(self) -> list[DeploymentEvent]:
-        response = self.get_response(str(Path(self._api_url) / HEALTH_ROUTE / DEPLOYMENTS_ROUTE))
+        response = self.__get_response(str(Path(self._api_url) / HEALTH_ROUTE / DEPLOYMENTS_ROUTE))
 
         if not response:
             return []
@@ -124,7 +133,7 @@ class LumigatorClient:
     def get_jobs(self) -> list[JobSubmissionResponse]:
         """Returns information on all job submissions."""
         endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/"
-        response = self.get_response(endpoint)
+        response = self.__get_response(endpoint)
 
         if not response:
             return []
@@ -134,9 +143,9 @@ class LumigatorClient:
     def get_job(self, job_id: str) -> JobSubmissionResponse | None:
         """Returns information on the job submission for the specified ID."""
         endpoint = Path(self._api_url) / f"{HEALTH_ROUTE}/jobs/{job_id}"
-        response = self.get_response(endpoint)
+        response = self.__get_response(endpoint)
 
-        if not response:
+        if not response or response.status_code != HTTPStatus.OK:
             return None
 
         data = response.json()

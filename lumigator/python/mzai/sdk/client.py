@@ -7,6 +7,7 @@ import requests
 from loguru import logger
 from requests.exceptions import HTTPError
 
+
 def _make_request(
         url: str,
         method: str = "GET",

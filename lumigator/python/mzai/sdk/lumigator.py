@@ -4,6 +4,7 @@ from sdk.datasets import Datasets
 from sdk.experiements import Experiments
 from sdk.health import Health
 
+
 class LumigatorClient:
     def __init__(self, api_host: str):
         self.client = ApiClient(api_host)

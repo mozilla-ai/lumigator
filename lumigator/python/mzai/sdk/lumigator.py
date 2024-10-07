@@ -1,5 +1,5 @@
-from sdk.client import ApiClient
-from sdk.health import Health
+from client import ApiClient
+from health import Health
 
 
 class LumigatorClient:

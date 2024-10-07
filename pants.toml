@@ -42,7 +42,7 @@ diff = true
 # Defines the "roots" for subprojects. anything with folders like
 # //**/[python|docker|k8s|infra]/<name>/
 # Will be importable as `<name>.whatever` in python/etc.
-root_patterns = ["python", "infra"]
+root_patterns = ["python/mzai/backend", "lumigator/python/mzai/sdk", "lumigator/python/mzai/summarizer", "infra"]
 
 [tailor]
 build_file_name = "BUILD.pants"

@@ -1,4 +1,0 @@
-python_sources(
-    name="schemas_sources",
-    sources=["*.py"],
-)

@@ -9,6 +9,8 @@ from transformers import AutoModelForSeq2SeqLM, pipeline, AutoTokenizer
 logger = logging.getLogger("ray.serve")
 
 
+# Note: This class is duplicated in
+# lumigator/python/mzai/backend/backend/api/deployments/summarizer_config_loader.py
 class SummarizerArgs(BaseModel):
     name: str  # model name, but model is protected namespace in pydantic
     tokenizer: str

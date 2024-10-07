@@ -9,7 +9,7 @@ from client import ApiClient
 class Completions:
     COMPLETIONS_ROUTE = "completions"
 
-    def __init__(self, c:ApiClient):
+    def __init__(self, c: ApiClient):
         self.client = c
 
     def get_vendors(self) -> list[str]:
@@ -20,7 +20,6 @@ class Completions:
             return []
 
         return [str(vendor) for vendor in response.json()]
-
 
     def get_completion(self, vendor: str, text: str) -> CompletionResponse | None:
         """Returns completions from the specified vendor for given text (prompt)."""
@@ -38,7 +37,9 @@ class Completions:
             raise ValueError("text cannot be empty or whitespace")
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
-        response = self.client.get_response(endpoint, HTTPMethod.POST, json.load(f'{{"text":"{text}"}}'))
+        response = self.client.get_response(
+            endpoint, HTTPMethod.POST, json.load(f'{{"text":"{text}"}}')
+        )
 
         if not response or response.status_code != HTTPStatus.OK:
             return None

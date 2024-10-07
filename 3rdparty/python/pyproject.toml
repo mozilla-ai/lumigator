@@ -24,6 +24,7 @@ dependencies = [
     "pydantic-settings==2.2.1",
     "pytest!=8.1.*,>6",
     "pytest-cov",
+    "pyyaml",
     "python-multipart==0.0.9",
     "ray[default]==2.30.0",
     "requests>=2,<3",

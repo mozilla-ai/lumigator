@@ -2,7 +2,7 @@ import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
-
+from typing import Optional
 from schemas.jobs import JobStatus
 
 
@@ -23,7 +23,7 @@ class ExperimentResponse(BaseModel, from_attributes=True):
     description: str
     status: JobStatus
     created_at: datetime.datetime
-    updated_at: datetime.datetime | None
+    updated_at: Optional[datetime.datetime]
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):

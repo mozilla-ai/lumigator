@@ -4,7 +4,8 @@
         "name": "exp1",
         "description": "experiment without update",
         "status": "created",
-        "created_at": "2024-10-01T19:01:45.080000Z"
+        "created_at": "2024-10-01T19:01:45.080000Z",
+        "updated_at": null
     },
     {
         "id": "e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",

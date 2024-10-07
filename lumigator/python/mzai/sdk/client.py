@@ -61,7 +61,7 @@ def _make_request(
 class ApiClient:
     def __init__(self, api_host: str):
         self.api_host = api_host
-        # NOTE: do we only support HTTP?
+        # NOTE: Consider support for HTTPS too.
         self._api_url = f"http://{self.api_host}/api/v1"
 
     def get_response(

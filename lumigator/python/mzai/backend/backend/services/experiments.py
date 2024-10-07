@@ -7,12 +7,12 @@ import loguru
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
 
-from backend import config_templates
-from backend.jobs.submission import RayJobEntrypoint, submit_ray_job
-from backend.records.experiments import ExperimentRecord
-from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from backend.services.datasets import DatasetService
-from backend.settings import settings
+from mzai.backend import config_templates
+from mzai.backend.backend.jobs.submission import RayJobEntrypoint, submit_ray_job
+from mzai.backend.backend.records.experiments import ExperimentRecord
+from mzai.backend.backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from mzai.backend.backend.services.datasets import DatasetService
+from mzai.backend.backend.settings import settings
 from schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,

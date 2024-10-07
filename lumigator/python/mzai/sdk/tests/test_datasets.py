@@ -1,8 +1,6 @@
-import importlib.resources
-import json
 from pathlib import Path
 
-from conftest import load_request
+from tests.helpers import load_request
 
 def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200

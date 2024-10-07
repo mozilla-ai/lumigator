@@ -1,8 +1,7 @@
 
 from schemas.datasets import DatasetResponse
 
-from sdk.client import ApiClient
-
+from client import ApiClient
 
 class Datasets:
     DATASETS_ROUTE = "datasets"

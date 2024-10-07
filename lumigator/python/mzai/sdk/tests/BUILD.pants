@@ -1,53 +1,15 @@
-python_sources(name="sdk_test_sources", sources=["**/*.py"])
+python_test_utils(name="sdk_test_utils", sources=["conftest.py", "helpers.py"])
 
 python_tests(
     name="sdk_tests",
     sources=["**/test_*.py"],
     dependencies=[
-        ":data-job", ":data-jobs",
-        ":data-dataset", ":data-datasets",
-        ":data-deployment", ":data-deployments",
-        ":data-experiment", ":data-experiments",
+        ":data-json",
         "3rdparty/python:3rdparty#pydantic"],
 )
 
-resource(
-    name="data-job",
-    source="data/job.json",
-)
-
-resource(
-    name="data-jobs",
-    source="data/jobs.json",
-)
-
-resource(
-    name="data-dataset",
-    source="data/dataset.json",
-)
-
-resource(
-    name="data-datasets",
-    source="data/datasets.json",
-)
-
-resource(
-    name="data-deployment",
-    source="data/deployment.json",
-)
-
-resource(
-    name="data-deployments",
-    source="data/deployments.json",
-)
-
-resource(
-    name="data-experiment",
-    source="data/experiment.json",
-)
-
-resource(
-    name="data-experiments",
-    source="data/experiments.json",
+resources(
+    name="data-json",
+    sources=["data/*.json"],
 )
 

@@ -8,17 +8,17 @@ from requests.exceptions import HTTPError
 
 
 def _make_request(
-        url: str,
-        method: HTTPMethod = HTTPMethod.GET,
-        params: Dict[str, Any] = None,  # noqa: UP006
-        data: Dict[str, Any] = None,  # noqa: UP006
-        files: Dict[str, Any] = None,  # noqa: UP006
-        headers: Dict[str, str] = None,  # noqa: UP006
-        json_: Dict[str, str] = None,  # noqa: UP006
-        timeout: int = 10,
-        verbose: bool = True,
-        *args,
-        **kwargs,
+    url: str,
+    method: HTTPMethod = HTTPMethod.GET,
+    params: Dict[str, Any] = None,  # noqa: UP006
+    data: Dict[str, Any] = None,  # noqa: UP006
+    files: Dict[str, Any] = None,  # noqa: UP006
+    headers: Dict[str, str] = None,  # noqa: UP006
+    json_: Dict[str, str] = None,  # noqa: UP006
+    timeout: int = 10,
+    verbose: bool = True,
+    *args,
+    **kwargs,
 ) -> requests.Response:
     """HTTP Request using requests
     Args:
@@ -64,7 +64,9 @@ class ApiClient:
         # NOTE: do we only support HTTP?
         self._api_url = f"http://{self.api_host}/api/v1"
 
-    def get_response(self, api_path, method: HTTPMethod=HTTPMethod.GET, data=None, verbose: bool = True) -> requests.Response:
+    def get_response(
+        self, api_path, method: HTTPMethod = HTTPMethod.GET, data=None, verbose: bool = True
+    ) -> requests.Response:
         """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.
         """
@@ -88,4 +90,3 @@ class ApiClient:
             # TODO: Don't log and raise
             logger.error(f"An error occurred: {e}")
             raise
-

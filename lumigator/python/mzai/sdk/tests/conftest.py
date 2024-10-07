@@ -29,6 +29,11 @@ def lumi_client() -> LumigatorClient:
     return LumigatorClient(LUMI_HOST)
 
 
+@pytest.fixture(scope="session")
+def mock_vendor_data() -> str:
+    return '["openai", "mistral"]'
+
+
 def json_data_path() -> Traversable:
     return importlib.resources.files("sdk.tests") / "data"
 

@@ -37,11 +37,12 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
     assert check.deployment_type is None
 
 
-def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_deployments_ok(
+    mock_requests_response, mock_requests, lumi_client, json_data_deployments
+):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("sdk.tests") / "data/deployments.json"
-    with importlib.resources.as_file(ref) as path:
+    with importlib.resources.as_file(json_data_deployments) as path:
         with Path.open(path) as file:
             data = json.load(file)
             mock_requests_response.json = lambda: data
@@ -50,11 +51,10 @@ def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
     assert deployments_ret is not None
 
 
-def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client, json_data_jobs):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("sdk.tests") / "data/jobs.json"
-    with importlib.resources.as_file(ref) as path:
+    with importlib.resources.as_file(json_data_jobs) as path:
         with Path.open(path) as file:
             data = json.load(file)
             mock_requests_response.json = lambda: data
@@ -76,11 +76,10 @@ def test_get_jobs_none(mock_requests_response, mock_requests, lumi_client):
     assert jobs == []
 
 
-def test_get_job_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_job_ok(mock_requests_response, mock_requests, lumi_client, json_data_job):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("sdk.tests") / "data/job.json"
-    with importlib.resources.as_file(ref) as path:
+    with importlib.resources.as_file(json_data_job) as path:
         with Path.open(path) as file:
             data = json.load(file)
             mock_requests_response.json = lambda: data

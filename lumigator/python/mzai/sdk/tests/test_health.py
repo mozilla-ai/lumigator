@@ -1,6 +1,5 @@
 import importlib.resources
 import json
-import unittest.mock as mock
 from http import HTTPStatus
 from pathlib import Path
 

@@ -9,7 +9,7 @@ from requests.exceptions import HTTPError
 
 def _make_request(
         url: str,
-        method: str = "GET",
+        method: HTTPMethod = HTTPMethod.GET,
         params: Dict[str, Any] = None,  # noqa: UP006
         data: Dict[str, Any] = None,  # noqa: UP006
         files: Dict[str, Any] = None,  # noqa: UP006
@@ -38,7 +38,7 @@ def _make_request(
     """
     try:
         response = requests.request(
-            method=method.upper(),
+            method=str(method),
             url=url,
             params=params,
             data=data,
@@ -71,7 +71,7 @@ class ApiClient:
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
-            response = _make_request(path, data, method=method, verbose=verbose)
+            response = _make_request(path, method, data=data, verbose=verbose)
             # Support returning a response for 200-204 status codes.
             # NOTE: Other status codes that are returned without an HTTP error aren't supported.
             # e.g. 307 - Temporary Redirect

@@ -23,13 +23,22 @@ class Completions:
 
 
     def get_completion(self, vendor: str, text: str) -> CompletionResponse | None:
+        """Returns completions from the specified vendor for given text (prompt)."""
+
+        # Sanitize the inputs.
         vendor = vendor.lower
-        if vendor not in ["mistral", "openai"]:
-            # TODO: invalid vendor
-            raise
+        text = text.strip()
+
+        # Validate that the requested vendor is supported.
+        if vendor not in [v.lower for v in self.get_vendors()]:
+            raise ValueError(f"vendor '{vendor}' not supported")
+
+        # Validate we have some text input as our prompt.
+        if text == "":
+            raise ValueError("text cannot be empty or whitespace")
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
-        response = self.client.get_response(endpoint, HTTPMethod.POST, json.load('{"text":"foo"}'))
+        response = self.client.get_response(endpoint, HTTPMethod.POST, json.load(f'{{"text":"{text}"}}'))
 
         if not response or response.status_code != HTTPStatus.OK:
             return None

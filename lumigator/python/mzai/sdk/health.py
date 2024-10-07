@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 from schemas.deployments import DeploymentEvent
 
-from mzai.backend.schemas.jobs import JobSubmissionResponse
-from sdk.client import ApiClient
+from schemas.jobs import JobSubmissionResponse
+from client import ApiClient
 
 
 class HealthCheck:

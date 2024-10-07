@@ -1,7 +1,7 @@
 import json
 from http import HTTPMethod, HTTPStatus
 
-from schemas.completions import CompletionResponse
+from mzai.backend.schemas.completions import CompletionResponse
 
 from sdk.client import ApiClient
 

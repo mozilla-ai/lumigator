@@ -1,13 +1,13 @@
 from pathlib import Path
 from uuid import UUID
 
-from schemas.experiments import (
+from mzai.backend.schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
 )
-from schemas.extras import ListingResponse
+from mzai.backend.schemas.extras import ListingResponse
 
 from sdk.client import ApiClient
 

@@ -1,10 +1,31 @@
 import unittest.mock as mock
+import importlib.resources
+import json
 
 import pytest
 
-from sdk.lumigator import LumigatorClient
+from client import ApiClient
+from pathlib import Path
 
 LUMI_HOST="localhost"
+
+def load_response(mock_requests_response: mock.Mock, path: str):
+    ref = importlib.resources.files("mzai.sdk.tests") / path
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            data = json.load(file)
+            mock_requests_response.json = lambda: data
+
+def load_request(path: str) -> str:
+    ref = importlib.resources.files("mzai.sdk.tests") / path
+    with importlib.resources.as_file(ref) as path:
+        with Path.open(path) as file:
+            return(json.load(file))
+
+def check_url(check_url, **kwargs):
+    print(f'the url used is {check_url} vs {kwargs["url"]}')
+    assert check_url == kwargs["url"]
+    return mock.DEFAULT
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
@@ -22,5 +43,5 @@ def mock_requests(mock_requests_response):
 
 
 @pytest.fixture(scope="session")
-def lumi_client() -> LumigatorClient:
-    return LumigatorClient(LUMI_HOST)
+def api_client() -> ApiClient:
+    return ApiClient(LUMI_HOST)

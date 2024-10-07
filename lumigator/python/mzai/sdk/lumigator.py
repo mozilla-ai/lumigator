@@ -1,7 +1,8 @@
 from sdk.client import ApiClient
 from sdk.completions import Completions
 from sdk.datasets import Datasets
-from sdk.experiements import Experiments
+from sdk.experiments import Experiments
+from sdk.deployments import Deployments
 from sdk.health import Health
 
 
@@ -13,3 +14,4 @@ class LumigatorClient:
         self.datasets = Datasets(self.client)
         self.experiments = Experiments(self.client)
         self.health = Health(self.client)
+        self.deployments = Deployments(self.client)

@@ -6,6 +6,8 @@ python_tests(
     dependencies=[
         ":data-job", ":data-jobs",
         ":data-dataset", ":data-datasets",
+        ":data-deployment", ":data-deployments",
+        ":data-experiment", ":data-experiments",
         "3rdparty/python:3rdparty#pydantic"],
 )
 
@@ -26,6 +28,26 @@ resource(
 
 resource(
     name="data-datasets",
-    source="data/datsets.json",
+    source="data/datasets.json",
+)
+
+resource(
+    name="data-deployment",
+    source="data/deployment.json",
+)
+
+resource(
+    name="data-deployments",
+    source="data/deployments.json",
+)
+
+resource(
+    name="data-experiment",
+    source="data/experiment.json",
+)
+
+resource(
+    name="data-experiments",
+    source="data/experiments.json",
 )
 

@@ -40,7 +40,7 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
 def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("mzai.sdk.tests") / "data/deployments.json"
+    ref = importlib.resources.files("sdk.tests") / "data/deployments.json"
     with importlib.resources.as_file(ref) as path:
         with Path.open(path) as file:
             data = json.load(file)
@@ -53,7 +53,7 @@ def test_get_deployments_ok(mock_requests_response, mock_requests, lumi_client):
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("mzai.sdk.tests") / "data/jobs.json"
+    ref = importlib.resources.files("sdk.tests") / "data/jobs.json"
     with importlib.resources.as_file(ref) as path:
         with Path.open(path) as file:
             data = json.load(file)
@@ -79,7 +79,7 @@ def test_get_jobs_none(mock_requests_response, mock_requests, lumi_client):
 def test_get_job_ok(mock_requests_response, mock_requests, lumi_client):
     mock_requests_response.status_code = 200
 
-    ref = importlib.resources.files("mzai.sdk.tests") / "data/job.json"
+    ref = importlib.resources.files("sdk.tests") / "data/job.json"
     with importlib.resources.as_file(ref) as path:
         with Path.open(path) as file:
             data = json.load(file)

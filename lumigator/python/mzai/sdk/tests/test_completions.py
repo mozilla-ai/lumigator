@@ -3,9 +3,9 @@ import json
 from pytest import raises
 
 
-def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client, mock_vendor_data):
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads('["openai", "mistral"]')
+    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
 
     vendors = lumi_client.completions.get_vendors()
 

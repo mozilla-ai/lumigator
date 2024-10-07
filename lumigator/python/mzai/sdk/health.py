@@ -14,6 +14,7 @@ class HealthCheck:
     def ok(self):
         return self.status == "OK"
 
+
 class Health:
     HEALTH_ROUTE = "health"
 
@@ -50,7 +51,6 @@ class Health:
             return []
 
         return [JobSubmissionResponse(**job) for job in response.json()]
-
 
     def get_job(self, job_id: str) -> JobSubmissionResponse | None:
         """Returns information on the job submission for the specified ID."""

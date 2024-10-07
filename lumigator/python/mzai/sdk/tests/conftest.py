@@ -4,13 +4,15 @@ import pytest
 
 from sdk.lumigator import LumigatorClient
 
-LUMI_HOST="localhost"
+LUMI_HOST = "localhost"
+
 
 @pytest.fixture(scope="function")
 def mock_requests_response():
     """Mocks calls to `requests.Response`."""
     with mock.patch("requests.Response") as resp_mock:
         yield resp_mock
+
 
 @pytest.fixture(scope="function")
 def mock_requests(mock_requests_response):

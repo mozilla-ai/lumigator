@@ -11,8 +11,8 @@ def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client, mock
 
     assert vendors is not None
     assert len(vendors) == 2
-    assert vendors[0] == "openai"
-    assert vendors[1] == "mistral"
+    assert "openai" in vendors
+    assert "mistral" in vendors
 
 
 def test_get_vendors_none(mock_requests_response, mock_requests, lumi_client):

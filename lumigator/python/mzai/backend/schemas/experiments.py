@@ -23,7 +23,7 @@ class ExperimentResponse(BaseModel, from_attributes=True):
     description: str
     status: JobStatus
     created_at: datetime.datetime
-    updated_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime] = None
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):

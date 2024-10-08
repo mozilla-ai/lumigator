@@ -174,3 +174,6 @@ cython_debug/
 .ruff_cache
 
 .ijwb
+
+# Env for docker-compose
+lumigator/lumigator/infra/docker-compose/.env

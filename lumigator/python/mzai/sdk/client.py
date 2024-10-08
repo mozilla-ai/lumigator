@@ -69,6 +69,7 @@ class ApiClient:
         api_path,
         method: HTTPMethod = HTTPMethod.GET,
         data=None,
+        files=None,
         json_data=None,
         verbose: bool = True,
     ) -> requests.Response:

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from sdk.lumigator import LumigatorClient
 
-LUMI_HOST = "localhost"
+LUMI_HOST = "localhost:8000"
 
 
 @pytest.fixture(scope="function")
@@ -113,5 +113,5 @@ def json_data_dataset() -> Path:
 
 
 @pytest.fixture(scope="session")
-def hf_data() -> Path:
-    return resources_dir() / "thunderbird_gt_bart.csv"
+def dialog_data() -> Path:
+    return resources_dir() / "dialogsum_exc.csv"

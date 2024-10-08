@@ -34,7 +34,7 @@ class Datasets:
     def create_dataset(self, dataset: IOBase, format: DatasetFormat) -> DatasetResponse:
         files = {"dataset": dataset, "format": (None, str(format))}
         response = self.client.get_response(
-            self.DATASETS_ROUTE, HTTPMethod.POST, data=None, files=files
+            self.DATASETS_ROUTE, method=HTTPMethod.POST, data=None, files=files
         )
 
         if not response:

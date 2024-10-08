@@ -127,7 +127,6 @@ class ExperimentService:
         # arguments defined in eval_config_args
         # Pass evaluation type
 
-
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,

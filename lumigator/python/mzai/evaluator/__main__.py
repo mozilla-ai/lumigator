@@ -3,7 +3,7 @@
 Makes the Evaluator CLI executable via `python -m evaluator`.
 """
 
-from evaluator.cli import cli
+from evaluator import entrypoint
 
 if __name__ == "__main__":
-    cli()
+    entrypoint.cli()

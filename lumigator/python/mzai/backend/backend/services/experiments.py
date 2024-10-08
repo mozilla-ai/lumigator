@@ -125,6 +125,9 @@ class ExperimentService:
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
+        # Pass evaluation type
+
+
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,

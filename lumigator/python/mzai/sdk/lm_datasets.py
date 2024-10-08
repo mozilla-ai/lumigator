@@ -4,8 +4,7 @@ from schemas.extras import ListingResponse
 from uuid import UUID
 from http import HTTPMethod
 
-from json import dumps
-
+from io import IOBase
 from client import ApiClient
 
 
@@ -25,16 +24,14 @@ class Datasets:
 
     def get_dataset(self, id: str) -> DatasetResponse:
         UUID(id)
-        endpoint = f"{self.DATASETS_ROUTE}/{id}/download"
-        response = self.client.get_response(endpoint)
+        response = self.client.get_response(f"{self.DATASETS_ROUTE}/{id}", HTTPMethod.DELETE)
 
         if not response:
             return []
 
         return DatasetResponse(**(response.json()))
 
-    def post_dataset(self, id: str, dataset: bytearray, format: DatasetFormat) -> DatasetResponse:
-        UUID(id)
+    def create_dataset(self, dataset: IOBase, format: DatasetFormat) -> DatasetResponse:
         files = {"dataset": dataset, "format": (None, str(format))}
         response = self.client.get_response(
             self.DATASETS_ROUTE, HTTPMethod.POST, data=None, files=files
@@ -47,11 +44,12 @@ class Datasets:
 
     def delete_dataset(self, id: str) -> None:
         UUID(id)
-        self.client.get_response(self.DATASETS_ROUTE)
+        self.client.get_response(f"{self.DATASETS_ROUTE}/{id}", HTTPMethod.DELETE)
 
     def get_dataset_link(self, id: str) -> DatasetDownloadResponse:
         UUID(id)
-        response = self.client.get_response(self.DATASETS_ROUTE, HTTPMethod.DELETE)
+        endpoint = f"{self.DATASETS_ROUTE}/{id}/download"
+        response = self.client.get_response(endpoint)
 
         if not response:
             return []

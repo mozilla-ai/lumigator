@@ -19,4 +19,3 @@ def check_url(is_url, **kwargs):
 def check_method(is_method, **kwargs):
     assert is_method == kwargs["method"]
     return mock.DEFAULT
-

@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest import raises
 from requests.exceptions import HTTPError
 
-from tests.helpers import load_response
+from tests.helpers import load_json
 
 
 def test_sdk_healthcheck_ok(mock_requests_response, mock_requests, lumi_client):
@@ -43,7 +43,8 @@ def test_get_deployments_ok(
     mock_requests_response, mock_requests, lumi_client, json_data_deployments
 ):
     mock_requests_response.status_code = 200
-    load_response(mock_requests_response, json_data_deployments)
+    data = load_json(json_data_deployments)
+    mock_requests_response.json = lambda: data
 
     deployments_ret = lumi_client.health.get_deployments()
     assert deployments_ret is not None
@@ -51,7 +52,8 @@ def test_get_deployments_ok(
 
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client, json_data_jobs):
     mock_requests_response.status_code = 200
-    load_response(mock_requests_response, json_data_jobs)
+    data = load_json(json_data_jobs)
+    mock_requests_response.json = lambda: data
 
     jobs = lumi_client.health.get_jobs()
     assert jobs is not None
@@ -71,7 +73,8 @@ def test_get_jobs_none(mock_requests_response, mock_requests, lumi_client):
 
 def test_get_job_ok(mock_requests_response, mock_requests, lumi_client, json_data_job):
     mock_requests_response.status_code = 200
-    load_response(mock_requests_response, json_data_job)
+    data = load_json(json_data_job)
+    mock_requests_response.json = lambda: data
 
     job_id = "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"
     job = lumi_client.health.get_job(job_id)

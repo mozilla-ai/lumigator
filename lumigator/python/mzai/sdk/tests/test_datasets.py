@@ -1,13 +1,15 @@
 from pathlib import Path
 
 import json
+import io
+from schemas.datasets import DatasetFormat
 
-from tests.helpers import load_request
+from tests.helpers import load_json
 
 
-def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client, json_data_datasets):
     mock_requests_response.status_code = 200
-    data = load_request("data/datasets.json")
+    data = load_json(json_data_datasets)
     mock_requests_response.json = lambda: data
 
     datasets = lumi_client.datasets.get_datasets()
@@ -23,13 +25,30 @@ def test_get_datasets_none(mock_requests_response, mock_requests, lumi_client):
     assert datasets == []
 
 
-def test_get_dataset_ok(mock_requests_response, mock_requests, lumi_client):
+def test_get_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
     mock_requests_response.status_code = 200
-    data = load_request("data/dataset.json")
+    data = load_json(json_data_dataset)
     mock_requests_response.json = lambda: data
 
     dataset = lumi_client.datasets.get_dataset(data["id"])
     assert dataset is not None
 
 
-bytearray([1] * 100)
+def test_delete_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
+    mock_requests_response.status_code = 204
+    data = load_json(json_data_dataset)
+    mock_requests_response.json = lambda: None
+
+    lumi_client.datasets.delete_dataset(data["id"])
+
+
+def test_create_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
+    mock_requests_response.status_code = 201
+    data = load_json(json_data_dataset)
+    mock_requests_response.json = lambda: data
+
+    content = io.BytesIO(bytearray(b"0" * 20))
+    dataset = lumi_client.datasets.create_dataset(
+        dataset=(data["filename"], content), format=DatasetFormat.EXPERIMENT
+    )
+    assert dataset is not None

@@ -122,13 +122,17 @@ class ExperimentService:
             "--config": config_template.format(**config_params),
         }
 
+        # as our command relies on libgomp which gives issues on aarch64, we
+        # preload it with LD_PRELOAD_PREFIX (see settings.py for details)
+        eval_command = f"{settings.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EXPERIMENT,
-            command="python -m evaluator evaluate huggingface",
+            command=eval_command,
             args=eval_config_args,
         )
 

@@ -42,7 +42,7 @@ class Completions:
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
         response = self.__client.get_response(
-            endpoint, HTTPMethod.POST, json.load(f'{{"text":"{text}"}}')
+            endpoint, HTTPMethod.POST, json_data=json.dumps(f'{{"text":"{text}"}}')
         )
 
         if not response or response.status_code != HTTPStatus.OK:

@@ -74,6 +74,7 @@ def test_get_completion_openai_ok(
     assert response is not None
     assert response.text == "thanks"
 
+
 def test_get_completion_mistral_ok(
     mock_requests_response, mock_requests, lumi_client, mock_vendor_data
 ):
@@ -90,4 +91,3 @@ def test_get_completion_mistral_ok(
     response = lumi_client.completions.get_completion("mistral", "please")
     assert response is not None
     assert response.text == "thanks"
-

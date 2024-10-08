@@ -65,7 +65,12 @@ class ApiClient:
         self._api_url = f"http://{self.api_host}/api/v1"
 
     def get_response(
-        self, api_path, method: HTTPMethod = HTTPMethod.GET, data=None, json_data=None, verbose: bool = True
+        self,
+        api_path,
+        method: HTTPMethod = HTTPMethod.GET,
+        data=None,
+        json_data=None,
+        verbose: bool = True,
     ) -> requests.Response:
         """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.

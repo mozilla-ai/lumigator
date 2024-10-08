@@ -19,12 +19,12 @@ class Health:
     HEALTH_ROUTE = "health"
 
     def __init__(self, c: ApiClient):
-        self.client = c
+        self.__client = c
 
     def healthcheck(self) -> HealthCheck | None:
         """Returns healthcheck information."""
         check = HealthCheck()
-        response = self.client.get_response(self.HEALTH_ROUTE)
+        response = self.__client.get_response(self.HEALTH_ROUTE)
         if not response:
             return None
 
@@ -35,7 +35,7 @@ class Health:
         return check
 
     def get_deployments(self) -> list[DeploymentEvent]:
-        response = self.client.get_response(f"{self.HEALTH_ROUTE}/deployments")
+        response = self.__client.get_response(f"{self.HEALTH_ROUTE}/deployments")
 
         if not response:
             return []
@@ -45,7 +45,7 @@ class Health:
     def get_jobs(self) -> list[JobSubmissionResponse]:
         """Returns information on all job submissions."""
         endpoint = f"{self.HEALTH_ROUTE}/jobs/"
-        response = self.client.get_response(endpoint)
+        response = self.__client.get_response(endpoint)
 
         if not response:
             return []
@@ -55,7 +55,7 @@ class Health:
     def get_job(self, job_id: str) -> JobSubmissionResponse | None:
         """Returns information on the job submission for the specified ID."""
         endpoint = f"{self.HEALTH_ROUTE}/jobs/{job_id}"
-        response = self.client.get_response(endpoint)
+        response = self.__client.get_response(endpoint)
 
         if not response or response.status_code != HTTPStatus.OK:
             return None

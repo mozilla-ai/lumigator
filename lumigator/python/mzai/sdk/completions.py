@@ -10,11 +10,11 @@ class Completions:
     COMPLETIONS_ROUTE = "completions"
 
     def __init__(self, c: ApiClient):
-        self.client = c
+        self.__client = c
 
     def get_vendors(self) -> list[str]:
         """Returns the list of supported external vendors."""
-        response = self.client.get_response(self.COMPLETIONS_ROUTE)
+        response = self.__client.get_response(self.COMPLETIONS_ROUTE)
 
         if not response:
             return []
@@ -37,7 +37,7 @@ class Completions:
             raise ValueError("text cannot be empty or whitespace")
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
-        response = self.client.get_response(
+        response = self.__client.get_response(
             endpoint, HTTPMethod.POST, json.load(f'{{"text":"{text}"}}')
         )
 

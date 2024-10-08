@@ -25,11 +25,11 @@ class Completions:
         """Returns completions from the specified vendor for given text (prompt)."""
 
         # Sanitize the inputs.
-        vendor = vendor.lower
+        vendor = vendor.lower()
         text = text.strip()
 
         # Validate that the requested vendor is supported.
-        if vendor not in [v.lower for v in self.get_vendors()]:
+        if vendor not in [v.lower() for v in self.get_vendors()]:
             raise ValueError(f"vendor '{vendor}' not supported")
 
         # Validate we have some text input as our prompt.

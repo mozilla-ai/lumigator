@@ -16,12 +16,6 @@ from evaluator.paths import strip_path_prefix
 from evaluator.tracking.run_utils import WandbResumeMode
 from loguru import logger
 
-
-
-
-
-
-
 class Evaluator:
     """Simple wrapper around executable functions for tasks available in the library."""
 

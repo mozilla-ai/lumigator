@@ -3,7 +3,6 @@ set -eou pipefail
 
 # Requires curl.
 
-
 function check_if_installed() {
 	tool=$1
 	test=$(command -v "$tool")

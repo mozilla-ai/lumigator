@@ -2,7 +2,6 @@ seq2seq_template = """{{
     "name": "{experiment_name}/{experiment_id}",
     "model": {{ "path": "{model_path}" }},
     "dataset": {{ "path": "{dataset_path}" }},
-    "evaluation_type": "huggingface",
     "evaluation": {{
         "metrics": ["rouge", "meteor", "bertscore"],
         "use_pipeline": true,

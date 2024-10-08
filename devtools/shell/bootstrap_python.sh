@@ -3,14 +3,13 @@
 set -eou pipefail
 # note that this is mostly ran from the repo root, so this is a relative path from there.
 if [[ -f "devtools/shell/common.sh" ]]; then
-  source devtools/shell/common.sh
+	source devtools/shell/common.sh
 elif [[ -f "common.sh" ]]; then
-  source common.sh
+	source common.sh
 else
-  echo "cannot find common.sh; exiting"
-  exit 1
+	echo "cannot find common.sh; exiting"
+	exit 1
 fi
-
 
 PLAT=$(uname -o)
 PY_VERSION=${MZAI_PY_VERISON:-3.11.9}

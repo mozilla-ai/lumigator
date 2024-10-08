@@ -1,3 +1,9 @@
+"""
+Completions SDK
+
+Provides a class to perform LLM vendor-based API inference from within in Lumigator.
+"""
+
 import json
 from http import HTTPMethod, HTTPStatus
 

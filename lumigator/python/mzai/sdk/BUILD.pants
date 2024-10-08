@@ -1,4 +1,7 @@
 python_sources(
     name="sdk_sources",
-    dependencies=["lumigator/python/mzai/schemas:schemas_sources"],
+    sources=[
+        "**/*.py",
+        "!tests",
+    ],
 )

@@ -20,7 +20,7 @@ class Completions:
         if not response:
             return []
 
-        # Update the cached vendors .
+        # Update the cached vendors.
         self.__cached_vendors = [str(vendor).lower() for vendor in response.json()]
 
         return self.__cached_vendors

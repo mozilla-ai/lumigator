@@ -1,4 +1,5 @@
 import wandb
+from loguru import logger
 
 from evaluator.configs.jobs import (
     EvaluationJobConfig,
@@ -14,7 +15,6 @@ from evaluator.jobs.evaluation.hf_evaluate import run_hf_evaluation
 from evaluator.jobs.evaluation.lm_harness import run_lm_harness
 from evaluator.paths import strip_path_prefix
 from evaluator.tracking.run_utils import WandbResumeMode
-from loguru import logger
 
 
 class Evaluator:
@@ -51,7 +51,7 @@ class Evaluator:
         The underlying evaluation framework is determined by the configuration type.
         """
         print("evaluating...")
-        logger.info("evaluating config: %s", config)
+        logger.info(f"evaluating config: {config}")
         match config:
             case LMHarnessJobConfig() as lm_harness_config:
                 result = run_lm_harness(lm_harness_config)

@@ -34,11 +34,11 @@ class Completions:
 
         # Attempt to validate vendors using the cache.
         if vendor not in self.__cached_vendors:
-            raise ValueError(f"vendor '{vendor}' not supported")
+            raise ValueError(f"vendor: '{vendor}' was not found in cache, 'get_vendors' to update cache)")
 
         # Validate we have some text input as our prompt.
         if text == "":
-            raise ValueError("text cannot be empty or whitespace")
+            raise ValueError("text: cannot be empty or whitespace")
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
         response = self.__client.get_response(

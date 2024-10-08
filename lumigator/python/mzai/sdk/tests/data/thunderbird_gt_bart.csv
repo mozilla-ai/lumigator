@@ -1,0 +1,2386 @@
+examples,ground_truth
+"I recently added a beta release, version 7.0b1, of my extension, Clippings for Thunderbird, and selected the option to self-host it so that I can make it available to testers separately while regular users continue to see version 6.3.5, the current release version. However, the beta release is now incorrectly appearing in the Add-ons for Thunderbird public listing. URL to ATN listing: https://addons.thunderbird.net/en-US/thunderbird/addon/clippings-tb/. Thanks for the report, it is best to file an issue with the addons-server: https://github.com/thunderbird/addons-server I have not looked at it in detail, but self-hosted add-ons need an update_url entry in their manifest and that should prevent it from being accepted on ATN. Since we do not sign add-ons, self-hosted add-ons do not need to be submitted to ATN at all.My best-practice advice is:
+- remove the beta version from ATN,
+- create a dedicated branch/repo which holds the update information (either a branch in each add-on repo you want to self-host, or a single update-repo with the information for all your add-ons)
+- host the XPI files either as an ""beta"" asset in a ""github release"", or directly as a file in the repo (I think the asset is the better choice),
+- make sure that the manifest of your self-hosted XPI points to the correct update.json. John I've removed the beta version of my extension from ATN, and the listing for my extension now shows the current stable release. Thanks for your help!","Clippings for Thunderbird self-hosts a beta release of version 7.0b1. The beta release is now incorrectly appearing in the Add-ons for Thunderbirds public listing. John has removed the beta version from ATN, and the listing for my extension now shows the current stable release."
+"the Thunderbird team is preparing the next big release: Thunderbird 128 ESR. Now is a good time to check if your add-ons are compatible. Thunderbird 128 is currently being shipped through the beta release channel. If you have not already installed Thunderbird Beta, you can get it from Thunderbird's download page [1]: Select the desired language, your operating system, and switch the ""release channel"" selection to ""Beta"".
+
+A list of known required changes to make add-ons compatible with Thunderbird 128 can be found on developer.thunderbird.net [2]. These changes mostly affect Experiment add-ons, which directly interact with Thunderbird code. WebExtensions usually do not need updates, but the add-ons team had to introduce the messagesUpdate permission, and browser.messages.update() will stop working, if the new permission has not been requested.
+Another notably change is the official support of Manifest Version 3 in Thunderbird 128. The add-ons team removed deprecated elements and made additional changes to resolve inconsistencies in the APIs. The full list of changes can be found on webextension-api.thunderbird.net [3].
+
+Starting with Thunderbird 128, the API documentation on webextension-api.thunderbird.net [4] not only includes the WebExtension APIs added by Thunderbird, but also those inherited from Firefox (Thunderbird and Firefox share a significant amount of code). We are listing only methods, which are actually supported and working.
+
+Do not hesitate to reach out for help [5]. Looking forward to see your add-ons running in Thunderbird 128!
+
+John
+
+
+[1] : https://www.thunderbird.net/thunderbird/all/
+[2] : https://developer.thunderbird.net/add-ons/updating/tb128
+[3] : https://webextension-api.thunderbird.net/en/128-esr-mv3/changes/esr128.html
+[4] : https://webextension-api.thunderbird.net/en/stable/
+[5] : https://developer.thunderbird.net/add-ons/community",Thunderbird 128 is currently being shipped through the beta release channel. A list of known required changes to make add-ons compatible with Thunderbird 128 can be found on developer.thunderbird.net.
+"Hi all, Well I think everything is in the title. We have an extension that shows pdf thumbs in the message pane (faster than openning them). We used to provide PDF.js. Is this still needed? Regards, We usually do not encourage add-ons to depend on files shipped with Thunderbird, because the file could be moved/renamed, which will break your add-on. Ship your own version, so your add-on always uses a known version and stays compatible, even if Thunderbird updates its internal file, which might include API changes which could break your add-on as well. John",We have an extension that shows pdf thumbs in the message pane (faster than openning them). We used to provide PDF.js. Is this still needed?
+"I'm studying how to develop addons. So, I'm sorry if my question is noob.
+
+My code is here: https://github.com/gersonjferreira/Zulip-Thunderbird
+
+The extension adds an icon to open the Zulip team chat on a Thunderbird tab. The purpose is to concentrate all chat/email apps into a single window. It is a simple extension and it is working fine... but...
+
+Within the Zulip chats (same for Slack or other examples), there are external links, or links to PDF files, etc... when I left-click on these, the Thunderbird internal browser breaks and stays black. Probably because it cannot show the ""save as"" dialog or ""open with"", and so on...
+
+But I if right-click and select ""open in browser"", it works fine. It takes me to Firefox and opens the desired link, or downloads the PDF, and so on...
+
+Is there a way to fix this, so that the left-click takes me to Firefox? Or to make it all work within Thunderbird?
+
+PS: my extension is quite simple and I'm still learning a lot of details. Please feel free to give feedback and tips on what I should improve. I have no idea how many people would be interested in using it.
+
+Best regards,
+Gerson
+
+Hm,
+
+I do not know if it is related: Do all those ""broken"" a-tags have a target=""_blank"" attribute? It appears those do not work as expected in Thunderbird. Filed a bug for it:
+https://bugzilla.mozilla.org/show_bug.cgi?id=1905616
+
+The link handler of Thunderbird content tabs will always open links of the same site in the same Thunderbird tab. Links to other sites will open in the default browser.
+
+To change this behaviour, you can use a content script.  Add this to your manifest:
+
+""content_scripts"": [ { ""matches"": [""<all_urls>""], ""js"": [""content-script.js""] } ],
+
+You may limit the content script to a more strict match, if you know which pages you are going to use with your extension. In the content script define a global clickhandler:
+
+window.addEventListener(""click"", clickhandler);
+
+function clickhandler(event) {
+event.preventDefault();
+event.stopPropagation();
+
+const anchor = event.target.closest(""a"");
+if (!anchor) return;
+browser.windows.openDefaultBrowser(anchor.getAttribute('href'));
+}
+
+Does this help?
+
+John
+
+Yes, at the moment I confirm that all links that fail have target=""_blank"", so it seems related to the bug you are reporting.
+
+Regarding you suggestion, it sounds promising, but I have a busy day of work today. I'll test this changes later tonight and I'll reply here if it works.
+
+I've just tested your suggestion, and it helped me identify some details:
+
+First, indeed the links that need to be fixed are the ones with target=""_blank"" for sure, but not all of then. In zulip, there are links that start with /user_uploads, like /user_uploads/bla_bla.pdf, and these are the broken ones in my addon. To make these work, I need to add the Zulip prefix ""https://my_org.zulipchat.com/"" + ""/user_uploads/bla_bla.pdf"".
+
+To make this work, I had to split your suggestion into a background and a content-script code like this:
+// background.js
+browser.runtime.onMessage.addListener(function (message) {
+  prefix = browser.storage.sync.get('zulip_url');
+  prefix.then(function(result) {
+    let prefix = result.zulip_url;
+    href = message.data;
+    if (href.startsWith(""/user_uploads"")) {
+      href = prefix + href;
+    }
+    browser.windows.openDefaultBrowser(href);
+  });
+});
+and
+// content-script.js
+window.addEventListener(""click"", clickhandler);
+
+function clickhandler(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const anchor = event.target.closest(""a"");
+    if (!anchor) return;
+    browser.runtime.sendMessage({
+        data: anchor.getAttribute('href')
+    });
+};
+
+I'll try this for a couple of days to see if I spot other issues. If you have any suggestion on how I can improve this code, please let me know.
+
+Thanks for the help,
+Best regards,
+Gerson","Gerson Jferreira's Zulip-Thunderbird extension is working fine. But when he left-click on external links, or links to PDF files, Thunderbird internal browser breaks and stays black."
+"I think this is going to require some expertise from someone who knows how Thunderbird works internally, but I thought I would ask anyway.
+
+When you set mail.tabs.drawInTitlebar=true in the Config Editor, the OS-supplied titlebar -- with the window title and the minimize/maximize/restore/close buttons -- is hidden, and Thunderbird-supplied equivalents for the buttons are added instead.  This is great.
+
+Another thing that happens is that you can DRAG in the toolbox/toolbars at the top of the window to move the Thunderbird window around, as the titlebar is no longer available for this purpose.  This is also great.
+
+I have been trying to implement the same behavior for an extension I have been working on.  I can hide the OS-supplied titlebar and add my own buttons, and that is working well, but I cannot figure out how to make it so I can drag on my extension's toolbox/toolbars to make the windows for my extension's move.
+
+I seem to have isolated what triggers this behavior for Thunderbird's main window (and the message view and compose windows.)  Using the Developer Toolbox, I just add Attribute chromemargin=""0,2,2,2"" (or chromemargin with ANY values, actually) to the <html> tag in the HTML/XUL for the Thunderbird window.  It's like magic.  Add the chromemargin Attribute, and the titlebar disappears, and you can drag the window around using the toolbox/toolbars at the top of the window.  Remove the chromemargin Attribute and the titlebar re-appears and you CANNOT drag the window around using the toolbox/toolbars at the top of the window.
+
+This does not work for the windows for my extension.  Dragging on the toolbox/toolbars does nothing.
+
+I have looked to see what event listeners might be attached to the Toolbox/toolbars that would respond to mouse drags and I cannot see anything.  Perhaps it's something in the source code for the app itself?  Or some other value stored somewhere, some toolbox or toolbar ID, or CSS class, or attribute or something.  I just don't know.
+
+I have tried looking at the Thunderbird source code, and I understand it a bit, but not well enough to figure this out.
+
+If you have any knowledge of this, could you please give me some help?
+
+Many thanks in advance,
+---Mark
+Just in case anyone is interested in this, user morat provided the answer in this article on mozillaZine:
+
+http://forums.mozillazine.org/viewtopic.php?t=3121128&sid=d068573e2643604e638528cdb09a5a63","When you set mail.tabs.drawInTitlebar=true in the Config Editor, the OS-supplied titlebar is hidden. You can drag in the toolbox/toolbars at the top of the window to move the Thunderbird window around. This does not work for the windows for my extension."
+"My extension uses a third-party script which offers the option of using web workers during some phases of processing.    I would like to attempt to use this option since they may offer performance improvements; however, when constructing the Worker object a content security policy exception is generated to the effect of:
+
+Content-Security-Policy: The page’s settings blocked the loading of a resource at blob:moz-extension://95dccb93-c83d-4a14-a837-e4c30420784f/74bc237c-be9c-4ff4-b846-1a87ee995454 (“script-src”).
+
+I am guessing that a meta tag needs to be added in the popup page, but I am not sure of the exact content of the tag, assuming I am on the right track and any of this is permissible in the first place.
+
+The relevant documentation that I could locate is below.
+
+developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers#content_security_policy
+
+Thank you.
+Can you provide a link to the add-on, so we could have a more detailed look?
+
+John
+Here is a link to the repository:
+
+https://github.com/tmccoid-tech/extract-em
+
+I checked in a change that produces the error (main branch).
+
+The background on this is that I am switching from the JSZip library for producing .zip files to zip.js since the former was not reliably able to handle larger (~750 MB) output files.
+
+zip.js offers Web Workers for generating the .zip files, but it is not mandatory.  No error is produced if the ww option isn't used.
+
+If I am not mistaken, the error is incurred in the getWebWorker method of the code file zip.js (line 2276) where the Worker object is constructed.  It is difficult to trace though presumably due to async execution and the fact that this is not a trappable error.
+
+Please see the screenshot of the error message presented in the debugger:
+
+https://github.com/tmccoid-tech/extract-em/issues/5
+
+Thanks,
+Tom
+Please ignore this for the time being -- the developer of the zip library reached out to me with a possible solution.",An extension that uses a third-party script blocks the loading of a resource at blob:moz-extension://95dccb93-c83d-4a14-a837-e4c30420784f. The error is incurred in the getWebWorker method of the code file zip.js (line 2276)
+"So, I have a content script that I'm writing, but calls to console.log() do not appear on the debug console launched with the inspect button. Messages from the background script and a popup.js I registered via the manifest appear fine. If it matters, the script is a message display script that is invoked by injecting the script the same way it is done in the message-content-script example - not via manifest. Do I need to set something in the debug console or manifest to see these messages?
+The script has registered an onMessage listener, but on sending a message from the background script I get ""Error: Could not establish connection. Receiving end does not exist"" thrown form the sending (background) code. The script definitely runs when I select the message, as I can see the redboxed text that was used in the message-content-script example. I just can't get it to react to a message form the background. I understand that the script will be sleeping/inactive normally, but shouldn't it wake on receipt of an onMessage? Is it even possible to listen to messages from the background in a content script? Or should I be injecting the code freshly somehow?",Message display script that is invoked by injecting the script the same way it is done in the message-content-script example - not via manifest. Messages from the background script and a popup.js I registered via the manifest appear fine.
+"I'm a long time TB user, and programmer by trade, but have never done any TB or add-on coding.
+I'm intested to get an idea of if what I would like to develop as an extension is possible, as I don't know what the limitations of add-on capabilities are.
+My thought was to create a basic CRM - client relationship managment add-on.
+Please let me know if any of this is not possible with an add-on so that I'm not wasting my time coding until I hit a wall.
+
+New button on received email (like where delete/spam buttons are) for create folder - this would create a new mail folder under some designated existing folder. Prompt for Folder Name, and creates a mail filter which will store sent emails and incoming emails in the new folder based on domain name (or other entered text).
+If a matching config exists already for the received email (using the mail filter), the button would be to send this email there instead (like when done reviewing in inbox).
+Another button for schedule response - when clicked, would prompt for a date and title/desc (can schedule be in TB directly or utilize calendar features?). Once added and the date/time arrives, TB will pop up the text entered. ""Check back with client regarding..."" Most likely, an upcoming list of scheduled items could appear where the current 'task' list would be (when using the calendar in TB).
+
+So, that is the jist of it. Super basic way to manage when the user wants to respond/check back to a clients email. Probably more stuff later, but this would improve my process enough I would not need the hassle of an entirely different CRM software.
+
+Thanks, Wes
+Hi Wes,
+
+I have seen a few CRM add-ons passing through review, for example
+
+* https://addons.thunderbird.net/addon/rt-archive-emails-to-crm/
+* https://addons.thunderbird.net/addon/kundenmeister-mail-export/
+
+Those seem to work only with specific systems, but they might give an impression of what is possible.
+
+You can:
+* have a button in the message header area
+* you can create folders
+* you can prompt the user in popus or in the options page for configuration data
+* you cannot yet create a ""real"" email filter (one which shows up in Thunderbirds filters), but you can react on incoming email and do something with new mail
+* you can implement a reminder functionality, or use https://addons.thunderbird.net/addon/mailmindr/ (or cooperate with that add-on: add-ons can communicate with other add-ons if they implement a public API)
+
+Hope that helps,
+John","New button on received email (like where delete/spam buttons are) for create folder. Another button for schedule response - when clicked, would prompt for a date and title/desc (can schedule be in TB directly or utilize calendar features?)"
+"Hello Mozillians and friends of Thunderbird,
+
+The next Thunderbird Council election is coming up. As in previous years, people eligible to vote and to stand as candidates need to be on an electoral roll. Contributors are eligible to be an elector if they have contributed 10 or more hours per year of involvement in the Thunderbird project. To illustrate this, if a contributor first became involved three years ago then the expected contribution is at least 30 hours, if two years ago then at least 20 hours, and if one year ago or less then at least 10 hours. Contributors may self-nominate, and on request must submit examples that illustrate their level of involvement.
+
+Contribution can be any of the following:
+
+triaging bugs;
+fixing, or reviewing code changes;
+providing support on SUMO or other forums;
+localizing Thunderbird, related websites, or extensions;
+testing, writing, or reviewing add-ons;
+furthering the Thunderbird cause by constructive contributions to tb-planning;
+or public relations, including writing blog posts, posting on social media, artwork, etc.
+People working for Mozilla who dedicate time to Thunderbird are also eligible.
+
+This simple rule will spare us any complicated metric, such as “x number of patches submitted”, “x bugs submitted” or “x SUMO comments written”, etc. If we have missed a group of contributors, or if you are unsure if your contribution qualifies, please reach out to the Council (at council@thunderbird.net), or me personally.
+
+Since we already know some of the people who are dedicating time, their most precious asset, to Thunderbird, we have prepared a preliminary electoral roll based on previous years. The roll is available on GItHub. New additions are listed at the bottom under ""(new for 2022)"".
+We ask voters who were previously added to the electoral roll to check for themselves whether they still fulfill the criteria mentioned above and inform us if they are no longer contributing to the Thunderbird project at the required level or do not wish to participate in the election. We also kindly ask you to notify others who may be eligible to self-nominate if you notice someone is missing from the electoral roll.
+To reiterate, people who are not on the preliminary electoral roll can contact any member of the Council (at council@thunderbird.net), mentioning their contribution and asking to be added to the electoral roll. The idea is not to make it hard to be on the electoral roll.
+
+In general, the election process will work as in past years (as documented in the bylaws), follow-up emails will include more instructions on the exact timeline, but you will have until at least November 28th, 2022 to be added to the electoral roll.
+The election itself will be run by neutral 3rd parties: Peter Saint-Andre, with G. Matthew Rice helping to moderate the list.
+
+Thanks,
+Andrei Hajdukewycz
+Thunderbird Council Secretary",The next Thunderbird Council election is coming up. People eligible to vote and to stand as candidates need to be on an electoral roll. Contributors are eligible to be an elector if they have contributed 10 or more hours per year of involvement in the Thunderbird project.
+"Notes:
+* FIXED indicates resolved in DAILY development builds in last 24 hours. May take a week or more to be fixed beta.   https://www.thunderbird.net/notes/beta lists issues definitely resolved in BETA.
+* A bug may change from FIXED to some other resolution in the time period, so this report might list bugs whose current resolution is something other than fixed.
+* Excludes bugs whose version field is 115 at the time this bug list was generated.
+* Includes bugs reported as version 128 and future versions, as these may also exist in beta.
+* PINNED 📌 posts at https://thunderbird.topicbox.com/groups/beta has links to more bug lists.
+* Report runs at 11am UTC and includes the following, but may be empty if no activity in the 24 hour period:
+** New bugs in last 24 hours
+** Resolved bugs in last 24 hours
+
+This search was scheduled by vseerror@fastmail.com.
+
+New bugs in last 24 hours
+ID	Type	Sev	Pri	Plt	Assignee	Status	Resolution	Summary
+1907113	defect	--	--	x86_64	ishikawa@yk.rim.or.jp	REOPENED	---	Many C-C TB xpcshell tests fail, Hit MOZ_CRASH(assertion `left != right` failed: src and dst must not alias ) at mozilla/netwerk/base/idna_glue/src/lib.rs:66
+1907115	defect	--	--	Unspecified	nobody@mozilla.org	NEW	---	Two Factor OAuth (for text and email) not working - Office365
+1907245	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	ExceptionCode: c0000005 (Access violation)
+1907248	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Sending format ""Only Plain Text"" should switch off HTML editor
+1907249	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Refresh Calendar drop-down items not rendered while editing remote calendars
+1907255	enhancement	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Allow calendar invitations to be encrypted
+1907262	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	Scrolling hides date headers in Calendar Week view
+1907270	defect	S3	--	Desktop	nobody@mozilla.org	NEW	---	Cannot delete emails using the DEL button while word search mode is activated
+1907282	defect	--	--	Unspecified	nobody@mozilla.org	UNCONFIRMED	---	RNP failed to parse signature in certificate breaking OpenPGP support
+Resolved bugs in last 24 hours
+ID	Type	Sev	Pri	Plt	Assignee	Status	Resolution	Summary
+1906835	defect	--	--	Unspecified	geoff@thunderbird.net	RESOLVED	FIXED	nsMsgDBFolder backup database isn't closed if the normal database is already closed",Fixed indicates resolved in DAILY development builds in last 24 hours. May take a week or more to be fixed beta. Bug may change from FIXED to some other resolution in the time period. Excludes bugs whose version field is 115.
+"Have you ever wondered what the release process of Thunderbird is like? Wanted to know if a particular bug would be fixed in the next release? Or how long release support lasts? Or just how many point releases are there?
+
+In the May Office Hours, we’ll demystify the current Thunderbird release process as we get closer to the next Extended Security Release on July 10, 2024.
+
+May Office Hours: The Thunderbird Release Process
+One of our guests you may know already: Wayne Mery, our release and community manager. Daniel Darnell, a key release engineer, will also join us. They’ll answer questions about what roles they play, how we stage releases, and when they know if releases are ready. Additionally, they’ll tell us about the future of Thunderbird releases, including working with add-on developers and exploring a monthly release cadence.
+
+Join us as our guests answer these questions and more in the next edition of our Community Office Hours! You can also submit your own questions about this topic beforehand and we’ll be sure to answer them: officehours@thunderbird.net
+
+Catch Up On Last Month’s Thunderbird Community Office Hours
+While you’re thinking of questions to ask, watch last month’s office hours where we chatted with three key developers bringing Rust and native Microsoft Exchange support into Thunderbird. You can find the video on our TILvids page.
+
+Join The Video Chat
+We’ll be back in our Big Blue Button room, th KDE and the Linux Application Summit. We’re grateful for their support and to have an open source web conferencing solution for our community office hours.
+
+Date and Time: Friday, May 31 at 17:30 UTC
+
+Direct URL to Join: https://meet.thunderbird.net/b/hea-uex-usn-rb1
+
+Access Code: 964573
+Greetings all,
+
+A video replay and PDF presentation from this session are now available for you!
+
+Video:
+https://youtu.be/x66t3ljNOiw
+
+Slide Deck PDF: https://blog.thunderbird.net/files/2024/06/Build-Release-How-Its-Done.pdf
+
+This was a really informative Office Hours session. Kudos to Wayne and Daniel for the prep work that went into this, and the insights they shared.","In the May Office Hours, we’ll demystify the current Thunderbird release process as we get closer to the next Extended Security Release on July 10, 2024. Wayne Mery, our release and community manager, and Daniel Darnell, a key release engineer, will also join us."
+"I had Thunderbird Beta running well on Ubuntu 23.10 and then did an OS upgrade to 24.04. That failed and left the system unuseable, so I did a fresh install of 24.04. This has my 23.10 home directory, including the Beta Thunderbird directory.
+
+The first issue is that running that beta would not use my profile and I had to create a new one. Kind of a hassle getting it quite right, and then sitting through message header downloads (I have a huge INBOX).
+
+That said its pretty much usable. However, the font in the message window doesn't look quite right, especially the somewhat larger spacing between messages.
+
+In addition I don't get a Thunderbird Icon in the dock. Just a generic icon thats not pinable.
+
+Any ideas on how to correct these?
+On 2024-05-30 19:29, kmandelb@gmail.com wrote:
+The first issue is that running that beta would not use my profile and I had to create a new one.
+Probably due to installing into another path than it was before.
+
+Start with `thunderbird -P` to select the profile you want to use.
+
+ -Magnus
+On 2024-05-30 19:29, kmandelb@gmail.com wrote:
+That said its pretty much usable. However, the font in the message window doesn't look quite right, especially the somewhat larger spacing between messages.
+You probably want to change density. App Menu | Density, or normal menu View | Density
+ -Magnus
+On 5/30/24 10:42 AM, Jason Evangelho wrote:
+Just forwarding this directly since I never assume we can see all the messages that get posted on Topicbox.
+Thanks Jason for making sure the right person sees this, although I did get the original message on the tb-beta list :)
+
+I'm cc'ing tb-beta back in so anyone else that might have this issue can discover the thread.
+
+---------- Forwarded message ---------
+From: <kmandelb@gmail.com>
+Date: Thu, May 30, 2024 at 9:35 AM
+Subject: [tb-beta] Ubuntu 24.04 Transition Issue
+To: TB Beta <beta@discuss.thunderbird.net>
+
+
+I had Thunderbird Beta running well on Ubuntu 23.10 and then did an OS upgrade to 24.04. That failed and left the system unuseable, so I did a fresh install of 24.04. This has my 23.10 home directory, including the Beta Thunderbird directory.
+
+The first issue is that running that beta would not use my profile and I had to create a new one. Kind of a hassle getting it quite right, and then sitting through message header downloads (I have a huge INBOX).
+
+Oof that sounds frustrating indeed and I'm really sorry to hear about your poor upgrade experience!
+
+How did you have TB beta installed? If you installed the TB deb that was shipped in Ubuntu 23.10, and then replaced the binary with the beta one, then when you upgraded
+Ubuntu 24.04 is the first Ubuntu version that supplants the Thunderbird deb with the snap. (There still is a Thunderbird deb package but it is a transition package that installs the snap). On an upgrade, there is a step that tries to copy over any existing profile to the location where the snap looks for a profile:
+* the deb looks for profile in: ~/.thunderbird
+
+* the snap looks for profile in: ~/snap/thunderbird/common/.thunderbird
+
+Since you ended up doing a _fresh_ install of Ubuntu 24.04, that migration step was skipped. You could have manually copied your .thunderbird folder into the snap location.
+
+That said its pretty much usable. However, the font in the message window doesn't look quite right, especially the somewhat larger spacing between messages.
+This is the default composition settings. My guess is you had changed something in your previous profile that changed the composition look and feel.
+I would recommend first backing up the new profile you've created:
+
+$ mv  ~/snap/thunderbird/common/.thunderbird ~/snap/thunderbird/common/.thunderbird-backup
+
+And then putting your old profile in the right place:
+
+$ cp -r ~/.thunderbird ~/snap/thunderbird/common/
+
+And restart Thunderbird to load your old profile.
+
+If you would rather not try and load in your old profile to change your font issue, then you can try what Magnus suggested regarding changing the density.
+
+I hope this helps,
+
+Heather
+
+In addition I don't get a Thunderbird Icon in the dock. Just a generic icon thats not pinable.
+I can look into this for sure.
+
+Any ideas on how to correct these?
+https://thunderbird.topicbox.com/groups/beta/ - check the READ me pinned 📌 postings for beta info and tips
+
+Thunderbird / TB Beta / see discussions + participants + delivery options
+Adding the reporter
+I have a thunderbird directory in my home directory, and as always I have /usr/bin/thunderbird linked to it.  I also have the .thunderbird in my home.  Those were copied from the 23.10 image where they worked well. So the snap version is not in play.
+
+When I ran it on 24.04 it wanted to create a new profile, either by default or if I used -P to select the one I had used.
+
+The newly created profile did have the density set differently than I 'm used to ""middle, instead of left"" , so by changing that the font/spacing look normal to me.
+
+So what's left is dealing with the fact there is no beta icon for  the dock, and I need to start thunderbird from a terminal.","I had Thunderbird Beta running well on Ubuntu 23.10 and then did an OS upgrade to 24.04. That failed and left the system unuseable, so I did a fresh install of 24.4. The first issue is that running that beta would not use my profile and I had to create a new one. In addition I don't get a Thunderbird Icon in the dock. Just a generic icon thats not pinable. Any ideas on how to correct these?"
+"The Thunderbird Project enjoyed a fantastic 2023. From my point of view – as someone who regularly engages with both the community and our team on a daily basis – the past year brought a renewed sense of purpose, sustainability, and excitement to Thunderbird. Let’s talk about a few of the awesome milestones Thunderbird achieved, but let’s also discuss where we stumbled and what lessons we learned along the way.
+
+Our 2023 Milestones
+The biggest milestone of 2023 was Thunderbird 115 “Supernova.” This release marked the first step towards a more flexible, reliable, and customizable Thunderbird that will accommodate different needs and workflows. Work has been long underway to modernize huge amounts of old code, with the aim of modernizing Thunderbird to deliver new features even faster. The “Supernova” release represented the first fruits of those efforts, and there’s a lot more in the pipeline!
+
+Alongside Supernova came a brand new Thunderbird logo to signal the revitalization of the project. We finally (even a bit reluctantly) said goodbye to our beloved “wig on an envelope” and ushered in a new era of Thunderbird with a refreshed, redesigned logo. But it was important to honor our roots, which is why we hired Jon Hicks – the designer of the original Firefox and Thunderbird logos – to help us bring it to life.
+
+One 2023 milestone that deserves more attention is that we hired a dedicated User Support Specialist! Roland Tanglao has been working enthusiastically towards removing “documentation debt” and updating the 100s of Thunderbird support articles at support.mozilla.org (which you’ll see us refer to internally as “SUMO”). Beyond that, he keeps a watchful eye on our Matrix community support channel for emerging issues, and is in the forums answering as many help questions as humanly possible, alongside our amazing support volunteers. In a nutshell, Roland is doing everything he can to improve the experience of asking for and receiving support, modernize existing documentation, and create new guides and articles that make using Thunderbird easier.
+
+These are some – not all – of our accomplishments from last year. But it’s time to shift focus to where we stumbled, and how we’ll do better.
+
+The Lessons We Learned In 2023
+In 2023, we failed to finish some of the great features we wanted to bring to Thunderbird, including Sync and Account Hub (both of which, however, are still in development). We also missed our target release window for Thunderbird on Android, after deciding it was worth the extra development time to add the kind of functionality and flexibility you expect from Thunderbird software.
+
+Speaking of functionality you expect, we hear you loud and clear: you want Exchange support in Thunderbird. We’ve already done some exploratory work, and have enabled the usage of Rust in Thunderbird. This is a complex topic, but the short version is that this opens the doors for us to start implementing native support for the Exchange protocol. It’s officially on our roadmap!
+
+We also believe our communication with you has fallen short of where it needs to be. There are times when we get so excited about things we’re working on that it seems like marketing hype. In other situations, we have over-promised and under-delivered because these projects haven’t been extensively scoped out.
+
+We’re beginning to solve the latter issue with the recent hiring of Kelly McSweeney, Senior Technical PM. She joined our team late last year and brings 20 years of valuable experience to Thunderbird. In a nutshell, Kelly is building processes and tools to accurately gauge how long development time will realistically take, from extensive projects to the tiniest tasks. Basically, she’s getting us very organized and making things run much more efficiently! This not only means smoother operations across the organization, but also clearer communication with you going forward.
+
+And communication is our biggest area of opportunity right now, specifically with our global Thunderbird community. We haven’t been as transparent as an open source project should be, nor have we discussed our future plans frequently enough. We’ve had several meetings about this over the past few weeks, and we’re taking immediate steps to do better.
+
+To begin with, you’ll start seeing monthly Developer Digests like this one from Alex, aimed at giving you a closer look at the work currently being planned. We’re also increasing our activity on the Thunderbird mailing lists, where you can give us direct feedback about future improvements and features.
+
+In 2024 you can also look forward to monthly community Office Hours sessions. This is where you can get some face time (or just voice time) with our team, and watch presentations about upcoming features and improvements by the developer(s) working on them.
+
+One last thing: In 2023, Thunderbird’s Marketing & Communications team consisted of myself and Wayne Mery. This year Wayne and I are fortunate to be working alongside new team members Heather Ellsworth, Monica Ayhens-Madon, and Natalia Ivanova. Together, we’re going to work diligently to create more tutorials on the blog, more video guides, and more content to help you get the most out of Thunderbird – with a focus on productivity.
+
+Thank you for being on this journey with us, and don't hesitate to let us know what's on your mind!
+
+~Jason
+Thunderbird Community Engagement Manager","The Thunderbird Project enjoyed a fantastic 2023. The biggest milestone of 2023 was Thunderbird 115 “Supernova” This release marked the first step towards a more flexible, reliable, and customizable Thunderbird that will accommodate different needs and workflows."
+"Hello, community!
+The topic for this month’s Thunderbird Community Office Hours takes a short break from the core of Thunderbird and takes us into the world of extensions we call Add-ons. These allow our users to add features and options beyond the customization already available in Thunderbird by default.
+
+We want it to be easy to make Thunderbird yours, and so does our community. The Thunderbird Add-on page shows the power of community-driven extensions. There are Add-ons for everything, from themes to integrations, that add even more customization to Thunderbird.
+
+Our guest for this month’s Thunderbird Community Office Hours is John Bieling, who is the person responsible for Thunderbird’s add-on component. This includes the WebExtension APIs, add-on documentation, as well as community support. He hosts a frequent open call about Add-on development and is welcoming to any developers seeking help. Come join us to learn about Add-on development and meet a key developer in the space.
+
+Before you join us on February 22 at 18:00 UTC, watch last month’s office hours with UX Engineer Elizabeth Mitchell. We had some great discussion around the Message Context Menu and testing beta and daily images. Watch the video and read more about our guest at last month’s blog post.
+
+Have any questions about Add-ons for our guest? Post them in a reply here or send them to officehours@thunderbird.net and we'll do our best to get them asked and answered in the chat!
+Join Us On Zoom
+(Yes, we’re still on Zoom for now, but a Jitsi server for future office hours is in the works!)
+
+When: February 22 at 18:00 UTC
+
+Direct URL To Join: https://mozilla.zoom.us/j/97506306527
+Meeting ID: 97506306527
+Password: 319424
+Dial by your location:
+
++1 646 518 9805 US (New York)
++1 669 219 2599 US (San Jose)
++1 647 558 0588 Canada
++33 1 7095 0103 France
++49 69 7104 9922 Germany
++44 330 088 5830 United Kingdom
+Find your local number: https://mozilla.zoom.us/u/adkUNXc0FO","This month’s Thunderbird Community Office Hours takes a short break from the core of Thunderbird and takes us into the world of extensions we call Add-ons. These allow our users to add features and options beyond the customization already available in Thunderbird by default. Our guest is John Bieling, who is the person responsible for Thunderbird's add-on component."
+"I've found various posts abouut duplicate emails appearing but nothing that quite fits my experience. I'm using Thunderbird 118.0b6 and IMAP mail servers. When I receive an attachment in an email I usually detach it from the email and save it separately. I've been doing this for years. For the last few weeks every time I remove an attachment a duplicate of the original email is immediately downloaded with the same attachment. If I ignore it or delete this duplicate nothing else happens. If I remove the attachment from the duplicate, I get a second duplicate. Can anyone tell me if this is a mistake in my settings or is it a bug?
+I'm seeing the same behavior, so it's most likely a bug. This also
+happens with TB115, so I don't think it started with TB 118.0b6. Didn't
+happen in TB102 though.
+Is this happening only with OAUTH IMAP accounts like GMail, or also with normal password IMAP accounts?
+For me this happens with Oauth IMAP accounts. I can't tell whether it
+happens with normal password IMAP accounts.
+Thanks for the replies. The duplicates are coming from a PrivateEmail account which AFAIK is normal password, but I could be wrong. Should it be reported as a bug?
+I'm getting it too",Every time I remove an attachment a duplicate of the original email is immediately downloaded with the same attachment. If I ignore it or delete this duplicate nothing else happens. The duplicates are coming from a PrivateEmail account which AFAIK is normal password.
+"Good afternoon, all!
+
+Running Thunderbird  115.0b4 on Ubuntu 23.04, Kernel 6.2.0-23-generic, GNOME 44.2 and Firefox 114.0.2 (Flatpak). The issue I am experiencing is reproducible by doing the following.
+
+The following fails:
+1. Ensure Thunderbird and Firefox are both closed.
+2. Launch Thunderbird.
+3. Click any form of hyperlink (image embedded, Web preview or typed) or right-click the link and select open in browser.
+4. Firefox launches a browser to a blank page with nothing in the address field.
+5. Without closing Firefox, select link again. A new tab launches with the URL viewable in the address bar but still no page content. Refresh and it does nothing.
+6. Close out of Thunderbird and Firefox.
+
+The following works:
+1. Ensure Thunderbird and Firefox are both closed.
+2. Launch Firefox
+3. Launch Thunderbird
+4. Click any form of hyperlink (image embedded, Web preview or typed).
+5. New tab loads properly with URL in the address filed and the page content loads in the new tab.
+
+Cheers!
+Jeff
+Runnin 115.0b4 on Win 11, 64bit
+
+Repeated fail tests below with no problems.
+I have exactly the same problem but with Thunderbird 102.12.0 on Linux Mint 20.3, Kernel 5.4.0-152-generic,  Cinnamon 5.2.7 and Firefox 114.0.2
+Actions
+Mea culpa! I completely forgot to report back. It became so frustrating I loaded prod, and currently on 115.3.0 and it works. So issue if indeed w/ beta/daily builds.","Running Thunderbird  115.0b4 on Ubuntu 23.04, Kernel 6.2.0-23-generic, GNOME 44.2 and Firefox 114.0.2 (Flatpak) The issue I am experiencing is reproducible by doing the following."
+"Hi,
+
+Just upgraded from 118.0b2 (64 bits) to 119.0b3 (64-bit) and now every time I open TB it takes 3mn+ for the Space Bar and Unified Toolbar to appear in the view. Happening as well in Safe Mode.
+
+Folder View and Message List appear immediately at startup.
+
+Has anyone else seen this behaviour?
+Would you be aware of an already opened bug report related to it?
+
+Cheers,
+Also just noticed that the Folder Header Pane re-appeared while it was hidden previously and my customised button in Unified Toolbar disappeared.
+Actions
+Could be related to:
+Spaces toolbar takes up to 5 seconds to show up on startup
+https://bugzilla.mozilla.org/show_bug.cgi?id=1857376
+Unified toolbar buttons disappear and could not be shown until TB is restarted
+https://bugzilla.mozilla.org/show_bug.cgi?id=1855833
+Regression found, should be fixed soon :-)
+https://bugzilla.mozilla.org/show_bug.cgi?id=1857376#c4",Every time I open TB it takes 3mn+ for the Space Bar and Unified Toolbar to appear in the view. Happening as well in Safe Mode.Folder View and Message List appear immediately at startup.
+"Hello. A few months ago, I warned of accessibility problems with the new Thunderbird interface for blind people who use screen readers such as NVDA, for example. At the time, they gave me several suggestions, such as F6 use, stable versions instead of betas, among others. But what most caught my attention is that the developers indicated that there was a concern with accessibility, but that it required time to make the necessary adaptations so that Thunderbird did not lose its good accessibility it had so far. However, several months have passed, new betas versions of Thunderbird were released, and finally the time of the new interface release for stable versions as well. What has changed since then in terms of accessibility in the new interface for users of screen readers like NVDA?! In my humble opinion, absolutely nothing, because the same complaints that I expressed months ago are now present in stable versions. So I decided to return to betas versions to see if anything had improved for the future. Unfortunately, no improvement either, because I still have to use Tab several times to navigate this new interface. If you decide to use the F6, which is not a comfortable either, I also have to press several times to make the same movement that I performed with a few pressing from the TAB key in the previous version. Nor can you anymore and couldn't get back there when I made my first complaint about the case, easily browse the content of each message selected in a list of messages within each folder. It is a pity that much has been said, but little has been performed in terms of accessibility in the new Thunderbird interface. Therefore, I'm even thinking of going back to the latest stable version before the new interface, and blocking Thunderbird updates, a hypothesis that should never be adopted in practice ... Thank you.
+
+Antonio Cezar Antunes Ribeiro - Advogado - OAB Nº 441.740/SP.
+Em 24/05/2023 18:10, Wayne Mery escreveu:
+This situation is well described in Peter's excellent bug report at https://bugzilla.mozilla.org/show_bug.cgi?id=1819281#c0. To quote a small bit
+""New message list introduced in Thunderbird 111 has many enhancements including better accessibility support in many ways.
+However the general user experience needs some fine tuning.""
+In other words, the keyboard accessibility improvements of Supernova have impacted users of screen readers, so more improvement is needed.  It is recognized as a significant issue and developers are working this, but the work will require time to deliver.
+
+On 5/14/23 3:47 PM, Advogado Antonio Cezar Antunes Ribeiro wrote:
+Hello. Yes, I'm being forced to use F6, but it's very cumbersome compared to the Tab key for blind users with their screen readers. So I really miss the less cluttered interface I had with the use of the Tab key in the clean interface of the older versions. Unfortunately, I can't go back to the stable versions at the moment because I receive a message saying that I would have to create a new profile, and I can't use my long-standing profile with multiple accounts and numerous properly configured messages. Thank you.
+
+Antonio Cezar Antunes Ribeiro - Advogado - OAB Nº 441.740/SP.
+Em 14/05/2023 15:24, Wayne Mery escreveu:
+On 5/14/23 2:07 PM, matthew dyer wrote:
+If you want to jump to the folder list and the message list just tap F6 or shift F6 and you will get there quicker.
+Great tip.
+
+I do agree that the interface is a bit clunky, but accessibility issues are being worked on.  I have a portable version of tb beta which I launch from time to time.  I would recommend using the stable version as n installed copy for now.
+
+Matthew\
+Most people I hope are using beta as a ""second"" Thunderbird and did not overwrite their release version.
+By keeping the release version software and Thunderbird profile, you have the stable version ready to use whenever you want.  So too, beta is there to use as much as you want.
+
+
+https://thunderbird.topicbox.com/groups/beta/ - check the READ me pinned postings for beta info and tips
+Thunderbird / Thunderbird Beta / see discussions + participants + delivery options Permalink
+These problems exist in 102.15.1 and in beta 119.0b5
+
+Regarding the 'Unified Toolbar'
+I find Tab will highlight :
+'Open Spaces' toolbar icon on far left - Tab again jumps over all the added buttons to the 'Global Search' then Tab again jumps over added button to the far right 'Menu app icon'.
+Not expected and not helpful.
+
+F6  does not perform the same as Tab eg: On Unified Toolbar, it only selects far left Spaces icon and then jumps to Global search and then jumps past everything to the 'Inbox' folder.
+
+How do you use the keyboard to navigate from left to right along the Unified Toolbar?","A few months ago, I warned of accessibility problems with the new Thunderbird interface for blind people who use screen readers such as NVDA. What has changed since then in terms of accessibility in the new interface for users of screen readers like NVDA?!"
+"Welcome to a new report on the progress of transforming K-9 Mail into Thunderbird for Android. I hope you’ve enjoyed the extra day in February. We certainly did and used this opportunity to release a new stable version on February 29.
+
+If you’re new to this series or the unusually long February made you forget what happened the previous month, you might want to check out January’s progress report.
+
+New stable release
+We spent most of our time in February getting ready for a new stable release – K-9 Mail 6.800. That mostly meant fixing bugs and usability issues reported by beta testers. Thanks to everyone who tested the app and reported bugs ❤️
+
+Read all about the new release in our blog post Towards Thunderbird for Android – K-9 Mail 6.800 Simplifies Adding Email Accounts.
+
+What’s next?
+With the new account setup being mostly done, we’ll concentrate on the following two areas.
+
+Material 3
+The question of whether to update the user interface to match the design used by the latest Android version seems to have always split the K-9 Mail user base. One group prefers that we work on adding new features instead. The other group wants their email app of choice to look similar to the apps that ship with Android.
+
+Never updating the user interface to the latest design is not really an option. At some point all third-party libraries we’re using will only support the latest platform design. Not updating those libraries is also not an option because Android itself is constantly changing and requires app/library updates just to keep existing functionality working.
+
+I think we found a good balance by not being the first ones to update to Material 3. By now a lot of other app developers have done so and countless bugs related to Material 3 have been found and fixed. So it’s a good time for us to start switching to Android’s latest design system now.
+
+We’re currently still in a research phase to figure out what parts of the app need changing. Once that’s done, we’ll change the base theme and fix up the app screen by screen. You will be able to follow along by becoming a beta tester and installing K-9 Mail 6.9xx beta versions once those become available.
+
+Android 14 compatibility
+K-9 Mail is affected by a couple of changes that were introduced with Android 14. We’ve started to look into which parts of the app need to be updated to be able to target Android 14.
+
+We’ve already identified these:
+
+Schedule exact alarms are denied by default – For some reason Google decided to also apply this change to apps targeting Android 13. We already mentioned this in our November/December 2023 progress report in the section “Push Not Working On Android 14”.
+Restrictions to implicit and pending intents – This affects the way we communicate with the crypto provider app (OpenKeychain) when using OpenPGP.
+Our current plan is to include the necessary changes in updates to the K-9 Mail 6.8xx line.
+
+Community Contributions
+S Tanveer Hussain submitted a pull request to update the information about third-party libraries in K-9 Mail’s About screen (#7601)
+GitHub user LorenzHo provided a patch to not focus the recipient input field when the Compose screen was opened using a mailto: URI (#7623). Unfortunately, this change had to be backed out later because of unintended side effects. But we’re hopeful a modified version of this change will make it into the app soon.
+Thank you for your contributions!
+
+Releases
+In February 2024 we published a new stable release:
+
+K-9 Mail v6.800 (2024-02-29)
+… and the following beta versions:
+
+K-9 Mail v6.715 (beta) (2024-02-01)
+K-9 Mail v6.716 (beta) (2024-02-13)
+K-9 Mail v6.717 (beta) (2024-02-16)","K-9 Mail 6.800 Simplifies Adding Email Accounts. New stable release on February 29. New account setup is mostly done, we’ll concentrate on the following two areas."
+"When can we expect Thunderbird hierarchical folders to be available in the Android version. There doesn't seem to be any progress on this feature.  This is the single missing feature that keeps me from fully embracing Thunderbird fully on my Samsung phone and tablet.
++1
+Because I can't find the ""Subscribe"" button to follow this topic here: https://thunderbird.topicbox.com/groups/android-planning/Td9891702e23fb53a. Sorry.
+I don't have a direct answer to your question, if the dev team has an idea of the timeline required for this feature to land, please do let us know...
+
+...but it is on the roadmap according to https://github.com/orgs/thunderbird/projects/4 so it looks like definitely coming sooner than later.
+
+Looking at the dev team monthly Thunderbird For Android Progress Reports for the past year on status of development https://blog.thunderbird.net/tag/android/ it appears clearly they are concentrating current efforts on the Improved Account Setup (including autoconfig) available in beta version that still under testing, fine running and bug fixing... which is based on new Atomic Design System being adopted as the foundation for the application UI. This required an initial effort and time investment needed to implement that system. Developers needing to adapt to the new system and learn how to use it effectively (source: https://github.com/thunderbird/thunderbird-android/blob/main/docs/architecture/adr/0002-ui-wrap-material-components-in-atomic-design-system.md)
+
+As everyone, I am and end-user, impatient to see the new Hierarchical Folder View (https://github.com/thunderbird/thunderbird-android/issues/630) implemented but that may require additional pre-requirements likely, and time certainly.
+
+At the meantime, the current stable K-9 Mail app already received a certain amount of fixes that added value to the app from my personal experience.
+
+I am just currently very thankful to the dev team, for their work and steady progress (even if not as fast as everyone would like) because until a year ago, there were no plan in motion to have Thunderbird for Android... now it is coming to fruition, beta is already available at the corner and it is only few more months of patience before we can get a new K-9 Mail > Thunderbird for Android in stable version with added features/value.
+
+Thank you guys for making that dream, once upon a time, becoming a reality ;-)",When can we expect Thunderbird hierarchical folders to be available in the Android version. This is the single missing feature that keeps me from fully embracing Thunderbird fully on my Samsung phone and tablet.
+"HI
+I would like to test the thunderbird android version if it is stable enough? in RC mode? because I use another application that no longer works well now!
+Where to find it? I see that there is a schedule but I don't see when the next versions will be published. where are they ?
+Regards
+ok I understood where to download the beta version on the page https://blog.thunderbird.net/2023/09/thunderbird-for-android-k-9-mail-august-2023-progress-report/
+I had to agree to beta test them. What I did. I haven't done any data migration.
+The result is rather disappointing, I don't see any major innovation. Is this an intermediate version of K9?
+Will we have to wait for a specific thunderbird android version?
+Or does this have nothing to do with the name change?
+regards",I would like to test the thunderbird android version if it is stable enough? in RC mode? because I use another application that no longer works well now! I see that there is a schedule but I don't see when the next versions will be published.
+"[Please particpate in this survey of our community, which I am forwarding from Thunderbird Planning topicbox. It is being cross posted to multiple groups - appologies if you receive multiple copies.  Please do not reply to this email.]
+
+Dear Thunderbird Community,
+
+We are excited to invite you to take part in our survey, tailored to gather your thoughts on various aspects of our community including governance, project transparency, technical contributions, the Bugzilla and review process, and so much more.
+
+Our primary objective is to deepen our understanding of how you perceive our governance structure, the efficiency of our organizational processes, and the council's role within it. Moreover, we are keen to grasp your communication preferences, insights on our council elections, community events, and any potential areas you think might benefit from improvement.
+
+We value your insights immensely as they will guide us in identifying gaps and making enhancements.
+
+Please allocate 10-15 minutes to fill out the survey through the following link [1]: https://sprw.io/stt-7PWgMhLsPKxyefYcurPug1
+
+Your feedback will be treated with utmost confidentiality.
+
+Upon analyzing the results, we'll share the survey results, outline steps to address any highlighted concerns and define actions based on the results.
+
+Thank you for dedicating your time to this effort and for helping us grow and evolve!
+
+-Berna
+(on behalf of the Council)
+
+[1] https://sprw.io/stt-7PWgMhLsPKxyefYcurPug1","We are excited to invite you to take part in our survey, tailored to gather your thoughts on various aspects of our community. We value your insights immensely as they will guide us in identifying gaps and making enhancements."
+"As a long term user of Thunderbird and K-9 (though I don't need Android email much these days) this tie up is great news.  And it will be great when an iOS client is available (unfortunately my work phone is Apple!).
+
+The feature I really miss is an option to flag some messages and say 'delete from  server', so that they are gone by the time I get home and download all my email there (yes, I still use POP rather than imap!).
+
+Many years ago I used a program called nPop extensively on early Windows handhelds (PocketPC) when mobile internet access was still dialup and then GPRS.  Indeed, I still use it occasionally on a PC to clear out old messages on various people's mail accounts when they are filling up to their limit.
+
+Unfortunately there is no nPop client for Android (and it only displays plain text anyway so would be very limited now).  But I think it's abilities for intermittent connection / limited memory / email triage while away were excellent and could add benefit to K9/Thunderbird for me.  This would make me use it more, rather than tending to use more Webmail these days.
+
+This and making K9 more Thunderbird should also allow me to gradually get family members off of things like Outlook and Blue Mail that they are using.
+Yes. Tbird needs ideas like this. Else it is DOOMED.
+
+Probably still DOOMED. As being niche and archaic.
+
+Even I, a multi-decade happy user am now sorely disappointed.
+
+Tech team: wake up and save this sinking ship.
+I use POP Mail. everything must remain on the server, and cleanup is only on the server level, not a reader client.
+if this K9 app tries to delete a message from the server my server has a fit... that makes a Lot of work for me, and Many messages can be lot in the process.
+I have been reluctant to try the K9 app for this very reason.
+so far I have not found any documentation on this topic.",As a long term user of Thunderbird and K-9 this tie up is great news. It will be great when an iOS client is available (unfortunately my work phone is Apple!). The feature I really miss is an option to flag some messages and say 'delete from server'
+"The K-9 android app has developed a couple of severe issues recently. Where can I report these? The forum at https://forum.k9mail.app/ does not seem to have much activity since Mozilla began taking over the app.
+https://github.com/thundernest/k-9/issues
+I waited to install the latest v of K9 to allow the latest changes to be applied. After installing it took several weeks for the app to receive the incoming mail. Then one day it suddenly started getting the emails. It just isn't getting all the email. I deleted a group of not spam but I didn't want it to be on my tablet, so now it seems to interpret that I don't want that sender, ok on the tablet. BUT it still skips maybe half of my non spamming.
+Folks
+This is a place to offer suggestions for the upcoming Thunderbird for Android. It is not the place to report or discuss problems with K-9.
+It is true that the existing K-9 will merge in to Thunderbird for Android but, as far as possible, the developers have expressed the desire to have a similar look and feel and features that Thunderbird has on other platforms.
+As I understand it this topicbox is to help the planning and to prioritise features and functions of the new Thunderbird for Android.
+As Luna Jernberg suggested above try
+https://github.com/thundernest/k-9/issues
+For K-9 issues.
+I would suggest better headlining of what this forum is about. I confess I was confused. But jumped at any opportunity to get my 2 cents into the mix. BTW Gambal you need to lighten up a bit. Your tone is borderline ...how about pushy.",The K-9 android app has developed a couple of severe issues. Where can I report these? The forum at https://forum.k9mail.app/ does not seem to have much activity since Mozilla began taking over the app.
+"TL;DR: Things are about to change in the sync feature. If you don't use Thunderbird Daily, or you do but don't use sync, this doesn't affect you and you can stop reading now.
+
+Hello Daily users!
+
+Today, I intend to land the first of several changes to sync, that finally starts us moving down the road from proof of concept (that I wrote a year and a half ago) to shipping feature. These are the changes and what they mean for you:
+
+(Today) I've completely rebuilt what we sync. After this change, Thunderbird will sync only the bare essential information required to set up your accounts¹ on another installation, such as server addresses and user names.
+
+Until now we've been sync'ing any account properties that I thought might be useful and were easy to implement. This was before Thunderbird for mobile was on the cards, and many of these properties are either useless on a phone or you'd want different settings in different contexts (e.g. how often to download mail and what to download). In future updates I'll add many of these account properties back to the sync'ed data in a more context-aware format, but for now we're concentrating on getting the basics right. (Bug 1888023)
+(Hopefully early next week) I'll be changing the keys Thunderbird uses to encrypt your data. Firefox will not be able to read your Thunderbird sync data and Thunderbird will not be able to read your Firefox sync data². We'll also be moving to Mozilla Accounts' new authentication flow. (Bug 1888019)
+You may need to sign Thunderbird in to your account again.
+
+(Soon) We'll begin storing Thunderbird data on our own servers, separate from Firefox data.
+
+Finally, when we're sure everything is working as intended, we'll change the Thunderbird configuration to move everything from the staging servers to the production servers. Only then will sync be enabled in Thunderbird Beta and the release channels. (Possibly ESR 128, no promises!)
+You will need to sign Thunderbird in again, and this time use your real Mozilla Accounts email and password.
+
+With each of these changes your existing data will either be wiped from the storage server, or Thunderbird will no longer be able to read it. If you use sync to set up new profiles, first load and sync an existing profile in an updated Daily and ensure that it uploads fresh data.
+
+Happy sync'ing!
+GL
+
+¹ … including address books and calendars, as before, but I'm not going to write it out every time.
+
+² This is the change Mozilla insisted on before allowing us to use Mozilla Accounts, and why it's take so long to get to this stage.","Thunderbird Daily's sync feature is about to change. If you don't use sync, this doesn't affect you. Thunderbird will begin storing Thunderbird data on our own servers, separate from Firefox data."
+"Been seeing this in all 115 variants and figured to give it a go in the daily. Exists here as well on 117.0a1, Ubuntu 23.04, Kernel 6.2.0-25-generic, GNOME 44.2 and Firefox 115.0.2 (Flatpak).
+
+The following fails:
+1. Ensure Thunderbird and Firefox are both closed.
+2. Launch Thunderbird.
+3. Click any form of hyperlink (image embedded, Web preview or typed) or right-click the link and select open in browser.
+4. Firefox launches a browser to a blank page with nothing in the address field.
+5. Without closing Firefox, select link again. A new tab launches with the URL viewable in the address bar but still no page content. Refresh and it does nothing.
+6. Close out of Thunderbird and Firefox.
+
+The following works:
+1. Ensure Thunderbird and Firefox are both closed.
+2. Launch Firefox
+3. Launch Thunderbird
+4. Click any form of hyperlink (image embedded, Web preview or typed).
+5. New tab loads properly with URL in the address filed and the page content loads in the new tab.
+Please use https://bugzilla.mozilla.org/ for bug reports. Might be Flatpack specific for Thunderbird, or Firefox.
+ -Magnus","Thunderbird and Firefox are both closed. Click any form of hyperlink (image embedded, Web preview or typed) or right-click the link and select open in browser. Firefox launches a browser to a blank page with nothing in the address field."
+"Soon Daily will have Sync capability for the first time. You are allowed to try it, but here are some very important things you should know:
+This is a testing phase. Use at your own risk.
+
+While we've done enough development to know that the code works as intended, it's only been used in very limited circumstances, and we simply don't know what bugs it has. Potential problems should be limited, but don't use it where you have data you value.
+
+As development continues, we will be making changes that could break your Sync configuration. Hopefully, we can limit the impact of these changes, and we'll try to keep you informed. Stay tuned to this mailing list.
+
+Some pieces aren't quite ready yet. There's some UI items that aren't connected, that will be fixed soon.
+For now, we're using the Firefox Accounts and Sync staging servers.
+
+We're testing the client code, so we're using the test servers. If you have an existing Firefox account, it won't be on these servers and you'll have to create a new one, although you can use the same account email address.
+
+When we switch to the real servers, you will have to set up Sync again. The data you put on the staging servers will be abandoned there. All Sync data is encrypted on the client side, so nobody (not even server admins) will be able to read your data even in the unlikely event they can access it.
+
+Sync will not be going to Beta … yet.
+Most new features on Daily automatically move to Beta every four weeks. Sync won't. We're adding it to Daily while we continue development and tie up some loose ends. Only once we are happy will we enable the code on Beta.
+
+What will Sync sync?
+
+Saved passwords
+POP3, IMAP, and SMTP accounts, and the identities associated with them
+CardDAV or LDAP address books
+CalDAV or iCal calendars (as long as they're on the web not your file system)
+It won't sync your mail, or contacts, or calendar events – just the information about where to find them. If you use Sync to set up a fresh profile, Thunderbird will then be able to retrieve the data from the source.
+There have been several requests for other things to be sync'ed, and we'll be deciding on each of those in time. For now we are concentrating on getting these core pieces ready.
+
+Can we use another server as the Sync server?
+
+No. Not yet anyway. This should be possible in the future.
+If you have questions or problems to report about using Sync while we test it, this list is a good place. For more general questions please use the Thunderbird Planning or Thunderbird UX lists.
+Thanks for this.","Thunderbird Daily will have Sync capability for the first time. You are allowed to try it, but here are some very important things you should know. Use at your own risk."
+"Hi,
+
+today, it's working again :D thanks a lot
+
+1) folder problem solved
+2) disappearance of the inbox folder solved: it is here and doesn't
+disappear after a few seconds
+3) the downloading of the messages (I deleted all the mails before
+launching the daily today) is much much faster.
+
+:D
+
+Some thoughts:
+
+1) the order of the accounts on the left pane cannot be arranged in a
+different order. It cold be useful.
+
+2) the text in the redaction pane (text mode) is too small and doesn't
+fit the font size of the other panes
+
+
+Some test todo (on my side)
+
+* filters saved or not (on firefox account).
+
+Thanks for the hard work; it's getting better and better.
+
+Best regards
+
+Eric
+Please file a bug report if you still see any of these issues.  Thanks.",The inbox is now working again. The redaction pane is too small and doesn't fit the font size of the other panes. The order of accounts on the left pane cannot be arranged in a different order.
+"Hello, Thunderbird Daily community!
+
+An important update just landed on comm-central, our main repository, that lays the basic foundation for our upcoming Supernova UI (the modernized overhaul that lands in version 115, our major 2023 ESR, shipping this summer). We want to spend a few minutes carefully explaining what is changing, what issues you may experience, and what to expect over the next few weeks.
+
+(When you’re finished reading this, you might enjoy watching this section of a new video that Alex, our Product Design Manager, recently published. It’s a fascinating look at the history of Thunderbird development, and the extensive amount of work involved in paying off “technical debt” and rebuilding much of the application from the ground up.)
+
+Think of this update as the first, fundamental building blocks for the Supernova UI, starting with a completely rebuilt Mail tab and Unified Toolbar. Rebuilding the entire Mail tab and Toolbar from scratch wasn’t an easy lift, though, and we’re not close to being done yet.
+
+These nightly builds will still work for standard usages, like reading and writing emails, and using your calendars and address books; any other area should not be affected, and no crashes should happen. But you may still find unpolished sections, weird interactions, and unresponsiveness as some of those areas are not yet finished.
+
+For these reasons, we have temporarily disabled Daily updates until Monday, 23rd January. We want to ensure that the basic functionalities are working as expected before allowing users on the daily channel to receive this update.
+
+What to do if you find an issue
+For now, please don’t report issues. At least, not yet.
+
+As you know, our Daily releases are considered Alpha software, so breakages and partially finished features are expected.
+
+We have a list of things that are unfinished and broken, as well as tests to cover those areas. So at this stage, bug reports are not needed because we are still working to restore and finish off features as part of the rebuilding process.
+
+When to start reporting bugs
+We’re aiming at having the Mail tab at feature parity with the previous Daily versions you’re used to by February 14th. After that point, we welcome your bug reports and impressions! (And don’t worry, we will update you accordingly on this mailing list when we’re ready to start receiving your bug reports again.)
+
+Why release this if it’s not finished?
+We’ve been building this new version from scratch inside a dedicated repository to not affect daily users, but we have reached a point where the codebase was diverging too much, and we couldn’t keep them in parallel without negatively affecting development time.
+
+We needed to merge into comm-central in order to allow the entire team to start thoroughly testing these new areas, as well as start releasing early builds internally.
+
+Just to reiterate: our goal is to bring daily back to full feature parity with 102 before February 14th, and we’ll keep you posted!
+
+A general overview of what’s missing:
+Folder Pane
+The folder modes headers are not styled
+
+Customizing colors doesn’t update properly, resetting colors doesn’t work
+
+Unread counter needs styling
+
+“New Message” indicator is missing
+
+Lots of UI and UX inconsistencies to polish
+
+Message Thread
+Drag&Drop to reorder columns is missing
+
+Focus and keyboard navigation are still unfinished
+
+Apply current order and current columns to all folders is missing
+
+Some UI and UX inconsistencies to polish
+
+Unified toolbar
+Drag&Drop to reorder buttons is missing (use alt+arrow or context menu to move buttons around)
+
+Extensions API to add custom buttons to the toolbar are missing
+
+UI and UX polish needed for the toolbar
+
+UI and UX polish needed for the customization panel
+
+Some buttons are missing
+
+We apologize for the inconvenience and potential disruption, and we hope that the new version will shape up to be much more performant and reliable than the current one.
+
+Finally, thank you all for your support, your valuable help in testing our work, your patience, and your understanding. We will do our best to ensure a smooth transition.
+
+The Thunderbird Team","An important update just landed on comm-central, our main repository, that lays the basic foundation for our upcoming Supernova UI. We’ve been building this new version from scratch inside a dedicated repository to not affect daily users. We have temporarily disabled Daily updates until Monday, 23rd January."
+"Thunderbird 108.0a1, as of the 2022-10-31 build, has lost the ability to use macOS' native Full Screen and Split Full Screen functionalities.
+It also interferes with the use of the OS' Menu Bar and Application Dock.
+
+Before, it was possible to use either the title bar on the main window or use macOS' Mission Control to send Thunderbird to a dedicated desktop or a desktop split between Thunderbird and another application.
+
+Now, the main window appears to be a full screen, but it is not possible to use split screen mode.
+It is now also a multi-step process where a Desktop needs to be manually created and Thunderbird's window dropped onto it.
+If these steps are not followed, the system is left without easy means of accessing the contents of the Desktop in Finder.
+And when Thunderbird is closed, the Desktop needs to be manually removed.
+
+Furthermore, the Thunderbird window prevents access to the system's Menu Bar/Control Center and Application Dock.
+
+The equivalent Firefox release is not only able to use Full/Split Full Screen, but will even go back into that mode across application restarts.
+It also does not interfere with access to the Application Dock and System Menu Bar/Control Center.
+
+Is this a bug to be reported in Bugzilla? or is it more akin to the Exit button discussion from earlier on?
+Please file a bug.
+ -Magnus",Thunderbird 108.0a1 has lost the ability to use Full Screen and Split Full Screen. It also interferes with the use of the OS' Menu Bar and Application Dock.
+"Hi,
+
+I'm new to Thunderbird/Firefox development, trying to close an old, minor bug (https://bugzilla.mozilla.org/show_bug.cgi?id=389156).
+
+There's an old patch that was using `cal.getCalendarManager()` to attach some event listeners for calendars being modified/deleted, but the calendar manager doesn't appear to exist anymore.
+
+It looks like I need to be using `Services.obs.addObserver()` instead, but I can't find any documentation on what comm events are available to be passed as the second parameter. I was able to find a list of Firefox events here (https://web.archive.org/web/20191006034558/https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Observer_Notifications)
+
+I'd appreciate if someone could point me in the right direction on this, whether that's the specific event(s) I should be using, some documentation, or letting me know that I'm looking in the completely wrong place (along with some tip of where to look instead).
+
+Thanks,
+S
+Hey Seth,
+
+I can't answer your specific question off-hand, but the place to look at would be the Thunderbird calendar source code.
+
+Depending on your preference, you can either use your IDE locally, or the helpful searchfox:
+https://searchfox.org/comm-central/source/
+(This is the link to search Thunderbird code specially)
+
+Enjoy the detective work ;-)
+
+Ben","New to Thunderbird/Firefox development, trying to close an old, minor bug. There's an old patch that was using `cal.getCalendarManager()` to attach some event listeners for calendars being modified/deleted, but the calendar manager doesn't appear to exist anymore. I can't find any documentation on what comm events are available to be passed as the second parameter."
+"Quick brain-dump of checkpointing/rollback in mork.
+
+Mork is (I think) all memory resident. Writes to disk are only performed
+when you Commit(). There are different levels of commit - from just
+appending new changes onto the end of the file (light), to compressing
+all the added-on changes and rebuilding the DB file in an optimal manner
+(heavy).
+
+To roll back a mork DB, you just close it without committing and reopen it.
+It's actually rather elegant and simple :-)
+It would mean that the rolling back is slow - it's got to re-read the
+whole DB... but who cares? That should be a rare case, so I don't think
+it matters that it's a bit slow.
+
+
+BUT.
+
+
+We don't really talk directly to Mork. We go through nsIMsgHdr,
+nsIMsgDatabase, nsIMsgThread et al...
+And they don't really have a concept of closing a mork db without
+committing.
+Worse still, they hold pointers to mork objects, and being XPCOM, you
+don't really have much control over their lifespan. So which you could
+close a mork DB, you really have no idea which XPCOM objects might still
+be out there pointing at things that have just been freed.
+
+So while mork does support rollback... we can't really take advantage of
+it as things currently stand.
+
+I think it's probably worth taking a bit of a look at this - we really
+should have some proper transaction support to bunch together DB
+operations into atomic units.
+But really, when it comes down to it, nsIMsgHdr et al are pretty
+ill-suited to a transaction-oriented approach. I think ultimately it
+might be a case of coming up with more suitable msgDB API and slowly
+migrating over to it... (but that's a way out still).
+
+Ben.",Mork is (I think) all memory resident. Writes to disk are only performed when you Commit(). There are different levels of commit - from justappending new changes onto the end of the file (light) to compressing all the added-on changes and rebuilding the DB file in an optimal manner (heavy)
+"Hey all,
+
+I entirely agree that - as Alex stated - ""Data should be formatted for user consumption as close to it being displayed as possible. Before that it should stay in its raw state (for example absolute timestamps, <number> type instead of string...)"". It is up to the UI to format data in the appropriate way.
+
+There is one exception to that rule, and that is error messages, and there are a number of reasons why they are different.
+
+1. We want error messages to be very specific.
+
+The more specific an error message is, the more helpful it is to the user. Extreme case is ""An error occurred"" (real example from Adobe). Also, a message like ""Could not read file"" is not helpful to the user: Which file? The document? A preference file? Is the file not there? Is the directory that the app uses the wrong path? Is the drive unplugged? Do I not have permission? Is the file correct? Is the data format not recognized? A more helpful message would be ""No permission to read file C:\tmp\nsmail.eml"". Then I have a specific path that I can check, and I know what the problem is. So, from that, we infer 2 basic rules for good error messages:
+
+1.1. Every error case should have a different messages, so that the error message is specific to that problem, and allows the user to know *how* exactly it failed, i.e. which operation failed. (In this case, it was a permission problem.)
+
+1.2. The error message should contain parameters, so that I know which data or *what* failed. (In this case, the file path name.)
+
+That means that developers need to constantly add new error messages, because as they write code, they write error checks, and they need to return the error. Therefore, we need to make this easy and efficient to them. If it's not easy, then developers will simply re-use an existing error code, and then we end up with generic errors that are unhelpful.
+
+So, to make that easy, each module should create its own error messages. Close to where the developer is working. I.e. IMAP backend code generates errors, and the IMAP code creates the error *message*, with the specific text, and inserts also the parameters/variables in the message.
+
+This is particularly important as the same code might be called from different windows, which both need to display the message.
+
+The only other alternative would be a global error code and error message list. However, the UI would still need to insert the variables into the message, which would need to be passed separately. Furthermore, additions to that global list would be prone to code-level conflicts of different devs working on different features which both add errors.
+
+That's why in practice, it works best when each module is responsible for creating the error message, in a user-readable form, directly for display verbatim to the end user.
+
+
+
+A good error message is:
+
+* Specific to the problem
+* Contains parameters showing what exactly is failing
+* Explains the problem in a way a user can understand (and experts still understand it), without making it too generic.
+* Suggests how the problem might be solved (without stating the obvious)
+
+Ben",Error messages should be very specific. A good error message is: Specific to the problem. Contains parameters showing what exactly is failing. Explains the problem in a way a user can understand (and experts still understand it)
+"Hi,
+
+What is the current status of handling of larger than 4GB folder?
+
+I am afraid that when Inbox folder becomes larger than 4GB, something
+bad happens.
+Well actutally, it happened about 18 hours ago on a Windows 10 PC with
+TB 115.6.1.
+For one, TB no longer displayed messages. A blank message header pane
+appeared for Inbox.
+(Nothing at all. Totally blank.)
+Message filter failed to work.
+And trying to optimize Inbox did not work because TB says something has
+locked the folder.
+
+My questions:
+
+Q-1. I thought there is a warning code to warn us when a folder becomes
+too large.
+Has it been removed?
+
+Q-2. Can Thunderbird handle larger than 4GB folder correctly?
+
+I had to do a major surgery of Inbox folder file using text
+manipulation tools under linux such as split, head, tail and create a
+pair of folders from the
+possibly broken Inbox, both of which are less than 4GB in size.
+Now all is well.
+Among the messages that caused the Inbox to become larger than 4GB is a
+spam message with
+ill-formed header lines and that may have made the situation worse.
+I know it is  a spam message since there are headers, ""X-Spam-Flag:
+YES"", ""X-Spam-Status: Yes, ..."", etc. added by ISP mail server(s)
+
+On the  affected Windows 10 machine where Inbox became larger than 4GB,
+the spam message's subject is blank, the party from which it was sent is
+shown as ""-"", and the sending date was ""Jan 17 11:12"" wheres on another
+PC, running linux and TB 115.6.0,  which receives the messages via a
+forwarder at a different ISP just in case like this,
+the subject is blank, but the corresponding party is shown as
+""wiajtl@hotmail.com"".
+and the sending date is shown Jan 17 23:52. (Not entirely sure why the
+sending date is different... TZ setting is different on another PC?
+Or maybe the spam message is ill-formed and there was no Date: and
+intervening mail host may have supplied their own date.
+OK, I find on the linux PC with pristine Inbox, the spam message DOES
+HAVE Date: header,
+Wed, 17 Jan 2024 23:52:35 +0900 (JST)
+when I request the display of full header lines.
+On the affected Windows 10 PC where Inbox became larger than 4GB, the
+Date header was missing.
+From: was missing, too.
+So I suspect 4GB+ size caused the proper insertion of this message into
+Inbox and MSF, but I could be wrong.
+
+In any case, if someone knows the status of handling a folder larger
+than 4GB, I would like to know the answers to Q1 and Q2 above.
+
+I am using pop3 to retrieve e-mails and use mbox format folder.
+
+I might want to summarize and post what I did to resurrect the Inbox
+into less than 4GB folders so that TB can handle them properly again.
+
+TIA
+
+Chiaki
+I meant to say
+    4GB+ size caused the proper insertion of this message into Inbox and
+MSF *FAIL*, ...
+
+Chiaki",A Windows 10 PC with TB 115.6.1.1 no longer displayed messages. A blank message header pane appeared for Inbox. A spam message with ill-formed header lines made the situation worse.
+"I need to backport a 900-lines patch to esr115, and it's painful,
+because of the let/const changes.
+
+In general, I would like to make a suggestion for the future,
+and more specifically, I want to describe a few steps that I use to
+simplify backporting.
+
+
+In general:
+
+If we need to make a large change to the codebase, which isn't
+necessarily for functionality, but is only done for ""code cosmetics"", I
+would like to propose that in the future, we carefully plan the timing
+of such changes.
+
+It could be done immediately after we have created the long-term
+maintenance branch for a new release. For example, the last time we did
+it, we could have done immediately after the comm-esr115 branch was
+created, and at that time, we could have applied the changes to both
+comm-central and comm-esr115.
+
+This would ensure that for the maintenance period of the comm-esr115
+branch, there aren't unnecessary differences between these branches,
+which should simplify backporting. (I think this will save us countless
+hours of backporting complications.)
+
+
+Backporting to 115:
+
+Here is an example how I helped myself backporting a patch.
+
+First, have a look at your patch.
+
+Does it change indenting of blocks?
+Then start by editing your comm-central code to undo the large
+indenting. (Ignore that the code isn't beautiful.)
+
+// Run these commands from with comm-central/mozilla/comm:
+
+hg diff -U5 -r ${base-rev-before-the-change} > /tmp/cc-org.patch
+cp /tmp/cc-org.patch /tmp/cc-letconst.patch
+
+perl -p -i -e 's|\blet\b|letconst|g' /tmp/cc-letconst.patch
+perl -p -i -e 's|\bconst\b|letconst|g' /tmp/cc-letconst.patch
+
+// Now change your working directory to comm-esr115/mozilla/comm.
+
+for file in `lsdiff --strip=1 /tmp/cc-letconst.patch `; do perl -p -i -e
+'s|\blet\b|letconst|g' $file; perl -p -i -e 's|\bconst\b|letconst|g'
+$file; done
+
+hg diff -U5 |tee /tmp/temp-letconst.patch
+
+cat /tmp/cc-letconst.patch  |patch -p1 --dry-run
+
+// The above command should show that your file applies mostly cleanly.
+
+cat /tmp/cc-letconst.patch  |patch -p1
+
+cat /tmp/temp-letconst.patch | patch -p1 -R
+
+// The above should have reverted most of the letconst changes, now
+change the remaining ones to ""let"". (You might want to ignore the .rej
+file.)
+
+for file in `lsdiff --strip=1 /tmp/cc-letconst.patch `; do perl -p -i -e
+'s|\bletconst\b|let|g' $file; done
+
+hg diff -U5 > /tmp/115.patch
+
+// Now look at file 115.patch, if you want, and if there are any
+unwanted changes from ""const"" to ""let"", fix them on the files in the
+branch, then run the diff command again
+
+// if you want, compare the diffs, to check that they are mostly
+identical. Your 115 patch will use ""let"" instead of ""const"" in the new code.
+
+tkdiff /tmp/cc-org.patch /tmp/115.patch
+
+// Now run linting on the 115 branch, which will fix the
+whitespace/indenting.
+
+
+Hope this helps someone.
+Kai
++1","In general, I would like to make a suggestion for the future, and more specifically, I want to describe a few steps that I use toSimplify backporting."
+"Documents used for displaying the Thunderbird UI used to be all xul, and
+there were document roots of various kinds: <window>, <dialog>,
+<overlay>, <prefwindow> and a few others. There was certain behaviors
+attached to each, and in the de-xbl process a few years back they were
+all reduced to only <window> with additional sub-elements having
+behavior intstaed.
+
+Almost exactly three years ago, following Firefox's work to make it
+possible, we started converting the documents in our code base to having
+top level <html>, which means our documents look a lot more familiar for
+someone not familiar with xul. While we still have a pretty heavy flavor
+of xul mixed into the documents, this gives documents a fighting chance
+of displaying *something*, should you try to load them in a browser. The
+next step is reducing the amounts of xul elements, coverting them over
+to their html equivalents until all of xul is gone. Since earlier this
+year the documents are using web compatible modern flexbox for layout
+which means that the css rules for everything doesn't have to change. It
+feels like standards work is coming together pretty nicely for us!
+
+Earlier this week I landed the last fix for bug 1703164 which have been
+used to track the conversion to top level <html>. Starting out with that
+bug I had hopes of automatic conversion, but soon realized I had to
+settle for a semi-automatic approach where a script did a lot but some
+human cleanup and interaction was still needed. I'd like to take the
+opportunity to thank all the reviewers for their insights: Henry Wilkes,
+Richard Marti, Elizabeth Mitchell, Alessandro Castellani, John Bieling,
+Micah Ilbery, Vineet Deo, and Martin Giger. This was a long project and
+now around 164 patches later I'm excited it's finally done!
+
+  -Magnus","Thunderbird documents used for displaying the Thunderbird UI used to be all xul. Firefox's work to make it possible to have documents in our code base to have top level <html>. This means our documents look a lot more familiar for people not familiar with xul, and gives them a fighting chance of displaying something in a browser."
+"Hello, good people of comm-central!
+There's a good chance you've seen some of the following log messages (on debug mochitests) and been told to ignore them:
+
+WARNING: YOU ARE LEAKING THE WORLD (at least one JSRuntime and everything alive inside it, that is) AT JS_ShutDown TIME. FIX THIS!
+TEST-UNEXPECTED-FAIL | leakcheck large nsGlobalWindowInner | path/to/test/browser/browser.ini
+TEST-UNEXPECTED-FAIL | leakcheck large BackstagePass | path/to/test/browser/browser.ini
+TEST-UNEXPECTED-FAIL | leakcheck | default NNNNNN bytes leaked
+Please don't ignore them from now on.
+
+There are no more permanent failures that result in this message, so it's either an intermittent failure¹ or somebody's introduced a new memory leak. I'm going to reduce the threshold to a very low level so any leak that's more than minor² will be reported as a test failure.
+
+If you're the sheriff, the second and third messages above have suggested bugs you can mark intermittent failures against. Don't file new bugs unless a permanent failure appears and you can't figure out why. (If you can figure out why, talk to the guilty party, as you would with any other new permanent failure.)
+
+If you're a developer and your patch starts producing one or more of these errors, congratulations, you're leaking some memory! This means you've created an object and somehow prevented it from being destroyed. In our code this typically means:
+
+You've passed something to a module (.jsm, .sys.mjs) and the module is holding onto it.
+You've called Services.obs.addObserver or Services.prefs.addObserver and forgotten to remove the observer.
+You've passed something to some other XPCOM object and that is holding onto it.
+You've done bad things with C++³.
+There's a number of strategies to avoid these problems, but each situation is different so I won't go into them here.
+
+Having said all of that, this message is only meant to be informative. You are now aware of what's going on, but you probably don't have to do anything differently. As always, if you have questions, feel free to ask.
+
+GL
+
+¹ There are two intermittent failures that I'm aware of. I'm not sure how frequently they will appear. If it's too often we'll figure out what to do about it. These things are very difficult to hunt down.
+
+² Any leak over 50kB will be reported as a failure. There's actually quite a lot you can leak below this amount, and we still have some permanent leaks below 50kB.
+
+³ If you're writing C++, you know what I mean. :-)
+Geoff deserves a hearty round of applause for this. Tracking down memory leaks is very difficult work and closing them can be just as hard. It's also work that isn't easy for either users or developers to perceive the benefits of, even though they do benefit. Thanks, Geoff, for working hard to improve the situation.
+
+Sean
+Agreed on all points! Thanks, Geoff!","There are no more permanent failures that result in this message, so it's either an intermittent failure¹ or somebody's introduced a new memory leak. I'm going to reduce the threshold to a very low level so any leak that's more than minor² will be reported as a test failure."
+"Hello developers
+
+This is just a quick message to note the passing of the Mozmill test
+suite. Almost four years after migrating the tests to Mochitest, I have
+just landed a stack of patches and finally removed the remaining
+Mozmill-isms, most notably the odd tracking of opening and closing
+windows (that had a large memory leak until earlier this year) and the
+hacking of the Javascript event loop that made asynchronous code appear
+synchronous (which unfortunately meant I had to add await to just about
+every function call). Mozmill window controller objects disappeared
+about a week ago, though they have for some time been just a shell of
+their former selves.
+
+Thanks to Magnus for chipping away at this for a long time.
+
+GL
+Hooray!
+I hope cheering isn't considered in bad taste on such a somber occasion ;-)
+Seeing code removed always gives me a nice warm feeling.
+
+Ben.","The Mozmill test suite has been updated to use Mochitest. A number of bugs have been fixed, including the odd tracking of opening and closing windows."
+"Attached is the shell script file to download the debug job log files.
+(live_backing.log)
+It downloads the log of the decision task log file first, and then,
+using the information therein,
+downloads the debug execution log files (if there are execution on
+different OS/platform, it will download all of them.).
+I know there are some loose use or confusing use of the term of hash
+something in the comment, but I simply winged it along the way.
+Feel free to improve on it. (I used the information from task analyzing
+log ""D"" because it was easy to obtain the URLs of log files from there.)
+
+Usage
+
+         download-live-backing-log.sh hash_for_task_D
+
+# Requirement: bash because this uses array variable according to
+# bash-ism
+# wget ... to download the gzipped log files.
+# gunzip ... to expand the gzipped downloaded file.
+#
+# parameter: hash used in the pathname for live-backing.log of the
+# job task decision process, ""D""
+#
+# How to obtain this hash value:
+#
+# Using the browser, look at the task decision task, ""D"" in the
+# submitted jobs task lists.  Move to its ""Artifacts and debugging
+# tools"" and look at its live_backing.log Note the URL shown in
+# browser's URL bar.
+# e.g. shown as
+#
+https://firefoxci.taskcluster-artifacts.net/IJzvccBCSfabZlThr3_RVA/0/public/logs/live_backing.log
+#
+# In this case JOB_ID, the argument to this script is IJzvccBCSfabZlThr3_RVA
+#
+
+#
+# Originally written by ishikawa@yk.rim.or.jp
+#
+
+You can download the shell file and add execution bit with chmod or
+invoke it via bash as in the example below.
+
+Downloaded file is stored in the shell variable DDIR defined there.
+Modify it to suit your needs.
+
+I dump the wget execution which I think is most likely fail.
+
+Real example:
+
+This is to download the debug  log files for the submission
+https://treeherder.mozilla.org/jobs?repo=try-comm-central&revision=700cd35f752333594ec2f3647bbde3b70a115d8a
+When you visit the live_backing.log of the Desicions Task opt ""D"", you
+get the following URL.
+https://firefoxci.taskcluster-artifacts.net/AbMXE1sbQQKifoDst-SdyQ/0/public/logs/live_backing.log
+So I use AbMXE1sbQQKifoDst-SdyQ to the shell script.
+
+(Now I think about it, I can simply pass this full URL to the shell
+script. Oh well.)
+
+
+Download is done in the order the file is mentioned in the analysis task
+log.
+
+ishikawa@ip030:/NREF-COMM-CENTRAL/mozilla$ bash
+~/Dropbox/TB-DIR/download-live-backing-log.sh AbMXE1sbQQKifoDst-SdyQ
+Using Decision Task Log Id =  AbMXE1sbQQKifoDst-SdyQ
++ wget -o test-linux1804-64-qr-bc6.live_backing.log.download.log.txt -O
+test-linux1804-64-qr-bc6.live_backing.log.gz
+https://firefoxci.taskcluster-artifacts.net/T2hqPi0mReG2Z8gLt4ixVQ/0/public/logs/live_backing.log
++ gunzip test-linux1804-64-qr-bc6.live_backing.log.gz
++ set +x
++ wget -o test-linux1804-64-qr-bc4.live_backing.log.download.log.txt -O
+test-linux1804-64-qr-bc4.live_backing.log.gz
+https://firefoxci.taskcluster-artifacts.net/Do0837EjQrS4v6IJU3BhzQ/0/public/logs/live_backing.log
++ gunzip test-linux1804-64-qr-bc4.live_backing.log.gz
++ set +x
++ wget -o test-linux1804-64-qr-bc7.live_backing.log.download.log.txt -O
+test-linux1804-64-qr-bc7.live_backing.log.gz
+https://firefoxci.taskcluster-artifacts.net/bnLbLhRERee3Y0NIVoeKFA/0/public/logs/live_backing.log
++ gunzip test-linux1804-64-qr-bc7.live_backing.log.gz
+
+   ... [omission] ...
+
++ wget -o
+test-windows11-64-2009-qr-msix-bc2.live_backing.log.download.log.txt -O
+test-windows11-64-2009-qr-msix-bc2.live_backing.log.gz
+https://firefoxci.taskcluster-artifacts.net/YlE8gAzDTpSvsemX5kjzww/0/public/logs/live_backing.log
++ gunzip test-windows11-64-2009-qr-msix-bc2.live_backing.log.gz
++ set +x
+ishikawa@ip030:/NREF-COMM-CENTRAL/mozilla$
+
+Caveat: If you have already downloaded the log file, this shell script
+silently skips downloading.
+If, for some reason, you have an incomplete download file, remove it first.
+
+Someone out there might find this useful.
+This works well for me for the last couple of days.
+Send bug reports, improvement wishes, etc. to me.
+
+Chiaki","The shell script downloads the log of the decision task log file first, and then, using the information therein, downloads the debug execution log files. You can download the shell file and add execution bit with chmod or invoke it via bash."
+"I changed the subject line.
+
+Has anyone noticed that if you search for the debug output you have implemented and
+sometimes, mysteriously you think you spotted them in a  the try-comm-central log, but the next time
+you try to find it in a different split log file after visiting it (bc1, bc2, ..., bc7 amd x1, x2, x3, ..., x5.), you no longer see them?
+
+I am afraid this happened with me so many times (and probably lost a few man-months by now),
+and I was puzzled very much.
+
+I think I figured the root cause of this mysterious issue.
+Initially, I was afraid that there could be a bug in Firefox browser, which I use to access treeherder.
+Of course, considering the number of FF users, this is unlikely.
+
+The root cause is a strange filtering done by treeherder.
+
+I found the following.
+I look at the log, say, Sat, Jul 8, 17:26:34
+https://treeherder.mozilla.org/jobs?repo=try-comm-central&revision=06fd87835e5e382aaf5b85222e4bf3357536bc7a
+
+and look at bc1 log for linux Debug job.
+
+- Hitting ""log"" icon serves strangely sanitized file
+I click ""bc1"" and obtain the attached screen and click ""log"" icon in the black strip.
+In the attached figure, it is marked with red circle.
+
+To my dismay, somehow, treeserver serves a filtered job log which does NOT have the debug outputs from my patch.
+(This has puzzled me for quite some time now.)
+
+- Choosing ""live_backing.log"" via ""Artifacts and Debugging Tools"" serves more complete log file.
+But then if I go the route of clicking ""Artifacts and Debugging Tools"" on the black strip, which is marked by blue in my attached figure,
+and select live_backing.log, I *DO* find the debug outputs I was searching for.
+
+What a surprise.
+
+I think in the past, sometimes, for some reason, I looked at live_backing.log or something and thought I found the output,
+and then tried to look at OTHER log files and then hit the log icon (instead of going down the route of ""Artifacts and Debugging Tools""), and no longer could not find them  (and sometimes even coming back to the original log file by way of ""log"" icon button) and no longer see the string I was looking for. Ouch.
+
+This must be borne in mind when people look at the log output.
+(Maybe it was only me who didin't realize this. It used to work until, I can't recall when exactly, several years ago reliably.)
+
+I discovered this after I downloaded the live_backing.log files for bc1, bc2, bc3, ..., x1, x2, x3, ..., x5 because of this strange issue puzzled me so much.
+Certainly, I found the expected debug output from these log files, but DID NOT see them when I click ""log"" icon.
+I scratched my head for a while and realized the the log file (?) served by hitting ""log"" button
+is a sanitized (but in which manner?) version of the log files.
+Oh well.
+
+FYI.
+
+I will post the shell script to download debug job log files with a single option of the hash ID of the decision task ""D""
+shown in the treeherder for the job.
+This a bash shell script.
+Obviously, searching for a debug output is much easier with local files.
+
+Chiaki","Treeserver serves a filtered job log which does NOT have the debug outputs from my patch. The root cause is a strange filtering done by treeherder. Hitting ""log"" icon serves strangely sanitized file."
+"Hi, all.
+
+As announced in https://groups.google.com/a/mozilla.org/g/dev-platform/c/GDAs-WJiiu8 and https://thunderbird.topicbox.com/groups/planning/T4500ca651b3d96c8 , ESMification for the Firefox and Thunderbird codebase is completed, and now it’s time to prepare for out-of-tree migration, including Thunderbird extension.
+
+If your Thunderbird extension imports or contains JSMs files, your extension is affected.
+
+Firefox and Thunderbird have been using JSM, the mozilla-specific JavaScript module system, and it has been available to privileged extensions and unsandboxed AutoConfig scripts, via Cu.import or ChromeUtils.import APIs and wrapper around them.
+
+As of version 126, all internal JSMs are migrated to the standard ECMAScript module (ESM) system, using new APIs ChromeUtils.importESModule and wrappers around it. The old APIs keep working by internally redirecting the call to the new APIs and corresponding ESMs.
+
+The migration period is planned to be until version 136 (Firefox 136 will be released Mar 2025, https://whattrainisitnow.com/calendar/). During the migration period, both the old APIs and new APIs keep working, and after the migration period, the support for the old APIs will be dropped. The next ESR, version 128 is compatible both with old and new APIs, and the next-next ESR will be compatible only with ESMs.
+
+Here’s the document that describes the affected cases and how to migrate each case:
+https://docs.google.com/document/d/14FqYX749nJkCSL_GknCDZyQnuqkXNc9KoTuXSV3HtMg/edit?usp=sharing
+
+Thank you for reading.
+If you have questions, feel free to ask in the #esmification matrix room!
+Why is it necessary to remove the automatic redirect so quickly?
+Why not in let's say 10 years?
+It might be easier to answer, or help, if you explain why this matters to you. However, I'll take a guess...
+The automatic redirect is not only redirecting the load from sys.mjs to jsm file, it is also switching between different module loaders. There are different semantics between how the module types work, so they can't be handled by one loader code.
+The old loader is now effectively bloat, to which there is a cost, and so we'd like to remove it completely.
+
+And to be explicit, the out-of-tree migration period is effectively a bit over a year - 128 ESR will support JSMs and ES Modules though to when it finishes (I guess somewhere around June/July next year).
+Mark.
+It matters to me because I maintain 5 Add-ons which are affected by this change.
+Thanks for the explanation - I can understand that you want to get rid of bloat.
+However this will force many Add-on developers to update their Add-ons. This will not be a problem if an update is worked on or planned anyway, but if not, meaning the Add-on has to be updated solely to cope with this change, it will generate quite some work for quite a lot of developers, just to get rid of some bloat. That was the reason for my proposal to extend the migration period.
+I strongly suspect that most experimental API add-ons will require
+updates anyway due to the amount of work that Thunderbird is currently
+doing. Obviously that's a bit hard to predict, but with the ongoing work
+and what I understand the planned changes to be, I think it is likely.
+
+Whilst I respect that you want to reduce the amount of change, this is
+the obvious issue with experiment API based add-ons - that they are
+susceptible to changes in core code. Add-ons based on the official
+WebExtension APIs will not be affected. I'm not sure what the ratio of
+those currently is, but hopefully the newer APIs that are being
+introduced are meaning that even if add-ons still need some experiment
+APIs, they'll need to use less of them.
+
+ From the core side, it is not just the bloat - as I mentioned before,
+there's a cost to keeping it in place, even if it seems small. The more
+we restrict those changes, the bigger that cost will be - and at this
+stage, keeping the old code is pretty much is only for Thunderbird add-ons.
+
+Mark.
+Here's some more details about the cost of the redirect.
+
+As mentioned above, currently there are 2 separate module loading system, one for JSM and one for ESM.
+
+The JSM loader exposes the module internal more than what the standard ESM does, around the global bindings. In order to make the automatic redirection work, currently the new ESM loader uses de-optimized compilation mode, for all system ESMs, both internal files and extensions files. (see https://searchfox.org/mozilla-central/rev/56f7d50bd9dcf8b93a9c65d31c4286a735224cc9/js/public/CompileOptions.h#318-326).  This results in inefficient execution, and it's a performance problem.
+Also, the redirection needs to track the mapping between the old URI and new module, which becomes a memory consumption cost (not so much tho).
+
+So, this automatic redirection feature comes both with the maintenance cost and the runtime cost, and keeping it for many years isn't desirable, both for developers and users.
+
+If you're having trouble around the migration, we're happy to help.  Feel free to ask in https://chat.mozilla.org/#/room/#esmification:mozilla.org room (Sorry, I noticed the first message doesn't have the link)","Firefox and Thunderbird have been using JSM, the mozilla-specific JavaScript module system. As of version 126, all internal JSMs are migrated to the standard ECMAScript module (ESM) system. The migration period is planned to be until version 136 (Firefox 136 will be released Mar 2025)"
+"I have just uploaded a new version of my add-on ShowInOut to ATN. This add-on uses the new API to add custom columns in the table view. Accordingly, it only runs on TB115.10 and later.
+However, when uploading to ATN, only 115.0 was accepted as strict_min_version and even after uploading it could not be changed to 115.10. That's a bit unsatisfactory!
+Günter
+I don't think this ever was possible.
+
+Issues (and requests?) can be reported at
+https://github.com/thunderbird/addons-server/issues
+
+You need a GitHub account for that.
+Hi,
+
+I added 115.10.0.
+
+All the best,
+John
+Thanks!","ShowInOut uses the new API to add custom columns in the table view. It only runs on TB115.10 and later. When uploading to ATN, only 115.0 was accepted as strict_min_version."
+"I'm having trouble understanding how to use the browser_action type set to menu.
+I do not want to use an HTML popup; instead, I'd like my menu to be styled like the standard Thunderbird menus.
+
+I've set the browser_action type to menu, and as per the documentation, I can't assign an HTML popup, which is fine. However, I haven't found a way to actually implement the menu. The button displays the arrow, but clicking it doesn't open anything.
+
+I am still able to assign a context menu (right-click), but that's not what I need.
+
+Could someone point me in the right direction?
+Thanks.
+
+Mic
+Are you using menus API? https://webextension-api.thunderbird.net/en/stable/menus.html
+Could you handle https://webextension-api.thunderbird.net/en/stable/browserAction.html#events ?
+And could you find which menu item was clicked by OnClickData.button?
+https://webextension-api.thunderbird.net/en/stable/browserAction.html#onclickdata
+Hi Mic,
+
+you need to create the actual menu through the menus API:
+https://webextension-api.thunderbird.net/en/stable/menus.html#create-createproperties-callback
+
+The browser.menus.create() function allows specifying one or more ContextTypes:
+https://webextension-api.thunderbird.net/en/stable/menus.html#menus-contexttype
+
+The context for the menu typed action button is browser_action_menu (added in Thunderbird 115).
+
+I will update the documentation to mention that :-)
+
+John
+Thank you Itagaki, I already tried everything, but all that works with the right click menu.
+
+I needed the browser_action_menu context, thank you John, I'll try it later!
+
+Mic","I do not want to use an HTML popup; instead, I'd like my menu to be styled like the standard Thunderbird menus. I'm having trouble understanding how to use the browser_action type set to menu. Could someone point me in the right direction?Thanks."
+"Hello everyone,
+
+while working on some addons, I realized I needed a simpler way to manage options. To address this, I've published a repository that includes my code and a guide on streamlining the process of storing and loading options.
+
+You can find the repository here: https://github.com/micz/Thunderbird-Addon-Options-Manager
+
+I hope it proves useful to other developers. If you have any suggestions or improvements, please feel free to fork the repository and submit a pull request.
+Your contributions are not only welcome but greatly appreciated.
+
+Regards,
+
+Mic
+Thank you for posting this, very interesting. It is fairly similar to what I do with Conversations, though I do also put the preferences in their own sub-object - in case I need to save extra data in future. I also have a system for pref migrations, so that I can ensure new default values are added.
+
+One thing I feel I ought to point out is that the code is licensed under the GPL. I believe a lot of add-ons are licensed under the MPL. My understanding is that if you incorporate the GPLed code into your MPL based add-on then you'd need to change your MPL license to be a sort-of dual license: https://www.mozilla.org/en-US/MPL/2.0/FAQ/#mpl-and-lgpl
+
+Mark.
+Dear Mark,
+
+thank you for your feedback.
+
+Regarding the license, you're right. I've always used GPL in my opensource projects; however, for this particular project, MPL is indeed more appropriate.
+I have updated the project license to MPL accordingly.
+
+Thank you for pointing this out.
+
+Best regards,
+Mic","The Thunderbird Options Manager is a new tool for managing options in the software. The code is licensed under the GPL, but some add-ons are licensed under MPL."
+"I'm trying to sync contacts in V115, but TB sends VCard data as V4, can there be an option to use V3?
+cPanel servers don't support V4 yet.
+Hi ukandrewc,
+
+you posted this in the add-on developer section. Are you working on your own synchronization add-on, which pulls the vCard data from the contacts using browser.contacts.* and sends it elsewhere, or are you referring to the built-in CardDAV support?
+
+John
+Not sure where else to have posted, but yes it's built in CardDAV support.
+When creating a new card, TB uses V4.0 which means it won't sync with cPanel CardDAV because that only accepts V3.0.
+You can set version 3 on a per-address-book basis by adding a pref ldap_2.servers.xyz.carddav.vcard3 set to true (where xyz matches the book in question). Restarting Thunderbird is required.
+
+This is set automatically for Google address books because that's a known problem, but I'm not aware of reports about other servers including cPanel. Except yours, obviously.
+
+GL
+That's great, thanks.
+I faced this issue with Thunderbird 123.0b2 (64-bit) and cPanel 116.0.11 in Jan 2024.
+Applying the fix suggested by Geoff Lankow solved the problem. Contacts added to Thunderbird are synced correctly with cPanel.
+
+Thanks Geoff Lankow.
+Is there a bug to improve this behaviour?
+There is a way to detect support: supported-address-data
+https://www.rfc-editor.org/rfc/rfc6352.html#section-6.2.2
+
+I do not see it being used in our code. That could be a way forward.
+
+John","When creating a new card, TB uses V4.0 which means it won't sync with cPanel CardDAV because that only accepts V3.0. You can set version 3 on a per-address-book basis by adding a pref ldap_2.servers.xyz.carddav set to true."
+"Hi,
+
+I'm hearing from third parties that Thunderbird is planning to start
+monthly releases.
+
+For testing purposes already with the next TB 124 release. But these are
+not for end-users, right?
+
+Starting which release are you planning to website-install and
+auto-update stable releases of Thunderbird, based on the monthly trunk
+versions (not ESRs)?
+
+Ben
+Hi Ben,
+
+you posted this to the add-on list.
+
+If I remember correctly, the default download will remain ESR, but users can optionally install the monthly-release-channel version. I have no detailed information on the time schedule, I suggest asking on tb-planning.
+
+All the best,
+John","The default download will remain ESR, but users can optionally install the monthly-release-channel version. I have no detailed information on the time schedule, I suggest asking on tb-planning."
+"Hello everyone,
+
+as many of you are maybe aware, in the past there was a site named Babelzilla that gave us the ability to collaboratively translate addons. This tool was instrumental in making our addons accessible to a wider, global audience, thereby enhancing the user experience for non-English speakers.
+
+In light of this, I'm reaching out to explore the possibility of creating a dedicated instance of Pontoon specifically for the translation of Thunderbird addons.
+
+The key questions I have are:
+Is it feasible to set up a dedicated Pontoon instance for our community's use? Given Pontoon's success in localizing Mozilla's main products, I believe it could serve as an excellent platform for our needs.
+Can such an initiative be officially managed or endorsed by the Thunderbird team? Having official support would not only ensure the sustainability of this solution but also give it legitimacy, encouraging more contributors to participate.
+
+I understand that this proposal may involve significant considerations, including resources and logistics. However, I believe that fostering a robust, accessible, and community-driven localization process is crucial for our continued success and growth. I am keen to hear your thoughts on this matter and whether there are any steps we can collectively take to make this a reality.
+
+Thank you for your time and consideration. I look forward to any feedback or suggestions you may have.
+
+Best regards,
+
+Mic
+Actions
+For those wondering what exactly Pontoon is:
+https://github.com/mozilla/pontoon","Babelzilla was instrumental in making Thunderbird addons accessible to a wider, global audience. In light of this, I'm reaching out to explore the possibility of creating a dedicated instance of Pontoon specifically for the translation of Thunderbirds."
+"Hello,
+
+I wrote an extension to analyse PDF in attachment : extract text with pdftoppm and tesseract, text analysis with OpenAI then display a form with synthetic information.
+This extension is specifically developed for 1 email account among 8.
+I want to display the button ""PDF Analysis"" only on one account.
+
+Cheers,
+Aubin (french)
+In that case, the MessageHeader object would contain a 'folder' (MailFolder object). And the MailFolder object would contain an 'accountId' (string). I think that would make a sharp distinction.
+I expect a key into manifest.json because in the code, it's too late, the button is already displayed when the code is executed.
+Here is the manifest.json :
+{
+   ""manifest_version""         : 2,
+   ""name""                     : ""PAP Analysis"",
+   ""description""              : ""Extract information from email and attached PDF message, writing a text file with results."",
+   ""version""                  : ""1.0"",
+   ""author""                   : ""Aubin Mahé <aubin.mahe@gmail.com>"",
+   ""browser_specific_settings"": {
+      ""gecko"": {
+         ""id"": ""pap.analysis@hpms.org"",
+         ""strict_min_version"": ""115.0""
+      }
+   },
+   ""message_display_action"": {
+      ""default_title"": ""Analyse PAP"",
+      ""default_icon"" : ""images/pap-32px.png""
+   },
+   ""background"": {
+     ""scripts"": [
+       ""src/main.js""
+     ]
+   },
+   ""icons"": {
+      ""64"": ""images/pap-64px.png"",
+      ""32"": ""images/pap-32px.png"",
+      ""16"": ""images/pap-16px.png""
+   },
+   ""permissions"": [
+      ""downloads"",
+      ""messagesRead"",
+      ""nativeMessaging"",
+      ""tabs""
+   ]
+}
+You cannot limit an extension only to one specific mail account, nor is it possible to ""hide"" the message display button in the UI only for specific accounts.\
+
+What you can do is to use a message display script and trigger it only when the selected/displayed message is in your required account. This way you can display a button and notification bar in the area of the displayed message.
+
+Would this fit your needs?
+
+// a.","An extension to analyse PDF in attachment. Extract text with pdftoppm and tesseract, text analysis with OpenAI then display a form with synthetic information."
+"Hello Someone is in grade to develop an addon
+that allow to add a note to an email .. and the note can be visibile by everyone that will read the same account
+in another  PC ?
+
+Thank you
+Gianni Pierobon
+CASH SRL
+For the notes, you can use XNote++ addon. A sync/continuous replication to other PCs is in planning/underway, if you are interested and/or  your company can support it, please contact me at buecher@optosolar.com.
+
+Klaus
+Klaus'es answer sounds closer to your needs, but if you happen to be using Obsidian as an enterprise wide note platform, ObsidianClipper would be a way to get the emails in your system and then addextra notes to the template.
+.. let me have a look 😉 thanks for suggestion","For the notes, you can use XNote++ addon. A sync/continuous replication to other PCs is in planning/underway. ObsidianClipper would be a way to get the emails in your system and then addextra notes to the template."
+"I've built an add-on that is triggered from a popup button built on the popup.html used in the tutorial. I'd like to be able to get the text a user has selected in an email where the user pressed the button. I've tried window.getSelection() (which I guess would be the popup window itself) and also window.parent.getSelection() (which I assume is the tab for the email itself) but keep getting no string. My best guess is that the window object I want with the mail text is a ""sibling"" of the popup window (that is, there's a parent window with both my popup window and a different text element with the selection I want). I'm about to try window.getAll() and step through all available windows, but I'm hoping a better way.
+
+Is there a way to access the  email's window, either by passing some sort of selective filter into the getInfo parameter of window.getAll(), by iterating through the windows list and looking at fields, or through some other window API call I missed?
+
+Thanks!
+Maybe an add-on I've made in the past would help.
+https://github.com/itagagaki/DeepL-Selected-Text
+Hi,
+
+this is possible without an Experiment, using a message display script. This is a script I use for quicktext:
+https://github.com/jobisoft/quicktext/blob/WebExt/scripts/compose.js
+
+That script is setting up a listener for runtime messages and can be triggered from the background.
+
+Ping me, if you need further help to get it running,
+John","I've built an add-on that is triggered from a popup button built on the popup.html used in the tutorial. I'd like to be able to get the text a user has selected in an email where the user pressed the button. I'm about to try window.getAll() and step through all available windows, but I'm hoping a better way."
+"So my add-on reads and clips messages to an outside notetaking app (Obsidian). I already clip the ""TO"" field and am going to add CC and BCC - the API (https://webextension-api.thunderbird.net/en/stable/messages.html#messageheader) is pretty clear. However, I noticed that in creating a test email in Thunderbird, I can add a TO, CC, BCC or a ""Reply To"" field. I'm not seeing any ""Reply-to"" in the API documentation - where can my code read it? I could blindly try ""reply-to"", treating it as an array of strings, but I haven't gotten around to it just yet.
+
+Also, when I submit my add-on I see a warning about not having version/change information that tells me to just enter it in the following web form. Having a chance to prewrite version info and archive it locally in my ZIP file would be useful for me. Where in the tree structure of a submitted ZIP file should I put version/change info that can be read by the submission process?
+Hi Kevin,
+
+we currently do not expose the reply-to information in the MessageHeader, and it will be difficult to do so. The MessageHeader is computed from an internal cache object, which is prepared for each message, so Thunderbird can display this information without having to parse the full message each time (for example in the message list).
+
+If you would like to have look, this is the available information.
+
+If you want to access any information which is beyond that standard data set, you have to call browser.messages.getFull() and look at the individual headers.
+
+Just for completeness: Since the reply-to information can be set in the composer, the compose API does allow accessing that field via set/getComposeDetails.
+
+I have no information on streamlining the submission process.  Maybe someone else knows if the version/change information can be provided in the XPI already?
+
+John","I'm not seeing any ""Reply-to"" in the API documentation - where can my code read it? I could blindly try ""reply-to"", treating it as an array of strings, but I haven't gotten around to it just yet. When I submit my add-on I see a warning about not having version/change information that tells me to just enter it in the following web form. Having a chance to prewrite version info and archive it locally in my ZIP file would be useful."
+"Hello everyone,
+
+I've just started my journey in theming thunderbird with a static theme. I've checked out the API documentation for the theme.api and it all seems (fairly) straightforward. I have a newbie question though, that I hope somebody can be kind enough to answer!
+
+I've been through and themed everything that the API specifies, but there are still elements that don't seem to be touched. For instance, the spaces bar on the left. Also the background colour & text colour of the messages pane. Is there something I'm missing or a reason the API doesn't let me colour some elements?
+
+I'm thinking it may be something to do with ""theme_experiment"" although I can't seem to find any links to investigate the items I would need to specify in the CSS file, if this is the correct way to theme those places the API doesn't seem to touch.
+
+Apologies if this all sounds a little dumb, but I've been looking at this for a good 3 or 4 hours now and a quick search of the topicbox threads doesn't seem to turn much up - unless I'm just not using the correct search terms?
+
+Any help would be greatly appreciated! Thank-you in advance...
+
+Zane.
+Hi zane,
+
+You pointed at an important issue: the theme API needs updates.
+
+I would ask you to file a bug for the missing properties.
+
+A theme_experiment would allow you to hook into the UI and create the missing properties, if the API itself does not yet support them. The idea is that add-on developers can play around with a theme_experiment and once they have the proper UI hooks, they can ask to get them implemented.
+
+So after you filed a bug for the missing properties, you could try to fix it and help us to move this forward. To get you an idea of how that would look like:
+
+1. Install Thunderbird Daily
+2. Open the DeveloperTools (Hamburger Menu -> Tools -> Developer Tools)
+3. Use the Inspector to look at the code of a specific UI element (activate the ""go-to-on-click"" mode, it is the first button left of the inspector tab
+4. See what CSS selector you need and play around with a theme_experiment
+
+If you succeed, you can submit your findings in your bug, and we can add it to the next Beta.
+
+You can also fix it for Thunderbird ESR (115), but you probably need different css selectors.
+
+Thanks,
+John
+Hi John,
+
+Thanks for the message. I'm glad it's not me then..!
+
+OK, what you suggest are great ideas to get things rolling. I'll certainly look more into it and make some suggestions.
+
+Thanks again,
+
+Zane.","The Thunderbird theme API needs updates. A theme_experiment would allow you to hook into the UI and create the missing properties. The idea is that add-on developers can play around with a theme. Once they have the proper UI hooks, they can ask to get them implemented."
+"Hi guys,
+Just a suggestion - The drop-down menu for each entry on the calendar, it would be good to have a completed (tick) as a suggestion rather than delete it when it is completed.  If you delete it you don't know if you have attanded to it or if it was on the calendar list for that day.
+Many thanks........................Eric",It would be good to have a completed (tick) as a suggestion rather than delete it when it is completed. If you delete it you don't know if you have attanded to it or if it was on the calendar list.
+"When I try to send to some users I get the message ""Unable to send this message with end-to-end encryption, because there are problems with the keys of the following recipients: ..."" and OpenGPG message security says the key is not accepted even though it is and I've verified that it is several times.
+
+Any ideas what the problem might be?
+
+Thank you!
+",OpenGPG message security says the key is not accepted even though it is and I've verified that it is several times. Any ideas what the problem might be?
+"I have a calendar event which reoccurs monthly and I add new data to the top of the description field of this event. While using TB v.78.14.0, all seemed well. This monthly job of adding data has been going on for over 11 years.
+
+I just jumped to v.102.4.2 today and notice that data which I added recently (the past 6 months, 6 edits)  in the description field does not display when I bring the event up to edit. We are now in November, but I only see data entered from this April or older. What am I missing?
+
+  While in the calendar view (Day, Week, Multiweek, Month), I can mouse-over that event which then pops-up a preview of the event and that does show the most recent data from October....!?
+
+  When I double click on the event, the window (prior to edit) does not show recent data just like the description field when I continue to the edit window.
+
+  I assumed I may have meet some type of data limit by adding ~10 lines a month = 1300-1400 lines total, but since I can see the recent data in question from the calendar window popup/preview, I'm not sure.
+
+  I believe I can rewrite the record, but wondered if there may be other issues now or in the future. It is convenient to keep all the data history, but can chop off some of the older data if I have to.
+
+  Thanks for any input/thoughts.","I have a calendar event which reoccurs monthly and I add new data to the top of the description field of this event. While using TB v.78.14.0, all seemed well. This monthly job of adding data has been going on for over 11 years. I just jumped to v.102.4.2 today and notice that data which I added recently (the past 6 months, 6 edits) does not display when I bring the event up to edit."
+"Good morning,
+
+Thunderbird does not automatically update from version 91 to 102 using admx
+
+Thank you
+
+Hi,
+
+can you give a few more details? Usually, Thunderbird updates automatically. What policy did you set additionally? Can you post the config file?
+
+John
+
+Good morning,
+
+GPOs were applied on a Windows 2019 Server machine.
+
+URL GPOs:
+
+<ins>https://github.com/thundernest/policy-templates/tree/master/templates/central</ins>
+<br/><br/>
+
+Thunderbird does not automatically update from version 91 to 102.
+
+**Computer Configuration (Enabled)**
+
+-Policies
+
+--Administrative Templates
+
+---Policy definitions (ADMX files) retrieved from the central store.
+
+----Mozilla/Thunderbird
+
+-----Policy Setting Comment
+
+*------Application Autoupdate Enabled*
+
+*------Background updater Enabled*
+
+*------Disable Update Disabled*
+
+**User Configuration (Enabled)**
+
+-Policies
+
+--Administrative Templates
+
+---Policy definitions (ADMX files) retrieved from the central store.
+
+----Mozilla/Thunderbird
+
+---Policy Setting Comment
+
+*------Application Autoupdate Enabled*
+
+*------Background updater Enabled*
+
+*------Disable Update Disabled*","Thunderbird does not automatically update from version 91 to 102 using admx. Usually, Thunderbird updates automatically. What policy did you set additionally? Can you post the config file?"
+"I love the general TB experience, overall. One niggling irritant, it is too easy to be zipping around the UI doing email drag & drops and accidentally grab a folder and move it. This can cause a big snag as the folders start to re-sync and the message filters I have set up have a fit about ""missing folders.
+
+Additionally, I have a small stroke of panic, thinking I've lost a folder, until I realize, whoops I snagged a folder by accident.
+
+All this is to say, It would be nice to have a CONFIRMATION ALERT pop-up and say ""Are you sure you want to move a folder"", maybe with the ability to bypass it with a keyboard shortcut.
+
+This way if I accidentally grab my ""Unified Mail inbox that contains my 11 email accounts consolidated I won't have the program crash because I've just inadvertently moved a large folder and it is trying to sync with server. I have had times when I've accidentally clicked the ""move to"" in the right click, and.....
+
+I may be a spaz, but I think a reminder/confirmation alert would be helpful.
+
+PS My real concern is that in trying to initiate a big move, the mail servers can occasionally glitch and really mess up the emails.
+
+Respectfully,
+Kevin
+
+A worthy request.  See Bug 279838 - Feature Request: Lock folders from unintentional drag and drop and https://bugzilla.mozilla.org/show_bug.cgi?id=467827#c4
+
+And perhaps this addon still works https://addons.thunderbird.net/en-US/thunderbird/addon/disable-draganddrop-tb-v2/?src=search","It is too easy to be zipping around the UI doing email drag & drops and accidentally grab a folder and move it. This can cause a big snag as the folders start to re-sync and the message filters I have set up have a fit about ""missing folders"""
+"Hi all.
+
+Is there a way to force ""from"" and ""to"" headers instead of ""Correspondent"" in cardview ?
+
+In my workflow, when I send a mail with my service in CC, the mail sender isn't me, but recipient and this can lead to misinterpretation.
+
+Thanks.
+
+regards,
+Didier B.","In my workflow, when I send a mail with my service in CC, the mail sender isn't me, but recipient. This can lead to misinterpretation. Is there a way to force ""from"" and ""to"" headers instead of ""Correspondent"" in cardview ?"
+"I've experimented with forwarding an email to a cellphone, which is received as an SMS.  The problem is all the prefix information (entire From address, To Address, Subject, etc.) exceeds the standard SMS message length of 160 characters.  There is no room for the actual message.  The phone simply appends the word 'more?'; indicating that there was more that couldn't be included.
+
+It would be very useful if a feature was added to Thunderbird's current email forwarding, whereby the message could be formatted as an SMS that includes only the basic From, and the Message-Body.  Of course if the message-body exceeded the SMS length it would be truncated, but it would still be viewable in-part.  I currently use a service that forwards SMS to Email; Thunderbird could then forward the emailed SMS to another phone.
+
+I hope this suggestion is considered for future Thunderbird improvements.
+
+MM","Thunderbird currently forwards email to a cellphone as an SMS. All the prefix information (entire From address, To Address, Subject, etc.) exceeds the standard SMS message length of 160 characters. There is no room for the actual message."
+"Hello Thunderbird group.
+
+Since the addition of themes to the e-mail app and the inclusion of those themes in the Calendar could we include two more tools in the Customize toolbox?
+1. A tab to open the Ad-Ons app to change the theme from black to light?
+    The current ad-ons access through the Tools tab works very well as it changes both the theme for mail and calendar, but when using a     calendar date as a means of saving important date information to be printed without changing the theme from dark to light uses a lot     of black ink.  (I use the large text box found in the date/edit app to store addresses, phones, and instructions that I can read while             traveling to an appointment).
+2. A Print tab to print the open date/edit app.
+
+My thinking in this addition is to place access to both options in the Customize app so those who need the tools can add it to their respective toolbars, and those who don't need the tools can leave it alone.
+
+Michael Gordon",A tab to open the Ad-Ons app to change the theme from black to light. A Print tab to print the open date/edit app.
+"Hi all,
+
+I was running 78.0b4 two days ago when this bug occurred. I'm now running 79.0b1 as of today's update.
+
+I had TB running and opened my laptop for the day. I couldn't send my first email of the day, however, due to a pop-up that told me my private key couldn't be identified. Fine, so I made sure that I wasn't sending it encrypted or signed. Still got the error.
+
+I ignored this because I was digging myself out of 10 days of email accumulation after going on holiday. Yet at some point I had to address my dozen or so unsent emails. Nothing would send; I always got the pop-up that my private key couldn't be found and so I couldn't send any emails, whether or not they were encrypted.
+
+Mind you, I had made no changes to my keys between the previous evening and that morning.
+
+The fix was to open the key management interface, and under the properties of my key re-affirm that indeed TB should treat it as my private key.
+
+There are two problems that need fixes, if they haven't happened already: 1) the way a presumable change was rolled out to TB settings, which was obtuse and frustrating and 2) that no email could be sent, even unencrypted and unsigned, due to an encryption-related setting.
+
+-Mallory",The bug was fixed in the latest TB update. Users can now send emails even if they are not encrypted or signed. The bug is the result of a presumable change that was rolled out to settings.
+"Hello,
+
+A big hurdle in facilitating end-to-end encryption in my environment in the need to send encrypted emails to distributionlists.
+
+Sending encrypted emails to individuals works fine, the certificate attribute is fetched from ldap without issue.
+
+When sending to a distribution list, I would expect Thunderbird to fetch the members using the members attribute and subsequently the certificate for each member. This works fine using Outlook but breaks as soon as someone with Thunderbird would like to compose or respond to such emails.
+
+Is there already an enhancement request for this feature or am I maybe missing a way to get it done, I could not find it after some searching.
+
+Not shure if this exactly meets your problem, but <ins>https://bugzilla.mozilla.org/show_bug.cgi?id=1644085</ins> also deals with sending mails to a maining or distribution list of (known) recipients, defining a list with recipients fingerprints as alias for the mailing list adress.
+
+Thank you for the reply dnk089. It is somewhat related but focuses on GPG/PGP and the related problems with key management. In my case with S/MIME trust is on the CA to provide the correct keys, the only thing missing is fetching them automatically through LDAP(s) and using them. In short, if I could expand the distribution group (there used to be a working plugin for this), all is working as expected.","Sending encrypted emails to individuals works fine, the certificate attribute is fetched from ldap without issue. In my case with S/MIME trust is on the CA to provide the correct keys, the only thing missing is fetching them automatically through LDAP(s) and using them."
+"Hello,
+
+I am totally new to Thunderbird, so please bear with me for any nonsense I might be uttering! I installed TB 78.9.1 today, hoping to take advantage of easy email encryption. I connect to my Hosted Exchange account with the ""Eule"" add-on, which uses the Outlook Web Access interface for authentication. My email messages and other Exchange items show up in TB. However, when I click on End-to-end Encryption, the Add Keys button is missing on the Account Settings page. According to the <ins>HOWTO</ins>, this button would allow me to configure PGP keys. What might be the problem here? Are Exchange accounts not yet supported by the encryption function?
+
+Kind regards,
+
+Armin
+
+Hi Armin,
+
+please see <ins>https://support.beonex.com/help/en-us/4-features/16-encryption-using-pgp</ins>
+
+(But we haven't tried with the new PGP support in TB 78 yet.)
+
+Ben
+
+&nbsp;
+
+OK thanks! I will check that out.",The Add Keys button is missing on the Account Settings page. This button would allow me to configure PGP keys. Are Exchange accounts not yet supported by the encryption function?
+"In Thunderbird/enigmail one could easily add extra IDs (email addresses) to a Private Key via the  ""Key Management"". Currently in the New Thunderbird that feature is not available. Regards Ian Mann
+As I wrote in reply to my own question: ‘The solution to my problem was far simpler than I thought; in fact, I almost got to it a couple entries back, because the solution actually involves Manage Identities, just not in the way I’d originally thought.
+
+‘Under Manage Identities, select an identity, press Edit, select the End-to-End Encryption tab, and select the certificate you wish to use (in case you have more than one associated with the identity, as happened with me 🙄 ) – None (‘Do not use OpenPGP with this identity’) is selected by default – and the default options you wish to use.’
+
+In other words, Thunderbird is now handling multiple User IDs in a way different than Enigmail did.
+
+HTH!","In Thunderbird/enigmail one could easily add extra IDs (email addresses) to a Private Key via the  ""Key Management"". Currently in the New Thunderbird that feature is not available."
+"While on vacation, I forward e-mails arriving to abc@somedomain com be
+forwarded to xyz@someotherdomain.com.
+
+When Thunderbird downloads such forwarded message, it complains that
+the private key, necessary to decrypt the message, is not available, despite
+the fact that both private keys (abc@somedomain com and
+xyz@someotherdomain.com) are available (as reported by the key manager).
+
+How can I instruct Thunderbird that for some particular message it skould
+use a different private key than the one associated with the e-mail account?
+
+In the message that claims ""decryption key is not available, it would be very
+useful if the key-id of the key (as specified in the received message) was given.
+TIA","Thunderbird complains that the private key, necessary to decrypt the message, is not available, despite the fact that both private keys are available. How can I instruct Thunderbird that for some particular message it skoulduse a different private key than the one associated with the e-mail account?"
+"I noticed that if the subject is encrypted the subject is initially displayed as a ellipsis (…) in the notification popup and in the folder listing. I only see the subject when I click on the message in the folder listing, which also opens the message in the message pane.
+
+Why does Thunderbird do this? Its annoying as it prevents me from deciding what to read later on based on the subject. Is there some setting in the config editor to disable this?
+
+The message and subject are stored encrypted in the mbox file. Is it to avoid storing the subject in the clear in the *.msf file? If I was worried about somebody reading that I'd strongly prefer to store my profile in a password protected encrypted container like Veracrypt instead. Especially if I ever use the ""copy as decrypted to"" option.
+
+This feature seems to ignore users whose concern most (but not all) of the time is just easier interoperability with ProtonMail, Tutanota users etc. that default to sending everything encrypted.
+
+Prefs mail.identity.default.protectSubject and mail.identity.idNN.protectSubject.
+
+Of course the sender determines which subject is transmitted in the header.
+
+The unobfuscated subject is stored in the MSF file since that's the database which serves the message list.
+
+Francesco
+
+I've looked at the inbox.msf file while the subject was still displayed as .... in the inbox and it had <span style=""color: #323436;"">obfuscated</span> text. Only after clicking on the subject in the inbox folder listing did the contents of the *.msf file change and replace it with a un<span style=""color: #323436;"">obfuscated subject.</span>
+
+<span style=""color: #323436;"">The mailfence account (where I get the encrypted message) I'm looking at is account12, server9, using id7. I've double checked</span> mail.identity.id7.useremail has the right email address.
+
+<span style=""color: #323436;"">Setting mail.identity.id7.protectSubject false has no effect when I try it with TB 102.0bl4. I'm looking at a new message in a account that only has a default identity. Am I misunderstanding something?</span> I also set <span style=""color: #323436;"">mail.identity.default.protectSubject false but assumed that only effected any accounts that I add later on.</span>",The message and subject are stored encrypted in the mbox file. The sender determines which subject is transmitted in the header. The unobfuscated subject is stored in the *.msf file.
+"I am a TB user for 15 years+, and I have been using Enimail addon originally, and now the PgP features added to TB:
+I run TB with 3 accounts of 3 domains, and I sent all mails digitally signed.
+
+I have a Windows 10,  64 configuration,  TB 102.8.0  all up to date (have decided to stay with W10 for yet sometime)
+
+Since October 2022 I have been having problems with the PgP keys.  These stop working suddenly after certain updates. I checked that the keys had not expired, and they should be all working.
+
+Again, today after the last update of W10 and of TB, I found that the keys did not work, in spite that I did not change any configuration.
+To verify the issue,  I use the OpenPGP Key manager and the keys are there, but when I try to refresh them, I get following error message: ""We couldn’t find any usable key matching the specified search criteria""
+
+I can generate a new key without any problem (it takes seconds) but when I try to refresh this newly created key, I get the same message ""We couldn’t find any usable key matching the specified search criteria""
+Any indication of what the problem may be?
+Thanks in advance for any assistance","Since October 2022 I have been having problems with the PgP keys. These stop working suddenly after certain updates. I checked that the keys had not expired, and they should be all working. Any indication of what the problem may be?"
+"I am trying to sign/encrypt email using Thunderbird 102.9.0 on RHEL 8.7 with a USB IdenTrust ECA. I am able to use the same ECA on Windows with Outlook and the ActivClient middleware.
+
+In the ""S/MIME Security Devices"" window I have a security device ""p11-kit-proxy"" which shows my ECA as ""ActivIdentity Activkey_Sim [CCID Bulk Interface] 00 00"". I am able to ""Log In"" to the device.
+
+Under ""Manage S/MIME Certificates"" I am able to view the two certificates from the ECA. Both have my correct email address under ""Subject Alt Names"". One has ""Key Usages"" listed as Key Encipherment and E-mail Protection. The other lists Digital Signature, Non-Repudiation, Client Authentication, E-mail Protection, Smartcard Login.
+
+The problem occurs when I try to Select the S/MIME Personal certificate for digital signing or encryption. When I click either of those buttons I get the following error:
+""Certificate Manager can't locate a valid certificate that can be used to digitally sign your messages with an address of <my email address>.""
+
+It seems like the ECA certs should be available to select since Thunderbird can log into the device and view them. I've run out of ideas on how to troubleshoot this.",I am trying to sign/encrypt email using Thunderbird 102.9.0 on RHEL 8.7 with a USB IdenTrust ECA. I am able to use the same ECA on Windows with Outlook and the ActivClient middleware. When I try to Select the S/MIME Personal certificate for digital signing or encryption I get the following error.
+"Hello,
+
+I am on 102.15.0 on linux/debian and I cannot decrypt messages. I have tested on the most recent version (115.2.0 on windows 11) and there I get a button ""Decrypt and Show"" which works. So I think the message itself is ok.
+
+On 102 all I get is the text *""This is an encrypted message part. You need to open it in a separate window by clicking on the attachment"".* There is only one .asc attachment with the key of the sender. Opening the message in a new tab or window changes nothing.
+
+Is this a known bug? I can not easily upgrade so I would like to solve this in the version my distribution provides.
+
+I created a screenshot also. What is the preferred way to share it here?
+
+Hello Thomas,
+
+the button with the label ""Decrypt and Show"" was added in
+<ins>https://bugzilla.mozilla.org/show_bug.cgi?id=1746579</ins>
+and unfortunately isn't available in version 102.
+
+We usually don't port feature enhancements to released versions of
+Thunderbird.
+
+I hope you won't to wait much longer until version 115 is provided by
+your distribution.
+
+If you urgently need 115 on your (Linux) distribution, you could
+consider to download the binary that is available on the thunderbird.net
+webpage, instead of using the binary that your distribution provides.
+
+Kai
+
+Thanks for the quick answer. Is there a workaround like saving the message and decrypting it with pgp manually or something?","On 102 all I get is the text *""This is an encrypted message part. You need to open it in a separate window by clicking on the attachment"" There is only one .asc attachment with the key of the sender."
+"Dear all,
+
+is there a possibility to make encryption more visible?
+We encrypt internal e-Mails in our company and since we have the new Thunderbird, some people do not recognize if the encryption is enabled or not. It is visible with a small symbol with a green checkmark below the word OpenPGP right at the top of a mail. When it is not encrypted it is just black and not red. We would like to have a bigger button to make encryption visible or something else.
+Has anyone the same problem?
+
+Greetings, Nina","We encrypt internal e-Mails in our company and since we have the new Thunderbird, some people do not recognize if the encryption is enabled or not. We would like to have a bigger button to make encryption visible or something else."
+"Hi everybody!
+
+Is there a link that always points to the latest version?
+Like: thunderbird.net/language/architecture/thunderbird-latest
+
+If not, it would be very handy for automatic downloads.
+
+Thanks!
+
+Thomas
+See: http://ftp.mozilla.org/pub/thunderbird/releases/latest/README.txt
+https://download.mozilla.org/?product=thunderbird-latest&os=win&lang=en-US
+Francesco
+
+Thanks a lot!","Is there a link that always points to the latest version?Like: thunderbird.net/language/architecture/thunderbird-latest? If not, it would be handy for automatic downloads."
+"Hello,
+while writing a new e-mail the cursor shows normally and is in the right place where I want to write. After attaching a PDF File the cursor shows at the bottom of the e-mail text, or it disappears complete. So if I want to correct some typos I can't tell where my cursor is placed.
+This problem was already addressed in this ticket at bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=1757745
+Does someone know how to resolve this problem?
+I am using Kubuntu 20.04 and 18.04 with Thunderbird 91.7.
+Kind regards,
+Maurice","After attaching a PDF File the cursor shows at the bottom of the e-mail text, or it disappears complete. If I want to correct some typos I can't tell where my cursor is placed."
+"Hi,
+
+Have you ever seen this problem for thunderbird from 68 to 78.
+
+In a intranet with proxy, Thunderbird is set to ""No proxy"", it takes 1 minute or more to display a PDF or DOCX attachment.
+
+I didn't see this problem with Thunderbird 45. I didn't test with Thunderbird 60.
+
+My company has an intranet.
+
+The pop3 server is in the intranet.
+
+There is a proxy to prevent the internet connection for most people.
+
+Thunderbird is set to ""No Proxy"" to prevent the internet connection.
+
+When I open a PDF or DOCX attachment, it takes 1 minute or more to display the PDF or DOCX file.
+
+The internet connection is possible when Thunderbird is set to ""manuel settings for proxy"", or ""Adress for Automatic settings for proxy"" with a http proxy.pac file.
+
+With the internet connection in Thunderbird, it takes less than 30 seconds to display the PDF or DOCX file.
+
+Thank you.
+
+Bye.
+
+LIVINE Christin
+
+Hi,
+I forgot to write that the proxy ask for login and password.
+Thank you.
+Bye.
+LIVINE Christin
+
+Hi,
+
+I forgot to write that the proxy ask for login and password.
+
+Bye.
+
+&nbsp;
+
+Hi,
+
+Is it because of option ""browser.safebrowsing.downloads.remote.enabled"" ?
+
+It's true by default. I'll test with false.
+
+Bye.
+
+LIVINE Christin
+
+Hi,
+
+I set the option ""browser.safebrowsing.downloads.remote.enabled"" to false on 12 thunderbird in my enterprise, it seems that there no waiting time anymore after clicking to open PDF or DOCX files.
+
+The problem is solved to me.
+
+I summarize the facts.
+
+My company have an intranet with proxy which ask a login and a password. No everybody have the rigth to go to internet. In Thunderbird, no proxy is set. After clicking to open a PDF or DOCX file, the file is opened after more that 30 seconds.
+
+When I set option ""browser.safebrowsing.downloads.remote.enabled"" to false, after clicking to open a PDF or DOCX file there is no waiting time anymore.
+
+Bye","Thunderbird is set to ""No Proxy"" to prevent the internet connection. After clicking to open a PDF or DOCX file, the file is opened after more that 30 seconds."
+"Hello,
+
+is there a way to deploy at thunderbird 91 the private pgp key (general company name) and some public pgp keys to all users?
+We used gnupg (linux) with TB 60 and copied the gnupg config to the users home profile.
+
+With TB 91 we tried to copy pubring.gpg, secring.gpg and encrypted-openpgp-passphrase.txt to the thunderbird user profile. This is working until users try to add public keys (adding not possible - damaged file). It seems we need to copy key4.db, but this isn't possible, because there are other passwords saved.
+
+Best regards,
+Markus
+
+You can export the respective keys from within TB's PGP key management UI, copy the exported text files to wherever your users can access them, and let your users import them, again using TB's PGP key management UI. This is not much more inconvenient than the procedure you have followed until now.
+
+I can tell for sure that this works reliably. But I can't tell whether it is the only way to achieve what you want.
+
+Regards,
+
+Binarus","You can export the respective keys from within TB's PGP key management UI, copy the exported text files to wherever your users can access them, and let your users import them. This is not much more inconvenient than the procedure you have followed until now."
+"Hi,
+
+I have worked on our policy templates to make them reflect what we actually support. They are available here:
+https://github.com/thundernest/policy-templates
+
+I am confident, that they work as expected, but feedback from administrators who actually use them to deploy configurations would be of course great.
+
+What I could not test is our support for MacOS, any feedback there is very much appreciated.
+
+John","I have worked on our policy templates to make them reflect what we actually support. I am confident, that they work as expected, but feedback from administrators who actually use them would be of course great."
+"Hello,
+
+Our company using Thunderbird in windows Server 2016 RDS enviroment. Every RDS user does have thunderbird installed with one business profile. Every time when I create new RDS user and create thunderbird profile I'm moving content of profite to another drive and changing path for it in profiles.ini.
+
+Is there a way to change default path for new users (RDS users) to be created in the second drive and create path in profiles.ini without manual interference?
+
+Thanks,
+
+Dalibor
+
+ ",Every RDS user does have thunderbird installed with one business profile. Is there a way to change default path for new users (RDS users) to be created in the second drive and create path in profiles.ini without manual interference?
+"Hi All
+
+I'm trying to have TB query AD for email addresses.
+
+The documentation I've found is rather dated, and either it's no longer correct or I'm not understanding it properly.
+
+Is there current documentation for this?  I'm *guessing* it has something to do with SSL and port numbers, since I don't believe nonencrypted queries to port 389 are allowed in Windows now, or perhaps user permissions, but I can't get it to return results at all right now.
+
+Not sure how to proceed on this one.","I'm trying to have TB query AD for email addresses. The documentation I've found is rather dated, and either it's no longer correct or I'm not understanding it properly. Is there current documentation for this?"
+"Dear all,
+
+Did someone experience an issue with profiles that are roamed between
+Windows 10 and Windows 11 PCs? If so, (how) did you solve it?
+
+Some of our machines have been upgraded to Windows 11 as a pilot, but on
+these machines Thunderbird sometimes stops sending emails (i.e. the
+""Send"" button will no longer do anything). Saving your current email as
+draft and then restarting Thunderbird solves the issue.
+This also happens in Safe Mode (and Firefox extensions also have an
+issue, although I'm not sure that this is related).
+
+Details of the Windows 11 machines:
+Windows 11, build 22621.1105
+Thunderbird 102.6.1 pushed with the MSI installer of ConfigMgr to the PCs
+The profiles are synced on sign-in from a central server and are also
+used on Windows 10 machines with the same version of TB.
+It does not happen for newly created profiles on Windows 11.
+
+Kind regards,
+Rink Pieters
+ ","Some of our machines have been upgraded to Windows 11 as a pilot. Thunderbird sometimes stops sending emails (i.e. the ""Send"" button will no longer do anything) Saving your current email asdraft and then restarting Thunderbird solves the issue."
+"Hello,
+
+is it possible to set with the policy or cfg the setting System Integration --> Check now --> ""E-Mail"" as default?
+
+Best regards,
+
+Markus
+
+Hi Markus,
+
+This has been changed recently. We apply all default programs using the built-in Windows functionality: <ins>https://techcommunity.microsoft.com/t5/ask-the-performance-team/how-to-configure-file-associations-for-it-pros/ba-p/1313151</ins>
+
+I believe it is the only way now as apps shouldn't change the default on their own for various reasons.
+
+Kind regards,
+
+Rink",This has been changed recently. We apply all default programs using the built-in Windows functionality. I believe it is the only way now as apps shouldn't change the default on their own.
+"If you need to verify whether your relevant addons have been updated to TB 115, you can use this addon:
+
+Addon Compatibility Check for TB 115: https://addons.thunderbird.net/en-us/thunderbird/addon/addon-compatibility-check/
+
+If you should need assistance to adapt old addons to TB 115 (even very old xul legacy addons), you can contact me at the support email address given at the addon page linked above.
+
+Klaus/opto","If you need assistance to adapt old addons to TB 115, you can contact me at the support email address given at the addon page linked above."
+"Hello all,
+
+We want to diminish the information overload on our colleagues and would like to disable Thunderbird's notifications  globally, with if possible the ability to set it back (on a individual basis).
+
+Do you know whether there is a policy for this, or any other mean by which one could achieve this?
+
+Thanks in advance for your ideas,
+
+Jérémie - Pro Velo","We would like to disable Thunderbird's notifications globally, with if possible the ability to set it back (on a individual basis) Do you know whether there is a policy for this, or any other mean by which one could achieve this?"
+"hi folks,
+
+wondering, why there is a redirect from <ins>https://github.com/thundernest/</ins> to <ins>https://github.com/thunderbird/</ins> ?
+
+The old projects download I can't find anymore.
+
+Anyone know, whats happened there ? It would be VERY sad, if that project won't be continued...
+
+Using this templates since a long time in my business environment...
+
+Thanks to anyone who can light up my darkness in my mind... ;-)
+
+Best regards, naYss
+
+I believe they just brought everything under a (new?) GitHub organization for consistency.
+
+I still see the templates at <ins>https://github.com/thunderbird/policy-templates</ins>
+
+HTH
+
+Dafydd
+
+just got an answer from john bieling - out of another forum :
+
+""Oh, that is just a link to full repository-download:
+
+<ins>https://github.com/thunderbird/policy-templates/archive/refs/heads/master.zip</ins>
+
+Same as clicking on the green ""code"" button and selecting ""zip"".""
+
+...and so : problem solved :-)
+
+best regards, naYss","The old projects download I can't find anymore. It would be VERY sad, if that project won't be continued. I believe they just brought everything under a (new?) GitHub organization for consistency."
+"I'm happy to announce that John Bieling is now officially a peer for the Thunderbird Add-on Support submodule!
+
+ -Magnus",I'm happy to announce that John Bieling is now officially a peer for the Thunderbird Add-on Support sub module. I'm also happy to say that he is now a member of the Mozilla Foundation.
+"I would like to donate to Thunderbird using means other than cards / paypal. I would very much like it if Thunderbird project uses something like Liberapay (https://liberapay.com/) or OpenCollective (https://opencollective.com/)to receive donations. As a donor, I can easily keep track of projects I donate to and follow progress there.
+
+Some of these platforms also support feature-bounties which could sometimes be very useful to attract community contributors.",I would like to donate to Thunderbird using means other than cards / paypal. I would very much like it if Thunderbird project uses something like Liberapay (https://liberapay.com/) or OpenCollective.
+"91.0 is now live with lots of great stuff, available from the website per release notes.
+For now, version 91.0 is only available via direct download - automatic and manual updates are not enabled - as was done with version 78.0 last year.
+After sufficient user experience is gathered, and no major issues have been identified, then updates will be enabled and announced.  The timing of when updates will be enabled is not possible to predict.","For now, version 91.0 is only available via direct download - automatic and manual updates are not enabled. After sufficient user experience is gathered, and no major issues have been identified, then updates will be enabled and announced."
+"Greetings,
+
+The election process is complete, having used the outline at https://wiki.mozilla.org/Thunderbird/Council_Election. The following individuals have been elected:
+
+Andrei Hajdukewycz
+Ben Bucksch
+Berna Alp
+Dirk Steinmetz
+Magnus Melin
+Patrick Cloke
+Philipp Kewisch
+
+Patrick managed the overall election process, and Wayne conducted two votes using opavote.  Eight people stood for election. Per the election process, the first vote was to bring the three MZLA candidates down to two candidates before the final vote could be held. The final slate of seven candidates for seven positions was approved by a vote of 8 no, 62 yes.
+Congratulations, and thank you to everyone for participating.
+
+Thanks, Wayne","The election process is complete, having used the outline at https://wiki.mozilla.org/Thunderbird/Council_Election. The final slate of seven candidates for seven positions was approved by a vote of 8 no, 62 yes. Patrick managed the overall election process, and Wayne conducted two votes using opavote."
+"The SUMO KB articles are useful, but they are no substitute for a tutorial. They also require a certain background knowledge to be able to find the right KB article, let alone use it effectively.
+
+The project is doing very well financially,  has at least 20 full time employees/contractors , is adding support for another platform and the product manager has stated he hopes to ""leap frog us past Outlook"" in the 114 roadmap. The Thunderbird blog talks about ""And in 2023, you can look forward to a modernized Thunderbird experience with a completely overhauled UX and UI""
+
+If things are going to change that much perhaps its finally time to think seriously about a tutorial.
+
+I suggest the project hire a contractor to create a tutorial for the desktop/laptop version of Thunderbird based on the 114 roadmap and add a link to it in the help menu.  Things will change in the user interface afterwards but not as dramatically. I'd assume you could go at least a few years before updating it becomes a potential issue if the focus is on basic concepts,  getting new users started, and getting existing users up to speed on a complete overhaul. Ideally a draft of the tutorial would be ready for early beta releases.
+
+I'm NOT suggesting it be a user manual, that implies more of a obligation to keep it uptodate and to provide a lot more information.
+Eric, thanks for the suggestion! As someone with both a content creator and marketing background, I recognize the need for visually-driven tutorials like what you're proposing. Especially as Thunderbird 114 represents a major change in UX/UI.
+
+I envision a series of short, easily digestible videos on YouTube, cross-posted to the Thunderbird blog. I will seriously consider this and propose it to the team. Time allowing, I'd even love to be personally involved.
+",The Thunderbird project is doing very well financially. The project hire a contractor to create a tutorial for the desktop/laptop version of Thunderbird based on the 114 roadmap. Things will change in the user interface afterwards but not as dramatically.
+"Hi,
+
+I am working on getting Thunderbird ready to support MV3 for the next major release. Current Daily still has a few things broken, so we do not yet officially support it.
+
+I also would like to use the switch from MV2 to MV3 to iron out some of our WebExtension API inconsistencies. WebExtension APIs are meant to be stable, so we cannot just change those things as we will break many add-ons. The introduction of MV3 however gives us the opportunity to address these issues and change them for MV3.
+
+I have collected the issues which I was able to think of:
+https://docs.google.com/document/d/1jcD1I7e5kCyb8XnCbRNrJ20IqKXWysYZeTxvPvZ233c/edit?usp=sharing
+
+I would be interested in your feedback.
+
+Note: I posted this on tb-planning in addition to the add-on developer group, as I do not want to miss add-on developers who may not be subscribed to the add-on developer list. I would like to ask everyone to NOT respond here, but directly in the document or in the add-on developer channel:
+https://thunderbird.topicbox.com/groups/addons/T86f6d56da13c3121/possible-backward-incompatible-changes-from-manifest-v2-to-manifest-v3-in-thunderbird
+
+Thanks,
+John","Current Daily still has a few things broken, so we do not yet officially support it. I would like to use the switch from MV2 to MV3 to iron out some of our WebExtension API inconsistencies."
+"91.3.0 just released with many fixes <ins>https://www.thunderbird.net/en-US/thunderbird/91.3.0/releasenotes/</ins>.
+
+There are notable issues still to be fixed, and more fixes are in the pipeline. But with Version 78 is approaching End of Life, with the Mac blocker resolved [1], and 91.3.0 looking strong, we expect to significantly increase the update rate with a goal of migrating the majority of users from version 78 by the end of next week. (Currently 66% of users are on version 91, 29% are on version 78)
+
+If you see any bugs that reproduce in safe mode please <ins>report them in bugzilla</ins>.
+
+[1] Updates from version 78 have been blocked the last couple weeks for **Mac** because of (multiple) dialog hangs on Mac. This is fixed according to early reports, so we expect to reenable Mac updates from version 78 in the next day. If you want to get it sooner you can download from <ins>https://www.thunderbird.net/en-US/</ins>
+
+Two of my favorite open source software introduced ""similar"" bugs in latest versions:
+LibreOffice <ins>bug 143971</ins> - added additional blocking popup when opening read-only file (so all files from Thunderbird) which wasn't meant to show for that kind of files
+Thunderbird <ins>bug 453455</ins> - stopped remembering with which application to open certain file types
+<br/>So, 2 extra popups every time I want to open attachment in Thunderbird if I upgrade to TB91 and LO7.2.
+I'll just wait for versions without those bugs, since I open a lot of attachments daily.
+<br/>I was hoping for TB to patch it whatever it could until Mozilla fixes Firefox part, but reading those bug comments we will maybe get that fix in TB 104 or later.
+<br/>Mihovil","91.3.0 just released with many fixes. Version 78 is approaching End of Life, with the Mac blocker resolved [1]. We expect to significantly increase the update rate with a goal of migrating the majority of users from version 78 by the end of next week."
+"The recent announcement by Apple, Google, and Microsoft that they plan to implement in 2023 password less sign-in using FIDO2 passkeys is disturbing as I assume it will build momentum over time and they'll use it to become gatekeepers.  I'd have to share my smartphone number with them , I don't trust my smartphone (its too hard to identify the risks due to mobile apps using nested SDKs) and I want to lessen my dependency upon my smartphone nowadays (not increase it). I'd want to use a FIDO2 hardware key such as Yubikey or Feitian, not a smartphone.
+
+https://www.ghacks.net/2022/05/06/google-microsoft-and-apple-commit-to-passwordless-sign-ins-standard/
+
+Thunderbird's U2F support seems to have been quietly deprecated. Supposedly Firefox supports FIDO2 since version 66.0.32 if you set security.webauth.u2f and security.webauth.webauthn_enable_usbtoken true.  My impression was that part of the resistance to U2F was that it was viewed as just a stepping stone to WebAuthn (part of FIDO2).
+
+Outlook.com and Office365 support password less login using FIDO2 security keys. Gmail is still limited to FIDO/U2F though there is speculation they will add support for FIDO2. Do you expect other major email providers to support FIDO2 security keys in the next couple of years? I assume this time it might not be limited to just webmail.
+
+What effect, if any, do you see on Thunderbird due to password-less sign-in?","Apple, Google, and Microsoft plan to implement in 2023 password less sign-in using FIDO2 passkeys. Thunderbird's U2F support seems to have been quietly deprecated. Outlook.com and Office365 support password less login using F IDO2 security keys."
+"Hello all,
+
+A very brief announcement on behalf of the team developing the EWS rust crate for Thunderbird:
+
+The initial scaffolding code has now hit the main branch on GitHub!
+
+https://github.com/thunderbird/ews
+
+Incredibly proud of the work that Brendan and Sean are doing here. Please note that other elements are happening within comm-central itself and beginning to land on tip (such as the xpcom bridge).
+
+Keep in mind it is super early (prealpha!) stages and we'll keep you up to date as and when we hit new milestones. It is also very nice to see this crate being developed in the public now, enabling other projects and developers to make use of it if they see fit :)
+
+- Ikey",The initial scaffolding code has now hit the main branch on GitHub. Please note that other elements are happening within comm-central itself and beginning to land on tip (such as the xpcom bridge).
+"An important milestone in improving our automated tests landed earlier
+today. asyncTestUtils.js a.k.a. the old async testing framework is now
+gone! (bug 1571683). The work that was done converted tests over to
+using modern async and promises instead. Going forwards, it will be much
+easier to understand, maintain, and build on those tests over time.
+
+Congrats and thanks to Nicolai Kasper, for finishing that off!
+
+-Magnus
+
+Thanks Nicolai!
+
+Glad you were able to get that work accomplished!
+
+Ryan",An important milestone in improving our automated tests landed earlier today. The old async testing framework is now                gone! (bug 1571683) The work that was done converted tests over to modern async and promises instead.
+"Hello!
+
+One of the major initiatives of the Thunderbird Council during this past term was to finalize an initial version of bylaws. This was a group effort lead by myself and Danny and after many, many meetings discussing the various clauses we would like to present to you the first version of the Thunderbird Council Bylaws. There is definitely room for improvement and a few clauses that we were unable to come to a reasonable consensus on, so expect more from future Council terms. If you do have specific feedback, we would love to hear it.
+
+Thanks,
+Patrick",The Thunderbird Council has released its first version of bylaws. There is definitely room for improvement and a few clauses that we were unable to come to a reasonable consensus on. Expect more from future Council terms.
+"Greetings,
+In keeping with past practice, as we reach the later months of an esr we start to have greater attention and time on the next version, and necessarilly less attention on the current esr version.
+
+So in the remaining months of 115 we will take 115 patch uplifts only for important remaining regressions, and security and stability patches. And for beta taking patch uplift requests only when important for the next esr 128.
+
+Let us know if you have any questions.
+
+Thanks
+Wayne for the release team","In keeping with past practice, as we reach the later months of an esr we start to have greater attention and time on the next version, and necessarilly less attention on the current esr version. So in the remaining months of 115 we will take patch uplifts only for important remaining regressions, and security and stability patches. And for beta taking patch uplift requests only when important for the next esr 128."
+"Hey everyone,
+
+I was wondering if it exists a place where all the website content is organized and updated.
+
+Specifically, I'm looking for a place where it should be stored:
+
+- Full website sitemap
+
+- The complete structure of the Main Navigation Menu
+
+- All the written content, including titles, subtitles, revisions, etc, of each page and sub-page
+
+- Footer Links and social media accounts
+
+
+If the answer is ""just look at what's in the website"", I'd like to know if there's a place where you discuss and write down content related updates, if there's a repository for these sort of things, and how the process usually goes when dealing with updating a page or changing the structure of the menu.
+
+Cheers,
+
+Alex
+
+I doubt there's a sitemap atm, especially as the thunderbird website is actually fairly new. It used to only be a subsection of mozilla.org up until sometime last summer or so.
+
+The repo to work on the website is <ins>https://github.com/thundernest/thunderbird-website</ins>. Basically, PRs to do what's needed. Sancus handles merging them, and it might be good to discuss with him about issues first, since many things are the way they are for a reason. There's <ins>a lot to consider</ins>. The website discussions are usually on the github repo issue tracker.
+
+-Magnus","I doubt there's a sitemap atm, especially as the thunderbird website is actually fairly new. It used to only be a subsection of mozilla.org up until sometime last summer or so."
+"Whoever thought monochrome icons were better than colored (or coloured) ones must have a strange outlook on life.  What's wrong with having a background color attribute for icons, which if a user wants monochrome, can all be set the same?  I use tabs a lot, and particularly dislike the release 78 tabs all being black & white.  Arguments about how to make icons readily distinguishable by shape, miss the point:  colour is the obvious way to make different tab categories immediately distinguishable.  Even if all black & white is the default, the user should be able to assign colours by category, like the previous version where all tabs containing regular folders were yellow, for example.","I use tabs a lot, and particularly dislike the release 78 tabs all being black & white. Whoever thought monochrome icons were better than colored ones must have a strange outlook on life. Arguments about how to make icons readily distinguishable by shape, miss the point."
+"First of all I'd like to chime into the voices lauding Thunderbird.
+
+And, yes, there is also something that I repeatedly came to miss in
+Thunderbird lately:
+For me it would be really helpful to be able to search the folder pane -
+since I do really have a lot of folders.
+
+I have done a quick search, and I found that
+
+- I am not the only one
+- there are add-ons to implement this function (which currently seem to
+    be not ready for TB 78.11.0, though)
+
+<ins>https://discourse.mozilla.org/t/search-folder-pane-in-thunderbird/75176/3</ins>
+
+I'd think this is something that would come in handy for many users.
+So, it would be nice to have it implemented in TB itself (not as
+add-on). What do you think?
+
+Best,
+Harry
+
+Correction:
+I've seen that 2 of the add-ons (Link below) do actually work with
+current version of TB . And one of those does exactly what I looked for!
+
+Harry","Thunderbird needs to add the ability to search folders. There are add-ons to do this, but they are not ready for TB 78.11.0."
+"With the ability to have multiple email accounts, their should be a way to assign in the account which local address book goes with what account. I see option for remote address book but not local?
+
+
+
+This is critical as most users have multiple accounts be it personal or business, having different address books, and having them restricted from looking/suggesting to other accounts is important. Nothing like sending to different email recipient because the names where the same.
+
+
+
+And Yes there is option to disable Globally under composition >> Addressing >> “when addressing messages, look for matching entries in:” we can check or uncheck “local address books” but this should be a feature per account, not so much Global
+
+
+
+You either get all suggestions from every address book you have, or none at all…
+
+
+
+(Forgive me if someone has requested this in the past, if so why this is not ASAP I do not know)
+
+
+S
+sfhowes
+4 Jan '22 (2 years 6 months ago)
+Actions
+This feature was available in the MoreFunctionsForAddressBook and MRC Compose add-ons, but both were never updated for current TB.
+
+https://bugzilla.mozilla.org/show_bug.cgi?id=220370","With the ability to have multiple email accounts, their should be a way to assign in the account which local address book goes with what account. This is critical as most users have multiple accounts."
+"I can not believe that this is not an automatic feature?  Why is the    View > Layout > Message Pane
+
+Not remembered per each Folder, that is to have the option to remember (user persist) per the account, per folder Inbox, Drafts, Sent, Archives, Junk, Trash
+
+IMO it can be dangerous in the spam/junk folder to have it on, depending on how the email message options are configured for external links etc.  But most of the time I wish for Trash/Junk and few other folders to not have the Message Pane on, but say my Inbox or Drafts or Sent to have it toggled on
+
+I am stuck with a button combo of F8 to toggle on off as I move my mouse to different folders..
+
+I would think that other Layout options to stay configured as toggled by user then the Global setting overriding all would be useful?
+
+Not really asking any more confusing GUI toggle, but simple user persist setting that overrides the default F8, now the behavior of default install vs this Global toggle might be a good option to have a ""restore default"" that would put all folders back to on/off Message Pane Globally
+
+Now how it is to be implemented, be it per folder type, inbox, drafts, sent, or individual? I do not know, I would be happy with some option though besides the current state
+
+
+If their is a way please do tell, because this is annoying and would seem like it should be a feature by default.
+
+Also I do not think that an addon should be required for this...","I can not believe that this is not an automatic feature?  Why is the    View > Layout > Message Pane not remembered per each folder, that is to have the option to remember (user persist) per the account, per folder Inbox, Drafts, Sent, Archives, Junk, Trash. It can be dangerous in the spam/junk folder to have it on."
+"When there is a new version of Thunderbird, and the user applies the update in the About window, the message appears:
+
+Restart to Update Thunderbird
+
+This implies restarting the computer, while the intent is to restart Thunderbird. I suggest changing the message to:
+
+Restart Thunderbird to Update
+
+M
+
+May I also append this request?
+When there is a new version of Thunderbird, and the user reads the popup message, or clicks the Help>About TB that along with the notice of a new update/grade the link to ""Release Notes' be upgraded from the current installed version to the new updated version.
+As it is now a user must exit TB and open a web browser to search for the new TB version number.
+For myself and thousands of other Mozilla users we have set our systems to default open a web browser (Firefox) when a hyperlink is clicked. We have instructed TB to notify us of a new update, but let us install it. We cannot find out what new changes are coming down the pipe until its too late.","When there is a new version of Thunderbird, and the user applies the update in the About window, the message appears:Restart to Update Thunderbird. This implies restarting the computer, while the intent is to restart Thunderbirds. As it is now a user must exit TB and open a web browser to search for the new TB version."

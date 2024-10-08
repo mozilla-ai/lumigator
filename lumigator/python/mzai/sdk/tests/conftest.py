@@ -51,3 +51,28 @@ def json_data_jobs() -> Traversable:
 @pytest.fixture(scope="session")
 def json_data_job() -> Traversable:
     return json_data_path() / "job.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiments() -> Traversable:
+    return json_data_path() / "experiments.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment() -> Traversable:
+    return json_data_path() / "experiment.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_post_response() -> Traversable:
+    return json_data_path() / "experiment-post-response.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_post_simple() -> Traversable:
+    return json_data_path() / "experiment-post-simple.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_post_all() -> Traversable:
+    return json_data_path() / "experiment-post-all.json"

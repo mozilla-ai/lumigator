@@ -65,7 +65,7 @@ class ApiClient:
         self._api_url = f"http://{self.api_host}/api/v1"
 
     def get_response(
-        self, api_path, method: HTTPMethod = HTTPMethod.GET, data=None, verbose: bool = True
+        self, api_path, method: HTTPMethod = HTTPMethod.GET, data=None, json_data=None, verbose: bool = True
     ) -> requests.Response:
         """Makes a request to the specified path and attempts to return the response.
         Raises an exception for any error other than 404 - NOT FOUND.
@@ -73,7 +73,7 @@ class ApiClient:
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
-            response = _make_request(path, method, data=data, verbose=verbose)
+            response = _make_request(path, method, data=data, json_=json_data, verbose=verbose)
             # Support returning a response for 200-204 status codes.
             # NOTE: Other status codes that are returned without an HTTP error aren't supported.
             # e.g. 307 - Temporary Redirect

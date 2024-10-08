@@ -11,6 +11,7 @@ class Completions:
 
     def __init__(self, c: ApiClient):
         self.__client = c
+        self.__cached_vendors = self.get_vendors()
 
     def get_vendors(self) -> list[str]:
         """Returns the list of supported external vendors."""
@@ -19,7 +20,10 @@ class Completions:
         if not response:
             return []
 
-        return [str(vendor) for vendor in response.json()]
+        # Update the cached vendors .
+        self.__cached_vendors = [str(vendor).lower() for vendor in response.json()]
+
+        return self.__cached_vendors
 
     def get_completion(self, vendor: str, text: str) -> CompletionResponse | None:
         """Returns completions from the specified vendor for given text (prompt)."""
@@ -28,8 +32,8 @@ class Completions:
         vendor = vendor.lower()
         text = text.strip()
 
-        # Validate that the requested vendor is supported.
-        if vendor not in [v.lower() for v in self.get_vendors()]:
+        # Attempt to validate vendors using the cache.
+        if vendor not in self.__cached_vendors:
             raise ValueError(f"vendor '{vendor}' not supported")
 
         # Validate we have some text input as our prompt.

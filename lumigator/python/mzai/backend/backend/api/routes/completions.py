@@ -8,6 +8,7 @@ router = APIRouter()
 MISTRAL = "mistral"
 OPENAI = "openai"
 
+
 @router.get("/")
 def list_vendors():
     return [MISTRAL, OPENAI]

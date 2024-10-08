@@ -79,7 +79,9 @@ class ApiClient:
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
-            response = _make_request(path, method, data=data, files=files, json_=json_data, verbose=verbose)
+            response = _make_request(
+                path, method, data=data, files=files, json_=json_data, verbose=verbose
+            )
             # Support returning a response for 200-204 status codes.
             # NOTE: Other status codes that are returned without an HTTP error aren't supported.
             # e.g. 307 - Temporary Redirect

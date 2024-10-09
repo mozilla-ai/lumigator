@@ -13,7 +13,7 @@ fi
 
 
 PLAT=$(uname -o)
-PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
+PY_VERSION=${MZAI_PY_VERSION:-3.11.9}
 # from common.sh
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)

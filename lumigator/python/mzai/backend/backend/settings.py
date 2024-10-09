@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from schemas.extras import DeploymentType
-from sqlalchemy.engine import URL
+from sqlalchemy.engine import URL, make_url
 
 
 class BackendSettings(BaseSettings):

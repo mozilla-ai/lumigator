@@ -166,6 +166,7 @@ ci-fmt: ci-lint
 ci-tests:
 	@echo "running tests with parametrized platform: $(PARAMETRIZE)"
 	pants test lumigator/python/mzai/backend/backend/tests:backend_tests@parametrize=$(PARAMETRIZE)
+	pants test lumigator/python/mzai/sdk/tests:sdk_tests@parametrize=$(PARAMETRIZE)
 
 ci-publish-images:
 	pants package publish lumigator/python/mzai/backend:lumigator

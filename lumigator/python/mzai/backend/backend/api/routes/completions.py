@@ -5,17 +5,20 @@ from loguru import logger
 
 router = APIRouter()
 
+VENDOR_MISTRAL = "mistral"
+VENDOR_OPENAI = "openai"
+
 
 @router.get("/")
 def list_vendors():
-    return ["openai", "mistral"]
+    return [VENDOR_MISTRAL, VENDOR_OPENAI]
 
 
-@router.post("/mistral")
+@router.post(f"/{VENDOR_MISTRAL}")
 def get_mistral_completion(request: CompletionRequest, service: MistralCompletionServiceDep):
     return service.get_completions_response(request)
 
 
-@router.post("/openai")
+@router.post(f"/{VENDOR_OPENAI}")
 def get_openai_completion(request: CompletionRequest, service: OpenAICompletionServiceDep):
     return service.get_completions_response(request)

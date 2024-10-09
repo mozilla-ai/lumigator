@@ -113,14 +113,7 @@ class BackendSettings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
-        return URL.create(
-            drivername="postgresql",
-            host=self.POSTGRES_HOST,
-            port=self.POSTGRES_PORT,
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            database=self.POSTGRES_DB,
-        )
+        return make_url(os.environ.get("SQLALCHEMY_DATABASE_URL", None))
 
 
 settings = BackendSettings()

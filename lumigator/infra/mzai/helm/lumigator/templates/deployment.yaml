@@ -73,6 +73,13 @@ spec:
                   name: {{ include "lumigator.mistral-secret-ref" . }}
                   key: {{ .Consts.mistralSecretKey }}
             {{- end }}
+            {{- if or .Values.openaiAPIKey .Values.existingOpenaiAPISecret }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "lumigator.openai-secret-ref" . }}
+                  key: {{ .Consts.openaiSecretKey }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

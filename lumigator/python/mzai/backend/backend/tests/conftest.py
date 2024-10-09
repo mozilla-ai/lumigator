@@ -28,7 +28,7 @@ def postgres_container():
 @pytest.fixture(scope="session", autouse=True)
 def db_engine(postgres_container: PostgresContainer):
     """Initialize a DB engine bound to the Postres container, and create tables."""
-    engine = create_engine(postgres_container.get_connection_url(), echo=True)
+    engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
 
     # TODO: Run migrations here once switched over to Alembic.
     BaseRecord.metadata.create_all(engine)

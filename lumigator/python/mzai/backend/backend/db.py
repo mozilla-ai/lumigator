@@ -1,8 +1,11 @@
 import contextlib
 from collections.abc import Generator
 
-from sqlalchemy import Connection, Engine, create_engine
+import sqlite3
+
+from sqlalchemy import Connection, Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
+from sqlite3 import Connection as SQLite3Connection
 
 from backend.settings import settings
 
@@ -39,6 +42,14 @@ class DatabaseSessionManager:
             raise
         finally:
             session.close()
+
+
+@event.listens_for(Engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, SQLite3Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON;")
+        cursor.close()
 
 
 # TODO: Override echo param with WARN at the app logging level

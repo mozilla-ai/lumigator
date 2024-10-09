@@ -83,3 +83,23 @@ Generated Secret name for Mistral
 {{- $_ := set . "Consts" (dict)  -}}
 {{- $_ := set .Consts "mistralSecretKey" "MISTRAL_API_KEY" -}}
 {{- end -}}
+
+{{/*
+Generated Secret name for OpenAI
+*/}}
+{{- define "lumigator.openai-secret-name" -}}
+{{- include "lumigator.name" . -}}-openai
+{{- end }}
+
+{{- define "lumigator.openai-secret-ref" -}}
+  {{ if .Values.existingOpenaiAPISecret }}
+    {{- .Values.existingOpenaiAPISecret }}
+  {{- else -}}
+    {{- include "lumigator.openai-secret-name" . }}
+  {{- end }}
+{{- end }}
+
+{{- define "lumigator.openai-default-secret" -}}
+{{- $_ := set . "Consts" (dict)  -}}
+{{- $_ := set .Consts "openaiSecretKey" "OPENAI_API_KEY" -}}
+{{- end -}}

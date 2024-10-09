@@ -81,6 +81,7 @@ class BackendSettings(BaseSettings):
         """
         lib_path = "lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0"
 
+        # We set the LD_PRELOAD env var ONLY if the architecture is aarch64.
         # NOTE that we are using POSIX compliant commands (e.g. "=" instead of "==")
         # as the default shell in the container is /bin/sh
         return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'

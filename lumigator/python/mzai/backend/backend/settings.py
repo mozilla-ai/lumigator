@@ -56,6 +56,9 @@ class BackendSettings(BaseSettings):
     # Summarizer
     SUMMARIZER_WORK_DIR: str | None = None
 
+    # Eval
+    EVALUATOR_WORK_DIR: str | None = None
+
     def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
         for env_var_name in self.RAY_WORKER_ENV_VARS:
             env_var = os.environ.get(env_var_name, None)

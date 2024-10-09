@@ -11,12 +11,12 @@ At this moment this Helm chart only deploys the Lumigator core REST API. We don'
 
 In the near future, a new version of this chart will be released, which will be able to deploy a minimal version of all the required tools.
 
-## Mistral API key management
+## Mistral/OpenAI API key management
 
-If the Mistral API is used, there are two ways to provide it to Lumigator:
+If the Mistral and/or the OpenAI API is used, there are two ways to provide it to Lumigator:
 
-* Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
-* Using an explicit Mistral key in property `mistralAPIKey`, which will be added in a new Secret
+* Using an existing Secret, whose name will be specified in property `existingMistralAPISecret` and/or `existingOpenaiAPISecret`
+* Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`, which will be added in a new Secret
 
 > [!NOTE]
 > Both properties cannot be set at the same time.
@@ -37,6 +37,8 @@ If the Mistral API is used, there are two ways to provide it to Lumigator:
 | podSecurityContext | `{}` | Security settings applied to the pod |
 | existingMistralAPISecret | `` | Name of an existing Secret that contains the Mistral key |
 | mistralAPIKey | `` | Mistral key to be added as a Secret |
+| existingOpenaiAPISecret | `` | Name of an existing Secret that contains the OpenAI key |
+| openaiAPIKey | `` | OpenAI key to be added as a Secret |
 | postgresDb | `""` | Name of the database |
 | postgresHost | `""` | URL of the database |
 | postgresPassword | `""` | Password of the user used to connect to the database |

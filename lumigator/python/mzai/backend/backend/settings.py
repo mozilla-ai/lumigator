@@ -80,7 +80,10 @@ class BackendSettings(BaseSettings):
         right before calling the job command by prepending it to the command itself.
         """
         lib_path = "lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0"
-        return f"LD_PRELOAD=$VIRTUAL_ENV/{lib_path}"
+
+        # NOTE that we are using POSIX compliant commands (e.g. "=" instead of "==")
+        # as the default shell in the container is /bin/sh
+        return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'
 
     @computed_field
     @property

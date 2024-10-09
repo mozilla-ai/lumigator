@@ -44,6 +44,17 @@ def test_delete_dataset_ok(mock_requests_response, mock_requests, lumi_client, j
     lumi_client.datasets.delete_dataset(data["id"])
 
 
+def test_delete_dataset_not_found(
+    mock_requests_response, mock_requests, lumi_client, json_data_dataset
+):
+    mock_requests_response.status_code = 404
+    data = load_json(json_data_dataset)
+    mock_requests_response.json = lambda: None
+    mock_requests.side_effect = lambda **kwargs: check_method(str(HTTPMethod.DELETE), **kwargs)
+
+    lumi_client.datasets.delete_dataset(data["id"])
+
+
 def test_create_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
     mock_requests_response.status_code = 201
     data = load_json(json_data_dataset)

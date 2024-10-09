@@ -122,8 +122,11 @@ class ExperimentService:
             "--config": config_template.format(**config_params),
         }
 
-        # as our command relies on libgomp which gives issues on aarch64, we
-        # preload it with LD_PRELOAD_PREFIX (see settings.py for details)
+        # Pre-loading libgomp with LD_PRELOAD resolves allocation issues on aarch64
+        # (see https://github.com/mozilla-ai/lumigator/issues/156). The path where
+        # libs are stored on worker nodes contains a hash that depends on the
+        # installed libraries, so we get it dynamically right before running the
+        # command (more info in settings.py)
         eval_command = f"{settings.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
 
         # Prepare the job configuration that will be sent to submit the ray job.

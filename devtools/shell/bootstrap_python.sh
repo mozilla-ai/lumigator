@@ -13,22 +13,21 @@ fi
 
 
 PLAT=$(uname -o)
-PY_VERSION=${MZAI_PY_VERISON:-3.11.9}
+PY_VERSION=${MZAI_PY_VERSION:-3.11.9}
 # from common.sh
 PYTHON_INSTALLED=$(check_if_installed python)
 CUDA_AVAILABLE=$(check_if_installed nvcc)
 UV_INSTALLED=$(check_if_installed uv)
 VENVNAME="mzaivenv"
 UV_ARGS=("--override" "tmp_overrides.txt" "--index-strategy=unsafe-best-match")
+PYTHON_INSTALL_DIR=.python
 
 if [[ $PLAT == 'Darwin' ]]; then
 	echo "Darwin setup"
-	PYTHON_INSTALL_DIR=.python
 	PY_NAME=cpython-3.11.9-macos-aarch64-none
 	echo "torch==${TORCH_VERSION}" >tmp_overrides.txt
 else
 	echo "linux setup"
-	PYTHON_INSTALL_DIR=/opt/python
 	PY_NAME=cpython-3.11.9-linux-x86_64-gnu
 	if [[ "$CUDA_AVAILABLE" != 0 ]]; then
 		echo "nvcc found; configuring with CUDA"

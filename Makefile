@@ -9,6 +9,7 @@ PYTHON :=
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
 RAY_ARCH_SUFFIX :=
+PYTHON_INSTALL_DIR:=.python
 
 ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
@@ -16,7 +17,6 @@ endif
 
 ifndef PYTHON
 	ifeq ($(UNAME), GNU/Linux)
-		PYTHON_INSTALL_DIR:= /opt/python
 		# UV's installation path post /opt/python
 		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-linux-x86_64-gnu/bin/python3
 		ifeq ($(CUDA_AVAILABLE), 0)
@@ -25,7 +25,6 @@ ifndef PYTHON
 			PARAMETRIZE = linux_cpu
 		endif
 	else
-		PYTHON_INSTALL_DIR:=.python
 		PYTHON := $(PYTHON_INSTALL_DIR)/cpython-${PY_VERSION}-macos-aarch64-none/bin/python3
 		PARAMETRIZE := darwin
 	endif

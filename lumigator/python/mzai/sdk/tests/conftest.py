@@ -83,3 +83,13 @@ def json_data_experiment_post_simple() -> Traversable:
 @pytest.fixture(scope="session")
 def json_data_experiment_post_all() -> Traversable:
     return json_data_path() / "experiment-post-all.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_result() -> Traversable:
+    return json_data_path() / "experiment-result.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_result_download() -> Traversable:
+    return json_data_path() / "experiment-download.json"

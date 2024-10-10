@@ -71,6 +71,11 @@ def json_data_experiment() -> Traversable:
 
 
 @pytest.fixture(scope="session")
+def json_data_experiment_missing() -> Traversable:
+    return json_data_path() / "experiment-missing.json"
+
+
+@pytest.fixture(scope="session")
 def json_data_experiment_post_response() -> Traversable:
     return json_data_path() / "experiment-post-response.json"
 
@@ -91,5 +96,15 @@ def json_data_experiment_result() -> Traversable:
 
 
 @pytest.fixture(scope="session")
+def json_data_experiment_result_missing() -> Traversable:
+    return json_data_path() / "experiment-result-no-experiment.json"
+
+
+@pytest.fixture(scope="session")
 def json_data_experiment_result_download() -> Traversable:
     return json_data_path() / "experiment-download.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_experiment_result_download_missing() -> Traversable:
+    return json_data_path() / "experiment-download-no-experiment.json"

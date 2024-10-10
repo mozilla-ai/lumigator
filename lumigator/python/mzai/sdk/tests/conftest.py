@@ -32,8 +32,7 @@ def lumi_client() -> LumigatorClient:
             resp_mock.status_code = 200
             resp_mock.json = lambda: json.loads('["openai", "mistral"]')
             req_mock.return_value = resp_mock
-            lumi_c = LumigatorClient(LUMI_HOST)
-            return lumi_c
+            return LumigatorClient(LUMI_HOST)
 
 
 @pytest.fixture(scope="session")

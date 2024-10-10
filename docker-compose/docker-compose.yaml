@@ -1,4 +1,4 @@
-name: lumi
+name: lumigator
 services:
   postgres:
     image: postgres:16-alpine
@@ -28,7 +28,7 @@ services:
       - localstack-data:/var/lib/localstack
 
   ray:
-    image: rayproject/ray:2.30.0-py311-cpu
+    image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
     ports:
       - "6379:6379"
       - "8265:8265"
@@ -50,43 +50,14 @@ services:
       - NUM_CPU_WORKER=1
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
-      - ../../python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
     extra_hosts:
       - "localhost:host-gateway"
     profiles: 
       - !external
       - !arm64
     
-  ray_arm64:
-    image: rayproject/ray:2.30.0-py311-cpu-aarch64
-    ports:
-      - "6379:6379"
-      - "8265:8265"
-      - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --block"
-    shm_size: 2g
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: '5g'
-    environment:
-      - HOST=localhost
-      - REDISPORT=6379
-      - DASHBOARDPORT=8265
-      - HEADNODEPORT=10001
-      - REDISPASSWORD=${REDISPASSWORD}
-      - NUM_WORKERS=4
-      - NUM_CPU_WORKER=1
-      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
-    volumes:
-      - ../../python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
-    extra_hosts:
-      - "localhost:host-gateway"
-    profiles: 
-      - !external
-      - arm64
-
+ 
   backend:
     image: mzdotai/lumigator:backend_dev
     depends_on:

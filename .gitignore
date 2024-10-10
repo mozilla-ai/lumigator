@@ -176,4 +176,4 @@ cython_debug/
 .ijwb
 
 # Env for docker-compose
-lumigator/lumigator/infra/docker-compose/.env
+docker-compose/.env

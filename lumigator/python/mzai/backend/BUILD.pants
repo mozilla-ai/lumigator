@@ -6,23 +6,6 @@ python_sources(
     ],
 )
 
-
-crossplatform_pex(
-    name="backend_app",
-    args=[
-        "backend.main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "80",
-    ],
-    execution_mode="venv",
-    include_requirements=True,
-    include_sources=True,
-    script="uvicorn",
-    unparametrized_deps=[":backend_sources"],
-)
-
 ## leaving this code here for now explicitly.
 # the above macro function effectively generates this for you.
 
@@ -77,16 +60,3 @@ crossplatform_pex(
 #     ),
 # )
 #
-docker_image(
-    name="lumigator",
-    build_platform=["linux/amd64"],
-    dependencies=[":backend_app@parametrize=linux_cpu"],
-    image_tags=[
-        "backend_dev_{build_args.REPOVERSION}",
-        "backend_dev",
-    ],
-    registries=[
-        "@dockerhub",
-    ],
-    repository="",
-)

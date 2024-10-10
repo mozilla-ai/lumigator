@@ -80,92 +80,127 @@ class ExperimentService:
         # set storage path
         storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_EXPERIMENT_RESULTS_PREFIX }/"
 
-        # fill up model url with default openai url
-        if request.model.startswith("oai://"):
-            model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
-            model_url = settings.MISTRAL_API_URL
-        else:
-            model_url = request.model_url
+        if request.type == "inference":
+            inference_command = f"{settings.LD_PRELOAD_PREFIX} python -m inference generate_ground_truth"
 
-        # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
-            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+            ray_config = JobConfig(
+                job_id=record.id,
+                job_type=JobType.EXPERIMENT,
+                command=inference_command,
+                # args=eval_config_args,
+            )
 
-        config_params = {
-            "experiment_name": request.name,
-            "experiment_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-        }
+            # build runtime ENV for workers
+            runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+            settings.inherit_ray_env(runtime_env_vars)
 
-        # load a config template and fill it up with config_params
-        if request.config_template is not None:
-            config_template = request.config_template
-        elif request.model in config_templates.config_template:
-            # if no config template is provided, get the default one for the model
-            config_template = config_templates.config_template[request.model]
-        else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = config_templates.causal_template
+            runtime_env = {
+                "pip": settings.PIP_REQS,
+                "working_dir": settings.INFERENCE_WORK_DIR,
+                "env_vars": runtime_env_vars,
+            }
 
-        # eval_config_args is used to map input configuration parameters with
-        # command parameters provided via command line to the ray job.
-        # To do this, we use a dict where keys are parameter names as they'd
-        # appear on the command line and the values are the respective params.
-        eval_config_args = {
-            "--config": config_template.format(**config_params),
-        }
+            loguru.logger.info("runtime env setup...")
+            loguru.logger.info(f"{runtime_env}")
 
-        # Pre-loading libgomp with LD_PRELOAD resolves allocation issues on aarch64
-        # (see https://github.com/mozilla-ai/lumigator/issues/156). The path where
-        # libs are stored on worker nodes contains a hash that depends on the
-        # installed libraries, so we get it dynamically right before running the
-        # command (more info in settings.py)
-        eval_command = f"{settings.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+            entrypoint = RayJobEntrypoint(
+                config=ray_config, runtime_env=runtime_env,
+            )
 
-        # Prepare the job configuration that will be sent to submit the ray job.
-        # This includes both the command that is going to be executed and its
-        # arguments defined in eval_config_args
-        ray_config = JobConfig(
-            job_id=record.id,
-            job_type=JobType.EXPERIMENT,
-            command=eval_command,
-            args=eval_config_args,
-        )
+            loguru.logger.info(f"Submitting Ray job...")
+            submit_ray_job(self.ray_client, entrypoint)
 
-        # build runtime ENV for workers
-        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        settings.inherit_ray_env(runtime_env_vars)
+            loguru.logger.info(f"Getting response...")
+            return ExperimentResponse.model_validate(record)
 
-        # set num_gpus per worker (zero if we are just hitting a service)
-        if not request.model.startswith("hf://"):
-            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
-        else:
-            worker_gpus = settings.RAY_WORKER_GPUS
+        elif request.type == "evaluate" :
 
-        runtime_env = {
-            "pip": settings.PIP_REQS,
-            "working_dir": settings.EVALUATOR_WORK_DIR,
-            "env_vars": runtime_env_vars,
-        }
+            # fill up model url with default openai url
+            if request.model.startswith("oai://"):
+                model_url = settings.OAI_API_URL
+            elif request.model.startswith("mistral://"):
+                model_url = settings.MISTRAL_API_URL
+            else:
+                model_url = request.model_url
 
-        loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
+            # provide a reasonable system prompt for services where none was specified
+            if request.system_prompt is None and not request.model.startswith("hf://"):
+                request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-        entrypoint = RayJobEntrypoint(
-            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
-        )
-        loguru.logger.info(f"Submitting Ray job...")
-        submit_ray_job(self.ray_client, entrypoint)
+            config_params = {
+                "experiment_name": request.name,
+                "experiment_id": record.id,
+                "model_path": request.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": storage_path,
+                "model_url": model_url,
+                "system_prompt": request.system_prompt,
+            }
 
-        loguru.logger.info(f"Getting response...")
-        return ExperimentResponse.model_validate(record)
+            # load a config template and fill it up with config_params
+            if request.config_template is not None:
+                config_template = request.config_template
+            elif request.model in config_templates.config_template:
+                # if no config template is provided, get the default one for the model
+                config_template = config_templates.config_template[request.model]
+            else:
+                # if no default config template is provided, get the causal template
+                # (which works with seq2seq models too except it does not use pipeline)
+                config_template = config_templates.causal_template
+
+            # eval_config_args is used to map input configuration parameters with
+            # command parameters provided via command line to the ray job.
+            # To do this, we use a dict where keys are parameter names as they'd
+            # appear on the command line and the values are the respective params.
+            eval_config_args = {
+                "--config": config_template.format(**config_params),
+            }
+
+            # Pre-loading libgomp with LD_PRELOAD resolves allocation issues on aarch64
+            # (see https://github.com/mozilla-ai/lumigator/issues/156). The path where
+            # libs are stored on worker nodes contains a hash that depends on the
+            # installed libraries, so we get it dynamically right before running the
+            # command (more info in settings.py)
+            eval_command = f"{settings.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+
+            # Prepare the job configuration that will be sent to submit the ray job.
+            # This includes both the command that is going to be executed and its
+            # arguments defined in eval_config_args
+            ray_config = JobConfig(
+                job_id=record.id,
+                job_type=JobType.EXPERIMENT,
+                command=eval_command,
+                args=eval_config_args,
+            )
+
+            # build runtime ENV for workers
+            runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+            settings.inherit_ray_env(runtime_env_vars)
+
+            # set num_gpus per worker (zero if we are just hitting a service)
+            if not request.model.startswith("hf://"):
+                worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
+            else:
+                worker_gpus = settings.RAY_WORKER_GPUS
+
+            runtime_env = {
+                "pip": settings.PIP_REQS,
+                "working_dir": settings.EVALUATOR_WORK_DIR,
+                "env_vars": runtime_env_vars,
+            }
+
+            loguru.logger.info("runtime env setup...")
+            loguru.logger.info(f"{runtime_env}")
+
+            entrypoint = RayJobEntrypoint(
+                config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+            )
+            loguru.logger.info(f"Submitting Ray job...")
+            submit_ray_job(self.ray_client, entrypoint)
+
+            loguru.logger.info(f"Getting response...")
+            return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
         record = self._get_experiment_record(experiment_id)

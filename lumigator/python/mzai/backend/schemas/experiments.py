@@ -8,6 +8,7 @@ from schemas.jobs import JobStatus
 
 class ExperimentCreate(BaseModel):
     name: str
+    type: str # eval or inference
     description: str = ""
     model: str
     dataset: UUID

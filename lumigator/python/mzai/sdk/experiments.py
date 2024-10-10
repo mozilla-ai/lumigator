@@ -1,5 +1,5 @@
 from uuid import UUID
-from http import HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from json import dumps
 
 from schemas.experiments import (
@@ -31,12 +31,12 @@ class Experiments:
         data = response.json()
         return ExperimentResponse(**data)
 
-    def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
+    def get_experiment(self, experiment_id: UUID) -> ExperimentResponse | None:
         """Returns information on the experiment for the specified ID."""
         response = self.__client.get_response(f"{self.EXPERIMENTS_ROUTE}/{experiment_id}")
 
-        if not response:
-            return []
+        if not response or response.status_code != HTTPStatus.OK:
+            return None
 
         data = response.json()
         return ExperimentResponse(**data)
@@ -52,26 +52,26 @@ class Experiments:
 
         return [ExperimentResponse(**args) for args in response.json()]
 
-    def get_experiment_result(self, experiment_id: UUID) -> ExperimentResultResponse:
+    def get_experiment_result(self, experiment_id: UUID) -> ExperimentResultResponse | None:
         """Returns the result of the experiment for the specified ID."""
         response = self.__client.get_response(f"{self.EXPERIMENTS_ROUTE}/{experiment_id}/result")
 
-        if not response:
-            return []
+        if not response or response.status_code != HTTPStatus.OK:
+            return None
 
         data = response.json()
         return ExperimentResultResponse(**data)
 
     def get_experiment_result_download(
         self, experiment_id: UUID
-    ) -> ExperimentResultDownloadResponse:
+    ) -> ExperimentResultDownloadResponse | None:
         """Returns the result of the experiment for the specified ID."""
         response = self.__client.get_response(
             f"{self.EXPERIMENTS_ROUTE}/{experiment_id}/result/download"
         )
 
-        if not response:
-            return []
+        if not response or response.status_code != HTTPStatus.OK:
+            return None
 
         data = response.json()
         return ExperimentResultDownloadResponse(**data)

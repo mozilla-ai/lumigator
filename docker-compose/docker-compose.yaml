@@ -1,0 +1,96 @@
+name: lumigator
+services:
+  postgres:
+    image: postgres:16-alpine
+    platform: linux/amd64
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  localstack:
+    image: localstack/localstack:3.4.0
+    platform: linux/amd64
+    ports:
+      - 4566:4566
+    environment:
+      - SERVICES=s3:4566
+      - CREATE_BUCKETS=${S3_BUCKET}
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - PERSISTENCE=1
+      - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
+    volumes:
+      - ./localstack:/etc/localstack/init/ready.d
+      - localstack-data:/var/lib/localstack
+
+  ray:
+    image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
+    ports:
+      - "6379:6379"
+      - "8265:8265"
+      - "10001:10001"
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --block"
+    shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '5g'
+    environment:
+      - HOST=localhost
+      - REDISPORT=6379
+      - DASHBOARDPORT=8265
+      - HEADNODEPORT=10001
+      - REDISPASSWORD=${REDISPASSWORD}
+      - NUM_WORKERS=4
+      - NUM_CPU_WORKER=1
+      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
+    volumes:
+      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+    extra_hosts:
+      - "localhost:host-gateway"
+    profiles: 
+      - !external
+      - !arm64
+    
+ 
+  backend:
+    image: mzdotai/lumigator:backend_dev
+    depends_on:
+      - postgres
+      - localstack
+    ports:
+      - 80:80
+    environment:
+      - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE:-local}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-2}
+      - AWS_ENDPOINT_URL=${S3_ENDPOINT_URL}
+      - S3_BUCKET=${S3_BUCKET}
+      - PYTHONPATH=/mzai/lumigator/python/mzai/backend
+      - RAY_DASHBOARD_PORT=${RAY_DASHBOARD_PORT}
+      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
+      - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
+      - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RAY_WORKER_GPUS=${RAY_WORKER_GPUS:-0}
+      - RAY_WORKER_GPUS_FRACTION=${RAY_WORKER_GPUS_FRACTION:-0}
+    extra_hosts:
+      - "localhost:host-gateway"
+
+volumes:
+  postgres-data:
+  localstack-data:

@@ -48,7 +48,6 @@ services:
       - REDISPASSWORD=${REDISPASSWORD}
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
-      - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
     extra_hosts:

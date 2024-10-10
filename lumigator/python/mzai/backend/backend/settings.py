@@ -93,10 +93,7 @@ class BackendSettings(BaseSettings):
     # However, reading relative paths across Docker plus Ray makes it hard to get the file
     # We hardcode the path for now as a workaround
     # TODO: refactor requirements into Ray TOML.
-    @computed_field
-    @property
-    def PIP_REQS(self) -> str:  # noqa: N802
-        return f"lumigator/python/mzai/evaluator/requirements.txt"
+    PIP_REQS: str | None = None
 
     @computed_field
     @property

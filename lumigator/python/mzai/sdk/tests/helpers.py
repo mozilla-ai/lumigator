@@ -1,17 +1,14 @@
 import unittest.mock as mock
-import importlib.resources
 import json
 from pathlib import Path
-from importlib.resources.abc import Traversable
 
 
 LUMI_HOST = "localhost"
 
 
-def load_json(datafile: Traversable) -> str:
-    with importlib.resources.as_file(datafile) as path:
-        with Path.open(path) as file:
-            return json.load(file)
+def load_json(path: Path) -> str:
+    with Path.open(path) as file:
+        return json.load(file)
 
 
 def check_url(is_url, **kwargs):

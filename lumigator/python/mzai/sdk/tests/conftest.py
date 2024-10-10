@@ -1,10 +1,9 @@
-import importlib.resources
+from pathlib import Path
 import unittest.mock as mock
 
 import pytest
 import json
 
-from importlib.resources.abc import Traversable
 from lumigator import LumigatorClient
 
 LUMI_HOST = "localhost"
@@ -40,70 +39,70 @@ def mock_vendor_data() -> str:
     return '["openai", "mistral"]'
 
 
-def json_data_path() -> Traversable:
-    return importlib.resources.files("sdk.tests") / "data"
+def resources_dir() -> Path:
+    return Path(__file__).parent / "data"
 
 
 @pytest.fixture(scope="session")
-def json_data_deployments() -> Traversable:
-    return json_data_path() / "deployments.json"
+def json_data_deployments() -> Path:
+    return resources_dir() / "deployments.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_jobs() -> Traversable:
-    return json_data_path() / "jobs.json"
+def json_data_jobs() -> Path:
+    return resources_dir() / "jobs.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_job() -> Traversable:
-    return json_data_path() / "job.json"
+def json_data_job() -> Path:
+    return resources_dir() / "job.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiments() -> Traversable:
-    return json_data_path() / "experiments.json"
+def json_data_experiments() -> Path:
+    return resources_dir() / "experiments.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment() -> Traversable:
-    return json_data_path() / "experiment.json"
+def json_data_experiment() -> Path:
+    return resources_dir() / "experiment.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_missing() -> Traversable:
-    return json_data_path() / "experiment-missing.json"
+def json_data_experiment_missing() -> Path:
+    return resources_dir() / "experiment-missing.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_response() -> Traversable:
-    return json_data_path() / "experiment-post-response.json"
+def json_data_experiment_post_response() -> Path:
+    return resources_dir() / "experiment-post-response.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_simple() -> Traversable:
-    return json_data_path() / "experiment-post-simple.json"
+def json_data_experiment_post_simple() -> Path:
+    return resources_dir() / "experiment-post-simple.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_all() -> Traversable:
-    return json_data_path() / "experiment-post-all.json"
+def json_data_experiment_post_all() -> Path:
+    return resources_dir() / "experiment-post-all.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result() -> Traversable:
-    return json_data_path() / "experiment-result.json"
+def json_data_experiment_result() -> Path:
+    return resources_dir() / "experiment-result.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_missing() -> Traversable:
-    return json_data_path() / "experiment-result-no-experiment.json"
+def json_data_experiment_result_missing() -> Path:
+    return resources_dir() / "experiment-result-no-experiment.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_download() -> Traversable:
-    return json_data_path() / "experiment-download.json"
+def json_data_experiment_result_download() -> Path:
+    return resources_dir() / "experiment-download.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_download_missing() -> Traversable:
-    return json_data_path() / "experiment-download-no-experiment.json"
+def json_data_experiment_result_download_missing() -> Path:
+    return resources_dir() / "experiment-download-no-experiment.json"

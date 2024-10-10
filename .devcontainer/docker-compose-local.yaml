@@ -13,25 +13,35 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=lumigator
 
-  localstack:
-    # if you want to enable local S3-style data persistence, use the following
-    # image and set LOCALSTACK_AUTH_TOKEN in your env
-    # image: localstack/localstack-pro:3.4.0
-    image: localstack/localstack:3.4.0
-    platform: linux/amd64
+  minio:
+    image: minio/minio
+    expose:
+      - "9000"
     ports:
-      - 4566:4566
+      - "9000:9000"
+      # MinIO Console is available at http://localhost:9001
+      - "9001:9001"
     environment:
-      - SERVICES=s3:4566
-      - CREATE_BUCKETS=lumigator-storage
-      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
-      - PERSISTENCE=1
-      - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
+      MINIO_ROOT_USER: "minio_user"
+      MINIO_ROOT_PASSWORD: "minio_password"
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 1s
+      timeout: 10s
+      retries: 5
+    command: server /data --console-address ":9001"
     volumes:
-      # Sync localstack startup scripts
-      # https://docs.localstack.cloud/references/init-hooks/
-      - ./localstack:/etc/localstack/init/ready.d
-      - localstack-data:/var/lib/localstack
+      - 'minio-data:/data'
+
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+      mc alias set minio http://minio:9000 minio_user minio_password &&
+      mc mb minio/lumigator-storage || true"
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -61,7 +71,7 @@ services:
       - LD_PRELOAD=/tmp/ray/session_latest/runtime_resources/pip/7d3f1f47289095547ca48bc9a1eaa799900bb4d9/virtualenv/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
     #       issues down the line. This should be used only for local, development
@@ -76,7 +86,7 @@ services:
     platform: linux/amd64
     depends_on:
       - postgres
-      - localstack
+      - minio
     ports:
       - 80:80
     environment:
@@ -89,11 +99,11 @@ services:
       # The local file needs to be available through a mount,
       # if persistence is needed
       - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
-      - S3_ENDPOINT_URL=http://localhost:4566
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localhost:4566
+      - S3_ENDPOINT_URL=http://localhost:9000
+      - AWS_ACCESS_KEY_ID=minio_user
+      - AWS_SECRET_ACCESS_KEY=minio_password
+      #- AWS_DEFAULT_REGION=us-east-2
+      - AWS_ENDPOINT_URL=http://localhost:9000
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/evaluator
@@ -108,7 +118,7 @@ services:
       - RAY_WORKER_GPUS_FRACTION=0
     volumes:
       - ../:/mzai
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
     #       issues down the line. This should be used only for local, development
@@ -119,4 +129,4 @@ services:
 volumes:
     postgres-data:
 
-    localstack-data:
+    minio-data:

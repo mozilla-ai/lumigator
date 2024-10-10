@@ -1,3 +1,9 @@
+"""
+Completions SDK
+
+Provides a class to manipulate completions in Lumigator.
+"""
+
 import json
 from http import HTTPMethod, HTTPStatus
 

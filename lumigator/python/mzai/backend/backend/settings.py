@@ -1,11 +1,10 @@
+import os
+from collections.abc import Mapping
+
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
-from sqlalchemy.engine import URL, make_url
-from pathlib import Path
-import os
-
 from schemas.extras import DeploymentType
-from collections.abc import Mapping
+from sqlalchemy.engine import URL, make_url
 
 
 class BackendSettings(BaseSettings):
@@ -68,6 +67,24 @@ class BackendSettings(BaseSettings):
     OAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
 
     MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY", "")
+
+    @computed_field
+    @property
+    def LD_PRELOAD_PREFIX(self) -> str:  # noqa: N802
+        """Sets the LD_PRELOAD env var for aarch64.
+
+        The ray image on Mac has a known issue ("cannot allocate memory in static TLS block")
+        loading libgomp (see https://github.com/mozilla-ai/lumigator/issues/156).
+        To fix this we preload the library adding it to the LD_PRELOAD env variable.
+        As the path is relative to ray workers' virtual environment, we set this variable
+        right before calling the job command by prepending it to the command itself.
+        """
+        lib_path = "lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0"
+
+        # We set the LD_PRELOAD env var ONLY if the architecture is aarch64.
+        # NOTE that we are using POSIX compliant commands (e.g. "=" instead of "==")
+        # as the default shell in the container is /bin/sh
+        return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'
 
     @computed_field
     @property

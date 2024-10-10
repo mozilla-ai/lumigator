@@ -142,7 +142,6 @@ If the S3 storage service is used, the endpoint, key and secret are needed. The 
 
 | Environment variable name | Default value | Description |
 | --- | :-: | --- |
-| AWS_HOST | "" | Host where S3 is located. Currently pointing at `services.localstack`. |
 | AWS_ENDPOINT_URL | "" | Endpoint URL for the S3 data storage service. |
 | AWS_ACCESS_KEY_ID | "" | Key for the S3 data storage service. |
 | AWS_SECRET_ACCESS_KEY | "" | Secret for the S3 data storage service. |

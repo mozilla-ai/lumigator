@@ -41,15 +41,7 @@
         "pip_check": false
       },
       "env_vars": {
-        "MZAI_JOB_ID": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
-        "AWS_ACCESS_KEY_ID": "test",
-        "AWS_SECRET_ACCESS_KEY": "test",
-        "AWS_ENDPOINT_URL": "http://localhost:4566",
-        "LOCAL_FSSPEC_S3_KEY": "",
-        "LOCAL_FSSPEC_S3_SECRET": "",
-        "LOCAL_FSSPEC_S3_ENDPOINT_URL": "",
-        "OPENAI_API_KEY": "",
-        "MISTRAL_API_KEY": ""
+        "MZAI_JOB_ID": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"
       },
       "_ray_commit": "97c37298df9e997b86ca9efed824e27024f3bd60"
     },

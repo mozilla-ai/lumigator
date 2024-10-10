@@ -32,18 +32,8 @@ class BackendSettings(BaseSettings):
     RAY_DASHBOARD_PORT: int = 8265
     RAY_SERVE_INFERENCE_PORT: int = 8000
     # the following vars will be copied, if present, from Ray head to workers
-    RAY_WORKER_ENV_VARS: list[str] = [
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "AWS_ENDPOINT_URL",
-        "AWS_HOST",
-        "LOCAL_FSSPEC_S3_KEY",
-        "LOCAL_FSSPEC_S3_SECRET",
-        "LOCAL_FSSPEC_S3_ENDPOINT_URL",
-        "HF_TOKEN",
-        "OPENAI_API_KEY",
-        "MISTRAL_API_KEY",
-    ]
+    # Secrets should be added directly to ray by setting env vars on the ray head/worker nodes
+    RAY_WORKER_ENV_VARS: list[str] = []
     RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
     RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
 

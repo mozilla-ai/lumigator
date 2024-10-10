@@ -55,6 +55,18 @@ services:
       - REDISPASSWORD=yourpassword
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
+      # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=http://localhost:4566 # Should match AWS_ENDPOINT_URL
+      - LOCAL_FSSPEC_S3_KEY=test # Should match AWS_SECRET_ACCESS_KEY
+      - LOCAL_FSSPEC_S3_SECRET=test # Should match AWS_SECRET_ACCESS_KEY
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-2
+      - AWS_ENDPOINT_URL=http://localhost:4566
+
     volumes:
       - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
@@ -95,9 +107,6 @@ services:
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai
       - RAY_DASHBOARD_PORT=8265
       - RAY_HEAD_NODE_HOST=ray
-      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
-      - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
-      - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0

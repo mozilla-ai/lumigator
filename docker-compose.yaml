@@ -1,25 +1,30 @@
 name: lumigator
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    platform: linux/amd64
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
 
   localstack:
-    # if you want to enable local S3-style data persistence, use the following
-    # image and set LOCALSTACK_AUTH_TOKEN in your env
-    # image: localstack/localstack-pro:3.4.0
     image: localstack/localstack:3.4.0
     platform: linux/amd64
     ports:
       - 4566:4566
     environment:
       - SERVICES=s3:4566
-      - CREATE_BUCKETS=lumigator-storage
+      - CREATE_BUCKETS=${S3_BUCKET}
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
       - PERSISTENCE=1
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
-      # Sync localstack startup scripts
-      # https://docs.localstack.cloud/references/init-hooks/
-      - ./.devcontainer/localstack:/etc/localstack/init/ready.d
+      - .devcontainer/localstack:/etc/localstack/init/ready.d
       - localstack-data:/var/lib/localstack
 
   ray:
@@ -28,7 +33,7 @@ services:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block" # pragma: allowlist secret
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --block"
     shm_size: 2g
     deploy:
       resources:
@@ -37,75 +42,57 @@ services:
           memory: '5g'
     environment:
       - HOST=localhost
-      - RAY_IMAGE=raytest
       - REDISPORT=6379
       - DASHBOARDPORT=8265
       - HEADNODEPORT=10001
-      - REDISPASSWORD=yourpassword
+      - REDISPASSWORD=${REDISPASSWORD}
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
-      # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
-      - LOCAL_FSSPEC_S3_ENDPOINT_URL=http://localhost:4566 # Should match AWS_ENDPOINT_URL
-      - LOCAL_FSSPEC_S3_KEY=test # Should match AWS_SECRET_ACCESS_KEY
-      - LOCAL_FSSPEC_S3_SECRET=test # Should match AWS_SECRET_ACCESS_KEY
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localhost:4566
-
     volumes:
-      - ./lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
-    #       and inside containers, we map localhost to the host gateway IP.
-    #       This currently works properly, but might be the cause of networking
-    #       issues down the line. This should be used only for local, development
-    #       deployments.
+      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
     extra_hosts:
       - "localhost:host-gateway"
-
+    profiles: 
+      - !external
+      - !arm64
+    
+ 
   backend:
-    build:
-      context: .
-      dockerfile: "Dockerfile"
+    image: mzdotai/lumigator:first_uv
     platform: linux/amd64
-    command: ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
     depends_on:
+      - postgres
       - localstack
     ports:
-      - 80:80
+      - 8000:8000
     environment:
-      - DEPLOYMENT_TYPE=local
-      # The local file needs to be available through a mount,
-      # if persistence is needed
+      - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE:-local}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
-      - S3_ENDPOINT_URL=http://localhost:4566
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localhost:4566
-      - S3_BUCKET=lumigator-storage
+      - POSTGRES_DB=${POSTGRES_DB}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-2}
+      - AWS_ENDPOINT_URL=${S3_ENDPOINT_URL}
+      - S3_BUCKET=${S3_BUCKET}
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
-      - PIP_REQS=/mzai/lumigator/python/mzai/evaluator/requirements.txt
-      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/evaluator
-      - RAY_DASHBOARD_PORT=8265
-      - RAY_HEAD_NODE_HOST=ray
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai
+      - RAY_DASHBOARD_PORT=${RAY_DASHBOARD_PORT}
+      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}
+      - LOCAL_FSSPEC_S3_KEY=${LOCAL_FSSPEC_S3_KEY}
+      - LOCAL_FSSPEC_S3_SECRET=${LOCAL_FSSPEC_S3_SECRET}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - RAY_WORKER_GPUS=0
-      - RAY_WORKER_GPUS_FRACTION=0
-    volumes:
-      - ./:/mzai
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
-    #       and inside containers, we map localhost to the host gateway IP.
-    #       This currently works properly, but might be the cause of networking
-    #       issues down the line. This should be used only for local, development
-    #       deployments.
+      - RAY_WORKER_GPUS=${RAY_WORKER_GPUS:-0}
+      - RAY_WORKER_GPUS_FRACTION=${RAY_WORKER_GPUS_FRACTION:-0}
     extra_hosts:
       - "localhost:host-gateway"
 
 volumes:
-
-    localstack-data:
+  postgres-data:
+  localstack-data:

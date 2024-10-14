@@ -71,13 +71,11 @@ update-3rdparty-lockfiles:
 # specifically dependent on that step.
 
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
+DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-# this is the pip requirements file needed for the local devcontainer
-3rdparty/python/requirements_python_linux_cpu.txt: install-pants
-	pants run 3rdparty/python:gen_requirements_python_linux_cpu
+local-up: 
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
 
-local-up:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
@@ -86,7 +84,11 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 
+start-lumigator:
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d 
 
+stop-lumigator:
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 ######
 # convenience function that mostly shows the various targets in this repo. not necessary at all
 ######

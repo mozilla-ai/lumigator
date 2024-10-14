@@ -6,4 +6,17 @@ python_sources(
 python_tests(
     name="backend_tests",
     sources=["**/test_*.py"],
+    dependencies=[
+        ":data-csv",
+    ],
+)
+
+resources(
+    name="data-csv",
+    sources=["data/*.csv"],
+)
+
+resource(
+    name="docker-compose",
+    source="docker-compose.yaml",
 )

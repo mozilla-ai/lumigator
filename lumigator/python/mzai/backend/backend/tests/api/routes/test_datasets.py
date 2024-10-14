@@ -1,11 +1,11 @@
 import csv
 import io
+from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 
@@ -113,3 +113,35 @@ def test_experiment_format_validation(
             files={"dataset": ("dataset.csv", d)},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_upload_csv_delete(app_client: TestClient):
+    response = app_client.get("/health")
+    assert response.status_code == status.HTTP_200_OK
+    cwd = Path(__file__).parent
+    filename = cwd.parent.parent / "data/dialogsum_converted.csv"
+
+    with Path(filename).open("rb") as f:
+        create_response = app_client.post(
+            url="/datasets",
+            data={"format": DatasetFormat.EXPERIMENT.value},
+            files={"dataset": f},
+        )
+    assert create_response.status_code == status.HTTP_201_CREATED
+
+    created_dataset = DatasetResponse.model_validate(create_response.json())
+
+    # Get
+    get_response = app_client.get(f"/datasets/{created_dataset.id}")
+    assert get_response.status_code == status.HTTP_200_OK
+
+    retrieved_dataset = DatasetResponse.model_validate(get_response.json())
+    assert retrieved_dataset.id == created_dataset.id
+
+    # Delete
+    delete_response = app_client.delete(f"/datasets/{created_dataset.id}")
+    assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+
+    # Get after delete (not found)
+    get_response = app_client.get(f"/datasets/{created_dataset.id}")
+    assert get_response.status_code == status.HTTP_404_NOT_FOUND

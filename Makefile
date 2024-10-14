@@ -87,6 +87,9 @@ local-logs:
 start-lumigator:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d 
 
+start-lumigator-external-ray:
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
+
 stop-lumigator:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 ######

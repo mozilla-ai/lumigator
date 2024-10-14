@@ -24,8 +24,18 @@ services:
       - PERSISTENCE=1
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
-      - .devcontainer/localstack:/etc/localstack/init/ready.d
       - localstack-data:/var/lib/localstack
+  
+  localstack-create-bucket:
+    image: localstack/localstack:3.4.0
+    platform: linux/amd64
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: >
+       bash -c "awslocal s3 mb s3://lumigator-storage"
+    extra_hosts:
+      - "localhost:host-gateway"
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -64,7 +74,7 @@ services:
       - postgres
       - localstack
     ports:
-      - 8000:8000
+      - 80:8000
     environment:
       - DEPLOYMENT_TYPE=${DEPLOYMENT_TYPE:-local}
       - POSTGRES_HOST=postgres

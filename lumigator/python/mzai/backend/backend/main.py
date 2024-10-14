@@ -13,6 +13,14 @@ import sys
 import os
 
 
+LUMIGATOR_APP_TAGS = {
+    "title": "Lumigator Backend",
+    "description": "Backend server",
+    "version": "0.0.1",
+    "openapi_tags": TAGS_METADATA,
+}
+
+
 def create_app(engine: Engine) -> FastAPI:
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -20,7 +28,7 @@ def create_app(engine: Engine) -> FastAPI:
         BaseRecord.metadata.create_all(engine)
         yield
 
-    app = FastAPI(title="Lumigator Backend", lifespan=lifespan, openapi_tags=TAGS_METADATA)
+    app = FastAPI(**(LUMIGATOR_APP_TAGS | {"lifespan": lifespan}))
 
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()

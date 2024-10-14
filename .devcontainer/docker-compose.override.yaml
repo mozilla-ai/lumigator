@@ -3,36 +3,7 @@ name: lumigator
 services:
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
-    ports:
-      - "6379:6379"
-      - "8265:8265"
-      - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block" # pragma: allowlist secret
-    shm_size: 2g
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: '5g'
-    environment:
-      - HOST=localhost
-      - RAY_IMAGE=raytest
-      - REDISPORT=6379
-      - DASHBOARDPORT=8265
-      - HEADNODEPORT=10001
-      - REDISPASSWORD=yourpassword
-      - NUM_WORKERS=4
-      - NUM_CPU_WORKER=1
-    volumes:
-      - ../lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
-    #       and inside containers, we map localhost to the host gateway IP.
-    #       This currently works properly, but might be the cause of networking
-    #       issues down the line. This should be used only for local, development
-    #       deployments.
-    extra_hosts:
-      - "localhost:host-gateway"
-
+    
   backend:
     build:
       context: ..

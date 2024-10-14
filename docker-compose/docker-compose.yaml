@@ -59,6 +59,7 @@ services:
  
   backend:
     image: mzdotai/lumigator:backend_dev
+    platform: linux/amd64
     depends_on:
       - postgres
       - localstack
@@ -78,6 +79,7 @@ services:
       - AWS_ENDPOINT_URL=${S3_ENDPOINT_URL}
       - S3_BUCKET=${S3_BUCKET}
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai
       - RAY_DASHBOARD_PORT=${RAY_DASHBOARD_PORT}
       - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${LOCAL_FSSPEC_S3_ENDPOINT_URL}

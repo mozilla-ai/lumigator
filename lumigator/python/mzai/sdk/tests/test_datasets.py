@@ -1,13 +1,11 @@
-from pathlib import Path
-
-import json
 import io
+import json
+from http import HTTPMethod
+from pathlib import Path
 from uuid import UUID
 
 from schemas.datasets import DatasetFormat
-from http import HTTPMethod
-
-from tests.helpers import load_json, check_method
+from tests.helpers import check_method, load_json
 
 
 def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client, json_data_datasets):

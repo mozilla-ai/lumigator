@@ -1,8 +1,8 @@
+from schemas.datasets import DatasetFormat
 from sqlalchemy.orm import Mapped
 
 from backend.records.base import BaseRecord
 from backend.records.mixins import CreatedAtMixin
-from schemas.datasets import DatasetFormat
 
 
 class DatasetRecord(BaseRecord, CreatedAtMixin):
@@ -11,3 +11,4 @@ class DatasetRecord(BaseRecord, CreatedAtMixin):
     filename: Mapped[str]
     format: Mapped[DatasetFormat]
     size: Mapped[int]
+    gt: Mapped[bool]

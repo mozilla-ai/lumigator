@@ -27,7 +27,7 @@ class HuggingFaceEvalJobConfig(JobConfig):
     """Configuration to run a HuggingFace evaluation job."""
 
     dataset: DatasetConfig = Field(
-        description="Dataset of text completions to evaluate using the Prometheus judge model."
+        description="Dataset holding text to be summarized (examples) and summaries (ground_truth)."
     )
     evaluation: HuggingFaceEvaluationConfig
     model: AutoModelConfig | VLLMCompletionsConfig

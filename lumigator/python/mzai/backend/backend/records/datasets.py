@@ -11,4 +11,4 @@ class DatasetRecord(BaseRecord, CreatedAtMixin):
     filename: Mapped[str]
     format: Mapped[DatasetFormat]
     size: Mapped[int]
-    gt: Mapped[bool]
+    ground_truth: Mapped[bool]

@@ -156,7 +156,7 @@ class DatasetService:
 
             # Create DB record
             record = self.dataset_repo.create(
-                filename=dataset.filename, format=format, size=actual_size, gt=has_gt
+                filename=dataset.filename, format=format, size=actual_size, ground_truth=has_gt
             )
 
             # convert the dataset to HF format and save it to S3

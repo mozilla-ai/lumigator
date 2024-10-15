@@ -135,7 +135,7 @@ def test_experiment_ground_truth(
     )
     assert create_response.status_code == status.HTTP_201_CREATED
     created_dataset = DatasetResponse.model_validate(create_response.json())
-    assert created_dataset.gt is True
+    assert created_dataset.ground_truth is True
 
     create_response = app_client.post(
         url="/datasets",
@@ -144,4 +144,4 @@ def test_experiment_ground_truth(
     )
     assert create_response.status_code == status.HTTP_201_CREATED
     created_dataset = DatasetResponse.model_validate(create_response.json())
-    assert created_dataset.gt is False
+    assert created_dataset.ground_truth is False

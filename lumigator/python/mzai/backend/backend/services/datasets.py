@@ -10,15 +10,16 @@ from loguru import logger
 from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
 from s3fs import S3FileSystem
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from schemas.extras import ListingResponse
 
 from backend.records.datasets import DatasetRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.settings import settings
-from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from schemas.extras import ListingResponse
 
-ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", "ground_truth"}
+GT_FIELD: str = "ground_truth"
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
+ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", GT_FIELD}
 
 
 def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) -> int:
@@ -83,6 +84,15 @@ def validate_experiment_dataset(filename: str):
             )
 
 
+def dataset_has_gt(filename: str) -> bool:
+    with Path(filename).open() as f:
+        reader = csv.DictReader(f)
+        fields = set(reader.fieldnames or [])
+        has_gt = GT_FIELD in fields
+
+    return has_gt
+
+
 class DatasetService:
     def __init__(
         self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem
@@ -141,11 +151,12 @@ class DatasetService:
             # Validate format
             validate_dataset_format(temp.name, format)
 
+            # Verify whether the dataset contains ground truth
+            has_gt = dataset_has_gt(temp.name)
+
             # Create DB record
             record = self.dataset_repo.create(
-                filename=dataset.filename,
-                format=format,
-                size=actual_size,
+                filename=dataset.filename, format=format, size=actual_size, ground_truth=has_gt
             )
 
             # convert the dataset to HF format and save it to S3

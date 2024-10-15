@@ -64,7 +64,7 @@ jobs:
 
       - name: Get repo version
         run: |
-          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*" --always)\" >> $GITHUB_ENV
+          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
           echo "Version of the repo for this build: $REPOVERSION"
 
       - name: Login to DockerHub

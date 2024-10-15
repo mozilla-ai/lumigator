@@ -9,7 +9,7 @@ from http import HTTPMethod, HTTPStatus
 
 from schemas.completions import CompletionResponse
 
-from client import ApiClient
+from sdk.client import ApiClient
 
 
 class Completions:

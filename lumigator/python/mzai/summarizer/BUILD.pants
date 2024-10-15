@@ -1,6 +1,0 @@
-python_sources(
-    sources=[
-        "**/*.py",
-        "!tests",
-    ],
-)

@@ -22,7 +22,6 @@ rayWorkerGPUs: ""
 
 serviceAccountName: ""
 
-summarizerWorkDir: ""
 
 existingMistralAPISecret: ""
 mistralAPIKey: ""

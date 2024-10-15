@@ -33,7 +33,6 @@ class Health:
 
         return check
 
-
     def get_jobs(self) -> list[JobSubmissionResponse]:
         """Returns information on all job submissions."""
         endpoint = f"{self.HEALTH_ROUTE}/jobs/"

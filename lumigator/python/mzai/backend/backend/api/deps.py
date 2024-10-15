@@ -63,7 +63,6 @@ def get_experiment_service(
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
-
 def get_mistral_completion_service() -> MistralCompletionService:
     return MistralCompletionService()
 

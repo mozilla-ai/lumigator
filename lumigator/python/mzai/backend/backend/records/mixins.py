@@ -24,7 +24,6 @@ class JobStatusMixin:
     status: Mapped[JobStatus] = mapped_column(default=JobStatus.CREATED)
 
 
-
 @declarative_mixin
 class CreatedAtMixin:
     created_at: Mapped[datetime.datetime] = mapped_column(

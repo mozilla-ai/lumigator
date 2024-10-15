@@ -81,7 +81,7 @@ jobs:
         run: docker tag mzdotai/lumigator:backend_dev_$REPOVERSION mzdotai/lumigator:latest
 
       - name: Push the Docker image
-        run: docker push mzdotai/lumigator:$REPOVERSION
+        run: docker push mzdotai/lumigator:backend_dev_$REPOVERSION
 
       - name: Push the Docker image with latest tag
         run: docker push mzdotai/lumigator:latest

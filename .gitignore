@@ -31,11 +31,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# pants
-/dist/
-/.pants.d
-pants_tools/macosx_14_pex_platform_tags_local.json
-pants.toml.bak
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

@@ -23,3 +23,9 @@ dependencies = [
     "psycopg2-binary==2.9.9", # For sqlalchemy
     "python-dotenv>=1.0.1",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "testcontainers>=4.8.2",
+]

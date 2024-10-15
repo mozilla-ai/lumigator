@@ -46,7 +46,7 @@ def common_resources_dir() -> Path:
 
 @pytest.fixture(scope="session")
 def json_data_jobs() -> Path:
-    return resources_dir() / "jobs.json"
+    return resources_dir() / "ray_submit.json"
 
 
 @pytest.fixture(scope="session")

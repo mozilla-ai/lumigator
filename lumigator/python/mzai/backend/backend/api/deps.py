@@ -12,8 +12,10 @@ from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
+from backend.services.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
+from backend.services.jobs import JobService
 from backend.settings import settings
 
 
@@ -60,6 +62,17 @@ def get_experiment_service(
 
 
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
+
+def get_job_service(
+    session: DBSessionDep, dataset_service: DatasetServiceDep
+) -> ExperimentService:
+    job_repo = JobRepository(session)
+    result_repo = JobResultRepository(session)
+    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
+    return JobService(job_repo, result_repo, ray_client, dataset_service)
+
+
+JobServiceDep = Annotated[JobService, Depends(get_job_service)]
 
 
 def get_mistral_completion_service() -> MistralCompletionService:

@@ -15,7 +15,7 @@ class WandbRunConfig(EvaluatorConfig):
     The W&B platform will auto-generate values for these variables if they are not provided
     when you initialize a run.
 
-    However, based on how these attributes are passed between jobs it is often necessary
+    However, based on how these attributes are passed between ray_submit it is often necessary
     to know the run ID before initializing a run.
     For this reason, the run ID field is made non-optional and auto-generated locally
     if it is not provided.

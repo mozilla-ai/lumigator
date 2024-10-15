@@ -112,7 +112,7 @@ class AdapterConfig(EvaluatorConfig, extra="allow"):
 
 
 class QuantizationConfig(EvaluatorConfig):
-    """Basic quantization settings to pass to training and evaluation jobs.
+    """Basic quantization settings to pass to training and evaluation ray_submit.
 
     Note that in order to use BitsAndBytes quantization on Ray,
     you must ensure that the runtime environment is installed with GPU support.

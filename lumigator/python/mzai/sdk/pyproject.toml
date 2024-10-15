@@ -4,9 +4,16 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "loguru==0.7.2",
+    "requests>=2,<3",
+    "schemas",
+]
 
 [tool.uv]
 dev-dependencies = [
     "pytest>=8.3.3",
 ]
+
+[tool.uv.sources]
+schemas = { path = "../schemas", editable = true }

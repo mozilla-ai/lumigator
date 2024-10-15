@@ -1,4 +1,4 @@
-from tests.helpers import load_json
+from .helpers import load_json
 
 
 def test_get_experiments_ok(

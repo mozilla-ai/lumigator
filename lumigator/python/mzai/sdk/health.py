@@ -3,7 +3,7 @@ from http import HTTPStatus
 from schemas.deployments import DeploymentEvent
 
 from schemas.jobs import JobSubmissionResponse
-from client import ApiClient
+from .client import ApiClient
 
 
 class HealthCheck:

@@ -23,7 +23,7 @@ head:
   serviceAccountName: s3
   rayStartParams:
     object-store-memory: "200000000" # 200mb
-    num-cpus: 0 # Force ray to not do any jobs on the head node
+    num-cpus: 0 # Force ray to not do any ray_submit on the head node
   resources:
     limits:
       #"nvidia.com/gpu": 1 # Required to use GPU.

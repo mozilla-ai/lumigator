@@ -5,6 +5,7 @@ class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
     EXPERIMENTS = "experiments"
+    JOBS = "ray_submit"
     COMPLETIONS = "completions"
 
 
@@ -19,6 +20,10 @@ TAGS_METADATA = [
     },
     {
         "name": Tags.EXPERIMENTS,
+        "description": "Create and manage evaluation experiments.",
+    },
+    {
+        "name": Tags.JOBS,
         "description": "Create and manage evaluation experiments.",
     },
     {

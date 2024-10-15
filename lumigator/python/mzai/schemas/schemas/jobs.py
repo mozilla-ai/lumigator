@@ -47,3 +47,33 @@ class JobSubmissionResponse(BaseModel):
     driver_agent_http_address: str | None = None
     driver_node_id: str | None = None
     driver_exit_code: int | None = None
+
+
+class JobCreate(BaseModel):
+    name: str
+    description: str = ""
+    model: str
+    dataset: UUID
+    max_samples: int | None = None
+    model_url: str | None = None
+    system_prompt: str | None = None
+    config_template: str | None = None
+
+
+class JobResponse(BaseModel, from_attributes=True):
+    id: UUID
+    name: str
+    description: str
+    status: JobStatus
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+
+
+class JobResultResponse(BaseModel, from_attributes=True):
+    id: UUID
+    experiment_id: UUID
+
+
+class JobResultDownloadResponse(BaseModel):
+    id: UUID
+    download_url: str

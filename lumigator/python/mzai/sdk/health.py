@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-from schemas.deployments import DeploymentEvent
 
 from schemas.jobs import JobSubmissionResponse
 from client import ApiClient
@@ -34,13 +33,6 @@ class Health:
 
         return check
 
-    def get_deployments(self) -> list[DeploymentEvent]:
-        response = self.__client.get_response(f"{self.HEALTH_ROUTE}/deployments")
-
-        if not response:
-            return []
-
-        return [DeploymentEvent(**args) for args in response.json()]
 
     def get_jobs(self) -> list[JobSubmissionResponse]:
         """Returns information on all job submissions."""

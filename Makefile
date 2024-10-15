@@ -1,4 +1,4 @@
-.PHONY: ci-setup ci-lint ci-fmt ci-tests show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants install-uv bootstrap-dev-environment
+.PHONY: ci-setup ci-lint ci-fmt ci-tests create-env-file show-pants-targets clean-python local-up local-down local-logs install-pants bootstrap-python clean-docker-buildcache clean-docker-images clean-docker-containers clean-pants install-uv bootstrap-dev-environment start-lumigator-external-ray start-lumigator stop-lumigator
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -50,12 +50,17 @@ $(PYTHON):
 
 $(VENV): $(PYTHON)
 
+create-env-file:
+	@if [ ! -f .env ]; then \
+	  	cp .env.example .env; \
+	fi
+
 bootstrap-python: $(PYTHON) $(VENV)
 
 .env: $(PYTHON) install-pants
 	# From: https://www.pantsbuild.org/2.20/docs/using-pants/setting-up-an-ide
 	# ROOTS="$(shell pants roots)" $(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$$ROOTS'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
-	$(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" > .env
+	$(PYTHON) -c "print('PYTHONPATH=./' + ':./'.join('''$(shell pants roots)'''.strip().split(' ')) + ':\$$PYTHONPATH')" >> .env
 
 bootstrap-dev-environment: $(PYTHON) $(VENVNAME) install-pants  .env
 
@@ -73,7 +78,7 @@ update-3rdparty-lockfiles:
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-local-up: 
+local-up: create-env-file
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
 
 
@@ -84,10 +89,10 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 
-start-lumigator:
+start-lumigator: create-env-file
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d 
 
-start-lumigator-external-ray:
+start-lumigator-external-ray: create-env-file
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
 
 stop-lumigator:

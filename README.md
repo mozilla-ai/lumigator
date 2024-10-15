@@ -81,10 +81,30 @@ It consists of:
 + A Postgres database to track platform-level tasks and dataset metadata
 
 # Get Started
+You can run the project locally using `docker-compose` on Mac or Linux, or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
 
-You can build the local project using `pants` and `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
+## Prerequisites:
+`docker` and `docker-compose` must be installed on your system.
 
-## Local Requirements
+## Environment Variables
+
+The project uses a `.env` file to configure settings such as database credentials, API keys, etc. By default, Docker Compose will look for `.env` in the root of the project directory.
+
+If the `.env` file does not exist, it will be automatically created from [`.env.example.`](.env.example)
+
+# Running Lumigator locally
+
+1. `git clone git@github.com:mozilla-ai/lumigator.git`
+2. `make start-lumigator`
+3. The application should be available at http://localhost:8000. 
+
+# Running Lumigator with an external Ray cluster
+To run Lumigator with an external Ray cluster, ensure the ray host and port are configured in [`.env.example.`](.env.example) and then use the following command:
+
+`make start-lumigator-external-ray`
+
+## Local Development Requirements
+If you want to contribute to the project or run it in a development environment these are the requirements.
 
 + [Docker](https://docs.docker.com/engine/install/)
     + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).

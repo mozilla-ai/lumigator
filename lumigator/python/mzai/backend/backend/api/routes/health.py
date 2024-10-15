@@ -47,3 +47,4 @@ def get_all_jobs() -> list[JobSubmissionResponse]:
             return {"error": "Invalid JSON response"}
     else:
         return {"error": f"HTTP error {resp.status_code}"}
+

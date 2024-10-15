@@ -78,7 +78,7 @@ jobs:
           docker build ./lumigator/python/mzai/backend/ --file ./lumigator/python/mzai/backend/Dockerfile.uv --tag mzdotai/lumigator:backend_dev_$REPOVERSION
 
       - name: Create an image with latest tag
-        run: docker tag mzdotai/lumigator:$REPOVERSION mzdotai/lumigator:latest
+        run: docker tag mzdotai/lumigator:backend_dev_$REPOVERSION mzdotai/lumigator:latest
 
       - name: Push the Docker image
         run: docker push mzdotai/lumigator:$REPOVERSION

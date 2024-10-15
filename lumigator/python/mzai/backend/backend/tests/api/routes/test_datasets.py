@@ -108,19 +108,24 @@ def test_presigned_download(app_client: TestClient, valid_experiment_dataset: st
         assert upload_filename in parse_result.path
 
 
+@pytest.mark.parametrize(
+    "dataset, expected_status",
+    [
+        ("missing_examples_dataset", status.HTTP_403_FORBIDDEN),
+        ("extra_column_dataset", status.HTTP_403_FORBIDDEN),
+    ],
+)
 def test_experiment_format_validation(
     app_client: TestClient,
-    missing_examples_dataset: str,
-    extra_column_dataset: str,
+    dataset: str,
+    expected_status: int,
 ):
-    datasets = [missing_examples_dataset, extra_column_dataset]
-    for d in datasets:
-        response = app_client.post(
-            url="/datasets",
-            data={"format": DatasetFormat.EXPERIMENT.value},
-            files={"dataset": ("dataset.csv", d)},
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+    response = app_client.post(
+        url="/datasets",
+        data={"format": DatasetFormat.EXPERIMENT.value},
+        files={"dataset": ("dataset.csv", dataset)},
+    )
+    assert response.status_code == expected_status
 
 
 def test_experiment_ground_truth(

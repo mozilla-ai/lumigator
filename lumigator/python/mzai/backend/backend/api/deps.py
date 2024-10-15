@@ -65,14 +65,6 @@ def get_experiment_service(
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
-def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
-    deployment_repo = GroundTruthDeploymentRepository(session)
-    ray_serve_client = ServeSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return GroundTruthService(deployment_repo, ray_serve_client)
-
-
-GroundTruthServiceDep = Annotated[GroundTruthService, Depends(get_ground_truth_service)]
-
 
 def get_mistral_completion_service() -> MistralCompletionService:
     return MistralCompletionService()

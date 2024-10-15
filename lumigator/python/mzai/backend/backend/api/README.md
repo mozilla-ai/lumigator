@@ -186,7 +186,7 @@ standard code structure:
 | [`backend/records`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/records)      | Records used by each service                                                                                                                                                                                                              |
 
 The general rule is that for most endpoints you'll end up with an identical filename for each of the above directories
-(see e.g. `datasets`, `experiments`, `groundtruth`, etc).
+(see e.g. `datasets`, `experiments`, etc).
 
 ## Writing a new endpoint
 
@@ -243,7 +243,6 @@ from backend.api.routes import (
     completions,
     datasets,
     experiments,
-    groundtruth,
     health,
     tasks, ### NEW
 )

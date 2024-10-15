@@ -49,18 +49,3 @@ def get_all_jobs() -> List[JobSubmissionResponse]:
     else:
         return {"error": f"HTTP error {resp.status_code}"}
 
-
-@router.get("/deployments/")
-def get_summarizer_status():
-    print(settings.RAY_DASHBOARD_URL)
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/serve/applications/")
-    if resp.status_code == 200:
-        try:
-            data = resp.json()
-            return data
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-            print(f"Response text: {resp.text}")
-            return {"error": "Invalid JSON response"}
-    else:
-        return {"error": f"HTTP error {resp.status_code}"}

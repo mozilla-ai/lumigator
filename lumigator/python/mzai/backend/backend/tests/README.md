@@ -16,17 +16,6 @@ that contains fixtures for the entire test suite.
 
 ## Running Tests
 
-Tests run through pants. To see all available tests:
-
-```pants --filter-target-type=experimental_test_shell_command,helm_unittest_test,python_test,shunit2_test list ::```
-
-Running all tests:
-
-``pants test ::``
-
-Tests are parametrized through Pants. See more on parametrization in the [Pants guide.](/PANTS_GUIDE.md). Running a single test on Mac:
-`pants test <target>@parametrize=darwin`
-
 
 ## Test Settings
 

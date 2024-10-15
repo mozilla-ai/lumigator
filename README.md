@@ -21,7 +21,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
   + [Evaluating Large Language Models](/EVALUATION_GUIDE.md)
 + **Installing Lumigator**
   + Building
-    + [Pants guide](PANTS_GUIDE.md)
+
   + Using/Testing
     + [Kubernetes Helm Charts](lumigator/infra/mzai/helm/lumigator/README.md)
     + [Local install documentation](/.devcontainer/README.md)
@@ -82,7 +82,7 @@ It consists of:
 
 # Get Started
 
-You can build the local project using `pants` and `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
+You can build the local project using `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
 
 ## Local Requirements
 
@@ -92,31 +92,11 @@ You can build the local project using `pants` and `docker-compose` on Mac or Lin
 
 ## Local Development Setup (either Mac or Linux)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
-2.  Install [Pants](https://www.pantsbuild.org) using the [official instructions for your system](https://www.pantsbuild.org/2.21/docs/getting-started/installing-pants). For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
-3. `make bootstrap-dev-environment` and `source mzaivenv/bin/activate` to activate the virtualenv.
+
 4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
 5. To shut down app, `make local-down` and `deactivate`to deactivate the virtualenv
 
 ### Dev Environment Details
-This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is
-handled by `uv`; pants maintains lockfiles for different platforms. Currently, only `python 3.11.9` is valid for this project; if a compatible interpreter
-is found `uv` will not download a standalone python interpreter for you.
-
-For VSCode users, activate the venv before opening your IDE; the `.env` file will be recognized automatically.
-
- 
-```shell
-make bootstrap-dev-environment
-source mzaivenv/bin/activate
-```
-
-Show targets:
-
-```bash
-make show-pants-targets
-```
-
-run the app locally via docker compose:
 
 ```bash
 make local-up
@@ -125,14 +105,6 @@ make local-down # shuts it down
 ```
 
 Compile targets manually:
-
-```bash
-pants package <target>
-# backend app
-pants package lumigator/python/mzai/backend --no-local-cache
-# backend docker image
-pants package lumigator/python/mzai/backend:backend_image
-```
 
 ### Environment variable reference
 
@@ -174,12 +146,4 @@ The Ray cluster used for computing allows several settings through the following
 | RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
 
 ## Rebuilding dependencies
-
-You may need to manually regenerate the [lockfiles](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
-To do so:
-
-1. Add your new dependency to `3rdparty/python/pyproject.toml`. This file respects system platform markers, and only very special cases need to be added as explicit `python_requirement` targets.
-2. run `pants generate-lockfiles`. This will take a while - 5-10 minutes in some cases and require access to pypi.
-
-make sure to add the new lockfiles to the repo with your PR. You'll have to rebuild your dev environment if you haven't already.
 

@@ -64,7 +64,7 @@ jobs:
 
       - name: Get repo version
         run: |
-          export REPOVERSION=$(git describe --tags --dirty --match "[0-9\.]*" --always)
+          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*" --always)\" >> $GITHUB_ENV
           echo "Version of the repo for this build: $REPOVERSION"
 
       - name: Login to DockerHub
@@ -75,7 +75,6 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          echo "Version of the repo for this build: $REPOVERSION"
           docker build ./lumigator/python/mzai/backend/ --file ./lumigator/python/mzai/backend/Dockerfile.uv --tag mzdotai/lumigator:$REPOVERSION
 
       - name: Create an image with latest tag

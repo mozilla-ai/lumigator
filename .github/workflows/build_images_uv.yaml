@@ -74,7 +74,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build the Docker image
-        run: docker build ./lumigator/python/mzai/backend/ --file ./lumigator/python/mzai/backend/Dockerfile.uv --tag mzdotai/lumigator:$REPOVERSION
+        run: |
+          echo "Version of the repo for this build: $REPOVERSION"
+          docker build ./lumigator/python/mzai/backend/ --file ./lumigator/python/mzai/backend/Dockerfile.uv --tag mzdotai/lumigator:$REPOVERSION
 
       - name: Create an image with latest tag
         run: docker tag mzdotai/lumigator:$REPOVERSION mzdotai/lumigator:latest

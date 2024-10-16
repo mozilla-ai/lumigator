@@ -29,7 +29,6 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
   + [Platform Examples](/notebooks/walkthrough.ipynb)
   + [Lumigator API](/lumigator/README.md)
   + Offline Evaluations with [lm-buddy](https://github.com/mozilla-ai/lm-buddy)
-  + Online Evaluations with [Ray Serve Deployments](lumigator/python/mzai/summarizer/README.md)
 + **Extending Lumigator:**
   + [Creating a new Lumigator endpoint](lumigator/python/mzai/backend/api/README.md)
 
@@ -73,10 +72,9 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
 Lumigator is a Python-based FastAPI web app with REST API endpoints that allow for access to services for serving and evaluating large language models available as safetensor artifacts hosted on both HuggingFace and local stores, with our first primary focus being Huggingface access, and tracking the lifecycle of a model in the backend database (Postgres).
 It consists of:
 
-+ a FastAPI-based huggingface's `evaluate` library for those metrics, but we are considering using lm-harness that manages platform activity backed by Postgres
-+ online evaluation of models using **Ray Serve** deployments
-+ a **Ray cluster** to run offline evaluation jobs using [lm-buddy](https://github.com/mozilla-ai/lm-buddy), our in-house eval framework
-    + LM buddy runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
++ a FastAPI-based web app that includes  huggingface's `evaluate` library for those metrics
++ a **Ray cluster** to run offline evaluation jobs using `evaluator`
+    + the `evaluator` module runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
 + Artifact management (S3 in the cloud, localstack locally )
 + A Postgres database to track platform-level tasks and dataset metadata
 

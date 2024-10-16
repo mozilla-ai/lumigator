@@ -42,9 +42,6 @@ class BackendSettings(BaseSettings):
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
-    # Summarizer
-    SUMMARIZER_WORK_DIR: str | None = None
-
     # Eval
     EVALUATOR_WORK_DIR: str | None = None
 

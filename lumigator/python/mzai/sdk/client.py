@@ -50,7 +50,7 @@ def _make_request(
             **kwargs,  # noqa: B026
         )
         response.raise_for_status()
-        if verbose:
+        if verbose and response.content:
             logger.info(f"{json.dumps(response.json(), indent=2)}")
     except requests.RequestException as e:
         logger.error(f"Request failed: {e}")
@@ -69,6 +69,7 @@ class ApiClient:
         api_path,
         method: HTTPMethod = HTTPMethod.GET,
         data=None,
+        files=None,
         json_data=None,
         verbose: bool = True,
     ) -> requests.Response:
@@ -78,7 +79,9 @@ class ApiClient:
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
         try:
-            response = _make_request(path, method, data=data, json_=json_data, verbose=verbose)
+            response = _make_request(
+                path, method, data=data, files=files, json_=json_data, verbose=verbose
+            )
             # Support returning a response for 200-204 status codes.
             # NOTE: Other status codes that are returned without an HTTP error aren't supported.
             # e.g. 307 - Temporary Redirect
@@ -92,6 +95,4 @@ class ApiClient:
                 # This happens for status codes such as 400 - Bad Request etc.
                 raise
         except requests.RequestException as e:
-            # TODO: Don't log and raise
-            logger.error(f"An error occurred: {e}")
             raise

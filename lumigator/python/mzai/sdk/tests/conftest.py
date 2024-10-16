@@ -106,3 +106,18 @@ def json_data_experiment_result_download() -> Path:
 @pytest.fixture(scope="session")
 def json_data_experiment_result_download_missing() -> Path:
     return resources_dir() / "experiment-download-no-experiment.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_datasets() -> Path:
+    return resources_dir() / "datasets.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_dataset() -> Path:
+    return resources_dir() / "dataset.json"
+
+
+@pytest.fixture(scope="session")
+def hf_data() -> Path:
+    return resources_dir() / "thunderbird_gt_bart.csv"

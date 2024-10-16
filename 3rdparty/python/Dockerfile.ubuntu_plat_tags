@@ -1,5 +1,0 @@
-ARG BASE_IMAGE=lumigator/python/mzai/backend:backend_image
-FROM $BASE_IMAGE
-
-RUN pip install pex
-ENTRYPOINT ["pex3", "interpreter", "inspect", "--markers", "--tags", "--interpreter-constraint", "CPython==3.11.9"]

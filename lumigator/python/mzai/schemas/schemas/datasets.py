@@ -19,4 +19,5 @@ class DatasetResponse(BaseModel, from_attributes=True):
     filename: str
     format: DatasetFormat
     size: int
+    ground_truth: bool
     created_at: datetime.datetime

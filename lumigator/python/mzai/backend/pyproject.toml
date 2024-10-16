@@ -20,6 +20,17 @@ dependencies = [
     "s3fs==2024.5.0",
     "datasets==2.20.0",
     "ray[client]==2.30.0",
-    "psycopg2-binary==2.9.9", # For sqlalchemy
+    "psycopg2-binary==2.9.9",
+    # For sqlalchemy
     "python-dotenv>=1.0.1",
+    "schemas",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "testcontainers>=4.8.2",
+]
+
+[tool.uv.sources]
+schemas = { path = "../schemas", editable = true }

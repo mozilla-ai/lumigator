@@ -22,13 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: mzdotai/lumigator          
-          tags: |
-            type=ref,event=branch,ref=main        
+      - name: Get repo version
+        run: |
+          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
+          echo "Version of the repo for this build: $REPOVERSION"   
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -47,4 +44,6 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            mzdotai/lumigator:backend_dev_$REPOVERSION
+            mzdotai/lumigator:latest

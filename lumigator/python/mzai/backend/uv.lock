@@ -163,6 +163,7 @@ dependencies = [
     { name = "ray", extra = ["client"] },
     { name = "requests" },
     { name = "s3fs" },
+    { name = "schemas" },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -190,6 +191,7 @@ requires-dist = [
     { name = "ray", extras = ["client"], specifier = "==2.30.0" },
     { name = "requests", specifier = ">=2,<3" },
     { name = "s3fs", specifier = "==2024.5.0" },
+    { name = "schemas", editable = "../schemas" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = "==2.0.28" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.28.0" },
 ]
@@ -1590,6 +1592,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/cb/67/94c6730ee4c34505b
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/4a/b221409913760d26cf4498b7b1741d510c82d3ad38381984a3ddc135ec66/s3transfer-0.10.2-py3-none-any.whl", hash = "sha256:eca1c20de70a39daee580aef4986996620f365c4e0fda6a86100231d62f1bf69", size = 82716 },
 ]
+
+[[package]]
+name = "schemas"
+version = "0.1.0"
+source = { editable = "../schemas" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.8.0" }]
 
 [[package]]
 name = "shellingham"

@@ -5,7 +5,6 @@ on:
     paths:
       - "lumigator/**"
       - ".github/**"
-    branches: ["main"]
     # synchronized is when you push new commits
     types: ["opened", "synchronize"]
   push:
@@ -14,30 +13,10 @@ on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
-env:
-  AWS_REGION: us-east-2
-
-# https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
-permissions:
-  id-token: write
-  contents: read # This is required for actions/checkout
-
 jobs:
   build:
     name: Build Docker image
     runs-on: ubuntu_2204_150gb # this is a mzai-custom image on github actions runners.
-    env:
-      # head_ref: source branch of the pull request.
-      # only set on PRs; e.g., for a PR from branch `myname/amazing_model`, will be `myname/amazing_model`
-      # ref_name: short ref name of branch triggering runs. works for pushes to a development branch.
-      # assignment works starting with the head_ref
-      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-    # set up a local registry
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
 
     steps:
       - name: Checkout
@@ -45,7 +24,7 @@ jobs:
         with:
           # gets full repo history
           fetch-depth: 0
-          
+
       - name: Get repo version
         run: |
           echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
@@ -59,7 +38,7 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker build ./lumigator/python/mzai/backend/ --file ./lumigator/python/mzai/backend/Dockerfile.uv --tag mzdotai/lumigator:backend_dev_$REPOVERSION
+          docker build . --file ./Dockerfile --tag mzdotai/lumigator:backend_dev_$REPOVERSION
 
       - name: Create an image with latest tag
         run: docker tag mzdotai/lumigator:backend_dev_$REPOVERSION mzdotai/lumigator:latest

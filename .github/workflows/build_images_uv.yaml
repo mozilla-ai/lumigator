@@ -45,5 +45,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            mzdotai/lumigator:backend_dev_$REPOVERSION
+            mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
             mzdotai/lumigator:latest

@@ -28,7 +28,7 @@ jobs:
         with:
           images: mzdotai/lumigator          
           tags: |
-            type=ref,event=branch            
+            type=ref,event=branch,ref=main        
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

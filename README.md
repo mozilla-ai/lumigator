@@ -97,7 +97,7 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 
 ### Dev Environment Details
 
-We use `uv` to manage dependencies. Each project under `/Users/kyle/mzai/lumigator/lumigator/python/mzai/` is an independent `uv` project to isolate dependencies. Projects are tied together using editable python installations. 
+We use `uv` to manage dependencies. Each project under `.../lumigator/lumigator/python/mzai/` is an independent `uv` Python project to isolate dependencies.  Sub-projects are linked together using editable Python package installs.
 
 For each project, here are some handy `uv` commands to work with the repo
 

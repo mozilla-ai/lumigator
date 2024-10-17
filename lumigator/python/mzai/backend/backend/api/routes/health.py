@@ -19,7 +19,7 @@ def get_health() -> HealthResponse:
 
 @router.get("/jobs/{job_id}")
 def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/ray_submit/{job_id}")
+    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}")
     if resp.status_code == 200:
         try:
             metadata = json.loads(resp.text)
@@ -34,7 +34,7 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
 
 @router.get("/jobs/")
 def get_all_jobs() -> List[JobSubmissionResponse]:
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/ray_submit/")
+    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/")
     if resp.status_code == 200:
         try:
             metadata = json.loads(resp.text)

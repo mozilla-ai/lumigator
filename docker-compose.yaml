@@ -52,7 +52,7 @@ services:
       - REDISPASSWORD=yourpassword
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
-      # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray ray_submit
+      # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=http://localhost:4566 # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=test # Should match AWS_SECRET_ACCESS_KEY
       - LOCAL_FSSPEC_S3_SECRET=test # Should match AWS_SECRET_ACCESS_KEY

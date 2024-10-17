@@ -46,17 +46,12 @@ def common_resources_dir() -> Path:
 
 @pytest.fixture(scope="session")
 def json_data_jobs() -> Path:
-    return resources_dir() / "ray_submit.json"
+    return resources_dir() / "jobs.json"
 
 
 @pytest.fixture(scope="session")
 def json_data_job() -> Path:
     return resources_dir() / "job.json"
-
-
-@pytest.fixture(scope="session")
-def json_data_experiments() -> Path:
-    return resources_dir() / "experiments.json"
 
 
 @pytest.fixture(scope="session")

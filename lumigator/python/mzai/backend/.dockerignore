@@ -79,3 +79,6 @@ venv/
 
 # Vim swap files
 **/*.swp
+
+# System
+.DS_Store

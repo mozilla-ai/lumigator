@@ -1,5 +1,5 @@
 import os
-
+from pathlib import Path
 import pytest
 from botocore.exceptions import ClientError
 from fastapi import FastAPI
@@ -25,6 +25,12 @@ def postgres_container():
     with PostgresContainer("postgres:16-alpine") as postgres:
         yield postgres
 
+@pytest.fixture(scope="function")
+def dialog_dataset():
+    working_dir = Path(__file__).parent
+    filename = working_dir / "data" / "dialogsum_converted.csv"
+    with Path(filename).open("r") as f:
+        yield f
 
 @pytest.fixture(scope="session", autouse=True)
 def db_engine(postgres_container: PostgresContainer):

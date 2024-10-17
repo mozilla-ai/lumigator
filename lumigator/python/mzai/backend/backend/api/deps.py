@@ -10,11 +10,9 @@ from sqlalchemy.orm import Session
 
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
-from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
-from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
 from backend.settings import settings
 
@@ -52,20 +50,9 @@ def get_dataset_service(
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 
 
-def get_experiment_service(
-    session: DBSessionDep, dataset_service: DatasetServiceDep
-) -> ExperimentService:
-    experiment_repo = ExperimentRepository(session)
-    result_repo = ExperimentResultRepository(session)
-    ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return ExperimentService(experiment_repo, result_repo, ray_client, dataset_service)
-
-
-ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
-
 def get_job_service(
     session: DBSessionDep, dataset_service: DatasetServiceDep
-) -> ExperimentService:
+) -> JobService:
     job_repo = JobRepository(session)
     result_repo = JobResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)

@@ -11,7 +11,7 @@ from uuid import UUID
 from http import HTTPMethod
 
 from io import IOBase
-from client import ApiClient
+from sdk.client import ApiClient
 from loguru import logger
 
 

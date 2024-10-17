@@ -4,7 +4,6 @@ import uuid
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
-from schemas.deployments import DeploymentStatus
 from schemas.jobs import JobStatus
 
 
@@ -23,11 +22,6 @@ class NameDescriptionMixin:
 @declarative_mixin
 class JobStatusMixin:
     status: Mapped[JobStatus] = mapped_column(default=JobStatus.CREATED)
-
-
-@declarative_mixin
-class DeploymentStatusMixin:
-    status: Mapped[DeploymentStatus] = mapped_column(default=DeploymentStatus.CREATED)
 
 
 @declarative_mixin

@@ -61,8 +61,6 @@ spec:
               value: {{ required "Missing Ray head node hostname" .Values.rayAddress | quote }}
             - name: RAY_DASHBOARD_PORT
               value: {{ required "Missing Ray dashboard node port" .Values.rayPort | quote }}
-            - name: SUMMARIZER_WORK_DIR
-              value: {{ required "Missing Summarizer work directory name" .Values.summarizerWorkDir | quote }}
             - name: RAY_WORKER_GPUS
               value: {{ required "Missing Ray Worker GPU number" .Values.rayWorkerGPUs | quote }}
               # pragma: allowlist-nextline secret

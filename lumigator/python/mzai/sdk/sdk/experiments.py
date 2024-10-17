@@ -10,7 +10,7 @@ from schemas.experiments import (
 )
 from schemas.extras import ListingResponse
 
-from client import ApiClient
+from sdk.client import ApiClient
 
 
 class Experiments:

@@ -4,7 +4,7 @@ import unittest.mock as mock
 import pytest
 import json
 
-from lumigator import LumigatorClient
+from sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost"
 
@@ -41,11 +41,6 @@ def mock_vendor_data() -> str:
 
 def resources_dir() -> Path:
     return Path(__file__).parent / "data"
-
-
-@pytest.fixture(scope="session")
-def json_data_deployments() -> Path:
-    return resources_dir() / "deployments.json"
 
 
 @pytest.fixture(scope="session")

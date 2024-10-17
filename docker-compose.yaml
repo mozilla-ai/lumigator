@@ -56,8 +56,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localhost:4566
 
-    volumes:
-      - ./lumigator/python/mzai/summarizer/summarizer.py:/home/ray/summarizer.py
+
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking

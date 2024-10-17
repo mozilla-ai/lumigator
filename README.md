@@ -21,7 +21,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
   + [Evaluating Large Language Models](/EVALUATION_GUIDE.md)
 + **Installing Lumigator**
   + Building
-    + [Pants guide](PANTS_GUIDE.md)
+    + See below
   + Using/Testing
     + [Kubernetes Helm Charts](lumigator/infra/mzai/helm/lumigator/README.md)
     + [Local install documentation](/.devcontainer/README.md)
@@ -29,7 +29,6 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
   + [Platform Examples](/notebooks/walkthrough.ipynb)
   + [Lumigator API](/lumigator/README.md)
   + Offline Evaluations with [lm-buddy](https://github.com/mozilla-ai/lm-buddy)
-  + Online Evaluations with [Ray Serve Deployments](lumigator/python/mzai/summarizer/README.md)
 + **Extending Lumigator:**
   + [Creating a new Lumigator endpoint](lumigator/python/mzai/backend/api/README.md)
 
@@ -73,16 +72,15 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
 Lumigator is a Python-based FastAPI web app with REST API endpoints that allow for access to services for serving and evaluating large language models available as safetensor artifacts hosted on both HuggingFace and local stores, with our first primary focus being Huggingface access, and tracking the lifecycle of a model in the backend database (Postgres).
 It consists of:
 
-+ a FastAPI-based huggingface's `evaluate` library for those metrics, but we are considering using lm-harness that manages platform activity backed by Postgres
-+ online evaluation of models using **Ray Serve** deployments
-+ a **Ray cluster** to run offline evaluation jobs using [lm-buddy](https://github.com/mozilla-ai/lm-buddy), our in-house eval framework
-    + LM buddy runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
++ a FastAPI-based web app that includes  huggingface's `evaluate` library for those metrics
++ a **Ray cluster** to run offline evaluation jobs using `evaluator`
+    + the `evaluator` module runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
 + Artifact management (S3 in the cloud, localstack locally )
 + A Postgres database to track platform-level tasks and dataset metadata
 
 # Get Started
 
-You can build the local project using `pants` and `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
+You can build the local project `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
 
 ## Local Requirements
 
@@ -92,46 +90,43 @@ You can build the local project using `pants` and `docker-compose` on Mac or Lin
 
 ## Local Development Setup (either Mac or Linux)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
-2.  Install [Pants](https://www.pantsbuild.org) using the [official instructions for your system](https://www.pantsbuild.org/2.21/docs/getting-started/installing-pants). For more on using Pants, read the [Pants guide](PANTS_GUIDE.md).
-3. `make bootstrap-dev-environment` and `source mzaivenv/bin/activate` to activate the virtualenv.
-4. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
-5. To shut down app, `make local-down` and `deactivate`to deactivate the virtualenv
+2. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
+3. To shut down app, `make local-down`
 
 ### Dev Environment Details
-This includes a standalone python interpreter, venv (`mzaivenv`), precommit configs, and more. Python setup is
-handled by `uv`; pants maintains lockfiles for different platforms. Currently, only `python 3.11.9` is valid for this project; if a compatible interpreter
-is found `uv` will not download a standalone python interpreter for you.
 
-For VSCode users, activate the venv before opening your IDE; the `.env` file will be recognized automatically.
+We use `uv` to manage dependencies. Each project under `.../lumigator/lumigator/python/mzai/` is an independent `uv` Python project to isolate dependencies.  Sub-projects are linked together using editable Python package installs.
 
- 
-```shell
-make bootstrap-dev-environment
-source mzaivenv/bin/activate
+For each project, here are some handy `uv` commands to work with the repo
+
+Change directory to the project you want to work on  (ie. `lumigator/lumigator/python/mzai/backend`)
+
+**Grab dependencies**
+
+```
+uv sync
 ```
 
-Show targets:
+**Run Tests**
 
-```bash
-make show-pants-targets
+```
+uv run pytest
 ```
 
-run the app locally via docker compose:
+**Add Dependencies to a given project**
+
+```
+uv add package
+```
+
+Make sure to commit the updated uv.lock file
+
+**Run the app locally via docker compose:**
 
 ```bash
 make local-up
 make local-logs # gets the logs from docker compose
 make local-down # shuts it down
-```
-
-Compile targets manually:
-
-```bash
-pants package <target>
-# backend app
-pants package lumigator/python/mzai/backend --no-local-cache
-# backend docker image
-pants package lumigator/python/mzai/backend:backend_image
 ```
 
 ### Environment variable reference
@@ -173,13 +168,4 @@ The Ray cluster used for computing allows several settings through the following
 | RAY_WORKER_GPUS | "" | Number of GPUs available for worker nodes. |
 | RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
 
-## Rebuilding dependencies
-
-You may need to manually regenerate the [lockfiles](https://www.pantsbuild.org/2.21/docs/python/overview/lockfiles) if you update dependencies.
-To do so:
-
-1. Add your new dependency to `3rdparty/python/pyproject.toml`. This file respects system platform markers, and only very special cases need to be added as explicit `python_requirement` targets.
-2. run `pants generate-lockfiles`. This will take a while - 5-10 minutes in some cases and require access to pypi.
-
-make sure to add the new lockfiles to the repo with your PR. You'll have to rebuild your dev environment if you haven't already.
 

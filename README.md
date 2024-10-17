@@ -88,6 +88,27 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
     + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 + System Python (that is: no version manager, such as pyenv, should be active).
 
+# Running Lumigator
+
+## Running Lumigator Locally
+
+1. `git clone git@github.com:mozilla-ai/lumigator.git`
+2. `make start-lumigator`
+3. The application should be available at http://localhost:8000. 
+
+## Running Lumigator with an external Ray cluster
+To run Lumigator with an external Ray cluster you need to ensure the following variables are configured properly in the [`docker-compose`](docker-compose) file before you start Lumigator:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_DEFAULT_REGION`
+- `RAY_DASHBOARD_PORT`
+- `RAY_HEAD_NODE_HOST`
+
+
+Once that's done, you can start Lumigator with:
+
+`make start-lumigator-external-ray`
+
 ## Local Development Setup (either Mac or Linux)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).

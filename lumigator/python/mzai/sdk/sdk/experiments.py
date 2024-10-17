@@ -1,6 +1,6 @@
-from uuid import UUID
 from http import HTTPMethod, HTTPStatus
 from json import dumps
+from uuid import UUID
 
 from schemas.experiments import (
     ExperimentCreate,

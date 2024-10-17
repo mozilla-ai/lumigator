@@ -1,10 +1,11 @@
 import os
 import warnings
 
-from evaluator.configs.common import EvaluatorConfig
 from pydantic import model_validator
 from wandb.apis.public import Run
 from wandb.util import random_string
+
+from evaluator.configs.common import EvaluatorConfig
 
 
 class WandbRunConfig(EvaluatorConfig):

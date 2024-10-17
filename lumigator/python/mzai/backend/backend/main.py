@@ -1,17 +1,15 @@
 import contextlib
+import os
+import sys
 
 from fastapi import FastAPI
+from loguru import logger
 from sqlalchemy import Engine
 
 from backend.api.router import api_router
 from backend.api.tags import TAGS_METADATA
 from backend.db import engine
 from backend.records.base import BaseRecord
-
-from loguru import logger
-import sys
-import os
-
 
 LUMIGATOR_APP_TAGS = {
     "title": "Lumigator Backend",

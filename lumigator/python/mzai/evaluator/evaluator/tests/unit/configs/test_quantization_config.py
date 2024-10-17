@@ -1,5 +1,6 @@
 import pytest
 import torch
+
 from evaluator.configs.huggingface import QuantizationConfig
 from evaluator.tests.test_utils import copy_pydantic_json
 

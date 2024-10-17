@@ -1,18 +1,16 @@
-"""
-Dataset SDK
+"""Dataset SDK
 
 Provides a class to manipulate datasets in Lumigator.
 """
 
-from schemas.datasets import DatasetFormat, DatasetResponse, DatasetDownloadResponse
+from http import HTTPMethod
+from io import IOBase
+from uuid import UUID
+
+from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
 
-from uuid import UUID
-from http import HTTPMethod
-
-from io import IOBase
 from sdk.client import ApiClient
-from loguru import logger
 
 
 class Datasets:
@@ -23,6 +21,7 @@ class Datasets:
 
     def get_datasets(self) -> ListingResponse[DatasetResponse]:
         """Returns information on all datasets.
+
         Returns:
             ListingResponse[DatasetResponse]: all existing datasets.
         """
@@ -35,6 +34,7 @@ class Datasets:
 
     def get_dataset(self, id: UUID) -> DatasetResponse:
         """Returns information on a specific dataset.
+
         Args:
             id (str): the id of the dataset to retrieve
         Returns:
@@ -48,11 +48,12 @@ class Datasets:
         return DatasetResponse(**(response.json()))
 
     def create_dataset(self, dataset: IOBase, format: DatasetFormat) -> DatasetResponse:
-        """
-        Creates a new dataset.
+        """Creates a new dataset.
+
         Args:
             dataset(IOBase): a bytes-like object containing the dataset itself.
             format(DatasetFormat): currently, always `DatasetFormat.EXPERIMENT`.
+
         Returns:
             DatasetResponse: the information for the newly created dataset.
         """
@@ -68,6 +69,7 @@ class Datasets:
 
     def delete_dataset(self, id: UUID) -> None:
         """Deletes a specific dataset.
+
         Args:
             id (str): the id of the dataset to retrieve
         """
@@ -75,8 +77,10 @@ class Datasets:
 
     def get_dataset_link(self, id: UUID) -> DatasetDownloadResponse:
         """Returns the download link for a specific dataset.
+
         Args:
             id (str): the id of the dataset whose download link we want to obtain.
+
         Returns:
             DatasetDownloadResponse: the download link for the requested dataset.
         """

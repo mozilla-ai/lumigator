@@ -1,8 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
-
-from backend.api.deps import ExperimentServiceDep
 from schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
@@ -10,6 +8,8 @@ from schemas.experiments import (
     ExperimentResultResponse,
 )
 from schemas.extras import ListingResponse
+
+from backend.api.deps import ExperimentServiceDep
 
 router = APIRouter()
 

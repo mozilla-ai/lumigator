@@ -1,9 +1,8 @@
-from pathlib import Path
+import json
 import unittest.mock as mock
+from pathlib import Path
 
 import pytest
-import json
-
 from sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost"

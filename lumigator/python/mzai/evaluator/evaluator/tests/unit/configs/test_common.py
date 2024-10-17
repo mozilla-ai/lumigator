@@ -1,10 +1,11 @@
 import pytest
 import torch
+from pydantic import ValidationError
+
 from evaluator.configs.common import (
     EvaluatorConfig,
     SerializableTorchDtype,
 )
-from pydantic import ValidationError
 
 
 def test_config_settings():

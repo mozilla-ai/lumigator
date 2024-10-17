@@ -2,8 +2,9 @@ from enum import Enum
 from typing import Any
 
 import wandb
-from evaluator.configs.wandb import WandbRunConfig
 from wandb.apis.public import Run as ApiRun
+
+from evaluator.configs.wandb import WandbRunConfig
 
 
 class WandbResumeMode(str, Enum):

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-
 from schemas.jobs import JobSubmissionResponse
+
 from sdk.client import ApiClient
 
 

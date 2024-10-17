@@ -1,4 +1,6 @@
 import pytest
+from pydantic import ValidationError
+
 from evaluator.configs.jobs.lm_harness import (
     LMHarnessEvaluationConfig,
     LMHarnessJobConfig,
@@ -6,7 +8,6 @@ from evaluator.configs.jobs.lm_harness import (
 )
 from evaluator.configs.vllm import InferenceServerConfig
 from evaluator.tests.test_utils import copy_pydantic_json
-from pydantic import ValidationError
 
 
 @pytest.fixture

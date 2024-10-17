@@ -94,7 +94,7 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2. `make start-lumigator`
-3. The application should be available at http://localhost:8000. 
+3. The REST API should be available at http://localhost:8000. 
 
 ## Running Lumigator with an external Ray cluster
 To run Lumigator with an external Ray cluster you need to ensure the following variables are configured properly in the [`docker-compose`](docker-compose) file before you start Lumigator:

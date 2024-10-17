@@ -1,12 +1,12 @@
+from abc import ABC, abstractmethod
+
 import mistralai.client
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
-from abc import ABC, abstractmethod
-import os
-from backend.settings import settings
+from schemas.completions import CompletionRequest, CompletionResponse
 
-from schemas.completions import CompletionResponse, CompletionRequest
+from backend.settings import settings
 
 
 class CompletionService(ABC):

@@ -3,16 +3,16 @@
 Makes the Evaluator CLI executable via `python -m evaluator`.
 """
 
-from evaluator import entrypoint
 from pathlib import Path
 from typing import TypeVar
+
 import click
+
+from evaluator import entrypoint
 from evaluator.configs.jobs import (
     HuggingFaceEvalJobConfig,
     LMHarnessJobConfig,
 )
-
-
 from evaluator.configs.jobs.common import JobConfig
 
 ConfigType = TypeVar("ConfigType", bound=JobConfig)

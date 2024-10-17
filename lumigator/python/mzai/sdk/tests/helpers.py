@@ -1,7 +1,6 @@
-import unittest.mock as mock
 import json
+import unittest.mock as mock
 from pathlib import Path
-
 
 LUMI_HOST = "localhost"
 

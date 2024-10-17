@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
 from schemas.completions import CompletionRequest
-from loguru import logger
+
+from backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
 
 router = APIRouter()
 

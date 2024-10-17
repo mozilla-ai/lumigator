@@ -68,7 +68,7 @@ def test_get_completion_openai_ok(
 
     # Now set the mock response data up as we'd expect it for the actual request
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(f'{{"text": "thanks"}}')
+    mock_requests_response.json = lambda: json.loads('{"text": "thanks"}')
 
     response = lumi_client.completions.get_completion("openai", "please")
     assert response is not None
@@ -86,7 +86,7 @@ def test_get_completion_mistral_ok(
 
     # Now set the mock response data up as we'd expect it for the actual request
     mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(f'{{"text": "thanks"}}')
+    mock_requests_response.json = lambda: json.loads('{"text": "thanks"}')
 
     response = lumi_client.completions.get_completion("mistral", "please")
     assert response is not None

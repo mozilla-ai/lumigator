@@ -94,5 +94,5 @@ class ApiClient:
                 # Re-raise the exception if it's not a 404 error
                 # This happens for status codes such as 400 - Bad Request etc.
                 raise
-        except requests.RequestException as e:
+        except requests.RequestException:
             raise

@@ -1,10 +1,9 @@
 import datetime
 import uuid
 
+from schemas.jobs import JobStatus
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
-
-from schemas.jobs import JobStatus
 
 
 @declarative_mixin

@@ -1,5 +1,4 @@
-"""
-Completions SDK
+"""Completions SDK
 
 Provides a class to perform LLM vendor-based API inference from within in Lumigator.
 """
@@ -33,7 +32,6 @@ class Completions:
 
     def get_completion(self, vendor: str, text: str) -> CompletionResponse | None:
         """Returns completions from the specified vendor for given text (prompt)."""
-
         # Sanitize the inputs.
         vendor = vendor.lower()
         text = text.strip()

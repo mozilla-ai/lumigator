@@ -1,6 +1,7 @@
 import pytest
-from evaluator.paths import AssetPath, strip_path_prefix
 from pydantic import TypeAdapter, ValidationError
+
+from evaluator.paths import AssetPath, strip_path_prefix
 
 
 def test_asset_path_validation():

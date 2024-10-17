@@ -4,7 +4,7 @@ from math import exp
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
+from backend.repositories.jobs import ExperimentRepository, ExperimentResultRepository
 from schemas.jobs import JobStatus
 
 

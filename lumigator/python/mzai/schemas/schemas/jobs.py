@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 from enum import Enum
 from typing import Any, Optional
 from uuid import UUID
@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field
 
 
 class JobType(str, Enum):
-    EXPERIMENT = "experiment"
+    INFERENCE = "inference"
+    EVALUATION = "evaluate"
 
 
 class JobStatus(str, Enum):
@@ -40,10 +41,40 @@ class JobSubmissionResponse(BaseModel):
     entrypoint: str | None = None
     message: str | None = None
     error_type: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    start_time: Optional[dt.datetime] = None
+    end_time: Optional[dt.datetime] = None
     metadata: dict = Field(default_factory=dict)
     runtime_env: dict = Field(default_factory=dict)
     driver_agent_http_address: str | None = None
     driver_node_id: str | None = None
     driver_exit_code: int | None = None
+
+
+class JobCreate(BaseModel):
+    name: str
+    description: str = ""
+    model: str
+    dataset: UUID
+    max_samples: int | None = None
+    model_url: str | None = None
+    system_prompt: str | None = None
+    config_template: str | None = None
+
+
+class JobResponse(BaseModel, from_attributes=True):
+    id: UUID
+    name: str
+    description: str
+    status: JobStatus
+    created_at: dt.datetime
+    updated_at: Optional[dt.datetime] = None
+
+
+class JobResultResponse(BaseModel, from_attributes=True):
+    id: UUID
+    job_id: UUID
+
+
+class JobResultDownloadResponse(BaseModel):
+    id: UUID
+    download_url: str

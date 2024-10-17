@@ -170,3 +170,6 @@ cython_debug/
 
 .ijwb
 *.db
+
+# System files
+.DS_Store

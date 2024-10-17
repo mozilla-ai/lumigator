@@ -14,12 +14,18 @@ from schemas.extras import ListingResponse
 router = APIRouter()
 
 
-@router.post("/{type}", status_code=status.HTTP_201_CREATED)
+@router.post("/inference", status_code=status.HTTP_201_CREATED)
 def create_job(
     service: JobServiceDep,
     request: JobCreate,
 ) -> JobResponse:
-    return service.create_job(request, type)
+    return service.create_inference_job(request, type)
+@router.post("/evaluate", status_code=status.HTTP_201_CREATED)
+def create_job(
+    service: JobServiceDep,
+    request: JobCreate,
+) -> JobResponse:
+    return service.create_evaluation_job(request, type)
 
 
 @router.get("/{job_id}")

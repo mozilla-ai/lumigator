@@ -44,11 +44,6 @@ def resources_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
-def json_data_deployments() -> Path:
-    return resources_dir() / "deployments.json"
-
-
-@pytest.fixture(scope="session")
 def json_data_jobs() -> Path:
     return resources_dir() / "jobs.json"
 

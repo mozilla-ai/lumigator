@@ -12,11 +12,9 @@ from sqlalchemy.orm import Session
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.experiments import ExperimentRepository, ExperimentResultRepository
-from backend.repositories.groundtruth import GroundTruthDeploymentRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
-from backend.services.groundtruth import GroundTruthService
 from backend.settings import settings
 
 
@@ -63,15 +61,6 @@ def get_experiment_service(
 
 
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
-
-
-def get_ground_truth_service(session: DBSessionDep) -> GroundTruthService:
-    deployment_repo = GroundTruthDeploymentRepository(session)
-    ray_serve_client = ServeSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return GroundTruthService(deployment_repo, ray_serve_client)
-
-
-GroundTruthServiceDep = Annotated[GroundTruthService, Depends(get_ground_truth_service)]
 
 
 def get_mistral_completion_service() -> MistralCompletionService:

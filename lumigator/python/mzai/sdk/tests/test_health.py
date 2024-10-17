@@ -39,17 +39,6 @@ def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_request
     assert check.deployment_type is None
 
 
-def test_get_deployments_ok(
-    mock_requests_response, mock_requests, lumi_client, json_data_deployments
-):
-    mock_requests_response.status_code = 200
-    data = load_json(json_data_deployments)
-    mock_requests_response.json = lambda: data
-
-    deployments_ret = lumi_client.health.get_deployments()
-    assert deployments_ret is not None
-
-
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client, json_data_jobs):
     mock_requests_response.status_code = 200
     data = load_json(json_data_jobs)

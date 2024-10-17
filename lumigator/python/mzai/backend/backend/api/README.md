@@ -186,7 +186,7 @@ standard code structure:
 | [`backend/records`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/records)      | Records used by each service                                                                                                                                                                                                              |
 
 The general rule is that for most endpoints you'll end up with an identical filename for each of the above directories
-(see e.g. `datasets`, `experiments`, `groundtruth`, etc).
+(see e.g. `datasets`, `experiments`, etc).
 
 ## Writing a new endpoint
 
@@ -243,7 +243,6 @@ from backend.api.routes import (
     completions,
     datasets,
     experiments,
-    groundtruth,
     health,
     tasks, ### NEW
 )
@@ -255,7 +254,6 @@ api_router = APIRouter(prefix=API_V1_PREFIX)
 api_router.include_router(health.router, prefix="/health", tags=[Tags.HEALTH])
 api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASETS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
-api_router.include_router(groundtruth.router, prefix="/ground-truth", tags=[Tags.GROUNDTRUTH])
 api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
 api_router.include_router(tasks.router, prefix="/tasks", tags=[Tags.TASKS]) ### NEW
 ```
@@ -271,7 +269,6 @@ class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
     EXPERIMENTS = "experiments"
-    GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
     TASKS = "tasks" ### NEW
 
@@ -288,10 +285,6 @@ TAGS_METADATA = [
     {
         "name": Tags.EXPERIMENTS,
         "description": "Create and manage evaluation experiments.",
-    },
-    {
-        "name": Tags.GROUNDTRUTH,
-        "description": "Create and manage ground truth generation",
     },
     {
         "name": Tags.COMPLETIONS,

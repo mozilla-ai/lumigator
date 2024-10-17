@@ -5,7 +5,6 @@ class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
     EXPERIMENTS = "experiments"
-    GROUNDTRUTH = "groundtruth"
     COMPLETIONS = "completions"
 
 
@@ -21,10 +20,6 @@ TAGS_METADATA = [
     {
         "name": Tags.EXPERIMENTS,
         "description": "Create and manage evaluation experiments.",
-    },
-    {
-        "name": Tags.GROUNDTRUTH,
-        "description": "Create and manage ground truth generation",
     },
     {
         "name": Tags.COMPLETIONS,

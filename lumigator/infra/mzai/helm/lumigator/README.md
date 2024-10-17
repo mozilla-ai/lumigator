@@ -56,7 +56,6 @@ If the Mistral and/or the OpenAI API is used, there are two ways to provide it t
 | service.port | `80` | Port for the http service |
 | service.type | `"ClusterIP"` | Type of the [Kubernetes service](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) to use |
 | serviceAccountName | `""` | ServiceAccount that the Pod will use to access the Kubernetes API and other resources |
-| summarizerWorkDir | `""` | S3-compatible storage system folder where the summarizer is located |
 | tolerations | `[]` | Configurable Kubernetes [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) |
 
 This list of variables was generated with [`helm-docs`](https://github.com/norwoodj/helm-docs) (only the list, not the descriptions)

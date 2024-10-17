@@ -7,9 +7,7 @@
 .travis.yml
 .taskcluster.yml
 
-# Pants
-mzaivenv
-.pants.d
+# Ruff
 .ruff_cache
 
 

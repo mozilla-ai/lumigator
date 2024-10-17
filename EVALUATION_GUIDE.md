@@ -1,4 +1,4 @@
-## Evaluating Large Language Models
+# Evaluating Large Language Models
 
 Current offline evaluation of large language models is an extremely complex and nuanced task, compounded by the speed of model development, continuously increasing options for evaluation metrics and their implementation, as well as lack of community consensus around metrics and pipelines.
 
@@ -13,7 +13,7 @@ In problems like recommendations and information retrieval ranking, which gets c
 
 Taking this to the next level, what if we have a model that completes an endless number of different machine learning tasks: summarization, autocompletion, reasoning, generating recommendations for movies and recipes, writing essays, telling stories, translating documents, generating good code, and on and on? Evaluation becomes much harder, almost as hard as deciding if a real person will consistently give you trustworthy information.
 
-## Evaluating Summarization
+# Evaluating Summarization
 
 Finding a good model for summarization is a daunting task, as the typical intuition that larger parameter models generally perform better goes out the window. For summarization, we need to consider the input, which will likely be of a longer context size, and finding models that efficiently deal with those longer contexts is of paramount importance. In our business case, which is to create summaries of conversation threads, much as you might see in Slack or an email chain, the models need to be able to extract key information from those threads while still being able to accept a large context window to capture the entire conversation history.
 

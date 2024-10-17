@@ -17,10 +17,18 @@ services:
       - PERSISTENCE=1
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
-      # Sync localstack startup scripts
-      # https://docs.localstack.cloud/references/init-hooks/
-      - ./.devcontainer/localstack:/etc/localstack/init/ready.d
       - localstack-data:/var/lib/localstack
+
+  localstack-create-bucket:
+    image: localstack/localstack:3.4.0
+    platform: linux/amd64
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: >
+       bash -c "awslocal s3 mb s3://lumigator-storage"
+    extra_hosts:
+      - "localhost:host-gateway"
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -64,17 +72,16 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
+    profiles: 
+      - !external
 
   backend:
-    build:
-      context: .
-      dockerfile: "Dockerfile"
+    image: mzdotai/lumigator:latest
     platform: linux/amd64
-    command: ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "80",  "--reload"]
     depends_on:
       - localstack
     ports:
-      - 80:80
+      - 8000:8000
     environment:
       - DEPLOYMENT_TYPE=local
       # The local file needs to be available through a mount,
@@ -95,8 +102,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
-    volumes:
-      - ./:/mzai
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking

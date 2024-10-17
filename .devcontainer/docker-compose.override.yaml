@@ -1,0 +1,43 @@
+name: lumigator
+
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: "Dockerfile"
+    platform: linux/amd64
+    command: ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000",  "--reload"]
+    depends_on:
+      - localstack
+    ports:
+      - 80:8000
+    environment:
+      - DEPLOYMENT_TYPE=local
+      # The local file needs to be available through a mount,
+      # if persistence is needed
+      - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
+      - S3_ENDPOINT_URL=http://localhost:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-2
+      - AWS_ENDPOINT_URL=http://localhost:4566
+      - S3_BUCKET=lumigator-storage
+      - PYTHONPATH=/mzai/lumigator/python/mzai/backend
+      - PIP_REQS=/mzai/lumigator/python/mzai/evaluator/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/evaluator
+      - RAY_DASHBOARD_PORT=8265
+      - RAY_HEAD_NODE_HOST=ray
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RAY_WORKER_GPUS=0
+      - RAY_WORKER_GPUS_FRACTION=0
+    volumes:
+      - ./:/mzai
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
+    extra_hosts:
+      - "localhost:host-gateway"

@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-ray start-lumigator stop-lumigator
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -11,16 +11,27 @@ ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
 endif
 
-LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 
-local-up:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
+DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
+
+local-up: 
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
+
+start-lumigator: 
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d 
+
+start-lumigator-external-ray: 
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
+
+stop-lumigator:
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 clean-docker-buildcache:
 	docker builder prune --all -f

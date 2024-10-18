@@ -26,7 +26,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Lint
-        run: uvx ruff
+        run: uvx ruff check
         continue-on-error: false
 
       - name: Get repo version

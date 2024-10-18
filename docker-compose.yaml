@@ -77,6 +77,9 @@ services:
 
   backend:
     image: mzdotai/lumigator:latest
+    build:
+      context: .
+      dockerfile: "Dockerfile"
     platform: linux/amd64
     depends_on:
       - localstack

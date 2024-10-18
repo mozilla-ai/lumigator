@@ -19,11 +19,11 @@ jobs:
         working-directory: lumigator/python/mzai/backend
 
       - name: Start backend
-        run: make local-up
+        run: make local-up-ci
 
       - name: Run tests
         run: SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
         working-directory: lumigator/python/mzai/backend
 
       - name: Stop backend
-        run: make local-down
+        run: make local-down-ci

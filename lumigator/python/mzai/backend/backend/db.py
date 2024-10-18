@@ -1,11 +1,9 @@
 import contextlib
 from collections.abc import Generator
-
-import sqlite3
+from sqlite3 import Connection as SQLite3Connection
 
 from sqlalchemy import Connection, Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
-from sqlite3 import Connection as SQLite3Connection
 
 from backend.settings import settings
 

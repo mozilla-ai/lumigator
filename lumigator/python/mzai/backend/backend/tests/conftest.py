@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from mypy_boto3_s3 import S3Client
@@ -14,8 +15,6 @@ from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.records.base import BaseRecord
 from backend.settings import settings
-
-from botocore.exceptions import ClientError
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 

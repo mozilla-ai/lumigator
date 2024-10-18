@@ -1,4 +1,6 @@
 import pytest
+from peft import PeftType, TaskType
+
 from evaluator.configs.huggingface import (
     AdapterConfig,
     AutoModelConfig,
@@ -8,7 +10,6 @@ from evaluator.configs.huggingface import (
 )
 from evaluator.configs.vllm import InferenceServerConfig
 from evaluator.configs.wandb import WandbRunConfig
-from peft import PeftType, TaskType
 
 
 @pytest.fixture

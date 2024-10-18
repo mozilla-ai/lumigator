@@ -1,13 +1,13 @@
 """Common definitions and methods for the lumigator demo notebook."""
 
 import io
+import json
 import os
 from pathlib import Path
 from typing import Any, Dict  # noqa: UP035
 from uuid import UUID
-import json
-import numpy as np
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -76,6 +76,7 @@ def make_request(
     """
     try:
         response = requests.request(
+            *args,
             method=method.upper(),
             url=url,
             params=params,
@@ -84,7 +85,6 @@ def make_request(
             headers=headers,
             timeout=timeout,
             json=json_,
-            *args,
             **kwargs,  # noqa: B026
         )
         response.raise_for_status()
@@ -241,7 +241,7 @@ def eval_results_to_table(eval_results):
 
             row[column] = value
 
-        row["RAM_GB"] = mi[mi.model_name == model_name]['RAM_GB'].values[0]
+        row["RAM_GB"] = mi[mi.model_name == model_name]['RAM_GB'].to_numpy()[0]
 
         return row
 
@@ -263,7 +263,6 @@ def runs_to_eval_table(job_ids):
 
 def show_best_worst(job_ids, model_name, metric_name):
     """Shows best and worst results for a given model and metric."""
-
     found = 0
     for job_id in job_ids:
         result = experiments_result_download(job_id)

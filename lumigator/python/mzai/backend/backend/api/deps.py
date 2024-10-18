@@ -4,7 +4,6 @@ from typing import Annotated
 import boto3
 from fastapi import Depends
 from mypy_boto3_s3.client import S3Client
-from ray.dashboard.modules.serve.sdk import ServeSubmissionClient
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.orm import Session

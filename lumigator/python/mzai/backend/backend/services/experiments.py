@@ -1,5 +1,3 @@
-import json
-import os
 from pathlib import Path
 from uuid import UUID
 
@@ -161,10 +159,10 @@ class ExperimentService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info(f"Submitting Ray job...")
+        loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        loguru.logger.info(f"Getting response...")
+        loguru.logger.info("Getting response...")
         return ExperimentResponse.model_validate(record)
 
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:

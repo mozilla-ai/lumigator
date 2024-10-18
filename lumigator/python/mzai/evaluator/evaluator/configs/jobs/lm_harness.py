@@ -1,5 +1,7 @@
 from typing import Literal
 
+from pydantic import conlist, model_validator
+
 from evaluator.configs.common import EvaluatorConfig
 from evaluator.configs.huggingface import (
     AutoModelConfig,
@@ -8,8 +10,6 @@ from evaluator.configs.huggingface import (
 from evaluator.configs.jobs.common import JobConfig
 from evaluator.configs.vllm import InferenceServerConfig
 from evaluator.paths import AssetPath
-
-from pydantic import conlist, model_validator
 
 
 class LocalChatCompletionsConfig(EvaluatorConfig):

@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
 from backend.api.routes import (
+    completions,
     datasets,
     experiments,
     health,
-    completions,
 )
 from backend.api.tags import Tags
 

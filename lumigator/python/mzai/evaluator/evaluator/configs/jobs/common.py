@@ -3,11 +3,12 @@ import tempfile
 from abc import abstractmethod
 from pathlib import Path
 
+from pydantic import Field
+from pydantic_yaml import parse_yaml_file_as, to_yaml_file
+
 from evaluator.configs.common import EvaluatorConfig
 from evaluator.configs.wandb import WandbRunConfig
 from evaluator.paths import AssetPath, PathPrefix
-from pydantic import Field
-from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
 
 class JobConfig(EvaluatorConfig):

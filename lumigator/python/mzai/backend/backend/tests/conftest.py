@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 import pytest
 from botocore.exceptions import ClientError
 from fastapi import FastAPI
@@ -19,6 +20,7 @@ from backend.settings import settings
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
 
+        
 @pytest.fixture(scope="session")
 def postgres_container():
     """Initialize a Postgres test container."""
@@ -29,7 +31,7 @@ def postgres_container():
 def dialog_dataset():
     working_dir = Path(__file__).parent
     filename = working_dir / "data" / "dialogsum_converted.csv"
-    with Path(filename).open("r") as f:
+    with Path(filename).open("rb") as f:
         yield f
 
 @pytest.fixture(scope="session", autouse=True)
@@ -109,6 +111,13 @@ def app_client(app: FastAPI):
     base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
+
+@pytest.fixture(scope="function")
+def local_client(app: FastAPI):
+    """Create a test client for calling the real backend."""
+    base_url = "http://localhost/api/v1/"  # Fake base URL for the app
+    with TestClient(app, base_url=base_url) as c:
+        yield c        
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -1,24 +1,34 @@
+from time import sleep
+
+import pytest
 import requests
-from fastapi import status
 from fastapi.testclient import TestClient
 from schemas.datasets import DatasetFormat, DatasetResponse
 
 
-def test_upload_data_launch_experiement(dialog_dataset):
-    
-    BASE_URL = "http://localhost/api/v1/"
-    
-    response = requests.get(BASE_URL + "health/")
-    assert response.status_code == status.HTTP_200_OK
-    
-    assert BASE_URL + "health/" == "http://localhost/api/v1/health/"
-    create_response = requests.post(
-            url=BASE_URL + "datasets/",
+# First test waits and polls up to 10 times for the real backend to be up.
+def test_health_ok(local_client: TestClient):
+    attempt = 0
+    while attempt < 10:
+        response = local_client.get("/health/")
+        
+        if response.status_code == 200:
+            assert True
+            return
+        attempt += 1
+        sleep(1)
+    pytest.fail("API did not respond with 200 OK within 10 attempts")
+
+def test_upload_data_launch_experiement(local_client: TestClient, dialog_dataset):
+    response = local_client.get("/health")
+    assert response.status_code == 200
+
+    create_response = local_client.post("/datasets",
             data={},
             files={"dataset": dialog_dataset, "format": (None, DatasetFormat.EXPERIMENT.value)},
         )
-    assert BASE_URL + "datasets/" == "http://localhost/api/v1/datasets/"
-    assert create_response.status_code == status.HTTP_201_CREATED
+
+    assert create_response.status_code == 201
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
     headers = {
@@ -36,8 +46,6 @@ def test_upload_data_launch_experiement(dialog_dataset):
         "config_template": "string",
     }
 
-    create_experiment_response = requests.post(
-        BASE_URL + "experiments/", headers=headers, json=payload
+    create_experiment_response = local_client.post("/experiments", headers=headers, json=payload
     )
-    assert BASE_URL + "experiments/" == "http://localhost/api/v1/experiments/"
-    assert create_experiment_response.status_code == status.HTTP_201_CREATED
+    assert create_experiment_response.status_code == 201

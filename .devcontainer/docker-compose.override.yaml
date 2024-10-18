@@ -11,7 +11,7 @@ services:
     depends_on:
       - localstack
     ports:
-      - 80:8000
+      - 8000:8000
     environment:
       - DEPLOYMENT_TYPE=local
       # The local file needs to be available through a mount,

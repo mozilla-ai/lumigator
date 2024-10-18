@@ -25,9 +25,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Debug
-        run: ls
-
       - name: Lint
         run: uvx ruff check --config ruff.toml
         continue-on-error: false

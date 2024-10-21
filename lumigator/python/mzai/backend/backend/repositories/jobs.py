@@ -15,7 +15,7 @@ class JobResultRepository(BaseRepository[JobResultRecord]):
     def __init__(self, session: Session):
         super().__init__(JobResultRecord, session)
 
-    def get_by_experiment_id(self, job_id: UUID) -> JobResultRecord | None:
+    def get_by_job_id(self, job_id: UUID) -> JobResultRecord | None:
         return (
             self.session.query(JobResultRecord)
             .where(JobResultRecord.job_id == job_id)

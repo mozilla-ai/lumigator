@@ -7,8 +7,6 @@ from schemas.datasets import DatasetFormat, DatasetResponse
 
 from backend.main import app
 
-
-# First test waits and polls up to 10 times for the real backend to be up.
 @app.on_event("startup")
 def test_health_ok(local_client: TestClient):
         response = local_client.get("/health/")

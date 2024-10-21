@@ -27,10 +27,12 @@ def postgres_container():
     with PostgresContainer("postgres:16-alpine") as postgres:
         yield postgres
 
+def common_resources_dir() -> Path:
+    return Path(__file__).parent.parent.parent.parent
+
 @pytest.fixture(scope="function")
 def dialog_dataset():
-    working_dir = Path(__file__).parent
-    filename = working_dir / "data" / "dialogsum_converted.csv"
+    filename = common_resources_dir() / "sample_data" / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 

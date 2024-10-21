@@ -12,13 +12,6 @@ class BackendSettings(BaseSettings):
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE: ByteSize = "50MB"
 
-    # Postgres
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str | None = None
-    POSTGRES_PASSWORD: str | None = None
-    POSTGRES_DB: str | None = None
-
     # AWS
     S3_ENDPOINT_URL: str | None = None
     S3_BUCKET: str = "lumigator-storage"
@@ -83,12 +76,6 @@ class BackendSettings(BaseSettings):
     def RAY_WORKER_GPUS_FRACTION(self) -> float:  # noqa: N802
         return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
 
-    # evaluator path - relative to experiment call site
-    # open lumigator pip reqs and split into string to pass into Ray
-    # Ray has the capability to pass a requirements file to `pip
-    # See `python/ray/_private/runtime_env/pip.py#L364`
-    # However, reading relative paths across Docker plus Ray makes it hard to get the file
-    # TODO: refactor requirements into Ray TOML.
     PIP_REQS: str | None = None
 
     @computed_field

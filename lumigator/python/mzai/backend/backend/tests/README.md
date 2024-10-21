@@ -26,7 +26,7 @@ The main settings for the backend application are defined in the
 `backend.settings.BackendSettings` class.
 This class inherits from the
 [Pydantic BaseSettings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-class and reads its values from the envrionment when instantiated.
+class and reads its values from the environment when instantiated.
 These settings are then used for instantiating various clients/controlling business logic
 throughout the application.
 

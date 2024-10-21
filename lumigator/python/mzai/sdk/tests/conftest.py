@@ -41,6 +41,8 @@ def mock_vendor_data() -> str:
 def resources_dir() -> Path:
     return Path(__file__).parent / "data"
 
+def common_resources_dir() -> Path:
+    return Path(__file__).parent.parent.parent / "sample_data"
 
 @pytest.fixture(scope="session")
 def json_data_jobs() -> Path:
@@ -114,4 +116,4 @@ def json_data_dataset() -> Path:
 
 @pytest.fixture(scope="session")
 def dialog_data() -> Path:
-    return resources_dir() / "dialogsum_exc.csv"
+    return common_resources_dir() / "dialogsum_exc.csv"

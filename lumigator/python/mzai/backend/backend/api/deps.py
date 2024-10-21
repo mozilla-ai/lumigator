@@ -15,6 +15,7 @@ from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.settings import settings
 
+from ray.job_submission import JobSubmissionClient
 
 def get_db_session() -> Generator[Session, None, None]:
     with session_manager.session() as session:

@@ -132,7 +132,7 @@ class JobService:
         # arguments defined in eval_config_args
         ray_config = JobConfig(
             job_id=record.id,
-            job_type=JobType.JOB,
+            job_type=JobType.INFERENCE,
             command=infer_command,
             args=infer_config_args,
         )
@@ -233,7 +233,7 @@ class JobService:
         # arguments defined in eval_config_args
         ray_config = JobConfig(
             job_id=record.id,
-            job_type=JobType.JOB,
+            job_type=JobType.EVALUATION,
             command=eval_command,
             args=eval_config_args,
         )

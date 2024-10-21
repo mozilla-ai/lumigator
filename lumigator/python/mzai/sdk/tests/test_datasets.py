@@ -12,7 +12,6 @@ from tests.helpers import check_method, load_json
 def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client, json_data_datasets):
     mock_requests_response.status_code = 200
     data = load_json(json_data_datasets)
-    print(f"test data is: {data}")
     mock_requests_response.json = lambda: data
 
     datasets = lumi_client.datasets.get_datasets()

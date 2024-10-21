@@ -1,19 +1,19 @@
-import json
-import os
 from pathlib import Path
 from uuid import UUID
 
 import loguru
 from fastapi import HTTPException, status
 from ray.job_submission import JobSubmissionClient
+from schemas.extras import ListingResponse
 from schemas.jobs import (
+    JobConfig,
     JobCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
+    JobStatus,
+    JobType,
 )
-from schemas.extras import ListingResponse
-from schemas.jobs import JobConfig, JobStatus, JobType
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -72,11 +72,7 @@ class JobService:
         )
 
     def create_inference_job(self, request: JobCreate, type: str) -> JobResponse:
-
-        """
-        Creates a new workload to load a model and perform batch inference
-        """
-
+        """Creates a new workload to perform batch inference"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
 
@@ -159,17 +155,14 @@ class JobService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info(f"Submitting Ray job...")
+        loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        loguru.logger.info(f"Getting response...")
+        loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
     def create_evaluation_job(self, request: JobCreate, type:str) -> JobResponse:
-        """
-        Creates a new workload to run on Ray and returns the response status
-        """
-
+        """Creates a new evaluation workload to run on Ray and returns the response status"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
 
@@ -260,10 +253,10 @@ class JobService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info(f"Submitting Ray job...")
+        loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        loguru.logger.info(f"Getting response...")
+        loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> JobResponse:

@@ -4,7 +4,9 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 from schemas.datasets import DatasetFormat, DatasetResponse
-from backend.main import  app
+
+from backend.main import app
+
 
 # First test waits and polls up to 10 times for the real backend to be up.
 @app.on_event("startup")

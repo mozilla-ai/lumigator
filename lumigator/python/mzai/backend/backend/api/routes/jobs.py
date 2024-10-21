@@ -1,28 +1,28 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
-
-from backend.api.deps import JobServiceDep
+from schemas.extras import ListingResponse
 from schemas.jobs import (
     JobCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
 )
-from schemas.extras import ListingResponse
+
+from backend.api.deps import JobServiceDep
 
 router = APIRouter()
 
 
 @router.post("/inference", status_code=status.HTTP_201_CREATED)
-def create_job(
+def create_inference_job(
     service: JobServiceDep,
     request: JobCreate,
 ) -> JobResponse:
     return service.create_inference_job(request, type)
 
 @router.post("/evaluate", status_code=status.HTTP_201_CREATED)
-def create_job(
+def create_evaluation_job(
     service: JobServiceDep,
     request: JobCreate,
 ) -> JobResponse:

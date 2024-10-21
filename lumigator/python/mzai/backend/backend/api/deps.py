@@ -4,18 +4,17 @@ from typing import Annotated
 import boto3
 from fastapi import Depends
 from mypy_boto3_s3.client import S3Client
+from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.orm import Session
 
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
-from backend.services.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
-from backend.services.jobs import JobService
+from backend.services.jobs import JobRepository, JobResultRepository, JobService
 from backend.settings import settings
 
-from ray.job_submission import JobSubmissionClient
 
 def get_db_session() -> Generator[Session, None, None]:
     with session_manager.session() as session:

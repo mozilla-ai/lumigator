@@ -1,9 +1,14 @@
+import sys
+sys.path.append("../schemas")
+
 import json
 import unittest.mock as mock
 from pathlib import Path
 
+from typing import BinaryIO
+
 import pytest
-from sdk.lumigator import LumigatorClient
+from lumigator_sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost:8000"
 
@@ -143,6 +148,7 @@ def json_data_job_response(resources_dir) -> Path:
     return resources_dir / "job-resp.json"
 
 
-@pytest.fixture(scope="session")
-def dialog_data(common_resources_dir) -> Path:
-    return common_resources_dir / "dialogsum_exc.csv"
+@pytest.fixture(scope="function")
+def dialog_data(common_resources_dir):
+    with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
+        yield file

@@ -1,0 +1,55 @@
+# TO BE REMOVED BEFORE MERGING
+
+name: SDK Publishing
+
+on:
+  push:
+    tags:
+    # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+jobs:
+  sdk-packaging:
+    name: Package SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Package SDK
+        run: uv build
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: SDK packages
+          path: |
+            lumigator/python/mzai/sdk/dist/*.whl
+            lumigator/python/mzai/sdk/dist/*.tar.gz
+
+  sdk-publishing:
+    name: Publish SDK
+    runs-on: ubuntu-latest
+    needs: sdk-packaging
+    steps:  
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+      - name: Prepare python
+        run: |
+          uv python install
+          uv venv
+      - name: Download dist packages
+        uses: actions/download-artifact@v4
+        with:
+          name: "SDK packages"
+      - name: Upload packages to Test PyPI
+        run: |
+          source .venv/bin/activate
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_sdk*

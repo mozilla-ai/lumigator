@@ -6,9 +6,9 @@ Provides a class to perform LLM vendor-based API inference from within in Lumiga
 import json
 from http import HTTPMethod, HTTPStatus
 
-from schemas.completions import CompletionResponse
+from lumigator_schemas.completions import CompletionResponse
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class Completions:

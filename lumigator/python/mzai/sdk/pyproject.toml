@@ -1,13 +1,13 @@
 [project]
-name = "sdk"
-version = "0.1.0"
+name = "lumigator-sdk"
+version = "0.1.0-rc.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "loguru==0.7.2",
     "requests>=2,<3",
-    "schemas",
+    "pydantic>=2.8.0"
 ]
 
 [tool.uv]
@@ -16,4 +16,20 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-schemas = { path = "../schemas", editable = true }
+lumigator-schemas = { path = "../schemas", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.hatch.build.targets.sdist.force-include]
+"../schemas/lumigator_schemas" = "lumigator_schemas"
+
+[tool.hatch.build.targets.sdist]
+packages = ["lumigator_sdk"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["lumigator_sdk", "lumigator_schemas"]

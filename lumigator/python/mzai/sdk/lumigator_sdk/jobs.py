@@ -8,8 +8,9 @@ from http import HTTPMethod
 from uuid import UUID
 
 import requests
-from schemas.extras import ListingResponse
-from schemas.jobs import (
+
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import (
     JobCreate,
     JobResponse,
     JobResultDownloadResponse,
@@ -17,7 +18,7 @@ from schemas.jobs import (
     JobType,
 )
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class Jobs:
@@ -65,9 +66,7 @@ class Jobs:
             JobResponse: the most recently job information for the id, when the job has finished
         """
         for _ in range(1, retries):
-            # http://localhost:8265/api/jobs/f311fa44-025a-4703-b8ba-7e0b1001b484
             response = self.client.get_ray_job_response(f'{id}')
-            # response = requests.get(f"http://localhost:8265/api/jobs/{id}")
             jobinfo = response.json()
             if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
                 await asyncio.sleep(poll_wait)

@@ -6,7 +6,7 @@ The types of tests can be broken down into two distinct categories:
 - `integration` tests that depend on some external service to run
 
 The external services that the application depends on are
-the Postgres database, Ray cluster, and S3 storage.
+the database, Ray cluster, and S3 storage.
 
 Currently, we are using the [TestContainers](https://testcontainers-python.readthedocs.io/en/latest/)
 library to provide some of these dependencies for testing.
@@ -26,7 +26,7 @@ The main settings for the backend application are defined in the
 `backend.settings.BackendSettings` class.
 This class inherits from the
 [Pydantic BaseSettings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-class and reads its values from the envrionment when instantiated.
+class and reads its values from the environment when instantiated.
 These settings are then used for instantiating various clients/controlling business logic
 throughout the application.
 

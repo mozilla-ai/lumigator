@@ -5,21 +5,14 @@ import requests
 from fastapi.testclient import TestClient
 from schemas.datasets import DatasetFormat, DatasetResponse
 
+from backend.main import app
 
-# First test waits and polls up to 10 times for the real backend to be up.
+@app.on_event("startup")
 def test_health_ok(local_client: TestClient):
-    attempt = 0
-    while attempt < 10:
         response = local_client.get("/health/")
-        
-        if response.status_code == 200:
-            assert True
-            return
-        attempt += 1
-        sleep(1)
-    pytest.fail("API did not respond with 200 OK within 10 attempts")
+        assert response.status_code == 200
 
-def test_upload_data_launch_experiement(local_client: TestClient, dialog_dataset):
+def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
     response = local_client.get("/health")
     assert response.status_code == 200
 
@@ -46,6 +39,6 @@ def test_upload_data_launch_experiement(local_client: TestClient, dialog_dataset
         "config_template": "string",
     }
 
-    create_experiment_response = local_client.post("/experiments", headers=headers, json=payload
+    create_experiment_response = local_client.post("/jobs/evaluate", headers=headers, json=payload
     )
     assert create_experiment_response.status_code == 201

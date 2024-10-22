@@ -50,6 +50,11 @@ def json_data_jobs() -> Path:
 
 
 @pytest.fixture(scope="session")
+def json_data_jobs_submit() -> Path:
+    return resources_dir() / "jobs-submit.json"
+
+
+@pytest.fixture(scope="session")
 def json_data_job() -> Path:
     return resources_dir() / "job.json"
 
@@ -112,6 +117,26 @@ def json_data_datasets() -> Path:
 @pytest.fixture(scope="session")
 def json_data_dataset() -> Path:
     return resources_dir() / "dataset.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_all() -> Path:
+    return resources_dir() / "job-all.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_minimal() -> Path:
+    return resources_dir() / "job-minimal.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_submit_response() -> Path:
+    return resources_dir() / "job-submit-resp.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_response() -> Path:
+    return resources_dir() / "job-resp.json"
 
 
 @pytest.fixture(scope="session")

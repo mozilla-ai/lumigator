@@ -12,7 +12,8 @@ from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.datasets import DatasetService
-from backend.services.jobs import JobRepository, JobResultRepository, JobService
+from backend.services.jobs import JobService
+from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.settings import settings
 
 

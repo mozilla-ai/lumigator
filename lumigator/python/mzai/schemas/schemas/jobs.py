@@ -58,7 +58,8 @@ class JobCreate(BaseModel):
     max_samples: int | None = None
     model_url: str | None = None
     system_prompt: str | None = None
-    config_template: str | None = None
+    config_infer_template: str | None = None
+    config_eval_template: str | None = None
 
 
 class JobResponse(BaseModel, from_attributes=True):

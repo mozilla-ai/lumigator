@@ -71,7 +71,7 @@ class JobService:
             )
         )
 
-    def create_inference_job(self, request: JobCreate, type: str) -> JobResponse:
+    def create_inference_job(self, request: JobCreate) -> JobResponse:
         """Creates a new workload to perform batch inference"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
@@ -107,7 +107,7 @@ class JobService:
 
 
         # load a config template and fill it up with config_params
-        if request.config_template is not None:
+        if request.config_infer_template is not None:
             config_template = request.config_infer_template
         elif request.model in config_templates.config_infer_template:
             # if no config template is provided, get the default one for the model
@@ -161,7 +161,7 @@ class JobService:
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
-    def create_evaluation_job(self, request: JobCreate, type:str) -> JobResponse:
+    def create_evaluation_job(self, request: JobCreate) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
@@ -196,8 +196,8 @@ class JobService:
         }
 
         # load a config template and fill it up with config_params
-        if request.config_template is not None:
-            config_template = request.config_template
+        if request.config_eval_template is not None:
+            config_template = request.config_eval_template
         elif request.model in config_templates.config_eval_template:
             # if no config template is provided, get the default one for the model
             config_template = config_templates.config_eval_template[request.model]

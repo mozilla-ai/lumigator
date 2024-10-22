@@ -1,6 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-from schemas.extras import HealthResponse
+from lumigator_schemas.extras import HealthResponse
 
 
 def test_health_check(app_client: TestClient):

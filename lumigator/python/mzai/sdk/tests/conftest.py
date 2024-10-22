@@ -3,7 +3,7 @@ import unittest.mock as mock
 from pathlib import Path
 
 import pytest
-from sdk.lumigator import LumigatorClient
+from lumigator_sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost:8000"
 

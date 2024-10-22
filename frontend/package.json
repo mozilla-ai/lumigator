@@ -1,0 +1,33 @@
+{
+  "name": "quasar_test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix"
+  },
+  "dependencies": {
+    "@quasar/vite-plugin": "^1.8.0",
+    "pinia": "^2.2.4",
+    "quasar": "^2.17.1",
+    "vue": "^3.5.10",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-vue": "^9.29.1",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3",
+    "sass": "^1.80.3",
+    "sass-embedded": "^1.80.3",
+    "sass-loader": "^16.0.2",
+    "vite": "^5.4.8"
+  }
+}

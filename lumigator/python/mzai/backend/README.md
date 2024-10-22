@@ -22,3 +22,6 @@ Alembic facilitates migrations of our database schemas.
 Breaking changes should be noted in release changelogs, but if you're working on `main` there may be times when you
 encounter a database issue that wasn't expected because the schema changed and your local database does not have a
 matching schema.
+
+For further information on using Alembic with the `backend` project,
+please see the specific [README](.alembic/README.md).

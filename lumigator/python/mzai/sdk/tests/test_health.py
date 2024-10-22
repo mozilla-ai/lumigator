@@ -5,8 +5,6 @@ from pathlib import Path
 from pytest import raises
 from requests.exceptions import HTTPError
 
-from tests.helpers import load_json
-
 
 def test_sdk_healthcheck_ok(mock_requests_response, mock_requests, lumi_client):
     deployment_type = "local"

@@ -2,7 +2,7 @@ import json
 
 import pandas as pd
 import requests
-from schemas.jobs import JobResultDownloadResponse
+from lumigator_schemas.jobs import JobResultDownloadResponse
 
 MODEL_INFO_FILE = "assets/model_info.csv"
 

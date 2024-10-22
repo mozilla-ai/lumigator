@@ -1,8 +1,9 @@
-from sdk.client import ApiClient
-from sdk.completions import Completions
-from sdk.health import Health
-from sdk.jobs import Jobs
-from sdk.lm_datasets import Datasets
+from lumigator_sdk.client import ApiClient
+from lumigator_sdk.completions import Completions
+from lumigator_sdk.experiments import Experiments
+from lumigator_sdk.health import Health
+from lumigator_sdk.jobs import Jobs
+from lumigator_sdk.lm_datasets import Datasets
 
 
 class LumigatorClient:

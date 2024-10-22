@@ -12,6 +12,13 @@ class BackendSettings(BaseSettings):
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE: ByteSize = "50MB"
 
+    # Postgres
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: str | None = None
+    POSTGRES_PASSWORD: str | None = None
+    POSTGRES_DB: str | None = None
+
     # AWS
     S3_ENDPOINT_URL: str | None = None
     S3_BUCKET: str = "lumigator-storage"

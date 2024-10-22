@@ -19,14 +19,6 @@ from backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
-
-        
-@pytest.fixture(scope="session")
-def postgres_container():
-    """Initialize a Postgres test container."""
-    with PostgresContainer("postgres:16-alpine") as postgres:
-        yield postgres
-
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
 
@@ -37,8 +29,8 @@ def dialog_dataset():
         yield f
 
 @pytest.fixture(scope="session", autouse=True)
-def db_engine(postgres_container: PostgresContainer):
-    """Initialize a DB engine bound to the Postres container, and create tables."""
+def db_engine():
+    """Initialize a DB engine and create tables."""
     engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
 
     # TODO: Run migrations here once switched over to Alembic.

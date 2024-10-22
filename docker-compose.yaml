@@ -79,8 +79,7 @@ services:
     image: mzdotai/lumigator:latest
     build:
       context: .
-      dockerfile: "Dockerfile"
-      target: main_image
+      dockerfile: "Dockerfile2"
     platform: linux/amd64
     depends_on:
       - localstack

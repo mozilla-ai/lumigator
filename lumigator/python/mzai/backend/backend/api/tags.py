@@ -6,6 +6,7 @@ class Tags(str, Enum):
     DATASETS = "datasets"
     JOBS = "jobs"
     COMPLETIONS = "completions"
+    EXPERIMENTS = "experiments"
 
 
 TAGS_METADATA = [

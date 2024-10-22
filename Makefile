@@ -48,3 +48,8 @@ clean-docker-images:
 clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-images
 
 clean-all: clean-docker-buildcache clean-docker-containers
+
+test:
+	make start-lumigator-build
+	cd lumigator/python/mzai/backend; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
+	cd lumigator/python/mzai/sdk; uv run pytest

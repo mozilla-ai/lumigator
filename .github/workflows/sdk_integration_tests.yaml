@@ -9,7 +9,6 @@ on:
       - "**"
   workflow_dispatch:
 
-
 jobs:
   integration:
     name: SDK integration tests
@@ -26,7 +25,7 @@ jobs:
         working-directory: lumigator/python/mzai/sdk
 
       - name: Setup containers
-        run: make start-lumigator
+        run: make start-lumigator-build
 
       - name: Run tests
         run: uv run pytest -o "python_files=int_test_*.py" tests

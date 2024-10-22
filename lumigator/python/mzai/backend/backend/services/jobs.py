@@ -121,11 +121,12 @@ class JobService:
             "--config": config_template.format(**config_params),
         }
 
+        #TODO Add inference module as entrypoint
         infer_command = f"{settings.LD_PRELOAD_PREFIX} python -m inference infer huggingface"
 
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
-        # arguments defined in eval_config_args
+        # arguments defined in infer_config_args
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.INFERENCE,

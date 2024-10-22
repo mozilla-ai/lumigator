@@ -18,6 +18,10 @@ TAGS_METADATA = [
         "description": "Upload and download datasets.",
     },
     {
+        "name": Tags.EXPERIMENTS,
+        "description": "Create and manage jobs running on Ray.",
+    },
+    {
         "name": Tags.JOBS,
         "description": "Create and manage jobs running on Ray.",
     },

@@ -25,17 +25,17 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 start-lumigator: 
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 start-lumigator-build:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 start-lumigator-external-ray: 
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
 
 stop-lumigator:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
-
+	docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	docker compose --profile external -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 clean-docker-buildcache:
 	docker builder prune --all -f
 

@@ -18,6 +18,8 @@ services:
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
       - localstack-data:/var/lib/localstack
+    profiles: 
+      - local
 
   localstack-create-bucket:
     image: localstack/localstack:3.4.0
@@ -29,6 +31,8 @@ services:
        bash -c "awslocal s3 mb s3://lumigator-storage"
     extra_hosts:
       - "localhost:host-gateway"
+    profiles: 
+      - local
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -73,7 +77,7 @@ services:
     extra_hosts:
       - "localhost:host-gateway"
     profiles: 
-      - !external
+      - local
 
   backend:
     image: mzdotai/lumigator:latest
@@ -112,6 +116,47 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
+    profiles:
+      - local
+  
+  backend_external:
+    image: mzdotai/lumigator:latest
+    build:
+      context: .
+      dockerfile: "Dockerfile"
+    platform: linux/amd64
+
+    ports:
+      - 8000:8000
+    environment:
+      - DEPLOYMENT_TYPE=local
+      # The local file needs to be available through a mount,
+      # if persistence is needed
+      - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
+      - S3_ENDPOINT_URL=http://localhost:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-2
+      - AWS_ENDPOINT_URL=http://localhost:4566
+      - S3_BUCKET=lumigator-storage
+      - PYTHONPATH=/mzai/lumigator/python/mzai/backend
+      - PIP_REQS=/mzai/lumigator/python/mzai/evaluator/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/evaluator
+      - RAY_DASHBOARD_PORT=8265
+      - RAY_HEAD_NODE_HOST=ray
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RAY_WORKER_GPUS=0
+      - RAY_WORKER_GPUS_FRACTION=0
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    #       and inside containers, we map localhost to the host gateway IP.
+    #       This currently works properly, but might be the cause of networking
+    #       issues down the line. This should be used only for local, development
+    #       deployments.
+    extra_hosts:
+      - "localhost:host-gateway"
+    profiles:
+      - external
 
 volumes:
 

@@ -6,7 +6,7 @@ https://alembic.sqlalchemy.org/en/latest/index.html
 > [SQLAlchemy](https://www.sqlalchemy.org/) Database Toolkit for Python.
 
 In Lumigator, whenever we make changes to the database (DB) schemas (via our SQLAlchemy models),
-we can create a migration path for the DB, removing blockers for developers working on the code base.
+we can create a migration path for the DB, removing blockers for developers working on the codebase.
 
 In future this should be extended to form part of releases so that moving between versions of Lumigator is easy,
 even when the database schemas have breaking changes.
@@ -61,7 +61,6 @@ To downgrade to the original state (not really recommended) use:
 `alembic downgrade base`
 
 You can also downgrade 'relative' to your current state, so to move backwards 1 revision:
-Previous revision (from current) relative ..
 
 `alembic downgrade -1`
 

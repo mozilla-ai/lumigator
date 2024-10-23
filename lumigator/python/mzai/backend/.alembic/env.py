@@ -3,14 +3,22 @@ from logging.config import fileConfig
 
 from alembic import context
 from backend.records.base import BaseRecord
+from backend.records.datasets import *
+from backend.records.jobs import *
 from sqlalchemy import engine_from_config, pool
+
+"""
+NOTE: Do NOT remove imports for the data models: backend.records.{package}
+Some may appear to be unused, but they are required in order for the BaseRecord's
+metadata to be populated correctly when it is used by Alembic as 'target_metadata'.
+
+If a new data model package is added, then it MUST be manually imported here!
+"""
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-# Override the SQLAlchemy URL with the one we have stored in our environment.
-config.set_main_option('sqlalchemy.url', os.environ.get("SQLALCHEMY_DATABASE_URL", None))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -23,10 +31,10 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = BaseRecord.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Override the SQLAlchemy URL with the one we have stored in our environment.
+config.set_main_option(
+    'sqlalchemy.url',
+    os.environ.get("SQLALCHEMY_DATABASE_URL", config.get_main_option("sqlalchemy.url")))
 
 
 def run_migrations_offline() -> None:

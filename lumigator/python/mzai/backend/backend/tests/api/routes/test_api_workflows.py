@@ -7,6 +7,7 @@ from schemas.datasets import DatasetFormat, DatasetResponse
 
 from backend.main import app
 
+
 @app.on_event("startup")
 def test_health_ok(local_client: TestClient):
         response = local_client.get("/health/")

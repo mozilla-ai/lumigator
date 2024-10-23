@@ -10,10 +10,10 @@ from sqlalchemy.orm import Session
 
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
+from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
-from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.settings import settings
 
 

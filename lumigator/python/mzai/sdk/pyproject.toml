@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "loguru==0.7.2",
     "requests>=2,<3",
-    "lumigator-schemas",
+    "pydantic>=2.8.0"
 ]
 
 [tool.uv]
@@ -25,3 +25,11 @@ build-backend = "hatchling.build"
 [tool.hatch.envs.default]
 installer = "uv"
 
+[tool.hatch.build.targets.sdist.force-include]
+"../schemas/lumigator_schemas" = "lumigator_schemas"
+
+[tool.hatch.build.targets.sdist]
+packages = ["lumigator_sdk"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["lumigator_sdk", "lumigator_schemas"]

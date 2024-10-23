@@ -4,9 +4,10 @@ services:
 
   backend:
     build:
-      target: dev_image
+      context: .
+      dockerfile: "Dockerfile"
+      target: "dev_image"
     platform: linux/amd64
-    command: ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000",  "--reload"]
     depends_on:
       - localstack
     ports:

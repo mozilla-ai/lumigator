@@ -72,14 +72,15 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
-    profiles: 
+    profiles:
       - !external
 
   backend:
     image: mzdotai/lumigator:latest
     build:
       context: .
-      dockerfile: "Dockerfile2"
+      dockerfile: "Dockerfile"
+      target: "main_image"
     platform: linux/amd64
     depends_on:
       - localstack

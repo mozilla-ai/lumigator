@@ -15,8 +15,9 @@ endif
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-local-up: 
+local-up:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
+	cd lumigator/python/mzai/backend/ && uv run pre-commit install
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
@@ -24,13 +25,13 @@ local-down:
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
-start-lumigator: 
+start-lumigator:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 start-lumigator-build:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
-start-lumigator-external-ray: 
+start-lumigator-external-ray:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
 
 stop-lumigator:

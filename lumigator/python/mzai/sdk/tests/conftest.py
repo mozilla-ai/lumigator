@@ -41,8 +41,10 @@ def mock_vendor_data() -> str:
 def resources_dir() -> Path:
     return Path(__file__).parent / "data"
 
+
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent / "sample_data"
+
 
 @pytest.fixture(scope="session")
 def json_data_jobs() -> Path:

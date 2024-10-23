@@ -4,16 +4,13 @@ from pathlib import Path
 
 from pytest import raises
 from requests.exceptions import HTTPError
-from schemas.jobs import JobType, JobCreate
+from schemas.jobs import JobCreate, JobType
 
 from tests.helpers import load_json
 
+
 def test_create_job_ok_all(
-    mock_requests_response,
-    mock_requests,
-    lumi_client,
-    json_data_job_response,
-    json_data_job_all
+    mock_requests_response, mock_requests, lumi_client, json_data_job_response, json_data_job_all
 ):
     mock_requests_response.status_code = 200
     data = load_json(json_data_job_response)
@@ -21,18 +18,19 @@ def test_create_job_ok_all(
 
     job_json = load_json(json_data_job_all)
     print(JobCreate.model_validate(job_json))
-    job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, job_json)
+    job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, JobCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
     assert job_ret.status == "created"
+
 
 def test_create_job_ok_minimal(
     mock_requests_response,
     mock_requests,
     lumi_client,
     json_data_job_response,
-    json_data_job_minimal
+    json_data_job_minimal,
 ):
     mock_requests_response.status_code = 200
     data = load_json(json_data_job_response)
@@ -40,7 +38,7 @@ def test_create_job_ok_minimal(
 
     job_json = load_json(json_data_job_minimal)
     print(JobCreate.model_validate(job_json))
-    job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, job_json)
+    job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"

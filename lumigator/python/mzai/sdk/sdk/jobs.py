@@ -1,18 +1,24 @@
-"""
-Jobs SDK
+"""Jobs SDK
 
 Provides a class to manipulate jobs in Lumigator.
 """
 
-from schemas.jobs import JobCreate, JobResponse, JobResultResponse, JobResultDownloadResponse, JobType
-from schemas.extras import ListingResponse
-
-from uuid import UUID
+import asyncio
 from http import HTTPMethod
+from uuid import UUID
 
-from io import IOBase
+import requests
+from schemas.extras import ListingResponse
+from schemas.jobs import (
+    JobCreate,
+    JobResponse,
+    JobResultDownloadResponse,
+    JobResultResponse,
+    JobType,
+)
+
 from sdk.client import ApiClient
-from loguru import logger
+
 
 class Jobs:
     JOBS_ROUTE = "jobs"
@@ -20,9 +26,9 @@ class Jobs:
     def __init__(self, c: ApiClient):
         self.client = c
 
-
     def get_jobs(self) -> ListingResponse[JobResponse]:
         """Returns information on all jobs.
+
         Returns:
             ListingResponse[JobResponse]: all existing jobs.
         """
@@ -35,8 +41,9 @@ class Jobs:
 
     def get_job(self, id: UUID) -> JobResponse:
         """Returns information on a specific job.
+
         Args:
-            id (str): the id of the job to retrieve
+            id (UUID): the id of the job to retrieve
         Returns:
             JobResponse: the job information for the provided id.
         """
@@ -47,18 +54,49 @@ class Jobs:
 
         return JobResponse(**(response.json()))
 
+    async def wait_for_job(self, id: UUID, retries: int = 30, poll_wait: int = 30) -> JobResponse:
+        """Waits for a job to succeed and returns its latest retrieved information.
+
+        Args:
+            id (UUID): the id of the job to wait for
+            retries (int):
+            poll_wait (int):
+        Returns:
+            JobResponse: the most recently job information for the id, when the job has finished
+        """
+        for _ in range(1, retries):
+            # http://localhost:8265/api/jobs/f311fa44-025a-4703-b8ba-7e0b1001b484
+            # response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
+            response = requests.get(f"http://localhost:8265/api/jobs/{id}")
+            jobinfo = response.json()
+            if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
+                await asyncio.sleep(poll_wait)
+                continue
+            elif jobinfo["status"] == "FAILED":
+                raise Exception(f"Job {id} failed")
+            elif jobinfo["status"] == "STOPPED":
+                raise Exception(f"Job {id} stopped")
+            elif jobinfo["status"] == "SUCCEEDED":
+                return jobinfo
+        raise Exception(
+            f"Job {id} did not complete in the polling "
+             "time (retries: {retries}, poll_wait: {poll_wait})"
+        )
 
     def create_job(self, type: JobType, request: JobCreate) -> JobResponse:
-        """
-        Creates a new job.
+        """Creates a new job.
+
         Args:
             type(JobType): the kind of job to create.
             request(JobCreate): the specific details about the job that needs to be created.
+
         Returns:
-            JobResponse: the information for the newly created dataset.
+            JobResponse: the information for the newly created job.
         """
         response = self.client.get_response(
-            f"{self.JOBS_ROUTE}/{type.value}", method=HTTPMethod.POST, data=request
+            f"{self.JOBS_ROUTE}/{type.value}",
+            method=HTTPMethod.POST,
+            data=request.model_dump_json(),
         )
 
         if not response:
@@ -66,9 +104,9 @@ class Jobs:
 
         return JobResponse(**(response.json()))
 
-
     def get_job_result(self, id: UUID) -> JobResultResponse:
         """Returns the results of a specific job.
+
         Args:
             id (str): the id of the job results to retrieve
         Returns:
@@ -81,9 +119,9 @@ class Jobs:
 
         return JobResultResponse(**(response.json()))
 
-
     def get_job_download(self, id: UUID) -> JobResultDownloadResponse:
         """Returns the download link for the results of a specific job.
+
         Args:
             id (str): the id of the job download link to retrieve
         Returns:
@@ -95,14 +133,3 @@ class Jobs:
             return []
 
         return JobResultDownloadResponse(**(response.json()))
-
-
-
-
-
-
-
-
-
-
-

@@ -13,6 +13,8 @@ even when the database schemas have breaking changes.
 
 This document covers the ways in which Alembic can be used.
 
+**NOTE**: Alembic creates an additional table in the database which it uses to store the matching revision ID.
+
 ## Environment variables
 
 In order to connect to a 'real' database to compare against the models, an `SQLALCHEMY_DATABASE_URL` is required to be

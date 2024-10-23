@@ -97,8 +97,8 @@ services:
       - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
-      - PIP_REQS=/mzai/lumigator/python/mzai/evaluator/requirements.txt
-      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/evaluator
+      - PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
       - RAY_DASHBOARD_PORT=8265
       - RAY_HEAD_NODE_HOST=ray
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}

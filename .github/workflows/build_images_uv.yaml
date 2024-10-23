@@ -53,5 +53,5 @@ jobs:
           push: true
           tags: |
             mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
-            mzdotai/lumigator:latest
+            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
 

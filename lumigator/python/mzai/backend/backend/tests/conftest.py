@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 from botocore.exceptions import ClientError
@@ -18,17 +19,18 @@ from backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
+def common_resources_dir() -> Path:
+    return Path(__file__).parent.parent.parent.parent
 
-@pytest.fixture(scope="session")
-def postgres_container():
-    """Initialize a Postgres test container."""
-    with PostgresContainer("postgres:16-alpine") as postgres:
-        yield postgres
-
+@pytest.fixture(scope="function")
+def dialog_dataset():
+    filename = common_resources_dir() / "sample_data" / "dialogsum_exc.csv"
+    with Path(filename).open("rb") as f:
+        yield f
 
 @pytest.fixture(scope="session", autouse=True)
-def db_engine(postgres_container: PostgresContainer):
-    """Initialize a DB engine bound to the Postres container, and create tables."""
+def db_engine():
+    """Initialize a DB engine and create tables."""
     engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
 
     # TODO: Run migrations here once switched over to Alembic.
@@ -103,6 +105,13 @@ def app_client(app: FastAPI):
     base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
+
+@pytest.fixture(scope="function")
+def local_client(app: FastAPI):
+    """Create a test client for calling the real backend."""
+    base_url = "http://localhost/api/v1/"  # Fake base URL for the app
+    with TestClient(app, base_url=base_url) as c:
+        yield c        
 
 
 @pytest.fixture(scope="function", autouse=True)

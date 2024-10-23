@@ -34,6 +34,8 @@ SQLALCHEMY_DATABASE_URL=sqlite:///local.db alembic history
 
 Examples shown in this document will presume `SQLALCHEMY_DATABASE_URL` is exported.
 
+If `SQLALCHEMY_DATABASE_URL` is not present then a default of `sqlite:///local.db` will be used (see: `alembic.ini`)
+
 ## Viewing migration history
 
 `alembic history`

@@ -36,43 +36,64 @@ Examples shown in this document will presume `SQLALCHEMY_DATABASE_URL` is export
 
 If `SQLALCHEMY_DATABASE_URL` is not present then a default of `sqlite:///local.db` will be used (see: `alembic.ini`)
 
+If you've followed the `README` for `backend` then you will have sourced the virtual environment which means you can
+run the `alembic` command directly in the terminal, but you can also run it using `uv`:
+
+```bash
+uv run alembic --version
+```
+
 ## Viewing migration history
 
-`alembic history`
+```bash
+alembic history
+```
 
 ## Show your current revision
 
-`alembic current`
+```bash
+alembic current
+```
 
 ## Upgrading
 
 Upgrade your database to match the latest models:
 
-`alembic upgrade head`
+```bash
+alembic upgrade head
+```
 
 You can also upgrade 'relative' to your current state, so to move forwards 1 revision:
 
-`alembic upgrade +1`
+```bash
+alembic upgrade +1
+```
 
 If you know the version you want to migrate to, you can specify it:
 
-`alembic upgrade cb3cf47d9259`
+```bash
+alembic upgrade cb3cf47d9259
+```
 
 ## Downgrading
 
 To downgrade to the original state (not really recommended) use:
 
-`alembic downgrade base`
+```bash
+alembic downgrade base
+```
 
 You can also downgrade 'relative' to your current state, so to move backwards 1 revision:
 
-`alembic downgrade -1`
+```bash
+alembic downgrade -1
+```
 
 If you know the version you want to migrate to, you can specify it:
 
-`alembic downgrade If you know the version you want to migrate to, you can specify it:
-
-`alembic upgrade cb3cf47d9259``
+```bash
+alembic upgrade cb3cf47d9259
+````
 
 ## Creating revisions
 
@@ -83,7 +104,9 @@ upgrading the database, and downgrading too (this allows a linear chain to be fo
 
 To create an empty revision that you populate manually:
 
-`alembic revision -m "{Explanatory commit-like message}"`
+```bash
+alembic revision -m "{Explanatory commit-like message}"
+```
 
 This will create a new file under `versions/`.
 
@@ -102,7 +125,9 @@ We should see a new Python file created with a commit/ID prepended to your messa
 Alembic can attempt to work out the changes required to migrate your database if you ask it to create a revision using
 the `--autogenerate` flag when creating a revision.
 
-`alembic revision --autogenerate -m {Explanatory commit-like message}`
+```bash
+alembic revision --autogenerate -m {Explanatory commit-like message}
+```
 
 Please note that 'automatic' doesn't mean this can be completely automated, as manual steps are still required in
 verifying the output.

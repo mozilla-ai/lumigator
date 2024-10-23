@@ -10,6 +10,16 @@ currently this includes code for the following components:
 * Repositories (for persisting data)
 * Repository model representations (data/entities)
 
+## Initialization
+
+To initialize the dependencies and the virtual environment:
+
+```bash
+uv sync && \
+uv sync --dev && \
+source .venv/bin/activate
+```
+
 ## Upgrading
 
 There may be times when changes are required to the database used for persistence.

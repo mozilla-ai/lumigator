@@ -3,7 +3,6 @@ import '@/styles/app.scss';
 import { createApp } from 'vue';
 import App from './App.vue';
 
-import 'quasar/src/css/index.sass'; // Import Quasar styles
 
 createApp(App)
   .mount('#app');

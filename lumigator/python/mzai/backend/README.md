@@ -20,6 +20,11 @@ uv sync --dev && \
 source .venv/bin/activate
 ```
 
+## Data models
+
+As an engineer/contributor, when you change a data model or add a new model which needs to be persisted to the database,
+you **MUST** ensure you've consulted and followed the [Alembic README](.alembic/README.md).
+
 ## Upgrading
 
 There may be times when changes are required to the database used for persistence.
@@ -27,11 +32,9 @@ There may be times when changes are required to the database used for persistenc
 In order to minimize issues for developers/contributors of Lumigator,
 we rely on [alembic](https://alembic.sqlalchemy.org/en/latest/) as a 'dev dependency'.
 
-Alembic facilitates migrations of our database schemas.
-
 Breaking changes should be noted in release changelogs, but if you're working on `main` there may be times when you
 encounter a database issue that wasn't expected because the schema changed and your local database does not have a
 matching schema.
 
-For further information on using Alembic with the `backend` project,
-please see the specific [README](.alembic/README.md).
+For further information on using Alembic to maintain the correct database schema with the `backend` project,
+please see the specific [Alembic README](.alembic/README.md).

@@ -15,6 +15,22 @@ This document covers the ways in which Alembic can be used.
 
 **NOTE**: Alembic creates an additional table in the database which it uses to store the matching revision ID.
 
+## Data model changes
+
+When code changes are made to the data models, or when new models are added, a manual step is
+required in order to ensure that the models are visible to Alembic.
+
+The imports at the top of [env.py](env.py) **MUST** import your package:
+
+`from backend.records.{package} import *`
+
+The reason the wildcard is used is so you don't have to explicitly import *every* type in the package,
+which makes this solution more brittle.
+
+This ensures that the types are loaded such that the `BaseRecord.metadata` fully represents all our types to Alembic.
+
+If a package is not imported then changes will not be captured by Alembic and shown in migration revisions.
+
 ## Environment variables
 
 In order to connect to a 'real' database to compare against the models, an `SQLALCHEMY_DATABASE_URL` is required to be
@@ -43,19 +59,21 @@ run the `alembic` command directly in the terminal, but you can also run it usin
 uv run alembic --version
 ```
 
-## Viewing migration history
+## Alembic commands
+
+### Viewing migration history
 
 ```bash
 alembic history
 ```
 
-## Show your current revision
+### Show your current revision
 
 ```bash
 alembic current
 ```
 
-## Upgrading
+### Upgrading
 
 Upgrade your database to match the latest models:
 
@@ -75,7 +93,7 @@ If you know the version you want to migrate to, you can specify it:
 alembic upgrade cb3cf47d9259
 ```
 
-## Downgrading
+### Downgrading
 
 To downgrade to the original state (not really recommended) use:
 
@@ -95,12 +113,12 @@ If you know the version you want to migrate to, you can specify it:
 alembic upgrade cb3cf47d9259
 ````
 
-## Creating revisions
+### Creating revisions
 
 When you make a change to a database schema via the models, you should create a migration (revision) that handles
 upgrading the database, and downgrading too (this allows a linear chain to be followed when moving between migrations).
 
-### Manual revision
+#### Manual revision
 
 To create an empty revision that you populate manually:
 
@@ -120,7 +138,7 @@ We should see a new Python file created with a commit/ID prepended to your messa
 
 `cb3cf47d9259_create_db.py`
 
-### Automatic* revision
+#### Automatic* revision
 
 Alembic can attempt to work out the changes required to migrate your database if you ask it to create a revision using
 the `--autogenerate` flag when creating a revision.
@@ -132,7 +150,7 @@ alembic revision --autogenerate -m {Explanatory commit-like message}
 Please note that 'automatic' doesn't mean this can be completely automated, as manual steps are still required in
 verifying the output.
 
-### Revision structure
+#### Revision structure
 
 The main parts of the migration Python files Alembic creates are:
 

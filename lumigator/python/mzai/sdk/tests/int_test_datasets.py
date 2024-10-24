@@ -1,8 +1,10 @@
+import asyncio
 from pathlib import Path
 from time import sleep
 
 from loguru import logger
 from schemas.datasets import DatasetFormat
+from schemas.jobs import JobCreate, JobStatus, JobType
 
 from tests.helpers import check_method, load_json
 
@@ -15,7 +17,7 @@ def test_sdk_healthcheck_ok(lumi_client):
             healthy = True
             break
         except Exception as e:
-            print(f'failed health check, retry {i} - due to {e}')
+            print(f"failed health check, retry {i} - due to {e}")
             sleep(1)
     assert healthy
 
@@ -37,3 +39,32 @@ def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
         lumi_client.datasets.delete_dataset(datasets.items[0].id)
         datasets = lumi_client.datasets.get_datasets()
         assert datasets.total == 0
+
+
+def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
+    with Path.open(dialog_data) as file:
+        datasets = lumi_client.datasets.get_datasets()
+        if datasets.total > 0:
+            for remove_ds in datasets.items:
+                logger.info(f"Removing dataset {remove_ds.id}")
+                lumi_client.datasets.delete_dataset(remove_ds.id)
+        datasets = lumi_client.datasets.get_datasets()
+        assert datasets.total == 0
+        dataset = lumi_client.datasets.create_dataset(dataset=file, format=DatasetFormat.EXPERIMENT)
+        datasets = lumi_client.datasets.get_datasets()
+        assert datasets.total == 1
+        jobs = lumi_client.jobs.get_jobs()
+        assert jobs is not None
+        print(lumi_client.datasets.get_dataset(dataset.id))
+        # job_create = JobCreate(name="test-job-int-001", model="hf://distilbert/distilbert-base-uncased", dataset=dataset.id)
+        job_create = JobCreate(name="test-job-int-001", model="hf://distilgpt2", dataset=dataset.id)
+        job_create.description = "This is a test job"
+        job_create.max_samples = 0
+        job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, job_create)
+        assert job_ret is not None
+        jobs = lumi_client.jobs.get_jobs()
+        assert jobs is not None
+        assert len(jobs.items) == jobs.total
+
+        job_status = asyncio.run(lumi_client.jobs.wait_for_job(job_ret.id))
+        print(job_status)

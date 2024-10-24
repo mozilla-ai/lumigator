@@ -22,10 +22,11 @@ required in order to ensure that the models are visible to Alembic.
 
 The imports at the top of [env.py](env.py) **MUST** import your package:
 
-`from backend.records.{package} import *`
+`from backend.records.{package} import * # noqa: F403`
 
 The reason the wildcard is used is so you don't have to explicitly import *every* type in the package,
-which makes this solution more brittle.
+which makes this solution more brittle. The comment is required to ignore the
+[Flake8 F403](https://www.flake8rules.com/rules/F403.html) rule which causes issues with `ruff` linting.
 
 This ensures that the types are loaded such that the `BaseRecord.metadata` fully represents all our types to Alembic.
 

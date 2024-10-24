@@ -3,8 +3,8 @@ from logging.config import fileConfig
 
 from alembic import context
 from backend.records.base import BaseRecord
-from backend.records.datasets import *
-from backend.records.jobs import *
+from backend.records.datasets import *  # noqa: F403
+from backend.records.jobs import *  # noqa: F403
 from sqlalchemy import engine_from_config, pool
 
 """

@@ -3,7 +3,6 @@
 import argparse
 import functools
 import json
-import os
 import time
 from collections.abc import Iterable
 from pathlib import Path
@@ -17,9 +16,6 @@ from model_clients import (
     MistralModelClient,
     OpenAIModelClient,
 )
-
-# SummarizationPipelineModelClient,
-# HuggingFaceModelClient,
 from tqdm import tqdm
 
 
@@ -51,23 +47,25 @@ def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     return predictions
 
 
+def save_to_disk(local_path: Path, data_dict: dict):
+    logger.info(f"Storing into {local_path}...")
+    local_path.parent.mkdir(exist_ok=True, parents=True)
+    with local_path.open("w") as f:
+        json.dump(data_dict, f)
+
+
+def save_to_s3(local_path: Path, storage_path: str):
+    s3 = s3fs.S3FileSystem()
+    if storage_path.endswith("/"):
+        storage_path = "s3://" + str(
+            Path(storage_path[5:]) / config.name / "inference_results.json"
+        )
+    logger.info(f"Storing into {storage_path}...")
+    s3.put_file(local_path, storage_path)
+
+
 def save_outputs(config: Box, inference_results: dict) -> Path:
     storage_path = config.evaluation.storage_path
-
-    def save_to_disk(local_path: Path):
-        logger.info(f"Storing into {local_path}...")
-        local_path.parent.mkdir(exist_ok=True, parents=True)
-        with local_path.open("w") as f:
-            json.dump(inference_results, f)
-
-    def save_to_s3(local_path: Path, storage_path: str):
-        s3 = s3fs.S3FileSystem()
-        if storage_path.endswith("/"):
-            storage_path = "s3://" + str(
-                Path(storage_path[5:]) / config.name / "inference_results.json"
-            )
-        logger.info(f"Storing into {storage_path}...")
-        s3.put_file(local_path, storage_path)
 
     # generate local temp file ANYWAY
     # (we don't want to lose all eval data if there is an issue wth s3)
@@ -90,9 +88,8 @@ def save_outputs(config: Box, inference_results: dict) -> Path:
 
 
 def run_inference(config: Box) -> Path:
-    # Do something with your config here, for example:
-    print("Received configuration:")
-    print(json.dumps(config, indent=4))
+    # initialize output dictionary
+    output = {}
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
@@ -122,21 +119,8 @@ def run_inference(config: Box) -> Path:
             # run the openai client
             logger.info(f"Using OAI client. Endpoint: {base_url}")
             model_client = OpenAIModelClient(base_url, config.model)
-    # else:
-    #     # a *huggingface model name* is passed
-    #     model_name = hf_model_loader.resolve_asset_path(config["model"]["path"])
-    #     output_model_name = config["model"]["path"]
-    #     # depending on config, use the summarizer pipeline or directly call the model
-    #     # for inference
-    #     if config.evaluation.use_pipeline:
-    #         logger.info(f"Using summarization pipeline. Model: {model_name}")
-    #         model_client = SummarizationPipelineModelClient(model_name, config)
-    #     else:
-    #         logger.info(f"Using direct HF model invocation. Model: {model_name}")
-    #         model_client = HuggingFaceModelClient(model_name, config)
 
     # run inference
-    output = {}
     output["predictions"], output["inference_time"] = predict(dataset_iterable, model_client)
     output["examples"] = dataset["examples"]
     output["ground_truth"] = dataset["ground_truth"]

@@ -49,16 +49,17 @@ class BackendSettings(BaseSettings):
     @computed_field
     @property
     def EVALUATOR_COMMAND(self) -> str:  # noqa: N802
+        """Returns the command required to run evaluator.
+
+        The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
+        on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
+        """
         return f"{self.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
 
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None
     INFERENCE_PIP_REQS: str | None = None
-
-    @computed_field
-    @property
-    def INFERENCE_COMMAND(self) -> str:  # noqa: N802
-        return "python inference.py"
+    INFERENCE_COMMAND: str = "python inference.py"
 
     def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
         for env_var_name in self.RAY_WORKER_ENV_VARS:

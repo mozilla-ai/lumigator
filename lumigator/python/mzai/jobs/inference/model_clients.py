@@ -1,12 +1,8 @@
 import os
-
-# from transformers import pipeline
 import re
 from abc import abstractmethod
 
 from box import Box
-
-# import torch
 from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
@@ -35,57 +31,6 @@ class BaseModelClient:
     def predict(self, prompt: str) -> str:
         """Given a prompt, return a prediction."""
         pass
-
-
-# class SummarizationPipelineModelClient(BaseModelClient):
-#     """Model client for the huggingface summarization pipeline
-#     (model is loaded locally).
-#     """
-
-#     def __init__(self, model: str, config: dict):
-#         self._config = config
-
-#         hf_tokenizer_loader = HuggingFaceTokenizerLoader()
-#         self._tokenizer = hf_tokenizer_loader.load_pretrained_tokenizer(config.tokenizer)
-
-#         self._summarizer = pipeline(
-#             "summarization",
-#             model=model,
-#             tokenizer=self._tokenizer,
-#             device=0 if torch.cuda.is_available() else -1,
-#             truncation=True,
-#         )
-
-#     def predict(self, prompt):
-#         # summarizer output is a list (1 element in this case) of dict with key = "summary_text"
-#         # TODO: bring summarizer parameters out at some point (not needed at the moment)
-#         pred = self._summarizer(prompt, min_length=30, do_sample=False)
-#         return pred[0]["summary_text"]
-
-
-# class HuggingFaceModelClient(BaseModelClient):
-#     """Model client for HF models (model is loaded locally, both Seq2SeqLM
-#     and CausalLM are supported).
-#     - Provide model path to load the model locally
-#     - Make sure you add quantization details if the model is too large
-#     - Optionally, add a tokenizer (the one matching the specified model name is the default)
-#     """
-
-#     def __init__(self, model: str, config: dict):
-#         self._config = config
-#         self._device = "cuda" if torch.cuda.is_available() else "cpu"
-
-#         hf_model_loader = HuggingFaceModelLoader()
-#         hf_tokenizer_loader = HuggingFaceTokenizerLoader()
-#         self._model = hf_model_loader.load_pretrained_model(config.model).to(self._device)
-#         self._tokenizer = hf_tokenizer_loader.load_pretrained_tokenizer(config.tokenizer)
-
-#     def predict(self, prompt):
-#         inputs = self._tokenizer(prompt, truncation=True, padding=True, return_tensors="pt").to(
-#             self._device
-#         )
-#         generated_ids = self._model.generate(**inputs, max_new_tokens=256)
-#         return self._tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
 
 class APIModelClient(BaseModelClient):

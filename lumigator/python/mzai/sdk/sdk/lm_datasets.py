@@ -12,7 +12,9 @@ from schemas.extras import ListingResponse
 
 from sdk.client import ApiClient
 
-
+'''
+Groups dataset manipulation.
+'''
 class Datasets:
     DATASETS_ROUTE = "datasets"
 

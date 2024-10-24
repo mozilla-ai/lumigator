@@ -1,3 +1,7 @@
+'''
+-none-
+'''
+
 import json
 from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict  # noqa: UP035

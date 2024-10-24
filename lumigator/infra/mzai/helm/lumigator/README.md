@@ -6,7 +6,8 @@ This Helm chart is the official way to deploy the Lumigator application in cloud
 
 At this moment this Helm chart only deploys the Lumigator core REST API. We don't provide support for Ray, S3-compatible storage, or Postgres which are required for the full application to run. 
 
-> [!WARNING]  
+> ⚠️ **WARNING**
+>
 > Lumigator needs an existent: S3 bucket, a relational database and a Ray cluster in order to work as expected.
 
 In the near future, a new version of this chart will be released, which will be able to deploy a minimal version of all the required tools.
@@ -18,7 +19,8 @@ If the Mistral and/or the OpenAI API is used, there are two ways to provide it t
 * Using an existing Secret, whose name will be specified in property `existingMistralAPISecret` and/or `existingOpenaiAPISecret`
 * Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`, which will be added in a new Secret
 
-> [!NOTE]
+> ℹ **NOTE**
+>
 > Both properties cannot be set at the same time.
 
 ## Values

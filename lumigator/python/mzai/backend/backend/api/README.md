@@ -10,7 +10,7 @@ containers (UI, Backend, Ray cluster, DB, Storage) are the different services Lu
 [Running Lumigator Locally with Docker-Compose](https://github.com/mozilla-ai/lumigator/blob/main/.devcontainer/README.md)).
 
 <p style="text-align: center;">
-<img src="/docs/assets/platform.png" alt="Lumigator's architecture" >
+<img src="../../../../../../docs/assets/platform.png" alt="Lumigator's architecture" >
 Lumigator's architecture
 </p>
 
@@ -33,7 +33,7 @@ The components inside Backend, shown in the image below, are the different abstr
   to actual records on the DB.
 
 <p style="text-align: center;">
-<img src="/docs/assets/backend_architecture.jpg" alt="Lumigator's backend" >
+<img src="../../../../../../docs/assets/backend_architecture.jpg" alt="Lumigator's backend" >
 Lumigator's backend
 </p>
 
@@ -54,17 +54,17 @@ together with a metadata tag (defined
 provide a short description of the route:
 
 <p style="text-align: center;">
-<img src="/docs/assets/routes_definition.png" alt="Definition of the current routes in Lumigator" >
+<img src="../../../../../../docs/assets/routes_definition.png" alt="Definition of the current routes in Lumigator" >
 Definition of the current routes in Lumigator
 </p>
 
 <p style="text-align: center;">
-<img src="/docs/assets/tags_definition.png" alt="Description tag for the Health endpoint" >
+<img src="../../../../../../docs/assets/tags_definition.png" alt="Description tag for the Health endpoint" >
 Description tag for the Health endpoint
 </p>
 
 <p style="text-align: center;">
-<img src="/docs/assets/health_api_descr.png" alt="Description appearing in the API docs" >
+<img src="../../../../../../docs/assets/health_api_descr.png" alt="Description appearing in the API docs" >
 Description appearing in the API docs
 </p>
 
@@ -160,13 +160,13 @@ see how the fields in the datasets table are defined).
 
 
 <p style="text-align: center;">
-<img src="/docs/assets/records_inheritance.jpg" alt="Definition of the fields appearing in DatasetRecord" >
+<img src="../../../../../../docs/assets/records_inheritance.jpg" alt="Definition of the fields appearing in DatasetRecord" >
 Definition of the fields appearing in DatasetRecord
 </p>
 
 
 <p style="text-align: center;">
-<img src="/docs/assets/table_schema.png" alt="Table schema on the DB" >
+<img src="../../../../../../docs/assets/table_schema.png" alt="Table schema on the DB" >
 Table schema on the DB
 </p>
 
@@ -303,7 +303,7 @@ TAGS_METADATA = [
 Connect to [http://localhost/docs](http://localhost/docs) and you should see the following:
 
 <p style="text-align: center;">
-<img src="/docs/assets/tasks_api_descr.png" alt="Your newly created tasks endpoint" >
+<img src="../../../../../../docs/assets/tasks_api_descr.png" alt="Your newly created tasks endpoint" >
 Your newly created tasks endpoint
 </p>
 
@@ -311,7 +311,7 @@ If you click on `Try it out`, add any value for `task_id` and then click on `Exe
 response:
 
 <p style="text-align: center;">
-<img src="/docs/assets/tasks_response.png" alt="Example response from the tasks endpoint" >
+<img src="../../../../../../docs/assets/tasks_response.png" alt="Example response from the tasks endpoint" >
 Example response from the tasks endpoint
 </p>
 
@@ -544,21 +544,21 @@ You should see a new section like
 the following one:
 
 <p style="text-align: center;">
-<img src="/docs/assets/tasks_api_methods.png" alt="List of new methods in the tasks endpoint" >
+<img src="../../../../../../docs/assets/tasks_api_methods.png" alt="List of new methods in the tasks endpoint" >
 List of new methods in the tasks endpoint
 </p>
 
 Here is an example for the creation of a new task:
 
 <p style="text-align: center;">
-<img src="/docs/assets/tasks_api_new.png" alt="New task creation" >
+<img src="../../../../../../docs/assets/tasks_api_new.png" alt="New task creation" >
 New task creation
 </p>
 
 And here is the format of a task list (to which we have also added a `summarization_eval` task):
 
 <p style="text-align: center;">
-<img src="/docs/assets/tasks_api_list.png" alt="The current list of tasks on the system" >
+<img src="../../../../../../docs/assets/tasks_api_list.png" alt="The current list of tasks on the system" >
 The current list of tasks on the system
 </p>
 
@@ -571,7 +571,7 @@ task can be quite straightforward (albeit a bit repetitive), especially if the e
 operations.
 
 <p style="text-align: center;">
-<img src="/docs/assets/git_status.png" alt="The list of new and updated files for the tasks endpoint" >
+<img src="../../../../../../docs/assets/git_status.png" alt="The list of new and updated files for the tasks endpoint" >
 The list of new and updated files for the tasks endpoint
 </p>
 

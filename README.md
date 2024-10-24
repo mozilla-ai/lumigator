@@ -96,18 +96,10 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 2. `make start-lumigator`
 3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the[`docker-compose`](docker-compose) )
 
-## Running Lumigator with an external Ray cluster
-To run Lumigator with an external Ray cluster you need to ensure the following variables are configured properly in the [`docker-compose`](docker-compose) file before you start Lumigator:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-- `RAY_DASHBOARD_PORT`
-- `RAY_HEAD_NODE_HOST`
+## Running Lumigator with an external services (Ray, S3)
+To run Lumigator with an external services you, fill in the required values in the `docker-compose.external.yaml` file. Once that's done, you can start Lumigator with:
 
-
-Once that's done, you can start Lumigator with:
-
-`make start-lumigator-external-ray`
+`make start-lumigator-external-services`
 
 ## Local Development Setup (either Mac or Linux)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`

@@ -1,10 +1,19 @@
 <script setup>
-	import Actions from './components/Actions.vue'
+ import LDatasets from './components/LDatasets.vue'
+	import http from '@/services/http/index.js';
+
+
+	const getDatasetDetails = async (id) => {
+		const response = await http.get(`datasets/${id}`);
+  	console.log(response.data);
+	}
 </script>
 <template>
   <div>
     <h1 class="logo">🐊 Lumigator</h1>
-		<Actions />
+		<l-datasets
+			@dataset-selected="getDatasetDetails($event)"
+		/>
   </div>
 </template>
 

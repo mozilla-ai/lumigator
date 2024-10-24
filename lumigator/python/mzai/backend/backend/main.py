@@ -4,6 +4,7 @@ import sys
 
 from fastapi import FastAPI
 from loguru import logger
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import Engine
 
 from backend.api.router import api_router
@@ -27,6 +28,18 @@ def create_app(engine: Engine) -> FastAPI:
         yield
 
     app = FastAPI(**(LUMIGATOR_APP_TAGS | {"lifespan": lifespan}))
+
+    origins = [
+        "http://localhost",
+        "http://localhost:3000",
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()

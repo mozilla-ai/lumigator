@@ -27,6 +27,8 @@ you **MUST** ensure you've consulted and followed the [Alembic README](.alembic/
 
 ## Upgrading
 
+### Database
+
 There may be times when changes are required to the database used for persistence.
 
 In order to minimize issues for developers/contributors of Lumigator,

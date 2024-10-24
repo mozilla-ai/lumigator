@@ -13,7 +13,8 @@ even when the database schemas have breaking changes.
 
 This document covers the ways in which Alembic can be used.
 
-**NOTE**: Alembic creates an additional table in the database which it uses to store the matching revision ID.
+**NOTE**: Alembic creates an additional table (`alembic_version`) in the database which it uses to store the matching
+revision ID.
 
 ## Data model changes
 
@@ -61,6 +62,31 @@ uv run alembic --version
 ```
 
 ## Alembic commands
+
+### Pre-existing databases (not currently managed by Alembic)
+
+Existing Lumigator operators/contributors may already have a populated database with data they don't want to lose.
+
+In this scenario, it is required to bring the database under the management of Alembic using the alembic `stamp` command.
+
+Currently this requires a manual process of reviewing the revisions stored in [versions](versions/) and deciding which
+ID represents the current state of the database containing the data.
+
+e.g. `e75fa022c781`.
+
+We then stamp the database to indicate this is the version of revisions that Alembic should manage 'from' going forward.
+
+If you believe your database matches the most up-to-date models:
+
+```bash
+alembic stamp head
+```
+
+To align your database with a specific revision:
+
+```bash
+alembic stamp e75fa022c781
+```
 
 ### Viewing migration history
 

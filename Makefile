@@ -17,7 +17,7 @@ DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 local-up:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
-	cd lumigator/python/mzai/backend/ && uv run pre-commit install
+	uv run pre-commit install
 
 local-down:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down

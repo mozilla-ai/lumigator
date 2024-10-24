@@ -2,7 +2,7 @@ import uuid
 from math import exp
 
 import pytest
-from schemas.jobs import JobStatus
+from lumigator_schemas.jobs import JobStatus
 from sqlalchemy.exc import IntegrityError
 
 from backend.repositories.jobs import JobRepository, JobResultRepository

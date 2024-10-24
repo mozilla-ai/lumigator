@@ -3,7 +3,7 @@ from time import sleep
 import pytest
 import requests
 from fastapi.testclient import TestClient
-from schemas.datasets import DatasetFormat, DatasetResponse
+from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 
 from backend.main import app
 

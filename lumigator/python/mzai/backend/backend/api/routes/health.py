@@ -3,8 +3,8 @@ from uuid import UUID
 
 import requests
 from fastapi import APIRouter
-from schemas.extras import HealthResponse
-from schemas.jobs import JobSubmissionResponse
+from lumigator_schemas.extras import HealthResponse
+from lumigator_schemas.jobs import JobSubmissionResponse
 
 from backend.settings import settings
 

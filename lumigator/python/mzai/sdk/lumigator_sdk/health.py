@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from schemas.jobs import JobSubmissionResponse
+from lumigator_schemas.jobs import JobSubmissionResponse
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class HealthCheck:

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from schemas.jobs import JobStatus
+from lumigator_schemas.jobs import JobStatus
 
 
 class ExperimentCreate(BaseModel):

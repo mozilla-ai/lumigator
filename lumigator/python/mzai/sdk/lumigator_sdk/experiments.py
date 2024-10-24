@@ -2,15 +2,15 @@ from http import HTTPMethod, HTTPStatus
 from json import dumps
 from uuid import UUID
 
-from schemas.experiments import (
+from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
 )
-from schemas.extras import ListingResponse
+from lumigator_schemas.extras import ListingResponse
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class Experiments:

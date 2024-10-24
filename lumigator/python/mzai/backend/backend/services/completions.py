@@ -4,7 +4,7 @@ import mistralai.client
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 from openai import OpenAI
-from schemas.completions import CompletionRequest, CompletionResponse
+from lumigator_schemas.completions import CompletionRequest, CompletionResponse
 
 from backend.settings import settings
 

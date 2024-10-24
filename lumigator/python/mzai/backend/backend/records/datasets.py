@@ -1,4 +1,4 @@
-from schemas.datasets import DatasetFormat
+from lumigator_schemas.datasets import DatasetFormat
 from sqlalchemy.orm import Mapped
 
 from backend.records.base import BaseRecord

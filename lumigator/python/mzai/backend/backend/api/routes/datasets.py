@@ -2,8 +2,8 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Form, UploadFile, status
-from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from schemas.extras import ListingResponse
+from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from lumigator_schemas.extras import ListingResponse
 
 from backend.api.deps import DatasetServiceDep
 

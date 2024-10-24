@@ -11,6 +11,7 @@
     "lint:fix": "eslint --ext .js,.vue src --fix"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "vue": "^3.5.10",
     "vue-router": "^4.4.5"
   },

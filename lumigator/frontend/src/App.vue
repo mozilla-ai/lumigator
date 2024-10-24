@@ -1,6 +1,10 @@
+<script setup>
+	import Actions from './components/Actions.vue'
+</script>
 <template>
   <div>
     <h1 class="logo">🐊 Lumigator</h1>
+		<Actions />
   </div>
 </template>
 

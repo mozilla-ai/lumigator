@@ -1,9 +1,0 @@
-python_sources(
-    name="backend_tests_sources",
-    sources=["**/*.py"],
-)
-
-python_tests(
-    name="backend_tests",
-    sources=["**/test_*.py"],
-)

@@ -4,8 +4,9 @@ from enum import Enum
 class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
-    EXPERIMENTS = "experiments"
+    JOBS = "jobs"
     COMPLETIONS = "completions"
+    EXPERIMENTS = "experiments"
 
 
 TAGS_METADATA = [
@@ -19,7 +20,11 @@ TAGS_METADATA = [
     },
     {
         "name": Tags.EXPERIMENTS,
-        "description": "Create and manage evaluation experiments.",
+        "description": "Create and manage jobs running on Ray.",
+    },
+    {
+        "name": Tags.JOBS,
+        "description": "Create and manage jobs running on Ray.",
     },
     {
         "name": Tags.COMPLETIONS,

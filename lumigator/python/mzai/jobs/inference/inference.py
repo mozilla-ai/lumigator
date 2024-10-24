@@ -33,7 +33,7 @@ def save_to_disk(local_path: Path, data_dict: dict):
         json.dump(data_dict, f)
 
 
-def save_to_s3(local_path: Path, storage_path: str):
+def save_to_s3(config: Box, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
         storage_path = "s3://" + str(
@@ -53,11 +53,11 @@ def save_outputs(config: Box, inference_results: dict) -> Path:
     )
 
     try:
-        save_to_disk(local_path)
+        save_to_disk(local_path, inference_results)
 
         # copy to s3 and return path
         if storage_path is not None and storage_path.startswith("s3://"):
-            save_to_s3(local_path, storage_path)
+            save_to_s3(config, local_path, storage_path)
             return storage_path
 
         return local_path

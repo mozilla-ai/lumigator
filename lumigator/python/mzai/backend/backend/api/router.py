@@ -1,12 +1,6 @@
 from fastapi import APIRouter
 
-from backend.api.routes import (
-    completions,
-    datasets,
-    health,
-    jobs,
-    experiments
-)
+from backend.api.routes import completions, datasets, health, jobs
 from backend.api.tags import Tags
 
 API_V1_PREFIX = "/api/v1"

@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-ray start-lumigator stop-lumigator
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -33,8 +33,8 @@ start-lumigator:
 start-lumigator-build:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
-# Launches lumigator without external dependencies (ray, S3)
-start-lumigator-external-ray: 
+# Launches lumigator without local dependencies (ray, S3)
+start-lumigator-external-services: 
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${EXTERNAL_DOCKER_COMPOSE_FILE} up -d
 
 stop-lumigator:

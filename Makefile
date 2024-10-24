@@ -11,27 +11,31 @@ ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
 endif
 
-
+EXTERNAL_DOCKER_COMPOSE_FILE:= docker-compose.external.yaml
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
+# Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: 
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up -d --build
 
 local-down:
-	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
+# Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
 start-lumigator: 
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
+# Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
+# Launches lumigator without external dependencies (ray, S3)
 start-lumigator-external-ray: 
-	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) --profile external up -d
+	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${EXTERNAL_DOCKER_COMPOSE_FILE} up -d
 
 stop-lumigator:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) down

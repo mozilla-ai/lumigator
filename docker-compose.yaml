@@ -18,6 +18,8 @@ services:
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
     volumes:
       - localstack-data:/var/lib/localstack
+    profiles:
+      - local
 
   localstack-create-bucket:
     image: localstack/localstack:3.4.0
@@ -29,6 +31,8 @@ services:
        bash -c "awslocal s3 mb s3://lumigator-storage"
     extra_hosts:
       - "localhost:host-gateway"
+    profiles:
+      - local
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -64,7 +68,6 @@ services:
       - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localhost:4566
 
-
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
@@ -73,7 +76,7 @@ services:
     extra_hosts:
       - "localhost:host-gateway"
     profiles: 
-      - !external
+      - local
 
   backend:
     image: mzdotai/lumigator:latest
@@ -82,7 +85,12 @@ services:
       dockerfile: "Dockerfile"
     platform: linux/amd64
     depends_on:
-      - localstack
+      localstack:
+        condition: "service_started"
+        required: false
+      ray:
+        condition: "service_started"
+        required: false
     ports:
       - 8000:8000
     environment:

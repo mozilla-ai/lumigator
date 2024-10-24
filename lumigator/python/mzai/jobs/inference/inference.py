@@ -1,9 +1,7 @@
 """python job to run batch inference"""
 
 import argparse
-import functools
 import json
-import time
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -19,25 +17,6 @@ from model_clients import (
 from tqdm import tqdm
 
 
-def timer(func):
-    """Decorator which times the execution of the wrapped func.
-    Execution time is logged and also returned together with func's returned value
-    (output will be a tuple).
-    """
-
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        tic = time.perf_counter()
-        value = func(*args, **kwargs)
-        toc = time.perf_counter()
-        elapsed_time = toc - tic
-        logger.info(f"Elapsed time for {func.__name__}: {elapsed_time:0.4f} seconds")
-        return value, elapsed_time
-
-    return wrapper_timer
-
-
-@timer
 def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     predictions = []
 
@@ -121,7 +100,7 @@ def run_inference(config: Box) -> Path:
             model_client = OpenAIModelClient(base_url, config.model)
 
     # run inference
-    output["predictions"], output["inference_time"] = predict(dataset_iterable, model_client)
+    output["predictions"] = predict(dataset_iterable, model_client)
     output["examples"] = dataset["examples"]
     output["ground_truth"] = dataset["ground_truth"]
     output["model"] = output_model_name

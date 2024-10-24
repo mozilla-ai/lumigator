@@ -9,9 +9,6 @@ export default defineConfig({
     vue({
       template: { transformAssetUrls }
     }),
-    quasar({
-      sassVariables: path.resolve(__dirname, './src/styles/quasar-variables.sass')
-    })
   ],
   resolve: {
     alias: {

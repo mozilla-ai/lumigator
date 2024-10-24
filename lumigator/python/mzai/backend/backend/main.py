@@ -1,15 +1,14 @@
-import contextlib
 import os
 import sys
+from pathlib import Path
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from loguru import logger
-from sqlalchemy import Engine
 
 from backend.api.router import api_router
 from backend.api.tags import TAGS_METADATA
-from backend.db import engine
-from backend.records.base import BaseRecord
 
 LUMIGATOR_APP_TAGS = {
     "title": "Lumigator Backend",
@@ -19,15 +18,11 @@ LUMIGATOR_APP_TAGS = {
 }
 
 
-def create_app(engine: Engine) -> FastAPI:
-    @contextlib.asynccontextmanager
-    async def lifespan(app: FastAPI):
-        # TODO: Remove this once switching to Alembic for migrations
-        BaseRecord.metadata.create_all(engine)
-        yield
+def _init_db():
+    alembic_cfg = Config(str(Path().parent / "alembic.ini"))
+    command.upgrade(alembic_cfg, "head")
 
-    app = FastAPI(**(LUMIGATOR_APP_TAGS | {"lifespan": lifespan}))
-
+def _configure_logger():
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()
     logger.add(
@@ -44,6 +39,13 @@ def create_app(engine: Engine) -> FastAPI:
         colorize=True,
     )
 
+def create_app() -> FastAPI:
+    _configure_logger()
+
+    _init_db()
+
+    app = FastAPI(**LUMIGATOR_APP_TAGS)
+
     app.include_router(api_router)
 
     @app.get("/")
@@ -53,4 +55,4 @@ def create_app(engine: Engine) -> FastAPI:
     return app
 
 
-app = create_app(engine)
+app = create_app()

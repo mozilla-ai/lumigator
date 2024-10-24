@@ -9,7 +9,6 @@ from mypy_boto3_s3 import S3Client
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
-from testcontainers.postgres import PostgresContainer
 
 from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
@@ -80,10 +79,10 @@ def setup_aws(localstack_container: LocalStackContainer):
             raise e
     # add ENV vars for FSSPEC access to S3 (s3fs + HuggingFace datasets)
     os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
-    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"
+    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack" # pragma: allowlist secret
     os.environ["FSSPEC_S3_ENDPOINT_URL"] = localstack_container.get_url()
     os.environ["AWS_ACCESS_KEY_ID"] = "testcontainers-localstack"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack" # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = localstack_container.get_url()
 
 
@@ -95,7 +94,7 @@ def s3_client(localstack_container: LocalStackContainer) -> S3Client:
 @pytest.fixture(scope="session")
 def app(db_engine: Engine):
     """Create the FastAPI app bound to the test DB engine."""
-    app = create_app(db_engine)
+    app = create_app()
     return app
 
 
@@ -111,7 +110,7 @@ def local_client(app: FastAPI):
     """Create a test client for calling the real backend."""
     base_url = "http://localhost/api/v1/"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
-        yield c        
+        yield c
 
 
 @pytest.fixture(scope="function", autouse=True)

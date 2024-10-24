@@ -52,7 +52,7 @@ class Datasets:
 
         Args:
             dataset(IOBase): a bytes-like object containing the dataset itself.
-            format(DatasetFormat): currently, always `DatasetFormat.EXPERIMENT`.
+            format(DatasetFormat): currently, always `DatasetFormat.JOB`.
 
         Returns:
             DatasetResponse: the information for the newly created dataset.

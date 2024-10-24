@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class DatasetFormat(str, Enum):
-    EXPERIMENT = "experiment"
+    JOB = "job"
 
 
 class DatasetDownloadResponse(BaseModel):

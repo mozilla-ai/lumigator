@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../schemas")
+
 import json
 import unittest.mock as mock
 from pathlib import Path

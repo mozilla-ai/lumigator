@@ -1,8 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
-from schemas.extras import ListingResponse
-from schemas.jobs import (
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import (
     JobCreate,
     JobResponse,
     JobResultDownloadResponse,

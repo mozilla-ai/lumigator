@@ -1,0 +1,8 @@
+[project]
+name = "common"
+version = "0.1.0"
+description = "Common deps to develop"
+requires-python = ">=3.11"
+dependencies = [
+    "pre-commit>=4.0.1",
+]

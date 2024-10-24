@@ -72,7 +72,7 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
-    profiles: 
+    profiles:
       - !external
 
   backend:
@@ -80,6 +80,7 @@ services:
     build:
       context: .
       dockerfile: "Dockerfile"
+      target: "main_image"
     platform: linux/amd64
     depends_on:
       - localstack

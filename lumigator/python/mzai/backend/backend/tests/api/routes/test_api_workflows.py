@@ -10,17 +10,19 @@ from backend.main import app
 
 @app.on_event("startup")
 def test_health_ok(local_client: TestClient):
-        response = local_client.get("/health/")
-        assert response.status_code == 200
+    response = local_client.get("/health/")
+    assert response.status_code == 200
+
 
 def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
     response = local_client.get("/health")
     assert response.status_code == 200
 
-    create_response = local_client.post("/datasets",
-            data={},
-            files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
-        )
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
 
     assert create_response.status_code == 201
 
@@ -40,9 +42,15 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "config_template": "string",
     }
 
-    create_experiment_response = local_client.post("/jobs/evaluate", headers=headers, json=payload
+    create_evaluation_job_response = local_client.post(
+        "/jobs/evaluate/", headers=headers, json=payload
     )
-    assert create_experiment_response.status_code == 201
+    assert create_evaluation_job_response.status_code == 201
+
+    create_inference_job_response = local_client.post(
+        "/jobs/inference/", headers=headers, json=payload
+    )
+    assert create_inference_job_response.status_code == 201
 
 
 def test_experiment_non_existing(local_client: TestClient):

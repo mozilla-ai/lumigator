@@ -99,6 +99,7 @@ def run_eval(config: HuggingFaceEvalJobConfig) -> Path:
     input_samples = dataset["examples"]
     dataset_iterable = tqdm(input_samples) if config.evaluation.enable_tqdm else input_samples
 
+    #TODO remove
     # Choose which model client to use
     if isinstance(config.model, VLLMCompletionsConfig):
         model_name = config.model.inference.base_url
@@ -123,9 +124,11 @@ def run_eval(config: HuggingFaceEvalJobConfig) -> Path:
             logger.info(f"Using direct HF model invocation. Model: {model_name}")
             model_client = HuggingFaceModelClient(model_name, config)
 
+    #TODO remove
     # run inference
     predictions, summarization_time = predict(dataset_iterable, model_client)
 
+    # TODO pass in CSV file
     # run evaluation
     ground_truth = dataset["ground_truth"]
     evaluation_results, evaluation_time = evaluate(

@@ -24,11 +24,11 @@ dependencies = [
     # For sqlalchemy
     "python-dotenv>=1.0.1",
     "schemas",
+    "alembic>=1.13.3",
 ]
 
 [tool.uv]
 dev-dependencies = [
-    "alembic>=1.13.3",
     "pytest>=8.3.3",
     "testcontainers>=4.8.2",
 ]

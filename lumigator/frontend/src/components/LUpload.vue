@@ -44,7 +44,7 @@ const handleFileChange = (event) => {
 </script>
 <template>
   <div class="actions-container">
-    <label v-if="!fileName" for="file-input" class="upload-label">Choose a file</label>
+    <label v-if="!fileName" for="file-input" class="upload-label">Choose a Dataset file</label>
     <input id="file-input" type="file" @change="handleFileChange" />
     <button v-if="fileName" @click="uploadFile()" class="confirm-btn">Confirm</button>
     <p v-if="fileName" class="file-name">Selected file: <span>{{ fileName }}</span></p>
@@ -54,6 +54,7 @@ const handleFileChange = (event) => {
 <style scoped>
 .actions-container {
   display: flex;
+	flex-direction: column;
   gap: 25px;
 }
 
@@ -73,6 +74,7 @@ const handleFileChange = (event) => {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
+	max-width: 200px;
 }
 
 .confirm-btn {

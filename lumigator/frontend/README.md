@@ -1,11 +1,10 @@
 # Lumigator Frontend
 
-This directory contains the **frontend** code for the **Lumigator** project, built with **Vue 3**, **Quasar**, and **Vite**. It is a modular and scalable front-end application designed to interact with the backend API provided by the Lumigator backend.
+This directory contains the **frontend** code for the **Lumigator** project, built with **Vue 3**, and **Vite**. It is a modular and scalable front-end application designed to interact with the backend API provided by the Lumigator backend.
 
 ## Tech Stack
 
 - **Vue 3**: The progressive JavaScript framework for building modern web interfaces.
-- **Quasar**: A UI library for Vue.js that supports responsive designs and can be used to create websites, mobile apps, and desktop apps.
 - **Vite**: A fast build tool and development server that supports modern JavaScript and hot module replacement (HMR).
 
 ## Getting Started
@@ -55,7 +54,7 @@ To run the frontend locally for development purposes, use the following command 
 npm run dev
 ```
 
-This will run the application at `http://localhost:3000` by default.
+### Visit `http://localhost:3000` in your browser. The application runs at this addrees by default.
 
 ### Build for Production
 

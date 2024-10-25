@@ -1,8 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
-import { ref, onMounted } from 'vue';
-import http from '@/services/http/index.js';
-
 const props = defineProps({
   datasets: Array
 })
@@ -42,7 +39,7 @@ const onRemoveDataset = (id) => {
             <span> {{ formatDate(dataset.created_at) }}</span>
             <span>File name: {{ dataset.filename }}</span>
             <span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
-            <span>Size: {{ dataset.size }}</span>
+            <span>Size: {{ dataset.size }} kb</span>
           </div>
 					<span class="l-datasets__list-remove" @click="onRemoveDataset(dataset.id)">🗑️</span>
         </li>

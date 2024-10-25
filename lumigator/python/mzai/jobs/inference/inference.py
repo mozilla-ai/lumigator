@@ -46,8 +46,9 @@ def save_to_s3(config: Box, local_path: Path, storage_path: str):
 def save_outputs(config: Box, inference_results: dict) -> Path:
     storage_path = config.evaluation.storage_path
 
-    # generate local temp file ANYWAY
-    # (we don't want to lose all eval data if there is an issue wth s3)
+    # generate local temp file ANYWAY:
+    # - if storage_path is not provided, it will be stored and kept into a default dir
+    # - if storage_path is provided AND saving to S3 is successful, local file is deleted
     local_path = Path(
         Path.home() / ".lumigator" / "results" / config.name / "inference_results.json"
     )
@@ -58,9 +59,11 @@ def save_outputs(config: Box, inference_results: dict) -> Path:
         # copy to s3 and return path
         if storage_path is not None and storage_path.startswith("s3://"):
             save_to_s3(config, local_path, storage_path)
+            Path.unlink(local_path)
+            Path.rmdir(local_path.parent)
             return storage_path
-
-        return local_path
+        else:
+            return local_path
 
     except Exception as e:
         logger.error(e)
@@ -75,7 +78,7 @@ def run_inference(config: Box) -> Path:
 
     # Limit dataset length if max_samples is specified
     max_samples = config.evaluation.max_samples
-    if max_samples and max_samples > 0:
+    if max_samples is not None and max_samples > 0:
         if max_samples > len(dataset):
             logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
             max_samples = len(dataset)

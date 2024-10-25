@@ -4,5 +4,12 @@ services:
 
   backend:
     command: ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000",  "--reload"]
-    volumes:
-      - ./:/mzai
+    develop:
+      watch: 
+        - path: ./
+          target: /mzai
+          action: sync
+          ignore: 
+           - lumigator/python/mzai/backend/.venv/
+        - path: lumigator/python/mzai/backend/pyproject.toml
+          action: rebuild

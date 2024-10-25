@@ -1,9 +1,13 @@
 name: SDK Packaging
 
 on:
+  workflow_dispatch:
   push:
     branches-ignore:
       - 'main'
+    tags:
+    # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
 
 jobs:
   sdk-packaging:

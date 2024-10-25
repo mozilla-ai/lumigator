@@ -3,9 +3,10 @@
 import { ref, onMounted } from 'vue';
 import http from '@/services/http/index.js';
 
-const datasets = ref([]);
-
-const emit = defineEmits(['dataset-selected'])
+const props = defineProps({
+  datasets: Array
+})
+const emit = defineEmits(['dataset-selected', 'remove'])
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -23,22 +24,17 @@ const onDatasetSelect = (id) => {
 	emit('dataset-selected', id)
 }
 
-const getDatasets = async () => {
-  const response = await http.get('datasets/');
-  console.log(response.data.items);
-  datasets.value = response.data.items;
-};
+const onRemoveDataset = (id) => {
+	emit('dataset-remove', id)
+}
 
-onMounted(() => {
-  getDatasets();
-});
 </script>
 
 <template>
   <div class="l-datasets">
     <div class="l-datasets__list-container">
       <ul class="l-datasets__list">
-        <li v-for="dataset in datasets" :key="dataset.id">
+        <li v-for="dataset in props.datasets" :key="dataset.id">
           <div
 						class="l-datasets__list-card"
 						@click="onDatasetSelect(dataset.id)"
@@ -48,6 +44,7 @@ onMounted(() => {
             <span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
             <span>Size: {{ dataset.size }}</span>
           </div>
+					<span class="l-datasets__list-remove" @click="onRemoveDataset(dataset.id)">🗑️</span>
         </li>
       </ul>
     </div>
@@ -67,23 +64,34 @@ onMounted(() => {
 		flex-direction: column;
     flex-wrap: wrap;
     list-style-type: none;
+
+		li {
+			display: flex;
+			align-items: center;
+		}
+
     &-card {
 			cursor: pointer;
       margin: 1rem;
 			padding: 1rem;
-      box-shadow: 2px 4px 15px rgba(252, 228, 228, 0.401);
+			box-shadow: 2px 8px 45px rgba(0, 0, 0, 0.15);
       border-radius: 12px;
       overflow: hidden;
       transition: all 0.2s linear;
       display: flex;
       flex-direction: column;
-			max-width: 250px;
+			width: 300px;
 
       &:hover {
-        box-shadow: 2px 8px 45px rgba(0, 0, 0, 0.15);
+      	box-shadow: 2px 4px 15px rgba(252, 228, 228, 0.401);
         transform: translate3D(0, -2px, 0);
       }
     }
+		&-remove {
+			cursor: pointer;
+			// background:transparent;
+		}
+
   }
 }
 </style>

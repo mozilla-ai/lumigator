@@ -18,12 +18,12 @@ const getDatasetDetails = async (id) => {
 };
 
 const deleteDataset = async (id) => {
-	console.log(id);
-	const response = await http.delete(`datasets/${id}`);
-	console.log(response.data);
-	setTimeout(() => {
-		getDatasets();
-	}, 1000);
+  console.log(id);
+  const response = await http.delete(`datasets/${id}`);
+  console.log(response.data);
+  setTimeout(() => {
+    getDatasets();
+  }, 1000);
 };
 
 onMounted(() => {
@@ -34,14 +34,14 @@ onMounted(() => {
   <div>
     <h1 class="logo">🐊 Lumigator</h1>
     <div class="l-main">
-			<div class="upload-container">
-      	<l-upload	@dataset-upload="getDatasets()"	/>
-			</div>
+      <div class="upload-container">
+        <l-upload @dataset-upload="getDatasets()" />
+      </div>
       <l-datasets
-				:datasets="datasets"
-				@dataset-selected="getDatasetDetails($event)"
-				@dataset-remove="deleteDataset($event)"
-			/>
+        :datasets="datasets"
+        @dataset-selected="getDatasetDetails($event)"
+        @dataset-remove="deleteDataset($event)"
+      />
     </div>
   </div>
 </template>
@@ -59,7 +59,7 @@ onMounted(() => {
 }
 
 .l-main {
-	padding: 3rem;
+  padding: 3rem;
   display: grid;
   grid-template-columns: minmax(150px, 25%) 1fr;
 }

@@ -1,3 +1,19 @@
+
+<template>
+  <div>
+    <h1 class="logo">🐊 Lumigator</h1>
+    <div class="l-main">
+      <div class="upload-container">
+        <l-upload @dataset-upload="getDatasets()" />
+      </div>
+      <l-datasets
+        :datasets="datasets"
+        @dataset-selected="getDatasetDetails($event)"
+        @dataset-remove="deleteDataset($event)"
+      />
+    </div>
+  </div>
+</template>
 <script setup>
 import { ref, onMounted } from 'vue';
 import LDatasets from './components/LDatasets.vue';
@@ -30,21 +46,6 @@ onMounted(() => {
   getDatasets();
 });
 </script>
-<template>
-  <div>
-    <h1 class="logo">🐊 Lumigator</h1>
-    <div class="l-main">
-      <div class="upload-container">
-        <l-upload @dataset-upload="getDatasets()" />
-      </div>
-      <l-datasets
-        :datasets="datasets"
-        @dataset-selected="getDatasetDetails($event)"
-        @dataset-remove="deleteDataset($event)"
-      />
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .logo {

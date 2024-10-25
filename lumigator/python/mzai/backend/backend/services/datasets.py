@@ -19,7 +19,6 @@ from backend.settings import settings
 
 GT_FIELD: str = "ground_truth"
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
-ALLOWED_EXPERIMENT_FIELDS: set[str] = {"examples", GT_FIELD}
 
 
 def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) -> int:
@@ -47,7 +46,7 @@ def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) ->
 def validate_dataset_format(filename: str, format: DatasetFormat):
     try:
         match format:
-            case DatasetFormat.EXPERIMENT:
+            case DatasetFormat.JOB:
                 validate_experiment_dataset(filename)
             case _:
                 # Should not be reachable
@@ -71,16 +70,6 @@ def validate_experiment_dataset(filename: str):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Experiment dataset is missing the required fields: {missing_fields}.",
-            )
-
-        extra_fields = fields.difference(ALLOWED_EXPERIMENT_FIELDS)
-        if extra_fields:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"Experiment dataset contains the invalid fields: {extra_fields}. "
-                    f"Only {ALLOWED_EXPERIMENT_FIELDS} are allowed."
-                ),
             )
 
 

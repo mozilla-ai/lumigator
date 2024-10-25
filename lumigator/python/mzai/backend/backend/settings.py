@@ -42,8 +42,24 @@ class BackendSettings(BaseSettings):
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
-    # Eval
+    # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
+    EVALUATOR_PIP_REQS: str | None = None
+
+    @computed_field
+    @property
+    def EVALUATOR_COMMAND(self) -> str:  # noqa: N802
+        """Returns the command required to run evaluator.
+
+        The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
+        on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
+        """
+        return f"{self.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+
+    # Inference job details
+    INFERENCE_WORK_DIR: str | None = None
+    INFERENCE_PIP_REQS: str | None = None
+    INFERENCE_COMMAND: str = "python inference.py"
 
     def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
         for env_var_name in self.RAY_WORKER_ENV_VARS:
@@ -82,8 +98,6 @@ class BackendSettings(BaseSettings):
     @property
     def RAY_WORKER_GPUS_FRACTION(self) -> float:  # noqa: N802
         return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
-
-    PIP_REQS: str | None = None
 
     @computed_field
     @property

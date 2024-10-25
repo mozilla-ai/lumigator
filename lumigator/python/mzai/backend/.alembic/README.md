@@ -1,17 +1,17 @@
 # Using Alembic with Lumigator
 
-https://alembic.sqlalchemy.org/en/latest/index.html
+From: https://alembic.sqlalchemy.org/en/latest/index.html
 
 > [Alembic](https://alembic.sqlalchemy.org/) is a lightweight database migration tool for usage with the
 > [SQLAlchemy](https://www.sqlalchemy.org/) Database Toolkit for Python.
 
 In Lumigator, whenever we make changes to the database (DB) schemas (via our SQLAlchemy models),
-we can create a migration path for the DB, removing blockers for developers working on the codebase.
+we must create a migration path for the DB, removing blockers for developers working on the codebase, and operators
+upgrading to newer versions of Lumigator.
 
-In future this should be extended to form part of releases so that moving between versions of Lumigator is easy,
-even when the database schemas have breaking changes.
+For new installations of Lumigator, Alembic is enabled by default to create the database and manage migrations.
 
-This document covers the ways in which Alembic can be used.
+This document covers the ways in which Alembic can be used with Lumigator.
 
 **NOTE**: Alembic creates an additional table (`alembic_version`) in the database which it uses to store the matching
 revision ID.
@@ -35,12 +35,10 @@ If a package is not imported then changes will not be captured by Alembic and sh
 
 ## Environment variables
 
-In order to connect to a 'real' database to compare against the models, an `SQLALCHEMY_DATABASE_URL` is required to be
-present in your environment.
+In order to connect to a 'real' database to compare its state against the codified data models, an
+`SQLALCHEMY_DATABASE_URL` is required to be present in your environment.
 
-You can `export` the variable in your shell, or provide it on each invocation.
-
-e.g.
+You can `export` the variable in your shell, or provide it on each invocation of `alembic`:
 
 ```bash
 export SQLALCHEMY_DATABASE_URL=sqlite:///local.db
@@ -50,9 +48,10 @@ export SQLALCHEMY_DATABASE_URL=sqlite:///local.db
 SQLALCHEMY_DATABASE_URL=sqlite:///local.db alembic history
 ```
 
-Examples shown in this document will presume `SQLALCHEMY_DATABASE_URL` is exported.
+Examples shown in this document assume `SQLALCHEMY_DATABASE_URL` is exported.
 
-If `SQLALCHEMY_DATABASE_URL` is not present then a default of `sqlite:///local.db` will be used (see: `alembic.ini`)
+If `SQLALCHEMY_DATABASE_URL` is not present then a default of `sqlite:///local.db` will be used (see: `alembic.ini`:
+`sqlalchemy.url ` setting).
 
 If you've followed the `README` for `backend` then you will have sourced the virtual environment which means you can
 run the `alembic` command directly in the terminal, but you can also run it using `uv`:
@@ -67,22 +66,32 @@ uv run alembic --version
 
 Existing Lumigator operators/contributors may already have a populated database with data they don't want to lose.
 
-In this scenario, it is required to bring the database under the management of Alembic using the alembic `stamp` command.
+In this scenario, the database must be brought under the management of Alembic using the alembic `stamp` command.
 
-Currently this requires a manual process of reviewing the revisions stored in [versions](versions/) and deciding which
-ID represents the current state of the database containing the data.
+This is done by stamping the database to indicate the version of revisions that Alembic should manage 'from' going
+forward.
 
-e.g. `e75fa022c781`.
+#### My database is up to date
 
-We then stamp the database to indicate this is the version of revisions that Alembic should manage 'from' going forward.
-
-If you believe your database matches the most up-to-date models:
+If you believe your database already matches the most up-to-date models:
 
 ```bash
 alembic stamp head
 ```
 
-To align your database with a specific revision:
+#### My database is in a different state (from a prior release)
+
+This scenario requires manual review of the existing revisions stored in the [versions folder](versions/),
+in order to determine which revision ID represents the current state of the database containing the data.
+
+Revisions are stored in a format resembling a linked-list, with each revision containing a `revision` ID and
+`down_revision` ID (which can be `None` for the initial revision). In each revision the changes captured in the
+`upgrade()` method must be examined.
+
+For information on the important information on see [Revision structure](#revision-structure).
+
+To align your database with a specific revision (migration ID `e75fa022c781` aligns with the current state of
+our database):
 
 ```bash
 alembic stamp e75fa022c781
@@ -102,7 +111,7 @@ alembic current
 
 ### Upgrading
 
-Upgrade your database to match the latest models:
+Manually upgrade your database to match the latest models:
 
 ```bash
 alembic upgrade head
@@ -122,7 +131,7 @@ alembic upgrade cb3cf47d9259
 
 ### Downgrading
 
-To downgrade to the original state (not really recommended) use:
+To downgrade to the original state (not recommended) use:
 
 ```bash
 alembic downgrade base
@@ -153,29 +162,29 @@ To create an empty revision that you populate manually:
 alembic revision -m "{Explanatory commit-like message}"
 ```
 
-This will create a new file under `versions/`.
+This will create a new Python file under `[versions/](versions/)`.
 
 For example:
 
 ```bash
-alembic revision -m "create db"
+alembic revision -m "added desc field to job"
 ```
 
 We should see a new Python file created with a commit/ID prepended to your message:
 
-`cb3cf47d9259_create_db.py`
+`cb3cf47d9259_added_desc_field_to_job.py`
 
 #### Automatic* revision
 
 Alembic can attempt to work out the changes required to migrate your database if you ask it to create a revision using
-the `--autogenerate` flag when creating a revision.
+the `--autogenerate` flag when creating a revision. This is the recommended way to create revisions in Lumigator.
 
 ```bash
 alembic revision --autogenerate -m {Explanatory commit-like message}
 ```
 
 Please note that 'automatic' doesn't mean this can be completely automated, as manual steps are still required in
-verifying the output.
+**verifying** the output in the generated `upgrade()` and `downgrade()` methods.
 
 #### Revision structure
 

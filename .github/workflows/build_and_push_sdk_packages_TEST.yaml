@@ -47,8 +47,6 @@ jobs:
         run: |
           uv python install
           uv venv
-      - name: Install publishing tools
-        run: uv pip install wheel twine
       - name: Download dist packages
         uses: actions/download-artifact@v4
         with:
@@ -56,4 +54,4 @@ jobs:
       - name: Upload packages to Test PyPI
         run: |
           source .venv/bin/activate
-          TWINE_USERNAME=__token__ TWINE_PASSWORD=${{ secrets.TESTPYPI_TOKEN }} twine upload --verbose --repository testpypi lumigator_sdk*
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_sdk*

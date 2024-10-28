@@ -76,7 +76,7 @@ It consists of:
 + a **Ray cluster** to run offline evaluation jobs using `evaluator`
     + the `evaluator` module runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
 + Artifact management (S3 in the cloud, localstack locally )
-+ A Postgres database to track platform-level tasks and dataset metadata
++ A database to track platform-level tasks and dataset metadata
 
 # Get Started
 
@@ -85,6 +85,7 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 ## Local Requirements
 
 + [Docker](https://docs.docker.com/engine/install/)
+    + On MAC, Docker Desktop >= 4.3, and docker-compose >= 1.28.
     + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 + System Python (that is: no version manager, such as pyenv, should be active).
 
@@ -186,5 +187,3 @@ The Ray cluster used for computing allows several settings through the following
 | RAY_DASHBOARD_PORT | "" | Port for accessing the Ray dashboards (usually 8265). |
 | RAY_WORKER_GPUS | "" | Number of GPUs available for worker nodes. |
 | RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
-
-

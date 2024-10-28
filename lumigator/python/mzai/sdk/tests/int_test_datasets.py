@@ -29,7 +29,7 @@ def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
     with Path.open(dialog_data) as file:
         datasets = lumi_client.datasets.get_datasets()
         assert datasets.total == 0
-        dataset = lumi_client.datasets.create_dataset(dataset=file, format=DatasetFormat.EXPERIMENT)
+        dataset = lumi_client.datasets.create_dataset(dataset=file, format=DatasetFormat.JOB)
         datasets = lumi_client.datasets.get_datasets()
         assert datasets.total == 1
         dataset = lumi_client.datasets.get_dataset(datasets.items[0].id)

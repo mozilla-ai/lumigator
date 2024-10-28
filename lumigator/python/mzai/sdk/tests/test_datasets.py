@@ -65,6 +65,6 @@ def test_create_dataset_ok(mock_requests_response, mock_requests, lumi_client, j
 
     content = io.BytesIO(bytearray(b"0" * 20))
     dataset = lumi_client.datasets.create_dataset(
-        dataset=(data["filename"], content), format=DatasetFormat.EXPERIMENT
+        dataset=(data["filename"], content), format=DatasetFormat.JOB
     )
     assert dataset is not None

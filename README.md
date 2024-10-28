@@ -76,7 +76,7 @@ It consists of:
 + a **Ray cluster** to run offline evaluation jobs using `evaluator`
     + the `evaluator` module runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
 + Artifact management (S3 in the cloud, localstack locally )
-+ A Postgres database to track platform-level tasks and dataset metadata
++ A database to track platform-level tasks and dataset metadata
 
 # Get Started
 
@@ -85,6 +85,7 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 ## Local Requirements
 
 + [Docker](https://docs.docker.com/engine/install/)
+    + On MAC, Docker Desktop >= 4.3, and docker-compose >= 1.28.
     + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 + System Python (that is: no version manager, such as pyenv, should be active).
 
@@ -96,18 +97,10 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 2. `make start-lumigator`
 3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the[`docker-compose`](docker-compose) )
 
-## Running Lumigator with an external Ray cluster
-To run Lumigator with an external Ray cluster you need to ensure the following variables are configured properly in the [`docker-compose`](docker-compose) file before you start Lumigator:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-- `RAY_DASHBOARD_PORT`
-- `RAY_HEAD_NODE_HOST`
+## Running Lumigator with an external services (Ray, S3)
+To run Lumigator with an external services you, fill in the required values in the `docker-compose.external.yaml` file. Once that's done, you can start Lumigator with:
 
-
-Once that's done, you can start Lumigator with:
-
-`make start-lumigator-external-ray`
+`make start-lumigator-external-services`
 
 ## Local Development Setup (either Mac or Linux)
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
@@ -194,5 +187,3 @@ The Ray cluster used for computing allows several settings through the following
 | RAY_DASHBOARD_PORT | "" | Port for accessing the Ray dashboards (usually 8265). |
 | RAY_WORKER_GPUS | "" | Number of GPUs available for worker nodes. |
 | RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
-
-

@@ -24,6 +24,7 @@ dependencies = [
     # For sqlalchemy
     "python-dotenv>=1.0.1",
     "schemas",
+    "alembic>=1.13.3",
 ]
 
 [tool.uv]

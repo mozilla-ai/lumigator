@@ -66,9 +66,7 @@ class JobService:
 
         return str(
             Path(settings.S3_JOB_RESULTS_PREFIX)
-            / settings.S3_JOB_RESULTS_FILENAME.format(
-                job_name=record.name, job_id=record.id
-            )
+            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
     def create_inference_job(self, request: JobCreate) -> JobResponse:
@@ -80,7 +78,7 @@ class JobService:
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
         # set storage path
-        storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
+        storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
 
         # fill up model url with default openai url
         if request.model.startswith("oai://"):
@@ -105,7 +103,6 @@ class JobService:
             "system_prompt": request.system_prompt,
         }
 
-
         # load a config template and fill it up with config_params
         if request.config_infer_template is not None:
             config_template = request.config_infer_template
@@ -121,16 +118,13 @@ class JobService:
             "--config": config_template.format(**config_params),
         }
 
-        #TODO Add inference module as entrypoint
-        infer_command = f"{settings.LD_PRELOAD_PREFIX} python -m inference infer huggingface"
-
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
         # arguments defined in infer_config_args
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.INFERENCE,
-            command=infer_command,
+            command=settings.INFERENCE_COMMAND,
             args=infer_config_args,
         )
 
@@ -145,8 +139,8 @@ class JobService:
             worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
-            "pip": settings.PIP_REQS,
-            "working_dir": settings.EVALUATOR_WORK_DIR,
+            "pip": settings.INFERENCE_PIP_REQS,
+            "working_dir": settings.INFERENCE_WORK_DIR,
             "env_vars": runtime_env_vars,
         }
 
@@ -215,20 +209,13 @@ class JobService:
             "--config": config_template.format(**config_params),
         }
 
-        # Pre-loading libgomp with LD_PRELOAD resolves allocation issues on aarch64
-        # (see https://github.com/mozilla-ai/lumigator/issues/156). The path where
-        # libs are stored on worker nodes contains a hash that depends on the
-        # installed libraries, so we get it dynamically right before running the
-        # command (more info in settings.py)
-        eval_command = f"{settings.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
-
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EVALUATION,
-            command=eval_command,
+            command=settings.EVALUATOR_COMMAND,
             args=eval_config_args,
         )
 
@@ -243,7 +230,7 @@ class JobService:
             worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
-            "pip": settings.PIP_REQS,
+            "pip": settings.EVALUATOR_PIP_REQS,
             "working_dir": settings.EVALUATOR_WORK_DIR,
             "env_vars": runtime_env_vars,
         }
@@ -298,9 +285,7 @@ class JobService:
             )
         return JobResultResponse.model_validate(result_record)
 
-    def get_job_result_download(
-        self, job_id: UUID
-    ) -> JobResultDownloadResponse:
+    def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
         result_key = self._get_results_s3_key(job_id)

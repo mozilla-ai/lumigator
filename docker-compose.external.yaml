@@ -1,0 +1,14 @@
+name: lumigator
+
+services:
+
+  backend:
+    environment:
+      - S3_ENDPOINT_URL=fill-in
+      - AWS_ACCESS_KEY_ID=fill-in
+      - AWS_SECRET_ACCESS_KEY=fill-in
+      - AWS_DEFAULT_REGION=fill-in
+      - AWS_ENDPOINT_URL=fill-in
+      - S3_BUCKET=fill-in
+      - RAY_DASHBOARD_PORT=8265
+      - RAY_HEAD_NODE_HOST=fill-in

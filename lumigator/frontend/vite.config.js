@@ -7,6 +7,7 @@ import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
 export default defineConfig({
+	envPrefix: 'VUE_APP_',
   plugins: [
     vue(),
   ],

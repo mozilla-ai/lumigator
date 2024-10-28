@@ -19,8 +19,11 @@ LUMIGATOR_APP_TAGS = {
 
 
 def _init_db():
-    alembic_cfg = Config(str(Path().parent / "alembic.ini"))
+    logger.info("Initializing database via Alembic")
+    backend_root = Path(Path(Path(__file__).resolve()).parent).parent
+    alembic_cfg = Config(str(backend_root / "alembic.ini"))
     command.upgrade(alembic_cfg, "head")
+
 
 def _configure_logger():
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -53,6 +56,5 @@ def create_app() -> FastAPI:
         return {"Hello": "Lumigator!🐊"}
 
     return app
-
 
 app = create_app()

@@ -12,7 +12,7 @@ from evaluator.tracking.artifact_utils import (
 
 @pytest.fixture(scope="session")
 def examples_dir():
-    return Path(__file__).parents[1] / "examples"
+    return Path(__file__).parents[2] / "examples"
 
 
 @pytest.fixture(scope="session")

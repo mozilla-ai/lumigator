@@ -7,7 +7,8 @@ from ray.job_submission import JobSubmissionClient
 from schemas.extras import ListingResponse
 from schemas.jobs import (
     JobConfig,
-    JobCreate,
+    JobEvalCreate,
+    JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -69,7 +70,7 @@ class JobService:
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
-    def create_inference_job(self, request: JobCreate) -> JobResponse:
+    def create_inference_job(self, request: JobInferenceCreate) -> JobResponse:
         """Creates a new workload to perform batch inference"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
@@ -99,13 +100,18 @@ class JobService:
             "dataset_path": dataset_s3_path,
             "max_samples": request.max_samples,
             "storage_path": storage_path,
+            "output_field": request.output_field,
             "model_url": model_url,
             "system_prompt": request.system_prompt,
+            "max_tokens": request.max_tokens,
+            "frequency_penalty": request.frequency_penalty,
+            "temperature": request.temperature,
+            "top_p": request.top_p,
         }
 
         # load a config template and fill it up with config_params
-        if request.config_infer_template is not None:
-            config_template = request.config_infer_template
+        if request.config_template is not None:
+            config_template = request.config_template
         elif request.model in config_templates.config_infer_template:
             # if no config template is provided, get the default one for the model
             config_template = config_templates.config_infer_template[request.model]
@@ -156,7 +162,7 @@ class JobService:
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
-    def create_evaluation_job(self, request: JobCreate) -> JobResponse:
+    def create_evaluation_job(self, request: JobEvalCreate) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
@@ -191,8 +197,8 @@ class JobService:
         }
 
         # load a config template and fill it up with config_params
-        if request.config_eval_template is not None:
-            config_template = request.config_eval_template
+        if request.config_template is not None:
+            config_template = request.config_template
         elif request.model in config_templates.config_eval_template:
             # if no config template is provided, get the default one for the model
             config_template = config_templates.config_eval_template[request.model]

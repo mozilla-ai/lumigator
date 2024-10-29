@@ -62,6 +62,19 @@ def create_app() -> FastAPI:
 
     app = FastAPI(**LUMIGATOR_APP_TAGS)
 
+    # Adding CORS middleware
+    origins = [
+        "http://localhost",
+        "http://localhost:3000",
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Adjust this list as needed for security (e.g., ["http://localhost:3000"])
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     app.include_router(api_router)
 
     @app.get("/")

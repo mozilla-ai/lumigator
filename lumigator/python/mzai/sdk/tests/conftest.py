@@ -38,82 +38,111 @@ def mock_vendor_data() -> str:
     return '["openai", "mistral"]'
 
 
+@pytest.fixture(scope="session")
 def resources_dir() -> Path:
     return Path(__file__).parent / "data"
 
+
+@pytest.fixture(scope="session")
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent / "sample_data"
 
-@pytest.fixture(scope="session")
-def json_data_jobs() -> Path:
-    return resources_dir() / "jobs.json"
-
 
 @pytest.fixture(scope="session")
-def json_data_job() -> Path:
-    return resources_dir() / "job.json"
+def json_data_jobs(resources_dir) -> Path:
+    return resources_dir / "jobs.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiments() -> Path:
-    return resources_dir() / "experiments.json"
+def json_data_jobs_submit(resources_dir) -> Path:
+    return resources_dir / "jobs-submit.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment() -> Path:
-    return resources_dir() / "experiment.json"
+def json_data_job(resources_dir) -> Path:
+    return resources_dir / "job.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_missing() -> Path:
-    return resources_dir() / "experiment-missing.json"
+def json_data_experiments(resources_dir) -> Path:
+    return resources_dir / "experiments.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_response() -> Path:
-    return resources_dir() / "experiment-post-response.json"
+def json_data_experiment(resources_dir) -> Path:
+    return resources_dir / "experiment.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_simple() -> Path:
-    return resources_dir() / "experiment-post-simple.json"
+def json_data_experiment_missing(resources_dir) -> Path:
+    return resources_dir / "experiment-missing.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_post_all() -> Path:
-    return resources_dir() / "experiment-post-all.json"
+def json_data_experiment_post_response(resources_dir) -> Path:
+    return resources_dir / "experiment-post-response.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result() -> Path:
-    return resources_dir() / "experiment-result.json"
+def json_data_experiment_post_simple(resources_dir) -> Path:
+    return resources_dir / "experiment-post-simple.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_missing() -> Path:
-    return resources_dir() / "experiment-result-no-experiment.json"
+def json_data_experiment_post_all(resources_dir) -> Path:
+    return resources_dir / "experiment-post-all.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_download() -> Path:
-    return resources_dir() / "experiment-download.json"
+def json_data_experiment_result(resources_dir) -> Path:
+    return resources_dir / "experiment-result.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_experiment_result_download_missing() -> Path:
-    return resources_dir() / "experiment-download-no-experiment.json"
+def json_data_experiment_result_missing(resources_dir) -> Path:
+    return resources_dir / "experiment-result-no-experiment.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_datasets() -> Path:
-    return resources_dir() / "datasets.json"
+def json_data_experiment_result_download(resources_dir) -> Path:
+    return resources_dir / "experiment-download.json"
 
 
 @pytest.fixture(scope="session")
-def json_data_dataset() -> Path:
-    return resources_dir() / "dataset.json"
+def json_data_experiment_result_download_missing(resources_dir) -> Path:
+    return resources_dir / "experiment-download-no-experiment.json"
 
 
 @pytest.fixture(scope="session")
-def dialog_data() -> Path:
-    return common_resources_dir() / "dialogsum_exc.csv"
+def json_data_datasets(resources_dir) -> Path:
+    return resources_dir / "datasets.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_dataset(resources_dir) -> Path:
+    return resources_dir / "dataset.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_all(resources_dir) -> Path:
+    return resources_dir / "job-all.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_minimal(resources_dir) -> Path:
+    return resources_dir / "job-minimal.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_submit_response(resources_dir) -> Path:
+    return resources_dir / "job-submit-resp.json"
+
+
+@pytest.fixture(scope="session")
+def json_data_job_response(resources_dir) -> Path:
+    return resources_dir / "job-resp.json"
+
+
+@pytest.fixture(scope="session")
+def dialog_data(common_resources_dir) -> Path:
+    return common_resources_dir / "dialogsum_exc.csv"

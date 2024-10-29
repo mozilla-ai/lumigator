@@ -7,5 +7,12 @@ services:
       context: .
       dockerfile: "Dockerfile"
       target: "dev_image"
-    volumes:
-      - ./:/mzai
+    develop:
+      watch:
+        - path: ./
+          target: /mzai
+          action: sync
+          ignore:
+           - lumigator/python/mzai/backend/.venv/
+        - path: lumigator/python/mzai/backend/pyproject.toml
+          action: rebuild

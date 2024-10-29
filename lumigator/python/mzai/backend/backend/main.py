@@ -7,7 +7,6 @@ from alembic.config import Config
 from fastapi import FastAPI
 from loguru import logger
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import Engine
 
 from backend.api.router import api_router
 from backend.api.tags import TAGS_METADATA
@@ -24,18 +23,7 @@ def _init_db():
     alembic_cfg = Config(str(Path().parent / "alembic.ini"))
     command.upgrade(alembic_cfg, "head")
 
-    origins = [
-        "http://localhost",
-        "http://localhost:3000",
-    ]
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
+def _configure_logger():
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()
     logger.add(
@@ -58,6 +46,19 @@ def create_app() -> FastAPI:
     _init_db()
 
     app = FastAPI(**LUMIGATOR_APP_TAGS)
+
+    # Adding CORS middleware
+    origins = [
+        "http://localhost",
+        "http://localhost:3000",
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Adjust this list as needed for security (e.g., ["http://localhost:3000"])
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(api_router)
 

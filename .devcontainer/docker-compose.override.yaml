@@ -14,5 +14,6 @@ services:
           action: sync
           ignore:
            - lumigator/python/mzai/backend/.venv/
+           - lumigator/python/mzai/backend/local.db
         - path: lumigator/python/mzai/backend/pyproject.toml
           action: rebuild

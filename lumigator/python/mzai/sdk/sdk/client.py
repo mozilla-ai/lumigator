@@ -59,10 +59,12 @@ def _make_request(
 
 
 class ApiClient:
-    def __init__(self, api_host: str):
+    def __init__(self, api_host: str, ray_host: str):
         self.api_host = api_host
+        self.ray_host = ray_host
         # NOTE: Consider support for HTTPS too.
         self._api_url = f"http://{self.api_host}/api/v1"
+        self._ray_url = f"http://{self.ray_host}/api/jobs"
 
     def get_response(
         self,
@@ -96,3 +98,37 @@ class ApiClient:
                 raise
         except requests.RequestException:
             raise
+
+    def get_ray_job_response(
+        self,
+        api_path,
+        method: HTTPMethod = HTTPMethod.GET,
+        data=None,
+        files=None,
+        json_data=None,
+        verbose: bool = True,
+    ) -> requests.Response:
+        """Makes a request to the specified path and attempts to return the response.
+        Raises an exception for any error other than 404 - NOT FOUND.
+        """
+        path = f"{self._ray_url.rstrip('/')}/{api_path.lstrip('/')}"
+
+        try:
+            response = _make_request(
+                path, method, data=data, files=files, json_=json_data, verbose=verbose
+            )
+            # Support returning a response for 200-204 status codes.
+            # NOTE: Other status codes that are returned without an HTTP error aren't supported.
+            # e.g. 307 - Temporary Redirect
+            if HTTPStatus.OK <= response.status_code <= HTTPStatus.NO_CONTENT:
+                return response
+        except HTTPError as e:
+            if e.response.status_code == HTTPStatus.NOT_FOUND:
+                return e.response
+            else:
+                # Re-raise the exception if it's not a 404 error
+                # This happens for status codes such as 400 - Bad Request etc.
+                raise
+        except requests.RequestException:
+            raise
+

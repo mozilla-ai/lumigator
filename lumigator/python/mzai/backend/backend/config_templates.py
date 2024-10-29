@@ -83,17 +83,27 @@ causal_infer_template = """{{
     "dataset": {{ "path": "{dataset_path}" }},
 }}"""
 
+
 oai_infer_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{
-        "inference": {{
-            "base_url": "{model_url}",
-            "engine": "{model_path}",
-            "system_prompt": "{system_prompt}",
-            "max_retries": 3
-        }}
-    }},
     "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
+    }},
+    "server": {{
+        "base_url": "{model_url}",
+        "engine": "{model_path}",
+        "system_prompt": "{system_prompt}",
+        "max_retries": 3
+    }},
+    "params": {{
+        "max_tokens": {max_tokens},
+        "frequency_penalty": {frequency_penalty},
+        "temperature": {temperature},
+        "top_p": {top_p}
+    }}
 }}"""
 
 config_infer_template = {
@@ -102,11 +112,11 @@ config_infer_template = {
     "hf://mrm8488/t5-base-finetuned-summarize-news": seq2seq_eval_template,
     "hf://Falconsai/text_summarization": seq2seq_eval_template,
     "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
-    "oai://gpt-4o-mini": oai_eval_template,
-    "oai://gpt-4-turbo": oai_eval_template,
-    "oai://gpt-3.5-turbo-0125": oai_eval_template,
-    "mistral://open-mistral-7b": oai_eval_template,
-    "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_eval_template,
+    "oai://gpt-4o-mini": oai_infer_template,
+    "oai://gpt-4-turbo": oai_infer_template,
+    "oai://gpt-3.5-turbo-0125": oai_infer_template,
+    "mistral://open-mistral-7b": oai_infer_template,
+    "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
 }
 
 

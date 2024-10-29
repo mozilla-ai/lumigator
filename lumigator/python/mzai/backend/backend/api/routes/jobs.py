@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, status
 from schemas.extras import ListingResponse
 from schemas.jobs import (
-    JobCreate,
+    JobEvalCreate,
+    JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -17,7 +18,7 @@ router = APIRouter()
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
-    request: JobCreate,
+    request: JobInferenceCreate,
 ) -> JobResponse:
     return service.create_inference_job(request)
 
@@ -25,7 +26,7 @@ def create_inference_job(
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
-    request: JobCreate,
+    request: JobEvalCreate,
 ) -> JobResponse:
     return service.create_evaluation_job(request)
 

@@ -6,8 +6,8 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import s3fs
-from box import Box
 from datasets import load_from_disk
+from inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import (
     BaseModelClient,
@@ -33,7 +33,7 @@ def save_to_disk(local_path: Path, data_dict: dict):
         json.dump(data_dict, f)
 
 
-def save_to_s3(config: Box, local_path: Path, storage_path: str):
+def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
         storage_path = "s3://" + str(
@@ -43,8 +43,8 @@ def save_to_s3(config: Box, local_path: Path, storage_path: str):
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: Box, inference_results: dict) -> Path:
-    storage_path = config.evaluation.storage_path
+def save_outputs(config: InferenceJobConfig, inference_results: dict) -> Path:
+    storage_path = config.job.storage_path
 
     # generate local temp file ANYWAY:
     # - if storage_path is not provided, it will be stored and kept into a default dir
@@ -69,7 +69,7 @@ def save_outputs(config: Box, inference_results: dict) -> Path:
         logger.error(e)
 
 
-def run_inference(config: Box) -> Path:
+def run_inference(config: InferenceJobConfig) -> Path:
     # initialize output dictionary
     output = {}
 
@@ -77,7 +77,7 @@ def run_inference(config: Box) -> Path:
     dataset = load_from_disk(config.dataset.path)
 
     # Limit dataset length if max_samples is specified
-    max_samples = config.evaluation.max_samples
+    max_samples = config.job.max_samples
     if max_samples is not None and max_samples > 0:
         if max_samples > len(dataset):
             logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
@@ -86,24 +86,24 @@ def run_inference(config: Box) -> Path:
 
     # Enable / disable tqdm
     input_samples = dataset["examples"]
-    dataset_iterable = tqdm(input_samples) if config.evaluation.enable_tqdm else input_samples
+    dataset_iterable = tqdm(input_samples) if config.job.enable_tqdm else input_samples
 
     # Choose which model client to use
-    if config.model.inference is not None:
+    if config.server is not None:
         # a model *inference service* is passed
-        base_url = config.model.inference.base_url
-        output_model_name = config.model.inference.engine
+        base_url = config.server.base_url
+        output_model_name = config.server.engine
         if "mistral" in base_url:
             # run the mistral client
             logger.info(f"Using Mistral client. Endpoint: {base_url}")
-            model_client = MistralModelClient(base_url, config.model)
+            model_client = MistralModelClient(base_url, config)
         else:
             # run the openai client
             logger.info(f"Using OAI client. Endpoint: {base_url}")
-            model_client = OpenAIModelClient(base_url, config.model)
+            model_client = OpenAIModelClient(base_url, config)
 
     # run inference
-    output["predictions"] = predict(dataset_iterable, model_client)
+    output[config.job.output_field] = predict(dataset_iterable, model_client)
     output["examples"] = dataset["examples"]
     output["ground_truth"] = dataset["ground_truth"]
     output["model"] = output_model_name
@@ -122,6 +122,6 @@ if __name__ == "__main__":
         err_str = "No input configuration provided. Please pass one using the --config flag"
         logger.error(err_str)
     else:
-        config = json.loads(args.config)
-        result_dataset_path = run_inference(Box(config, default_box=True, default_box_attr=None))
+        config = InferenceJobConfig.model_validate_json(args.config)
+        result_dataset_path = run_inference(config)
         logger.info(f"Inference results stored at {result_dataset_path}")

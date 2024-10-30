@@ -32,6 +32,10 @@ class JobEvent(BaseModel):
     detail: str | None = None
 
 
+class JobLogsResponse(BaseModel):
+    logs: str | None = None
+
+
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     job_id: str | None = None

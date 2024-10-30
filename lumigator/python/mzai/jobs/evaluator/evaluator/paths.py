@@ -119,5 +119,5 @@ def format_mistral_model_path(model_name: str) -> AssetPath:
     return f"{PathPrefix.MISTRAL.value}{model_name}"
 
 
-def format_llama_model_path(model_name: str) -> AssetPath:
+def format_llamafile_model_path(model_name: str) -> AssetPath:
     return f"{PathPrefix.LLAMA.value}{model_name}"

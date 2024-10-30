@@ -82,7 +82,7 @@ def validate_asset_path(path: str) -> "AssetPath":
             raise ValueError(f"'{raw_path}' is not a valid Mistral model name.")
     elif path.startswith(PathPrefix.LLAMAFILE):
         if not is_valid_llamafile_model_name(raw_path):
-            raise ValueError(f"'{raw_path}' is not a valid Llama model name.")
+            raise ValueError(f"'{raw_path}' is not a valid Llamafile model name.")
     else:
         allowed_prefixes = {x.value for x in PathPrefix}
         raise ValueError(f"'{path}' does not begin with an allowed prefix: {allowed_prefixes}")

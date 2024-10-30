@@ -72,7 +72,7 @@ def validate_asset_path(path: str) -> "AssetPath":
         if not is_valid_wandb_path(raw_path):
             raise ValueError(f"'{raw_path}' is not a validpath.")
     elif path.startswith(PathPrefix.S3):
-        if not is_valid_s3_path(raw_path):
+        if not is_valid_s3_path(path):
             raise ValueError(f"'{raw_path}' is not a valid S3 path.")
     elif path.startswith(PathPrefix.OPENAI):
         if not is_valid_openai_model_name(raw_path):

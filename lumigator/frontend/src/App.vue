@@ -34,12 +34,19 @@ const getDatasetDetails = async (id) => {
 };
 
 const deleteDataset = async (id) => {
-  console.log(id);
-  const response = await http.delete(`datasets/${id}`);
-  console.log(response.data);
-  setTimeout(() => {
-    getDatasets();
-  }, 1000);
+  try {
+    const response = await http.delete(`datasets/${id}`);
+
+    if (response.status === 200 || response.status === 204) {
+      setTimeout(() => {
+        getDatasets();
+      }, 1000);
+    } else {
+      console.error("Unexpected response status: ", response.status);
+    }
+  } catch (error) {
+    console.error("Error deleting dataset:", error);
+  }
 };
 
 onMounted(() => {

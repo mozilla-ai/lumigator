@@ -80,7 +80,7 @@ def validate_asset_path(path: str) -> "AssetPath":
     elif path.startswith(PathPrefix.MISTRAL):
         if not is_valid_mistral_model_name(raw_path):
             raise ValueError(f"'{raw_path}' is not a valid Mistral model name.")
-    elif path.startswith(PathPrefix.LLAMA):
+    elif path.startswith(PathPrefix.LLAMAFILE):
         if not is_valid_llama_model_name(raw_path):
             raise ValueError(f"'{raw_path}' is not a valid Llama model name.")
     else:

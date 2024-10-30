@@ -34,9 +34,8 @@ def is_valid_huggingface_repo_id(s: str) -> bool:
 
 
 def is_valid_wandb_path(wandb_path: str) -> bool:
-    """Basic validation for W&B path format (e.g., entity/project/run)."""
-    parts = wandb_path.split("/")
-    return len(parts) == 3
+    """Basic validation for W&B path format."""
+    return bool(wandb_path)
 
 
 def is_valid_s3_path(s3_path: str) -> bool:

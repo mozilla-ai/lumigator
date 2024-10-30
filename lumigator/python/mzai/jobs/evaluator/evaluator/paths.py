@@ -55,7 +55,7 @@ def is_valid_mistral_model_name(model_name: str) -> bool:
 
 
 def is_valid_llamafile_model_name(model_name: str) -> bool:
-    """Basic validation for Llama model names."""
+    """Basic validation for Llamafile model names."""
     return bool(model_name)
 
 

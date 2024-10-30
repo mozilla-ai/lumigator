@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 const props = defineProps({
   datasets: Array,
@@ -9,8 +8,8 @@ const formatDate = (dateString) => {
   const date = new Date(dateString);
 
   const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
-  const year = String(date.getFullYear()).slice(-2); // Get last two digits of year
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = String(date.getFullYear()).slice(-2);
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
 
@@ -82,7 +81,6 @@ const onRemoveDataset = (id) => {
     }
     &-remove {
       cursor: pointer;
-      // background:transparent;
     }
   }
 }

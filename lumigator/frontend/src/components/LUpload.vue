@@ -8,7 +8,7 @@ const selectedFile = ref();
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    fileName.value = file.name; // Update the fileName ref
+    fileName.value = file.name; // Update the fileName
     selectedFile.value = file;
   } else {
     fileName.value = '';
@@ -24,7 +24,7 @@ const uploadFile = async () => {
     // Create a new FormData object and append the selected file and the required format
     const formData = new FormData();
     formData.append('dataset', selectedFile.value); // Attach the file
-    formData.append('format', 'experiment'); // Specify the format as required
+    formData.append('format', 'job'); // Specification @localhost:8000/docs
 
     const response = await http.post('datasets/', formData, {
       headers: {

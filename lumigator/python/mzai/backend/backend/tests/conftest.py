@@ -1,4 +1,5 @@
 import os
+import uuid
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,7 @@ from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.settings import settings
+from schemas.jobs import JobConfig,JobType
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
@@ -131,3 +133,26 @@ def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client)
 
     app.dependency_overrides[get_db_session] = get_db_session_override
     app.dependency_overrides[get_s3_client] = get_s3_client_override
+
+@pytest.fixture(scope="function")
+def create_job_config()-> JobConfig:
+    conf_args = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "model": "hf://facebook/bart-large-cnn",
+        "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
+        "max_samples": 10,
+        "model_url": "hf://facebook/bart-large-cnn",
+        "system_prompt": "Hello Lumigator",
+        "config_template": {},
+    }
+
+    conf = JobConfig(
+        job_id=uuid.uuid4(),
+        job_type=JobType.EVALUATION,
+        command=settings.EVALUATOR_COMMAND,
+        args=conf_args ,
+    )
+
+
+    return conf

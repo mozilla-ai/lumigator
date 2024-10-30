@@ -35,7 +35,7 @@ def upgrade() -> None:
         server_default=sa.text('(CURRENT_TIMESTAMP)'),
         nullable=False
     ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
     )
     op.create_table('jobs',
     sa.Column('id', sa.Uuid(), nullable=False),
@@ -60,7 +60,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.ForeignKeyConstraint(['job_id'], ['jobs.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('job_id')
+    sa.UniqueConstraint('job_id'),
     )
     # ### end Alembic commands ###
 

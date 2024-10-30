@@ -106,8 +106,8 @@ services:
       - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
-      - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
-      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
+      - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/eval_lite/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/eval_lite
       - INFERENCE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/inference/requirements.txt
       - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
       - RAY_DASHBOARD_PORT=8265

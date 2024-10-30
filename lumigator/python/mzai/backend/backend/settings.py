@@ -54,7 +54,7 @@ class BackendSettings(BaseSettings):
         The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
         on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
         """
-        return f"{self.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+        return f"{self.LD_PRELOAD_PREFIX} python eval_lite.py"
 
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None

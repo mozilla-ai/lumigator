@@ -175,10 +175,6 @@ class JobService:
         else:
             model_url = request.model_url
 
-        # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
-            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
-
         config_params = {
             "job_name": request.name,
             "job_id": record.id,
@@ -187,7 +183,6 @@ class JobService:
             "max_samples": request.max_samples,
             "storage_path": storage_path,
             "model_url": model_url,
-            "system_prompt": request.system_prompt,
         }
 
         # load a config template and fill it up with config_params
@@ -198,7 +193,6 @@ class JobService:
             config_template = config_templates.config_eval_template[request.model]
         else:
             # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
             config_template = config_templates.causal_eval_template
 
         # eval_config_args is used to map input configuration parameters with
@@ -215,19 +209,13 @@ class JobService:
         ray_config = JobConfig(
             job_id=record.id,
             job_type=JobType.EVALUATION,
-            command=settings.EVALUATOR_COMMAND,
             args=eval_config_args,
         )
 
         # build runtime ENV for workers
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
         settings.inherit_ray_env(runtime_env_vars)
-
-        # set num_gpus per worker (zero if we are just hitting a service)
-        if not request.model.startswith("hf://"):
-            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
-        else:
-            worker_gpus = settings.RAY_WORKER_GPUS
+        worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
             "pip": settings.EVALUATOR_PIP_REQS,

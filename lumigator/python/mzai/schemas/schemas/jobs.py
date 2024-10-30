@@ -21,7 +21,6 @@ class JobStatus(str, Enum):
 class JobConfig(BaseModel):
     job_id: UUID
     job_type: JobType
-    command: str
     args: dict[str, Any] | None = None
 
 

@@ -22,7 +22,7 @@ export default defineConfig({
 		strictPort: true,  // Fail if the port is already in use
 		proxy: {
       '/api/v1': {
-        target: 'http://localhost:8000', // Your backend's base URL
+        target: 'http://localhost:3000', // Your backend's base URL
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1'), // Ensure `/api/v1` is kept in the path
       },

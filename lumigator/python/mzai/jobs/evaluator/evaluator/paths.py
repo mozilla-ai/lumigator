@@ -15,7 +15,7 @@ class PathPrefix(str, Enum):
     S3 = "s3://"
     OPENAI = "oai://"
     MISTRAL = "mistral://"
-    LLAMA = "llama://"
+    LLAMAFILE = "llamafile://"
 
 
 def strip_path_prefix(path: str) -> str:

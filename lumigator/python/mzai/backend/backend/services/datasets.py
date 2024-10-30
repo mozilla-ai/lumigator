@@ -97,11 +97,7 @@ class DatasetService:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
-        record = self.dataset_repo.get(dataset_id)
-
-        if record is None:
-            self._raise_not_found(dataset_id)
-        return record
+        return self.dataset_repo.get(dataset_id)
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
@@ -168,20 +164,29 @@ class DatasetService:
         return dataset_path
 
     def delete_dataset(self, dataset_id: UUID) -> None:
+        """When the dataset exists, attempts to delete it from an S3 bucket and the repository (DB).
+
+        Raises exceptions it encounters dealing with S3, except when the file is not found in S3.
+        In this case it deletes the orphaned record from the DB.
+        """
         record = self._get_dataset_record(dataset_id)
+        # Early return if the record does not exist (for idempotency).
+        if record is None:
+            return None
 
         try:
-            # Delete from S3
-            # S3 delete is called first => if this fails the DB delete won't take place
+            # S3 delete is called first, if this fails for any other reason that the file not being
+            # found, then the DB delete won't take place, and an exception raised.
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
             self.s3_filesystem.rm(dataset_path, recursive=True)
-
-            # Delete DB record
+            self.dataset_repo.delete(record.id)
+        except FileNotFoundError as e:
+            # File not found errors are allowed, but we perform clean-up in this situation.
+            logger.error(f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
+                         f"Cleaning up DB by removing ID. {e}")
             self.dataset_repo.delete(record.id)
 
-        except Exception as e:
-            self._raise_unhandled_exception(e)
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
         """Generate presigned download URLs for dataset files."""

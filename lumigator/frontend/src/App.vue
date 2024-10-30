@@ -29,7 +29,9 @@ const getDatasets = async () => {
 };
 
 const getDatasetDetails = async (id) => {
-  const response = await http.get(`datasets/${id}`);
+	const response = await http.get(`datasets/${id}`);
+	// this will fetch further information for the selected dataset
+	// when endpoint is ready
   console.log(response.data);
 };
 

@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DatasetConfig(BaseModel):
     path: str
+    model_config = ConfigDict(extra="forbid")
 
 
 class JobConfig(BaseModel):
@@ -10,6 +11,7 @@ class JobConfig(BaseModel):
     storage_path: str
     output_field: str = "prediction"
     enable_tqdm: bool = True
+    model_config = ConfigDict(extra="forbid")
 
 
 class InferenceServerConfig(BaseModel):
@@ -17,6 +19,7 @@ class InferenceServerConfig(BaseModel):
     engine: str
     system_prompt: str | None
     max_retries: int = 3
+    model_config = ConfigDict(extra="forbid")
 
 
 class SamplingParameters(BaseModel):
@@ -24,6 +27,7 @@ class SamplingParameters(BaseModel):
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
+    model_config = ConfigDict(extra="forbid")
 
 
 class InferenceJobConfig(BaseModel):
@@ -32,3 +36,4 @@ class InferenceJobConfig(BaseModel):
     job: JobConfig
     server: InferenceServerConfig
     params: SamplingParameters
+    model_config = ConfigDict(extra="forbid")

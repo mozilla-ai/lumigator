@@ -180,12 +180,13 @@ class DatasetService:
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
             self.s3_filesystem.rm(dataset_path, recursive=True)
-            self.dataset_repo.delete(record.id)
         except FileNotFoundError as e:
             # File not found errors are allowed, but we perform clean-up in this situation.
             logger.error(f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
                          f"Cleaning up DB by removing ID. {e}")
-            self.dataset_repo.delete(record.id)
+
+        # Getting this far means we are OK to remove the record from the DB.
+        self.dataset_repo.delete(record.id)
 
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:

@@ -13,7 +13,6 @@ from testcontainers.localstack import LocalStackContainer
 from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
-from backend.records.base import BaseRecord
 from backend.settings import settings
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
@@ -31,10 +30,6 @@ def dialog_dataset():
 def db_engine():
     """Initialize a DB engine and create tables."""
     engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, echo=True)
-
-    # TODO: Run migrations here once switched over to Alembic.
-    BaseRecord.metadata.create_all(engine)
-
     return engine
 
 
@@ -92,11 +87,19 @@ def s3_client(localstack_container: LocalStackContainer) -> S3Client:
 
 
 @pytest.fixture(scope="session")
-def app(db_engine: Engine):
-    """Create the FastAPI app bound to the test DB engine."""
+def app():
+    """Create the FastAPI app bound to DB managed via Alembic.
+
+     Expects an environment variable of 'SQLALCHEMY_DATABASE_URL' to be configured.
+     Ideally this should be an absolute path:
+
+     e.g. sqlite:////Users/{me}/tmp/local_test.db
+
+     If the environment variable is not specified, then a 'local.db' will be created in the
+     folder where the tests are executed.
+     """
     app = create_app()
     return app
-
 
 @pytest.fixture(scope="function")
 def app_client(app: FastAPI):

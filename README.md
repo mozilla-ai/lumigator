@@ -136,7 +136,6 @@ uv add package
 Make sure to commit the updated uv.lock file
 
 **Run Test Suite Across all projects**
-
 ```
 make test
 ```

@@ -24,9 +24,7 @@ class RayJobEntrypoint(ABC):
         string.
         """
 
-        full_command = ""
-
-        loguru.logger.info(self.config.args)
+        full_command = self.config.command
 
         if self.config.args:
             for k in self.config.args.keys():

@@ -21,6 +21,7 @@ class JobStatus(str, Enum):
 class JobConfig(BaseModel):
     job_id: UUID
     job_type: JobType
+    command: str
     args: dict[str, Any] | None = None
 
 
@@ -58,6 +59,16 @@ class JobCreate(BaseModel):
     model_url: str | None = None
     system_prompt: str | None = None
     config_infer_template: str | None = None
+    config_eval_template: str | None = None
+
+class JobEvalCreate(BaseModel):
+    name: str
+    description: str = ""
+    model: str
+    dataset: UUID
+    max_samples: int | None = None
+    model_url: str | None = None
+    system_prompt: str | None = None
     config_eval_template: str | None = None
 
 

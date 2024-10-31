@@ -17,6 +17,7 @@ DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up:
+
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 	uv run pre-commit install
 
@@ -58,3 +59,5 @@ test:
 	make start-lumigator-build
 	cd lumigator/python/mzai/backend; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
 	cd lumigator/python/mzai/sdk; uv run pytest
+	make stop-lumigator
+

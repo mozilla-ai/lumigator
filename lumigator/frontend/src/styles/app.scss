@@ -1,8 +1,8 @@
-@use 'resetcss';
-@use 'variables';
-@use 'lumigator-theme';
-@use 'components';
-@use 'typography';
+@import 'resetcss';
+@import 'variables';
+@import 'lumigator-theme';
+@import 'components';
+@import 'typography';
 
 // Import PrimeVue Base Styles
 @import 'primeicons/primeicons.css'; // PrimeIcons

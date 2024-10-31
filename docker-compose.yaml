@@ -75,7 +75,7 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
-    profiles: 
+    profiles:
       - local
 
   backend:
@@ -127,3 +127,4 @@ services:
 volumes:
 
     localstack-data:
+    database_volume:

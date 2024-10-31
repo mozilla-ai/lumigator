@@ -1,18 +1,19 @@
 <template>
   <div id="app">
 		<div class="header"></div>
-		<div class="l-menu-container"></div>
-		<div class="l-main-container"></div>
+		<div class="l-menu-container">
+			<l-menu />
+		</div>
+		<div class="l-main-container">
+		</div>
   </div>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
 import http from '@/services/http/index.js';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext'
+import LMenu from '@/components/LMenu.vue'
 
 const datasets = ref([]);
-const value = ref('');
 
 const getDatasets = async () => {
   const response = await http.get('datasets/');
@@ -49,6 +50,17 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+// .logo {
+//   height: 6em;
+//   padding: 1.5em;
+//   will-change: filter;
+//   transition: filter 300ms;
+//   cursor: default;
+// }
+// .logo:hover {
+//   filter: drop-shadow(0 0 2em #646cffaa);
+// }
+
 #app {
 	height: 100vh;
   padding: $l-spacing-1;

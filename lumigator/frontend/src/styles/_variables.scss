@@ -2,7 +2,7 @@
 $l-primary-color: #e0c414; // Main brand color (gold/yellow)
 $l-primary-color-text: #ffffff;
 $l-menu-bg: #161616; // menu background color
-$l-main-bg: #222222; // Main content background color
+$l-main-bg: #161616; // Main content background color
 $l-card-bg: #222222; // Card background color
 $l-overlay-color: rgba(0, 0, 0, 0.6);
 $l-text-color: #eaeaea;
@@ -15,10 +15,12 @@ $l-font-weight-normal: 400;
 $l-font-weight-bold: 600;
 
 // Spacing and Borders
+$l-main-radius: 8px;
 $l-border-radius: 6px;
 $l-button-border-radius: 4px;
 $l-input-border-radius: 4px;
-$l-spacing-unit: 1rem;
+$l-spacing-1: 1rem;
+$l-app-width: 1800px;
 
 // Shadows
 $l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);

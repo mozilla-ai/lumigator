@@ -1,28 +1,18 @@
-
 <template>
-  <div>
-    <h1 class="logo">🐊 Lumigator</h1>
-		<Button label="Push me"/>
-    <div class="l-main">
-      <div class="upload-container">
-        <l-upload @dataset-upload="getDatasets()" />
-      </div>
-      <l-datasets
-        :datasets="datasets"
-        @dataset-selected="getDatasetDetails($event)"
-        @dataset-remove="deleteDataset($event)"
-      />
-    </div>
+  <div id="app">
+		<div class="header"></div>
+		<div class="l-menu-container"></div>
+		<div class="l-main-container"></div>
   </div>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
-import LDatasets from './components/LDatasets.vue';
-import LUpload from './components/LUpload.vue';
 import http from '@/services/http/index.js';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext'
 
 const datasets = ref([]);
+const value = ref('');
 
 const getDatasets = async () => {
   const response = await http.get('datasets/');
@@ -58,21 +48,35 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-  cursor: default;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
+<style scoped lang="scss">
+#app {
+	height: 100vh;
+  padding: $l-spacing-1;
+	margin: auto;
+	background-color: $l-main-bg;
+	display: grid;
+	grid-template-columns: minmax(150px, 20%) 1fr;
+	grid-template-rows: auto 1fr;
+	max-width: $l-app-width;
+	text-align: center;
 
-.l-main {
-  padding: 3rem;
-  display: grid;
-  grid-template-columns: minmax(150px, 25%) 1fr;
+	.header {
+		// border: 2px solid red;
+		background-color: $l-main-bg;
+		grid-column: 1/-1;
+		grid-row: 1;
+	}
+
+	.l-menu-container{
+		background-color: $l-main-bg;
+		// border: 2px solid blue;
+		grid-row: 2;
+	}
+
+	.l-main-container {
+		background-color: $l-card-bg;
+		border-radius: $l-main-radius;
+		grid-row: 2;
+	}
 }
 </style>

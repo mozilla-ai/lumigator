@@ -1,0 +1,31 @@
+@import 'variables';
+
+// Menu Styling
+.menu {
+  background-color: $menu-bg;
+  color: $text-color;
+  font-family: $font-family;
+  padding: 20px;
+
+  .menu-item {
+    padding: 10px;
+    &:hover {
+      background-color: darken($menu-bg, 10%);
+    }
+  }
+}
+
+// Button Styling
+.button {
+  background-color: $primary-color;
+  color: $primary-color-text;
+  padding: 0.75rem 1.5rem;
+  border-radius: $button-border-radius;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: $button-hover-bg;
+  }
+}

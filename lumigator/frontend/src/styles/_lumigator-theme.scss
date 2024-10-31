@@ -1,0 +1,33 @@
+@import 'variables';
+
+// PrimeVue Theme Customizations need -p prefix
+.p-button {
+  background-color: $button-bg;
+  color: $button-text-color;
+  border-radius: $button-border-radius;
+  font-family: $font-family;
+  font-weight: $font-weight-bold;
+
+  &:hover {
+    background-color: $button-hover-bg;
+  }
+}
+
+.p-menu {
+  background-color: $menu-bg;
+  color: $text-color;
+}
+
+.p-card {
+  background-color: $card-bg;
+  color: $text-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
+.p-inputtext {
+  background-color: $main-bg;
+  color: $text-color;
+  padding: $spacing-unit / 2;
+  border-radius: $input-border-radius;
+}

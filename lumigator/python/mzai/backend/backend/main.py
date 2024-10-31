@@ -20,7 +20,7 @@ LUMIGATOR_APP_TAGS = {
 
 def _init_db():
     logger.info("Initializing database via Alembic")
-    backend_root = Path(Path(Path(__file__).resolve()).parent).parent
+    backend_root = Path(__file__).parent.parent
     alembic_cfg = Config(str(backend_root / "alembic.ini"))
     command.upgrade(alembic_cfg, "head")
 

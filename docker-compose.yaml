@@ -65,7 +65,7 @@ services:
       - HF_TOKEN=${HF_TOKEN}
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
+#      - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localhost:4566
 
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
@@ -75,7 +75,7 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
-    profiles: 
+    profiles:
       - local
 
   backend:
@@ -102,7 +102,7 @@ services:
       - S3_ENDPOINT_URL=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
+#      - AWS_DEFAULT_REGION=us-east-2
       - AWS_ENDPOINT_URL=http://localhost:4566
       - S3_BUCKET=lumigator-storage
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend

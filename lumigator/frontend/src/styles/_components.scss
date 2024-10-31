@@ -2,30 +2,30 @@
 
 // Menu Styling
 .menu {
-  background-color: $menu-bg;
-  color: $text-color;
-  font-family: $font-family;
+  background-color: $l-menu-bg;
+  color: $l-text-color;
+  font-family: $l-font-family;
   padding: 20px;
 
   .menu-item {
     padding: 10px;
     &:hover {
-      background-color: darken($menu-bg, 10%);
+      background-color: darken($l-menu-bg, 10%);
     }
   }
 }
 
 // Button Styling
-.button {
-  background-color: $primary-color;
-  color: $primary-color-text;
+.p-button {
+  background-color: $l-primary-color;
+  color: $l-primary-color-text;
   padding: 0.75rem 1.5rem;
-  border-radius: $button-border-radius;
+  border-radius: $l-button-border-radius;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: $button-hover-bg;
+    background-color: $l-button-hover-bg;
   }
 }

@@ -1,4 +1,7 @@
 @use 'resetcss';
+@use 'variables';
+@use 'lumigator-theme';
+@use 'components';
 @use 'typography';
 
 body {
@@ -11,9 +14,3 @@ body {
 }
 // Import PrimeVue Base Styles
 @import 'primeicons/primeicons.css'; // PrimeIcons
-
-
-// Import Theme Variables and Component Customizations
-@import 'variables';
-@import 'lumigator-theme';
-@import 'components';

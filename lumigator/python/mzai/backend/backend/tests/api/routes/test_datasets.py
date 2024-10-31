@@ -1,5 +1,7 @@
 import csv
 import io
+import uuid
+from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
 import pytest
@@ -81,6 +83,17 @@ def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
     # Get after delete (not found)
     get_response = app_client.get(f"/datasets/{created_dataset.id}")
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_dataset_delete_error(app_client: TestClient):
+    dataset_id = uuid.uuid4()
+    with patch(
+            "backend.services.datasets.DatasetService.delete_dataset",
+            side_effect=Exception("argh I am exceptional")):
+        resp = app_client.delete(f"/datasets/{dataset_id}")
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        data = resp.json()
+        assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
 
 
 def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str):

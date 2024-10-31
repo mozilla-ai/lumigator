@@ -1,7 +1,7 @@
 import csv
 import io
 import uuid
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from urllib.parse import urlparse
 
 import pytest

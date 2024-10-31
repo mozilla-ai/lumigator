@@ -1,8 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
-import loguru
 from fastapi import APIRouter, Form, HTTPException, UploadFile, status
+from loguru import logger
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
 
@@ -30,7 +30,7 @@ def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
     try:
         service.delete_dataset(dataset_id)
     except Exception as e:
-        loguru.logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. "
+        logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. "
                             f"{e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

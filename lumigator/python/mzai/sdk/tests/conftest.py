@@ -1,10 +1,7 @@
-import sys
-sys.path.append("../schemas")
-
 import json
+import sys
 import unittest.mock as mock
 from pathlib import Path
-
 from typing import BinaryIO
 
 import pytest

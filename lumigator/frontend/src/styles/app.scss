@@ -4,13 +4,5 @@
 @use 'components';
 @use 'typography';
 
-body {
-  background-image: linear-gradient(60deg, #29323c 0%, #161616 100%);
-
-  ::selection {
-    color: red;
-    background: #E0C414;
-  }
-}
 // Import PrimeVue Base Styles
 @import 'primeicons/primeicons.css'; // PrimeIcons

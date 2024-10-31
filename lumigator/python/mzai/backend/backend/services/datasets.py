@@ -153,8 +153,11 @@ class DatasetService:
 
         return DatasetResponse.model_validate(record)
 
-    def get_dataset(self, dataset_id: UUID) -> DatasetResponse:
+    def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return
+
         return DatasetResponse.model_validate(record)
 
     def get_dataset_s3_path(self, dataset_id: UUID) -> str:

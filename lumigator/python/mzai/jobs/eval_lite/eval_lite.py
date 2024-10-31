@@ -89,20 +89,19 @@ def save_to_s3(config: dict, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
         storage_path = "s3://" + str(
-            Path(storage_path[5:]) / config.name / "inference_results.json"
+            Path(storage_path[5:]) / config.get("name") / "eval_results.json"
         )
     logger.info(f"Storing into {storage_path}...")
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: dict, inference_results: dict) -> Path:
-    storage_path = config.evaluation.storage_path
+def save_outputs(config: dict, eval_results: dict) -> Path:
+    storage_path = config.get("evaluation").get("storage_path")
 
-    local_path = Path( "inference_results.json"
-    )
+    local_path = Path( "eval_results.json")
 
     try:
-        save_to_disk(local_path, inference_results)
+        save_to_disk(local_path, eval_results)
 
         # copy to s3 and return path
         if storage_path is not None and storage_path.startswith("s3://"):
@@ -141,7 +140,7 @@ def run_eval(config: dict) -> Path:
     )
 
     # add input data to results dict
-    if config.evaluation.return_input_data:
+    if config.get("evaluation").get("return_input_data"):
         evaluation_results["predictions"] = dataset["predictions"]
         evaluation_results["ground_truth"] = dataset["ground_truth"]
 

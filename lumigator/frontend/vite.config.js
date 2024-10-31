@@ -7,28 +7,33 @@ import vue from '@vitejs/plugin-vue';
 import path from 'path';
 
 export default defineConfig({
-	envPrefix: 'VUE_APP_',
-  plugins: [
-    vue(),
-  ],
+  envPrefix: 'VUE_APP_',
+  plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // Optional: Adds '@' alias for 'src' directory
-    }
-	},
-	server: {
-    host: 'localhost', // Specify the host
-    port: 3000,        // Specify the port
-		strictPort: true,  // Fail if the port is already in use
-		proxy: {
+      '@': path.resolve(__dirname, './src'), // Adds '@' alias for 'src' directory
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";`,
+      },
+    },
+  },
+  server: {
+    host: 'localhost',
+    port: 3000,
+    strictPort: true,
+    proxy: {
       '/api/v1': {
-        target: 'http://localhost:3000', // Your backend's base URL
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1'), // Ensure `/api/v1` is kept in the path
+        rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1'),
       },
     },
   },
   build: {
-    target: 'esnext' // Ensures support for the latest JavaScript features
-  }
+    target: 'esnext',
+  },
 });

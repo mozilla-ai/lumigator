@@ -2,6 +2,7 @@
 <template>
   <div>
     <h1 class="logo">🐊 Lumigator</h1>
+		<Button label="Push me"/>
     <div class="l-main">
       <div class="upload-container">
         <l-upload @dataset-upload="getDatasets()" />
@@ -19,6 +20,7 @@ import { ref, onMounted } from 'vue';
 import LDatasets from './components/LDatasets.vue';
 import LUpload from './components/LUpload.vue';
 import http from '@/services/http/index.js';
+import Button from 'primevue/button';
 
 const datasets = ref([]);
 

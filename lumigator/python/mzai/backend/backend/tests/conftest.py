@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from mypy_boto3_s3 import S3Client
+from schemas.jobs import JobConfig, JobType
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
@@ -15,7 +16,6 @@ from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.settings import settings
-from schemas.jobs import JobConfig,JobType
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
@@ -92,14 +92,14 @@ def s3_client(localstack_container: LocalStackContainer) -> S3Client:
 def app():
     """Create the FastAPI app bound to DB managed via Alembic.
 
-     Expects an environment variable of 'SQLALCHEMY_DATABASE_URL' to be configured.
-     Ideally this should be an absolute path:
+    Expects an environment variable of 'SQLALCHEMY_DATABASE_URL' to be configured.
+    Ideally this should be an absolute path:
 
-     e.g. sqlite:////Users/{me}/tmp/local_test.db
+    e.g. sqlite:////Users/{me}/tmp/local_test.db
 
-     If the environment variable is not specified, then a 'local.db' will be created in the
-     folder where the tests are executed.
-     """
+    If the environment variable is not specified, then a 'local.db' will be created in the
+    folder where the tests are executed.
+    """
     app = create_app()
     return app
 

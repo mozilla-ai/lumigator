@@ -7,7 +7,6 @@ import asyncio
 from http import HTTPMethod
 from uuid import UUID
 
-import requests
 from schemas.extras import ListingResponse
 from schemas.jobs import (
     JobCreate,

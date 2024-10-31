@@ -25,7 +25,7 @@ from evaluator.jobs.model_clients import (
     SummarizationPipelineModelClient,
 )
 from evaluator.jobs.utils import timer
-import datasets
+
 
 @timer
 def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
@@ -85,7 +85,7 @@ def run_eval(config: HuggingFaceEvalJobConfig) -> Path:
     hf_model_loader = HuggingFaceModelLoader()
 
     # Load dataset given its URI
-    dataset = load_from_disk(config.dataset.path)
+    dataset = hf_dataset_loader.load_dataset(config.dataset)
 
     # Limit dataset length if max_samples is specified
     max_samples = config.evaluation.max_samples

@@ -5,7 +5,7 @@ from typing import Any
 import loguru
 from ray.job_submission import JobSubmissionClient
 from schemas.jobs import JobConfig
-import json
+
 
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
@@ -23,7 +23,6 @@ class RayJobEntrypoint(ABC):
         parameter names as keys and parameter values as values) or directly with the command
         string.
         """
-
         full_command = self.config.command
 
         if self.config.args:
@@ -34,7 +33,7 @@ class RayJobEntrypoint(ABC):
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
-    loguru.logger.info(f"Submitting {entrypoint.get_command_with_params}\n...{entrypoint.runtime_env}")
+    loguru.logger.info(f"Run {entrypoint.get_command_with_params}\n...{entrypoint.runtime_env}")
     return client.submit_job(
         entrypoint=entrypoint.get_command_with_params,
         entrypoint_num_cpus=entrypoint.num_cpus,

@@ -1,13 +1,11 @@
-import argparse
 import json
 from pathlib import Path
-import evaluate as ev
 
+import click
+import numpy as np
 import s3fs
 from datasets import load_from_disk
 from loguru import logger
-import click
-import numpy as np
 
 
 class EvaluationMetrics:

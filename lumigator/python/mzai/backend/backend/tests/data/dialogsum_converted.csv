@@ -1,4 +1,4 @@
-examples,ground_truth
+predictions,ground_truth
 "#Person1#: Hello, how are you doing today?
 #Person2#: I ' Ve been having trouble breathing lately.
 #Person1#: Have you had any type of cold lately?
@@ -334,61 +334,61 @@ examples,ground_truth
 #Person1#: Thank you very much. Goodbye.",John Cruise calls Eve to register a complaint about his video recorder and explains what the problem is. Eve promises to urge their legal consultant to call him back.
 "#Person1#: Excuse me, can you tell me how to get to the Rainbow Restaurant from here?
 #Person2#: Drive two blocks and turn left. Continue on until you reach Heath Street and turn right. Then turn left at the second stop light. You can't miss it.",#Person1# asks #Person2# the way to the Rainbow Restaurant.
-"#Person1#: Adam, could you show me around the school? 
-#Person2#: No problem. 
-#Person1#: What's the tallest building? 
-#Person2#: You mean the white building near the playground? 
-#Person1#: Yes. 
-#Person2#: That is the library. And it has more than 1, 000, 000 books. 
-#Person1#: What's the building to the south of the library? 
-#Person2#: You know, our school is divided into two parts, the junior high school and the senior high school. That is the new classroom building for our senior high school. 
-#Person1#: Is there a swimming pool in your school? 
-#Person2#: Yes. There is a large swimming pool, but it is only available in summer. 
-#Person1#: I do envy you. And I hope I can enter your school one day. 
+"#Person1#: Adam, could you show me around the school?
+#Person2#: No problem.
+#Person1#: What's the tallest building?
+#Person2#: You mean the white building near the playground?
+#Person1#: Yes.
+#Person2#: That is the library. And it has more than 1, 000, 000 books.
+#Person1#: What's the building to the south of the library?
+#Person2#: You know, our school is divided into two parts, the junior high school and the senior high school. That is the new classroom building for our senior high school.
+#Person1#: Is there a swimming pool in your school?
+#Person2#: Yes. There is a large swimming pool, but it is only available in summer.
+#Person1#: I do envy you. And I hope I can enter your school one day.
 #Person2#: I believe that you can make your dream come true. ",#Person1# asks Adam to show #Person1# around the school. #Person1# envies Adam and hopes to enter Adam's school one day.
-"#Person1#: Excuse me. I'm a stranger here and lost my way. 
-#Person2#: Can I help you? 
-#Person1#: Sure. Can I get to the central department stall this way? 
-#Person2#: uh... Yes. Turn right, then take the second turning on your left. 
-#Person1#: Is it far? 
-#Person2#: It's about fifteen minutes' walk. That's all. 
-#Person1#: And do you know where the national bank is? 
-#Person2#: Yes. It's on this street. Keep walking for two blocks and it's on the corner on the right. 
-#Person1#: Thanks very much. 
-#Person2#: You are welcome. Good luck. 
+"#Person1#: Excuse me. I'm a stranger here and lost my way.
+#Person2#: Can I help you?
+#Person1#: Sure. Can I get to the central department stall this way?
+#Person2#: uh... Yes. Turn right, then take the second turning on your left.
+#Person1#: Is it far?
+#Person2#: It's about fifteen minutes' walk. That's all.
+#Person1#: And do you know where the national bank is?
+#Person2#: Yes. It's on this street. Keep walking for two blocks and it's on the corner on the right.
+#Person1#: Thanks very much.
+#Person2#: You are welcome. Good luck.
 #Person1#: Thank you. I won't miss it. ",#Person1# lost the way and asks #Person2# for the way to the central department stall and the national bank.
-"#Person1#: Some people pile on their agonise and try to seek other's sympathy by telling them how miserable they are. 
-#Person2#: Yeah. They take the advantage of other people's hospitality and generosity. 
-#Person1#: I was fooled once. A lady told me she needed some money to keep the pot boiling. So I gave her some money and bailed her out of the situation. But later I learned that she had lied to me. 
-#Person2#: You are still wet behind the ears. You should have seen through her. 
+"#Person1#: Some people pile on their agonise and try to seek other's sympathy by telling them how miserable they are.
+#Person2#: Yeah. They take the advantage of other people's hospitality and generosity.
+#Person1#: I was fooled once. A lady told me she needed some money to keep the pot boiling. So I gave her some money and bailed her out of the situation. But later I learned that she had lied to me.
+#Person2#: You are still wet behind the ears. You should have seen through her.
 #Person1#: Nothing rang a bell. ",#Person1# and #Person2# talk about people taking advantage of other's hospitality and generosity. #Person1# shares #Person1#'s own experience.
-"#Person1#: I'm looking for a pan I can use in my kitchen. 
-#Person2#: What size pan were you thinking of? 
-#Person1#: I've already got a small pan. I need a big one. 
-#Person2#: Well, this one might work for you. 
-#Person1#: Oh, no, that's way too heavy a pan for me. 
-#Person2#: Here, lift this aluminum pan. It's the same size. 
-#Person1#: Yes, it's very lightweight. But I don't want this aluminum handle. 
-#Person2#: Here's a similar aluminum pan. But it has a heat-resistant handle. 
-#Person1#: Oh, this feels very nice. It's perfect. I'll take it. 
-#Person2#: I knew we'd find the right pan sooner or later. How would you like to pay? 
-#Person1#: Cash. But first, I need a lid for this pan. 
+"#Person1#: I'm looking for a pan I can use in my kitchen.
+#Person2#: What size pan were you thinking of?
+#Person1#: I've already got a small pan. I need a big one.
+#Person2#: Well, this one might work for you.
+#Person1#: Oh, no, that's way too heavy a pan for me.
+#Person2#: Here, lift this aluminum pan. It's the same size.
+#Person1#: Yes, it's very lightweight. But I don't want this aluminum handle.
+#Person2#: Here's a similar aluminum pan. But it has a heat-resistant handle.
+#Person1#: Oh, this feels very nice. It's perfect. I'll take it.
+#Person2#: I knew we'd find the right pan sooner or later. How would you like to pay?
+#Person1#: Cash. But first, I need a lid for this pan.
 #Person2#: Oh, no problem. Here's the lid that comes with the pan. ","#Person1# wants a pan, and #Person2# recommends a big aluminum pan with a heat-resistant handle and a lid. #Person1# pays for it by cash."
-"#Person1#: Come in, come in! 
-#Person2#: Hi, Gary, what happened? I was waiting for you at the theater. Why didn't you meet me there? 
-#Person1#: I thought we were supposed to meet here. 
-#Person2#: Don't you know our movie starts at seven? And we were going to meet at the theater at five to seven. Then it doesn't make sense to meet at the apartment. 
-#Person1#: I'm sorry. We must have misunderstood each other. 
-#Person2#: Why don't you try to be clearer about your intentions? 
-#Person1#: You're right. I am sorry. Let's go and watch the movie. 
+"#Person1#: Come in, come in!
+#Person2#: Hi, Gary, what happened? I was waiting for you at the theater. Why didn't you meet me there?
+#Person1#: I thought we were supposed to meet here.
+#Person2#: Don't you know our movie starts at seven? And we were going to meet at the theater at five to seven. Then it doesn't make sense to meet at the apartment.
+#Person1#: I'm sorry. We must have misunderstood each other.
+#Person2#: Why don't you try to be clearer about your intentions?
+#Person1#: You're right. I am sorry. Let's go and watch the movie.
 #Person2#: It's okay. I don't want to go now. We've already missed ten minutes of the movie. I don't want to see a movie without watching the beginning. ","#Person2# and Gary misunderstood each other, so they missed the beginning of the movie. Gary apologizes, but #Person2# doesn't want to see the movie anymore."
-"#Person1#: Good morning, I'm Daniel. I'm applying for the positon of manager. 
-#Person2#: Yes. Sit down, please. How did you learn about our company? 
-#Person1#: I got to know your company through such famous brands as LUX, LIPTON and WALLS. After making a customer survey, I was glad to find out how your products are appreciated by millions of Chinese. 
-#Person2#: Why would you like to work with us? 
-#Person1#: It's the job I'm interested in. And your company is the best-known. Although I don't have much experience as a manager, the job description you sent to me was very interesting. It's a job I've been dreaming of and I feel suited to fill it. 
-#Person2#: Oh, really? Would you transfer to another company if it is not what you expected? 
-#Person1#: I don't think so. As the saying goes, A great oak needs deep roots. I'm really interested in this job. 
+"#Person1#: Good morning, I'm Daniel. I'm applying for the positon of manager.
+#Person2#: Yes. Sit down, please. How did you learn about our company?
+#Person1#: I got to know your company through such famous brands as LUX, LIPTON and WALLS. After making a customer survey, I was glad to find out how your products are appreciated by millions of Chinese.
+#Person2#: Why would you like to work with us?
+#Person1#: It's the job I'm interested in. And your company is the best-known. Although I don't have much experience as a manager, the job description you sent to me was very interesting. It's a job I've been dreaming of and I feel suited to fill it.
+#Person2#: Oh, really? Would you transfer to another company if it is not what you expected?
+#Person1#: I don't think so. As the saying goes, A great oak needs deep roots. I'm really interested in this job.
 #Person2#: That's fine. Thanks for coming to see us. I hope to be able to let you know about the job within the week. ","Daniel applies for the position of manager, and #Person2# interviews Daniel. Daniel talks about how he learned about the company and why he'd like to work here."
 "#Person1#: What's wrong with you, Lucy?
 #Person2#: Our dog Rusty is lost. Someone left the backyard gate open and he got out. My daughter is so upset right now.
@@ -730,99 +730,99 @@ examples,ground_truth
 #Person2#: We have several part-time jobs available here, Would you like to look through the list?
 #Person1#: Yes, thank you. I'd like to apply for the job at the computer center.
 #Person2#: Please fill out the form.",#Person1# wants to find a job at the computer center.
-"#Person1#: What did the boss say to you? 
-#Person2#: He asked me to beef up in the work. 
-#Person1#: Yeah. You look so unhappy recently. What's the matter. 
+"#Person1#: What did the boss say to you?
+#Person2#: He asked me to beef up in the work.
+#Person1#: Yeah. You look so unhappy recently. What's the matter.
 #Person2#: Nothing, thanks. I am just not in the mood these days. ",The boss asks the unhappy #Person2# to beef up in the job.
-"#Person1#: I'll always remember my college days. 
-#Person2#: Oh yeah? 
-#Person1#: It was one of the best times in my life. It was tough, but I made it. I became a college graduate. 
-#Person2#: How did you feel when you graduated? 
-#Person1#: It was a pround day for me. My family attend the graduation ceremony. I was so nervous. I couldn't find my cap and gown, but all worked out in the end. 
-#Person2#: What did you do after graduation? 
-#Person1#: I was planning to attend gradate school, but then I was offered a good job doing marketing, so I changed my mind. 
-#Person2#: Sounds like you're happy with your decision. 
-#Person1#: I sure am. So what about you? How did you feel when you graduated? 
-#Person2#: It was also a proud day for me, but I also felt like a kind of loss that day. 
-#Person1#: How could it be? 
-#Person2#: While seeing others going to work or continue their study, I didn't know what I would do. 
-#Person1#: You didn't have an offer? 
-#Person2#: I had one, but I didn't like the job very much. I wanted to attend graduate school, but I was afraid it would be too tough. 
+"#Person1#: I'll always remember my college days.
+#Person2#: Oh yeah?
+#Person1#: It was one of the best times in my life. It was tough, but I made it. I became a college graduate.
+#Person2#: How did you feel when you graduated?
+#Person1#: It was a pround day for me. My family attend the graduation ceremony. I was so nervous. I couldn't find my cap and gown, but all worked out in the end.
+#Person2#: What did you do after graduation?
+#Person1#: I was planning to attend gradate school, but then I was offered a good job doing marketing, so I changed my mind.
+#Person2#: Sounds like you're happy with your decision.
+#Person1#: I sure am. So what about you? How did you feel when you graduated?
+#Person2#: It was also a proud day for me, but I also felt like a kind of loss that day.
+#Person1#: How could it be?
+#Person2#: While seeing others going to work or continue their study, I didn't know what I would do.
+#Person1#: You didn't have an offer?
+#Person2#: I had one, but I didn't like the job very much. I wanted to attend graduate school, but I was afraid it would be too tough.
 #Person1#: I think you lack in the power of decision. Once you make your decision, don't be overtaken by misgivings and fear. Just go full steam ahead! ",#Person1# and #Person2# share their feelings about the graduation day and different plans after graduation. #Person1# encourages #Person2# to have more power on a decision.
-"#Person1#: hey Jayden, I was wondering if you could do me a favor. 
-#Person2#: that depends. What is it? 
-#Person1#: it's kind of a big favor. I'm absolutely flat broke, and I owe my landlady $200. she's given me until Friday to give it to her, but I don't get paid until next Monday. Do you think you could loanm 
-#Person2#: I'd love to help you out, but I'm a bit short on cash this month as well. I had to get a new engine put into my car, and that ate up my savings. 
-#Person1#: if you can't give me the full amount, a fraction of it would still help. I'll pay you back on Monday. I promise. 
-#Person2#: let's see, I've got about $50 to get me through the weekend. I can only spare about $20. I would give you more if I had it, I just don't have much money to my name right now. 
-#Person1#: thanks a lot Jayden. Every little bit will help. Tell you what, if you aren't doing anything tonight, why don't you come over and have dinner at my place. 
-#Person2#: that'd be great. Thanks! What time should I come over? 
-#Person1#: how about at 6 pm? 
+"#Person1#: hey Jayden, I was wondering if you could do me a favor.
+#Person2#: that depends. What is it?
+#Person1#: it's kind of a big favor. I'm absolutely flat broke, and I owe my landlady $200. she's given me until Friday to give it to her, but I don't get paid until next Monday. Do you think you could loanm
+#Person2#: I'd love to help you out, but I'm a bit short on cash this month as well. I had to get a new engine put into my car, and that ate up my savings.
+#Person1#: if you can't give me the full amount, a fraction of it would still help. I'll pay you back on Monday. I promise.
+#Person2#: let's see, I've got about $50 to get me through the weekend. I can only spare about $20. I would give you more if I had it, I just don't have much money to my name right now.
+#Person1#: thanks a lot Jayden. Every little bit will help. Tell you what, if you aren't doing anything tonight, why don't you come over and have dinner at my place.
+#Person2#: that'd be great. Thanks! What time should I come over?
+#Person1#: how about at 6 pm?
 #Person2#: see you then! ",#Person1# owes the landlord $200 and wants to borrow some from Jayden who is tight on cash as well. Jayden only lends #Person1# $20 and #Person1# will come over at 6 pm.
-"#Person1#: How old are you? 
-#Person2#: Nine . . . but I'll be ten on May 1st. When is your birthday? 
-#Person1#: I'm older than you! I'll be ten on April 14th. 
-#Person2#: Are you going to have a birthday party? 
+"#Person1#: How old are you?
+#Person2#: Nine . . . but I'll be ten on May 1st. When is your birthday?
+#Person1#: I'm older than you! I'll be ten on April 14th.
+#Person2#: Are you going to have a birthday party?
 #Person1#: Maybe. I'll have to ask my mother. ",#Person1# and #Person2# talk about their birthday.
-"#Person1#: this party rocks! 
-#Person2#: you said it. Good beer, good music, and on top of that, there are so many hot girls here! 
-#Person1#: I'm with you on that. Check out that one over there. I think I'm in love! 
-#Person2#: well, she's alright, but not really my cup of tea. What about the blond with the red dress? 
-#Person1#: oh, that's Janice. She's just new in town. You have a thing for blonds, eh? 
-#Person2#: yeah! She could do anything she wants to me! 
-#Person1#: I bet. Why not go over and talk to her? She's really nice. 
-#Person2#: I don't think so. I get so nervous talking to girls. I always put my foot in my mouth, scare her off, and end up looking like a real fool. Besides, she is way out of my league. 
-#Person1#: come on! Man up! You'll never know until you try. 
-#Person2#: okay okay, just let me have another cup of beers to get my head in the game. 
-#Person1#: all right. But I think you ought to move soon. 
-#Person2#: why? 
-#Person1#: I can see five other guys eying her up. 
-#Person2#: okay, here I go! 
+"#Person1#: this party rocks!
+#Person2#: you said it. Good beer, good music, and on top of that, there are so many hot girls here!
+#Person1#: I'm with you on that. Check out that one over there. I think I'm in love!
+#Person2#: well, she's alright, but not really my cup of tea. What about the blond with the red dress?
+#Person1#: oh, that's Janice. She's just new in town. You have a thing for blonds, eh?
+#Person2#: yeah! She could do anything she wants to me!
+#Person1#: I bet. Why not go over and talk to her? She's really nice.
+#Person2#: I don't think so. I get so nervous talking to girls. I always put my foot in my mouth, scare her off, and end up looking like a real fool. Besides, she is way out of my league.
+#Person1#: come on! Man up! You'll never know until you try.
+#Person2#: okay okay, just let me have another cup of beers to get my head in the game.
+#Person1#: all right. But I think you ought to move soon.
+#Person2#: why?
+#Person1#: I can see five other guys eying her up.
+#Person2#: okay, here I go!
 #Person1#: good luck! ","#Person1# and #Person2# see a blond, but #Person2# is nervous talking with girls. After #Person1#'s encouragement and another cup of beer, #Person2# decides to talk to the blond."
-"#Person1#: Mary? Are you still there? 
-#Person2#: Yes. What do you want? 
-#Person1#: Did your bid win? 
-#Person2#: What do you care, dork? 
-#Person1#: Hey! I'm trying to be nice, and you still want to fight! Did you get the statue or not? 
-#Person2#: You mean fat boy? 
+"#Person1#: Mary? Are you still there?
+#Person2#: Yes. What do you want?
+#Person1#: Did your bid win?
+#Person2#: What do you care, dork?
+#Person1#: Hey! I'm trying to be nice, and you still want to fight! Did you get the statue or not?
+#Person2#: You mean fat boy?
 #Person1#: Sorry. I take that back. I mean the copper Buddha you wanted. ",#Person1# asks Mary the result of the bid not very nicely so Mary doesn't want to answer.
-"#Person1#: Good morning! 
-#Person2#: Good morning, Gav! Did you sleep well last night? 
-#Person1#: I slept like a baby. I fell asleep right away last night, didn't wake up once, and didn't have any nightmares! 
-#Person2#: That's great news! You look much more relaxed than you did yesterday. 
-#Person1#: I feel much better, but I'm still worried about something. 
-#Person2#: What's that? 
-#Person1#: Well, I have to drive to school for a meeting this morning, and I'm going to end up getting stuck in rush-hour traffic. 
-#Person2#: That's annoying, but nothing to worry about. 
-#Person1#: For me, traffic jams are quite stressful, because I'm pretty impatient. How can I prevent myself from getting stressed if I get stuck in a traffic jam? 
-#Person2#: Just breathe deeply when you feel yourself getting upset. 
-#Person1#: Ok, I'll try that. 
-#Person2#: Is there anything else bothering you? 
-#Person1#: Just one more thing. A school called me this morning to see if I could teach a few classes this weekend and I don't know what to do. 
-#Person2#: Do you have any other plans this weekend? 
-#Person1#: I'm supposed to work on a paper that'd due on Monday. 
-#Person2#: Try not to take on more than you can handle. 
+"#Person1#: Good morning!
+#Person2#: Good morning, Gav! Did you sleep well last night?
+#Person1#: I slept like a baby. I fell asleep right away last night, didn't wake up once, and didn't have any nightmares!
+#Person2#: That's great news! You look much more relaxed than you did yesterday.
+#Person1#: I feel much better, but I'm still worried about something.
+#Person2#: What's that?
+#Person1#: Well, I have to drive to school for a meeting this morning, and I'm going to end up getting stuck in rush-hour traffic.
+#Person2#: That's annoying, but nothing to worry about.
+#Person1#: For me, traffic jams are quite stressful, because I'm pretty impatient. How can I prevent myself from getting stressed if I get stuck in a traffic jam?
+#Person2#: Just breathe deeply when you feel yourself getting upset.
+#Person1#: Ok, I'll try that.
+#Person2#: Is there anything else bothering you?
+#Person1#: Just one more thing. A school called me this morning to see if I could teach a few classes this weekend and I don't know what to do.
+#Person2#: Do you have any other plans this weekend?
+#Person1#: I'm supposed to work on a paper that'd due on Monday.
+#Person2#: Try not to take on more than you can handle.
 #Person1#: You're right. I probably should just work on my paper. Thanks! ",Gav had a good sleep last night but worries about the traffic jam and classes to teach. #Person2# asks Gav's plan for the weekend and #Person2# gives the suggestions when Gav feels upset.
-"#Person1#: I don't think the teacher had a right to say that. The teacher was wrong to have accused her in front of the whole class. 
-#Person2#: You've got to be joking! It's the teacher's right to say anything wants, and if she saw Myra cheating, she certainly had the right to say so. 
-#Person1#: I agree she had the right to say something, but I feel she should have done it privately. 
+"#Person1#: I don't think the teacher had a right to say that. The teacher was wrong to have accused her in front of the whole class.
+#Person2#: You've got to be joking! It's the teacher's right to say anything wants, and if she saw Myra cheating, she certainly had the right to say so.
+#Person1#: I agree she had the right to say something, but I feel she should have done it privately.
 #Person2#: You're right. If I were the teacher, I wouldn't have done that. ",Both #Person1# and #Person2# think the teacher should say to Myra privately if she saw Myra cheating.
-"#Person1#: Listen, Karen, I need your help. I don't know anyone here yet. 
-#Person2#: I'm glad to help you. What's wrong? 
-#Person1#: My mother-in-law just went into the hospital in L. A. Hank and I will be flying there tonight. 
-#Person2#: I'm sorry to hear it. What's wrong with her? 
-#Person1#: Doctors aren't sure yet. But the real problem is Suzy. She has a bad cold, and we don't want to take her with us. But we don't know who can stay with her. 
-#Person2#: You need a babysitter. 
-#Person1#: Yes, I'd ask Jill, the girl I've had before, but I need someone overnight. Maybe even for two nights. 
-#Person2#: I could have Suzy stay at my place. 
-#Person1#: I don't want to do that to you, Karen. 
-#Person2#: Why not? 
-#Person1#: Your own kids would get Suzy's cold. I think it would be better to have a good babysitter here. But I don't know who to ask. I need someone more mature than Jill. It might even be for two or three days. 
-#Person2#: I know who we can ask. There is a girl I know, Sara Ralston. She is 17, and she will usually take this kind of job. I know her from my church, and I trust her completely. 
-#Person1#: I'd like to talk with her. This is short notice, I know. But Hank and I are leaving tonight. 
-#Person2#: I'll get you her number. I hope she can do it. She is very responsible. 
-#Person1#: I'm glad you know someone. I knew you would be the best person to ask about this. I don't want to insult Jill or her mother. I think Jill maybe could do it. But I'd rather have someone a little older. 
-#Person2#: I'll go home and get Sara's number. I'll call her first myself. 
+"#Person1#: Listen, Karen, I need your help. I don't know anyone here yet.
+#Person2#: I'm glad to help you. What's wrong?
+#Person1#: My mother-in-law just went into the hospital in L. A. Hank and I will be flying there tonight.
+#Person2#: I'm sorry to hear it. What's wrong with her?
+#Person1#: Doctors aren't sure yet. But the real problem is Suzy. She has a bad cold, and we don't want to take her with us. But we don't know who can stay with her.
+#Person2#: You need a babysitter.
+#Person1#: Yes, I'd ask Jill, the girl I've had before, but I need someone overnight. Maybe even for two nights.
+#Person2#: I could have Suzy stay at my place.
+#Person1#: I don't want to do that to you, Karen.
+#Person2#: Why not?
+#Person1#: Your own kids would get Suzy's cold. I think it would be better to have a good babysitter here. But I don't know who to ask. I need someone more mature than Jill. It might even be for two or three days.
+#Person2#: I know who we can ask. There is a girl I know, Sara Ralston. She is 17, and she will usually take this kind of job. I know her from my church, and I trust her completely.
+#Person1#: I'd like to talk with her. This is short notice, I know. But Hank and I are leaving tonight.
+#Person2#: I'll get you her number. I hope she can do it. She is very responsible.
+#Person1#: I'm glad you know someone. I knew you would be the best person to ask about this. I don't want to insult Jill or her mother. I think Jill maybe could do it. But I'd rather have someone a little older.
+#Person2#: I'll go home and get Sara's number. I'll call her first myself.
 #Person1#: Great. Then call me and let me know if she's free. ","#Person1# asks Karen for help to find a mature babysitter for two or three days because #Person1# will fly to L.A. to see #Person1#'s mother-in-law in the hospital and has to leave Suzy, who has a cold, at home. Karen recommends Sara who is mature and responsible, and she will contact her."
 "#Person1#: Anna just email to say that the managers meeting is put off till next Monday. Will you have everything ready by then, Sabrina? Hey Sabrina, what's wrong?
 #Person2#: I'm so worried. I haven't heard from my sister for 2 weeks.
@@ -1223,7 +1223,7 @@ examples,ground_truth
 #Person1#: Right! A pretty important role, Peter. What sort of protest would you organize?
 #Person2#: Well, recently we've been involved in anti-nuclear campaigns. I've personally arranged for the demonstration against radioactive waste dumping in the Atlantic Ocean. We've got a few small Green Peace boats that we harass the dumping ship with.
 #Person1#: Say? Hold on, Peter. I thought you said your organization was non-violent. What do you mean by 'harass'?
-#Person2#: Well, we circle round and round the ships and get in the way when they try to dump the drums of nuclear waste in the sea. We talk to the men and try to change, you know, yell at them to stop. We generally make ourselves as much of a nuisance as possible. 
+#Person2#: Well, we circle round and round the ships and get in the way when they try to dump the drums of nuclear waste in the sea. We talk to the men and try to change, you know, yell at them to stop. We generally make ourselves as much of a nuisance as possible.
 #Person1#: Well, people may think differently of your methods, but there's no doubt you're doing a great job. Keep it up and good luck. And thanks for talking with us.",#Person1# interviews Peter Wilson who is the action organizer of Green Peace organization. #Person1# asks Peter to introduce to the audience what Green Peace is and what work it does. Peter also introduces detailed anti-nuclear campaigns.
 "#Person1#: My hand still hurts from the fall on the ice yesterday. I wonder if I broke something.
 #Person2#: I'm no doctor, but it's not black and blue or anything. Maybe you just need to rest it for a few days.",#Person1#'s hand hurts and #Person2# advises #Person1# to rest.
@@ -1297,46 +1297,46 @@ examples,ground_truth
 #Person1#: Well, nobody wants to be poor...ah, here's the drinks trolley. What would you like?
 #Person2#: A Coke, please,I'm sorry...I don't know your name...
 #Person1#: Oh, sorry. I forgot...Ali.",#Person1# sits next to #Person2# on the plane. They talk about why they are going to London.
-"#Person1#: I'm sure it will be wet when we arrive. 
-#Person2#: Yes. I dare say it will be. 
-#Person1#: It will be Sunday so I expected everything will be closed. 
-#Person2#: No. I don't think that's possible. Some places are sure to be open. 
-#Person1#: But the bank should be closed so we shouldn't to be able to get any money. 
-#Person2#: Mmm, you may be right. 
-#Person1#: Do you think we'll need our overcoats? 
-#Person2#: No. We couldn't possibly. 
-#Person1#: Why not? 
-#Person2#: It will be summer. So it will be hot. 
-#Person1#: Is that very likely in England? 
+"#Person1#: I'm sure it will be wet when we arrive.
+#Person2#: Yes. I dare say it will be.
+#Person1#: It will be Sunday so I expected everything will be closed.
+#Person2#: No. I don't think that's possible. Some places are sure to be open.
+#Person1#: But the bank should be closed so we shouldn't to be able to get any money.
+#Person2#: Mmm, you may be right.
+#Person1#: Do you think we'll need our overcoats?
+#Person2#: No. We couldn't possibly.
+#Person1#: Why not?
+#Person2#: It will be summer. So it will be hot.
+#Person1#: Is that very likely in England?
 #Person2#: Yes. It could happen. ",#Person1# talks with #Person2# about what the situation will be when they arrive in England.
-"#Person1#: Are you an art aficionado? 
-#Person2#: Not really. I like going to an art exhibition once or twice a year. I hardly know anything about art or sculpture. You are a true art lover, aren't you? 
-#Person1#: I love going to art galleries, particularly when one is holding an exhibition of abstract art. 
-#Person2#: I never understand the meaning of those painting. They are too abstract for me. I didn't pay much attention in art class at school. 
-#Person1#: Art isn't for everyone. I'm going to an exhibition tomorrow at the national gallery. It's an exhibition of greek and roman sculpture. 
-#Person2#: I like sculpture, especially that from ancient rome or Greece. What time are you thinking of going? I'd love to go with you. 
-#Person1#: I thought I'd have an early lunch and go immediately afterwards. Does that sound ok to you? Bus 51 goes directly there. 
-#Person2#: That sounds fine. What time shall we meet at the bus stop? 
+"#Person1#: Are you an art aficionado?
+#Person2#: Not really. I like going to an art exhibition once or twice a year. I hardly know anything about art or sculpture. You are a true art lover, aren't you?
+#Person1#: I love going to art galleries, particularly when one is holding an exhibition of abstract art.
+#Person2#: I never understand the meaning of those painting. They are too abstract for me. I didn't pay much attention in art class at school.
+#Person1#: Art isn't for everyone. I'm going to an exhibition tomorrow at the national gallery. It's an exhibition of greek and roman sculpture.
+#Person2#: I like sculpture, especially that from ancient rome or Greece. What time are you thinking of going? I'd love to go with you.
+#Person1#: I thought I'd have an early lunch and go immediately afterwards. Does that sound ok to you? Bus 51 goes directly there.
+#Person2#: That sounds fine. What time shall we meet at the bus stop?
 #Person1#: Let's meet at 12 thirty. it will probably take us three or four hours to see all of the exhibits. ",#Person1# is an art aficionado. #Person2# doesn't appreciate paintings but enjoys sculptures. They decide to go to an exhibition of greek and roman sculpture together.
-"#Person1#: Let's call it a day. 
-#Person2#: It's nice to go home earlier once in a while. But it's the evening rush. 
-#Person1#: It's hard to commute a long way. 
+"#Person1#: Let's call it a day.
+#Person2#: It's nice to go home earlier once in a while. But it's the evening rush.
+#Person1#: It's hard to commute a long way.
 #Person2#: Sure it is. I really hate to get caught in a traffic jam. ",Both #Person1# and #Person2# hate the evening rush.
-"#Person1#: Can anyone tell me where I can buy the ingredients to make Chinese food? 
-#Person2#: There is a supermarket in Kensington High Street. I'll come and give you a hand. 
-#Person1#: That is good of you. Here, take one of these trolleys. What do you want exactly? 
-#Person2#: I'm after things to stuff dumplings with, like Chinese cabbage 
-#Person1#: The fruit and vegetables are over there. 
-#Person2#: Pork. Where's the meat counter? 
+"#Person1#: Can anyone tell me where I can buy the ingredients to make Chinese food?
+#Person2#: There is a supermarket in Kensington High Street. I'll come and give you a hand.
+#Person1#: That is good of you. Here, take one of these trolleys. What do you want exactly?
+#Person2#: I'm after things to stuff dumplings with, like Chinese cabbage
+#Person1#: The fruit and vegetables are over there.
+#Person2#: Pork. Where's the meat counter?
 #Person1#: Over there. ",#Person2# helps #Person1# find the ingredients to make Chinese food.
-"#Person1#: Excuse me. Do you think I can get there in time to catch the 11:30 train? 
-#Person2#: Well, let me see. Now it's 11:00 sharp. It's a long way to go. If I take the shortest route, we may come across a traffic jam. If I take a less heavy route, it will save us 10 or more minutes, but you'll have to pay more. Which do you prefer? 
-#Person1#: Are you sure that I can get there in time if we take the less heavy route? 
-#Person2#: Generally speaking, we can if we go at this speed and nothing unexpected happens. 
-#Person1#: How much more do I have to pay? 
-#Person2#: Compared to the shortest route, you may pay around 5 Euro more. 
-#Person1#: That's acceptable. No one wants to miss a train. 
-#Person2#: OK. . . Here we are. We'll turn left at this cross. To go straight ahead is the shortest route. 
+"#Person1#: Excuse me. Do you think I can get there in time to catch the 11:30 train?
+#Person2#: Well, let me see. Now it's 11:00 sharp. It's a long way to go. If I take the shortest route, we may come across a traffic jam. If I take a less heavy route, it will save us 10 or more minutes, but you'll have to pay more. Which do you prefer?
+#Person1#: Are you sure that I can get there in time if we take the less heavy route?
+#Person2#: Generally speaking, we can if we go at this speed and nothing unexpected happens.
+#Person1#: How much more do I have to pay?
+#Person2#: Compared to the shortest route, you may pay around 5 Euro more.
+#Person1#: That's acceptable. No one wants to miss a train.
+#Person2#: OK. . . Here we are. We'll turn left at this cross. To go straight ahead is the shortest route.
 #Person1#: Thank you! ",#Person1# agrees with #Person2#'s suggestion to pay extra 5 euros to take a less heavy route to catch the train.
 "#Person1#: Nice to see you again, Mike. How was your trip to China?
 #Person2#: It was great. I flew to Beijing with my wife last month and I stayed there for 3 days. There were so many things to see and so many places of interest to visit in Beijing that we really couldn't decide whether to leave or stay.
@@ -1735,50 +1735,50 @@ examples,ground_truth
 #Person2#: That's real pretty, but the price tag says $13.99, and I know I don't have that much money.
 #Person1#: Well, let's just say the tie went on sale. How about $5.00. What do you say?
 #Person2#: Oh, thanks. I'll take it.","#Person2# is looking for a Father's Day gift, but she only has $10 or so even though she has been helping with housework for the past week to earn money. #Person1# sells a tie worth $13.99 to her at the price of $5."
-"#Person1#: Shall we share a taxi? 
-#Person2#: Where are you heading now? 
-#Person1#: I want to go back to my college on the Huanghe road. It is very close to your house. 
-#Person2#: Is that the university next to the Teachers' College? 
-#Person1#: That's the one. 
-#Person2#: You mean we'll share the taxi? 
-#Person1#: Yeah. If we share the cab, it'll be cheaper. Besides that your Chinese is better than mine. The drivers usually have difficulty understanding me even though I practice my pronunciation carefully. 
+"#Person1#: Shall we share a taxi?
+#Person2#: Where are you heading now?
+#Person1#: I want to go back to my college on the Huanghe road. It is very close to your house.
+#Person2#: Is that the university next to the Teachers' College?
+#Person1#: That's the one.
+#Person2#: You mean we'll share the taxi?
+#Person1#: Yeah. If we share the cab, it'll be cheaper. Besides that your Chinese is better than mine. The drivers usually have difficulty understanding me even though I practice my pronunciation carefully.
 #Person2#: Well. Don't worry about it, I will be happy to share the taxi with you. ",#Person1# wants to share a taxi with #Person2# because it's cheaper and #Person2#'s Chinese is better. #Person2# agrees.
-"#Person1#: Um. . . where are my utensils? 
-#Person2#: You eat with your hands. Pick up the bread and use it like a spoon to scoop up the food. 
-#Person3#: This dish, Zilbo, has lamb and potatoes. 
-#Person1#: Mmm! This is really good! Can you pass the honey wine? So, Clyde, what do you study? 
-#Person2#: International law and business. My family runs its own firm. 
-#Person3#: Clyde wants to be the first black president. 
+"#Person1#: Um. . . where are my utensils?
+#Person2#: You eat with your hands. Pick up the bread and use it like a spoon to scoop up the food.
+#Person3#: This dish, Zilbo, has lamb and potatoes.
+#Person1#: Mmm! This is really good! Can you pass the honey wine? So, Clyde, what do you study?
+#Person2#: International law and business. My family runs its own firm.
+#Person3#: Clyde wants to be the first black president.
 #Person2#: WILL be the first black president. I take Ronald Reagan as my role model. ","#Person1#, Clyde, and #Person3# have a meal together and Clyde mentions his wish to be the first black president."
-"#Person1#: I would like to have a custom-made skirt. 
-#Person2#: May I take your size? 
-#Person1#: OK. I want it a bit close around the waist. 
-#Person2#: No problem. 
-#Person1#: How long will it take? 
-#Person2#: About a week. 
-#Person1#: What's the charge for the tailoring? 
+"#Person1#: I would like to have a custom-made skirt.
+#Person2#: May I take your size?
+#Person1#: OK. I want it a bit close around the waist.
+#Person2#: No problem.
+#Person1#: How long will it take?
+#Person2#: About a week.
+#Person1#: What's the charge for the tailoring?
 #Person2#: 20 yuan for a skirt. ",#Person1# wants a custom-made skirt from #Person2#.
-"#Person1#: Isabelle, you know I'm not interested in fame. 
-#Person2#: Well, you don't seem to be interested in getting a real job, either. 
-#Person1#: You know I'm interested in teaching. I'm looking for jazz students. . . 
-#Person2#: Yeah, and every high school student in town is banging on your door, right? 
-#Person1#: I know they're out there. I'll find them. 
+"#Person1#: Isabelle, you know I'm not interested in fame.
+#Person2#: Well, you don't seem to be interested in getting a real job, either.
+#Person1#: You know I'm interested in teaching. I'm looking for jazz students. . .
+#Person2#: Yeah, and every high school student in town is banging on your door, right?
+#Person1#: I know they're out there. I'll find them.
 #Person2#: You're such a dreamer! You think that you can spread the word of jazz in an underpass? ",Isabelle thinks #Person1# is a dreamer because #Person1# doesn't do real things.
-"#Person1#: Are you studying here? 
-#Person2#: Yes, I am studying in Eastern Asian language department. 
-#Person1#: What are you major in? 
-#Person2#: I major in Japanese. 
-#Person1#: What do you think of the literature course. 
+"#Person1#: Are you studying here?
+#Person2#: Yes, I am studying in Eastern Asian language department.
+#Person1#: What are you major in?
+#Person2#: I major in Japanese.
+#Person1#: What do you think of the literature course.
 #Person2#: Its very helpful. The course has let me into a world of literature. I read so many great literatures. ",#Person2# majors in Japanese and thinks the literature course is helpful.
-"#Person1#: I came to this lab to have my blood drawn. 
-#Person2#: You are in the right place. Roll up your left sleeve and have a seat. 
-#Person1#: What am I being tested for? 
-#Person2#: Your doctor wants to know what your white blood cell count is. 
-#Person1#: What does my white blood cell count tell him? 
-#Person2#: Usually if your white count is off, the doctor suspects an infection. 
-#Person1#: How much will it hurt? 
-#Person2#: It is only a pin prick. I have to put this tourniquet on your arm to make the vein easier to find. 
-#Person1#: Is that my blood going into that tube? 
+"#Person1#: I came to this lab to have my blood drawn.
+#Person2#: You are in the right place. Roll up your left sleeve and have a seat.
+#Person1#: What am I being tested for?
+#Person2#: Your doctor wants to know what your white blood cell count is.
+#Person1#: What does my white blood cell count tell him?
+#Person2#: Usually if your white count is off, the doctor suspects an infection.
+#Person1#: How much will it hurt?
+#Person2#: It is only a pin prick. I have to put this tourniquet on your arm to make the vein easier to find.
+#Person1#: Is that my blood going into that tube?
 #Person2#: That blood that just filled the tube is all that I needed. Thanks for coming in! ",#Person2# is drawing #Person1#'s blood because the doctor wants to know #Person1#'s white blood cell count.
 "#Person1#: Do you know what is the most special event in Kentucky?
 #Person2#: The world class horses or the Hollywood stars?
@@ -2177,92 +2177,92 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person1#: Me, too. Tuition is sure high, isn't it? Well, I'd better get going. I've got to plant some trees for my neighbours this afternoon.
 #Person2#: Well, don't work too hard. Holding down a job, going to class, studying. Sometimes it can become too much for one person. Take it easy.
 #Person1#: You, too. It was great seeing you. Sally!","Sally and Tom talk about their job. Sally works part-time in a supermarket, while Tom does yard work for people. They both agree that every job has its shortcomings but they need to work to earn money for school."
-"#Person1#: Susan, Did you know the four ugliest women in ancient China? 
-#Person2#: No, I only know four great beauties of China. 
-#Person1#: There were some famous ugly women in history. 
-#Person2#: Yeah? Were they famous because of the ugliness? 
-#Person1#: Though they were ugly, they had great virtue. 
-#Person2#: Then who were they? 
-#Person1#: Mo Mu, Zhong Lichun, Meng Guang and Ruan Nv. They were well respected. 
-#Person2#: It seems that the inner beauty is also important. 
+"#Person1#: Susan, Did you know the four ugliest women in ancient China?
+#Person2#: No, I only know four great beauties of China.
+#Person1#: There were some famous ugly women in history.
+#Person2#: Yeah? Were they famous because of the ugliness?
+#Person1#: Though they were ugly, they had great virtue.
+#Person2#: Then who were they?
+#Person1#: Mo Mu, Zhong Lichun, Meng Guang and Ruan Nv. They were well respected.
+#Person2#: It seems that the inner beauty is also important.
 #Person1#: Sometimes the inner beauty is more beautiful. ",#Person1# introduced the four ugliest women who had great virtue in ancient China to Susan.
-"#Person1#: Argh. . . I feel terrible, I keep sneezing and my eyes are all watery, what's wrong with me? 
-#Person2#: Wow, you're not dying are you, it looks like you have a cold, you should take some medicine. 
-#Person1#: I don't think it's a cold, I feel fine if I move a few feet away from my desk. 
-#Person2#: Maybe we should put you into quarantine, ha ha, jokes aside, I think you might have an allergy. 
-#Person1#: An allergy? I never thought about that, I don't think I'm allergic to pollen though and I'm desensitized to bee stings after being stung so many times, Hmm. . . 
-#Person2#: Ow! Why did you chuck that peanut at me? 
-#Person1#: Just checking if you're allergic to peanuts, I guess not. 
-#Person2#: Not funny! I could have gone into Anaphylactic Shock. 
-#Person1#: Okay, my bad, how about dust? This office is full of it. 
-#Person2#: Yes the whole is office is dusty yet I only feel affected near our desks! 
-#Person3#: Meow meow meow. 
-#Person1#: You brought your cat into the office? ! 
-#Person2#: Yes, it's Mr. Snuffle's birthday today, I didn't want him to be alone on his special day! 
-#Person1#: ACHOO! Argh, put it away, ACHOO! 
+"#Person1#: Argh. . . I feel terrible, I keep sneezing and my eyes are all watery, what's wrong with me?
+#Person2#: Wow, you're not dying are you, it looks like you have a cold, you should take some medicine.
+#Person1#: I don't think it's a cold, I feel fine if I move a few feet away from my desk.
+#Person2#: Maybe we should put you into quarantine, ha ha, jokes aside, I think you might have an allergy.
+#Person1#: An allergy? I never thought about that, I don't think I'm allergic to pollen though and I'm desensitized to bee stings after being stung so many times, Hmm. . .
+#Person2#: Ow! Why did you chuck that peanut at me?
+#Person1#: Just checking if you're allergic to peanuts, I guess not.
+#Person2#: Not funny! I could have gone into Anaphylactic Shock.
+#Person1#: Okay, my bad, how about dust? This office is full of it.
+#Person2#: Yes the whole is office is dusty yet I only feel affected near our desks!
+#Person3#: Meow meow meow.
+#Person1#: You brought your cat into the office? !
+#Person2#: Yes, it's Mr. Snuffle's birthday today, I didn't want him to be alone on his special day!
+#Person1#: ACHOO! Argh, put it away, ACHOO!
 #Person2#: I guess we found the problem, your allergic to cats! ","#Person1# feels terrible, and #Person2# thinks #Person1# might get an allergy. #Person2# tries to find out what triggers that, and it turns out that #Person1# is allergic to #Person2#'s cat."
-"#Person1#: Ghost will be on at six thirty. It's already six fifteen now. Hurry up. 
-#Person2#: You'd been hanging around before left home. Well, now, you are urging me for the movie. This has been fun! 
-#Person1#: Don't be upset. I am just afraid of missing the movie. It is your favorite. 
-#Person2#: In short, you become more and more impatient with me after wedding. 
-#Person1#: Why do you think so?? 
-#Person2#: Every time I complain about the domestic chores with you, you just don't listen. 
-#Person1#: Nothing of the sort! 
-#Person2#: Don't interrupt me! In addition, every time I need your advice, you just say, it's up to you. 
-#Person1#: Maybe I was busy with my work at that time, so I felt a little bored. 
-#Person2#: You mean, I am not busy with my work? 
-#Person1#: Honey, don't get me wrong. I don't know how to explain. But I really have eyes only for you and our children. 
-#Person2#: Do you still love me? 
-#Person1#: Honey, maybe sometimes I seem careless, but I take great care to cooking breakfast every morning. That shows how much I love you. 
-#Person2#: Oh, honey, that's enough. Our love story is more touching than the Ghost. 
+"#Person1#: Ghost will be on at six thirty. It's already six fifteen now. Hurry up.
+#Person2#: You'd been hanging around before left home. Well, now, you are urging me for the movie. This has been fun!
+#Person1#: Don't be upset. I am just afraid of missing the movie. It is your favorite.
+#Person2#: In short, you become more and more impatient with me after wedding.
+#Person1#: Why do you think so??
+#Person2#: Every time I complain about the domestic chores with you, you just don't listen.
+#Person1#: Nothing of the sort!
+#Person2#: Don't interrupt me! In addition, every time I need your advice, you just say, it's up to you.
+#Person1#: Maybe I was busy with my work at that time, so I felt a little bored.
+#Person2#: You mean, I am not busy with my work?
+#Person1#: Honey, don't get me wrong. I don't know how to explain. But I really have eyes only for you and our children.
+#Person2#: Do you still love me?
+#Person1#: Honey, maybe sometimes I seem careless, but I take great care to cooking breakfast every morning. That shows how much I love you.
+#Person2#: Oh, honey, that's enough. Our love story is more touching than the Ghost.
 #Person1#: Let's go to see the movie. It's time to begin. ","#Person2# thinks #Person1# is impatient and might not love #Person2# anymore, but #Person1# reassures #Person2# and they will watch the movie together."
-"#Person1#: I need a pan. 
-#Person2#: Okay. Do you have a particular size in mind? 
-#Person1#: Well, the bigger the better, I think. 
-#Person2#: Look at this one. It's our biggest pan. 
-#Person1#: Yes, that is big enough, but it's too heavy for me. 
-#Person2#: Okay, we have the same thing in aluminum. 
-#Person1#: Oh, this is nice and light. But it has an aluminum handle. 
-#Person2#: Try this one. Same aluminum pan, but with a heat-resistant bamboo handle. 
-#Person1#: Oh, yes. This is very nice. I'll take this one. 
-#Person2#: That's a good choice. How do you want to pay for it? 
-#Person1#: Cash. Oh, I almost forgot. I need a lid, too. 
+"#Person1#: I need a pan.
+#Person2#: Okay. Do you have a particular size in mind?
+#Person1#: Well, the bigger the better, I think.
+#Person2#: Look at this one. It's our biggest pan.
+#Person1#: Yes, that is big enough, but it's too heavy for me.
+#Person2#: Okay, we have the same thing in aluminum.
+#Person1#: Oh, this is nice and light. But it has an aluminum handle.
+#Person2#: Try this one. Same aluminum pan, but with a heat-resistant bamboo handle.
+#Person1#: Oh, yes. This is very nice. I'll take this one.
+#Person2#: That's a good choice. How do you want to pay for it?
+#Person1#: Cash. Oh, I almost forgot. I need a lid, too.
 #Person2#: I'm so sorry. A lid comes with the pan. Here it is. ",#Person2# helps #Person1# to choose a big aluminum pan with a heat-resistant bamboo handle and a lid.
-"#Person1#: Lily, do you know Lizzy? 
-#Person2#: Lizzy who? 
-#Person1#: Lizzy smith. 
-#Person2#: Of course I do. 
-#Person1#: Then, Do you know her younger sister? 
-#Person2#: You mean Mary? 
-#Person1#: Yes. 
-#Person2#: Sure. I know her elder sister Sue and younger sister Mary. 
-#Person1#: Oh, not bad. Then do you know her mother? 
-#Person2#: Yes, certainly. I know her mother and father, and brother and sisters, too. 
-#Person1#: That sounds terrific. 
-#Person2#: Why do you ask me these questions? 
+"#Person1#: Lily, do you know Lizzy?
+#Person2#: Lizzy who?
+#Person1#: Lizzy smith.
+#Person2#: Of course I do.
+#Person1#: Then, Do you know her younger sister?
+#Person2#: You mean Mary?
+#Person1#: Yes.
+#Person2#: Sure. I know her elder sister Sue and younger sister Mary.
+#Person1#: Oh, not bad. Then do you know her mother?
+#Person2#: Yes, certainly. I know her mother and father, and brother and sisters, too.
+#Person1#: That sounds terrific.
+#Person2#: Why do you ask me these questions?
 #Person1#: I just want to visit the family some day. ",#Person1# asks Lily about Lizzy's family because #Person1# wants to pay a visit.
-"#Person1#: The Johnsons are on their way back. You remember them, don't you? 
-#Person2#: Johnson? I can't place them. 
-#Person1#: We met them in Bermuda last May. 
-#Person2#: They've completely slipped my mind. 
-#Person1#: The couple with the dogs-think back. 
-#Person2#: No, I don't recall a thing about them. 
-#Person1#: Well, I've invited them for brunch. 
+"#Person1#: The Johnsons are on their way back. You remember them, don't you?
+#Person2#: Johnson? I can't place them.
+#Person1#: We met them in Bermuda last May.
+#Person2#: They've completely slipped my mind.
+#Person1#: The couple with the dogs-think back.
+#Person2#: No, I don't recall a thing about them.
+#Person1#: Well, I've invited them for brunch.
 #Person2#: Hmm, I must be getting absent-minded. ",#Person1# helps #Person2# to recall the Johnsons but fails.
-"#Person1#: Hello. Capital Hotel. May I help you? 
-#Person2#: Yes, unlikely my flight will be 2 hours due to the fog. Would you please keep my reservation? 
-#Person1#: Sure. May I have your name please? 
+"#Person1#: Hello. Capital Hotel. May I help you?
+#Person2#: Yes, unlikely my flight will be 2 hours due to the fog. Would you please keep my reservation?
+#Person1#: Sure. May I have your name please?
 #Person2#: Lincoln. That's L-I-N-C-O-L-N. Thank you. ",#Person1# helps Lincoln to keep the reservation.
-"#Person1#: May I take your order now, sir? 
-#Person2#: Yes, please. I'd like to start with a chef's salad. 
-#Person1#: Chef's salad for starter. And what would you like to have for the main course? 
-#Person2#: I'll have steak. 
-#Person1#: How would you like your steak done? 
-#Person2#: Medium. 
-#Person1#: And what would you like to go with your steak? 
-#Person2#: Peas and carrots. 
-#Person1#: Potatoes? 
-#Person2#: Boiled. 
+"#Person1#: May I take your order now, sir?
+#Person2#: Yes, please. I'd like to start with a chef's salad.
+#Person1#: Chef's salad for starter. And what would you like to have for the main course?
+#Person2#: I'll have steak.
+#Person1#: How would you like your steak done?
+#Person2#: Medium.
+#Person1#: And what would you like to go with your steak?
+#Person2#: Peas and carrots.
+#Person1#: Potatoes?
+#Person2#: Boiled.
 #Person1#: Thank you. ",#Person1# helps #Person2# order the starter and main course.
 "#Person1#: Would you hurry up? We're late.
 #Person2#: I know, I'm coming.
@@ -2696,53 +2696,53 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person2#: Thanks, but I can only play music on my guitar because it's a left-handed guitar...it's for people who use their left hands for most things. I fixed my guitar on Monday night.
 #Person1#: Why didn't you fix it sooner? We only have two days until our show.
 #Person2#: I've been so busy this month! I have to work at the grocery store and watch my little sister until my mom comes home from work.",Tina didn't come to band practice last week because her guitar was broken. #Person1# blames her for not fixing the guitar sooner but Tina has been too busy this month.
-"#Person1#: So, you finally got your doctorate in genetics. Well done! 
-#Person2#: Thanks. Now, I have to find a job. 
-#Person1#: What are you thinking of doing? 
-#Person2#: I'd like to conduct some scientific research into genes. It would be wonderful to make a medical breakthrough. 
-#Person1#: There must be several private companies that are interested in employing someone like you. You could do some research for a university. There's a lot of discussion about genetics nowadays. Someone wit 
-#Person2#: Many companies and universities investing resources in genetics, because there are so many possibilities. Few people know where next discoveries will be made. 
+"#Person1#: So, you finally got your doctorate in genetics. Well done!
+#Person2#: Thanks. Now, I have to find a job.
+#Person1#: What are you thinking of doing?
+#Person2#: I'd like to conduct some scientific research into genes. It would be wonderful to make a medical breakthrough.
+#Person1#: There must be several private companies that are interested in employing someone like you. You could do some research for a university. There's a lot of discussion about genetics nowadays. Someone wit
+#Person2#: Many companies and universities investing resources in genetics, because there are so many possibilities. Few people know where next discoveries will be made.
 #Person1#: Well, I hope scientists don't decode to make a clone of me in the future! I wouldn't like to be the subject of an experiment. ",#Person2# got a doctorate in genetic and wants to find a job conducting genetic research. #Person1# suggests working for private companies and universities.
-"#Person1#: While you are thinking about what you might like to order for dinner, would you like to order your drinks? 
-#Person2#: Can you tell me where your wine list is? 
-#Person1#: The wine list is posted right there on the board. 
-#Person2#: Can we order a mixed drink in this restaurant? 
-#Person1#: Yes, we have a wide selection of mixed drinks available from our bar. 
-#Person2#: Do you have any house specials that you could recommend? 
-#Person1#: Our most popular drinks are our Cuervo Gold margaritas. 
-#Person2#: That sounds like a good choice for me. May I have one, please? 
-#Person1#: Can I bring that to you on the rocks, or would you like it blended? 
-#Person2#: Please bring it to me on the rocks. 
-#Person1#: Salt or no salt? 
+"#Person1#: While you are thinking about what you might like to order for dinner, would you like to order your drinks?
+#Person2#: Can you tell me where your wine list is?
+#Person1#: The wine list is posted right there on the board.
+#Person2#: Can we order a mixed drink in this restaurant?
+#Person1#: Yes, we have a wide selection of mixed drinks available from our bar.
+#Person2#: Do you have any house specials that you could recommend?
+#Person1#: Our most popular drinks are our Cuervo Gold margaritas.
+#Person2#: That sounds like a good choice for me. May I have one, please?
+#Person1#: Can I bring that to you on the rocks, or would you like it blended?
+#Person2#: Please bring it to me on the rocks.
+#Person1#: Salt or no salt?
 #Person2#: I would like it with no salt, please. ",#Person2# orders Cuervo Gold margaritas under #Person1#'s recommendation and asks #Person1# to bring it on the rocks with no salt.
-"#Person1#: How do you feel about teaching my friend how to read? 
-#Person2#: How old is your friend and why doesn't he know how to read? 
-#Person1#: He's 78 and he's a new emigrant from South America and he's never been to school. 
-#Person2#: Does he even know how to speak English? 
-#Person1#: No. But I thought that you could start with reading and then go from there. 
-#Person2#: That was very thoughtful of you to volunteer me. 
-#Person1#: Come on. You're great at teaching and I know you will love him. He's adorable! 
+"#Person1#: How do you feel about teaching my friend how to read?
+#Person2#: How old is your friend and why doesn't he know how to read?
+#Person1#: He's 78 and he's a new emigrant from South America and he's never been to school.
+#Person2#: Does he even know how to speak English?
+#Person1#: No. But I thought that you could start with reading and then go from there.
+#Person2#: That was very thoughtful of you to volunteer me.
+#Person1#: Come on. You're great at teaching and I know you will love him. He's adorable!
 #Person2#: Oh, all right. Have him come over here for dinner. But you get to make dinner! ",#Person1# volunteers #Person2# to teach a 78-year-old illiterate American how to read. #Person2# thinks it challenging but agrees on the condition that #Person1# makes dinner.
-"#Person1#: Veronica, wait! Come on, honey, get back in the car. Let's talk it over, okay? 
-#Person2#: No! I'm tired of your lies! I don't know who you are anymore! 
-#Person1#: Veronica. It's me, the man that has and always will love you. I'm sorry that I've lied to you. Believe me, it's been so hard for me as well, and time and again, I've thought of coming clean. But, I couldn't put you or my mission at risk. It's all over now. My assignment is complete and now I have to go back to India. 
-#Person2#: What? Are you kidding? Is there anything else I should know before I never see you again? How could you deceive me like that? 
-#Person1#: Yes. . . Veronica. . . I know that this isn't the best time and that you probably hate me right now but, I want to be completely forthright with you. I know deep in my heart that you are the best thing that has ever happened to me. Veronica. . . will you marry me? Come with me to India,baby, I can't make up for everything that's happened, but I can promise you my undying love. I will be the most devoted husband, and I will cherish you always. 
-#Person2#: Steven. . . I can't just leave everything at the drop of a hat! With everything t hat has happened between us, I just don't know you any more. I just can't build a relationship on a foundation of lies. I do love you but. . . I can't go with you. I'm sorry. . . I love you. . . 
-#Person3#: This is the last call for flight eight one five from Los Angeles to Hyderabad. 
-#Person4#: I'm sorry , sir, we can't wait any longer you must board the plane. Are you waiting for someone? 
+"#Person1#: Veronica, wait! Come on, honey, get back in the car. Let's talk it over, okay?
+#Person2#: No! I'm tired of your lies! I don't know who you are anymore!
+#Person1#: Veronica. It's me, the man that has and always will love you. I'm sorry that I've lied to you. Believe me, it's been so hard for me as well, and time and again, I've thought of coming clean. But, I couldn't put you or my mission at risk. It's all over now. My assignment is complete and now I have to go back to India.
+#Person2#: What? Are you kidding? Is there anything else I should know before I never see you again? How could you deceive me like that?
+#Person1#: Yes. . . Veronica. . . I know that this isn't the best time and that you probably hate me right now but, I want to be completely forthright with you. I know deep in my heart that you are the best thing that has ever happened to me. Veronica. . . will you marry me? Come with me to India,baby, I can't make up for everything that's happened, but I can promise you my undying love. I will be the most devoted husband, and I will cherish you always.
+#Person2#: Steven. . . I can't just leave everything at the drop of a hat! With everything t hat has happened between us, I just don't know you any more. I just can't build a relationship on a foundation of lies. I do love you but. . . I can't go with you. I'm sorry. . . I love you. . .
+#Person3#: This is the last call for flight eight one five from Los Angeles to Hyderabad.
+#Person4#: I'm sorry , sir, we can't wait any longer you must board the plane. Are you waiting for someone?
 #Person1#: I was but, I don't think she is coming. . . ","Steven lied to Veronica because of his mission. Veronica feels so deceived that she doesn't believe Steven anymore. Steven asks Veronica to move to India together and marry him but Veronica refuses. At last, Veronica doesn't appear at the airport when Steven's going to board the plane from Los Angeles to Hyderabad."
-"#Person1#: I was told to come to you to get a chest X-ray. 
-#Person2#: No problem. Just take your clothes off from the waist up and put the gown on, with the opening in the back. 
-#Person1#: Then what should I do? 
-#Person2#: You will stand over here up against this plate. 
-#Person1#: Should I just stand naturally? 
-#Person2#: You will raise your arms up shoulder high. 
-#Person1#: Is this all right? 
-#Person2#: Yes, you are doing great. 
-#Person1#: Where will you be going? 
-#Person2#: I need to stand behind this shield. Now you will take a deep breath, hold it, and let it out. 
-#Person1#: Is that it? 
+"#Person1#: I was told to come to you to get a chest X-ray.
+#Person2#: No problem. Just take your clothes off from the waist up and put the gown on, with the opening in the back.
+#Person1#: Then what should I do?
+#Person2#: You will stand over here up against this plate.
+#Person1#: Should I just stand naturally?
+#Person2#: You will raise your arms up shoulder high.
+#Person1#: Is this all right?
+#Person2#: Yes, you are doing great.
+#Person1#: Where will you be going?
+#Person2#: I need to stand behind this shield. Now you will take a deep breath, hold it, and let it out.
+#Person1#: Is that it?
 #Person2#: That's it. You can get dressed when the film is developed. ",#Person1# gets a chest X-ray step by step under #Person2#'s guidance.
 "#Person1#: Oh, man. Nobody can stand this kind of burning heat.
 #Person2#: Tell me about it. You can't even stay in the sun for 5 minutes.
@@ -3199,78 +3199,78 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person1#: No, no. Actually, it's 10:30. I set my watch half an hour fast.
 #Person2#: You're never late, are you?
 #Person1#: Never. I can't be!",#Person1# tells #Person2# #Person1#'s alarm is ringing for an appointment at 11.
-"#Person1#: Excuse me, I'd like to make a suit of this material. 
-#Person2#: Well, sir. Can I take your measurements first? 
-#Person1#: Yes. Should I take off my coat? 
-#Person2#: That'll be helpful. All right, thank you. 
-#Person1#: Please make a single-breasted. 
-#Person2#: No, problem. If you'll wait one moment, I'll make out your receipt. 
-#Person1#: How much does it cost? 
-#Person2#: Let me see, with padding and lining cloth, it comes to 357 dollars altogether. 
-#Person1#: All right. When can I get it? 
-#Person2#: In two weeks. 
+"#Person1#: Excuse me, I'd like to make a suit of this material.
+#Person2#: Well, sir. Can I take your measurements first?
+#Person1#: Yes. Should I take off my coat?
+#Person2#: That'll be helpful. All right, thank you.
+#Person1#: Please make a single-breasted.
+#Person2#: No, problem. If you'll wait one moment, I'll make out your receipt.
+#Person1#: How much does it cost?
+#Person2#: Let me see, with padding and lining cloth, it comes to 357 dollars altogether.
+#Person1#: All right. When can I get it?
+#Person2#: In two weeks.
 #Person1#: Thank you. ","#Person1# wants to make a single-breasted suit. #Person2# measures #Person1#'s size, and tells the price is 357 dollars."
-"#Person1#: did you go to university? 
-#Person2#: yes, I graguated with a BA in English from Qingdao Uinversity. 
-#Person1#: when did you graduate? 
-#Person2#: just a few years ago. What about you? 
-#Person1#: I just graduated from high school. 
-#Person2#: are you planning on going to university? 
-#Person1#: I'd like to get a BA, but I don't know where I should go. 
-#Person2#: have you applied anywhere yet? 
-#Person1#: yes, I've applied to four universities and have been accepted into all of them. 
-#Person2#: congratulations! Which one is the cheapest? 
-#Person1#: the tuition is the same for all of them. 
-#Person2#: which one has the most interesting course? 
-#Person1#: I think the course at Leeds University is interesting, but I think the one at Manchester University would be more practical. 
-#Person2#: where would you like to be located? 
-#Person1#: I'd really like to be in London, but it's the most expensive city in England to live in, so I don't know if I can afford to live there. 
-#Person2#: have you applied for grants or financial aid of some sort? 
-#Person1#: not yet. 
-#Person2#: I think you should do that soon. It will help you make a decision about the school you go to. 
-#Person1#: that's a good idea. 
+"#Person1#: did you go to university?
+#Person2#: yes, I graguated with a BA in English from Qingdao Uinversity.
+#Person1#: when did you graduate?
+#Person2#: just a few years ago. What about you?
+#Person1#: I just graduated from high school.
+#Person2#: are you planning on going to university?
+#Person1#: I'd like to get a BA, but I don't know where I should go.
+#Person2#: have you applied anywhere yet?
+#Person1#: yes, I've applied to four universities and have been accepted into all of them.
+#Person2#: congratulations! Which one is the cheapest?
+#Person1#: the tuition is the same for all of them.
+#Person2#: which one has the most interesting course?
+#Person1#: I think the course at Leeds University is interesting, but I think the one at Manchester University would be more practical.
+#Person2#: where would you like to be located?
+#Person1#: I'd really like to be in London, but it's the most expensive city in England to live in, so I don't know if I can afford to live there.
+#Person2#: have you applied for grants or financial aid of some sort?
+#Person1#: not yet.
+#Person2#: I think you should do that soon. It will help you make a decision about the school you go to.
+#Person1#: that's a good idea.
 #Person2#: good luck! ",#Person2# congratulates #Person1# for receiving four university offers and asks #Person1# which one is preferred. #Person2# suggests #Person1# apply for financial aid.
-"#Person1#: Have you read the new rules about using cell phone at work? 
-#Person2#: Yes, not bad. Like turn your cell phone ringer off and find a private place to make calls which it's showing your respect to your co-workers. 
-#Person1#: Well, but for this one, don't bring your cell phone to meetings, I think it is not reasonable. What if there are some important calls? 
-#Person2#: Well, this one is not compulsory. It is just suggestion. 
+"#Person1#: Have you read the new rules about using cell phone at work?
+#Person2#: Yes, not bad. Like turn your cell phone ringer off and find a private place to make calls which it's showing your respect to your co-workers.
+#Person1#: Well, but for this one, don't bring your cell phone to meetings, I think it is not reasonable. What if there are some important calls?
+#Person2#: Well, this one is not compulsory. It is just suggestion.
 #Person1#: I didn't pay attention to that. ",#Person1# and #Person2# are talking about the new rules of using a cellphone at work.
-"#Person1#: Hi! Is that the new laptop you brought last week? It looks very nice. 
-#Person2#: Yes, it is. Thanks. I'm just surfing on the internet. 
-#Person1#: Here? In this cafe? How can you do that? 
-#Person2#: This cafe offers a wireless internet connection. That means I can get on the net for free while I'm here. Of course , I have to buy a cup of coffee! 
-#Person1#: That's great. Can you do it anywhere? 
-#Person2#: No. you can only do it when the cafe offers a wireless connection. There are only about 10 or 12 places that offer it in this city. 
-#Person1#: So, what programes do you have on your laptop? 
-#Person2#: I've got all the usual ones for word processing and then I have a few for creating and editing photographs. 
-#Person1#: I know you are keen on photography. It's very useful for you to be able to download photos from your digital camera. Then you attach the picture files to emails and send them to anyone, anywhere, at anytime! 
+"#Person1#: Hi! Is that the new laptop you brought last week? It looks very nice.
+#Person2#: Yes, it is. Thanks. I'm just surfing on the internet.
+#Person1#: Here? In this cafe? How can you do that?
+#Person2#: This cafe offers a wireless internet connection. That means I can get on the net for free while I'm here. Of course , I have to buy a cup of coffee!
+#Person1#: That's great. Can you do it anywhere?
+#Person2#: No. you can only do it when the cafe offers a wireless connection. There are only about 10 or 12 places that offer it in this city.
+#Person1#: So, what programes do you have on your laptop?
+#Person2#: I've got all the usual ones for word processing and then I have a few for creating and editing photographs.
+#Person1#: I know you are keen on photography. It's very useful for you to be able to download photos from your digital camera. Then you attach the picture files to emails and send them to anyone, anywhere, at anytime!
 #Person2#: It's wonderful, isn't it? Would you like to see some photos that I look recently? ","#Person2# tells #Person1# the new laptop's functions, photography program, and how to surf the Internet in the cafe by using the wireless."
-"#Person1#: Are there any interesting stories in the newspaper today? 
-#Person2#: There are a few stories about natural disasters. There is a massive forest fire in Australia. It covers several square kilometers of land has destroyed many more square kilometers. 
-#Person1#: Was it caused accidentally or naturally? Sometimes it gets so hot that fires begin naturally in Australia and Africa. 
-#Person2#: Nobody knows at the moment, but it has been very hot there recently. The drought in Africa is causing starvation. Millions of people have migrated to try and find food. 
-#Person1#: What is the international community doing to help? 
-#Person2#: The European union has sent several plants with relief supplies. Several countries have sent soldiers to distribute food and medical supplies. Refugee camps have been set up across the region. 
-#Person1#: How many countries have been affected? 
-#Person2#: Six have been seriously affected, but the refugees are also migrating to several surrounding countries. 
-#Person1#: I saw on the tv yesterday that there has been another earthquake in Iran. 
-#Person2#: Yes. There have been a few there recently. They say that this one was not a big quake. The Iranians are dealing with it on their own. They have purchased some special equipment to find people buried under rubble. 
-#Person1#: Does the newspaper say anything about casualties? 
+"#Person1#: Are there any interesting stories in the newspaper today?
+#Person2#: There are a few stories about natural disasters. There is a massive forest fire in Australia. It covers several square kilometers of land has destroyed many more square kilometers.
+#Person1#: Was it caused accidentally or naturally? Sometimes it gets so hot that fires begin naturally in Australia and Africa.
+#Person2#: Nobody knows at the moment, but it has been very hot there recently. The drought in Africa is causing starvation. Millions of people have migrated to try and find food.
+#Person1#: What is the international community doing to help?
+#Person2#: The European union has sent several plants with relief supplies. Several countries have sent soldiers to distribute food and medical supplies. Refugee camps have been set up across the region.
+#Person1#: How many countries have been affected?
+#Person2#: Six have been seriously affected, but the refugees are also migrating to several surrounding countries.
+#Person1#: I saw on the tv yesterday that there has been another earthquake in Iran.
+#Person2#: Yes. There have been a few there recently. They say that this one was not a big quake. The Iranians are dealing with it on their own. They have purchased some special equipment to find people buried under rubble.
+#Person1#: Does the newspaper say anything about casualties?
 #Person2#: So far, less than 20 people have died, but over 100 are in hospital. ","#Person2# tells #Person1# the news of natural disasters reported in today's newspaper, including the massive forest fire in Australia, the starvation in Africa, an earthquake in Iran, and the help of the international community in Australia and Africa."
-"#Person1#: Are you ready to order, sir? 
-#Person2#: Yes. I'll have the beef stew for starters and my wife would like tomato soup. 
-#Person1#: One beef stew and one tomato soup. What would you like for the main course? 
-#Person2#: I'll have the Cayenne Pepper Steak and my wife would like the Fried Trout with mashed potatoes. 
-#Person1#: I'm afraid the trout is off. 
-#Person2#: Oh dear. Err. . . What else do you recommend? 
-#Person1#: The sole is very good. 
-#Person2#: OK. I'll have that. Do you have any coleslaw? 
-#Person1#: No, I'm sorry, we don't. 
-#Person2#: Just give me a small mixed salad then. Same for me. 
-#Person1#: Certainly. Would you like something to drink? 
-#Person2#: Yes, please. May I see the wine list? 
-#Person1#: Certainly. Here you are. 
-#Person2#: A bottle of Chablis 99, please. 
+"#Person1#: Are you ready to order, sir?
+#Person2#: Yes. I'll have the beef stew for starters and my wife would like tomato soup.
+#Person1#: One beef stew and one tomato soup. What would you like for the main course?
+#Person2#: I'll have the Cayenne Pepper Steak and my wife would like the Fried Trout with mashed potatoes.
+#Person1#: I'm afraid the trout is off.
+#Person2#: Oh dear. Err. . . What else do you recommend?
+#Person1#: The sole is very good.
+#Person2#: OK. I'll have that. Do you have any coleslaw?
+#Person1#: No, I'm sorry, we don't.
+#Person2#: Just give me a small mixed salad then. Same for me.
+#Person1#: Certainly. Would you like something to drink?
+#Person2#: Yes, please. May I see the wine list?
+#Person1#: Certainly. Here you are.
+#Person2#: A bottle of Chablis 99, please.
 #Person1#: Excellent choice! ",#Person1# serves #Person2# and his wife in the restaurant. #Person2# orders some courses and drinks recommended by #Person1#.
 "#Person1#: Ah, that's the forth ad that appears suddenly on my computer screen since I started working on my paper.
 #Person2#: You can buy an app that will stop those ads.
@@ -3649,59 +3649,59 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person2#: You can't do it for ever.
 #Person1#: No, but I've decided to open a dance school once I've moved to the top. A lot of young dancers need better training, don't they?
 #Person2#: That's a wonderful idea.",David has left his position because of his rude boss. Susan becomes a successful dancer and plans to open a dance school.
-"#Person1#: How are you doing today? 
-#Person2#: I'm doing great. What about you? 
-#Person1#: I'm absolutely lovely, thank you. 
-#Person2#: Everything's been good with you? 
-#Person1#: I haven't been better. How about yourself? 
-#Person2#: I started school recently. 
-#Person1#: Where are you going to school? 
-#Person2#: I'm going to PCC. 
-#Person1#: How do you like it so far? 
-#Person2#: I like it so far. My classes are pretty good right now. 
-#Person1#: I wish you luck. 
+"#Person1#: How are you doing today?
+#Person2#: I'm doing great. What about you?
+#Person1#: I'm absolutely lovely, thank you.
+#Person2#: Everything's been good with you?
+#Person1#: I haven't been better. How about yourself?
+#Person2#: I started school recently.
+#Person1#: Where are you going to school?
+#Person2#: I'm going to PCC.
+#Person1#: How do you like it so far?
+#Person2#: I like it so far. My classes are pretty good right now.
+#Person1#: I wish you luck.
 #Person2#: Thanks a lot. ",#Person1# and #Person2# exchange greetings. #Person2# tells #Person1# #Person2#'s going to PCC and #Person2# likes the classes there.
-"#Person1#: What kind of car is best for me? 
-#Person2#: For you, I would recommend this one here. 
-#Person1#: The compact? Why do you think that one is better than the others? 
-#Person2#: This automobile is just right for your needs because not only is it compact for ease in city driving, but also, it has many safety features. I know that as a parent, you are concerned about safety in driving your kids to and from school. 
-#Person1#: That's true. What kind of safety features are we talking about? 
-#Person2#: This model features anti-lock brakes, airbags on both driver and passenger sides, and impact collision design. But that's not all. This car isn't only safe but it's also very economical. 
-#Person1#: You mean it has a cheaper price than similar models? 
-#Person2#: Yes, this price is very affordable, but driving this car you'll also notice a significant annual saving in gas consumption. The main attraction for this model is the fuel economy. 
-#Person1#: With the cost of gasoline these days, that is a big plus. I think this model may be just what I'm looking for. 
+"#Person1#: What kind of car is best for me?
+#Person2#: For you, I would recommend this one here.
+#Person1#: The compact? Why do you think that one is better than the others?
+#Person2#: This automobile is just right for your needs because not only is it compact for ease in city driving, but also, it has many safety features. I know that as a parent, you are concerned about safety in driving your kids to and from school.
+#Person1#: That's true. What kind of safety features are we talking about?
+#Person2#: This model features anti-lock brakes, airbags on both driver and passenger sides, and impact collision design. But that's not all. This car isn't only safe but it's also very economical.
+#Person1#: You mean it has a cheaper price than similar models?
+#Person2#: Yes, this price is very affordable, but driving this car you'll also notice a significant annual saving in gas consumption. The main attraction for this model is the fuel economy.
+#Person1#: With the cost of gasoline these days, that is a big plus. I think this model may be just what I'm looking for.
 #Person2#: Why don't you take it for a test drive, and think it over. ",#Person2# recommends the compact to #Person1# and introduces its features. #Person1# is satisfied with the price and then #Person2# suggests #Person1# have a test drive and think it over.
-"#Person1#: Have you ever been involved in the auditing work? 
-#Person2#: Yes,I have. I was employed by the financial section of the university ever since I graduated. I worked there for 3 years. Then I had worked in a bank for 3 years. 
-#Person1#: How long did it take you to become an auditor? 
+"#Person1#: Have you ever been involved in the auditing work?
+#Person2#: Yes,I have. I was employed by the financial section of the university ever since I graduated. I worked there for 3 years. Then I had worked in a bank for 3 years.
+#Person1#: How long did it take you to become an auditor?
 #Person2#: Very short time. I became an auditor within three months. ",#Person2# tells #Person1# about #Person2#'s auditory experience.
-"#Person1#: Nice dress. How do I look? Be honest. 
-#Person2#: Hmm... you look too dressed up. How about this purple top and these jeans? 
-#Person1#: Well, that top is a little too tight, and those jeans aren't dressy enough. And I don't feel comfortable with that. What do you think, Vicky? You've been very quiet up to now. 
+"#Person1#: Nice dress. How do I look? Be honest.
+#Person2#: Hmm... you look too dressed up. How about this purple top and these jeans?
+#Person1#: Well, that top is a little too tight, and those jeans aren't dressy enough. And I don't feel comfortable with that. What do you think, Vicky? You've been very quiet up to now.
 #Person3#: Be confident. Wear styles you're going to be comfortable in. ",#Person1#'s asking for opinions about #Person1#'s dressing. #Person2# thinks #Person1# looks too dressed up while Vicky thinks #Person1# should be confident.
-"#Person1#: Whew! I had to wait for almost an hour to get to the front of the line. 
-#Person2#: You have much patience. 
-#Person1#: Wow! Your calligraphy is very beautiful. It was worth the wait! 
-#Person2#: Thank you. Today I'm writing a kind of poem called a Chinese couplet. 
-#Person1#: What does it say? 
-#Person2#: This is an especially famous one. It says 'May the passing days bring you health and longevity. May this season of renewal find you basked in riches.' 
-#Person1#: That's very nice. Is it for sale? 
-#Person2#: No. I never sell my artwork. 
-#Person1#: Really? Then what do you do with it? 
-#Person2#: I give it away. Here, this one is for you. 
-#Person1#: Wow! Really? Are you sure? Now I'll have a lucky year! 
+"#Person1#: Whew! I had to wait for almost an hour to get to the front of the line.
+#Person2#: You have much patience.
+#Person1#: Wow! Your calligraphy is very beautiful. It was worth the wait!
+#Person2#: Thank you. Today I'm writing a kind of poem called a Chinese couplet.
+#Person1#: What does it say?
+#Person2#: This is an especially famous one. It says 'May the passing days bring you health and longevity. May this season of renewal find you basked in riches.'
+#Person1#: That's very nice. Is it for sale?
+#Person2#: No. I never sell my artwork.
+#Person1#: Really? Then what do you do with it?
+#Person2#: I give it away. Here, this one is for you.
+#Person1#: Wow! Really? Are you sure? Now I'll have a lucky year!
 #Person2#: Remember, real luck must be created (by) yourself, and then it cannot be given or taken away. . . ",#Person1# waited for a long time to see #Person2#'s beautiful calligraphy. #Person2# today is writing a Chinese couplet and gives it away to #Person1#. #Person1#'s thrilled.
-"#Person1#: They got a divorce at last. 
-#Person2#: It's inenvitable. Their love wasbuilt on the sand, and this is why their marriage has landed on the rocks. 
-#Person1#: You said it. Love buit on the sand will soon be on the rocks. 
+"#Person1#: They got a divorce at last.
+#Person2#: It's inenvitable. Their love wasbuilt on the sand, and this is why their marriage has landed on the rocks.
+#Person1#: You said it. Love buit on the sand will soon be on the rocks.
 #Person2#: That give us a good lesson. ",#Person1# and #Person2# learn that love built on the sand will soon be on the rocks from someone's divorce.
-"#Person1#: Most of our customers are foreigners. How many foreign languages can you speak, Elizabeth? 
-#Person2#: Two. French and Spanish. 
-#Person1#: And how well can you speak them? 
-#Person2#: Well, French was my best subject at school. I can read and write it pretty well. 
-#Person1#: And how about your Spanish? 
-#Person2#: Well, it's not as good as my French. I can speak it reasonably well, but my written Spanish isn't very good. 
-#Person1#: I see. Well, we have a lot of Spanish customers, but you wouldn't need to write any Spanish here. 
+"#Person1#: Most of our customers are foreigners. How many foreign languages can you speak, Elizabeth?
+#Person2#: Two. French and Spanish.
+#Person1#: And how well can you speak them?
+#Person2#: Well, French was my best subject at school. I can read and write it pretty well.
+#Person1#: And how about your Spanish?
+#Person2#: Well, it's not as good as my French. I can speak it reasonably well, but my written Spanish isn't very good.
+#Person1#: I see. Well, we have a lot of Spanish customers, but you wouldn't need to write any Spanish here.
 #Person2#: In that case, I'm fit for the position I think. ","Elizabeth can speak French well. Since #Person1# has many Spanish customers, Elizabeth thinks she's fit for the position."
 "#Person1#: Ah, where am I?
 #Person2#: Excuse me, do you need any help?
@@ -4086,124 +4086,124 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person2#: What shall we do in the meantime?
 #Person1#: Let's find some seats in the quiet part of the terminal to take a nap.
 #Person2#: Good idea. I am pretty tired.",#Person1# tells #Person2# their flight is delayed and suggests taking a nap.
-"#Person1#: May I help you? 
-#Person2#: Yes. I'm looking for a green dress. 
-#Person1#: What size do you wear? These dresses are on sale. 
-#Person2#: I wear size 32. This one looks nice. Where may I try it on? 
-#Person1#: Come this way. Here's the dressing room. 
-#Person2#: How does it look? 
-#Person1#: It looks nice. And it's not expensive. 
-#Person2#: How much is it? 
-#Person1#: It's only $20. 
+"#Person1#: May I help you?
+#Person2#: Yes. I'm looking for a green dress.
+#Person1#: What size do you wear? These dresses are on sale.
+#Person2#: I wear size 32. This one looks nice. Where may I try it on?
+#Person1#: Come this way. Here's the dressing room.
+#Person2#: How does it look?
+#Person1#: It looks nice. And it's not expensive.
+#Person2#: How much is it?
+#Person1#: It's only $20.
 #Person2#: I'll take it. ",#Person1# recommends a dress for #Person2#. #Person2# tries it and buys it.
-"#Person1#: Can I help you, sir? 
-#Person2#: I want to find a book called Gone with the Wind. But I can't find it. 
-#Person1#: Let me give you a hand. The author is. . . 
-#Person2#: Margaret Mitchell. 
-#Person1#: Oh, yes. Here it is. 
-#Person2#: Thank you very much. I have been looking for it for a long time. Is this the latest edition? 
-#Person1#: Yes, we have both the paperback and hardcover. which would you want to buy? 
-#Person2#: How about the price of the hardcover? 
-#Person1#: It's $25. 
+"#Person1#: Can I help you, sir?
+#Person2#: I want to find a book called Gone with the Wind. But I can't find it.
+#Person1#: Let me give you a hand. The author is. . .
+#Person2#: Margaret Mitchell.
+#Person1#: Oh, yes. Here it is.
+#Person2#: Thank you very much. I have been looking for it for a long time. Is this the latest edition?
+#Person1#: Yes, we have both the paperback and hardcover. which would you want to buy?
+#Person2#: How about the price of the hardcover?
+#Person1#: It's $25.
 #Person2#: A little bit expensive, but I will buy one. This is $25 , here you are. ",#Person2# buys a hardcover of Gone with the Wind for $25 with #Person1#'s help.
-"#Person1#: Excuse me, Sir, do you know what time it is? 
-#Person2#: Oh, it's almost eleven twenty. 
-#Person1#: Thank you. 
-#Person2#: You're welcome. The rain is quite heavy, isn't it? 
-#Person1#: Yeah. I was in a hurry and I forgot my umbrella today. 
-#Person2#: I have one. We could share it. Which way are you going? 
-#Person1#: Oh, that's very kind of you. I am going to the Garden Hotel. 
-#Person2#: I am going there, too. We can walk together. 
+"#Person1#: Excuse me, Sir, do you know what time it is?
+#Person2#: Oh, it's almost eleven twenty.
+#Person1#: Thank you.
+#Person2#: You're welcome. The rain is quite heavy, isn't it?
+#Person1#: Yeah. I was in a hurry and I forgot my umbrella today.
+#Person2#: I have one. We could share it. Which way are you going?
+#Person1#: Oh, that's very kind of you. I am going to the Garden Hotel.
+#Person2#: I am going there, too. We can walk together.
 #Person1#: Sure. ","It rains heavily, #Person2# shares an umbrella with #Person1#, and they go to the Garden Hotel."
-"#Person1#: Hi Mary, how's it going? 
-#Person2#: Well, last night I had a big argument with Ann. 
-#Person1#: Terrible. It must be something serious. You two are such close friends. 
-#Person2#: Now that I look back at it, it wasn't that big a deal. I shouldn't have lost my temper. 
-#Person1#: Really? What happened? 
-#Person2#: It's just we've been planning to go the beach for a while, and we decided we could both make it this weekend. Then out of nowhere she called me up, said her boyfriend had made plans and that she need to cancel the trip. I was so angry when she told me that I said she didn't care about our friendship at all. 
-#Person1#: That's pretty harsh. 
-#Person2#: I know, but I was so upset. I mean, come on! Does she have to do everything her boyfriend says? 
-#Person1#: You know she probably feels just as bad. 
-#Person2#: Well, I think I was being a little selfish myself. I know they don't get to see each other very often. 
-#Person1#: Well, in that case I guess maybe you can be more understanding. You shouldn't let a trivial thing like this stand in the way of your friendship. After all you can go to the beach anytime you want. 
+"#Person1#: Hi Mary, how's it going?
+#Person2#: Well, last night I had a big argument with Ann.
+#Person1#: Terrible. It must be something serious. You two are such close friends.
+#Person2#: Now that I look back at it, it wasn't that big a deal. I shouldn't have lost my temper.
+#Person1#: Really? What happened?
+#Person2#: It's just we've been planning to go the beach for a while, and we decided we could both make it this weekend. Then out of nowhere she called me up, said her boyfriend had made plans and that she need to cancel the trip. I was so angry when she told me that I said she didn't care about our friendship at all.
+#Person1#: That's pretty harsh.
+#Person2#: I know, but I was so upset. I mean, come on! Does she have to do everything her boyfriend says?
+#Person1#: You know she probably feels just as bad.
+#Person2#: Well, I think I was being a little selfish myself. I know they don't get to see each other very often.
+#Person1#: Well, in that case I guess maybe you can be more understanding. You shouldn't let a trivial thing like this stand in the way of your friendship. After all you can go to the beach anytime you want.
 #Person2#: Yeah, I'll call later to patch things up. ",Mary argued with Ann yesterday because Ann needed to cancel their trip and went to her boyfriend's plan. #Person1# tells Mary to be more understanding. Mary will call later to patch things up.
-"#Person1#: Jenny, what's wrong with you? Why do you keep weeping like that? 
-#Person2#: Mary told me that she had seen you with John last night. I got to know the fact that you are playing the field. 
+"#Person1#: Jenny, what's wrong with you? Why do you keep weeping like that?
+#Person2#: Mary told me that she had seen you with John last night. I got to know the fact that you are playing the field.
 #Person1#: Honey, cross my heart, I'v never looked at another woman since the first day I set my eyes on you! Believe me, that's the truth. ",Jenny thinks #Person1# is playing the field. #Person1# declares love to Jenny.
 "#Person1#: Lieb! How are you doing these day?
-#Person2#: Hi! I am busy with my new cat. Do you want to see a picture of her? 
+#Person2#: Hi! I am busy with my new cat. Do you want to see a picture of her?
 #Person2#: What? You have had a cat! Show me the pictures please!
 #Person1#: See, she is only 3 month.
 #Person2#: Yes, I can tell. Look how small she is. She's really cute.",Lieb has a small cat and shows the pictures to #Person2#.
-"#Person1#: You're so witty. . . 
-#Person2#: So why is the face tilted to the right? 
-#Person1#: This watch is supposed to be worn on your left hand. 
-#Person2#: So it's not as convenient for left-handed people? 
-#Person1#: It's better for right-handed people like me. See, I don't even have to move my arm to see the time. 
-#Person2#: I'm left-handed. You bought that watch so that I won't borrow it. . . 
+"#Person1#: You're so witty. . .
+#Person2#: So why is the face tilted to the right?
+#Person1#: This watch is supposed to be worn on your left hand.
+#Person2#: So it's not as convenient for left-handed people?
+#Person1#: It's better for right-handed people like me. See, I don't even have to move my arm to see the time.
+#Person2#: I'm left-handed. You bought that watch so that I won't borrow it. . .
 #Person1#: Bingo! ","#Person1# buys a watch that is convenient for right-handed people, so left-handed #Person2# won't borrow it."
-"#Person1#: I heard Rose is pregnant. I hope it'll be a boy this time. 
-#Person2#: I hope so, too. Rose and her husband have been wanting a boy so much. 
-#Person1#: After three baby girls in a row, Rose is under a lot of pressure from her in-laws. They want a boy in the worst way now. 
-#Person2#: But baby girls are just as good and just as fun as baby boys. 
+"#Person1#: I heard Rose is pregnant. I hope it'll be a boy this time.
+#Person2#: I hope so, too. Rose and her husband have been wanting a boy so much.
+#Person1#: After three baby girls in a row, Rose is under a lot of pressure from her in-laws. They want a boy in the worst way now.
+#Person2#: But baby girls are just as good and just as fun as baby boys.
 #Person1#: I agree with you, but you know how old-fashioned the elders are. ",#Person1# and #Person2# are talking about Rose's pregnancy and that Rose is under pressure from the old-fashioned elders.
-"#Person1#: My friend finally dumped her boyfriend, and she's sworn she's going to abstain until she finds the right man to marry . 
-#Person2#: After going through an episode like that I'm not surprised . How's her headspace? 
-#Person1#: She's doing great , she's getting her confidence back, and her self-esteem, has improved drastically. She's very happy. 
-#Person2#: I'm proud of you for standing by her. I think you've helped make a big difference in her life. 
-#Person1#: Do you have any plans for next Sunday evening? 
-#Person2#: No, why? 
-#Person1#: My friend, who had the mishap, wants to take us to dinner to show her gratitude for helping her. 
-#Person2#: She doesn't need to do that, I didn't do anything. 
+"#Person1#: My friend finally dumped her boyfriend, and she's sworn she's going to abstain until she finds the right man to marry .
+#Person2#: After going through an episode like that I'm not surprised . How's her headspace?
+#Person1#: She's doing great , she's getting her confidence back, and her self-esteem, has improved drastically. She's very happy.
+#Person2#: I'm proud of you for standing by her. I think you've helped make a big difference in her life.
+#Person1#: Do you have any plans for next Sunday evening?
+#Person2#: No, why?
+#Person1#: My friend, who had the mishap, wants to take us to dinner to show her gratitude for helping her.
+#Person2#: She doesn't need to do that, I didn't do anything.
 #Person1#: She feels you gave me the freedom to be able to assist her and she appreciates that. Come on, Let's indulge her. ",#Person1# tells #Person2# #Person1#'s friend finally dumped her boyfriend. They both stand by her and she invites them to have dinner to show gratitude for helping her.
-"#Person1#: Susan has got the cancer of stomach. 
-#Person2#: How terrible! This is quite unexpected! 
-#Person1#: Yesterday when I went to hospital to see her, you cannot imagine how greatly surprised when I saw her. 
-#Person3#: What happened? 
+"#Person1#: Susan has got the cancer of stomach.
+#Person2#: How terrible! This is quite unexpected!
+#Person1#: Yesterday when I went to hospital to see her, you cannot imagine how greatly surprised when I saw her.
+#Person3#: What happened?
 #Person2#: Because of atomic cocktail and other medicines, all of them have the side effect. she has lost all her hair. ",#Person1# tells #Person2# Susan got stomach cancer and she has lost all her hair.
-"#Person1#: The sun is up! Time for all the campers to rise. Time to get paddling. 
-#Person2#: Oh, no! No more paddling! My arms are sore! 
-#Person1#: Do not worry. Today will be easier. 
-#Person2#: Beth, what date is today? 
-#Person1#: Today is Saturday. 
-#Person2#: What is the date today? 
-#Person1#: Today is July 4th. 
-#Person2#: Oh, i almost forgot. Today is my mom's birthday. 
-#Person1#: Call her on my cell phone. Wish her 'Happy Birthday!'. Tell her you are out exploring the great American wilderness. Tell her I said she is lucky to be born on Independence Day. 
-#Person2#: Thanks! I will do that! When is your birthday? 
-#Person1#: It is December 25th. 
-#Person2#: Wow! What a lucky girl! Your birthday is on Christmas Day. 
-#Person1#: Yes, I am lucky. I was born on Christ's birthday. Maybe that is why I usually go to church on Sundays. When is your birthday? 
-#Person2#: April 2nd. I missed being a target of a lot of jokes by one day. I guess I am lucky, too! 
-#Person1#: That is true! Here, have some Granola for breakfast. 
-#Person2#: Thanks. 
-#Person1#: After eating , we will take down our tent. Then we will pack everything into the canoe, We can shove off by 6 
-#Person2#: I guess so. 
-#Person1#: How about going for swim around 10 
-#Person2#: That should work out great. You are miracle worker! You have got me awake and motivated. 
+"#Person1#: The sun is up! Time for all the campers to rise. Time to get paddling.
+#Person2#: Oh, no! No more paddling! My arms are sore!
+#Person1#: Do not worry. Today will be easier.
+#Person2#: Beth, what date is today?
+#Person1#: Today is Saturday.
+#Person2#: What is the date today?
+#Person1#: Today is July 4th.
+#Person2#: Oh, i almost forgot. Today is my mom's birthday.
+#Person1#: Call her on my cell phone. Wish her 'Happy Birthday!'. Tell her you are out exploring the great American wilderness. Tell her I said she is lucky to be born on Independence Day.
+#Person2#: Thanks! I will do that! When is your birthday?
+#Person1#: It is December 25th.
+#Person2#: Wow! What a lucky girl! Your birthday is on Christmas Day.
+#Person1#: Yes, I am lucky. I was born on Christ's birthday. Maybe that is why I usually go to church on Sundays. When is your birthday?
+#Person2#: April 2nd. I missed being a target of a lot of jokes by one day. I guess I am lucky, too!
+#Person1#: That is true! Here, have some Granola for breakfast.
+#Person2#: Thanks.
+#Person1#: After eating , we will take down our tent. Then we will pack everything into the canoe, We can shove off by 6
+#Person2#: I guess so.
+#Person1#: How about going for swim around 10
+#Person2#: That should work out great. You are miracle worker! You have got me awake and motivated.
 #Person1#: Happy Independence Day! ",#Person1# asks #Person2# to go paddling but #Person2# remembers today is #Person2#'s mother's birthday. #Person1# suggests #Person2# call her and wish her happy birthday and tells her #Person2# is out. Then they talk about their birthdays and later schedule.
-"#Person1#: May I have my bill, please? 
-#Person2#: That's $20 in all. 
-#Person1#: Well, I am afraid you have made a mistake. Would you check it again, please? 
-#Person2#: Let me see. I am terribty sorry, sir. That should be $18. 
+"#Person1#: May I have my bill, please?
+#Person2#: That's $20 in all.
+#Person1#: Well, I am afraid you have made a mistake. Would you check it again, please?
+#Person2#: Let me see. I am terribty sorry, sir. That should be $18.
 #Person1#: It doesn't matter. ",#Person1# points out a mistake on #Person1#'s bill.
-"#Person1#: Hi, Mary. You look pale today. What's the matter with you? 
-#Person2#: I think I've caught a cold. Now I'm aching all over. 
-#Person1#: You'd better take some medicine and have a good rest. I hope you'll be yourself pretty soon. 
+"#Person1#: Hi, Mary. You look pale today. What's the matter with you?
+#Person2#: I think I've caught a cold. Now I'm aching all over.
+#Person1#: You'd better take some medicine and have a good rest. I hope you'll be yourself pretty soon.
 #Person2#: Thank you. I suppose I should go to see a doctor. ",Mary gets cold. #Person1# hopes Mary gets better soon.
-"#Person1#: Do you want to hear a funny joke? 
-#Person2#: OK. Are you sure it's funny, though? 
-#Person1#: Well, you'll see. 
-#Person2#: OK. 
-#Person1#: OK, an Englishman, a Scotsman, and an Irishman were going on a trip across the desert, and they could only take one thing with them. 
-#Person2#: I see. 
-#Person1#: So they met up at the start of the journey and showed each other their equipment. 
-#Person2#: Oh, that's funny! 
-#Person1#: Hang on, I haven't finished yet. 
-#Person2#: Oh, sorry. 
-#Person1#: Well, as I was saying, they showed each other what they had decided to bring. The Englishman had brought some water. 'If we get thirsty, we'll have something to drink, ' he said. The Scotsman brought a map. 'If we get lost, we'll be able to find our way. ' The Irishman had brought a car door. 
-#Person2#: A car door? You mean just one car door? 
-#Person1#: Yep. A car door. 'Why the door? ' the others asked him. 'Well, ' he said, 'If it gets hot, we can open the window. ' Do you get it? 
+"#Person1#: Do you want to hear a funny joke?
+#Person2#: OK. Are you sure it's funny, though?
+#Person1#: Well, you'll see.
+#Person2#: OK.
+#Person1#: OK, an Englishman, a Scotsman, and an Irishman were going on a trip across the desert, and they could only take one thing with them.
+#Person2#: I see.
+#Person1#: So they met up at the start of the journey and showed each other their equipment.
+#Person2#: Oh, that's funny!
+#Person1#: Hang on, I haven't finished yet.
+#Person2#: Oh, sorry.
+#Person1#: Well, as I was saying, they showed each other what they had decided to bring. The Englishman had brought some water. 'If we get thirsty, we'll have something to drink, ' he said. The Scotsman brought a map. 'If we get lost, we'll be able to find our way. ' The Irishman had brought a car door.
+#Person2#: A car door? You mean just one car door?
+#Person1#: Yep. A car door. 'Why the door? ' the others asked him. 'Well, ' he said, 'If it gets hot, we can open the window. ' Do you get it?
 #Person2#: Well... ","#Person1# tells #Person2# a cold joke about an Englishman, a Scotsman, and an Irishman taking some water, a map, and a car door on a trip across the desert."
 "#Person1#: I'm now at the airport to meet Mr. Dale, who is arriving at 3:00 PM. There will be some calls for me while I'm away. So please take a message.
 #Person2#: Certainly. What time will you be back?
@@ -4594,62 +4594,62 @@ After seeing his right foot, Dr. Cardano decides to send him up to the lab on th
 #Person2#: No, but I can't stand him anymore. He is the worst roommate I've ever had. He never cleans up after himself and he is always listening to loud music when I try to get some sleep.
 #Person1#: Why don't you have a heart-to-heart talk with him?
 #Person2#: I've tried, but it didn't work. Maybe you can talk to him. After all, you are his good friend.","#Person2# complains about #Person2#'s roommate, Charlie, to #Person1# and asks #Person1# to talk to Charlie."
-"#Person1#: Tom, I married Julia last month. Have you already known it? 
-#Person2#: No, I haven't. I'm so surprised at the news. 
-#Person1#: Indeed, we got married too soon. 
-#Person2#: Congratulations. But have you heard the proverb that if one gets married too hurriedly one may regret it for a long time? 
-#Person1#: Yes. However, I believe that marriage comes by destiny. I knew I would marry Julia when I met her at the first time. 
-#Person2#: How's your married life? 
-#Person1#: We're happy together now. 
-#Person2#: I have to say you're a well-matched couple. 
+"#Person1#: Tom, I married Julia last month. Have you already known it?
+#Person2#: No, I haven't. I'm so surprised at the news.
+#Person1#: Indeed, we got married too soon.
+#Person2#: Congratulations. But have you heard the proverb that if one gets married too hurriedly one may regret it for a long time?
+#Person1#: Yes. However, I believe that marriage comes by destiny. I knew I would marry Julia when I met her at the first time.
+#Person2#: How's your married life?
+#Person1#: We're happy together now.
+#Person2#: I have to say you're a well-matched couple.
 #Person1#: Thank you! ",#Person1# tells Tom he and Julia got married hurriedly but they are happy.
-"#Person1#: Have you ever seen Bill Gate's home on the internet? 
-#Person2#: No. what's it like? 
-#Person1#: It's got its own library, theatre, swimming pool, and a guest house. The house itself has about ten different rooms that are all hooked up to computers so you can get things done in each room through a remote control. It's also located near the sea, so he can park his boats next to his house. It's absolutely amazing! 
-#Person2#: Would you want to live there? 
-#Person1#: I think his house is fantastic, but I wouldn't want to live there. You would have to hire one or two people to clean all the rooms in the house, plus a few people to take care of the gardens, and probably an au pair or two to take care of the children. It's just too big of a place to take care of on your own. 
-#Person2#: What's your dreamhome like then? 
+"#Person1#: Have you ever seen Bill Gate's home on the internet?
+#Person2#: No. what's it like?
+#Person1#: It's got its own library, theatre, swimming pool, and a guest house. The house itself has about ten different rooms that are all hooked up to computers so you can get things done in each room through a remote control. It's also located near the sea, so he can park his boats next to his house. It's absolutely amazing!
+#Person2#: Would you want to live there?
+#Person1#: I think his house is fantastic, but I wouldn't want to live there. You would have to hire one or two people to clean all the rooms in the house, plus a few people to take care of the gardens, and probably an au pair or two to take care of the children. It's just too big of a place to take care of on your own.
+#Person2#: What's your dreamhome like then?
 #Person1#: My dream home is actually just a small cottage in a quiet village in England.
-#Person2#: Would you want to buy an old cottage or build a new one yourself? 
-#Person1#: Old homes are great because they've got character. I think that's important. 
-#Person2#: Is that why you wear second-hand clothes as well? Because they've got character? 
-#Person1#: No, that's just because I don't have enough money to buy new cloths all the time! 
-#Person2#: I see. If you lived in an old house, would it be decorated in a modern way? 
+#Person2#: Would you want to buy an old cottage or build a new one yourself?
+#Person1#: Old homes are great because they've got character. I think that's important.
+#Person2#: Is that why you wear second-hand clothes as well? Because they've got character?
+#Person1#: No, that's just because I don't have enough money to buy new cloths all the time!
+#Person2#: I see. If you lived in an old house, would it be decorated in a modern way?
 #Person1#: No, I'd definitely try to restore it to its original state. I love to imagine what it'd be like to live in another time in history and living in a house decorated like it would have been 200 years ago would be a great way to feed my imagination even more! ","#Person1# tells #Person2# what Bill Gate's home like. It's got its own library, theatre, swimming pool, and a guest house. #Person1# doesn't want to live there because it's too big to take care of by one person. #Person1# prefers old cottages in a quiet village in England because they've got characters."
-"#Person1#: What can I do for you, sir? 
-#Person2#: What have you got this morning? 
-#Person1#: Fruit juice, cakes and refreshments, and everything. 
-#Person2#: I'd like to have a glass of tomato juice, please. 
-#Person1#: Any cereal, sir? 
-#Person2#: Yes, a dish of cream of wheat. 
-#Person1#: And eggs? 
-#Person2#: Yes, bacon and eggs with buttered toast. I like my bacon very crisp. 
-#Person1#: How do you want your eggs? 
-#Person2#: Fried, please. 
-#Person1#: Anything more, sir? 
+"#Person1#: What can I do for you, sir?
+#Person2#: What have you got this morning?
+#Person1#: Fruit juice, cakes and refreshments, and everything.
+#Person2#: I'd like to have a glass of tomato juice, please.
+#Person1#: Any cereal, sir?
+#Person2#: Yes, a dish of cream of wheat.
+#Person1#: And eggs?
+#Person2#: Yes, bacon and eggs with buttered toast. I like my bacon very crisp.
+#Person1#: How do you want your eggs?
+#Person2#: Fried, please.
+#Person1#: Anything more, sir?
 #Person2#: No, that's enough. T hank you. ","#Person2# orders tomato juice, a dish of cream of wheat, crisp bacon, and fried eggs."
-"#Person1#: Excuse me, is there a table for 8 right now? 
-#Person2#: Let me see. . . I am sorry the tables you want are booked. 
-#Person1#: Well, since there are some small square tables, could we put two tables together? 
+"#Person1#: Excuse me, is there a table for 8 right now?
+#Person2#: Let me see. . . I am sorry the tables you want are booked.
+#Person1#: Well, since there are some small square tables, could we put two tables together?
 #Person2#: No problem, sir. Let me help you. ",#Person2# helps #Person1# put two tables together to make it for 8 people.
-"#Person1#: I am totally fed up with my boss. He has crossed the line one too many times with his sexist comments. This time I am really going to report him for sexual harassment. 
-#Person2#: What happened? Did your boss say something to offend you at work? 
-#Person1#: He constantly lets inappropriate things slip out, referring to the women employees as girls or calling us sweetheart or darling. I doubt any of my male colleagues would stand for such treatment. 
-#Person2#: Don't you think you are overreacting a little? Calling you by nicknames shouldn't be so bad... 
-#Person1#: You're missing the point. It's about respect. He treats us with such a patronizing attitude, as if we are not equal or not as serious as our male co-workers. It's his attitude that needs to be changed, not just his words. 
+"#Person1#: I am totally fed up with my boss. He has crossed the line one too many times with his sexist comments. This time I am really going to report him for sexual harassment.
+#Person2#: What happened? Did your boss say something to offend you at work?
+#Person1#: He constantly lets inappropriate things slip out, referring to the women employees as girls or calling us sweetheart or darling. I doubt any of my male colleagues would stand for such treatment.
+#Person2#: Don't you think you are overreacting a little? Calling you by nicknames shouldn't be so bad...
+#Person1#: You're missing the point. It's about respect. He treats us with such a patronizing attitude, as if we are not equal or not as serious as our male co-workers. It's his attitude that needs to be changed, not just his words.
 #Person2#: That's what you get for working in a male-dominated field. I think you'll find that most male bosses in your industry are already conditioned to treat females in this way. You probably won't be able to change him. ",#Person1# complains to #Person2# about her boss's sexist comments. #Person1# is going to report him for sexual harassment. #Person2# thinks #Person1# is overreacting and she can't change her boss.
-"#Person1#: Now that it's the new year, I've decided to turn over a new leaf. 
-#Person2#: Yeah? You finally decided to wipe the slate clean? 
-#Person1#: You got it! I have a new job, I'm living in a new city, with new friends! This is my opportunity to make some small changes in the way I live my life. 
-#Person2#: So what are you going to do? Take up an art class or something? 
-#Person1#: Well, first of all, I've decided to stop smoking. It's not that I'm pinching pennies or anything, it's just that I've been smoking since I was sixteen, and I think it's time to stop. 
-#Person2#: I'm with you on that one. Anything else you're planning on doing? 
-#Person1#: One last thing, I've decided to come out of the closet. 
+"#Person1#: Now that it's the new year, I've decided to turn over a new leaf.
+#Person2#: Yeah? You finally decided to wipe the slate clean?
+#Person1#: You got it! I have a new job, I'm living in a new city, with new friends! This is my opportunity to make some small changes in the way I live my life.
+#Person2#: So what are you going to do? Take up an art class or something?
+#Person1#: Well, first of all, I've decided to stop smoking. It's not that I'm pinching pennies or anything, it's just that I've been smoking since I was sixteen, and I think it's time to stop.
+#Person2#: I'm with you on that one. Anything else you're planning on doing?
+#Person1#: One last thing, I've decided to come out of the closet.
 #Person2#: It's about time! ",#Person1# decides to stop smoking and come out of the closet in the new year. #Person2# supports #Person1#.
-"#Person1#: You married Joe, didn't you? 
-#Person2#: Joe? I don't know what you mean. 
-#Person1#: I remember you are in love. 
-#Person2#: Oh, I took a shine to him when we met for the first time. But it comes and goes. 
+"#Person1#: You married Joe, didn't you?
+#Person2#: Joe? I don't know what you mean.
+#Person1#: I remember you are in love.
+#Person2#: Oh, I took a shine to him when we met for the first time. But it comes and goes.
 #Person1#: It's Greek to me. ",#Person1# thought #Person2# married Joe. #Person2# denies.
 "#Person1#: How can I help you mam?
 #Person2#: I was hoping you could look at my car today for the past few weeks. It has been making very strange noises.

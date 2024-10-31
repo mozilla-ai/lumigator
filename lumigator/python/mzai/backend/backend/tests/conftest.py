@@ -144,7 +144,7 @@ def create_job_config()-> JobConfig:
         "max_samples": 10,
         "model_url": "hf://facebook/bart-large-cnn",
         "system_prompt": "Hello Lumigator",
-        "config_template": {},
+        "eval_config_template": str,
     }
 
     conf = JobConfig(

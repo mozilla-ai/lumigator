@@ -17,18 +17,18 @@ def format_dataset(data: list[list[str]]) -> str:
 
 
 @pytest.fixture
-def valid_experiment_dataset() -> str:
+def valid_dataset() -> str:
     data = [
-        ["examples", "ground_truth"],
+        ["predictions", "ground_truth"],
         ["Hello World", "Hello"],
     ]
     return format_dataset(data)
 
 
 @pytest.fixture
-def valid_experiment_dataset_without_gt() -> str:
+def valid_dataset_without_gt() -> str:
     data = [
-        ["examples"],
+        ["predictions"],
         ["Hello World"],
     ]
     return format_dataset(data)
@@ -46,20 +46,20 @@ def missing_examples_dataset() -> str:
 @pytest.fixture
 def extra_column_dataset() -> str:
     data = [
-        ["examples", "ground_truth", "extra"],
+        ["predictions", "ground_truth", "extra"],
         ["Hello World", "Hello", "Nope"],
     ]
     return format_dataset(data)
 
 
-def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
+def test_upload_delete(app_client: TestClient, valid_dataset: str):
     upload_filename = "dataset.csv"
 
     # Create
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
-        files={"dataset": (upload_filename, valid_experiment_dataset)},
+        files={"dataset": (upload_filename, valid_dataset)},
     )
     assert create_response.status_code == status.HTTP_201_CREATED
 
@@ -83,14 +83,14 @@ def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str):
+def test_presigned_download(app_client: TestClient, valid_dataset: str):
     upload_filename = "dataset.csv"
 
     # Create
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
-        files={"dataset": (upload_filename, valid_experiment_dataset)},
+        files={"dataset": (upload_filename, valid_dataset)},
     )
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
@@ -130,13 +130,13 @@ def test_experiment_format_validation(
 
 def test_experiment_ground_truth(
     app_client: TestClient,
-    valid_experiment_dataset: str,
-    valid_experiment_dataset_without_gt: str,
+    valid_dataset: str,
+    valid_dataset_without_gt: str,
 ):
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
-        files={"dataset": ("dataset.csv", valid_experiment_dataset)},
+        files={"dataset": ("dataset.csv", valid_dataset)},
     )
     assert create_response.status_code == status.HTTP_201_CREATED
     created_dataset = DatasetResponse.model_validate(create_response.json())
@@ -145,7 +145,7 @@ def test_experiment_ground_truth(
     create_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
-        files={"dataset": ("dataset.csv", valid_experiment_dataset_without_gt)},
+        files={"dataset": ("dataset.csv", valid_dataset_without_gt)},
     )
     assert create_response.status_code == status.HTTP_201_CREATED
     created_dataset = DatasetResponse.model_validate(create_response.json())

@@ -15,11 +15,11 @@ def test_health_ok(local_client: TestClient):
 
 
 def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
-    response = local_client.get("/health")
+    response = local_client.get("/health/")
     assert response.status_code == 200
 
     create_response = local_client.post(
-        "/datasets/",
+        "datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
@@ -31,7 +31,8 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "accept": "application/json",
         "Content-Type": "application/json",
     }
-    payload = {
+
+    infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
         "model": "hf://facebook/bart-large-cnn",
@@ -42,13 +43,24 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "config_template": "string",
     }
 
+    eval_payload = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "model": "hf://facebook/bart-large-cnn",
+        "dataset": str(created_dataset.id),
+        "max_samples": 10,
+        "model_url": "string",
+        "system_prompt": "string",
+        "config_eval_template": "string"
+    }
+
     create_evaluation_job_response = local_client.post(
-        "/jobs/evaluate/", headers=headers, json=payload
+        "/jobs/evaluate/", headers=headers, json=eval_payload
     )
     assert create_evaluation_job_response.status_code == 201
 
     create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=headers, json=payload
+        "/jobs/inference/", headers=headers, json=infer_payload
     )
     assert create_inference_job_response.status_code == 201
 

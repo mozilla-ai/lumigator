@@ -10,7 +10,7 @@ from uuid import UUID
 import requests
 from schemas.extras import ListingResponse
 from schemas.jobs import (
-    JobCreate,
+    JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -83,7 +83,7 @@ class Jobs:
              "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
-    def create_job(self, type: JobType, request: JobCreate) -> JobResponse:
+    def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:
         """Creates a new job.
 
         Args:

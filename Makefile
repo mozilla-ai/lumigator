@@ -57,4 +57,4 @@ clean-all: clean-docker-buildcache clean-docker-containers
 test:
 	make start-lumigator-build
 	cd lumigator/python/mzai/backend; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-	cd lumigator/python/mzai/sdk; uv run pytest
+	cd lumigator/python/mzai/sdk; uv run pytest; uv run pytest -o "python_files=int_test_*.py"

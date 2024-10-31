@@ -4,7 +4,7 @@ from time import sleep
 
 from loguru import logger
 from schemas.datasets import DatasetFormat
-from schemas.jobs import JobCreate, JobType
+from schemas.jobs import JobEvalCreate, JobType
 
 import requests
 
@@ -58,8 +58,7 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
         jobs = lumi_client.jobs.get_jobs()
         assert jobs is not None
         logger.info(lumi_client.datasets.get_dataset(dataset.id))
-        # job_create = JobCreate(name="test-job-int-001", model="hf://distilbert/distilbert-base-uncased", dataset=dataset.id)
-        job_create = JobCreate(name="test-job-int-001", model="hf://distilgpt2", dataset=dataset.id)
+        job_create = JobEvalCreate(name="test-job-int-001", model="hf://distilgpt2", dataset=dataset.id)
         job_create.description = "This is a test job"
         job_create.max_samples = 0
         job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, job_create)

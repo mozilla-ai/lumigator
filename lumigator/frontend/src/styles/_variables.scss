@@ -1,29 +1,29 @@
 // Colors
-$primary-color: #E0C414;  // Main brand color (gold/yellow)
-$primary-color-text: #ffffff;
-$menu-bg: #161616;     // menu background color
-$main-bg: #222222;        // Main content background color
-$card-bg: #222222;        // Card background color
-$overlay-color: rgba(0, 0, 0, 0.6);
-$text-color: #eaeaea;
-$text-secondary-color: #b3b3b3;
+$l-primary-color: #E0C414;  // Main brand color (gold/yellow)
+$l-primary-color-text: #ffffff;
+$l-menu-bg: #161616;     // menu background color
+$l-main-bg: #222222;        // Main content background color
+$l-card-bg: #222222;        // Card background color
+$l-overlay-color: rgba(0, 0, 0, 0.6);
+$l-text-color: #eaeaea;
+$l-text-secondary-color: #b3b3b3;
 
 // Typography
-$font-family: 'Inter', sans-serif;
-$font-size: 1rem;
-$font-weight-normal: 400;
-$font-weight-bold: 600;
+$l-font-family: 'Inter', sans-serif;
+$l-font-size: 1rem;
+$l-font-weight-normal: 400;
+$l-font-weight-bold: 600;
 
 // Spacing and Borders
-$border-radius: 6px;
-$button-border-radius: 4px;
-$input-border-radius: 4px;
-$spacing-unit: 1rem;
+$l-border-radius: 6px;
+$l-button-border-radius: 4px;
+$l-input-border-radius: 4px;
+$l-spacing-unit: 1rem;
 
 // Shadows
-$box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+$l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 
 // Button Specific
-$button-bg: $primary-color;
-$button-text-color: #000000;
-$button-hover-bg: darken($primary-color, 10%);
+$l-button-bg: $l-primary-color;
+$l-button-text-color: #000000;
+$l-button-hover-bg: darken($l-primary-color, 10%);

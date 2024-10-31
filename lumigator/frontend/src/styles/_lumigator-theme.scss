@@ -2,32 +2,32 @@
 
 // PrimeVue Theme Customizations need -p prefix
 .p-button {
-  background-color: $button-bg;
-  color: $button-text-color;
-  border-radius: $button-border-radius;
-  font-family: $font-family;
-  font-weight: $font-weight-bold;
+  background-color: $l-button-bg;
+  color: $l-button-text-color;
+  border-radius: $l-button-border-radius;
+  font-family: $l-font-family;
+  font-weight: $l-font-weight-bold;
 
   &:hover {
-    background-color: $button-hover-bg;
+    background-color: $l-button-hover-bg;
   }
 }
 
 .p-menu {
-  background-color: $menu-bg;
-  color: $text-color;
+  background-color: $l-menu-bg;
+  color: $l-text-color;
 }
 
 .p-card {
-  background-color: $card-bg;
-  color: $text-color;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
+  background-color: $l-card-bg;
+  color: $l-text-color;
+  border-radius: $l-border-radius;
+  box-shadow: $l-box-shadow;
 }
 
 .p-inputtext {
-  background-color: $main-bg;
-  color: $text-color;
-  padding: $spacing-unit / 2;
-  border-radius: $input-border-radius;
+  background-color: $l-main-bg;
+  color: $l-text-color;
+  padding: $l-spacing-unit / 2;
+  border-radius: $l-input-border-radius;
 }

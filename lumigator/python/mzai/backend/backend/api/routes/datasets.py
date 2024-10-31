@@ -34,7 +34,7 @@ def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
                             f"{e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error deleting data for ID: {dataset_id}",
+            detail=f"Unexpected error deleting dataset for ID: {dataset_id}",
         ) from e
 
 

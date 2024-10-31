@@ -1,13 +1,83 @@
 import argparse
 import json
 from pathlib import Path
+import evaluate as ev
 
 import s3fs
 from datasets import load_from_disk
 from loguru import logger
 import click
+import numpy as np
 
-import eval_metrics
+
+class EvaluationMetrics:
+    def __init__(self, metrics):
+        self._supported_metrics = {
+            "rouge": self._rouge,
+            "meteor": self._meteor,
+            "bertscore": self._bertscore,
+        }
+
+        # chosen metrics are the intersection between the provided and the supported ones
+        self._chosen_metrics = set(metrics) & set(self._supported_metrics.keys())
+        # unsupported metrics are the difference between the provided and the supporterd ones
+        self._unsupported_metrics = set(metrics) - set(self._supported_metrics.keys())
+
+        if len(self._chosen_metrics) == 0:
+            logger.info("No valid metrics selected")
+        else:
+            logger.info(f"Chosen metrics: {self._chosen_metrics}")
+
+        if len(self._unsupported_metrics) > 0:
+            logger.info(f"Unsupported metrics: {self._unsupported_metrics}")
+
+    def _rouge(self, pred, ref):
+        ev = evaluate.load("rouge")
+
+        # compute with use_aggregator = False to get individual scores
+        evals = ev.compute(predictions=pred, references=ref, use_aggregator=False)
+
+        # calculate mean for each of the submetrics (rouge1, rouge2, rougeL, rougeLsum)
+        for k in ["rouge1", "rouge2", "rougeL", "rougeLsum"]:
+            evals[f"{k}_mean"] = np.mean(evals[k])
+
+        return evals
+
+    def _meteor(self, pred, ref):
+        ev = evaluate.load("meteor")
+
+        # initialize dictionary with metric name
+        evals = {"meteor": []}
+
+        # run sample-wise evals (as default implementation only returns mean value)
+        for p, r in zip(pred, ref):
+            evals["meteor"].append(ev.compute(predictions=[p], references=[r])["meteor"])
+
+        # calculate mean
+        evals["meteor_mean"] = np.mean(evals["meteor"])
+
+        return evals
+
+    def _bertscore(self, pred, ref):
+        ev = evaluate.load("bertscore")
+
+        # calculate evals (the default is not to aggregate them)
+        evals = ev.compute(predictions=pred, references=ref, lang="en")
+
+        # calculate mean for each of the submetrics (precision, recall, f1)
+        for k in ["precision", "recall", "f1"]:
+            evals[f"{k}_mean"] = np.mean(evals[k])
+
+        return evals
+
+    def run_all(self, pred, ref):
+        results = {}
+
+        for metric in self._chosen_metrics:
+            results[metric] = self._supported_metrics[metric](pred, ref)
+
+        return results
+
 
 
 def save_to_disk(local_path: Path, data_dict: dict):
@@ -48,7 +118,7 @@ def save_outputs(config: dict, inference_results: dict) -> Path:
     except Exception as e:
         logger.error(e)
 def evaluate(predictions: list, ground_truth: list, evaluation_metrics: list):
-    em = eval_metrics.EvaluationMetrics(evaluation_metrics)
+    em = EvaluationMetrics(evaluation_metrics)
     evaluation_results = em.run_all(predictions, ground_truth)
 
     return evaluation_results
@@ -57,7 +127,7 @@ def run_eval(config: dict) -> Path:
     max_samples = config.get("max_samples")
 
     # Load dataset given its URI
-    dataset = load_from_disk(config.dataset)
+    dataset = load_from_disk(config.get("dataset").get("path"))
     if max_samples:
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
         # select data between the minimum and total length of dataset
@@ -69,7 +139,7 @@ def run_eval(config: dict) -> Path:
     ground_truth = dataset["ground_truth"]
 
     evaluation_results = evaluate(
-        predictions, ground_truth, config.evaluation.metrics
+        predictions, ground_truth, config.get("evaluation").get("metrics")
     )
 
     # add input data to results dict

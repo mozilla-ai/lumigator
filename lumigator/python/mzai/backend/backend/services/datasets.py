@@ -18,7 +18,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.settings import settings
 
 GT_FIELD: str = "ground_truth"
-REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
+REQUIRED_EXPERIMENT_FIELDS: set[str] = {"predictions"}
 
 
 def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) -> int:

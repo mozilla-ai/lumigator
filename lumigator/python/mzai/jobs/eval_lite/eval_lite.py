@@ -6,7 +6,7 @@ import numpy as np
 import s3fs
 from datasets import load_from_disk
 from loguru import logger
-
+import evaluate
 
 class EvaluationMetrics:
     def __init__(self, metrics):
@@ -115,7 +115,7 @@ def save_outputs(config: dict, inference_results: dict) -> Path:
 
     except Exception as e:
         logger.error(e)
-def evaluate(predictions: list, ground_truth: list, evaluation_metrics: list):
+def run_eval_metrics(predictions: list, ground_truth: list, evaluation_metrics: list):
     em = EvaluationMetrics(evaluation_metrics)
     evaluation_results = em.run_all(predictions, ground_truth)
 
@@ -136,7 +136,7 @@ def run_eval(config: dict) -> Path:
     predictions = dataset["predictions"]
     ground_truth = dataset["ground_truth"]
 
-    evaluation_results = evaluate(
+    evaluation_results = run_eval_metrics(
         predictions, ground_truth, config.get("evaluation").get("metrics")
     )
 

@@ -17,5 +17,5 @@ jobs:
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:
-            # regex to exclude mailing addresses and localhost
+            # Args here https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
             args: --base . --verbose --no-progress './**/*.md' --exclude 'mailto:|localhost'

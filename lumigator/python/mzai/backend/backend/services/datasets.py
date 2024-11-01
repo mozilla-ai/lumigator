@@ -156,7 +156,7 @@ class DatasetService:
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
         record = self._get_dataset_record(dataset_id)
         if record is None:
-            return
+            return None
 
         return DatasetResponse.model_validate(record)
 

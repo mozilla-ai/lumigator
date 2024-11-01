@@ -1,4 +1,4 @@
-name: Check for Broken Links
+name: Check for Broken Links in Markdown
 
 on:
     workflow_dispatch:
@@ -18,4 +18,4 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
             # regex to exclude mailing addresses and localhost
-            args: --exclude 'mailto:|localhost'
+            args: --base . --verbose --no-progress './**/*.md' --exclude 'mailto:|localhost'

@@ -155,5 +155,5 @@ def eval_command(config: str) -> None:
     run_eval(config_dict)
 
 if __name__ == "__main__":
-    logger.info("starting..")
+    logger.info("Starting evaluation job..")
     eval_command()

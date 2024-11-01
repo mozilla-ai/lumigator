@@ -23,11 +23,10 @@ def upload_dataset(
 @router.get("/{dataset_id}")
 def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse:
     dataset = service.get_dataset(dataset_id)
-
     if not dataset:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset not found: {dataset_id}",
+            detail=f"Dataset '{dataset_id}' not found.",
         )
 
     return dataset

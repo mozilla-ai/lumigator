@@ -167,10 +167,13 @@ class DatasetService:
         return dataset_path
 
     def delete_dataset(self, dataset_id: UUID) -> None:
-        """When the dataset exists, attempts to delete it from an S3 bucket and the repository (DB).
+        """When the dataset exists, attempts to delete it from both an S3 bucket and the DB.
 
-        Raises exceptions it encounters dealing with S3, except when the file is not found in S3.
-        In this case it deletes the orphaned record from the DB.
+        Raises exceptions it encounters dealing with S3, except when the file is not found in S3
+        (in this case it deletes the orphaned record from the DB).
+
+        This operation is idempotent, calling it with a record that never existed, or that has
+        already been deleted, will not raise an error.
         """
         record = self._get_dataset_record(dataset_id)
         # Early return if the record does not exist (for idempotency).

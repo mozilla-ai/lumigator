@@ -185,9 +185,9 @@ class JobService:
             "model_url": model_url,
         }
 
-        # load a config template from config_templates
+        # load a config template and fill it up with config_params
         if request.config_eval_template is not None:
-            config_template  = config_templates.config_eval_template[request.model]
+            config_template = request.config_eval_template
         elif request.model in config_templates.config_eval_template:
             # if no config template is provided, get the default one for the model
             config_template = config_templates.config_eval_template[request.model]
@@ -195,8 +195,6 @@ class JobService:
             # if no default config template is provided, get the causal template
             config_template = config_templates.causal_eval_template
 
-        loguru.logger.info(config_params)
-        loguru.logger.info(request.config_eval_template)
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
@@ -204,8 +202,6 @@ class JobService:
         eval_config_args = {
             "--config": config_template.format(**config_params),
         }
-
-        loguru.logger.info(eval_config_args)
 
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
@@ -220,7 +216,12 @@ class JobService:
         # build runtime ENV for workers
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
         settings.inherit_ray_env(runtime_env_vars)
-        worker_gpus = settings.RAY_WORKER_GPUS
+
+        # set num_gpus per worker (zero if we are just hitting a service)
+        if not request.model.startswith("hf://"):
+            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
+        else:
+            worker_gpus = settings.RAY_WORKER_GPUS
 
         runtime_env = {
             "pip": settings.EVALUATOR_PIP_REQS,

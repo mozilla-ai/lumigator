@@ -19,7 +19,7 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
     assert response.status_code == 200
 
     create_response = local_client.post(
-        "datasets/",
+        "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )

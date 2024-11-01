@@ -16,3 +16,6 @@ jobs:
       - name: Link Checker
         id: lychee
         uses: lycheeverse/lychee-action@v2
+        with:
+            # regex to exclude mailing addresses and localhost
+            args: --exclude 'mailto:|localhost'

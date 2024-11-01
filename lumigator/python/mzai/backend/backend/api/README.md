@@ -18,18 +18,18 @@ The components inside Backend, shown in the image below, are the different abstr
 
 * The **API** makes backend functionalities available to the UI (or whatever front-end you want to develop) through
   different **routes** (code
-  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/routes)).
+  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)).
   [**Schemas**](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/schemas) are used in the API
   which allows one to exactly know which kind of data has to be passed to it (similarly, using the same schemas will be
   a requirement for our SDK).
 
 * **Services** implement the actual functionalities and are called by the different methods exposed in the API (code
-  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/services)).
+  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/services)).
 
 * **Repositories** implement the [repository pattern](https://www.cosmicpython.com/book/chapter_02_repository.html) as
   an abstraction over the DB (code
-  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/repositories)). They make use
-  of [record classes](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/records) to refer
+  [here](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/repositories)). They make use
+  of [record classes](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/records) to refer
   to actual records on the DB.
 
 <p style="text-align: center;">
@@ -46,7 +46,7 @@ of the repo `/lumigator/python/mzai/backend/api/routes/`.
 ## Understanding Lumigator endpoints
 
 All the endpoints you can access in Lumigator's API are defined in
-[`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/routes)
+[`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)
 and explicitly listed in
 [`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/router.py),
 together with a metadata tag (defined
@@ -178,12 +178,12 @@ standard code structure:
 
 |                        |                                                                                                                                                                                                                                           |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`backend/api/routes`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/routes)   | The actual API endpoints one can hit (remember they need to be explicitly added to the [router.py](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/router.py) file before you can actually see them!) |
-| [`backend/services`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/services)     | The code that implements core functionalities for each route                                                                                                                                                                              |
-| [`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/deps.py)  | Used to inject dependencies for services                                                                                                                                                                                                  |
+| [`backend/api/routes`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)   | The actual API endpoints one can hit (remember they need to be explicitly added to the [router.py](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/router.py) file before you can actually see them!) |
+| [`backend/services`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/services)     | The code that implements core functionalities for each route                                                                                                                                                                              |
+| [`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/deps.py)  | Used to inject dependencies for services                                                                                                                                                                                                  |
 | [`schemas`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/schemas)              | The schemas used by each route / service                                                                                                                                                                                                  |
-| [`backend/repositories`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/repositories) | Repositories used by each service                                                                                                                                                                                                         |
-| [`backend/records`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/records)      | Records used by each service                                                                                                                                                                                                              |
+| [`backend/repositories`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/repositories) | Repositories used by each service                                                                                                                                                                                                         |
+| [`backend/records`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/records)      | Records used by each service                                                                                                                                                                                                              |
 
 The general rule is that for most endpoints you'll end up with an identical filename for each of the above directories
 (see e.g. `datasets`, `experiments`, etc).
@@ -233,7 +233,7 @@ Being this the code for a new route, you will save it in `backend/api/routes/tas
 
 #### 1.2. Add the route to `router.py`with the appropriate tags
 
-The following step is adding the new route to [`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/router.py). The code below shows the updated file with
+The following step is adding the new route to [`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/router.py). The code below shows the updated file with
 comments next to the two lines marked below as **NEW**:
 
 ```
@@ -258,7 +258,7 @@ api_router.include_router(completions.router, prefix="/completions", tags=[Tags.
 api_router.include_router(tasks.router, prefix="/tasks", tags=[Tags.TASKS]) ### NEW
 ```
 
-Also note that we are specifying some `Tags.TASKS` which have not been defined yet! Open [`backend/api/tags.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/api/tags.py) and add
+Also note that we are specifying some `Tags.TASKS` which have not been defined yet! Open [`backend/api/tags.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/tags.py) and add
 the sections marked below as **NEW**:
 
 ```

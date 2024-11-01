@@ -27,6 +27,6 @@ def command(self) -> str:
         )
 
 ```
-and are populated from [these config templates.](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/config_templates.py)
-Via [submission run here](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/jobs/submission.py). 
+and are populated from [these config templates.](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/config_templates.py)
+Via [submission run here](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/ray_submit/submission.py). 
 

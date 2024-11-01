@@ -48,9 +48,9 @@ of the repo `/lumigator/python/mzai/backend/api/routes/`.
 All the endpoints you can access in Lumigator's API are defined in
 [`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)
 and explicitly listed in
-[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/router.py),
+[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/router.py),
 together with a metadata tag (defined
-[here](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/tags.py)) which is used to
+[here](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/tags.py)) which is used to
 provide a short description of the route:
 
 <p style="text-align: center;">
@@ -70,7 +70,7 @@ Description appearing in the API docs
 
 ### The simplest endpoint: /health
 
-The [`/health`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/routes/health.py) route provides
+The [`/health`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/routes/health.py) route provides
 perhaps the simplest example as it allows you to get the current backend status which is a constant:
 
 ```
@@ -88,7 +88,7 @@ with the same name of the route, service, etc.
 
 Being this simple, all the code for `get_health()` directly appears in the route file. A `HealthResponse`, composed of a
 deployment type which is loaded from 
-[`backend/settings.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/settings.py) and the status (currently always ok), is returned. Nothing is ran, nothing is saved on DB or on storage.
+[`backend/settings.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/settings.py) and the status (currently always ok), is returned. Nothing is ran, nothing is saved on DB or on storage.
 
 ### One step further: /datasets
 
@@ -102,7 +102,7 @@ def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse
 ```
 
 * the core functionalities are provided by a *service* (in this case a `DatasetService`) defined in
-  [`backend/services/datasets.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/services/datasets.py)
+  [`backend/services/datasets.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/services/datasets.py)
 
 * instead of directly passing a `DatasetService` to the `get_dataset` method, DatasetServiceDep is defined to perform a
   *dependency injection* (see [FastAPI's dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/))
@@ -115,7 +115,7 @@ So, let us suppose you have already uploaded a dataset on Lumigator. What happen
 `/datasets` endpoint by passing a dataset id?
 
 First thing, `DatasetServiceDep` will make sure that all the dependencies to run your `DatasetService` are met. If you
-look at [`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/deps.py) you will see that
+look at [`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/deps.py) you will see that
 a `DatasetServiceDep` is nothing more than a `DatasetService` that depends on a `DBSessionDep` and and `S3ClientDep`:
 
 ```
@@ -130,7 +130,7 @@ def get_dataset_service(session: DBSessionDep, s3_client: S3ClientDep) -> Datase
 an S3 client.  
 I'll leave you to transitively following deps. For now, it is interesting to note that while the S3 dep is a "simple"
 one (i.e. it just instantiates a boto3 client in place), the DB one is a bit more advanced (i.e. it relies on a
-[`DatabaseSessionManager`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/db.py) to return a session).
+[`DatabaseSessionManager`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/db.py) to return a session).
 
 Secondly, `DatasetService` provides a `get_dataset` method which gets the actual data from the DB and returns a
 `DatasetResponse` after validating it:
@@ -150,10 +150,10 @@ def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
 
 The way data is selected from the DB is through a *repository* , in this case from the `DatasetRepository` class. All
 repositories are defined in `backend/repositories` and inherit from 
-[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/repositories/base.py) which is
+[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/repositories/base.py) which is
 a general class providing the low-level code to count, create, update, get, delete, and list items. In particular, the
 `DatasetRepository` is a `BaseRepository` working with items of type
-[`DatasetRecord`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/records/datasets.py).
+[`DatasetRecord`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/records/datasets.py).
 
 Fields in records are defined as a mix of explicit type definitions and declarative mappings (see the picture below to
 see how the fields in the datasets table are defined).
@@ -178,7 +178,7 @@ standard code structure:
 
 |                        |                                                                                                                                                                                                                                           |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`backend/api/routes`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)   | The actual API endpoints one can hit (remember they need to be explicitly added to the [router.py](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/router.py) file before you can actually see them!) |
+| [`backend/api/routes`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/routes)   | The actual API endpoints one can hit (remember they need to be explicitly added to the [router.py](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/router.py) file before you can actually see them!) |
 | [`backend/services`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/services)     | The code that implements core functionalities for each route                                                                                                                                                                              |
 | [`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/api/deps.py)  | Used to inject dependencies for services                                                                                                                                                                                                  |
 | [`schemas`](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/schemas)              | The schemas used by each route / service                                                                                                                                                                                                  |
@@ -372,7 +372,7 @@ class TaskRepository(BaseRepository[TaskRecord]):
 ```
 
 This does not usually change much as long as you are fine with the base methods provided by the
-[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/repositories/base.py) class.
+[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/repositories/base.py) class.
 
 The `TaskRepository` is a repository that allows to run the set of methods defined in the `BaseRepository` on the table
 defined by `TaskRecord`. You can define a `TaskRecord` in `backend/records/tasks.py` as follows:
@@ -390,7 +390,7 @@ class TaskRecord(BaseRecord, NameDescriptionMixin, CreatedAtMixin):
 ```
 
 Similarly to what you saw before for `DatasetRecord`, `TaskRecord` inherits from
-[`BaseRecord`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/records/base.py) the property
+[`BaseRecord`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/records/base.py) the property
 of having an `id` primary key. In addition to that, it inherits `name` and `description` from `NameDescriptionMixin` and
 `created_at` from `CreatedAtMixin`. The only field that we need to specify manually is `models`, a non-null column
 holding a list of strings.
@@ -485,7 +485,7 @@ but we'll discuss that in another tutorial.
 
 As `TaskService` depends on the existence of a database, we should inject a dependency on a DB session. To do this, add
 the following code to 
-[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/api/deps.py):
+[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/python/mzai/backend/backend/api/deps.py):
 
 ```
 def get_task_service(session: DBSessionDep) -> TaskService:

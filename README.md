@@ -30,7 +30,7 @@ See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthro
   + [Lumigator API](/lumigator/README.md)
   + Offline Evaluations with [lm-buddy](https://github.com/mozilla-ai/lm-buddy)
 + **Extending Lumigator:**
-  + [Creating a new Lumigator endpoint](lumigator/python/mzai/backend/api/README.md)
+  + [Creating a new Lumigator endpoint](lumigator/python/mzai/backend/backend/api/README.md)
 
 
 # Available Machine Learning Tasks

@@ -20,7 +20,7 @@ def create_inference_job(
     service: JobServiceDep,
     request: JobInferenceCreate,
 ) -> JobResponse:
-    return service.create_inference_job(request)
+    return service.create_job(request)
 
 
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
@@ -28,7 +28,7 @@ def create_evaluation_job(
     service: JobServiceDep,
     request: JobEvalCreate,
 ) -> JobResponse:
-    return service.create_evaluation_job(request)
+    return service.create_job(request)
 
 
 @router.get("/{job_id}")

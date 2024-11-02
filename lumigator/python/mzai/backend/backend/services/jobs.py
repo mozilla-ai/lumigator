@@ -3,6 +3,7 @@ from uuid import UUID
 
 import loguru
 from fastapi import HTTPException, status
+from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from schemas.extras import ListingResponse
 from schemas.jobs import (
@@ -25,6 +26,27 @@ from backend.settings import settings
 
 
 class JobService:
+    # set storage path
+    storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
+
+    # TODO: we can set a different amount of GPUs per type of job
+    job_settings = {
+        JobType.INFERENCE: {
+            "command": settings.INFERENCE_COMMAND,
+            "pip": settings.INFERENCE_PIP_REQS,
+            "work_dir": settings.INFERENCE_WORK_DIR,
+            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
+            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
+        },
+        JobType.EVALUATION: {
+            "command": settings.EVALUATOR_COMMAND,
+            "pip": settings.EVALUATOR_PIP_REQS,
+            "work_dir": settings.EVALUATOR_WORK_DIR,
+            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
+            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
+        },
+    }
+
     def __init__(
         self,
         job_repo: JobRepository,
@@ -70,18 +92,25 @@ class JobService:
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
-    def create_inference_job(self, request: JobInferenceCreate) -> JobResponse:
-        """Creates a new workload to perform batch inference"""
-        # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+    def _get_config_template(self, job_type: str, model_name: str) -> str:
+        job_templates = config_templates.templates[job_type]
 
+        if model_name in job_templates:
+            # if no config template is provided, get the default one for the model
+            config_template = job_templates[model_name]
+        else:
+            # if no default config template is provided, get the causal template
+            # (which works with seq2seq models too except it does not use pipeline)
+            config_template = job_templates["default"]
+
+        return config_template
+
+    def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
-        # set storage path
-        storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
-
-        # fill up model url with default openai url
+        # TODO: the following is currently both eval and inference, but
+        #       will soon be inference only. Make sure we'll move this out
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
         elif request.model.startswith("mistral://"):
@@ -93,119 +122,60 @@ class JobService:
         if request.system_prompt is None and not request.model.startswith("hf://"):
             request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-        config_params = {
-            "job_name": request.name,
-            "job_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "output_field": request.output_field,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-            "max_tokens": request.max_tokens,
-            "frequency_penalty": request.frequency_penalty,
-            "temperature": request.temperature,
-            "top_p": request.top_p,
-        }
-
-        # load a config template and fill it up with config_params
-        if request.config_template is not None:
-            config_template = request.config_template
-        elif request.model in config_templates.config_infer_template:
-            # if no config template is provided, get the default one for the model
-            config_template = config_templates.config_infer_template[request.model]
+        # this section differs between inference and eval
+        if job_type == JobType.EVALUATION:
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_path": request.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
+                "model_url": model_url,
+                "system_prompt": request.system_prompt,
+            }
         else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = config_templates.causal_infer_template
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_path": request.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
+                "model_url": model_url,
+                "system_prompt": request.system_prompt,
+                "output_field": request.output_field,
+                "max_tokens": request.max_tokens,
+                "frequency_penalty": request.frequency_penalty,
+                "temperature": request.temperature,
+                "top_p": request.top_p,
+            }
 
-        infer_config_args = {
-            "--config": config_template.format(**config_params),
-        }
+        return job_params
 
-        # Prepare the job configuration that will be sent to submit the ray job.
-        # This includes both the command that is going to be executed and its
-        # arguments defined in infer_config_args
-        ray_config = JobConfig(
-            job_id=record.id,
-            job_type=JobType.INFERENCE,
-            command=settings.INFERENCE_COMMAND,
-            args=infer_config_args,
-        )
-
-        # build runtime ENV for workers
-        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        settings.inherit_ray_env(runtime_env_vars)
-
-        # set num_gpus per worker (zero if we are just hitting a service)
-        if not request.model.startswith("hf://"):
-            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
+    def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
+        """Creates a new evaluation workload to run on Ray and returns the response status."""
+        # TODO: we might want to explicitly provide a job string definition as a request
+        # parameter, so we can reuse the same config profiles across different job types
+        if isinstance(request, JobEvalCreate):
+            job_type = JobType.EVALUATION
+        elif isinstance(request, JobInferenceCreate):
+            job_type = JobType.INFERENCE
         else:
-            worker_gpus = settings.RAY_WORKER_GPUS
+            raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
 
-        runtime_env = {
-            "pip": settings.INFERENCE_PIP_REQS,
-            "working_dir": settings.INFERENCE_WORK_DIR,
-            "env_vars": runtime_env_vars,
-        }
-
-        loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
-
-        entrypoint = RayJobEntrypoint(
-            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
-        )
-        loguru.logger.info("Submitting Ray job...")
-        submit_ray_job(self.ray_client, entrypoint)
-
-        loguru.logger.info("Getting response...")
-        return JobResponse.model_validate(record)
-
-    def create_evaluation_job(self, request: JobEvalCreate) -> JobResponse:
-        """Creates a new evaluation workload to run on Ray and returns the response status"""
         # Create a db record for the job
         record = self.job_repo.create(name=request.name, description=request.description)
 
-        # get dataset S3 path from UUID
-        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
-
-        # set storage path
-        storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
-
-        # fill up model url with default openai url
-        if request.model.startswith("oai://"):
-            model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
-            model_url = settings.MISTRAL_API_URL
-        else:
-            model_url = request.model_url
-
-        # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
-            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
-
-        config_params = {
-            "job_name": request.name,
-            "job_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-        }
+        # prepare configuration parameters, which depend both on the user inputs
+        # (request) and on the job type
+        config_params = self._get_job_params(job_type, record, request)
 
         # load a config template and fill it up with config_params
         if request.config_template is not None:
             config_template = request.config_template
-        elif request.model in config_templates.config_eval_template:
-            # if no config template is provided, get the default one for the model
-            config_template = config_templates.config_eval_template[request.model]
         else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = config_templates.causal_eval_template
+            config_template = self._get_config_template(job_type, request.model)
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
@@ -218,10 +188,12 @@ class JobService:
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
+        job_settings = self.job_settings[job_type]
+
         ray_config = JobConfig(
             job_id=record.id,
-            job_type=JobType.EVALUATION,
-            command=settings.EVALUATOR_COMMAND,
+            job_type=job_type,
+            command=job_settings["command"],
             args=eval_config_args,
         )
 
@@ -231,13 +203,13 @@ class JobService:
 
         # set num_gpus per worker (zero if we are just hitting a service)
         if not request.model.startswith("hf://"):
-            worker_gpus = settings.RAY_WORKER_GPUS_FRACTION
+            worker_gpus = job_settings["ray_worker_gpus_fraction"]
         else:
-            worker_gpus = settings.RAY_WORKER_GPUS
+            worker_gpus = job_settings["ray_worker_gpus"]
 
         runtime_env = {
-            "pip": settings.EVALUATOR_PIP_REQS,
-            "working_dir": settings.EVALUATOR_WORK_DIR,
+            "pip": job_settings["pip"],
+            "working_dir": job_settings["work_dir"],
             "env_vars": runtime_env_vars,
         }
 

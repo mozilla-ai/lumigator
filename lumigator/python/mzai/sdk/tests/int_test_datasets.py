@@ -2,11 +2,11 @@ import asyncio
 from pathlib import Path
 from time import sleep
 
+import requests
 from loguru import logger
 from schemas.datasets import DatasetFormat
-from schemas.jobs import JobCreate, JobType
+from schemas.jobs import JobEvalCreate, JobType
 
-import requests
 
 def test_sdk_healthcheck_ok(lumi_client):
     healthy = False
@@ -41,7 +41,7 @@ def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
 
 
 def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
-    logger.info('Starting jobs lifecycle')
+    logger.info("Starting jobs lifecycle")
     with Path.open(dialog_data) as file:
         datasets = lumi_client.datasets.get_datasets()
         if datasets.total > 0:
@@ -57,11 +57,30 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
 
         jobs = lumi_client.jobs.get_jobs()
         assert jobs is not None
+
+        eval_template = """{{
+            "name": "{job_name}/{job_id}",
+            "model": {{ "path": "{model_path}" }},
+            "dataset": {{ "path": "{dataset_path}" }},
+            "evaluation": {{
+                "metrics": ["meteor", "rouge"],
+                "use_pipeline": false,
+                "max_samples": {max_samples},
+                "return_input_data": true,
+                "return_predictions": true,
+                "storage_path": "{storage_path}"
+            }}
+        }}"""
+
         logger.info(lumi_client.datasets.get_dataset(dataset.id))
-        # job_create = JobCreate(name="test-job-int-001", model="hf://distilbert/distilbert-base-uncased", dataset=dataset.id)
-        job_create = JobCreate(name="test-job-int-001", model="hf://distilgpt2", dataset=dataset.id)
+        job_create = JobEvalCreate(
+            name="test-job-int-001",
+            model="hf://distilgpt2",
+            dataset=dataset.id,
+            config_template=eval_template,
+        )
         job_create.description = "This is a test job"
-        job_create.max_samples = 0
+        job_create.max_samples = 2
         job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, job_create)
         assert job_ret is not None
         jobs = lumi_client.jobs.get_jobs()
@@ -72,6 +91,6 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
         logger.info(job_status)
 
         download_info = lumi_client.jobs.get_job_download(job_ret.id)
-        logger.info(f'getting result from {download_info.download_url}')
+        logger.info(f"getting result from {download_info.download_url}")
         results = requests.get(download_info.download_url, allow_redirects=True)
-        logger.info(f'first 30 chars: {results.content[:30]}...')
+        logger.info(f"first 30 chars: {results.content[:30]}...")

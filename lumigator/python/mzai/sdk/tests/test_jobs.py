@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pytest import raises
 from requests.exceptions import HTTPError
-from schemas.jobs import JobCreate, JobType
+from schemas.jobs import JobEvalCreate, JobType
 
 from tests.helpers import load_json
 
@@ -17,8 +17,10 @@ def test_create_job_ok_all(
     mock_requests_response.json = lambda: data
 
     job_json = load_json(json_data_job_all)
-    print(JobCreate.model_validate(job_json))
-    job_ret = lumi_client.jobs.create_job(JobType.EVALUATION, JobCreate.model_validate(job_json))
+    print(JobEvalCreate.model_validate(job_json))
+    job_ret = lumi_client.jobs.create_job(
+        JobType.EVALUATION, JobEvalCreate.model_validate(job_json)
+    )
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
@@ -37,8 +39,8 @@ def test_create_job_ok_minimal(
     mock_requests_response.json = lambda: data
 
     job_json = load_json(json_data_job_minimal)
-    print(JobCreate.model_validate(job_json))
-    job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobCreate.model_validate(job_json))
+    print(JobEvalCreate.model_validate(job_json))
+    job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"

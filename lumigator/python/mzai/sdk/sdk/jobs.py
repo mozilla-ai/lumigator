@@ -7,10 +7,9 @@ import asyncio
 from http import HTTPMethod
 from uuid import UUID
 
-import requests
 from schemas.extras import ListingResponse
 from schemas.jobs import (
-    JobCreate,
+    JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -66,7 +65,7 @@ class Jobs:
         """
         for _ in range(1, retries):
             # http://localhost:8265/api/jobs/f311fa44-025a-4703-b8ba-7e0b1001b484
-            response = self.client.get_ray_job_response(f'{id}')
+            response = self.client.get_ray_job_response(f"{id}")
             # response = requests.get(f"http://localhost:8265/api/jobs/{id}")
             jobinfo = response.json()
             if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
@@ -80,15 +79,15 @@ class Jobs:
                 return jobinfo
         raise Exception(
             f"Job {id} did not complete in the polling "
-             "time (retries: {retries}, poll_wait: {poll_wait})"
+            "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
-    def create_job(self, type: JobType, request: JobCreate) -> JobResponse:
+    def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:
         """Creates a new job.
 
         Args:
             type(JobType): the kind of job to create.
-            request(JobCreate): the specific details about the job that needs to be created.
+            request(JobEvalCreate): the specific details about the job that needs to be created.
 
         Returns:
             JobResponse: the information for the newly created job.

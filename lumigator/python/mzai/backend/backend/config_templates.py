@@ -124,6 +124,7 @@ templates = {
         "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
     },
     JobType.EVALUATION: {
+        "default": causal_eval_template,
         "hf://facebook/bart-large-cnn": bart_eval_template,
         "hf://mikeadimech/longformer-qmsum-meeting-summarization": seq2seq_eval_template,
         "hf://mrm8488/t5-base-finetuned-summarize-news": seq2seq_eval_template,

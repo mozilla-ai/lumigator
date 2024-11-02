@@ -177,11 +177,15 @@ class DatasetService:
             dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
             self.s3_filesystem.rm(dataset_path, recursive=True)
 
-            # Delete DB record
-            self.dataset_repo.delete(record.id)
+        except FileNotFoundError:
+            logger.info("Dataset ID was present in the DB but not on S3. Removing from DB...")
 
         except Exception as e:
+            logger.error(e)
             self._raise_unhandled_exception(e)
+
+        # Delete DB record
+        self.dataset_repo.delete(record.id)
 
     def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
         """Generate presigned download URLs for dataset files."""

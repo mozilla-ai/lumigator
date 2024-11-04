@@ -17,9 +17,9 @@ export default defineConfig({
     }
 	},
 	server: {
-    host: 'localhost', // Specify the host
-    port: 3000,        // Specify the port
-		strictPort: true,  // Fail if the port is already in use
+    host: 'localhost',
+    port: 3000,
+		strictPort: true,
 		proxy: {
       '/api/v1': {
         target: 'http://localhost:3000', // Your backend's base URL

@@ -116,10 +116,5 @@ You can add other environment-specific variables as needed.
 
 Contributions are welcome! Please follow our [Contributions page](https://github.com/mozilla-ai/lumigator/blob/main/CONTRIBUTING.md)
 
-### License
-
-This project is licensed under the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
-
-```
 
 ```

@@ -74,7 +74,6 @@ const uploadFile = async () => {
   gap: 25px;
 }
 
-/* Add your styles here */
 /* Hide the actual file input element */
 #file-input {
   display: none;

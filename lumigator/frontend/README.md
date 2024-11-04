@@ -1,6 +1,6 @@
 # Lumigator Frontend
 
-This directory contains the **frontend** code for the **Lumigator** project, built with **Vue 3**, and **Vite**. It is a modular and scalable front-end application designed to interact with the backend API provided by the Lumigator backend.
+This directory contains the **frontend** code for **Lumigator***, built with **Vue 3**, and **Vite**. It calls the FastAPI endpoints provided in `backend`.
 
 ## Tech Stack
 
@@ -54,7 +54,7 @@ To run the frontend locally for development purposes, use the following command 
 npm run dev
 ```
 
-### Visit `http://localhost:3000` in your browser. The application runs at this addrees by default.
+ Visit `http://localhost:3000` in your browser. The application runs at this addrees by default.
 
 ### Build for Production
 
@@ -114,13 +114,7 @@ You can add other environment-specific variables as needed.
 
 ### Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new feature branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m 'Add feature'`.
-4. Push to the branch: `git push origin feature-name`.
-5. Create a pull request.
+Contributions are welcome! Please follow our [Contributions page](https://github.com/mozilla-ai/lumigator/blob/main/CONTRIBUTING.md)
 
 ### License
 

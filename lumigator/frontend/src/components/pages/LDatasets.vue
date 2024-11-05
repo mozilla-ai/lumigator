@@ -28,6 +28,7 @@ const onRemoveDataset = (id) => {
 <template>
   <div class="l-datasets">
     <div class="l-datasets__list-container">
+		<p>hello</p>
       <ul class="l-datasets__list">
         <li v-for="dataset in props.datasets" :key="dataset.id">
           <div class="l-datasets__list-card" @click="onDatasetSelect(dataset.id)">

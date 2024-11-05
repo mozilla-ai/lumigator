@@ -19,7 +19,7 @@ def format_dataset(data: list[list[str]]) -> str:
 @pytest.fixture
 def valid_dataset() -> str:
     data = [
-        ["predictions", "ground_truth"],
+        ["samples", "ground_truth"],
         ["Hello World", "Hello"],
     ]
     return format_dataset(data)
@@ -28,7 +28,7 @@ def valid_dataset() -> str:
 @pytest.fixture
 def valid_dataset_without_gt() -> str:
     data = [
-        ["predictions"],
+        ["samples"],
         ["Hello World"],
     ]
     return format_dataset(data)
@@ -46,7 +46,7 @@ def missing_examples_dataset() -> str:
 @pytest.fixture
 def extra_column_dataset() -> str:
     data = [
-        ["predictions", "ground_truth", "extra"],
+        ["samples", "ground_truth", "predictions"],
         ["Hello World", "Hello", "Nope"],
     ]
     return format_dataset(data)

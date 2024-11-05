@@ -7,6 +7,7 @@ import s3fs
 from datasets import load_from_disk
 from loguru import logger
 import evaluate
+from eval_lite_config import EvalJobConfig
 
 class EvaluationMetrics:
     def __init__(self, metrics):
@@ -119,28 +120,28 @@ def run_eval_metrics(predictions: list, ground_truth: list, evaluation_metrics: 
     evaluation_results = em.run_all(predictions, ground_truth)
 
     return evaluation_results
-def run_eval(config: dict) -> Path:
+def run_eval(config: EvalJobConfig) -> Path:
 
-    max_samples = config.get("max_samples")
+    max_samples = config.evaluation.max_samples
 
     # Load dataset given its URI
-    dataset = load_from_disk(config.get("dataset").get("path"))
+    dataset = load_from_disk(config.dataset.path)
     if max_samples:
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
         # select data between the minimum and total length of dataset
         num_samples = range(min(max_samples, len(dataset)))
         dataset = dataset.select(num_samples)
 
-    # run evaluation and append to dict
+    # run evaluation and append to results dict
     predictions = dataset["predictions"]
     ground_truth = dataset["ground_truth"]
 
     evaluation_results = run_eval_metrics(
-        predictions, ground_truth, config.get("evaluation").get("metrics")
+        predictions, ground_truth, config.evaluation.metrics
     )
 
     # add input data to results dict
-    if config.get("evaluation").get("return_input_data"):
+    if config.evaluation.return_input_data:
         evaluation_results["predictions"] = dataset["predictions"]
         evaluation_results["ground_truth"] = dataset["ground_truth"]
 

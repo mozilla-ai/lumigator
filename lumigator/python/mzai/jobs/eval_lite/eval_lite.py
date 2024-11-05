@@ -6,7 +6,6 @@ import numpy as np
 import s3fs
 from datasets import load_from_disk
 from loguru import logger
-import evaluate
 from eval_lite_config import EvalJobConfig
 from from eval_metrics import EvaluationMetrics
 

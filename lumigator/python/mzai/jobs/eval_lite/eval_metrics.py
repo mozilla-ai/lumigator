@@ -1,3 +1,6 @@
+import numpy as np
+from loguru import logger
+
 class EvaluationMetrics:
     def __init__(self, metrics):
         self._supported_metrics = {

@@ -95,7 +95,7 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2. `make start-lumigator`
-3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the[`docker-compose`](docker-compose) )
+3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the [`docker-compose`](docker-compose.yaml) )
 
 ## Running Lumigator with an external services (Ray, S3)
 To run Lumigator with an external services you, fill in the required values in the `docker-compose.external.yaml` file. Once that's done, you can start Lumigator with:
@@ -136,7 +136,6 @@ uv add package
 Make sure to commit the updated uv.lock file
 
 **Run Test Suite Across all projects**
-
 ```
 make test
 ```

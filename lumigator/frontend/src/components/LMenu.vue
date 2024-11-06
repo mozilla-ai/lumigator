@@ -11,7 +11,9 @@
 					:disabled="item.disabled"
 				>
           <span :class="item.icon" />
-          <span ripple>{{ item.name }} </span>
+          <span ripple
+						class="l-main-menu__link-label"
+					 >{{ item.name }} </span>
         </router-link>
       </template>
     </Menu>
@@ -64,6 +66,10 @@ import { routes } from '@/router'
       background-color: $l-menu-bg;
 			text-shadow: 0px 0px 2px $white;
     }
+
+		&-label {
+			font-size: $l-menu-font-size
+		}
   }
 }
 

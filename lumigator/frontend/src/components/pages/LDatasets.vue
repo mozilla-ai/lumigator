@@ -1,3 +1,21 @@
+<template>
+	<div class="l-datasets">
+		<div class="l-datasets__list-container">
+			<p>hello</p>
+			<ul class="l-datasets__list">
+				<li v-for="dataset in props.datasets" :key="dataset.id">
+					<div class="l-datasets__list-card" @click="onDatasetSelect(dataset.id)">
+						<span> {{ formatDate(dataset.created_at) }}</span>
+						<span>File name: {{ dataset.filename }}</span>
+						<span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
+						<span>Size: {{ dataset.size }} kb</span>
+					</div>
+					<span class="l-datasets__list-remove" @click="onRemoveDataset(dataset.id)">🗑️</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</template>
 <script setup>
 const props = defineProps({
   datasets: Array,
@@ -24,25 +42,6 @@ const onRemoveDataset = (id) => {
   emit('dataset-remove', id);
 };
 </script>
-
-<template>
-  <div class="l-datasets">
-    <div class="l-datasets__list-container">
-		<p>hello</p>
-      <ul class="l-datasets__list">
-        <li v-for="dataset in props.datasets" :key="dataset.id">
-          <div class="l-datasets__list-card" @click="onDatasetSelect(dataset.id)">
-            <span> {{ formatDate(dataset.created_at) }}</span>
-            <span>File name: {{ dataset.filename }}</span>
-            <span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
-            <span>Size: {{ dataset.size }} kb</span>
-          </div>
-          <span class="l-datasets__list-remove" @click="onRemoveDataset(dataset.id)">🗑️</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
 
 <style scoped lang="scss">
 .l-datasets {

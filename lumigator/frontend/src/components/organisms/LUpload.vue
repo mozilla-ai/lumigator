@@ -8,7 +8,7 @@ const selectedFile = ref();
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    fileName.value = file.name; // Update the fileName
+    fileName.value = file.name;
     selectedFile.value = file;
   } else {
     fileName.value = '';

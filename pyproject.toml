@@ -6,3 +6,8 @@ requires-python = ">=3.11"
 dependencies = [
     "pre-commit>=4.0.1",
 ]
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=8.1.3",
+]

@@ -14,7 +14,7 @@
 	</div>
 </template>
 <script setup>
-import LMenu from '@/components/LMenu.vue'
+import LMenu from '@/components/organisms/LMenu.vue'
 
 </script>
 

@@ -1,13 +1,16 @@
 import json
+from pathlib import Path
 
 from fastapi import status
 from fastapi.testclient import TestClient
 from requests_mock import Mocker
-from schemas.extras import HealthResponse
-from tests.helpers import load_json
 
+from schemas.extras import HealthResponse
 from backend.settings import settings
 
+def load_json(path: Path) -> str:
+    with Path.open(path) as file:
+        return json.load(file)
 
 def test_health_check(app_client: TestClient):
     response = app_client.get("/health")

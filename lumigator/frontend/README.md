@@ -112,15 +112,6 @@ VITE_API_URL=http://localhost:8000/api  # Backend API URL
 
 You can add other environment-specific variables as needed.
 
-### Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new feature branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m 'Add feature'`.
-4. Push to the branch: `git push origin feature-name`.
-5. Create a pull request.
 
 ### License
 

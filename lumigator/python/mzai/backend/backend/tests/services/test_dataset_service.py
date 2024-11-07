@@ -14,7 +14,7 @@ def test_delete_dataset_file_not_found(db_session, s3_client):
     assert dataset_record is not None
     assert dataset_record.filename == filename
     assert dataset_record.format == format
-    dataset_service = DatasetService(dataset_repo, s3_client, S3FileSystem()) # S3FileSystem)
+    dataset_service = DatasetService(dataset_repo, s3_client, S3FileSystem())
     dataset_service.delete_dataset(dataset_record.id)
     dataset_record = dataset_service._get_dataset_record(dataset_record.id)
     assert dataset_record is None

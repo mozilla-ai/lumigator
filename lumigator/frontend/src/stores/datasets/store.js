@@ -1,5 +1,18 @@
-export const useDatasetStrore = defineStore('dataset', () => {
-	datasets = ref([]);
+import { ref } from 'vue';
+import { defineStore } from 'pinia'
+import datasetsService from "@/services/datasets/datasetsService";
 
-	return { datasets }
+export const useDatasetStrore = defineStore('dataset', () => {
+	const datasets = ref([]);
+
+
+	async function loadDatasets() {
+		if (datasets.value.length > 0) return;
+		datasets.value = await datasetsService.fetchDatasets();
+		console.log(datasets.value);
+	}
+	return {
+		datasets,
+		loadDatasets
+	}
 })

@@ -21,7 +21,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import Menu from 'primevue/menu';
 import { routes } from '@/router'
 

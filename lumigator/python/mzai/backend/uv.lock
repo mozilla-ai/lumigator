@@ -216,7 +216,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=8.3.3" },
-    { name = "requests-mock" },
+    { name = "requests-mock", specifier = ">=1.12.1" },
     { name = "testcontainers", specifier = ">=4.8.2" },
 ]
 

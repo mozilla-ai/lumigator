@@ -49,25 +49,16 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
 @router.get("/jobs/")
 def get_all_jobs() -> list[JobSubmissionResponse]:
     resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/")
-
-    if resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(f"Unexpected status code getting jobs: {resp.status_code}")
-        loguru.logger.error(f"Upstream jobs response: {resp}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Unexpected error getting jobs",
-        )
-
-    try:
-        metadata = json.loads(resp.text)
-        submissions: list[JobSubmissionResponse] = [
-            JobSubmissionResponse(**item) for item in metadata
-        ]
-        return submissions
-    except json.JSONDecodeError as e:
-        loguru.logger.error(f"JSON decode error: {e}")
-        loguru.logger.error(f"Response text: {resp.text}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Invalid JSON response"
-        ) from e
+    if resp.status_code == 200:
+        try:
+            metadata = json.loads(resp.text)
+            submissions: list[JobSubmissionResponse] = [
+                JobSubmissionResponse(**item) for item in metadata
+            ]
+            return submissions
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+            print(f"Response text: {resp.text}")
+            return {"error": "Invalid JSON response"}
+    else:
+        return {"error": f"HTTP error {resp.status_code}"}

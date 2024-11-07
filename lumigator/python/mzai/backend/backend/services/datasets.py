@@ -96,8 +96,11 @@ class DatasetService:
     def _raise_unhandled_exception(self, e: Exception) -> None:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
-    def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
+    def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
         return self.dataset_repo.get(dataset_id)
+
+    def _get_s3_path(self, dataset_key: str) -> str:
+        return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
@@ -115,7 +118,7 @@ class DatasetService:
 
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_path = self._get_s3_path(dataset_key)
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
         except Exception as e:
             # if a record was already created, delete it from the DB
@@ -160,10 +163,13 @@ class DatasetService:
 
         return DatasetResponse.model_validate(record)
 
-    def get_dataset_s3_path(self, dataset_id: UUID) -> str:
+    def get_dataset_s3_path(self, dataset_id: UUID) -> str | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return None
+
         dataset_key = self._get_s3_key(record.id, record.filename)
-        dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        dataset_path = self._get_s3_path(dataset_key)
         return dataset_path
 
     def delete_dataset(self, dataset_id: UUID) -> None:
@@ -184,7 +190,7 @@ class DatasetService:
             # S3 delete is called first, if this fails for any other reason that the file not being
             # found, then the DB delete won't take place, and an exception raised.
             dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_path = self._get_s3_path(dataset_key)
             self.s3_filesystem.rm(dataset_path, recursive=True)
         except FileNotFoundError as e:
             # File not found errors are allowed, but we perform clean-up in this situation.

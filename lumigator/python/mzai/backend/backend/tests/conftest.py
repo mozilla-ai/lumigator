@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from mypy_boto3_s3 import S3Client
+from requests_mock import Mocker
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
@@ -144,3 +145,8 @@ def json_data_health_job_metadata_ok(resources_dir) -> Path:
 @pytest.fixture(scope="session")
 def json_data_health_job_metadata_ray(resources_dir) -> Path:
     return resources_dir / "health_job_metadata_ray.json"
+
+@pytest.fixture(scope="function")
+def request_mock() -> Mocker:
+    with Mocker() as cm:
+        yield cm

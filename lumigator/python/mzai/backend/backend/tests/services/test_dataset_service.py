@@ -5,7 +5,7 @@ from backend.services.datasets import DatasetService
 
 
 def test_delete_dataset_file_not_found(db_session, s3_client):
-    filename = "juan"
+    filename = "dataset.csv"
     format = "job"
     dataset_repo = DatasetRepository(db_session)
     dataset_record = dataset_repo.create(

@@ -1,7 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Form, UploadFile, status
+from fastapi import APIRouter, Form, HTTPException, UploadFile, status
+from loguru import logger
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
 
@@ -21,12 +22,27 @@ def upload_dataset(
 
 @router.get("/{dataset_id}")
 def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse:
-    return service.get_dataset(dataset_id)
+    dataset = service.get_dataset(dataset_id)
+    if not dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dataset '{dataset_id}' not found.",
+        )
+
+    return dataset
 
 
 @router.delete("/{dataset_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
-    service.delete_dataset(dataset_id)
+    try:
+        service.delete_dataset(dataset_id)
+    except Exception as e:
+        logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. "
+                            f"{e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error deleting dataset for ID: {dataset_id}",
+        ) from e
 
 
 @router.get("/")

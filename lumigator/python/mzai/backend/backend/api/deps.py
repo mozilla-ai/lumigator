@@ -43,16 +43,13 @@ def get_dataset_service(
     session: DBSessionDep, s3_client: S3ClientDep, s3_filesystem: S3FileSystemDep
 ) -> DatasetService:
     dataset_repo = DatasetRepository(session)
-    dataset_repo = DatasetRepository(session)
     return DatasetService(dataset_repo, s3_client, s3_filesystem)
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 
 
-def get_job_service(
-    session: DBSessionDep, dataset_service: DatasetServiceDep
-) -> JobService:
+def get_job_service(session: DBSessionDep, dataset_service: DatasetServiceDep) -> JobService:
     job_repo = JobRepository(session)
     result_repo = JobResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)

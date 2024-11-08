@@ -3,7 +3,6 @@ from pathlib import Path
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from requests_mock import Mocker
 from schemas.extras import HealthResponse
 
 from backend.settings import settings

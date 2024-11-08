@@ -111,12 +111,3 @@ VITE_API_URL=http://localhost:8000/api  # Backend API URL
 ```
 
 You can add other environment-specific variables as needed.
-
-
-### License
-
-This project is licensed under the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
-
-```
-
-```

@@ -90,14 +90,14 @@ def s3_client(localstack_container: LocalStackContainer) -> S3Client:
 def app():
     """Create the FastAPI app bound to DB managed via Alembic.
 
-     Expects an environment variable of 'SQLALCHEMY_DATABASE_URL' to be configured.
-     Ideally this should be an absolute path:
+    Expects an environment variable of 'SQLALCHEMY_DATABASE_URL' to be configured.
+    Ideally this should be an absolute path:
 
-     e.g. sqlite:////Users/{me}/tmp/local_test.db
+    e.g. sqlite:////Users/{me}/tmp/local_test.db
 
-     If the environment variable is not specified, then a 'local.db' will be created in the
-     folder where the tests are executed.
-     """
+    If the environment variable is not specified, then a 'local.db' will be created in the
+    folder where the tests are executed.
+    """
     app = create_app()
     return app
 

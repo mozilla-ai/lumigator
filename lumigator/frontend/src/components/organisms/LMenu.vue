@@ -33,8 +33,6 @@ import { routes } from '@/router'
 }
 
 .l-main-menu {
-  width: 100%;
-  border: none;
 
   &__logo {
     height: 6rem;
@@ -43,7 +41,7 @@ import { routes } from '@/router'
     font-family: 'Zilla Slab', sans-serif;
     font-size: 30px;
     text-wrap: nowrap;
-    font-weight: 400;
+    font-weight: 500;
     cursor: default;
 		display: flex;
 		align-items: center;
@@ -54,9 +52,9 @@ import { routes } from '@/router'
   }
 
   &__link {
-    padding: $l-spacing-1;
+    padding: $l-spacing-1/2 $l-spacing-1;
     display: flex;
-    gap: $l-spacing-1;
+    gap: $l-spacing-1/2;
     align-items: center;
     color: $l-menu-item-color;
 		text-transform: capitalize;

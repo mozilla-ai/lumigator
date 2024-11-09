@@ -1,15 +1,18 @@
 @import 'variables';
 
+// this file overrides some of the default styles from primevue
+//  so the use of !important may be necessary
+
 // Menu Styling
 .p-menu {
-  background-color: $l-menu-bg;
+  background-color: $l-menu-bg!important;
   font-family: $l-font-family;
 	padding: $l-spacing-1 0;
-	border: none;
+	border: none!important;
 
   &-item {
 		cursor: pointer;
-		
+
 		:hover {
 			background-color: $l-menu-bg;
 		}

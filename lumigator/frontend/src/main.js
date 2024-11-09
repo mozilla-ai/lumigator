@@ -17,7 +17,7 @@ app.use(PrimeVue, {
 		options: {
 			prefix: 'l',
 			darkModeSelector: '.l-always-dark',
-			cssLayer: true
+			cssLayer: false
 		}
   },
 });

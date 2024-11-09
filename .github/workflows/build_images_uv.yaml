@@ -53,4 +53,5 @@ jobs:
           push: true
           target: "main_image"
           tags: |
-            kernelloophole/test:tagname
+              mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
+            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}

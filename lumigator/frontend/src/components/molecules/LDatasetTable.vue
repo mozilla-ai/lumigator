@@ -1,6 +1,10 @@
 <template>
   <div class="l-dataset-table">
-    <DataTable :value="tableData">
+    <DataTable
+      :value="tableData"
+      tableStyle="min-width: min(80vw, 1200px)"
+      scrollable
+    >
       <Column
         field="filename"
         header="Filename"
@@ -143,9 +147,12 @@ const togglePopover = (event) => {
 }
 </style>
 
-<!-- the following css rules must not be "scoped" because the popup-menu is attached to the DOM after the
-component is mounted  -->
+
 <style lang="scss">
+//  In order to have effect the following
+// css rules must not be "scoped" because
+// the popup-menu is attached to the DOM after the
+// component is mounted
 .l-dataset-table__options-menu {
 	padding: 0 $l-spacing-1;
 }

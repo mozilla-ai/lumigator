@@ -13,6 +13,7 @@
 		</div>
 	</div>
 </template>
+
 <script setup>
 import LMenu from '@/components/organisms/LMenu.vue'
 

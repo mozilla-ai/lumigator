@@ -46,7 +46,6 @@ import LMenu from '@/components/organisms/LMenu.vue'
 		border-radius: $l-main-radius;
 		grid-row: 2;
 		display: grid;
-		place-items: center;
 	}
 }
 </style>

@@ -60,6 +60,12 @@ def _make_request(
 
 class ApiClient:
     def __init__(self, api_host: str, ray_host: str):
+        """Base class for the Lumigator API client.
+
+        Args:
+            api_host (str): The host of the Lumigator backend API.
+            ray_host (str): The host of the Ray cluster.
+        """
         self.api_host = api_host
         self.ray_host = ray_host
         # NOTE: Consider support for HTTPS too.
@@ -69,14 +75,41 @@ class ApiClient:
     def get_response(
         self,
         api_path,
-        method: HTTPMethod = HTTPMethod.GET,
+        method=HTTPMethod.GET,
         data=None,
         files=None,
         json_data=None,
         verbose: bool = True,
     ) -> requests.Response:
-        """Makes a request to the specified path and attempts to return the response.
-        Raises an exception for any error other than 404 - NOT FOUND.
+        """Make a request to the specified endpoint.
+
+        Args:
+            api_path (str): The path to make the request to.
+            method (HTTPMethod, optional): The HTTP method to use.
+                Defaults to ``HTTPMethod.GET``.
+            data (optional): Dictionary, list of tuples, bytes, or file-like
+                object to send in the body of the Request.
+            files (optional): Dictionary of ``{'name': file-like-objects}`` (or
+                ``{'name': file-tuple}``) for multipart encoding upload.
+                ``file-tuple`` can be a 2-tuple ``('filename', fileobj)``,
+                3-tuple ``('filename', fileobj, 'content_type')`` or a 4-tuple
+                ``('filename', fileobj, 'content_type', custom_headers)``,
+                where ``content_type`` is a string defining the content type of
+                the given file and ``custom_headers`` a dict-like object
+                containing additional headers to add for the file.
+            json_data (optional): A JSON serializable Python object to send in
+                the body of the Request.
+            verbose (bool, optional): Whether to log the response.
+                Defaults to True.
+
+        Returns:
+            ``requests.Response``: The response object from the request.
+
+        Raises:
+            ``HTTPError``: Raises an exception for any error other than
+                ``404 - NOT FOUND``.
+            ``requests.RequestException``: Raises an exception for any other
+                request error.
         """
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
 
@@ -102,14 +135,41 @@ class ApiClient:
     def get_ray_job_response(
         self,
         api_path,
-        method: HTTPMethod = HTTPMethod.GET,
+        method=HTTPMethod.GET,
         data=None,
         files=None,
         json_data=None,
-        verbose: bool = True,
+        verbose= True,
     ) -> requests.Response:
-        """Makes a request to the specified path and attempts to return the response.
-        Raises an exception for any error other than 404 - NOT FOUND.
+        """Make a request to the specified endpoint.
+
+        Args:
+            api_path (str): The path to make the request to.
+            method (HTTPMethod, optional): The HTTP method to use.
+                Defaults to ``HTTPMethod.GET``.
+            data (optional): Dictionary, list of tuples, bytes, or file-like
+                object to send in the body of the Request.
+            files (optional): Dictionary of ``{'name': file-like-objects}`` (or
+                ``{'name': file-tuple}``) for multipart encoding upload.
+                ``file-tuple`` can be a 2-tuple ``('filename', fileobj)``,
+                3-tuple ``('filename', fileobj, 'content_type')`` or a 4-tuple
+                ``('filename', fileobj, 'content_type', custom_headers)``,
+                where ``content_type`` is a string defining the content type of
+                the given file and ``custom_headers`` a dict-like object
+                containing additional headers to add for the file.
+            json_data (optional): A JSON serializable Python object to send in
+                the body of the Request.
+            verbose (bool, optional): Whether to log the response.
+                Defaults to True.
+
+        Returns:
+            ``requests.Response``: The response object from the request.
+
+        Raises:
+            ``HTTPError``: Raises an exception for any error other than
+                ``404 - NOT FOUND``.
+            ``requests.RequestException``: Raises an exception for any other
+                request-related error.
         """
         path = f"{self._ray_url.rstrip('/')}/{api_path.lstrip('/')}"
 
@@ -131,4 +191,3 @@ class ApiClient:
                 raise
         except requests.RequestException:
             raise
-

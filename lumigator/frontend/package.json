@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue src",
-    "lint:fix": "eslint --ext .js,.vue src --fix"
+    "lint": "eslint . --fix",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@primevue/themes": "^4.1.1",

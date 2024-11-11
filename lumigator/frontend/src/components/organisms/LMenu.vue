@@ -6,14 +6,14 @@
       </template>
       <template #item="{ item }">
         <router-link
-					:to="item.path"
-					class="l-main-menu__link"
-					:disabled="item.disabled"
-				>
+          :to="item.path"
+          class="l-main-menu__link"
+          :disabled="item.disabled"
+        >
           <span :class="item.icon" />
           <span ripple
-						class="l-main-menu__link-label"
-					 >{{ item.name }} </span>
+                class="l-main-menu__link-label"
+          >{{ item.name }} </span>
         </router-link>
       </template>
     </Menu>

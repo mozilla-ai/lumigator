@@ -14,7 +14,7 @@ from backend.api.deps import JobServiceDep
 router = APIRouter()
 
 
-@router.post("/inference/", status_code=status.HTTP_201_CREATED)
+@router.post("/inference", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
     request: JobCreate,
@@ -22,7 +22,7 @@ def create_inference_job(
     return service.create_inference_job(request)
 
 
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
+@router.post("/evaluate", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
     request: JobCreate,

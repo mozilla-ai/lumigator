@@ -46,7 +46,7 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
             detail="Invalid JSON response"
         ) from e
 
-@router.get("/jobs/")
+@router.get("/jobs")
 def get_all_jobs() -> list[JobSubmissionResponse]:
     resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/")
     if resp.status_code == 200:

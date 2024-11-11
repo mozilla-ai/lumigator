@@ -113,7 +113,7 @@ def app_client(app: FastAPI):
 @pytest.fixture(scope="function")
 def local_client(app: FastAPI):
     """Create a test client for calling the real backend."""
-    base_url = "http://localhost/api/v1/"  # Fake base URL for the app
+    base_url = "http://localhost/api/v1"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
 

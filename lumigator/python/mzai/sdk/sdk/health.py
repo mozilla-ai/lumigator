@@ -83,7 +83,7 @@ class Health:
         Returns:
             list[JobSubmissionResponse]: A list of job submission information.
         """
-        endpoint = f"{self.HEALTH_ROUTE}/jobs/"
+        endpoint = f"{self.HEALTH_ROUTE}/jobs"
         response = self.__client.get_response(endpoint)
 
         if not response:

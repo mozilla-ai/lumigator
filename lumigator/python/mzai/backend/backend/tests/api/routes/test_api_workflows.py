@@ -43,12 +43,12 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
     }
 
     create_evaluation_job_response = local_client.post(
-        "/jobs/evaluate/", headers=headers, json=payload
+        "/jobs/evaluate", headers=headers, json=payload
     )
     assert create_evaluation_job_response.status_code == 201
 
     create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=headers, json=payload
+        "/jobs/inference", headers=headers, json=payload
     )
     assert create_inference_job_response.status_code == 201
 

@@ -137,7 +137,7 @@ class Jobs:
             JobResponse: The information for the newly created job.
         """
         response = self.client.get_response(
-            f"{self.JOBS_ROUTE}/{type.value}/",
+            f"{self.JOBS_ROUTE}/{type.value}",
             method=HTTPMethod.POST,
             data=request.model_dump_json(),
         )

@@ -1,7 +1,9 @@
+import json
 import os
 from pathlib import Path
 
 import pytest
+import requests_mock
 from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -131,3 +133,20 @@ def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client)
 
     app.dependency_overrides[get_db_session] = get_db_session_override
     app.dependency_overrides[get_s3_client] = get_s3_client_override
+
+@pytest.fixture(scope="session")
+def resources_dir() -> Path:
+    return Path(__file__).parent / "data"
+
+@pytest.fixture(scope="session")
+def json_data_health_job_metadata_ok(resources_dir) -> Path:
+    return resources_dir / "health_job_metadata.json"
+
+@pytest.fixture(scope="session")
+def json_data_health_job_metadata_ray(resources_dir) -> Path:
+    return resources_dir / "health_job_metadata_ray.json"
+
+@pytest.fixture(scope="function")
+def request_mock() -> requests_mock.Mocker:
+    with requests_mock.Mocker() as cm:
+        yield cm

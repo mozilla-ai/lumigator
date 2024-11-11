@@ -1,6 +1,6 @@
 <template>
-	<div class="l-table">
-		<DataTable v-if="entityType === 'datasets'" :value="tableData" size="medium" tableStyle="min-width: 70rem">
+	<div class="l-dataset-table">
+		<DataTable :value="tableData">
 			<Column field="filename" header="Filename" />
 			<Column field="id" header="dataset id">
 				<template #body="slotProps">
@@ -24,13 +24,13 @@
 			</Column>
 			<Column header="options">
 				<template #body>
-					<span class="pi pi-fw pi-ellipsis-h l-table__options-trigger" @click="togglePopover"
+					<span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger" @click="togglePopover"
 						aria-controls="optionsMenu" />
 				</template>
 			</Column>
 		</DataTable>
 		<Menu ref="optionsMenu" id="options_menu" :model="options" :popup="true"
-			:pt="{ list: 'l-table__options-menu', itemLink: 'l-table__menu-option', itemIcon: 'l-table__menu-option-icon', separator: 'separator' }" />
+			:pt="ptConfigOptionsMenu" />
 	</div>
 </template>
 
@@ -76,6 +76,13 @@ const options = ref([
 	},
 ])
 
+const ptConfigOptionsMenu = ref({
+  list: 'l-dataset-table__options-menu',
+  itemLink: 'l-dataset-table__menu-option',
+  itemIcon: 'l-dataset-table__menu-option-icon',
+  separator: 'separator'
+});
+
 const shortenedID = (id) =>
 	id.length <= 20 ? id : `${id.slice(0, 20)}...`;
 
@@ -98,7 +105,7 @@ const togglePopover = (event) => {
 </script>
 
 <style scoped lang="scss">
-.l-table {
+.l-dataset-table {
 	$root: &;
 	width: 100%;
 	display: flex;
@@ -112,18 +119,21 @@ const togglePopover = (event) => {
 }
 </style>
 
+<!-- the following css rules must not be "scoped" because the popup-menu is attached to the DOM after the
+component is mounted  -->
 <style lang="scss">
-.l-table__options-menu {
+.l-dataset-table__options-menu {
 	padding: 0 $l-spacing-1;
 }
 
-.l-table__menu-option {
+.l-dataset-table__menu-option {
 	color: $l-grey-100;
 	padding: $l-spacing-1 $l-spacing-1 $l-spacing-1 0 $l-spacing-1;
 	font-size: $l-menu-font-size;
 
 	&:hover {
 		color: white;
+    text-shadow: 0 0 1px white;
 	}
 }
 
@@ -131,7 +141,7 @@ const togglePopover = (event) => {
 	padding: $l-spacing-1/2 0;
 }
 
-.l-table__options-menu> :first-child .l-table__menu-option {
+.l-dataset-table__options-menu> :first-child .l-dataset-table__menu-option {
 	padding-bottom: 1rem;
 	padding-top: 0rem;
 }

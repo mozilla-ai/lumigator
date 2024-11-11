@@ -1,7 +1,7 @@
 <template>
 	<div class="l-datasets">
-		<div class="l-datasets__list-container">
-			<l-table :columns="datasetColumns" :table-data="datasets" entity-type="datasets" />
+		<div class="l-datasets__table-container">
+			<l-dataset-table :table-data="datasets" entity-type="datasets" />
 		</div>
 	</div>
 </template>
@@ -9,20 +9,11 @@
 import { onMounted} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStrore } from '@/stores/datasets/store'
-import LTable from '@/components/molecules/LTable.vue';
-
-const emit = defineEmits(['dataset-selected', 'remove']);
+import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 
 const datasetStore = useDatasetStrore()
 const { datasets } = storeToRefs(datasetStore);
 
-const onDatasetSelect = (id) => {
-  emit('dataset-selected', id);
-};
-
-const onRemoveDataset = (id) => {
-  emit('dataset-remove', id);
-};
 
 onMounted(async () => {
 	await datasetStore.loadDatasets()
@@ -33,7 +24,7 @@ onMounted(async () => {
 .l-datasets {
   $root: &;
 
-  &__list-container {
+  &__table-container {
 		padding: $l-spacing-1;
     display: grid;
   }

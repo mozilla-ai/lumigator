@@ -1,3 +1,33 @@
+<template>
+  <div class="actions-container">
+    <label
+      v-if="!fileName"
+      for="file-input"
+      class="upload-label"
+    >
+      Choose a Dataset file
+    </label>
+    <input id="file-input"
+           type="file"
+           @change="handleFileChange"
+    />
+    <button
+      v-if="fileName"
+      class="confirm-btn"
+      @click="uploadFile()"
+    >
+      Confirm
+    </button>
+    <p
+      v-if="fileName"
+      class="file-name"
+    >
+      Selected file: <span>{{ fileName }}
+      </span>
+    </p>
+  </div>
+</template>
+
 <script setup>
 import { ref } from 'vue';
 import http from '@/services/http/index.js';
@@ -41,31 +71,6 @@ const uploadFile = async () => {
   }
 };
 </script>
-<template>
-  <div class="actions-container">
-    <label
-			v-if="!fileName"
-			for="file-input"
-			class="upload-label">
-			Choose a Dataset file
-		</label>
-    <input id="file-input" type="file" @change="handleFileChange" />
-    <button
-			v-if="fileName"
-			@click="uploadFile()"
-			class="confirm-btn"
-			>
-				Confirm
-		</button>
-    <p
-			v-if="fileName"
-			class="file-name"
-		>
-      Selected file: <span>{{ fileName }}
-		</span>
-    </p>
-  </div>
-</template>
 
 <style scoped>
 .actions-container {

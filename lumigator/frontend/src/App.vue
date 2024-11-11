@@ -25,7 +25,7 @@ import LMenu from '@/components/organisms/LMenu.vue'
 	margin: auto;
 	background-color: $l-main-bg;
 	display: grid;
-	grid-template-columns: minmax(150px, 20%) 1fr;
+	grid-template-columns: minmax(200px, 15%) 1fr;
 	grid-template-rows: auto 1fr;
 	max-width: $l-app-width;
 	text-align: center;

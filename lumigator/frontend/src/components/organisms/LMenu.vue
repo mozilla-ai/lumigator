@@ -39,7 +39,7 @@ import { routes } from '@/router'
     will-change: filter;
     transition: filter 300ms;
     font-family: 'Zilla Slab', sans-serif;
-    font-size: 30px;
+    font-size: 1.5em;
     text-wrap: nowrap;
     font-weight: 500;
     cursor: default;

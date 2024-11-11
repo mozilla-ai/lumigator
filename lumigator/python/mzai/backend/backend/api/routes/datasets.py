@@ -5,8 +5,11 @@ from fastapi import APIRouter, Form, HTTPException, UploadFile, status
 from loguru import logger
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
+from starlette.requests import Request
+from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
+from backend.api.http_headers import HttpHeaders
 
 router = APIRouter()
 
@@ -16,8 +19,15 @@ def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,
     format: Annotated[DatasetFormat, Form()],
+    request: Request,
+    response: Response
 ) -> DatasetResponse:
-    return service.upload_dataset(dataset, format)
+    ds_response = service.upload_dataset(dataset, format)
+
+    url = request.url_for(get_dataset.__name__, dataset_id=ds_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return ds_response
 
 
 @router.get("/{dataset_id}")

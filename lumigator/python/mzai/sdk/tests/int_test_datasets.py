@@ -2,11 +2,11 @@ import asyncio
 from pathlib import Path
 from time import sleep
 
+import requests
 from loguru import logger
 from schemas.datasets import DatasetFormat
 from schemas.jobs import JobCreate, JobType
 
-import requests
 
 def test_sdk_healthcheck_ok(lumi_client):
     healthy = False

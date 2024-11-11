@@ -2,7 +2,6 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile, status
-from http_constants.headers import HttpHeaders
 from loguru import logger
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
@@ -10,6 +9,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
+from backend.api.http_headers import HttpHeaders
 
 router = APIRouter()
 

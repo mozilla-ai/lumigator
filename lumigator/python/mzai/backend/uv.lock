@@ -167,7 +167,6 @@ dependencies = [
     { name = "boto3-stubs", extra = ["essential", "s3"] },
     { name = "datasets" },
     { name = "fastapi", extra = ["standard"] },
-    { name = "http-constants" },
     { name = "loguru" },
     { name = "mistralai" },
     { name = "mypy-boto3" },
@@ -198,7 +197,6 @@ requires-dist = [
     { name = "boto3-stubs", extras = ["essential", "s3"], specifier = "==1.34.105" },
     { name = "datasets", specifier = "==2.20.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.0" },
-    { name = "http-constants", specifier = ">=0.5.0" },
     { name = "loguru", specifier = "==0.7.2" },
     { name = "mistralai", specifier = "==0.4.2" },
     { name = "mypy-boto3", specifier = "==1.34.105" },
@@ -628,12 +626,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/f5/38/3af3d3633a34a3316
 wheels = [
     { url = "https://files.pythonhosted.org/packages/95/04/ff642e65ad6b90db43e668d70ffb6736436c7ce41fcc549f4e9472234127/h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761", size = 58259 },
 ]
-
-[[package]]
-name = "http-constants"
-version = "0.5.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d5/33/3d45bce979cbcb87e9390240b2f2446a43f38816fc64ca084c2eb305c7c4/http-constants-0.5.0.tar.gz", hash = "sha256:151cb595a0964110ee51e1f5bf09c1b30b025de37f32688f3d0ca58fc8dae43e", size = 6268 }
 
 [[package]]
 name = "httpcore"

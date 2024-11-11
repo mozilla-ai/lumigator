@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
-from http_constants.headers import HttpHeaders
 from schemas.extras import ListingResponse
 from schemas.jobs import (
     JobCreate,
@@ -13,6 +12,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from backend.api.deps import JobServiceDep
+from backend.api.http_headers import HttpHeaders
 
 router = APIRouter()
 

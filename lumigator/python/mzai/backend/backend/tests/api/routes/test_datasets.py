@@ -9,6 +9,8 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
+from backend.api.http_headers import HttpHeaders
+
 
 def format_dataset(data: list[list[str]]) -> str:
     """Format a list of tabular data as a CSV string."""
@@ -146,20 +148,26 @@ def test_experiment_ground_truth(
     valid_experiment_dataset: str,
     valid_experiment_dataset_without_gt: str,
 ):
-    create_response = app_client.post(
+    ground_truth_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
         files={"dataset": ("dataset.csv", valid_experiment_dataset)},
     )
-    assert create_response.status_code == status.HTTP_201_CREATED
-    created_dataset = DatasetResponse.model_validate(create_response.json())
+    assert ground_truth_response.status_code == status.HTTP_201_CREATED
+    created_dataset = DatasetResponse.model_validate(ground_truth_response.json())
     assert created_dataset.ground_truth is True
+    location = ground_truth_response.headers.get(HttpHeaders.LOCATION)
+    assert location != ""
+    assert location == f"{app_client.base_url}datasets/{created_dataset.id}"
 
-    create_response = app_client.post(
+    no_ground_truth_response = app_client.post(
         url="/datasets",
         data={"format": DatasetFormat.JOB.value},
         files={"dataset": ("dataset.csv", valid_experiment_dataset_without_gt)},
     )
-    assert create_response.status_code == status.HTTP_201_CREATED
-    created_dataset = DatasetResponse.model_validate(create_response.json())
+    assert no_ground_truth_response.status_code == status.HTTP_201_CREATED
+    created_dataset = DatasetResponse.model_validate(no_ground_truth_response.json())
     assert created_dataset.ground_truth is False
+    location = no_ground_truth_response.headers.get(HttpHeaders.LOCATION)
+    assert location != ""
+    assert location == f"{app_client.base_url}datasets/{created_dataset.id}"

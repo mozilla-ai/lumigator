@@ -1,6 +1,9 @@
 import json
 from http import HTTPStatus
 from uuid import UUID
+from typing import Annotated
+
+import loguru
 
 import loguru
 import requests
@@ -12,6 +15,8 @@ from backend.settings import settings
 
 router = APIRouter()
 
+def ray_jobs() -> str:
+    return f"{settings.RAY_DASHBOARD_URL}/api/jobs/"
 
 @router.get("/")
 def get_health() -> HealthResponse:
@@ -20,7 +25,7 @@ def get_health() -> HealthResponse:
 
 @router.get("/jobs/{job_id}")
 def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}")
+    resp = requests.get(ray_jobs() + f"{job_id}")
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
         raise HTTPException(
@@ -48,7 +53,7 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
 
 @router.get("/jobs/{job_id}/logs")
 def get_job_logs(job_id: UUID) -> JobLogsResponse:
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}/logs")
+    resp = requests.get(ray_jobs() + f"{job_id}/logs")
     if resp.status_code == 200:
         try:
             metadata = json.loads(resp.text)
@@ -63,7 +68,7 @@ def get_job_logs(job_id: UUID) -> JobLogsResponse:
 
 @router.get("/jobs/")
 def get_all_jobs() -> list[JobSubmissionResponse]:
-    resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/")
+    resp = requests.get(ray_jobs())
     if resp.status_code == 200:
         try:
             metadata = json.loads(resp.text)

@@ -60,3 +60,45 @@ def test_get_job_metadata_ok(app_client: TestClient,
     actual = json.loads(response.text)
     expected = load_json(json_data_health_job_metadata_ok)
     assert expected == actual
+
+def test_job_logs(app_client: TestClient, valid_experiment_dataset: str):
+    upload_filename = "dataset.csv"
+    dataset_resp = app_client.post(
+        url="/datasets",
+        data={"format": (None, DatasetFormat.JOB.value)},
+        files={"dataset": (upload_filename, valid_experiment_dataset)},
+    )
+    assert dataset_resp.status_code == status.HTTP_201_CREATED
+    dataset = DatasetResponse.model_validate(dataset_resp.json())
+
+    eval_template = """{{
+        "name": "{job_name}/{job_id}",
+        "model": {{ "path": "{model_path}" }},
+        "dataset": {{ "path": "{dataset_path}" }},
+        "evaluation": {{
+            "metrics": ["meteor", "rouge"],
+            "use_pipeline": false,
+            "max_samples": {max_samples},
+            "return_input_data": true,
+            "return_predictions": true,
+            "storage_path": "{storage_path}"
+        }}
+    }}"""
+
+    job = JobCreate(
+        name="test-job-int-001",
+        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        dataset=dataset.id,
+        config_template=eval_template,
+        description="This is a test job",
+        max_samples=2,
+    )
+
+    job_response_resp = app_client.post("/jobs/evaluate/", data=job.model_dump_json())
+    assert job_response_resp.status_code == status.HTTP_201_CREATED
+    job_response = JobResponse.model_validate(job_response_resp.json())
+
+    print(f'--> /health/jobs/{job_response.id}/logs')
+    logs_resp = app_client.get(f'/health/jobs/{job_response.id}/logs')
+    print(f"--> {logs_resp.content}")
+    assert logs_resp.status_code == status.HTTP_200_OK

@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, status
+from http_constants.headers import HttpHeaders
 from schemas.extras import ListingResponse
 from schemas.jobs import (
     JobCreate,
@@ -8,6 +9,8 @@ from schemas.jobs import (
     JobResultDownloadResponse,
     JobResultResponse,
 )
+from starlette.requests import Request
+from starlette.responses import Response
 
 from backend.api.deps import JobServiceDep
 
@@ -17,17 +20,31 @@ router = APIRouter()
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
-    request: JobCreate,
+    job_create_request: JobCreate,
+    request: Request,
+    response: Response
 ) -> JobResponse:
-    return service.create_inference_job(request)
+    job_response = service.create_inference_job(job_create_request)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
 
 
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
-    request: JobCreate,
+    job_create_request: JobCreate,
+    request: Request,
+    response: Response
 ) -> JobResponse:
-    return service.create_evaluation_job(request)
+    job_response = service.create_evaluation_job(job_create_request)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
 
 
 @router.get("/{job_id}")

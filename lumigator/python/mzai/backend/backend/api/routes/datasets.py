@@ -2,9 +2,12 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile, status
+from http_constants.headers import HttpHeaders
 from loguru import logger
 from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from schemas.extras import ListingResponse
+from starlette.requests import Request
+from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
 
@@ -16,8 +19,15 @@ def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,
     format: Annotated[DatasetFormat, Form()],
+    request: Request,
+    response: Response
 ) -> DatasetResponse:
-    return service.upload_dataset(dataset, format)
+    ds_response = service.upload_dataset(dataset, format)
+
+    url = request.url_for(get_dataset.__name__, dataset_id=ds_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return ds_response
 
 
 @router.get("/{dataset_id}")

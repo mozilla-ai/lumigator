@@ -7,7 +7,7 @@ export const useDatasetStrore = defineStore('dataset', () => {
 
 
 	async function loadDatasets() {
-		if (datasets.value.length > 0) return;
+		if (datasets.value.length > 0) {return;}
 		datasets.value = await datasetsService.fetchDatasets();
 	}
 	return {

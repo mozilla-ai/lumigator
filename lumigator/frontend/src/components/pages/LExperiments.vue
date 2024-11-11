@@ -1,7 +1,7 @@
 <template>
-	<div class="l-experiments">
-		<h2>Experiments Page</h2>
-	</div>
+  <div class="l-experiments">
+    <h2>Experiments Page</h2>
+  </div>
 </template>
 
 <script setup>

@@ -1,20 +1,29 @@
 <template>
-	<div class="l-datasets">
-		<div class="l-datasets__list-container">
-			<ul class="l-datasets__list" v-if="datasets.length">
-				<li v-for="dataset in datasets" :key="dataset.id">
-					<div class="l-datasets__list-card" @click="onDatasetSelect(dataset.id)">
-						<span> {{ formatDate(dataset.created_at) }}</span>
-						<span>File name: {{ dataset.filename }}</span>
-						<span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
-						<span>Size: {{ dataset.size }} kb</span>
-					</div>
-					<span class="l-datasets__list-remove" @click="onRemoveDataset(dataset.id)">🗑️</span>
-				</li>
-			</ul>
-		</div>
-	</div>
+  <div class="l-datasets">
+    <div class="l-datasets__list-container">
+      <ul v-if="datasets.length"
+          class="l-datasets__list"
+      >
+        <li v-for="dataset in datasets"
+            :key="dataset.id"
+        >
+          <div class="l-datasets__list-card"
+               @click="onDatasetSelect(dataset.id)"
+          >
+            <span> {{ formatDate(dataset.created_at) }}</span>
+            <span>File name: {{ dataset.filename }}</span>
+            <span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
+            <span>Size: {{ dataset.size }} kb</span>
+          </div>
+          <span class="l-datasets__list-remove"
+                @click="onRemoveDataset(dataset.id)"
+          >🗑️</span>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
+
 <script setup>
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'

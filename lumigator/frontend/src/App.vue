@@ -1,17 +1,19 @@
 <template>
-	<div id="app">
-		<div class="header"></div>
-		<div class="l-menu-container">
-			<l-menu />
-		</div>
-		<div class="l-main-container">
-			<router-view v-slot="{ Component }">
-				<transition name="transition-fade">
-					<component :is="Component" @s-disable-scroll="disableScroll = $event" />
-				</transition>
-			</router-view>
-		</div>
-	</div>
+  <div id="app">
+    <div class="header"></div>
+    <div class="l-menu-container">
+      <l-menu />
+    </div>
+    <div class="l-main-container">
+      <router-view v-slot="{ Component }">
+        <transition name="transition-fade">
+          <component :is="Component"
+                     @s-disable-scroll="disableScroll = $event"
+          />
+        </transition>
+      </router-view>
+    </div>
+  </div>
 </template>
 
 <script setup>

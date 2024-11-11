@@ -6,6 +6,7 @@ repos:
         exclude: |
           (?x)^(
               notebooks/preprocess_thunderbird_samples.ipynb|
+              .+/tests/data/.+json
           )$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

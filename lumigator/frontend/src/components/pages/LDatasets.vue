@@ -27,11 +27,11 @@
 <script setup>
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStrore } from '@/stores/datasets/store.js'
+import { useDatasetStore } from '@/stores/datasets/store.js'
 
 const emit = defineEmits(['dataset-selected', 'remove']);
 
-const datasetStore = useDatasetStrore()
+const datasetStore = useDatasetStore()
 const { datasets } = storeToRefs(datasetStore);
 
 const formatDate = (dateString) => {

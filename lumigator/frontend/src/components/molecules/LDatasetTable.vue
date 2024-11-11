@@ -1,37 +1,61 @@
 <template>
-	<div class="l-dataset-table">
-		<DataTable :value="tableData">
-			<Column field="filename" header="Filename" />
-			<Column field="id" header="dataset id">
-				<template #body="slotProps">
-					{{ shortenedID(slotProps.data.id) }}
-				</template>
-			</Column>
-			<Column field="created_at" header="submitted">
-				<template #body="slotProps">
-					{{ formatDate(slotProps.data.created_at) }}
-				</template>
-			</Column>
-			<Column field="size" header="size">
-				<template #body="slotProps">
-					{{ Math.floor(slotProps.data.size / 1000) }} KB
-				</template>
-			</Column>
-			<Column field="ground_truth" header="GroundTruth">
-				<template #body="slotProps">
-					<span v-text="slotProps.data.ground_truth" class="capitalize" />
-				</template>
-			</Column>
-			<Column header="options">
-				<template #body>
-					<span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger" @click="togglePopover"
-						aria-controls="optionsMenu" />
-				</template>
-			</Column>
-		</DataTable>
-		<Menu ref="optionsMenu" id="options_menu" :model="options" :popup="true"
-			:pt="ptConfigOptionsMenu" />
-	</div>
+  <div class="l-dataset-table">
+    <DataTable :value="tableData">
+      <Column
+        field="filename"
+        header="Filename"
+      />
+      <Column
+        field="id"
+        header="dataset id"
+      >
+        <template #body="slotProps">
+          {{ shortenedID(slotProps.data.id) }}
+        </template>
+      </Column>
+      <Column
+        field="created_at"
+        header="submitted"
+      >
+        <template #body="slotProps">
+          {{ formatDate(slotProps.data.created_at) }}
+        </template>
+      </Column>
+      <Column
+        field="size"
+        header="size"
+      >
+        <template #body="slotProps">
+          {{ Math.floor(slotProps.data.size / 1000) }} KB
+        </template>
+      </Column>
+      <Column
+        field="ground_truth"
+        header="GroundTruth"
+      >
+        <template #body="slotProps">
+          <span class="capitalize"
+                v-text="slotProps.data.ground_truth"
+          />
+        </template>
+      </Column>
+      <Column header="options">
+        <template #body>
+          <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
+                aria-controls="optionsMenu"
+                @click="togglePopover"
+          />
+        </template>
+      </Column>
+    </DataTable>
+    <Menu
+      id="options_menu"
+      ref="optionsMenu"
+      :model="options"
+      :popup="true"
+      :pt="ptConfigOptionsMenu"
+    />
+  </div>
 </template>
 
 <script setup>

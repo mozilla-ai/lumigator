@@ -69,6 +69,47 @@ class JobService:
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
+    def get_config_params(self,request,
+                     record:JobRepository, dataset_s3_path:DatasetService, storage_path:str, model_url:str )-> dict:
+        """Given a set of input params from the request itself plus logic injected at the service level,
+        pass a complete set of configs to the Ray job"""
+
+        config_params = {
+            "job_name": request.name,
+            "job_id": record.id,
+            "model_path": request.model,
+            "dataset_path": dataset_s3_path,
+            "max_samples": request.max_samples,
+            "storage_path": storage_path,
+            "model_url": model_url,
+            "system_prompt": request.system_prompt,
+        }
+
+        # set default max samples to unlimited
+        if request.max_samples is None:
+            config_params["max_samples"] = -1
+
+        return config_params
+
+    def fill_infer_config_template(self,request: JobCreate,config_params: dict)->dict:
+
+        # load a config template and fill it up with config_params
+        if request.config_infer_template is not None:
+            config_template = request.config_infer_template
+        elif request.model in config_templates.config_infer_template:
+            # if no config template is provided, get the default one for the model
+            config_template = config_templates.config_infer_template[request.model]
+        else:
+            # if no default config template is provided, get the causal template
+            # (which works with seq2seq models too except it does not use pipeline)
+            config_template = config_templates.causal_infer_template
+
+        infer_config_args = {
+            "--config": config_template.format(**config_params),
+        }
+
+        return infer_config_args
+
     def create_inference_job(self, request: JobCreate) -> JobResponse:
         """Creates a new workload to perform batch inference"""
         # Create a db record for the job
@@ -92,31 +133,9 @@ class JobService:
         if request.system_prompt is None and not request.model.startswith("hf://"):
             request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-        config_params = {
-            "job_name": request.name,
-            "job_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-        }
+        config_params = self.get_config_params(request, record, dataset_s3_path,storage_path, model_url)
 
-        # load a config template and fill it up with config_params
-        if request.config_infer_template is not None:
-            config_template = request.config_infer_template
-        elif request.model in config_templates.config_infer_template:
-            # if no config template is provided, get the default one for the model
-            config_template = config_templates.config_infer_template[request.model]
-        else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = config_templates.causal_infer_template
-
-        infer_config_args = {
-            "--config": config_template.format(**config_params),
-        }
+        infer_config_args = self.fill_infer_config_template(request, config_params)
 
         # Prepare the job configuration that will be sent to submit the ray job.
         # This includes both the command that is going to be executed and its
@@ -179,16 +198,7 @@ class JobService:
         if request.system_prompt is None and not request.model.startswith("hf://"):
             request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-        config_params = {
-            "job_name": request.name,
-            "job_id": record.id,
-            "model_path": request.model,
-            "dataset_path": dataset_s3_path,
-            "max_samples": request.max_samples,
-            "storage_path": storage_path,
-            "model_url": model_url,
-            "system_prompt": request.system_prompt,
-        }
+        config_params = self.get_config_params(request, record, dataset_s3_path,storage_path, model_url)
 
         # load a config template and fill it up with config_params
         if request.config_eval_template is not None:

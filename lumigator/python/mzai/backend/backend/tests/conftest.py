@@ -16,7 +16,7 @@ from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.settings import settings
-
+from backend.repositories.jobs import JobRepository, JobResultRepository,BaseRepository
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
 def common_resources_dir() -> Path:
@@ -150,3 +150,7 @@ def json_data_health_job_metadata_ray(resources_dir) -> Path:
 def request_mock() -> requests_mock.Mocker:
     with requests_mock.Mocker() as cm:
         yield cm
+
+@pytest.fixture(scope="function")
+def job_repository(db_session):
+    return JobRepository(session=db_session)

@@ -55,7 +55,7 @@ class JobCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int | None = None
+    max_samples: int = Field(-1, ge=0)
     model_url: str | None = None
     system_prompt: str | None = None
     config_infer_template: str | None = None

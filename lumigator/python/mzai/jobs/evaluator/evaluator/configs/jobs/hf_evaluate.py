@@ -18,7 +18,7 @@ class HuggingFaceEvaluationConfig(EvaluatorConfig):
     metrics: conlist(str, min_length=1)
     use_pipeline: bool = False
     enable_tqdm: bool = False
-    max_samples: int | None = None
+    max_samples: int = -1
     storage_path: str | None = None
     return_input_data: bool = False
     return_predictions: bool = False

@@ -27,18 +27,6 @@ def _init_db():
 
 
 def _configure_logger():
-    origins = [
-        "http://localhost",
-        "http://localhost:3000",
-    ]
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
     main_log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     logger.remove()
     logger.add(

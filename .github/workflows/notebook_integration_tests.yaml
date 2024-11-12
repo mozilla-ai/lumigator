@@ -1,0 +1,46 @@
+name: SDK integration tests
+
+on:
+  push:
+    branches:
+      - main
+      - "fix-**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  integration:
+    name: Notebook integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Create a virtual environment
+        run: uv venv
+        working-directory: notebooks
+
+      - name: Install required packages
+        run: uv pip install -r requirements.txt
+        working-directory: notebooks
+
+      - name: Install sdk
+        run: uv pip install -e ../lumigator/python/mzai/sdk
+        working-directory: notebooks
+
+      - name: Install kernel
+        run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
+        working-directory: notebooks
+
+      - name: Setup containers
+        run: make start-lumigator-build
+
+      - name: Run notebook
+        run: source .venv/bin/activate && jupyter execute --kernel_name=lumigator walkthrough.ipynb
+        working-directory: notebooks
+        shell: bash

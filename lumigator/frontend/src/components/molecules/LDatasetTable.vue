@@ -156,7 +156,8 @@ function deleteConfirmation() {
       severity: 'danger'
     },
     accept: () => {
-      emit('l-delete-dataset', focusedDataset.value.id)
+      emit('l-delete-dataset', focusedDataset.value.id);
+      focusedDataset.value = null;
     },
     reject: () => {
       focusedDataset.value = null;

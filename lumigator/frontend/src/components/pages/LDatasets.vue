@@ -11,7 +11,10 @@
     <div
       class="l-datasets__table-container"
     >
-      <l-dataset-table :table-data="datasets" />
+      <l-dataset-table
+        :table-data="datasets"
+        @l-delete-dataset="onDeleteDataset($event)"
+      />
     </div>
     <l-file-upload
       ref="datasetInput"
@@ -36,6 +39,10 @@ const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {
   datasetStore.uploadDataset(datasetFile);
+}
+
+const onDeleteDataset = (datasetID) => {
+  datasetStore.deleteDataset(datasetID);
 }
 
 onMounted(async () => {

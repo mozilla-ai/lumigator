@@ -1,5 +1,5 @@
 import http from '@/services/http';
-import { PATH_DATASETS_ROOT } from './api';
+import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET } from './api';
 
 async function fetchDatasets() {
   try {
@@ -24,7 +24,22 @@ async function postDataset(formData) {
   }
 }
 
+async function deleteDataset(id) {
+
+  try {
+    const response = await http.delete(PATH_SINGLE_DATASET(id));
+    if (response.status === 200 || response.status === 204) {
+      return response;
+    } else {
+      console.error("Unexpected response status: ", response.status);
+    }
+  } catch (error) {
+    console.error("Error deleting dataset:", error);
+  }
+}
+
 export default {
-   fetchDatasets,
-  postDataset
+  fetchDatasets,
+  postDataset,
+  deleteDataset
 }

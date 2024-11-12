@@ -44,10 +44,10 @@
         </template>
       </Column>
       <Column header="options">
-        <template #body>
+        <template #body="slotProps">
           <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
                 aria-controls="optionsMenu"
-                @click="togglePopover"
+                @click="togglePopover($event, slotProps.data)"
           />
         </template>
       </Column>
@@ -58,7 +58,9 @@
       :model="options"
       :popup="true"
       :pt="ptConfigOptionsMenu"
-    />
+    >
+      <ConfirmDialog></ConfirmDialog>
+    </Menu>
   </div>
 </template>
 
@@ -67,7 +69,8 @@ import { ref } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
-
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
 
 defineProps({
 	tableData: {
@@ -80,7 +83,11 @@ defineProps({
 	}
 })
 
-const optionsMenu = ref()
+const emit = defineEmits(['l-delete-dataset'])
+
+const confirm = useConfirm();
+const focusedDataset = ref(null);
+const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
@@ -99,7 +106,10 @@ const options = ref([
 	},
 	{
 		label: 'Delete',
-		icon: 'pi pi-trash'
+    icon: 'pi pi-trash',
+    command: () => {
+      deleteConfirmation()
+    }
 	},
 ])
 
@@ -125,9 +135,35 @@ const formatDate = (dateString) => {
 	}).format(date).replace(/(\d{4})(\s)/, '$1,$2');
 };
 
-const togglePopover = (event) => {
+const togglePopover = (event, dataset) => {
+  focusedDataset.value = dataset;
 	optionsMenu.value.toggle(event);
 }
+
+function deleteConfirmation() {
+  confirm.require({
+    message: `${focusedDataset.value.filename}`,
+    header: 'Delete  dataset ?',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      emit('l-delete-dataset', focusedDataset.value.id)
+    },
+    reject: () => {
+      focusedDataset.value = null;
+    }
+  });
+}
+
 
 </script>
 

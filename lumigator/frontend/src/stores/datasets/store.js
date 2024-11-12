@@ -17,15 +17,22 @@ export const useDatasetStore = defineStore('dataset', () => {
     formData.append('dataset', datasetFile); // Attach the file
     formData.append('format', 'job'); // Specification @localhost:8000/docs
     const uploadConfirm = await datasetsService.postDataset(formData)
-    console.log('uploadConfirm', uploadConfirm)
     if (uploadConfirm.status) {
       console.log('⚠️ Error', uploadConfirm.message);
     }
     await loadDatasets();
   }
+
+  async function deleteDataset(id) {
+    if (!id) { return };
+    await datasetsService.deleteDataset(id);
+    await loadDatasets();
+  }
+
   return {
     datasets,
     loadDatasets,
-    uploadDataset
+    uploadDataset,
+    deleteDataset
   }
 })

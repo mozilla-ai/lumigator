@@ -54,6 +54,7 @@ onMounted(async () => {
 .l-datasets {
   $root: &;
   max-width: $l-main-width;
+  margin: 0 auto;
 
   &__header-container {
     padding: $l-spacing-1;

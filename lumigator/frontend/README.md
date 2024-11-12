@@ -106,7 +106,7 @@ frontend/
 To configure environment variables, create an `.env` file in the root of the `frontend` directory with the following structure:
 
 ```bash
-VITE_API_URL=http://localhost:8000/api  # Backend API URL
+VUE_APP_BASE_URL=http://localhost:8000/api  # Backend API URL
 ```
 
 You can add other environment-specific variables as needed.

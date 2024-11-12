@@ -78,7 +78,6 @@ defineProps({
 		type: String,
 		required: false,
 	}
-
 })
 
 const optionsMenu = ref()

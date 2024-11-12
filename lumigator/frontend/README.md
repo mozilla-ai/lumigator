@@ -16,13 +16,6 @@ Ensure you have the following installed on your system:
 - **Node.js** (version 14 or higher)
 - **npm** or **yarn** package manager
 
-To check your installed versions:
-
-```bash
-node -v
-npm -v
-```
-
 ### Installation
 
 1. **Clone the repository** (if you haven't already) and navigate to the `frontend` directory:
@@ -54,7 +47,13 @@ To run the frontend locally for development purposes, use the following command 
 npm run dev
 ```
 
-### Visit `http://localhost:3000` in your browser. The application runs at this addrees by default.
+Or using yarn:
+
+```bash
+yarn dev
+```
+
+### Visit `http://localhost:3000` in your browser. The application runs at this address by default.
 
 ### Build for Production
 

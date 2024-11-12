@@ -5,27 +5,38 @@
         title="Datasets"
         subtitle="Excepteur sint  occaecat cupidatat non proident, sunt in culpa qui iest."
         button-label="Provide Dataset"
+        @l-header-action="onDatasetAdded()"
       />
     </div>
     <div
-      v-if="true"
       class="l-datasets__table-container"
     >
       <l-dataset-table :table-data="datasets" />
     </div>
+    <l-file-upload
+      ref="datasetInput"
+      entity="dataset"
+      @l-file-upload="onDatasetUpload($event)"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted} from 'vue'
+import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
-
+import LFileUpload from '@/components/molecules/LFileUpload.vue';
 const datasetStore = useDatasetStore()
 const { datasets } = storeToRefs(datasetStore);
+const datasetInput = ref(null);
 
+const onDatasetAdded = () => { datasetInput.value.input.click() }
+
+const onDatasetUpload = (datasetFile) => {
+  datasetStore.uploadDataset(datasetFile);
+}
 
 onMounted(async () => {
 	await datasetStore.loadDatasets()

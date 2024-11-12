@@ -24,10 +24,10 @@ import Button from 'primevue/button';
   buttonLabel: String
 });
 
-const emits = defineEmits(['action']);
+const emit = defineEmits(['l-header-action']);
 
 const handleAction = () => {
-  emits('action');
+  emit('l-header-action')
 };
 </script>
 

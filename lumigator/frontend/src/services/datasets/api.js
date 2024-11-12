@@ -1,1 +1,1 @@
-export const PATH_GET_ALL_DATASETS = () => `datasets/`
+export const PATH_DATASETS_ROOT = () => `datasets/`

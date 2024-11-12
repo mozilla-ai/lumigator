@@ -1,6 +1,12 @@
 <template>
-  <div class="l-datasets">
-    <div class="l-datasets__header-container">
+  <div
+    class="l-datasets"
+    :class="{'is-empty': datasets.length === 0 || !datasets}"
+  >
+    <div
+      v-if="datasets.length > 0"
+      class="l-datasets__header-container"
+    >
       <l-page-header
         title="Datasets"
         subtitle="Excepteur sint  occaecat cupidatat non proident, sunt in culpa qui iest."
@@ -8,7 +14,12 @@
         @l-header-action="onDatasetAdded()"
       />
     </div>
+    <l-dataset-empty
+      v-else
+      @l-add-dataset="onDatasetAdded()"
+    />
     <div
+      v-if="datasets.length > 0"
       class="l-datasets__table-container"
     >
       <l-dataset-table
@@ -31,6 +42,8 @@ import { useDatasetStore } from '@/stores/datasets/store'
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
+import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
+
 const datasetStore = useDatasetStore()
 const { datasets } = storeToRefs(datasetStore);
 const datasetInput = ref(null);
@@ -68,5 +81,10 @@ onMounted(async () => {
     display: grid;
     width: 100%;
   }
+}
+
+.is-empty {
+  display: grid;
+  place-items: center;
 }
 </style>

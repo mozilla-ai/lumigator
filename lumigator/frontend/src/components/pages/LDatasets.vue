@@ -1,7 +1,7 @@
 <template>
   <div class="l-datasets">
     <div class="l-datasets__list-container">
-      <ul v-if="datasets.length"
+      <ul v-if="datasets && datasets.length"
           class="l-datasets__list"
       >
         <li v-for="dataset in datasets"

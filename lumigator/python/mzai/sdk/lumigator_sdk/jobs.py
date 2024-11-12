@@ -1,9 +1,14 @@
-import asyncio
+"""Jobs SDK
+
+Provides a class to manipulate jobs in Lumigator.
+"""
+
+import time
 from http import HTTPMethod
 from uuid import UUID
 
-from schemas.extras import ListingResponse
-from schemas.jobs import (
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import (
     JobCreate,
     JobResponse,
     JobResultDownloadResponse,
@@ -11,7 +16,7 @@ from schemas.jobs import (
     JobType,
 )
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class Jobs:
@@ -74,7 +79,7 @@ class Jobs:
 
         return JobResponse(**(response.json()))
 
-    async def wait_for_job(self, id: UUID, retries: int = 30, poll_wait: int = 30) -> JobResponse:
+    def wait_for_job(self, id: UUID, retries: int = 180, poll_wait: int = 5) -> JobResponse:
         """Wait for a job to succeed and return latest retrieved information.
 
         .. admonition:: Example
@@ -84,8 +89,7 @@ class Jobs:
                 from sdk.lumigator import LumigatorClient
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                job = lm_client.jobs.wait_for_job(job_id)  # Create the coroutine object
-                result = await job  # Await the coroutine to get the result
+                job = lm_client.jobs.wait_for_job(job_id)
 
         Args:
             id (UUID): The ID of the job to wait for.
@@ -97,12 +101,10 @@ class Jobs:
               job has finished
         """
         for _ in range(1, retries):
-            # http://localhost:8265/api/jobs/f311fa44-025a-4703-b8ba-7e0b1001b484
             response = self.client.get_ray_job_response(f'{id}')
-            # response = requests.get(f"http://localhost:8265/api/jobs/{id}")
             jobinfo = response.json()
             if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
-                await asyncio.sleep(poll_wait)
+                time.sleep(poll_wait)
                 continue
             elif jobinfo["status"] == "FAILED":
                 raise Exception(f"Job {id} failed")

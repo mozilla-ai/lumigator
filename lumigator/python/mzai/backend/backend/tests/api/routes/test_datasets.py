@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 from backend.api.http_headers import HttpHeaders
 

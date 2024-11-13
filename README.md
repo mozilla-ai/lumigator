@@ -1,5 +1,9 @@
 # Mozilla.ai Lumigator 🐊
 
+[![Docs](https://github.com/mozilla-ai/lumigator/actions/workflows/docs.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/docs.yaml)
+[![Tests](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv.yaml)
+[![SDK Tests](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv_sdk.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv_sdk.yaml)
+
 Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
 users select the most suitable language model for their specific needs. Currently, Lumigator
 supports the evaluation of summarization tasks using sequence-to-sequence models such as BART and

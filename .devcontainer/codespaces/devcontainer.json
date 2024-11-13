@@ -1,0 +1,8 @@
+{
+    "name": "Lumigator",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "docker": true
+    },
+    "postCreateCommand": "make start-lumigator"
+}

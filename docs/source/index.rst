@@ -43,6 +43,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
    operation-guides/kubernetes
    operation-guides/alembic
+   operation-guides/dev
 
 .. TODO: Add user-guides and examples here.
 .. .. toctree::

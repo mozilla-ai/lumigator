@@ -11,7 +11,7 @@ on:
 
 jobs:
   integration:
-    name: SDK integration tests
+    name: SDK integration tests - Python
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

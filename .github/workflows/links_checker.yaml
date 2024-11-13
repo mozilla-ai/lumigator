@@ -11,7 +11,7 @@ on:
 
 jobs:
   link-checker:
-    name: Link Checker
+    name: Docs - Link Checker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

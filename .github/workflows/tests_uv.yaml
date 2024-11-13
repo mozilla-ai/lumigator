@@ -1,11 +1,11 @@
-name: Tests
+name: Lumigator integration tests
 
 on:
   push:
 
 jobs:
   uv-example:
-    name: python
+    name: Integration tests - Python
     runs-on: ubuntu-latest
 
     steps:

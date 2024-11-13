@@ -1,191 +1,122 @@
-# Mozilla.ai Lumigator
+# Mozilla.ai Lumigator 🐊
 
-Lumigator is an open-source platform built by [Mozilla.ai](https://www.mozilla.ai/) for guiding users through the process of selecting the right language model for their needs.
-Currently, we support evaluating summarization tasks using sequence-to-sequence models like BART and BERT and causal architectures like GPT and Mistral,
-but will be expanding to other machine learning tasks and use-cases.
+[![Docs](https://github.com/mozilla-ai/lumigator/actions/workflows/docs.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/docs.yaml)
+[![Tests](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv.yaml)
+[![SDK Tests](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv_sdk.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/tests_uv_sdk.yaml)
 
-See [example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthrough.
+Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
+users select the most suitable language model for their specific needs. Currently, Lumigator
+supports the evaluation of summarization tasks using sequence-to-sequence models such as BART and
+BERT, as well as causal models like GPT and Mistral. We plan to expand support to additional machine
+learning tasks and use cases in the future.
 
+To learn more about Lumigator's features and capabilities, see the
+[documentation](https://mozilla-ai.github.io/lumigator/), or get started with the
+[example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthrough.
 
 > [!NOTE]
->
-> Lumigator is in the early stages of development.
-> It is missing important features and documentation.
-> You should expect breaking changes in the core interfaces and configuration structures
-> as development continues.
+> Lumigator is in the early stages of development. It is missing important features and
+> documentation. You should expect breaking changes in the core interfaces and configuration
+> structures as development continues.
 
+## Why Lumigator?
 
-# Docs
+As more organizations turn to AI for solutions, they face the challenge of selecting the best model
+from an ever-growing list of options. The AI landscape is evolving rapidly, with [twice as many new
+models released in 2023 compared to the previous year](https://hai.stanford.edu/research/ai-index-report).
+Yet, in spite of the wealth of metrics available, there’s still no standard way to compare these
+models.
 
-+ **Understanding Evaluation**
-  + [Evaluating Large Language Models](/EVALUATION_GUIDE.md)
-+ **Installing Lumigator**
-  + Building
-    + See below
-  + Using/Testing
-    + [Kubernetes Helm Charts](lumigator/infra/mzai/helm/lumigator/README.md)
-    + [Local install documentation](/.devcontainer/README.md)
-+ **Using Lumigator:**
-  + [Platform Examples](/notebooks/walkthrough.ipynb)
-  + [Lumigator API](/lumigator/README.md)
-  + Offline Evaluations with [lm-buddy](https://github.com/mozilla-ai/lm-buddy)
-+ **Extending Lumigator:**
-  + [Creating a new Lumigator endpoint](lumigator/python/mzai/backend/api/README.md)
+[The 2024 AI Index Report](https://aiindex.stanford.edu/wp-content/uploads/2024/05/HAI_AI-Index-Report-2024.pdf)
+highlighted that AI evaluation tools aren’t (yet) keeping up with the pace of development, making it
+harder for developers and businesses to make informed choices. Without a clear single method for
+comparing models, many teams end up using suboptimal solutions, or just choosing models based on
+hype, slowing down product progress and innovation.
 
+With Lumigator MVP, Mozilla.ai aims to make model selection transparent, efficient, and empowering.
+Lumigator provides a framework for comparing LLMs, using task-specific metrics to evaluate how well
+a model fits your project’s needs. With Lumigator, we want to ensure that you’re not just picking a
+model—you’re picking the right model for your use case.
 
-# Available Machine Learning Tasks
+## Get started
 
-## Summarization
+The simplest way to set up Lumigator is to deploy it locally using Docker Compose. To this end, you
+need to have the following prerequisites installed on your machine:
 
-### Models for Online Ground Truth Generation
+- A working installation of [Docker](https://docs.docker.com/engine/install/).
+    - On a Mac, you need Docker Desktop `4.3` or later and docker-compose `1.28` or later.
+    - On Linux, you need to follow the
+      [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
+- The system Python; no version manager, such as pyenv, should be active.
 
-| Model Type | Model                                        | via HuggingFace | via API |
-|------------|----------------------------------------------|-----------------|---------|
-| seq2seq    | facebook/bart-large-cnn                      |       X         |         |
-| causal     | gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo-0125 |                 |    X    |
-| causal     | open-mistral-7b                              |                 |    X    |
+You can run and develop Lumigator locally using Docker Compose. This creates three container
+services networked together to make up all the components of the Lumigator application:
 
+- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
+- `backend`: Lumigator’s FastAPI REST API.
+- `ray`: A Ray cluster for submitting several types of jobs.
 
-### Models for Offline Evaluation
+> [!NOTE]
+> Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
+> uses SQLite for this purpose.
 
-| Model Type | Model                                        | via HuggingFace | via API |
-|------------|----------------------------------------------|-----------------|---------|
-| seq2seq    | facebook/bart-large-cnn                      |       X         |         |
-| seq2seq    | longformer-qmsum-meeting-summarization       |       X         |         |
-| seq2seq    | mrm8488/t5-base-finetuned-summarize-news     |       X         |         |
-| seq2seq    | Falconsai/text_summarization                 |       X         |         |
-| causal     | gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo-0125 |                 |    X    |
-| causal     | open-mistral-7b                              |                 |    X    |
+To start Lumigator locally, follow these steps:
 
+1. Clone the Lumigator repository:
 
-### Metrics
+    ```bash
+    git clone git@github.com:mozilla-ai/lumigator.git
+    ```
 
-+ ROUGE - (Recall-Oriented Understudy for Gisting Evaluation), which compares an automatically-generated summary to one generated by a machine learning model on a score of 0 to 1 in a range of metrics comparing statistical similarity of two texts.
-+ METEOR - Looks at the harmonic mean of precision and recall
-+ BERTScore - Generates embeddings of ground truth input and model output and compares their cosine similarity
+1. Navigate to the repository root directory:
 
-[Check this link](docs/assets/metrics.png) for a list of pros and cons of each metric and an example of how they work
+    ```bash
+    cd lumigator
+    ```
 
+1. Start Lumigator using Docker Compose:
 
-# Technical Overview
+    ```bash
+    make start-lumigator
+    ```
 
-Lumigator is a Python-based FastAPI web app with REST API endpoints that allow for access to services for serving and evaluating large language models available as safetensor artifacts hosted on both HuggingFace and local stores, with our first primary focus being Huggingface access, and tracking the lifecycle of a model in the backend database (Postgres).
-It consists of:
+To verify that Lumigator is running, open a web browser and navigate to
+[`http://localhost:8000`](http://localhost:8000). You should get the following response:
 
-+ a FastAPI-based web app that includes  huggingface's `evaluate` library for those metrics
-+ a **Ray cluster** to run offline evaluation jobs using `evaluator`
-    + the `evaluator` module runs inference accessing different kind of models, accessible locally or via APIs, and evaluation with huggingface's `evaluate` library or lm-evaluation-harness
-+ Artifact management (S3 in the cloud, localstack locally )
-+ A database to track platform-level tasks and dataset metadata
-
-# Get Started
-
-You can build the local project `docker-compose` on Mac or Linux,  or into a distributed environment using Kubernetes [`Helm charts`](lumigator/infra/mzai/helm/lumigator/README.md)
-
-## Local Requirements
-
-+ [Docker](https://docs.docker.com/engine/install/)
-    + On MAC, Docker Desktop >= 4.3, and docker-compose >= 1.28.
-    + On Linux, please also follow the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
-+ System Python (that is: no version manager, such as pyenv, should be active).
-
-# Running Lumigator
-
-## Running Lumigator Locally
-
-1. `git clone git@github.com:mozilla-ai/lumigator.git`
-2. `make start-lumigator`
-3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the [`docker-compose`](docker-compose.yaml) )
-
-## Running Lumigator with an external services (Ray, S3)
-To configure Lumigator to use external services (Ray and S3), update the relevant values in the `.env` file. Ensure that credentials and endpoints are correctly set for your external services.
-
-`make start-lumigator-external-services`
-
-## Local Development Setup (either Mac or Linux)
-
-1. `git clone git@github.com:mozilla-ai/lumigator.git`
-2. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
-3. To shut down app, `make local-down`
-
-When running Lumigator locally, `.env.example` is provided as a central source for all environment variables. The `make local-up` command will auto-create a `.env` file based on `.env.example` if it doesn’t exist.
-
-### Dev Environment Details
-
-We use `uv` to manage dependencies. Each project under `.../lumigator/lumigator/python/mzai/` is an independent `uv` Python project to isolate dependencies.  Sub-projects are linked together using editable Python package installs.
-
-For each project, here are some handy `uv` commands to work with the repo
-
-Change directory to the project you want to work on  (ie. `lumigator/lumigator/python/mzai/backend`)
-
-**Grab dependencies**
-
-```
-uv sync
+```json
+{"Hello": "Lumigator!🐊"}
 ```
 
-**Run Tests**
+Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
+one could provide different `AWS_*` environment variables to the backend container to connect to any
+provider’s S3-compatible service, instead of localstack. Similarly, one could provide a different
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See
+[here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml)
+for an example of how to do this, and see the
+[operational guides](https://mozilla-ai.github.io/lumigator/operation-guides/kubernetes.html) in the
+documentation for more deployment options.
 
-```
-uv run pytest
-```
+Now that Lumigator is running, you can start using it. The platform provides a REST API that allows
+you to interact with the system. Run the [example notebook](/notebooks/walkthrough.ipynb) for a
+quick walkthrough.
 
-**Add Dependencies to a given project**
-
-```
-uv add package
-```
-
-Make sure to commit the updated uv.lock file
-
-**Run Test Suite Across all projects**
-```
-make test
-```
-
-**Run the app locally via docker compose:**
+To stop the containers you started using Docker Compose, simply run the following command:
 
 ```bash
-make local-up
-make local-logs # gets the logs from docker compose
-make local-down # shuts it down
+make stop-lumigator
 ```
 
-### Environment variable reference
+## Documentation
 
-The `docker-compose` setup described in the [corresponding README](./.devcontainer/README.md) needs several environment variables to work appropriately.
+For the complete Lumigator documentation, visit the
+[docs page](https://mozilla-ai.github.io/lumigator).
 
-If the S3 storage service is used, the endpoint, key and secret are needed. The LocalStack implementation used also requires an authentication token.
+## Contribute
 
-| Environment variable name | Default value | Description |
-| --- | :-: | --- |
-| AWS_ENDPOINT_URL | "" | Endpoint URL for the S3 data storage service. |
-| AWS_ACCESS_KEY_ID | "" | Key for the S3 data storage service. |
-| AWS_SECRET_ACCESS_KEY | "" | Secret for the S3 data storage service. |
-| AWS_DEFAULT_REGION | "" | Default region for the S3 service. |
-| LOCALSTACK_AUTH_TOKEN | "" | Authentication token for the LocalStack service. |
-| S3_BUCKET | lumigator-storage | "" | Bucket name to be used for S3 storage. |
+For contribution guidelines, see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
- Models from Mistral or OpenAI can be used via API instead of instantiating them within Lumigator. In this case, the corresponding key is needed.
+## Questions? Problems? Suggestions?
 
-| Environment variable name | Default value | Description |
-| --- | :-: | --- |
-| MISTRAL_API_KEY | "" | Key for Mistral API models. |
-| OPENAI_API_KEY | "" | Key for OpenAI API models. |
-
-Lumigator uses a database to store its structured data. It needs a database user, a password and a default database.
-
-| Environment variable name | Default value | Description |
-| --- | :-: | --- |
-| POSTGRES_HOST | "" | Host where the postgres db is available.  Currently pointing at `services.postgres`. |
-| POSTGRES_PORT | "" | Port where the postgres db is available (usually 5432). |
-| POSTGRES_USER | "" | Database user holding the lumigator structured data. Needs to match `postgres.environment.POSTGRES_DB`. |
-| POSTGRES_DB | "" | Database name holding the lumigator structured data. Needs to match `postgres.environment.POSTGRES_DB`. |
-
-The Ray cluster used for computing allows several settings through the following variables.
-
-| Environment variable name | Default value | Description |
-| --- | :-: | --- |
-| RAY_DASHBOARD_PORT | "" | Port for accessing the Ray dashboards (usually 8265). |
-| RAY_WORKER_GPUS | "" | Number of GPUs available for worker nodes. |
-| RAY_WORKER_GPUS_FRACTION | "" | Fraction of available GPUs used by worker nodes. |
+To report a bug or request a feature, please open a
+[GitHub issue](https://github.com/mozilla-ai/lumigator/issues/new/choose). Be sure to check if
+someone else has already created an issue for the same topic.

@@ -39,9 +39,11 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Operation Guides
+   :caption: Operations Guide
 
-   operation-guides/kubernetes
+   operations-guide/kubernetes
+   operations-guide/alembic
+   operations-guide/dev
 
 .. TODO: Add user-guides and examples here.
 .. .. toctree::
@@ -55,6 +57,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :caption: Conceptual Guides
 
    conceptual-guides/endpoints
+   conceptual-guides/new-endpoint
 
 .. toctree::
    :maxdepth: 1

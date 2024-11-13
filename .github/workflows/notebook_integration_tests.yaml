@@ -1,4 +1,4 @@
-name: SDK integration tests
+name: Notebook integration tests
 
 on:
   push:

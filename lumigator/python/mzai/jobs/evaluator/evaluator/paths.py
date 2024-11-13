@@ -61,7 +61,7 @@ def is_valid_llamafile_model_name(model_name: str) -> bool:
 
 def validate_asset_path(path: str) -> "AssetPath":
     raw_path = strip_path_prefix(path)
-    
+
     if path.startswith(PathPrefix.FILE):
         if not Path(raw_path).is_absolute():
             raise ValueError(f"'{raw_path}' is not an absolute file path.")

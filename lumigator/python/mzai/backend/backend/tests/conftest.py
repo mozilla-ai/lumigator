@@ -1,4 +1,5 @@
-import json
+import csv
+import io
 import os
 from pathlib import Path
 from s3fs import S3FileSystem
@@ -30,6 +31,42 @@ from backend.tests.fakes.fake_ray_client import FakeJobSubmissionClient
 
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
+
+
+def format_dataset(data: list[list[str]]) -> str:
+    """Format a list of tabular data as a CSV string."""
+    buffer = io.StringIO()
+    csv.writer(buffer).writerows(data)
+    buffer.seek(0)
+    return buffer.read()
+
+
+@pytest.fixture(scope="session")
+def valid_experiment_dataset_without_gt() -> str:
+    data = [
+        ["examples"],
+        ["Hello World"],
+    ]
+    return format_dataset(data)
+
+
+@pytest.fixture(scope="session")
+def missing_examples_dataset() -> str:
+    data = [
+        ["ground_truth"],
+        ["Hello"],
+    ]
+    return format_dataset(data)
+
+
+@pytest.fixture(scope="session")
+def extra_column_dataset() -> str:
+    data = [
+        ["examples", "ground_truth", "extra"],
+        ["Hello World", "Hello", "Nope"],
+    ]
+    return format_dataset(data)
+
 
 @pytest.fixture(scope="function")
 def dialog_dataset():
@@ -160,6 +197,7 @@ def request_mock() -> requests_mock.Mocker:
     with requests_mock.Mocker() as cm:
         yield cm
 
+<<<<<<< HEAD
 @pytest.fixture(scope="function")
 def job_repository(db_session):
     return JobRepository(session=db_session)

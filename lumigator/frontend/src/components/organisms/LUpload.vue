@@ -54,7 +54,8 @@ const uploadFile = async () => {
     // Create a new FormData object and append the selected file and the required format
     const formData = new FormData();
     formData.append('dataset', selectedFile.value); // Attach the file
-    formData.append('format', 'job'); // Specification @localhost:8000/docs
+    // Format can currently only be 'job' (see specification @localhost:8000/docs)
+    formData.append('format', 'job');
 
     const response = await http.post('datasets/', formData, {
       headers: {

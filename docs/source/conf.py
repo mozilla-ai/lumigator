@@ -22,7 +22,7 @@ for path in module_paths:
 
 # import the modules that we want to document here to aboid the autodoc error
 # see: https://github.com/pydantic/pydantic/discussions/7763#discussioncomment-8417097
-from sdk import jobs, lm_datasets  # noqa: F401, E402
+from lumigator_sdk import jobs, lm_datasets  # noqa: F401, E402
 
 project = 'Lumigator 🐊'
 copyright = '2024, Mozilla AI'

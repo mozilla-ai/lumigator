@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from schemas.completions import CompletionRequest
+from lumigator_schemas.completions import CompletionRequest
 
 from backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
 

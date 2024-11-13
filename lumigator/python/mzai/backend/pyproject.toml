@@ -23,8 +23,8 @@ dependencies = [
     "psycopg2-binary==2.9.9",
     # For sqlalchemy
     "python-dotenv>=1.0.1",
-    "schemas",
     "alembic>=1.13.3",
+    "lumigator-schemas",
 ]
 
 [tool.uv]
@@ -35,4 +35,4 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-schemas = { path = "../schemas", editable = true }
+lumigator-schemas = { path = "../schemas", editable = true }

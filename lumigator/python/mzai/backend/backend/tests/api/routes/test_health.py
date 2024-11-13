@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi import status
 from fastapi.testclient import TestClient
-from schemas.extras import HealthResponse
+from lumigator_schemas.extras import HealthResponse
 
 from backend.settings import settings
 

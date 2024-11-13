@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pytest import raises
 from requests.exceptions import HTTPError
-from schemas.jobs import JobCreate, JobType
+from lumigator_schemas.jobs import JobCreate, JobType
 
 from tests.helpers import load_json
 

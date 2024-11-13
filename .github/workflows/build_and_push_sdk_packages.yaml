@@ -1,0 +1,51 @@
+name: SDK Publishing
+
+on:
+  push:
+    tags:
+    # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+jobs:
+  sdk-packaging:
+    name: Package SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Package SDK
+        run: uv build
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Package schemas
+        run: uv build
+        working-directory: lumigator/python/mzai/schemas
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: SDK packages
+          path: |
+            lumigator/python/mzai/schemas/dist/*.whl
+            lumigator/python/mzai/schemas/dist/*.tar.gz
+            lumigator/python/mzai/sdk/dist/*.whl
+            lumigator/python/mzai/sdk/dist/*.tar.gz
+
+      - name: Upload SDK packages to Test PyPI
+        working-directory: lumigator/python/mzai/sdk
+        run: |
+          source .venv/bin/activate
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_sdk*
+
+      - name: Upload schemas packages to Test PyPI
+        working-directory: lumigator/python/mzai/schemas
+        run: |
+          source .venv/bin/activate
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_schemas*

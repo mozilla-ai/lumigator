@@ -2,10 +2,10 @@
 
 The SDK provides the communication and validation primitives needed to contact the Lumigator itself, either locally or remotely.
 
-You can install the lumigator SDK using the usual `pip` tool:
+You can install the lumigator SDK  via `pip` directly or via `uv`:
 
 ```
-pip install lumigator-sdk
+uv pip install lumigator-sdk
 ```
 
 # Sample script

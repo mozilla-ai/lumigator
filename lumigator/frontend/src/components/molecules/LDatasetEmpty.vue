@@ -1,7 +1,7 @@
 <template>
   <div class="l-dataset-empty">
-    <h2>Submit a dataset to start using Lumigator.</h2>
-    <p>
+    <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
+    <p class="l-dataset-empty__instructions">
       Please make sure you have the correct column structure.
       <a
         href="#"
@@ -17,7 +17,7 @@
       class="l-dataset-empty__action-btn"
       @click="emit('l-add-dataset')"
     />
-    <p class="note">Currently only CSV files are supported.</p>
+    <p class="l-dataset-empty__note">Currently only CSV files are supported.</p>
   </div>
 </template>
 
@@ -31,21 +31,16 @@ const emit  = defineEmits(['add-dataset'])
   $root: &;
   margin: auto;
 
-  h2, p {
+  &__instructions {
     color: $l-grey-100;
     font-size: $l-font-size;
     font-weight: $l-font-weight-normal;
   }
 
-  p {
-    margin-bottom: $l-spacing-1;
+  &__note {
+    font-size: $l-font-size-sm;
+    color: $l-grey-100;
   }
-
-  a {
-    background-color: $l-card-bg;
-    color: $l-primary-color;
-  }
-
 
   &__action-btn {
     font-weight: $l-font-weight-normal;
@@ -56,5 +51,14 @@ const emit  = defineEmits(['add-dataset'])
       color: $white;
     }
   }
+  p {
+    margin-bottom: $l-spacing-1;
+  }
+
+  a {
+    background-color: $l-card-bg;
+    color: $l-primary-color;
+  }
+
 }
 </style>

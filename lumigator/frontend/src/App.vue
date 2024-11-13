@@ -9,8 +9,9 @@
     <div class="l-main-container">
       <router-view v-slot="{ Component }">
         <transition name="transition-fade">
-          <component :is="Component"
-                     @s-disable-scroll="disableScroll = $event"
+          <component
+            :is="Component"
+            @s-disable-scroll="disableScroll = $event"
           />
         </transition>
       </router-view>

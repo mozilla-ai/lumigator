@@ -3,8 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Form, HTTPException, UploadFile, status
 from loguru import logger
-from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from schemas.extras import ListingResponse
+from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from lumigator_schemas.extras import ListingResponse
 from starlette.requests import Request
 from starlette.responses import Response
 

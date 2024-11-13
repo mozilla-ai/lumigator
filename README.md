@@ -98,14 +98,17 @@ You can build the local project `docker-compose` on Mac or Linux,  or into a dis
 3. The REST API should be available at http://localhost:8000. (If you need to change the port, you can do it in the [`docker-compose`](docker-compose.yaml) )
 
 ## Running Lumigator with an external services (Ray, S3)
-To run Lumigator with an external services you, fill in the required values in the `docker-compose.external.yaml` file. Once that's done, you can start Lumigator with:
+To configure Lumigator to use external services (Ray and S3), update the relevant values in the `.env` file. Ensure that credentials and endpoints are correctly set for your external services.
 
 `make start-lumigator-external-services`
 
 ## Local Development Setup (either Mac or Linux)
+
 1. `git clone git@github.com:mozilla-ai/lumigator.git`
 2. `make local-up`. For more on `docker-compose`, see the [local install documentation.](/.devcontainer/README.md).
 3. To shut down app, `make local-down`
+
+When running Lumigator locally, `.env.example` is provided as a central source for all environment variables. The `make local-up` command will auto-create a `.env` file based on `.env.example` if it doesn’t exist.
 
 ### Dev Environment Details
 

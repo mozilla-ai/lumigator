@@ -1,8 +1,8 @@
 from http import HTTPMethod, HTTPStatus
 
-from schemas.completions import CompletionResponse
+from lumigator_schemas.completions import CompletionResponse
 
-from sdk.client import ApiClient
+from lumigator_sdk.client import ApiClient
 
 
 class Completions:

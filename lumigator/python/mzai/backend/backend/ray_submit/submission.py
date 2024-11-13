@@ -4,7 +4,7 @@ from typing import Any
 
 import loguru
 from ray.job_submission import JobSubmissionClient
-from schemas.jobs import JobConfig
+from lumigator_schemas.jobs import JobConfig
 
 
 @dataclass(kw_only=True)

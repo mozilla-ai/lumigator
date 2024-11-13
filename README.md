@@ -93,7 +93,7 @@ provider’s S3-compatible service, instead of localstack. Similarly, one could 
 `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See
 [here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml)
 for an example of how to do this, and see the
-[operational guides](https://mozilla-ai.github.io/lumigator/operation-guides/kubernetes.html) in the
+[operational guides](https://mozilla-ai.github.io/lumigator/operations-guide/kubernetes.html) in the
 documentation for more deployment options.
 
 Now that Lumigator is running, you can start using it. The platform provides a REST API that allows

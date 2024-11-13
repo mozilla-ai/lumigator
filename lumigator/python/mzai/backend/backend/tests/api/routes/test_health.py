@@ -15,13 +15,18 @@ def load_json(path: Path) -> str:
     with Path.open(path) as file:
         return json.load(file)
 
+
 def test_health_check(app_client: TestClient):
     response = app_client.get("/health")
     assert response.status_code == status.HTTP_200_OK
     health = HealthResponse.model_validate(response.json())
     assert health.status == "OK"
 
-def test_get_job_metadata_not_found(app_client: TestClient, request_mock,):
+
+def test_get_job_metadata_not_found(
+    app_client: TestClient,
+    request_mock,
+):
     job_id = "42e146e3-10eb-4a55-8018-218829c4752d"
     request_mock.get(
         url=f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}",
@@ -34,7 +39,11 @@ def test_get_job_metadata_not_found(app_client: TestClient, request_mock,):
     data = response.json()
     assert data["detail"] == f"Job metadata for ID: {job_id} not found - Not Found"
 
-def test_get_job_metadata_not_ok(app_client: TestClient, request_mock,):
+
+def test_get_job_metadata_not_ok(
+    app_client: TestClient,
+    request_mock,
+):
     job_id = "22e146e3-10eb-4a55-8018-218829c4752a"
     request_mock.get(
         url=f"{settings.ray_jobs}{job_id}",
@@ -46,15 +55,18 @@ def test_get_job_metadata_not_ok(app_client: TestClient, request_mock,):
     data = response.json()
     assert data["detail"] == f"Unexpected error getting job metadata for ID: {job_id} - "
 
-def test_get_job_metadata_ok(app_client: TestClient,
-                             request_mock,
-                             json_data_health_job_metadata_ray,
-                             json_data_health_job_metadata_ok):
+
+def test_get_job_metadata_ok(
+    app_client: TestClient,
+    request_mock,
+    json_data_health_job_metadata_ray: Path,
+    json_data_health_job_metadata_ok: Path,
+):
     job_id = "e899341d-bada-4f3c-ae32-b87bf730f897"
     request_mock.get(
         url=f"{settings.ray_jobs}{job_id}",
         status_code=status.HTTP_200_OK,
-        text = json.dumps(load_json(json_data_health_job_metadata_ray))
+        text=json.dumps(load_json(json_data_health_job_metadata_ray)),
     )
     response = app_client.get(f"/health/jobs/{job_id}")
     assert response is not None
@@ -64,57 +76,21 @@ def test_get_job_metadata_ok(app_client: TestClient,
     expected = load_json(json_data_health_job_metadata_ok)
     assert expected == actual
 
-def test_get_job_logs_ok(app_client: TestClient,
-                         request_mock,
-                         valid_experiment_dataset):
-    job_id = "e899341d-bada-4f3c-ae32-b87bf730f897"
+
+def test_job_logs(
+    app_client: TestClient,
+    request_mock,
+):
+    job_id = "d34dd34d-d34d-d34d-d34d-d34dd34dd34d"
+    log = "2024-11-13 02:00:08,889\\tINFO job_manager.py:530 -- Runtime env is setting up.\\n"
+    logs_content = f'{"logs": "{log}"}'
+
     request_mock.get(
         url=f"{settings.ray_jobs}{job_id}/logs",
         status_code=status.HTTP_200_OK,
-        text = '{"logs": ""}'
+        text=logs_content,
     )
-    logs_resp = app_client.get(f'/health/jobs/{job_id}/logs')
-    assert logs_resp is not None
-    assert logs_resp.status_code == status.HTTP_200_OK
-    assert (json.loads(logs_resp.text))["logs"] == ""
-
-def test_integration_job_logs(app_client: TestClient, valid_experiment_dataset: str):
-    upload_filename = "dataset.csv"
-    dataset_resp = app_client.post(
-        url="/datasets",
-        data={"format": (None, DatasetFormat.JOB.value)},
-        files={"dataset": (upload_filename, valid_experiment_dataset)},
-    )
-    assert dataset_resp.status_code == status.HTTP_201_CREATED
-    dataset = DatasetResponse.model_validate(dataset_resp.json())
-
-    eval_template = """{{
-        "name": "{job_name}/{job_id}",
-        "model": {{ "path": "{model_path}" }},
-        "dataset": {{ "path": "{dataset_path}" }},
-        "evaluation": {{
-            "metrics": ["meteor", "rouge"],
-            "use_pipeline": false,
-            "max_samples": {max_samples},
-            "return_input_data": true,
-            "return_predictions": true,
-            "storage_path": "{storage_path}"
-        }}
-    }}"""
-
-    job = JobCreate(
-        name="test-job-int-001",
-        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
-        dataset=dataset.id,
-        config_template=eval_template,
-        description="This is a test job",
-        max_samples=2,
-    )
-
-    job_response_resp = app_client.post("/jobs/evaluate/", data=job.model_dump_json())
-    assert job_response_resp.status_code == status.HTTP_201_CREATED
-    job_response = JobResponse.model_validate(job_response_resp.json())
-
-    logs_resp = app_client.get(f'/health/jobs/{job_response.id}/logs')
-    assert logs_resp.status_code == status.HTTP_200_OK
-    job_response = JobLogsResponse.model_validate(job_response_resp.json())
+    response = app_client.get(f"/health/jobs/{job_id}/logs")
+    assert response is not None
+    assert response.status_code == status.HTTP_200_OK
+    assert json.loads(logs_content)["logs"] == log

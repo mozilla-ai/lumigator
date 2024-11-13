@@ -57,16 +57,16 @@ services:
       - NUM_WORKERS=4
       - NUM_CPU_WORKER=1
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
-      - LOCAL_FSSPEC_S3_ENDPOINT_URL=http://localhost:4566 # Should match AWS_ENDPOINT_URL
-      - LOCAL_FSSPEC_S3_KEY=test # Should match AWS_SECRET_ACCESS_KEY
-      - LOCAL_FSSPEC_S3_SECRET=test # Should match AWS_SECRET_ACCESS_KEY
+      - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
+      - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY
+      - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - HF_TOKEN=${HF_TOKEN}
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localhost:4566
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
 
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
@@ -99,19 +99,19 @@ services:
       # The local file needs to be available through a mount,
       # if persistence is needed
       - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
-      - S3_ENDPOINT_URL=http://localhost:4566
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-2
-      - AWS_ENDPOINT_URL=http://localhost:4566
-      - S3_BUCKET=lumigator-storage
+      - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - S3_BUCKET=${S3_BUCKET}
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
       - INFERENCE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/inference/requirements.txt
       - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
-      - RAY_DASHBOARD_PORT=8265
-      - RAY_HEAD_NODE_HOST=ray
+      - RAY_DASHBOARD_PORT=${RAY_DASHBOARD_PORT}
+      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0

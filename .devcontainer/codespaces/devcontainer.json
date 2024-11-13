@@ -2,7 +2,7 @@
     "name": "Lumigator",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-      "docker": true
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
     "postCreateCommand": "make start-lumigator"
 }

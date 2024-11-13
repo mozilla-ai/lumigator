@@ -2,7 +2,11 @@
   <nav class="l-main-menu-container">
     <Menu :model="routes">
       <template #start>
-        <div class="l-main-menu__logo">🐊 Lumigator</div>
+        <div class="l-main-menu__logo">
+          <img
+            src="@/assets/lumigator.svg"
+            alt="lumigator-logo"
+          > Lumigator</div>
       </template>
       <template #item="{ item }">
         <router-link
@@ -44,8 +48,12 @@ import { routes } from '@/router'
     font-weight: 500;
     cursor: default;
 		display: flex;
-		align-items: center;
 		padding: $l-spacing-1/2;
+    padding-top: 0;
+
+    img {
+      height: 1.5em;
+    }
   }
   .logo:hover {
     filter: drop-shadow(0 0 2em #646cffaa);

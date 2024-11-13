@@ -7,7 +7,7 @@ import loguru
 import requests
 from fastapi import APIRouter, HTTPException
 from lumigator_schemas.extras import HealthResponse
-from lumigator_schemas.jobs import JobSubmissionResponse
+from lumigator_schemas.jobs import JobSubmissionResponse, JobLogsResponse
 
 from backend.settings import settings
 

@@ -1,9 +1,7 @@
-import csv
-import io
 import json
 from pathlib import Path
+import urllib
 
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from lumigator_schemas.extras import HealthResponse
@@ -29,7 +27,7 @@ def test_get_job_metadata_not_found(
 ):
     job_id = "42e146e3-10eb-4a55-8018-218829c4752d"
     request_mock.get(
-        url=f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}",
+        url=urllib.parse.urljoin(f"{settings.ray_jobs}", f"{job_id}"),
         status_code=status.HTTP_404_NOT_FOUND,
         text="Not Found",
     )
@@ -46,7 +44,7 @@ def test_get_job_metadata_not_ok(
 ):
     job_id = "22e146e3-10eb-4a55-8018-218829c4752a"
     request_mock.get(
-        url=f"{settings.ray_jobs}{job_id}",
+        url=urllib.parse.urljoin(f"{settings.ray_jobs}", f"{job_id}"),
         status_code=status.HTTP_409_CONFLICT,
     )
     response = app_client.get(f"/health/jobs/{job_id}")
@@ -64,7 +62,7 @@ def test_get_job_metadata_ok(
 ):
     job_id = "e899341d-bada-4f3c-ae32-b87bf730f897"
     request_mock.get(
-        url=f"{settings.ray_jobs}{job_id}",
+        url=urllib.parse.urljoin(f"{settings.ray_jobs}", f"{job_id}"),
         status_code=status.HTTP_200_OK,
         text=json.dumps(load_json(json_data_health_job_metadata_ray)),
     )
@@ -86,11 +84,11 @@ def test_job_logs(
     logs_content = f'{{"logs": "{log}"}}'
 
     request_mock.get(
-        url=f"{settings.ray_jobs}{job_id}/logs",
+        url=urllib.parse.urljoin(f"{settings.ray_jobs}", f"{job_id}/logs"),
         status_code=status.HTTP_200_OK,
         text=logs_content,
     )
     response = app_client.get(f"/health/jobs/{job_id}/logs")
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
-    assert json.loads(logs_content)["logs"] == log
+    assert json.loads(logs_content)["logs"] == json.loads(f'"{log}"')

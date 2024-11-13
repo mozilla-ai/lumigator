@@ -42,9 +42,9 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Invalid JSON response"
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e
+
 
 @router.get("/jobs/{job_id}/logs")
 def get_job_logs(job_id: UUID) -> JobLogsResponse:

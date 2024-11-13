@@ -83,7 +83,7 @@ def test_job_logs(
 ):
     job_id = "d34dd34d-d34d-d34d-d34d-d34dd34dd34d"
     log = "2024-11-13 02:00:08,889\\tINFO job_manager.py:530 -- Runtime env is setting up.\\n"
-    logs_content = f'{"logs": "{log}"}'
+    logs_content = f'{{"logs": "{log}"}}'
 
     request_mock.get(
         url=f"{settings.ray_jobs}{job_id}/logs",

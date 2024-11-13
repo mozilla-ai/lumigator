@@ -29,12 +29,12 @@ include the dataset file. Here is an example:
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
   -H 'Accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
-  -F 'dataset=@'"path/to/dataset.csv"';type=text/csv' \
-  -F 'format=experiment' | jq
+  -F 'dataset=@'"lumigator/python/mzai/sample_data/dialogsum_exc.csv"';type=text/csv' \
+  -F 'format=job' | jq
 {
   "id": "dd15bbaa-8d6f-44ae-a995-b3b78f4ea6fb",
   "filename": "dataset.csv",
-  "format": "experiment",
+  "format": "job",
   "size": 180528,
   "ground_truth": true,
   "created_at": "2024-10-30T12:10:18"
@@ -48,7 +48,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
 from lumigator_sdk.lumigator import LumigatorClient
 from schemas.datasets import DatasetFormat
 
-dataset_path = 'path/to/dataset.csv'
+dataset_path = 'lumigator/python/mzai/sample_data/dialogsum_exc.csv'
 lm_client = LumigatorClient('localhost:8000')
 
 response = lm_client.datasets.create_dataset(
@@ -76,7 +76,7 @@ checking that the uploaded dataset is in the list:
 :sync: tab1
 ```console
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[] | .filename'
-dataset.csv
+dialogsum_exc.csv
 ```
 :::
 

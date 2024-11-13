@@ -45,7 +45,7 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 
-const datasetStore = useDatasetStore()
+const datasetStore = useDatasetStore();
 const { datasets } = storeToRefs(datasetStore);
 const datasetInput = ref(null);
 const onDatasetAdded = () => { datasetInput.value.input.click() }

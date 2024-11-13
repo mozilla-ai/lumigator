@@ -53,7 +53,7 @@ Or using yarn:
 yarn dev
 ```
 
-### Visit `http://localhost:3000` in your browser. The application runs at this address by default.
+Visit `http://localhost:3000` in your browser. The application runs at this address by default.
 
 ### Build for Production
 

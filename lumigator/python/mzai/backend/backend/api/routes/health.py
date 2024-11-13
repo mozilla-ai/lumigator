@@ -2,9 +2,6 @@ import json
 import urllib
 from http import HTTPStatus
 from uuid import UUID
-from typing import Annotated
-
-import loguru
 
 import loguru
 import requests

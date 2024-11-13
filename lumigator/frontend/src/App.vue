@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <div class="header"></div>
+    <div class="header">
+      <l-health-status />
+    </div>
     <div class="l-menu-container">
       <l-menu />
     </div>
@@ -18,6 +20,7 @@
 
 <script setup>
 import LMenu from '@/components/organisms/LMenu.vue'
+import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
 
 </script>
 

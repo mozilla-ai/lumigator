@@ -1,6 +1,9 @@
+import csv
+import io
 import json
 from pathlib import Path
 
+import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from lumigator_schemas.extras import HealthResponse
@@ -29,19 +32,19 @@ def test_get_job_metadata_not_found(app_client: TestClient, request_mock,):
     assert response is not None
     assert response.status_code == status.HTTP_404_NOT_FOUND
     data = response.json()
-    assert data["detail"] == f"Job metadata for ID: {job_id} not found"
+    assert data["detail"] == f"Job metadata for ID: {job_id} not found - Not Found"
 
 def test_get_job_metadata_not_ok(app_client: TestClient, request_mock,):
     job_id = "22e146e3-10eb-4a55-8018-218829c4752a"
     request_mock.get(
-        url=f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}",
+        url=f"{settings.ray_jobs}{job_id}",
         status_code=status.HTTP_409_CONFLICT,
     )
     response = app_client.get(f"/health/jobs/{job_id}")
     assert response is not None
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     data = response.json()
-    assert data["detail"] == f"Unexpected error getting job metadata for ID: {job_id}"
+    assert data["detail"] == f"Unexpected error getting job metadata for ID: {job_id} - "
 
 def test_get_job_metadata_ok(app_client: TestClient,
                              request_mock,
@@ -49,7 +52,7 @@ def test_get_job_metadata_ok(app_client: TestClient,
                              json_data_health_job_metadata_ok):
     job_id = "e899341d-bada-4f3c-ae32-b87bf730f897"
     request_mock.get(
-        url=f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}",
+        url=f"{settings.ray_jobs}{job_id}",
         status_code=status.HTTP_200_OK,
         text = json.dumps(load_json(json_data_health_job_metadata_ray))
     )
@@ -61,7 +64,21 @@ def test_get_job_metadata_ok(app_client: TestClient,
     expected = load_json(json_data_health_job_metadata_ok)
     assert expected == actual
 
-def test_job_logs(app_client: TestClient, valid_experiment_dataset: str):
+def test_get_job_logs_ok(app_client: TestClient,
+                         request_mock,
+                         valid_experiment_dataset):
+    job_id = "e899341d-bada-4f3c-ae32-b87bf730f897"
+    request_mock.get(
+        url=f"{settings.ray_jobs}{job_id}/logs",
+        status_code=status.HTTP_200_OK,
+        text = '{"logs": ""}'
+    )
+    logs_resp = app_client.get(f'/health/jobs/{job_id}/logs')
+    assert logs_resp is not None
+    assert logs_resp.status_code == status.HTTP_200_OK
+    assert (json.loads(logs_resp.text))["logs"] == ""
+
+def test_integration_job_logs(app_client: TestClient, valid_experiment_dataset: str):
     upload_filename = "dataset.csv"
     dataset_resp = app_client.post(
         url="/datasets",
@@ -98,7 +115,6 @@ def test_job_logs(app_client: TestClient, valid_experiment_dataset: str):
     assert job_response_resp.status_code == status.HTTP_201_CREATED
     job_response = JobResponse.model_validate(job_response_resp.json())
 
-    print(f'--> /health/jobs/{job_response.id}/logs')
     logs_resp = app_client.get(f'/health/jobs/{job_response.id}/logs')
-    print(f"--> {logs_resp.content}")
     assert logs_resp.status_code == status.HTTP_200_OK
+    job_response = JobLogsResponse.model_validate(job_response_resp.json())

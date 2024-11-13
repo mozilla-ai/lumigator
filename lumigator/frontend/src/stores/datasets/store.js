@@ -4,10 +4,15 @@ import datasetsService from "@/services/datasets/datasetsService";
 
 export const useDatasetStore = defineStore('dataset', () => {
   const datasets = ref([]);
+  const selectedDataset = ref(null);
 
 
   async function loadDatasets() {
     datasets.value = await datasetsService.fetchDatasets();
+  }
+
+  async function loadDatasetInfo(datasetID) {
+    selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID);
   }
 
   async function uploadDataset(datasetFile) {
@@ -32,6 +37,8 @@ export const useDatasetStore = defineStore('dataset', () => {
   return {
     datasets,
     loadDatasets,
+    selectedDataset,
+    loadDatasetInfo,
     uploadDataset,
     deleteDataset
   }

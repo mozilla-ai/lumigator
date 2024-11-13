@@ -11,6 +11,16 @@ async function fetchDatasets() {
   }
 }
 
+async function fetchDatasetInfo(id) {
+  try {
+    const response = await http.get(PATH_SINGLE_DATASET(id));
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dataset info:", error.message || error);
+    return [];
+  }
+}
+
 async function postDataset(formData) {
   try {
     const response = await http.post(PATH_DATASETS_ROOT(), formData, {
@@ -40,6 +50,7 @@ async function deleteDataset(id) {
 
 export default {
   fetchDatasets,
+  fetchDatasetInfo,
   postDataset,
   deleteDataset
 }

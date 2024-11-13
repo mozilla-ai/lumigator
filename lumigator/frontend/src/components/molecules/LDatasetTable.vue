@@ -4,6 +4,7 @@
       :value="tableData"
       tableStyle="min-width: min(80vw, 1200px)"
       scrollable
+      @row-click="emit('l-dataset-selected', $event.data)"
     >
       <Column
         field="filename"
@@ -47,7 +48,7 @@
         <template #body="slotProps">
           <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
                 aria-controls="optionsMenu"
-                @click="togglePopover($event, slotProps.data)"
+                @click.stop="togglePopover($event, slotProps.data)"
           />
         </template>
       </Column>
@@ -83,7 +84,7 @@ defineProps({
 	}
 })
 
-const emit = defineEmits(['l-delete-dataset'])
+const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
 
 const confirm = useConfirm();
 const focusedDataset = ref(null);

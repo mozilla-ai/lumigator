@@ -24,6 +24,7 @@
     >
       <l-dataset-table
         :table-data="datasets"
+        @l-dataset-selected="onDatasetSelected($event)"
         @l-delete-dataset="onDeleteDataset($event)"
       />
     </div>
@@ -47,7 +48,6 @@ import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 const datasetStore = useDatasetStore()
 const { datasets } = storeToRefs(datasetStore);
 const datasetInput = ref(null);
-
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {
@@ -56,6 +56,10 @@ const onDatasetUpload = (datasetFile) => {
 
 const onDeleteDataset = (datasetID) => {
   datasetStore.deleteDataset(datasetID);
+}
+
+const onDatasetSelected = (dataset) => {
+  datasetStore.loadDatasetInfo(dataset.id);
 }
 
 onMounted(async () => {

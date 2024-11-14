@@ -1,8 +1,7 @@
-'''
-Integration tests for the SDK. The lumigator backend needs to
+"""Integration tests for the SDK. The lumigator backend needs to
 be started prior to running these tests using
 `make start-lumigator-build`.
-'''
+"""
 from pathlib import Path
 from time import sleep
 
@@ -10,7 +9,6 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobCreate, JobType
-
 
 '''
 Test the healthcheck endpoint.

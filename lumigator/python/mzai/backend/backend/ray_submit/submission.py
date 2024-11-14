@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import loguru
-from ray.job_submission import JobSubmissionClient
 from lumigator_schemas.jobs import JobConfig
+from ray.job_submission import JobSubmissionClient
 
 
 @dataclass(kw_only=True)

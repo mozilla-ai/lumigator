@@ -16,7 +16,7 @@ def configs_with_missing_field(cfgd):
                 d_copy[k] = d_child
                 yield d_copy
 
-        # after removing each son, finally remove the parent
+        # after removing each child, finally remove the parent
         print(f"Removing {k}")
         del d_copy[k]
         # return the dict without the key

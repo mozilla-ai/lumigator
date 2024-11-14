@@ -5,7 +5,7 @@ on:
 
 jobs:
   uv-example:
-    name: Integration tests - Python
+    name: Backend integration tests - Python
     runs-on: ubuntu-latest
 
     steps:

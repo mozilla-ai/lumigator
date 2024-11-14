@@ -7,11 +7,12 @@ import loguru
 import requests
 from fastapi import APIRouter, HTTPException
 from lumigator_schemas.extras import HealthResponse
-from lumigator_schemas.jobs import JobSubmissionResponse, JobLogsResponse
+from lumigator_schemas.jobs import JobLogsResponse, JobSubmissionResponse
 
 from backend.settings import settings
 
 router = APIRouter()
+
 
 @router.get("/")
 def get_health() -> HealthResponse:
@@ -75,8 +76,7 @@ def get_job_logs(job_id: UUID) -> JobLogsResponse:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Invalid JSON response"
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e
 
 
@@ -100,6 +100,5 @@ def get_all_jobs() -> list[JobSubmissionResponse]:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Invalid JSON response"
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e

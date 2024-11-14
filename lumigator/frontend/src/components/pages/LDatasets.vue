@@ -64,6 +64,11 @@ const onDatasetUpload = (datasetFile) => {
 }
 
 const onDeleteDataset = (datasetID) => {
+  if (datasetID === selectedDataset.value.id) {
+    selectedDataset.value = null;
+    showSlidingPanel.value = false;
+  }
+
   datasetStore.deleteDataset(datasetID);
 }
 

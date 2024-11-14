@@ -17,7 +17,6 @@ def test_create_job_ok_all(
     mock_requests_response.json = lambda: data
 
     job_json = load_json(json_data_job_all)
-    print(JobEvalCreate.model_validate(job_json))
     job_ret = lumi_client.jobs.create_job(
         JobType.EVALUATION, JobEvalCreate.model_validate(job_json)
     )
@@ -39,7 +38,6 @@ def test_create_job_ok_minimal(
     mock_requests_response.json = lambda: data
 
     job_json = load_json(json_data_job_minimal)
-    print(JobEvalCreate.model_validate(job_json))
     job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"

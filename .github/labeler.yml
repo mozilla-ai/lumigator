@@ -1,0 +1,15 @@
+backend:
+- changed-files:
+  - any-glob-to-any-file: 'lumigator/python/mzai/backend/*'
+documentation:
+- changed-files:
+  - any-glob-to-any-file: 'docs/*'
+frontend:
+- changed-files:
+  - any-glob-to-any-file: 'lumigator/frontend/*'
+gha:
+- changed-files:
+  - any-glob-to-any-file: '.github/workflows/*'
+sdk:
+- changed-files:
+  - any-glob-to-any-file: 'lumigator/python/mzai/sdk/*'

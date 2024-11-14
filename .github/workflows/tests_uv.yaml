@@ -1,11 +1,11 @@
-name: Tests
+name: Lumigator backend tests
 
 on:
   push:
 
 jobs:
-  uv-example:
-    name: python
+  backend-integration-tests:
+    name: Backend integration tests - Python
     runs-on: ubuntu-latest
 
     steps:
@@ -14,7 +14,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Install python
+      - name: Install Python
         run: uv python install
         working-directory: lumigator/python/mzai/backend
 

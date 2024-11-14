@@ -1,11 +1,11 @@
-name: SDK Tests
+name: SDK tests
 
 on:
   push:
 
 jobs:
-  uv-example:
-    name: python
+  sdk-unit-tests:
+    name: SDK unit tests - Python
     runs-on: ubuntu-latest
 
     steps:

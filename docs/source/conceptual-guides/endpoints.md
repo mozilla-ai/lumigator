@@ -13,16 +13,15 @@ cluster, SQL database, and S3-compatible Storage) are the different services Lum
 The components inside the backend, shown in the image below, are the different abstraction layers
 the backend itself relies on:
 
-* The **API** makes backend functionalities available to the UI through different **routes** (code
-  [here](https://github.com/mozilla-ai/lumigator/tree/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/routes)).
+* The **API** makes backend functionalities available to the UI through different **routes** (see: [schema code](https://github.com/mozilla-ai/lumigator/tree/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/routes)).
   [**Schemas**](https://github.com/mozilla-ai/lumigator/tree/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/schemas/schemas)
   are used in the API which allows one to exactly know which kind of data has to be passed to it.
 
 * **Services** implement the actual functionalities and are called by the different methods exposed
-  in the API (code [here](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/services)).
+  in the API (see: [backend services](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/services)).
 
 * **Repositories** implement the [repository pattern](https://www.cosmicpython.com/book/chapter_02_repository.html)
-  as an abstraction over the SQL database (code [here](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/repositories)).
+  as an abstraction over the SQL database (see: [code for repositories](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/repositories)).
   They make use of [record classes](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/records) to refer to actual records in the database.
 
 ![Lumigator Backend](../../assets/lumigator-backend.svg)
@@ -40,7 +39,7 @@ All the endpoints you can access in Lumigator's API are defined in
 [`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/tree/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/routes)
 and explicitly listed in
 [`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/router.py),
-together with a metadata tag (defined [here](https://github.com/mozilla-ai/lumigator/blob/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/tags.py))
+together with a [metadata tag](https://github.com/mozilla-ai/lumigator/blob/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/api/tags.py)
 which is used to provide a short description of the route.
 
 Let us now walk through a few examples to understand how Lumigator's endpoints work.
@@ -60,8 +59,7 @@ def get_health() -> HealthResponse:
 Note that the returned type is a `HealthResponse`: this is a
 [pydantic model](https://docs.pydantic.dev/latest/api/base_model/) defining the schema of the
 returned data. The general rule is that all return values in our routes should match a predefined
-schema. Schemas are defined under the `schemas` directory (in particular, `HealthResponse` can be
-found [here](https://github.com/mozilla-ai/lumigator/blob/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/schemas/schemas/extras.py#L16)),
+schema. Schemas are defined under the `schemas` directory (see: [health response in our source code](https://github.com/mozilla-ai/lumigator/blob/d87dc33b4578d1fe89277ba2412ab53857c9cad8/lumigator/python/mzai/schemas/lumigator_schemas/extras.py#L16)),
 typically in files with the same name of the route, service, etc.
 
 All the code for `get_health()` appears in the route file. A `HealthResponse`, composed of a
@@ -85,7 +83,7 @@ def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse
   [`backend/services/datasets.py`](https://github.com/mozilla-ai/lumigator/blob/b1ea63ba3e1aae5907e46ffbe9bfd809253c6053/lumigator/python/mzai/backend/backend/services/datasets.py).
 
 * Instead of directly passing a `DatasetService` to the `get_dataset` method, DatasetServiceDep is
-  defined to perform a *dependency injection* (see
+  defined to perform a *dependency injection* (see:
   [FastAPI's dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/)).
 
 * As with the `/health` endpoint, a *schema* defines the return type (in this case a
@@ -150,7 +148,7 @@ see how the fields in the datasets table are defined).
 
 ![Records inheritance](../../assets/records_inheritance.jpg)
 
-Definition of the fields appearing in DatasetRecord:
+Definition of the fields appearing in `DatasetRecord`:
 
 ![Table Schema](../../assets/table_schema.png)
 

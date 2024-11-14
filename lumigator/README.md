@@ -1,18 +1,23 @@
-# Lumigator API
+# Lumigator
 
-## Uploading a dataset
-Lumigator expects you to first import your data on its object storage and then saves experiment outputs in the same place. 
-Localstack takes care of this abstraction by creating a local object storage on disk that can be accessed via AWS or any S3-compatible storage.  
+Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) designed to
+help users select the most appropriate language model for their needs. It supports tasks such as
+evaluating summarization using sequence-to-sequence models (like BART and BERT) and causal models
+(like GPT and Mistral), with plans to expand to other machine learning tasks and use cases in the
+future.
 
-The simplest way you can test a dataset upload to the platform is by directly accessing the API at the [OpenAPI doc URL](http://localhost/docs). 
-Expand the Upload dataset section, click on `Try it out`, provide a dataset (you can browse and get it from disk) and click on `Execute`. 
-If everything works properly, you should be able to see a JSON response in the Response body section that contains fields such as id (the one you will use to refer to this dataset from now on), filename, format, and so on.
-Your dataset is stored on Lumigator!
+## `infra` Directory
 
-You can now perform different operations, e.g.:
-+ see if it appears in `List datasets`
-+ open `Get dataset` and provide the dataset UUID to get its metadata back
+The `infra` directory contains all necessary infrastructure files for deploying Lumigator,
+including:
 
-## Running an Experiment
+- **HELM charts**: For deploying Lumigator on Kubernetes.
+- **YAML configuration files**: For deploying Ray clusters.
 
-For step-by-step details, see the [demo notebook.](/notebooks/walkthrough.ipynb) 
+## `python` Directory
+
+The `python` directory contains the source code for the core functionality of Lumigator,
+including:
+
+- **SDK**: A Python SDK for interacting with Lumigator services.
+- **Backend API**: The backend API that mkes the platform's features available.

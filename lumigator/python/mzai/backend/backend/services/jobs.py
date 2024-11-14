@@ -3,7 +3,6 @@ from uuid import UUID
 
 import loguru
 from fastapi import HTTPException, status
-from ray.job_submission import JobSubmissionClient
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
@@ -14,6 +13,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from ray.job_submission import JobSubmissionClient
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job

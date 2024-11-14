@@ -1,0 +1,38 @@
+{
+  "name": "lumigator-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --fix",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@primevue/themes": "^4.1.1",
+    "axios": "^1.7.7",
+    "install": "^0.13.0",
+    "npm": "^10.9.0",
+    "pinia": "^2.2.6",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.1.1",
+    "vue": "^3.5.10",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-vue": "^9.30.0",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "sass": "^1.80.3",
+    "sass-embedded": "^1.80.3",
+    "sass-loader": "^16.0.2",
+    "vite": "^5.4.8"
+  }
+}

@@ -1,4 +1,4 @@
-name: SDK integration tests
+name: SDK tests
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  integration:
+  sdk-integration-tests:
     name: SDK integration tests - Python
     runs-on: ubuntu-latest
     steps:

@@ -112,11 +112,6 @@ oai_infer_template = """{{
 templates = {
     JobType.INFERENCE: {
         "default": causal_infer_template,
-        "hf://facebook/bart-large-cnn": bart_eval_template,
-        "hf://mikeadimech/longformer-qmsum-meeting-summarization": seq2seq_eval_template,
-        "hf://mrm8488/t5-base-finetuned-summarize-news": seq2seq_eval_template,
-        "hf://Falconsai/text_summarization": seq2seq_eval_template,
-        "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
         "oai://gpt-4o-mini": oai_infer_template,
         "oai://gpt-4-turbo": oai_infer_template,
         "oai://gpt-3.5-turbo-0125": oai_infer_template,

@@ -6,13 +6,11 @@
       style="display: none"
       @change="handleFileChange"
     />
-    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
 
 
@@ -61,15 +59,20 @@ function confirmUpload() {
   })
 }
 
-function cancelUpload() {
-  // Clear the file input and reset state
-  input.value.value = '';
+function reset() {
+  input.value.value = null;
   selectedFile.value = null;
   fileName.value = '';
 }
 
+function cancelUpload() {
+  // Clear the file input and reset state
+  reset();
+}
+
 function uploadConfirmed() {
   emit('l-file-upload', selectedFile.value);
+  reset();
 }
 
 defineExpose({

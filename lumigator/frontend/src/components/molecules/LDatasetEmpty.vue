@@ -23,7 +23,7 @@
 
 <script setup>
 import Button from 'primevue/button';
-const emit  = defineEmits(['add-dataset'])
+const emit  = defineEmits(['l-add-dataset'])
 </script>
 
 <style scoped lang="scss">

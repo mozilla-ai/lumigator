@@ -1,4 +1,4 @@
-name: Lumigator integration tests
+name: Lumigator backend tests
 
 on:
   push:

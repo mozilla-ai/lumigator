@@ -5,7 +5,7 @@ on:
 
 jobs:
   uv-example:
-    name: SDK tests - Python
+    name: SDK unit tests - Python
     runs-on: ubuntu-latest
 
     steps:

@@ -67,7 +67,6 @@
       :popup="true"
       :pt="ptConfigOptionsMenu"
     >
-      <ConfirmDialog></ConfirmDialog>
     </Menu>
   </div>
 </template>
@@ -77,8 +76,6 @@ import { ref, computed, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from "primevue/useconfirm";
 import { useSlidePanel } from '@/composables/SlidingPanel';
 
 defineProps({
@@ -100,7 +97,6 @@ const style = computed(() => {
 
 const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
 
-const confirm = useConfirm();
 const focusedDataset = ref(null);
 const tableVisible = ref(true)
 const optionsMenu = ref();
@@ -124,7 +120,7 @@ const options = ref([
 		label: 'Delete',
     icon: 'pi pi-trash',
     command: () => {
-      deleteConfirmation()
+      emit('l-delete-dataset', focusedDataset.value)
     }
 	},
 ])
@@ -156,31 +152,6 @@ const togglePopover = (event, dataset) => {
 	optionsMenu.value.toggle(event);
 }
 
-function deleteConfirmation() {
-  confirm.require({
-    message: `${focusedDataset.value.filename}`,
-    header: 'Delete  dataset ?',
-    icon: 'pi pi-info-circle',
-    rejectLabel: 'Cancel',
-    rejectProps: {
-      label: 'Cancel',
-      severity: 'secondary',
-      outlined: true
-    },
-    acceptProps: {
-      label: 'Delete',
-      severity: 'danger'
-    },
-    accept: () => {
-      emit('l-delete-dataset', focusedDataset.value.id);
-      focusedDataset.value = null;
-    },
-    reject: () => {
-      focusedDataset.value = null;
-    }
-  });
-}
-
 watch(showSlidingPanel, () => {
   tableVisible.value = false;
   setTimeout(() => {
@@ -210,7 +181,7 @@ watch(showSlidingPanel, () => {
 //  In order to have effect the following
 // css rules must not be "scoped" because
 // the popup-menu is attached to the DOM after the
-// component is mounted
+// parent component is mounted
 .l-dataset-table__options-menu {
 	padding: 0 $l-spacing-1;
 }

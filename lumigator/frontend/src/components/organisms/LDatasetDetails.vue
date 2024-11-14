@@ -30,7 +30,7 @@
           icon="pi pi-trash"
           variant="text"
           rounded
-          aria-label="Close"
+          @click="emit('l-delete-dataset', selectedDataset)"
         />
       </span>
     </div>
@@ -69,6 +69,7 @@ const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 
+const emit = defineEmits(['l-delete-dataset'])
 const formatDate = (dateString) => {
 	const date = new Date(dateString);
 	return new Intl.DateTimeFormat('en-GB', {

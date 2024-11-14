@@ -30,6 +30,9 @@ export const useDatasetStore = defineStore('dataset', () => {
 
   async function deleteDataset(id) {
     if (!id) { return };
+    if (selectedDataset.value && id === selectedDataset.value.id) {
+      selectedDataset.value = null
+    }
     await datasetsService.deleteDataset(id);
     await loadDatasets();
   }

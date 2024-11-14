@@ -25,7 +25,7 @@
       <l-dataset-table
         :table-data="datasets"
         @l-dataset-selected="onDatasetSelected($event)"
-        @l-delete-dataset="onDeleteDataset($event)"
+        @l-delete-dataset="deleteConfirmation($event)"
       />
     </div>
     <l-file-upload
@@ -34,11 +34,14 @@
       @l-file-upload="onDatasetUpload($event)"
     />
     <Teleport
-      v-if="selectedDataset"
       to=".sliding-panel"
     >
-      <l-dataset-details />
+      <l-dataset-details
+        v-if="selectedDataset"
+        @l-delete-dataset="deleteConfirmation($event)"
+      />
     </Teleport>
+    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
 
@@ -52,11 +55,41 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
 const datasetInput = ref(null);
+const confirm = useConfirm();
+
+function deleteConfirmation(dataset) {
+  confirm.require({
+    message: `${dataset.filename}`,
+    header: 'Delete  dataset ?',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      onDeleteDataset(dataset.id)
+      if (!selectedDataset.value && showSlidingPanel.value) {
+        showSlidingPanel.value = false
+      }
+    },
+    reject: () => {}
+  });
+}
+
+
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {

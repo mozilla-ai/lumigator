@@ -134,7 +134,7 @@ To build the frontend for production, run:
 user@host:~/lumigator/lumigator/frontend$ npm run build
 ```
 
-This command will bundle the frontend code into a production-ready, optimized set of static assets located in the `dist` directory. By default `dist` is placed in project's root directory ( `./frontend` in this case) .
+This command will bundle the frontend code into a production-ready, optimized set of static assets located in the `dist` directory. By default `dist` is placed in project's root directory ( `./lumigator/frontend` in this case).
 
 ### Linting and Code Formatting
 

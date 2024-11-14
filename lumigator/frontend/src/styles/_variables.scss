@@ -18,10 +18,12 @@ $l-text-secondary-color: #b3b3b3;
 $l-font-family: 'Inter', sans-serif;
 $l-font-size: 1rem;
 $l-font-size-sm: 12px;
+$l-font-size-md: 16px;
 $l-menu-font-size: 14px;
 $l-table-font-size: 14px;
 $l-font-weight-normal: 400;
 $l-font-weight-bold: 600;
+$l-button-icon-only-width: 1.5rem;
 
 // Spacing and Borders
 $l-main-radius: 8px;
@@ -41,4 +43,4 @@ $l-button-text-color: #000000;
 $l-button-hover-bg: darken($l-primary-color, 10%);
 
 // Sizes
-$l-sliding-panel-size: 330px;
+$l-sliding-panel-size: 300px;

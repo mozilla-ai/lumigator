@@ -20,13 +20,10 @@
       <div class="sliding-panel"
            :class="{ open: showSlidingPanel }"
       >
-        <p v-if="showSlidingPanel">Sliding Panel Content</p>
       </div>
     </div>
   </div>
 </template>
-
-
 
 <script setup>
 import LMenu from '@/components/organisms/LMenu.vue';

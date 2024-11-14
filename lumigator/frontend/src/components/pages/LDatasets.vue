@@ -33,6 +33,12 @@
       entity="dataset"
       @l-file-upload="onDatasetUpload($event)"
     />
+    <Teleport
+      v-if="selectedDataset"
+      to=".sliding-panel"
+    >
+      <l-dataset-details />
+    </Teleport>
   </div>
 </template>
 
@@ -40,14 +46,15 @@
 import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
+import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
-import { useSlidePanel } from '@/composables/SlidingPanel';
+import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
 
 const datasetStore = useDatasetStore();
-const { datasets } = storeToRefs(datasetStore);
+const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
 const datasetInput = ref(null);
 const onDatasetAdded = () => { datasetInput.value.input.click() }

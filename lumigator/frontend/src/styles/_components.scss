@@ -75,3 +75,11 @@
 	background-color:$l-card-bg ;
 	font-size:$l-table-font-size;
 }
+.p-button-icon-only.p-button-rounded {
+  height:   $l-button-icon-only-width!important;
+  width:  $l-button-icon-only-width;
+  span {
+   font-size: 10px;
+
+  }
+}

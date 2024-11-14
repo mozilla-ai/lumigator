@@ -22,7 +22,7 @@ documentation.
 
 ## Test instructions
 
-The SDK contains both unit tests (requiring no additional containers) and integration tests (requiring a live lumigator backend). By default only unit tests are run.
+The SDK contains both unit tests (requiring no additional containers) and integration tests (requiring a live Lumigator backend). By default only unit tests are run.
 
 To run unit tests, please use:
 

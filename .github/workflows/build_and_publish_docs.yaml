@@ -3,13 +3,11 @@ name: Build and publish docs
 on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-  pull_request:
-    branches:
-      - "**"
-  # separate workflow that runs on PRs to main
+  workflow_run:
+    workflows:
+      - Link checker
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -20,6 +18,7 @@ jobs:
   build-docs:
     name: Build and publish docs
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code

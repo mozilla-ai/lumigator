@@ -1,0 +1,32 @@
+@import 'variables';
+
+// Menu Styling
+.p-menu {
+  background-color: $l-menu-bg;
+  font-family: $l-font-family;
+	padding: $l-spacing-1 0;
+	border: none;
+
+  &-item {
+		cursor: pointer;
+		
+		:hover {
+			background-color: $l-menu-bg;
+		}
+  }
+}
+
+// Button Styling
+.p-button {
+  background-color: $l-primary-color;
+  color: $l-primary-color-text;
+  padding: 0.75rem 1.5rem;
+  border-radius: $l-button-border-radius;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: $l-button-hover-bg;
+  }
+}

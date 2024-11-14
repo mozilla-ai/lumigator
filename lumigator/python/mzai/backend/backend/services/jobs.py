@@ -3,10 +3,15 @@ from uuid import UUID
 
 import loguru
 from fastapi import HTTPException, status
+<<<<<<< HEAD
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from schemas.extras import ListingResponse
 from schemas.jobs import (
+=======
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import (
+>>>>>>> main
     JobConfig,
     JobEvalCreate,
     JobInferenceCreate,
@@ -16,6 +21,7 @@ from schemas.jobs import (
     JobStatus,
     JobType,
 )
+from ray.job_submission import JobSubmissionClient
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job

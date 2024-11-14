@@ -5,6 +5,7 @@ from pathlib import Path
 from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from backend.api.router import api_router
@@ -48,6 +49,19 @@ def create_app() -> FastAPI:
     _init_db()
 
     app = FastAPI(**LUMIGATOR_APP_TAGS)
+
+    # Adding CORS middleware
+    origins = [
+        "http://localhost",
+        "http://localhost:3000",
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Adjust this list as needed for security (e.g., ["http://localhost:3000"])
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(api_router)
 

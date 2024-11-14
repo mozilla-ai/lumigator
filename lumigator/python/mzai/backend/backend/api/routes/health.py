@@ -1,10 +1,12 @@
 import json
+from http import HTTPStatus
 from uuid import UUID
 
+import loguru
 import requests
-from fastapi import APIRouter
-from schemas.extras import HealthResponse
-from schemas.jobs import JobSubmissionResponse
+from fastapi import APIRouter, HTTPException
+from lumigator_schemas.extras import HealthResponse
+from lumigator_schemas.jobs import JobSubmissionResponse
 
 from backend.settings import settings
 
@@ -19,17 +21,30 @@ def get_health() -> HealthResponse:
 @router.get("/jobs/{job_id}")
 def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
     resp = requests.get(f"{settings.RAY_DASHBOARD_URL}/api/jobs/{job_id}")
-    if resp.status_code == 200:
-        try:
-            metadata = json.loads(resp.text)
-            return JobSubmissionResponse(**metadata)
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-            print(f"Response text: {resp.text}")
-            return {"error": "Invalid JSON response"}
-    else:
-        return {"error": f"HTTP error {resp.status_code}"}
 
+    if resp.status_code == HTTPStatus.NOT_FOUND:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job metadata for ID: {job_id} not found",
+        )
+    elif resp.status_code != HTTPStatus.OK:
+        loguru.logger.error(f"Unexpected status code getting job metadata text: {resp.status_code}")
+        loguru.logger.error(f"Upstream job metadata response: {resp}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error getting job metadata for ID: {job_id}",
+        )
+
+    try:
+        metadata = json.loads(resp.text)
+        return JobSubmissionResponse(**metadata)
+    except json.JSONDecodeError as e:
+        loguru.logger.error(f"JSON decode error: {e}")
+        loguru.logger.error(f"Response text: {resp.text}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Invalid JSON response"
+        ) from e
 
 @router.get("/jobs/")
 def get_all_jobs() -> list[JobSubmissionResponse]:

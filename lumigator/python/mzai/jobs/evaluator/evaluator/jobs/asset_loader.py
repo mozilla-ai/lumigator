@@ -49,8 +49,12 @@ class HuggingFaceAssetLoader:
         """
         raw_path = strip_path_prefix(path)
         if path.startswith(
-            (PathPrefix.FILE, PathPrefix.HUGGINGFACE, PathPrefix.OPENAI, PathPrefix.MISTRAL)
-        ):
+    (
+        PathPrefix.FILE, PathPrefix.HUGGINGFACE, PathPrefix.OPENAI, 
+        PathPrefix.MISTRAL, PathPrefix.LLAMAFILE
+    )
+):
+
             return raw_path
         elif path.startswith(PathPrefix.WANDB):
             artifact = get_artifact_from_api(raw_path)

@@ -1,13 +1,24 @@
-import asyncio
+"""Integration tests for the SDK. The lumigator backend needs to
+be started prior to running these tests using
+`make start-lumigator-build`.
+"""
 from pathlib import Path
 from time import sleep
 
 import requests
 from loguru import logger
+<<<<<<< HEAD
 from schemas.datasets import DatasetFormat
 from schemas.jobs import JobEvalCreate, JobType
 
+=======
+from lumigator_schemas.datasets import DatasetFormat
+from lumigator_schemas.jobs import JobCreate, JobType
+>>>>>>> main
 
+'''
+Test the healthcheck endpoint.
+'''
 def test_sdk_healthcheck_ok(lumi_client):
     healthy = False
     for i in range(10):
@@ -21,25 +32,31 @@ def test_sdk_healthcheck_ok(lumi_client):
     assert healthy
 
 
+'''
+Test the `get_datasets` endpoint.
+'''
 def test_get_datasets_remote_ok(lumi_client):
     datasets = lumi_client.datasets.get_datasets()
     assert datasets is not None
 
-
+'''
+Test a complete dataset lifecycle test: add a new dataset,
+list datasets, remove the dataset
+'''
 def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
-    with Path.open(dialog_data) as file:
-        datasets = lumi_client.datasets.get_datasets()
-        before = datasets.total
-        dataset = lumi_client.datasets.create_dataset(dataset=file, format=DatasetFormat.JOB)
-        datasets = lumi_client.datasets.get_datasets()
-        after = datasets.total
-        dataset = lumi_client.datasets.get_dataset(datasets.items[0].id)
-        assert dataset is not None
-        lumi_client.datasets.delete_dataset(datasets.items[0].id)
-        datasets = lumi_client.datasets.get_datasets()
-        assert after - before == 1
+    datasets = lumi_client.datasets.get_datasets()
+    n_initial_datasets = datasets.total
+    lumi_client.datasets.create_dataset(dataset=dialog_data, format=DatasetFormat.JOB)
+    datasets = lumi_client.datasets.get_datasets()
+    n_current_datasets = datasets.total
+    created_dataset = lumi_client.datasets.get_dataset(datasets.items[0].id)
+    assert created_dataset is not None
+    lumi_client.datasets.delete_dataset(datasets.items[0].id)
+    datasets = lumi_client.datasets.get_datasets()
+    assert n_current_datasets - n_initial_datasets == 1
 
 
+<<<<<<< HEAD
 def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
     logger.info("Starting jobs lifecycle")
     with Path.open(dialog_data) as file:
@@ -86,11 +103,52 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data):
         jobs = lumi_client.jobs.get_jobs()
         assert jobs is not None
         assert len(jobs.items) == jobs.total
+=======
+'''
+Test a complete job lifecycle test: add a new dataset,
+create a new job, run the job, get the results
+'''
+def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template):
+    logger.info('Starting jobs lifecycle')
+    datasets = lumi_client.datasets.get_datasets()
+    if datasets.total > 0:
+        for removed_dataset in datasets.items:
+            lumi_client.datasets.delete_dataset(removed_dataset.id)
+    datasets = lumi_client.datasets.get_datasets()
+    n_initial_datasets = datasets.total
+    dataset = lumi_client.datasets.create_dataset(dataset=dialog_data, format=DatasetFormat.JOB)
+    datasets = lumi_client.datasets.get_datasets()
+    n_current_datasets = datasets.total
+    assert n_current_datasets - n_initial_datasets == 1
 
-        job_status = asyncio.run(lumi_client.jobs.wait_for_job(job_ret.id))
-        logger.info(job_status)
+    jobs = lumi_client.jobs.get_jobs()
+    assert jobs is not None
+    logger.info(lumi_client.datasets.get_dataset(dataset.id))
+>>>>>>> main
 
+    job = JobCreate(
+        name="test-job-int-001",
+        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        dataset=dataset.id,
+        config_template=simple_eval_template,
+    )
+    logger.info(job)
+    job.description = "This is a test job"
+    job.max_samples = 2
+    job_creation_result = lumi_client.jobs.create_job(JobType.EVALUATION, job)
+    assert job_creation_result is not None
+    assert lumi_client.jobs.get_jobs() is not None
+
+<<<<<<< HEAD
         download_info = lumi_client.jobs.get_job_download(job_ret.id)
         logger.info(f"getting result from {download_info.download_url}")
         results = requests.get(download_info.download_url, allow_redirects=True)
         logger.info(f"first 30 chars: {results.content[:30]}...")
+=======
+    job_status = lumi_client.jobs.wait_for_job(job_creation_result.id)
+    logger.info(job_status)
+
+    download_info = lumi_client.jobs.get_job_download(job_creation_result.id)
+    logger.info(f'getting result from {download_info.download_url}')
+    requests.get(download_info.download_url, allow_redirects=True)
+>>>>>>> main

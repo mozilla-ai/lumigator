@@ -7,11 +7,11 @@ from uuid import UUID
 from datasets import load_dataset
 from fastapi import HTTPException, UploadFile, status
 from loguru import logger
+from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
+from lumigator_schemas.extras import ListingResponse
 from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
 from s3fs import S3FileSystem
-from schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
-from schemas.extras import ListingResponse
 
 from backend.records.datasets import DatasetRecord
 from backend.repositories.datasets import DatasetRepository
@@ -96,12 +96,11 @@ class DatasetService:
     def _raise_unhandled_exception(self, e: Exception) -> None:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
-    def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
-        record = self.dataset_repo.get(dataset_id)
+    def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
+        return self.dataset_repo.get(dataset_id)
 
-        if record is None:
-            self._raise_not_found(dataset_id)
-        return record
+    def _get_s3_path(self, dataset_key: str) -> str:
+        return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
@@ -119,7 +118,7 @@ class DatasetService:
 
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_path = self._get_s3_path(dataset_key)
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
         except Exception as e:
             # if a record was already created, delete it from the DB
@@ -157,32 +156,59 @@ class DatasetService:
 
         return DatasetResponse.model_validate(record)
 
-    def get_dataset(self, dataset_id: UUID) -> DatasetResponse:
+    def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return None
+
         return DatasetResponse.model_validate(record)
 
-    def get_dataset_s3_path(self, dataset_id: UUID) -> str:
+    def get_dataset_s3_path(self, dataset_id: UUID) -> str | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return None
+
         dataset_key = self._get_s3_key(record.id, record.filename)
-        dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        dataset_path = self._get_s3_path(dataset_key)
         return dataset_path
 
     def delete_dataset(self, dataset_id: UUID) -> None:
+        """When the dataset exists, attempts to delete it from both an S3 bucket and the DB.
+
+        Raises exceptions it encounters dealing with S3, except when the file is not found in S3
+        (in this case it deletes the orphaned record from the DB).
+
+        This operation is idempotent, calling it with a record that never existed, or that has
+        already been deleted, will not raise an error.
+        """
         record = self._get_dataset_record(dataset_id)
+        # Early return if the record does not exist (for idempotency).
+        if record is None:
+            return None
 
         try:
-            # Delete from S3
-            # S3 delete is called first => if this fails the DB delete won't take place
+            # S3 delete is called first, if this fails for any other reason that the file not being
+            # found, then the DB delete won't take place, and an exception raised.
             dataset_key = self._get_s3_key(record.id, record.filename)
-            dataset_path = f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+            dataset_path = self._get_s3_path(dataset_key)
             self.s3_filesystem.rm(dataset_path, recursive=True)
+        except FileNotFoundError as e:
+            # File not found errors are allowed, but we perform clean-up in this situation.
+            logger.warning(f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
+                         f"Cleaning up DB by removing ID. {e}")
 
+<<<<<<< HEAD
         except FileNotFoundError:
             logger.info("Dataset ID was present in the DB but not on S3. Removing from DB...")
 
         except Exception as e:
             logger.error(e)
             self._raise_unhandled_exception(e)
+=======
+        # Getting this far means we are OK to remove the record from the DB.
+        self.dataset_repo.delete(record.id)
+
+>>>>>>> main
 
         # Delete DB record
         self.dataset_repo.delete(record.id)

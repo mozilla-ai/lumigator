@@ -4,7 +4,7 @@ from http import HTTPMethod
 from pathlib import Path
 from uuid import UUID
 
-from schemas.datasets import DatasetFormat
+from lumigator_schemas.datasets import DatasetFormat
 
 from tests.helpers import check_method, load_json
 

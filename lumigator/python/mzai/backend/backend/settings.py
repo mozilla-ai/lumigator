@@ -1,9 +1,9 @@
 import os
 from collections.abc import Mapping
 
+from lumigator_schemas.extras import DeploymentType
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
-from schemas.extras import DeploymentType
 from sqlalchemy.engine import URL, make_url
 
 

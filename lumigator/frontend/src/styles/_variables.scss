@@ -1,0 +1,34 @@
+// Colors
+$l-primary-color: #e0c414; // Main brand color (gold/yellow)
+$l-primary-color-text: #ffffff;
+$white: #ffffff;
+$l-menu-bg: #161616;
+$l-menu-item-color: #7F7F7F;
+$l-main-bg: #161616;
+$l-card-bg: #222222;
+$l-overlay-color: rgba(0, 0, 0, 0.6);
+$l-text-color: #eaeaea;
+$l-text-secondary-color: #b3b3b3;
+
+// Typography
+$l-font-family: 'Inter', sans-serif;
+$l-font-size: 1rem;
+$l-menu-font-size: 14px;
+$l-font-weight-normal: 400;
+$l-font-weight-bold: 600;
+
+// Spacing and Borders
+$l-main-radius: 8px;
+$l-border-radius: 6px;
+$l-button-border-radius: 4px;
+$l-input-border-radius: 4px;
+$l-spacing-1: 1rem;
+$l-app-width: 1800px;
+
+// Shadows
+$l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+// Button Specific
+$l-button-bg: $l-primary-color;
+$l-button-text-color: #000000;
+$l-button-hover-bg: darken($l-primary-color, 10%);

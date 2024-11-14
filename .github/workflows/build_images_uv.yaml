@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker image CI
 
 on:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub

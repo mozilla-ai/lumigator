@@ -174,3 +174,4 @@ cython_debug/
 .ijwb
 *.db
 *.db-journal
+.DS_Store

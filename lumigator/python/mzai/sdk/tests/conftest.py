@@ -1,9 +1,7 @@
-import sys
-
 import json
+import sys
 import unittest.mock as mock
 from pathlib import Path
-
 from typing import BinaryIO
 
 import pytest
@@ -167,4 +165,3 @@ def simple_eval_template():
             "storage_path": "{storage_path}"
         }}
     }}"""
-

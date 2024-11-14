@@ -1,4 +1,4 @@
-name: Build and Publish Docs
+name: Build and publish docs
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   link-checker:
-    name: Docs - Link Checker
+    name: Docs - Link checker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

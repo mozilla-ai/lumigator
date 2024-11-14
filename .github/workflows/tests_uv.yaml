@@ -14,7 +14,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Install python
+      - name: Install Python
         run: uv python install
         working-directory: lumigator/python/mzai/backend
 

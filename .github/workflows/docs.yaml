@@ -1,4 +1,4 @@
-name: Build and Publish Docs
+name: Build and publish docs
 
 on:
   # required to enable manual triggers on the GH web ui
@@ -18,11 +18,11 @@ permissions:
 
 jobs:
   build-docs:
-    name: Build and Publish Docs
+    name: Build and publish docs
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Python 3.11
@@ -30,7 +30,7 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Set up Environment
+    - name: Set up environment
       id: setup
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -38,23 +38,23 @@ jobs:
         echo "VIRTUAL_ENV=$HOME/.venv" >> $GITHUB_ENV
       continue-on-error: false
 
-    - name: Install Docs Dependencies
+    - name: Install docs dependencies
       id: install_build_dependencies
       run: |
         . .venv/bin/activate
         uv pip install -r pyproject.toml --extra docs
       continue-on-error: false
 
-    - name: Build Documentation
+    - name: Build documentation
       run: |
         . .venv/bin/activate
         cd docs
         sphinx-build source build/html
 
-    - name: Set up Pages
+    - name: Set up pages
       uses: actions/configure-pages@v4
 
-    - name: Upload Artifact
+    - name: Upload artifact
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       uses: actions/upload-pages-artifact@v3
       with:

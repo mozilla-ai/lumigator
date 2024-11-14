@@ -167,6 +167,7 @@ def job_repository(db_session):
 @pytest.fixture(scope="function")
 def result_repository(db_session):
     return JobResultRepository(session=db_session)
+
 @pytest.fixture(scope="function")
 def fake_ray_client():
     return FakeJobSubmissionClient()
@@ -175,9 +176,11 @@ def fake_ray_client():
 def dataset_service(db_session):
     dataset_repo = DatasetRepository(db_session)
     return DatasetService(dataset_repo=dataset_repo,s3_client=s3_client, s3_filesystem=S3FileSystem())
+
 @pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
+
 @pytest.fixture(scope="function")
 def job_service(db_session, job_repository, result_repository,fake_ray_client,dataset_service):
     return JobService(job_repository, result_repository,fake_ray_client, dataset_service)

@@ -94,7 +94,7 @@ oai_infer_template = """{{
         "storage_path": "{storage_path}",
         "output_field": "{output_field}"
     }},
-    "server": {{
+    "inference_server": {{
         "base_url": "{model_url}",
         "engine": "{model_path}",
         "system_prompt": "{system_prompt}",

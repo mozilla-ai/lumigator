@@ -34,6 +34,6 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    server: InferenceServerConfig
+    inference_server: InferenceServerConfig
     params: SamplingParameters
     model_config = ConfigDict(extra="forbid")

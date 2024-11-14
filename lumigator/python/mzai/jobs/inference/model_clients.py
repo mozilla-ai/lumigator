@@ -38,8 +38,8 @@ class APIModelClient(BaseModelClient):
 
     def __init__(self, config: InferenceJobConfig):
         self._config = config
-        self._engine = strip_path_prefix(config.server.engine)
-        self._system = config.server.system_prompt
+        self._engine = strip_path_prefix(config.inference_server.engine)
+        self._system = config.inference_server.system_prompt
 
     @abstractmethod
     def _chat_completion(
@@ -58,7 +58,11 @@ class APIModelClient(BaseModelClient):
         prompt: str,
     ) -> tuple[str, str]:
         current_retry_attempt = 1
-        max_retries = 1 if config.server.max_retries is None else config.server.max_retries
+        max_retries = (
+            1
+            if config.inference_server.max_retries is None
+            else config.inference_server.max_retries
+        )
         while current_retry_attempt <= max_retries:
             try:
                 response = self._chat_completion(self._config, self._client, prompt, self._system)

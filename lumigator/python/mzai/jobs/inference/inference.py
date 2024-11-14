@@ -89,10 +89,10 @@ def run_inference(config: InferenceJobConfig) -> Path:
     dataset_iterable = tqdm(input_samples) if config.job.enable_tqdm else input_samples
 
     # Choose which model client to use
-    if config.server is not None:
+    if config.inference_server is not None:
         # a model *inference service* is passed
-        base_url = config.server.base_url
-        output_model_name = config.server.engine
+        base_url = config.inference_server.base_url
+        output_model_name = config.inference_server.engine
         if "mistral" in base_url:
             # run the mistral client
             logger.info(f"Using Mistral client. Endpoint: {base_url}")

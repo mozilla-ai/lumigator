@@ -12,11 +12,14 @@ dependencies = [
 requires = ["hatchling", "versioningit"]
 build-backend = "hatchling.build"
 
+[tool.hatch.envs.default]
+installer = "uv"
+
 [tool.hatch.version]
 source = "versioningit"
 
-[tool.hatch.envs.default]
-installer = "uv"
+[tool.versioningit]
+default-version = "0.0.0"
 
 [tool.versioningit.vcs]
 method = "git"

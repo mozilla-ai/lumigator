@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  uv-example:
+  sdk-unit-tests:
     name: SDK unit tests - Python
     runs-on: ubuntu-latest
 

@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  uv-example:
+  backend-integration-tests:
     name: Backend integration tests - Python
     runs-on: ubuntu-latest
 

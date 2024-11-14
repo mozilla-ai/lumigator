@@ -1,6 +1,9 @@
 backend:
 - changed-files:
   - any-glob-to-any-file: 'lumigator/python/mzai/backend/*'
+dependencies:
+- changed-files:
+  - any-glob-to-any-file: 'pyproject.toml'
 documentation:
 - changed-files:
   - any-glob-to-any-file: 'docs/*'

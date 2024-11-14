@@ -20,7 +20,7 @@ source .venv/bin/activate
 
 ## Test instructions
 
-The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, an SQLite inside the test container is used. To run the tests, please use:
+The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
 
 ```bash
 SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest

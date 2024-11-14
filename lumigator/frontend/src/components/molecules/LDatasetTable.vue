@@ -1,58 +1,65 @@
 <template>
   <div class="l-dataset-table">
-    <DataTable
-      :value="tableData"
-      tableStyle="min-width: min(80vw, 1200px)"
-      scrollable
-      @row-click="emit('l-dataset-selected', $event.data)"
-    >
-      <Column
-        field="filename"
-        header="Filename"
-      />
-      <Column
-        field="id"
-        header="dataset id"
+    <transition name="transition-fade">
+
+      <DataTable
+        v-if="tableVisible"
+        :value="tableData"
+        :tableStyle="style"
+        columnResizeMode="expand"
+        scrollable
+        :pt="{table:'table-root'}"
+        @row-click="emit('l-dataset-selected', $event.data)"
       >
-        <template #body="slotProps">
-          {{ shortenedID(slotProps.data.id) }}
-        </template>
-      </Column>
-      <Column
-        field="created_at"
-        header="submitted"
-      >
-        <template #body="slotProps">
-          {{ formatDate(slotProps.data.created_at) }}
-        </template>
-      </Column>
-      <Column
-        field="size"
-        header="size"
-      >
-        <template #body="slotProps">
-          {{ Math.floor(slotProps.data.size / 1000) }} KB
-        </template>
-      </Column>
-      <Column
-        field="ground_truth"
-        header="GroundTruth"
-      >
-        <template #body="slotProps">
-          <span class="capitalize"
-                v-text="slotProps.data.ground_truth"
-          />
-        </template>
-      </Column>
-      <Column header="options">
-        <template #body="slotProps">
-          <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
-                aria-controls="optionsMenu"
-                @click.stop="togglePopover($event, slotProps.data)"
-          />
-        </template>
-      </Column>
-    </DataTable>
+        <Column
+          field="filename"
+          header="Filename"
+        />
+        <Column
+          field="id"
+          header="dataset id"
+        >
+          <template #body="slotProps">
+            {{ shortenedID(slotProps.data.id) }}
+          </template>
+        </Column>
+        <Column
+          field="created_at"
+          header="submitted"
+        >
+          <template #body="slotProps">
+            {{ formatDate(slotProps.data.created_at) }}
+          </template>
+        </Column>
+        <Column
+          field="size"
+          header="size"
+        >
+          <template #body="slotProps">
+            {{ Math.floor(slotProps.data.size / 1000) }} KB
+          </template>
+        </Column>
+        <Column
+          field="ground_truth"
+          header="GroundTruth"
+        >
+          <template #body="slotProps">
+            <span class="capitalize"
+                  v-text="slotProps.data.ground_truth"
+            />
+          </template>
+        </Column>
+        <Column header="options">
+          <template #body="slotProps">
+            <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
+                  aria-controls="optionsMenu"
+                  @click.stop="togglePopover($event, slotProps.data)"
+            />
+          </template>
+        </Column>
+      </DataTable>
+    </transition>
+
     <Menu
       id="options_menu"
       ref="optionsMenu"
@@ -66,12 +73,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
+import { useSlidePanel } from '@/composables/SlidingPanel';
 
 defineProps({
 	tableData: {
@@ -84,10 +92,17 @@ defineProps({
 	}
 })
 
+const { showSlidingPanel  } = useSlidePanel();
+const style = computed(() => {
+  return showSlidingPanel.value ?
+    'min-width: min(40vw, 1200px)' : 'min-width: min(80vw, 1200px)'
+})
+
 const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
 
 const confirm = useConfirm();
 const focusedDataset = ref(null);
+const tableVisible = ref(true)
 const optionsMenu = ref();
 const options = ref([
 	{
@@ -166,6 +181,12 @@ function deleteConfirmation() {
   });
 }
 
+watch(showSlidingPanel, () => {
+  tableVisible.value = false;
+  setTimeout(() => {
+    tableVisible.value = true;
+  }, 100);
+});
 
 </script>
 

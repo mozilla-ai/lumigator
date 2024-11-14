@@ -44,9 +44,11 @@ import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
+import { useSlidePanel } from '@/composables/SlidingPanel';
 
 const datasetStore = useDatasetStore();
 const { datasets } = storeToRefs(datasetStore);
+const { showSlidingPanel  } = useSlidePanel();
 const datasetInput = ref(null);
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 
@@ -60,6 +62,7 @@ const onDeleteDataset = (datasetID) => {
 
 const onDatasetSelected = (dataset) => {
   datasetStore.loadDatasetInfo(dataset.id);
+  showSlidingPanel.value = true;
 }
 
 onMounted(async () => {

@@ -3,56 +3,93 @@
     <div class="header">
       <l-health-status />
     </div>
-    <div class="l-menu-container">
-      <l-menu />
-    </div>
-    <div class="l-main-container">
-      <router-view v-slot="{ Component }">
-        <transition name="transition-fade">
-          <component
-            :is="Component"
-            @s-disable-scroll="disableScroll = $event"
-          />
-        </transition>
-      </router-view>
+    <div class="content-wrapper">
+      <div class="l-menu-container">
+        <l-menu />
+      </div>
+      <div class="l-main-container">
+        <router-view v-slot="{ Component }">
+          <transition name="transition-fade">
+            <component
+              :is="Component"
+              @s-disable-scroll="disableScroll = $event"
+            />
+          </transition>
+        </router-view>
+      </div>
+      <div class="sliding-panel"
+           :class="{ open: showSlidingPanel }"
+      >
+        <p v-if="showSlidingPanel">Sliding Panel Content</p>
+      </div>
     </div>
   </div>
 </template>
 
+
+
 <script setup>
-import LMenu from '@/components/organisms/LMenu.vue'
+import LMenu from '@/components/organisms/LMenu.vue';
 import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
+import { useSlidePanel } from '@/composables/SlidingPanel';
+
+const { showSlidingPanel } = useSlidePanel();
 
 </script>
 
 <style scoped lang="scss">
 #app {
-	height: 100vh;
-	padding: $l-spacing-1;
-	margin: auto;
-	background-color: $l-main-bg;
-	display: grid;
-	grid-template-columns: minmax(200px, 15%) 1fr;
-	grid-template-rows: auto 1fr;
-	max-width: $l-app-width;
-	text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: $l-main-bg;
+  padding: $l-spacing-1;
 
-	.header {
-		background-color: $l-main-bg;
-		grid-column: 1/-1;
-		grid-row: 1;
-	}
+  .header {
+    background-color: $l-main-bg;
+  }
 
-	.l-menu-container {
-		background-color: $l-main-bg;
-		grid-row: 2;
-	}
+  .content-wrapper {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    overflow: hidden;
+  }
 
-	.l-main-container {
-		background-color: $l-card-bg;
-		border-radius: $l-main-radius;
-		grid-row: 2;
-		display: grid;
-	}
+  .l-menu-container {
+    height: 90vh;
+    width: minmax(200px, 15%);
+    background-color: $l-main-bg;
+  }
+
+  .l-main-container {
+    flex: 1;
+    background-color: $l-card-bg;
+    transition: margin-right 0.3s ease-in-out;
+    background-color: $l-card-bg;
+    border-radius: $l-main-radius;
+    display: grid;
+    text-align: center;
+  }
+
+  .sliding-panel {
+    width: 0;
+    background-color: $l-main-bg;
+    transition: width 0.3s ease-in-out;
+    overflow: hidden;
+  }
+
+  .sliding-panel.open {
+    width: $l-sliding-panel-size;
+  }
+
+  .l-main-container {
+    transition: flex-grow 0.3s, margin-right 0.3s;
+  }
+
+  .sliding-panel.open+.l-main-container {
+    margin-right: 0;
+  }
 }
 </style>

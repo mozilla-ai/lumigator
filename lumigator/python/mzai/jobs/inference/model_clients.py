@@ -2,7 +2,7 @@ import os
 import re
 from abc import abstractmethod
 
-from box import Box
+from inference_config import InferenceJobConfig
 from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
@@ -23,7 +23,7 @@ class BaseModelClient:
     """
 
     @abstractmethod
-    def __init__(self, model: str, config: Box):
+    def __init__(self, model: str, config: InferenceJobConfig):
         """Used to initialize the model / inference service."""
         pass
 
@@ -36,15 +36,15 @@ class BaseModelClient:
 class APIModelClient(BaseModelClient):
     """General model client for APIs."""
 
-    def __init__(self, config: Box):
+    def __init__(self, config: InferenceJobConfig):
         self._config = config
-        self._engine = strip_path_prefix(config.inference.engine)
-        self._system = config.inference.system_prompt
+        self._engine = strip_path_prefix(config.inference_server.engine)
+        self._system = config.inference_server.system_prompt
 
     @abstractmethod
     def _chat_completion(
         self,
-        config: Box,
+        config: InferenceJobConfig,
         client: OpenAI | MistralClient,
         prompt: str,
         system: str,
@@ -54,11 +54,15 @@ class APIModelClient(BaseModelClient):
 
     def _get_response_with_retries(
         self,
-        config: Box,
+        config: InferenceJobConfig,
         prompt: str,
     ) -> tuple[str, str]:
         current_retry_attempt = 1
-        max_retries = 1 if config.inference.max_retries is None else config.inference.max_retries
+        max_retries = (
+            1
+            if config.inference_server.max_retries is None
+            else config.inference_server.max_retries
+        )
         while current_retry_attempt <= max_retries:
             try:
                 response = self._chat_completion(self._config, self._client, prompt, self._system)
@@ -89,13 +93,13 @@ class OpenAIModelClient(APIModelClient):
     - Customize the system prompt if needed
     """
 
-    def __init__(self, base_url: str, config: Box):
+    def __init__(self, base_url: str, config: InferenceJobConfig):
         super().__init__(config)
         self._client = OpenAI(base_url=base_url)
 
     def _chat_completion(
         self,
-        config: Box,
+        config: InferenceJobConfig,
         client: OpenAI,
         prompt: str,
         system: str = "You are a helpful assisant.",
@@ -106,10 +110,10 @@ class OpenAIModelClient(APIModelClient):
         return client.chat.completions.create(
             model=self._engine,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.max_tokens,
-            frequency_penalty=config.frequency_penalty,
-            temperature=config.temperature,
-            top_p=config.top_p,
+            max_tokens=config.params.max_tokens,
+            frequency_penalty=config.params.frequency_penalty,
+            temperature=config.params.temperature,
+            top_p=config.params.top_p,
         )
 
 
@@ -120,13 +124,13 @@ class MistralModelClient(APIModelClient):
     - Customize the system prompt if needed
     """
 
-    def __init__(self, base_url: str, config: Box):
+    def __init__(self, base_url: str, config: InferenceJobConfig):
         super().__init__(config)
         self._client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
 
     def _chat_completion(
         self,
-        config: Box,
+        config: InferenceJobConfig,
         client: MistralClient,
         prompt: str,
         system: str = "You are a helpful assisant.",
@@ -137,7 +141,7 @@ class MistralModelClient(APIModelClient):
         return client.chat(
             model=self._engine,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.max_tokens,
-            temperature=config.temperature,
-            top_p=config.top_p,
+            max_tokens=config.params.max_tokens,
+            temperature=config.params.temperature,
+            top_p=config.params.top_p,
         )

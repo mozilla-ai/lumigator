@@ -2,13 +2,9 @@ import json
 from http import HTTPStatus
 from pathlib import Path
 
-from lumigator_schemas.jobs import JobCreate, JobType
+from lumigator_schemas.jobs import JobEvalCreate, JobType
 from pytest import raises
 from requests.exceptions import HTTPError
-<<<<<<< HEAD
-from schemas.jobs import JobEvalCreate, JobType
-=======
->>>>>>> main
 
 from tests.helpers import load_json
 

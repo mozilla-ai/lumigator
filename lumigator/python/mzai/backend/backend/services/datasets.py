@@ -197,18 +197,9 @@ class DatasetService:
             logger.warning(f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
                          f"Cleaning up DB by removing ID. {e}")
 
-<<<<<<< HEAD
-        except FileNotFoundError:
-            logger.info("Dataset ID was present in the DB but not on S3. Removing from DB...")
-
-        except Exception as e:
-            logger.error(e)
-            self._raise_unhandled_exception(e)
-=======
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)
 
->>>>>>> main
 
         # Delete DB record
         self.dataset_repo.delete(record.id)

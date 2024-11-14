@@ -9,7 +9,7 @@ from uuid import UUID
 
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobCreate,
+    JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -117,7 +117,7 @@ class Jobs:
              "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
-    def create_job(self, type: JobType, request: JobCreate) -> JobResponse:
+    def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:
         """Create a new job.
 
         .. admonition:: Example
@@ -125,15 +125,15 @@ class Jobs:
             .. code-block:: python
 
                 from sdk.lumigator import LumigatorClient
-                from schemas.jobs import JobType, JobCreate
+                from lumigator_schemas.jobs import JobType, JobEvalCreate
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.create_job(JobType.EVALUATION, JobCreate(...))
+                lm_client.jobs.create_job(JobType.EVALUATION, JobEvalCreate(...))
 
         Args:
             type(JobType): The kind of job to create. It can be either
                 EVALUATION or INFERENCE.
-            request(JobCreate): The job's configuration.
+            request(JobEvalCreate): The job's configuration.
 
         Returns:
             JobResponse: The information for the newly created job.

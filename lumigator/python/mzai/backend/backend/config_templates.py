@@ -1,5 +1,5 @@
 # Evaluation templates
-from schemas.jobs import JobType
+from lumigator_schemas.jobs import JobType
 
 seq2seq_eval_template = """{{
     "name": "{job_name}/{job_id}",

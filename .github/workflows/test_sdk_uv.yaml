@@ -1,7 +1,13 @@
-name: SDK tests
+name: Lumigator SDK tests
 
 on:
   push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
 
 jobs:
   sdk-unit-tests:

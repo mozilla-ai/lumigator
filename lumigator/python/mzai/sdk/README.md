@@ -36,5 +36,8 @@ To run integration tests, please use:
 pushd ../../../../ # go back to the project root
 make start-lumigator-build # wait until all containers are up and running
 popd
-uv run pytest -o python_files="int_test_*.py"
+uv run pytest -o python_files="int_test_*.py" # wait until all tests have passed; update and repeat...
+pushd ../../../../ # go back to the project root
+make local-down # wait until all containers are removed
+popd
 ```

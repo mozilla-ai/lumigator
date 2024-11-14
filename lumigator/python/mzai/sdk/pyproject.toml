@@ -1,6 +1,6 @@
 [project]
 name = "lumigator-sdk"
-version = "0.1.0-rc.2"
+dynamic = ["version"]
 description = "Lumigator SDK using the REST API"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -16,14 +16,12 @@
           severity="secondary"
           variant="text"
           rounded
-          aria-label="Close"
         />
         <Button
           icon="pi pi-download"
           severity="secondary"
           variant="text"
           rounded
-          aria-label="Close"
         />
         <Button
           severity="secondary"
@@ -37,19 +35,27 @@
     <div class="l-dataset-details__content">
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">filename</span>
-        <span class="l-dataset-details__content-field">{{ selectedDataset.filename }}</span>
+        <span class="l-dataset-details__content-field">
+          {{ selectedDataset.filename }}
+        </span>
       </div>
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">dataset id</span>
-        <span class="l-dataset-details__content-field">{{ selectedDataset.id }}</span>
+        <span class="l-dataset-details__content-field">
+          {{ selectedDataset.id }}
+        </span>
       </div>
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">submitted</span>
-        <span class="l-dataset-details__content-field">{{ formatDate(selectedDataset.created_at) }}</span>
+        <span class="l-dataset-details__content-field">
+          {{ formatDate(selectedDataset.created_at) }}
+        </span>
       </div>
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">file size</span>
-        <span class="l-dataset-details__content-field">{{ Math.floor(selectedDataset.size / 1000) }} KB</span>
+        <span class="l-dataset-details__content-field">
+          {{ Math.floor(selectedDataset.size / 1000) }} KB
+        </span>
       </div>
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">ground truth</span>

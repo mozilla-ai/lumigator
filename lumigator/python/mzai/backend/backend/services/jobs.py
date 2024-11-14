@@ -29,7 +29,6 @@ class JobService:
     # set storage path
     storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
 
-    # TODO: we can set a different amount of GPUs per type of job
     job_settings = {
         JobType.INFERENCE: {
             "command": settings.INFERENCE_COMMAND,
@@ -109,8 +108,6 @@ class JobService:
         # get dataset S3 path from UUID
         dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
 
-        # TODO: the following is currently both eval and inference, but
-        #       will soon be inference only. Make sure we'll move this out
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
         elif request.model.startswith("mistral://"):
@@ -155,8 +152,6 @@ class JobService:
 
     def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
-        # TODO: we might want to explicitly provide a job string definition as a request
-        # parameter, so we can reuse the same config profiles across different job types
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
         elif isinstance(request, JobInferenceCreate):

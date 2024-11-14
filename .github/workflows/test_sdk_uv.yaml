@@ -1,4 +1,4 @@
-name: SDK tests
+name: Lumigator SDK tests
 
 on:
   push:

@@ -8,5 +8,8 @@
             "source.organizeImports.ruff": "explicit"
         }
     },
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "./lumigator/python/mzai/schemas"
+    ]
 }

@@ -108,7 +108,7 @@ class BackendSettings(BaseSettings):
     # URL for Ray jobs API
     @computed_field
     @property
-    def ray_jobs(self) -> str:  # noqa: N802
+    def RAY_JOBS_URL(self) -> str:  # noqa: N802
         return f"{self.RAY_DASHBOARD_URL}/api/jobs/"
 
     # URL for the DB used by Alchemy, please refer to

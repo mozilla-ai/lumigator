@@ -1,6 +1,5 @@
 class FakeJobSubmissionClient:
-    """
-    A mock implementation of Ray's JobSubmissionClient for testing purposes.
+    """A mock implementation of Ray's JobSubmissionClient for testing purposes.
     Simulates basic job submission and management functionality.
     """
     def __init__(self):

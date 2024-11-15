@@ -2,8 +2,6 @@ import csv
 import io
 import os
 from pathlib import Path
-from s3fs import S3FileSystem
-
 
 import pytest
 import requests_mock
@@ -11,20 +9,20 @@ from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from mypy_boto3_s3 import S3Client
+from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from testcontainers.localstack import LocalStackContainer
-from backend.repositories.jobs import JobRepository, JobResultRepository,BaseRepository
-from backend.repositories.datasets import DatasetRepository
-from backend.records.jobs import JobRecord, JobResultRecord
-from backend.services.jobs import JobService
 
 from backend.api.deps import get_db_session, get_s3_client
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
+from backend.records.jobs import JobRecord, JobResultRecord
+from backend.repositories.datasets import DatasetRepository
+from backend.repositories.jobs import BaseRepository, JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.jobs import JobService
 from backend.settings import settings
-
 from backend.tests.fakes.fake_ray_client import FakeJobSubmissionClient
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
@@ -40,6 +38,13 @@ def format_dataset(data: list[list[str]]) -> str:
     buffer.seek(0)
     return buffer.read()
 
+@pytest.fixture
+def valid_experiment_dataset() -> str:
+    data = [
+        ["examples", "ground_truth"],
+        ["Hello World", "Hello"],
+    ]
+    return format_dataset(data)
 
 @pytest.fixture(scope="session")
 def valid_experiment_dataset_without_gt() -> str:
@@ -197,7 +202,6 @@ def request_mock() -> requests_mock.Mocker:
     with requests_mock.Mocker() as cm:
         yield cm
 
-<<<<<<< HEAD
 @pytest.fixture(scope="function")
 def job_repository(db_session):
     return JobRepository(session=db_session)

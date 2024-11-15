@@ -21,19 +21,21 @@ def get_health() -> HealthResponse:
 
 @router.get("/jobs/{job_id}")
 def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
-    resp = requests.get(urllib.parse.urljoin(settings.ray_jobs, f"{job_id}"))
+    resp = requests.get(urllib.parse.urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
+        loguru.logger.error(f"Unexpected status code getting job metadata text: {resp.status_code}")
+        loguru.logger.error(f"Upstream job metadata response: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job metadata for ID: {job_id} not found - {resp.text or ''}",
+            detail=f"Job metadata for ID: {job_id} not found",
         )
     elif resp.status_code != HTTPStatus.OK:
         loguru.logger.error(f"Unexpected status code getting job metadata text: {resp.status_code}")
-        loguru.logger.error(f"Upstream job metadata response: {resp}")
+        loguru.logger.error(f"Upstream job metadata response: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error getting job metadata for ID: {job_id} - {resp.text or ''}",
+            detail=f"Unexpected error getting job metadata for ID: {job_id}",
         )
 
     try:
@@ -41,7 +43,7 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
         return JobSubmissionResponse(**metadata)
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
-        loguru.logger.error(f"Response text: {resp.text}")
+        loguru.logger.error(f"Response text: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e
@@ -49,21 +51,18 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
 
 @router.get("/jobs/{job_id}/logs")
 def get_job_logs(job_id: UUID) -> JobLogsResponse:
-    resp = requests.get(urllib.parse.urljoin(settings.ray_jobs, f"{job_id}/logs"))
+    resp = requests.get(urllib.parse.urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"))
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
+        loguru.logger.error(f"Unexpected status code getting job logs: {resp.status_code}")
+        loguru.logger.error(f"Upstream job logs response: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job logs for ID: {job_id} not found - {resp.text or ''}",
-        )
-    elif resp.status_code == HTTPStatus.BAD_REQUEST:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Job ID: {job_id} not submitted via the Ray API - {resp.text or ''}",
+            detail=f"Job logs for ID: {job_id} not found",
         )
     elif resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(f"Unexpected status code getting job logs text: {resp.status_code}")
-        loguru.logger.error(f"Upstream job metadata response: {resp}")
+        loguru.logger.error(f"Unexpected status code getting job logs: {resp.status_code}")
+        loguru.logger.error(f"Upstream job logs response: {resp}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error getting job logs for ID: {job_id} - {resp.text or ''}",
@@ -82,10 +81,10 @@ def get_job_logs(job_id: UUID) -> JobLogsResponse:
 
 @router.get("/jobs/")
 def get_all_jobs() -> list[JobSubmissionResponse]:
-    resp = requests.get(settings.ray_jobs)
+    resp = requests.get(settings.RAY_JOBS_URL)
     if resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(f"Unexpected status code getting job logs text: {resp.status_code}")
-        loguru.logger.error(f"Upstream job metadata response: {resp}")
+        loguru.logger.error(f"Unexpected status code getting all jobs: {resp.status_code}")
+        loguru.logger.error(f"Upstream get all jobs response: {resp}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error getting job logs - {resp.text or ''}",

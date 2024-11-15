@@ -3,20 +3,20 @@ ARG NODE_VERSION=18.20.0
 FROM node:${NODE_VERSION}-alpine AS base
 
 # Copy the project into the image
-COPY . /frontend
+COPY ../../ /mzai
 
-WORKDIR /frontend/
+WORKDIR /mzai/
 
 # Install dependencies
-RUN npm install
+RUN npm --prefix /mzai/lumigator/frontend install
 
 # Build static files
-RUN npm run build
+RUN npm --prefix /mzai/lumigator/frontend run build
 
 
 FROM nginx:1.27.2-alpine-slim AS server
 
 # Copy builded files to the Nginx image
-COPY --from=base  /frontend/dist /usr/share/nginx/html
+COPY --from=base  /mzai/lumigator/frontend/dist /usr/share/nginx/html
 
 EXPOSE 80

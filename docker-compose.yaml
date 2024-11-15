@@ -20,6 +20,7 @@ services:
       - localstack-data:/var/lib/localstack
     profiles:
       - local
+      - local-fe
 
   localstack-create-bucket:
     image: localstack/localstack:3.4.0
@@ -33,6 +34,7 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+      - local-fe
 
   ray:
     image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
@@ -77,6 +79,7 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+      - local-fe
 
   backend:
     image: mzdotai/lumigator:latest
@@ -123,6 +126,21 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
+
+  frontend:
+    image: mzdotai/lumigator-frontend:latest
+    build:
+      context: .
+      dockerfile: "./lumigator/frontend/Dockerfile"
+      target: "server"
+    depends_on:
+      backend:
+        condition: "service_started"
+        required: true
+    ports:
+      - 80:80
+    profiles:
+      - local-fe
 
 volumes:
 

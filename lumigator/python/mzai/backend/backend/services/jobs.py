@@ -148,9 +148,6 @@ class JobService:
                 "top_p": request.top_p,
             }
 
-        # set max samples to unlimited if not specified
-        if request.max_samples is None:
-            request.max_samples = -1
 
         return job_params
 

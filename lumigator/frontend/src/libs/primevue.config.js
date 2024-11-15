@@ -9,8 +9,9 @@ const LumiPreset = definePreset(Aura, {
         primary: {
           color: '#E0C414',
           inverseColor: '#E0C414',
-          hoverColor: 'red',
-          activeColor: '#f2f2f2',
+          hoverColor: '#93810d',
+          activeColor: '#E0C414',
+          lgFontSize: '14px',
 				},
       },
     },

@@ -4,7 +4,8 @@ import App from './App.vue';
 import { createPinia } from 'pinia';
 import router from '@/router';
 import PrimeVue from 'primevue/config';
-
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 import LumiPreset from './libs/primevue.config.js';
 const app = createApp(App);
 
@@ -16,9 +17,10 @@ app.use(PrimeVue, {
 		options: {
 			prefix: 'l',
 			darkModeSelector: '.l-always-dark',
-			cssLayer: true
+			cssLayer: false
 		}
   },
 });
-
+app.use(ConfirmationService);
+app.use(ToastService);
 app.mount('#app');

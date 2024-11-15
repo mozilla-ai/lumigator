@@ -148,7 +148,6 @@ class JobService:
                 "top_p": request.top_p,
             }
 
-
         return job_params
 
     def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:

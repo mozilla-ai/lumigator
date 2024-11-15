@@ -1,7 +1,6 @@
 <template>
   <div class="l-dataset-table">
     <transition name="transition-fade">
-
       <DataTable
         v-if="tableVisible"
         :value="tableData"
@@ -41,7 +40,7 @@
         </Column>
         <Column
           field="ground_truth"
-          header="GroundTruth"
+          header="Ground Truth"
         >
           <template #body="slotProps">
             <span class="capitalize"

@@ -4,10 +4,8 @@
     <p class="l-dataset-empty__instructions">
       Please make sure you have the correct column structure.
       <a
-        href="#"
-        target="_blank"
         class="l-dataset-empty__-more"
-      >Learn more</a>
+      >Learn more.</a>
     </p>
     <Button
       rounded

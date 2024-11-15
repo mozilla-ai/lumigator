@@ -7,7 +7,6 @@ from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.router import api_router
 from backend.api.tags import TAGS_METADATA

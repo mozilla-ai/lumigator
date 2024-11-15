@@ -79,7 +79,3 @@ defineExpose({
   input
 })
 </script>
-
-<style scoped>
-
-</style>

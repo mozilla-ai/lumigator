@@ -67,7 +67,7 @@ const confirm = useConfirm();
 function deleteConfirmation(dataset) {
   confirm.require({
     message: `${dataset.filename}`,
-    header: 'Delete  dataset ?',
+    header: 'Delete  dataset?',
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancel',
     rejectProps: {

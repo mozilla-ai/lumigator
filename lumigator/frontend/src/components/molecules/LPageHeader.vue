@@ -62,8 +62,4 @@ const handleAction = () => {
   }
 
 }
-
-
-
-
 </style>

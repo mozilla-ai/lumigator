@@ -76,6 +76,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import { formatDate } from '@/helpers/index'
 
 defineProps({
 	tableData: {
@@ -134,17 +135,6 @@ const ptConfigOptionsMenu = ref({
 const shortenedID = (id) =>
 	id.length <= 20 ? id : `${id.slice(0, 20)}...`;
 
-const formatDate = (dateString) => {
-	const date = new Date(dateString);
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).format(date).replace(/(\d{4})(\s)/, '$1,$2');
-};
 
 const togglePopover = (event, dataset) => {
   focusedDataset.value = dataset;

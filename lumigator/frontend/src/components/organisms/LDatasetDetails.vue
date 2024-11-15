@@ -69,6 +69,7 @@
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button';
 
 const datasetStore = useDatasetStore();
@@ -76,17 +77,6 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 
 const emit = defineEmits(['l-delete-dataset'])
-const formatDate = (dateString) => {
-	const date = new Date(dateString);
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).format(date).replace(/(\d{4})(\s)/, '$1,$2');
-};
 
 </script>
 

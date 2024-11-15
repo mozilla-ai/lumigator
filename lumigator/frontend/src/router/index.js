@@ -20,11 +20,22 @@ export const routes = [
 		disabled: false,
 		component: LExperiments,
 		icon: 'pi pi-fw pi-database'
-	}
+  },
+  {
+    path: '/:pathMatch(.*)*', // Catch-all route for undefined paths
+    redirect: { name: 'datasets' } // Redirect to the datasets route
+  }
 ]
 
 const router = createRouter({
-  routes,
   history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  },
 });
 export default router;

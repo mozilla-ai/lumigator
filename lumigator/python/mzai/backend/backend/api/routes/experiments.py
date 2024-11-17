@@ -27,7 +27,7 @@ def create_experiment(
 
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
-    return ExperimentResponse(service.get_job(experiment_id).model_dump())
+    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
 
 
 @router.get("/")

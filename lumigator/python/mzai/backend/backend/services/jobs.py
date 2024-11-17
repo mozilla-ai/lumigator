@@ -8,6 +8,7 @@ from lumigator_schemas.jobs import (
     JobConfig,
     JobEvalCreate,
     JobInferenceCreate,
+    JobCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -24,6 +25,8 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
 
+from lumigator_schemas.jobs import InferenceJobConfig
+
 
 class JobService:
     # set storage path
@@ -34,6 +37,7 @@ class JobService:
             "command": settings.INFERENCE_COMMAND,
             "pip": settings.INFERENCE_PIP_REQS,
             "work_dir": settings.INFERENCE_WORK_DIR,
+            "model": InferenceJobConfig,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -41,6 +45,7 @@ class JobService:
             "command": settings.EVALUATOR_COMMAND,
             "pip": settings.EVALUATOR_PIP_REQS,
             "work_dir": settings.EVALUATOR_WORK_DIR,
+            "model": None,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -184,6 +189,58 @@ class JobService:
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
         job_settings = self.job_settings[job_type]
+
+        ray_config = JobConfig(
+            job_id=record.id,
+            job_type=job_type,
+            command=job_settings["command"],
+            args=eval_config_args,
+        )
+
+        # build runtime ENV for workers
+        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
+        settings.inherit_ray_env(runtime_env_vars)
+
+        # set num_gpus per worker (zero if we are just hitting a service)
+        if not request.model.startswith("hf://"):
+            worker_gpus = job_settings["ray_worker_gpus_fraction"]
+        else:
+            worker_gpus = job_settings["ray_worker_gpus"]
+
+        runtime_env = {
+            "pip": job_settings["pip"],
+            "working_dir": job_settings["work_dir"],
+            "env_vars": runtime_env_vars,
+        }
+
+        loguru.logger.info("runtime env setup...")
+        loguru.logger.info(f"{runtime_env}")
+
+        entrypoint = RayJobEntrypoint(
+            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+        )
+        loguru.logger.info("Submitting Ray job...")
+        submit_ray_job(self.ray_client, entrypoint)
+
+        loguru.logger.info("Getting response...")
+        return JobResponse.model_validate(record)
+
+    def create_job_alt(self, request: JobCreate ) -> JobResponse:
+        """Creates a new evaluation workload to run on Ray and returns the response status."""
+        job_type = JobCreate.type
+        job_settings = self.job_settings[job_type]
+        job_model = job_settings["model"]
+
+        # Create a db record for the job
+        record = self.job_repo.create(name=request.name, description=request.description)
+
+        # eval_config_args is used to map input configuration parameters with
+        # command parameters provided via command line to the ray job.
+        # To do this, we use a dict where keys are parameter names as they'd
+        # appear on the command line and the values are the respective params.
+        eval_config_args = {
+            "--config": job_model.model_validate(**request.specific_config),
+        }
 
         ray_config = JobConfig(
             job_id=record.id,

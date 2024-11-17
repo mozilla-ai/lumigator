@@ -7,6 +7,12 @@ from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL, make_url
 
 
+class JobSettings:
+    work_dir: str | None = None
+    pip_reqs: str | None = None
+    command: str
+
+
 class BackendSettings(BaseSettings):
     # Backend
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
@@ -60,6 +66,8 @@ class BackendSettings(BaseSettings):
     INFERENCE_WORK_DIR: str | None = None
     INFERENCE_PIP_REQS: str | None = None
     INFERENCE_COMMAND: str = "python inference.py"
+
+
 
     def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
         for env_var_name in self.RAY_WORKER_ENV_VARS:

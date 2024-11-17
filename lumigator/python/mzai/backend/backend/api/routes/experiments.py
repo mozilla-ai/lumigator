@@ -22,7 +22,7 @@ def create_experiment(
     service: JobServiceDep,
     request: ExperimentCreate,
 ) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate(request.model_dump()))
+    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
 
 
 @router.get("/{experiment_id}")
@@ -36,7 +36,8 @@ def list_experiments(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[ExperimentResponse]:
-    return [ExperimentResponse(job.model_dump()) for job in service.list_jobs(skip, limit)]
+    return [ExperimentResponse.model_validate(job.model_dump())
+            for job in service.list_jobs(skip, limit)]
 
 
 @router.get("/{experiment_id}/result")
@@ -45,7 +46,9 @@ def get_experiment_result(
     experiment_id: UUID,
 ) -> ExperimentResultResponse:
     """Return experiment results metadata if av ailable in the DB."""
-    return ExperimentResultResponse(service.get_job_result(experiment_id).model_dump())
+    return ExperimentResultResponse.model_validate(
+        service.get_job_result(experiment_id).model_dump()
+        )
 
 
 @router.get("/{experiment_id}/result/download")
@@ -54,6 +57,6 @@ def get_experiment_result_download(
     experiment_id: UUID,
 ) -> ExperimentResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return ExperimentResultDownloadResponse(
+    return ExperimentResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
         )

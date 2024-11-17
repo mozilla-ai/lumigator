@@ -27,7 +27,9 @@ def create_experiment(
 
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
-    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
+    return ExperimentResponse.model_validate(
+        service.get_job(experiment_id).model_dump()
+        )
 
 
 @router.get("/")
@@ -36,8 +38,9 @@ def list_experiments(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[ExperimentResponse]:
-    return [ExperimentResponse.model_validate(job.model_dump())
-            for job in service.list_jobs(skip, limit)]
+    return ListingResponse[ExperimentResponse].model_validate(
+        service.list_jobs(skip, limit).model_dump()
+        )
 
 
 @router.get("/{experiment_id}/result")

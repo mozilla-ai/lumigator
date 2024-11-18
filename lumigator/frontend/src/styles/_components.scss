@@ -34,7 +34,6 @@
   }
 }
 
-
 // Datable styling
 .p-datatable-table-container {
 		border-radius: 8px;
@@ -82,4 +81,32 @@
    font-size: 10px;
 
   }
+}
+
+// Select
+.p-select-label {
+  font-size: $l-font-size-sm;
+  // font-size: $l-menu-font-size;
+}
+
+.p-floatlabel-in {
+  font-size: $l-font-size-sm;
+}
+
+.p-select-option-label {
+  font-size: $l-font-size-sm;
+}
+
+.p-select.p-disabled {
+  background-color: $l-disabled-input-color!important;
+  color: $l-grey-600!important;
+
+   .p-select-label, .p-floatlabel-in {
+    color: $l-grey-600!important;
+  }
+
+  .p-select-dropdown {
+    color: $l-grey-600!important;
+  }
+
 }

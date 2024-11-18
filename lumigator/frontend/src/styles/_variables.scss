@@ -6,6 +6,7 @@ $l-grey-100: #A4A4A4;
 $l-grey-200: #7F7F7F;
 $l-grey-300: #3F3F46;
 $l-grey-400: #323232;
+$l-grey-600: #4D4D4D;
 $l-menu-bg: #161616;
 $l-menu-item-color: #7F7F7F;
 $l-main-bg: #161616;
@@ -13,6 +14,7 @@ $l-card-bg: #222222;
 $l-overlay-color: rgba(0, 0, 0, 0.6);
 $l-text-color: #eaeaea;
 $l-text-secondary-color: #b3b3b3;
+$l-disabled-input-color: #363636;
 
 // Typography
 $l-font-family: 'Inter', sans-serif;
@@ -44,3 +46,4 @@ $l-button-hover-bg: darken($l-primary-color, 10%);
 
 // Sizes
 $l-sliding-panel-size: 300px;
+$l-input-height: 50px;

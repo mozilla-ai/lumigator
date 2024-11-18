@@ -39,6 +39,7 @@
     >
       <l-dataset-details
         v-if="selectedDataset"
+        @l-experiment="onExperimentDataset($event)"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
       />
@@ -116,6 +117,7 @@ const onClearSelection = () => {
 
 const onExperimentDataset = (dataset) => {
   datasetStore.loadDatasetInfo(dataset.id);
+  router.push(`experiments`)
 }
 
 onMounted(async () => {

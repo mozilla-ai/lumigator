@@ -61,6 +61,17 @@
         <span class="l-dataset-details__content-label">ground truth</span>
         <span class="l-dataset-details__content-field">{{ selectedDataset.ground_truth }}</span>
       </div>
+      <div class="l-dataset-details__actions">
+        <Button
+          rounded
+          severity="secondary"
+          size="small"
+          icon="pi pi-microchip"
+          label="Use in Experiment"
+          class="l-dataset-empty__action-btn"
+          @click="emit('l-experiment', selectedDataset)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -76,7 +87,11 @@ const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 
-const emit = defineEmits(['l-delete-dataset', 'l-details-closed'])
+const emit = defineEmits([
+  'l-delete-dataset',
+  'l-details-closed',
+  'l-experiment'
+])
 
 function onCloseDetails() {
   showSlidingPanel.value = false;
@@ -128,6 +143,12 @@ function onCloseDetails() {
   }
    &__content-item {
     padding: $l-spacing-1/2 0;
+   }
+
+   &__actions {
+    padding: $l-spacing-1 0;
+    display: flex;
+    justify-content: center;
    }
 
 }

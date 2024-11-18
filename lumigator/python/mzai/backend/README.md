@@ -18,6 +18,16 @@ uv sync --dev && \
 source .venv/bin/activate
 ```
 
+## Test instructions
+
+The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
+
+```bash
+SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
+```
+
+Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests.
+
 ## Data models
 
 As an engineer/contributor, when you change a data model or add a new model which needs to be

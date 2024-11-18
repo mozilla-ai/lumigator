@@ -1,9 +1,11 @@
 
-from backend.services.jobs import JobService
 from lumigator_schemas.jobs import (
     JobInferenceCreate,
-
 )
+
+from backend.services.jobs import JobService
+
+
 def test_set_null_inference_job_params(job_record,job_service ):
     request = JobInferenceCreate(name="test_run_hugging_face",
                                  description="Test run for Huggingface model",

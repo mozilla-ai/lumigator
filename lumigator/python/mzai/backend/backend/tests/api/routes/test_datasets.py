@@ -1,5 +1,3 @@
-import csv
-import io
 import uuid
 from unittest.mock import patch
 from urllib.parse import urlparse
@@ -10,50 +8,6 @@ from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 from backend.api.http_headers import HttpHeaders
-
-
-def format_dataset(data: list[list[str]]) -> str:
-    """Format a list of tabular data as a CSV string."""
-    buffer = io.StringIO()
-    csv.writer(buffer).writerows(data)
-    buffer.seek(0)
-    return buffer.read()
-
-
-@pytest.fixture
-def valid_experiment_dataset() -> str:
-    data = [
-        ["examples", "ground_truth"],
-        ["Hello World", "Hello"],
-    ]
-    return format_dataset(data)
-
-
-@pytest.fixture
-def valid_experiment_dataset_without_gt() -> str:
-    data = [
-        ["examples"],
-        ["Hello World"],
-    ]
-    return format_dataset(data)
-
-
-@pytest.fixture
-def missing_examples_dataset() -> str:
-    data = [
-        ["ground_truth"],
-        ["Hello"],
-    ]
-    return format_dataset(data)
-
-
-@pytest.fixture
-def extra_column_dataset() -> str:
-    data = [
-        ["examples", "ground_truth", "extra"],
-        ["Hello World", "Hello", "Nope"],
-    ]
-    return format_dataset(data)
 
 
 def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
@@ -90,8 +44,9 @@ def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
 def test_dataset_delete_error(app_client: TestClient):
     dataset_id = uuid.uuid4()
     with patch(
-            "backend.services.datasets.DatasetService.delete_dataset",
-            side_effect=Exception("argh I am exceptional")):
+        "backend.services.datasets.DatasetService.delete_dataset",
+        side_effect=Exception("argh I am exceptional"),
+    ):
         resp = app_client.delete(f"/datasets/{dataset_id}")
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         data = resp.json()

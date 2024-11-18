@@ -20,7 +20,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          # For PRs set the depth to be one more than the number of commits in the PR,
+          # otherwise set it to one (e.g. for merge to main).
+          fetch-depth: $(( ${{ github.event_name == 'pull_request' && github.event.pull_request.commits || 0 }} + 1 ))
 
       - name: Check for modified paths
         uses: dorny/paths-filter@v3

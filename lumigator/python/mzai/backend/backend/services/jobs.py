@@ -104,16 +104,24 @@ class JobService:
 
         return config_template
 
-    def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
-        # get dataset S3 path from UUID
-        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
-
+    def _set_model_type(self, request:BaseModel)-> str:
+        """
+        Sets model URL based on protocol address logic
+        """
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
         elif request.model.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
         else:
             model_url = request.model_url
+
+        return model_url
+
+    def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
+        # get dataset S3 path from UUID
+        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+
+        model_url = self._set_model_type(request)
 
         # provide a reasonable system prompt for services where none was specified
         if request.system_prompt is None and not request.model.startswith("hf://"):

@@ -4,6 +4,8 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
+from lumigator_schemas.experiments import ExperimentResponse
+from lumigator_schemas.extras import ListingResponse
 
 from backend.main import app
 
@@ -51,6 +53,21 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "/jobs/inference/", headers=headers, json=payload
     )
     assert create_inference_job_response.status_code == 201
+
+    create_experiments_response = local_client.post(
+        "/experiments/", headers=headers, json=payload
+    )
+    assert create_experiments_response.status_code == 201
+
+    get_experiments_response = local_client.get(
+        "/experiments/")
+    get_experiments = ListingResponse[ExperimentResponse].model_validate(get_experiments_response.json())
+    print(get_experiments)
+    assert get_experiments.total > 0
+
+    get_experiment_response = local_client.get(
+        f"/experiments/{get_experiments.items[0].id}")
+    assert get_experiment_response.status_code == 200
 
 
 def test_experiment_non_existing(local_client: TestClient):

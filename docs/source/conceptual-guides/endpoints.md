@@ -28,9 +28,9 @@ the backend itself relies on:
 
 ```{admonition} Notation
 In the following, we will refer to paths inside Lumigator's repo relative to the
-`/lumigator/python/mzai` folder, e.g. the relative path `backend/api/routes/` (note the lack of a
+`/lumigator/python/mzai/backend` folder, e.g. the relative path `backend/api/routes` (note the lack of a
 trailing slash) will map to the absolute path from the root of the repo
-`/lumigator/python/mzai/backend/backend/api/routes/`.
+`/lumigator/python/mzai/backend/backend/api/routes`.
 ```
 
 ## Lumigator endpoints

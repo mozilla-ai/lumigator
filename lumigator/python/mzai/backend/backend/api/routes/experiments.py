@@ -48,7 +48,7 @@ def get_experiment_result(
     service: JobServiceDep,
     experiment_id: UUID,
 ) -> ExperimentResultResponse:
-    """Return experiment results metadata if av ailable in the DB."""
+    """Return experiment results metadata if available in the DB."""
     return ExperimentResultResponse.model_validate(
         service.get_job_result(experiment_id).model_dump()
         )

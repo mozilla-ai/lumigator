@@ -13,6 +13,7 @@
           :to="item.path"
           class="l-main-menu__link"
           :disabled="item.disabled"
+          @click="showSlidingPanel=false"
         >
           <span :class="item.icon" />
           <span ripple
@@ -27,6 +28,8 @@
 <script setup>
 import Menu from 'primevue/menu';
 import { routes } from '@/router'
+import { useSlidePanel } from '@/composables/SlidingPanel';
+const { showSlidingPanel  } = useSlidePanel();
 
 </script>
 

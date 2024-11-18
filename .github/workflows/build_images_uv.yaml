@@ -53,7 +53,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        if: steps.filter.outputs.backrebuildend == 'true'
+        if: steps.filter.outputs.rebuild == 'true'
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64

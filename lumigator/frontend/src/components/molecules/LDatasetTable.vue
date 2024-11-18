@@ -103,7 +103,10 @@ const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
-		icon: 'pi pi-microchip',
+    icon: 'pi pi-microchip',
+     command: () => {
+      emit('l-experiment', focusedDataset.value)
+    }
 	},
 	{
 		separator: true,

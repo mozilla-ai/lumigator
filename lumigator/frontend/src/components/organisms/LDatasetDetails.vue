@@ -6,7 +6,7 @@
       rounded
       aria-label="Close"
       class="l-dataset-details__close"
-      @click="showSlidingPanel = false"
+      @click="onCloseDetails"
     />
     <div class="l-dataset-details__header">
       <h3>Dataset Details</h3>
@@ -76,7 +76,12 @@ const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 
-const emit = defineEmits(['l-delete-dataset'])
+const emit = defineEmits(['l-delete-dataset', 'l-details-closed'])
+
+function onCloseDetails() {
+  showSlidingPanel.value = false;
+  emit('l-details-closed')
+}
 
 </script>
 

@@ -8,7 +8,7 @@ const LExperiments = () => import('@/components/pages/LExperiments.vue')
 
 export const routes = [
 	{
-		path: '/',
+		path: '/datasets',
 		name: 'datasets',
 		disabled: false,
 		component: LDatasetes,

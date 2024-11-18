@@ -50,16 +50,31 @@ class JobSubmissionResponse(BaseModel):
     driver_exit_code: int | None = None
 
 
-class JobCreate(BaseModel):
+class JobEvalCreate(BaseModel):
     name: str
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int | None = None
+    max_samples: int = -1 # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
-    config_infer_template: str | None = None
-    config_eval_template: str | None = None
+    config_template: str | None = None
+
+
+class JobInferenceCreate(BaseModel):
+    name: str
+    description: str = ""
+    model: str
+    dataset: UUID
+    max_samples: int = -1 # set to all samples by default
+    model_url: str | None = None
+    system_prompt: str | None = None
+    output_field: str | None = "prediction"
+    max_tokens: int = 1024
+    frequency_penalty: float = 0.0
+    temperature: float = 1.0
+    top_p: float = 1.0
+    config_template: str | None = None
 
 
 class JobResponse(BaseModel, from_attributes=True):

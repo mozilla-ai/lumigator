@@ -1,58 +1,109 @@
 <template>
-  <div class="l-datasets">
-    <div class="l-datasets__list-container">
-      <ul v-if="datasets && datasets.length"
-          class="l-datasets__list"
-      >
-        <li v-for="dataset in datasets"
-            :key="dataset.id"
-        >
-          <div class="l-datasets__list-card"
-               @click="onDatasetSelect(dataset.id)"
-          >
-            <span> {{ formatDate(dataset.created_at) }}</span>
-            <span>File name: {{ dataset.filename }}</span>
-            <span>Ground truth: {{ dataset.ground_truth ? '✅ ' : ' ❌' }}</span>
-            <span>Size: {{ dataset.size }} kb</span>
-          </div>
-          <span class="l-datasets__list-remove"
-                @click="onRemoveDataset(dataset.id)"
-          >🗑️</span>
-        </li>
-      </ul>
+  <div
+    class="l-datasets"
+    :class="{'is-empty': datasets.length === 0 || !datasets}"
+  >
+    <div
+      v-if="datasets.length > 0"
+      class="l-datasets__header-container"
+    >
+      <l-page-header
+        title="Datasets"
+        subtitle="Excepteur sint  occaecat cupidatat non proident, sunt in culpa qui iest."
+        button-label="Provide Dataset"
+        @l-header-action="onDatasetAdded()"
+      />
     </div>
+    <l-dataset-empty
+      v-else
+      @l-add-dataset="onDatasetAdded()"
+    />
+    <div
+      v-if="datasets.length > 0"
+      class="l-datasets__table-container"
+    >
+      <l-dataset-table
+        :table-data="datasets"
+        @l-dataset-selected="onDatasetSelected($event)"
+        @l-delete-dataset="deleteConfirmation($event)"
+      />
+    </div>
+    <l-file-upload
+      ref="datasetInput"
+      entity="dataset"
+      @l-file-upload="onDatasetUpload($event)"
+    />
+    <Teleport
+      to=".sliding-panel"
+    >
+      <l-dataset-details
+        v-if="selectedDataset"
+        @l-delete-dataset="deleteConfirmation($event)"
+      />
+    </Teleport>
+    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store.js'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useSlidePanel } from '@/composables/SlidingPanel';
+import LPageHeader from '@/components/molecules/LPageHeader.vue';
+import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
+import LFileUpload from '@/components/molecules/LFileUpload.vue';
+import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
+import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
 
-const emit = defineEmits(['dataset-selected', 'remove']);
+const datasetStore = useDatasetStore();
+const { datasets, selectedDataset } = storeToRefs(datasetStore);
+const { showSlidingPanel  } = useSlidePanel();
+const datasetInput = ref(null);
+const confirm = useConfirm();
 
-const datasetStore = useDatasetStore()
-const { datasets } = storeToRefs(datasetStore);
+function deleteConfirmation(dataset) {
+  confirm.require({
+    message: `${dataset.filename}`,
+    header: 'Delete  dataset?',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      onDeleteDataset(dataset.id)
+      if (!selectedDataset.value && showSlidingPanel.value) {
+        showSlidingPanel.value = false
+      }
+    },
+    reject: () => {}
+  });
+}
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: '2-digit',
-		year: '2-digit',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).format(date).replace(',', ' -');
-};
 
-const onDatasetSelect = (id) => {
-  emit('dataset-selected', id);
-};
+const onDatasetAdded = () => { datasetInput.value.input.click() }
 
-const onRemoveDataset = (id) => {
-  emit('dataset-remove', id);
-};
+const onDatasetUpload = (datasetFile) => {
+  datasetStore.uploadDataset(datasetFile);
+}
+
+const onDeleteDataset = (datasetID) => {
+  datasetStore.deleteDataset(datasetID);
+}
+
+const onDatasetSelected = (dataset) => {
+  datasetStore.loadDatasetInfo(dataset.id);
+  showSlidingPanel.value = true;
+}
 
 onMounted(async () => {
 	await datasetStore.loadDatasets()
@@ -62,43 +113,25 @@ onMounted(async () => {
 <style scoped lang="scss">
 .l-datasets {
   $root: &;
+  max-width: $l-main-width;
+  margin: 0 auto;
 
-  &__list-container {
+  &__header-container {
+    padding: $l-spacing-1;
     display: grid;
+    place-items: center;
+    width: 100%;
   }
 
-  &__list {
-    display: flex;
-    flex-wrap: wrap;
-    list-style-type: none;
-		padding: 1rem;
-
-    li {
-      display: flex;
-		padding: 1rem;
-      align-items: center;
-    }
-
-    &-card {
-      cursor: pointer;
-      margin: 1rem;
-      padding: 1rem;
-      box-shadow: 2px 8px 45px rgba(0, 0, 0, 0.15);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.2s linear;
-      display: flex;
-      flex-direction: column;
-      width: 300px;
-
-      &:hover {
-        box-shadow: 2px 4px 15px rgba(252, 228, 228, 0.401);
-        transform: translate3D(0, -2px, 0);
-      }
-    }
-    &-remove {
-      cursor: pointer;
-    }
+  &__table-container {
+		padding: $l-spacing-1;
+    display: grid;
+    width: 100%;
   }
+}
+
+.is-empty {
+  display: grid;
+  place-items: center;
 }
 </style>

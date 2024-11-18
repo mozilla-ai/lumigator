@@ -32,6 +32,10 @@ class JobEvent(BaseModel):
     detail: str | None = None
 
 
+class JobLogsResponse(BaseModel):
+    logs: str | None = None
+
+
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     job_id: str | None = None
@@ -55,7 +59,7 @@ class JobEvalCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int | None = None
+    max_samples: int = -1 # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None
@@ -66,7 +70,7 @@ class JobInferenceCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int | None = None
+    max_samples: int = -1 # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     output_field: str | None = "prediction"

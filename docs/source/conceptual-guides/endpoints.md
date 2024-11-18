@@ -105,7 +105,6 @@ def get_dataset_service(
     session: DBSessionDep, s3_client: S3ClientDep, s3_filesystem: S3FileSystemDep
 ) -> DatasetService:
     dataset_repo = DatasetRepository(session)
-    dataset_repo = DatasetRepository(session)
     return DatasetService(dataset_repo, s3_client, s3_filesystem)
 
 

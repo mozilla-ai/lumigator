@@ -20,7 +20,7 @@ TAGS_METADATA = [
     },
     {
         "name": Tags.EXPERIMENTS,
-        "description": "Create and manage experiments running on Ray.",
+        "description": "Create and manage experiments.",
     },
     {
         "name": Tags.JOBS,

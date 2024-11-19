@@ -9,7 +9,7 @@
     >
       <l-page-header
         title="Datasets"
-        subtitle="Excepteur sint  occaecat cupidatat non proident, sunt in culpa qui iest."
+        subtitle="Currently only CSV files are supported."
         button-label="Provide Dataset"
         @l-header-action="onDatasetAdded()"
       />

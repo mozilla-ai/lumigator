@@ -61,7 +61,7 @@ def is_valid_llamafile_model_name(model_name: str) -> bool:
 
 def validate_asset_path(path: str) -> "AssetPath":
     raw_path = strip_path_prefix(path)
-    
+
     if path.startswith(PathPrefix.FILE):
         if not Path(raw_path).is_absolute():
             raise ValueError(f"'{raw_path}' is not an absolute file path.")
@@ -91,6 +91,7 @@ def validate_asset_path(path: str) -> "AssetPath":
 
 AssetPath = Annotated[str, AfterValidator(lambda x: validate_asset_path(x))]
 
+
 def format_file_path(path: str | Path) -> AssetPath:
     path = Path(path).absolute()
     return f"{PathPrefix.FILE.value}{path}"
@@ -109,11 +110,15 @@ def format_artifact_path(artifact: wandb.Artifact) -> AssetPath:
             "Make sure to log the artifact before calling this method."
         )
         raise ValueError(msg) from e
+
+
 def format_s3_path(bucket: str, key: str) -> AssetPath:
     return f"{PathPrefix.S3.value}{bucket}/{key}"
 
+
 def format_openai_model_path(model_name: str) -> AssetPath:
     return f"{PathPrefix.OPENAI.value}{model_name}"
+
 
 def format_mistral_model_path(model_name: str) -> AssetPath:
     return f"{PathPrefix.MISTRAL.value}{model_name}"

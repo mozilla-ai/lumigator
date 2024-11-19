@@ -54,6 +54,29 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
     )
     assert create_inference_job_response.status_code == 201
 
+
+def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
+    response = local_client.get("/health")
+    assert response.status_code == 200
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
+    assert create_response.status_code == 201
+    created_dataset = DatasetResponse.model_validate(create_response.json())
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "model": "hf://facebook/bart-large-cnn",
+        "dataset": str(created_dataset.id),
+        "max_samples": 2,
+    }
+
     create_experiments_response = local_client.post(
         "/experiments/", headers=headers, json=payload
     )

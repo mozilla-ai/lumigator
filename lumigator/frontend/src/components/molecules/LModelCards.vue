@@ -15,11 +15,14 @@
         />
         <label :for="model.link">{{ model.link }}</label>
         <Button
+          as="a"
           icon="pi pi-external-link"
           severity="secondary"
           variant="text"
           rounded
           class="l-models__external-link"
+          :href="model.externalLink"
+          target="_blank"
         />
       </div>
     </div>
@@ -38,7 +41,7 @@ defineProps({
 })
 
 const modelOptions = ref([
-    { name: 'Accounting', link: 'hf://facebook/bart-large-cnn' },
+  { name: 'Bart', link: 'hf://facebook/bart-large-cnn', externalLink:'https://www.google.com' },
     { name: 'Marketing', link: 'mikeadimech/longformer-qmsum-meeting-summarization' },
     { name: 'Production', link: 'mrm8488/t5-base-finetuned-summarize-news' },
     { name: 'Research', link: 'mrm8488/t5-base-finetuned-summarize-news' }
@@ -72,7 +75,7 @@ const modelOptions = ref([
       }
      }
 
-     &__external-link, button {
+     &__external-link, a {
         background-color: $l-grey-300!important;
         border: none;
      }

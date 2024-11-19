@@ -1,5 +1,16 @@
 import http from '@/services/http';
-import { PATH_EXPERIMENTS_EVALUATE } from './api';
+import { PATH_EXPERIMENTS_ROOT, PATH_EXPERIMENTS_EVALUATE } from './api';
+
+
+async function fetchExperiments() {
+  try {
+    const response = await http.get(PATH_EXPERIMENTS_ROOT());
+    return response.data.items;
+  } catch (error) {
+    console.error("Error fetching experiments:", error.message || error);
+    return [];
+  }
+}
 
 async function triggerExperiment(experimentPayload) {
   try {
@@ -16,5 +27,6 @@ async function triggerExperiment(experimentPayload) {
 }
 
 export default {
+  fetchExperiments,
   triggerExperiment
 }

@@ -20,21 +20,22 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
-import { useDatasetStore } from '@/stores/datasets/store'
-
+import { useExperimentStore } from '@/stores/experiments/store'
 
 const { showSlidingPanel } = useSlidePanel();
-const datasetStore = useDatasetStore();
+const experimentStore = useExperimentStore();
+const { experiments } = storeToRefs(experimentStore);
 
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
 }
 onMounted(async () => {
-  await datasetStore.loadDatasets();
-
+  await experimentStore.loadExperiments();
+  console.log(experiments.value)
 })
 </script>
 

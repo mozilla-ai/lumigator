@@ -41,11 +41,12 @@ defineProps({
 })
 
 const modelOptions = ref([
-  { name: 'Bart', link: 'hf://facebook/bart-large-cnn', externalLink:'https://www.google.com' },
-    { name: 'Marketing', link: 'mikeadimech/longformer-qmsum-meeting-summarization' },
-    { name: 'Production', link: 'mrm8488/t5-base-finetuned-summarize-news' },
-    { name: 'Research', link: 'mrm8488/t5-base-finetuned-summarize-news' }
+  { id: '1', link: 'hf://facebook/bart-large-cnn', externalLink: '' },
+  { id: '2', link: 'mikeadimech/longformer-qmsum-meeting-summarization', externalLink: '' },
+  { id: '3', link: 'mrm8488/t5-base-finetuned-summarize-news', externalLink: '' },
+  { id: '4', link: 'mrm8488/t5-base-finetuned-summarize-news', externalLink: '' }
 ]);
+
 
 defineExpose({
   selectedModel
@@ -63,7 +64,7 @@ defineExpose({
     gap: $l-spacing-1;
 
 
-     &--option {
+    &--option {
       display: grid;
       grid-template-columns: 30px 80% 1fr;
       grid-gap: 5px;
@@ -75,12 +76,13 @@ defineExpose({
         font-size: $l-font-size-sm;
         color: $l-grey-150;
       }
-     }
+    }
 
-     &__external-link, a {
-        background-color: $l-grey-300!important;
-        border: none;
-     }
+    &__external-link,
+    a {
+      background-color: $l-grey-300 !important;
+      border: none;
+    }
   }
 }
 </style>

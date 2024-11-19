@@ -71,12 +71,11 @@
         variant="in"
         class="l-experiment-form__field"
       >
-        <InputText
+        <InputNumber
           id="max_samples"
           v-model="maxSamples"
           variant="filled"
-          disabled
-          style="background-color: #363636"
+          class="number-input"
         />
         <label for="max_samples">Maximum samples (optional)</label>
       </FloatLabel>
@@ -94,6 +93,7 @@
         size="small"
         label="Run experiment"
         class="l-page-header__action-btn"
+        :disabled="isInvalid"
         @click="triggerExperiment"
       />
     </div>
@@ -101,14 +101,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
+import { useDatasetStore } from '@/stores/datasets/store';
+import { useExperimentStore } from '@/stores/experiments/store';
 import Button from 'primevue/button';
 import FloatLabel from 'primevue/floatlabel';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 import LModelCards from '@/components/molecules/LModelCards.vue';
 
 const emit = defineEmits([
@@ -116,20 +118,45 @@ const emit = defineEmits([
 ])
 
 const datasetStore = useDatasetStore();
-const { datasets } = storeToRefs(datasetStore);
+const experimentStore = useExperimentStore();
+;const { datasets } = storeToRefs(datasetStore);
 
 const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
 const experimentType = experimentTypeOptions.value[0];
 const dataset = ref(null);
 const experimentTitle = ref('');
 const experimentDescription = ref('');
-const maxSamples = ref(null);
+const maxSamples = ref();
 const modelSelection = ref(null);
 
-function triggerExperiment() {
-  console.log(modelSelection.value.selectedModel);
+const isInvalid = computed(() =>
+  !experimentTitle.value ||
+  !experimentDescription.value ||
+  !dataset.value ||
+  !modelSelection.value?.selectedModel
+);
+
+async function triggerExperiment() {
+  const experimentPayload = {
+    name: experimentTitle.value,
+    description: experimentDescription.value,
+    model: modelSelection.value.selectedModel.link,
+    dataset: dataset.value.id,
+    max_samples: maxSamples.value ? maxSamples.value : 0,
+  }
+  const success = await experimentStore.runExperiment(experimentPayload);
+  if (success === experimentTitle.value) {
+    resetForm();
+  }
 }
 
+function resetForm() {
+  experimentTitle.value = '';
+  experimentDescription.value = '';
+  dataset.value = null;
+  modelSelection.value.selectedModel = null;
+  maxSamples.value = null;
+}
 </script>
 
 <style scoped lang="scss">
@@ -179,8 +206,9 @@ function triggerExperiment() {
       font-size: $l-font-size-sm;
     }
 
-    .disabled {
-
+    .number-input {
+      background-color: $l-card-bg;
+      width: 100%;
     }
   }
 
@@ -200,5 +228,3 @@ function triggerExperiment() {
 
 }
 </style>
-
-<style lang="scss"></style>

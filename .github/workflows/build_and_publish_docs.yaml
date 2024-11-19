@@ -23,6 +23,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Check links
+      id: lychee
+      uses: lycheeverse/lychee-action@v2
+      with:
+        # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
+        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost'
+
     - name: Check for modified paths
       uses: dorny/paths-filter@v3
       id: filter
@@ -30,14 +37,6 @@ jobs:
         filters: |
           docs_changes:
             - 'docs/**'
-
-    - name: Check links
-      if: steps.filter.outputs.docs-changes == 'true'
-      id: lychee
-      uses: lycheeverse/lychee-action@v2
-      with:
-        # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
-        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost'
 
     - name: Set up Python 3.11
       if: steps.filter.outputs.docs_changes == 'true'

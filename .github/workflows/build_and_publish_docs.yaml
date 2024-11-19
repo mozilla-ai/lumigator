@@ -32,7 +32,7 @@ jobs:
             - 'docs/**'
 
     - name: Check links
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs-changes == 'true'
       id: lychee
       uses: lycheeverse/lychee-action@v2
       with:

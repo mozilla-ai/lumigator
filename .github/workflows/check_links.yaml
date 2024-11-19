@@ -1,4 +1,4 @@
-name: Link checker
+name: Documentation - Link checker
 
 on:
   push:
@@ -16,15 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check for modified paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            changes:
-              - 'docs/**'
-
-      - name: Link Checker
+      - name: Check links
         if: steps.filter.outputs.changes == 'true'
         id: lychee
         uses: lycheeverse/lychee-action@v2

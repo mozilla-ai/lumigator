@@ -1,11 +1,11 @@
-name: Build and publish docs
+name: Documentation - Build and publish
 
 on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
   workflow_run:
     workflows:
-      - Link checker
+      - Documentation - Link checker
     types:
       - completed
 
@@ -29,17 +29,17 @@ jobs:
       id: filter
       with:
         filters: |
-          changes:
+          docs_changes:
             - 'docs/**'
 
     - name: Set up Python 3.11
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs_changes == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
     - name: Set up environment
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs_changes == 'true'
       id: setup
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -48,7 +48,7 @@ jobs:
       continue-on-error: false
 
     - name: Install docs dependencies
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs_changes == 'true'
       id: install_build_dependencies
       run: |
         . .venv/bin/activate
@@ -56,24 +56,24 @@ jobs:
       continue-on-error: false
 
     - name: Build documentation
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs_changes == 'true'
       run: |
         . .venv/bin/activate
         cd docs
         sphinx-build source build/html
 
     - name: Set up pages
-      if: steps.filter.outputs.changes == 'true'
+      if: steps.filter.outputs.docs_changes == 'true'
       uses: actions/configure-pages@v4
 
     - name: Upload artifact
-      if: steps.filter.outputs.changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: steps.filter.outputs.docs_changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: docs/build/html/
 
     - name: Deploy
-      if: steps.filter.outputs.changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: steps.filter.outputs.docs_changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/deploy-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

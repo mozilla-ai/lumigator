@@ -34,7 +34,7 @@ def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
     elif resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
             "Unexpected status code getting job metadata text: "
-             "{resp.status_code}, error: {resp.text or ''}"
+            f"{resp.status_code}, error: {resp.text or ''}"
         )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

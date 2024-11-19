@@ -3,7 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobCreate,
+    JobEvalCreate,
+    JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -20,11 +21,11 @@ router = APIRouter()
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobInferenceCreate,
     request: Request,
     response: Response
 ) -> JobResponse:
-    job_response = service.create_inference_job(job_create_request)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -35,11 +36,11 @@ def create_inference_job(
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobEvalCreate,
     request: Request,
     response: Response
 ) -> JobResponse:
-    job_response = service.create_evaluation_job(job_create_request)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

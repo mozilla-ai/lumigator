@@ -11,7 +11,7 @@ class ExperimentCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int | None = None
+    max_samples: int = -1 # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None

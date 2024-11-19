@@ -2,6 +2,11 @@ name: Lumigator backend tests
 
 on:
   push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
 
 jobs:
   backend-integration-tests:

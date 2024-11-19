@@ -18,7 +18,6 @@ jobs:
   build-docs:
     name: Docs - Build and publish
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout code

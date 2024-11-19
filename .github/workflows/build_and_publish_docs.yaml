@@ -4,8 +4,7 @@ on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
   workflow_run:
-    workflows:
-      - Documentation - Link checker
+    workflows: ["Documentation - Link checker"]
     types:
       - completed
 

@@ -19,6 +19,7 @@ class JobStatus(str, Enum):
 
 
 class JobConfig(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     job_id: UUID
     job_type: JobType
     command: str
@@ -26,6 +27,7 @@ class JobConfig(BaseModel):
 
 
 class JobEvent(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     job_id: UUID
     job_type: JobType
     status: JobStatus
@@ -33,10 +35,12 @@ class JobEvent(BaseModel):
 
 
 class JobLogsResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     logs: str | None = None
 
 
 class JobSubmissionResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     type: str | None = None
     job_id: str | None = None
     submission_id: str | None = None
@@ -67,6 +71,7 @@ class JobEvalCreate(BaseModel):
 
 
 class JobInferenceCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: str
     description: str = ""
     model: str
@@ -83,6 +88,7 @@ class JobInferenceCreate(BaseModel):
 
 
 class JobResponse(BaseModel, from_attributes=True):
+    model_config = ConfigDict(extra='forbid')
     id: UUID
     name: str
     description: str
@@ -92,10 +98,12 @@ class JobResponse(BaseModel, from_attributes=True):
 
 
 class JobResultResponse(BaseModel, from_attributes=True):
+    model_config = ConfigDict(extra='forbid')
     id: UUID
     job_id: UUID
 
 
 class JobResultDownloadResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     id: UUID
     download_url: str

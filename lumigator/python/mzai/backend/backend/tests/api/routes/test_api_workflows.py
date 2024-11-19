@@ -85,7 +85,6 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
     get_experiments_response = local_client.get(
         "/experiments/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(get_experiments_response.json())
-    print(get_experiments)
     assert get_experiments.total > 0
 
     get_experiment_response = local_client.get(

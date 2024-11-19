@@ -1,6 +1,9 @@
 <template>
   <div class="l-experiment-form">
-    <div class="l-experiment-form__header">
+    <div
+      class="l-experiment-form__header"
+      style="position: sticky; top: 0;z-index:100"
+    >
       <h3>Create Experiment</h3>
       <Button
         icon="pi pi-times"
@@ -73,16 +76,26 @@
           v-model="maxSamples"
           variant="filled"
           disabled
+          style="background-color: #363636"
         />
-        <label
-          for="max_samples"
-          class="disabled"
-        >Maximul samples (optional)</label>
+        <label for="max_samples">Maximum samples (optional)</label>
       </FloatLabel>
     </div>
-    <div class="l-experiment-form__model-container">
+    <div class="l-experiment-form__models-container">
       <h3>Model Selection</h3>
       <h4>Hugging Face Model Hub & Mistral</h4>
+      <div class="l-experiment-form__models">
+        <l-model-cards  />
+      </div>
+    </div>
+    <div class="l-experiment-form__submit-container">
+      <Button
+        rounded
+        size="small"
+        label="Run experiment"
+        class="l-page-header__action-btn"
+        @click="triggerExperiment"
+      />
     </div>
   </div>
 </template>
@@ -96,6 +109,7 @@ import FloatLabel from 'primevue/floatlabel';
 import Select from 'primevue/select';
 import Textarea from 'primevue/textarea';
 import InputText from 'primevue/inputtext';
+import LModelCards from '@/components/molecules/LModelCards.vue';
 
 const emit = defineEmits([
   'l-close-form',
@@ -118,15 +132,16 @@ const maxSamples = ref(null)
   display: flex;
   flex-direction: column;
 
-  &__header, &__model-container{
-    color: $l-grey-100;
+  &__header, &__models-container{
     padding-bottom: $l-spacing-1;
     display: flex;
     justify-content: space-between;
+    background-color: $l-main-bg;
 
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
+      color: $l-grey-150;
     }
 
     button {
@@ -138,6 +153,7 @@ const maxSamples = ref(null)
   }
 
   &__fields {
+    z-index: 1;
     display: flex;
     flex-direction: column;
   }
@@ -158,17 +174,22 @@ const maxSamples = ref(null)
     }
 
     .disabled {
-      color: #4D4D4D;
-      cursor: not-allowed!important;
+
     }
   }
 
-  &__model-container {
+  &__models-container {
     flex-direction: column;
     h4 {
       font-size: $l-font-size-sm;
+      color: $l-grey-150;
       font-weight:$l-font-weight-bold ;
     }
+  }
+
+  &__submit-container {
+    display: flex;
+    justify-content: center;
   }
 
 }

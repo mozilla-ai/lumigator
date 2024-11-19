@@ -110,3 +110,18 @@
   }
 
 }
+
+.p-radiobutton-box {
+  border: 1px solid white!important;
+  background-color: $l-grey-300!important;
+  height: 18px!important;
+  width: 18px!important;
+}
+
+.p-radiobutton-checked .p-radiobutton-box {
+  border-color: var(--l-radiobutton-checked-border-color)!important;
+
+  .p-radiobutton-icon {
+    background: $l-primary-color!important;
+  }
+}

@@ -79,6 +79,7 @@ const { showSlidingPanel } = useSlidePanel();
 
   .sliding-panel.open {
     width: $l-sliding-panel-size;
+    overflow-y: auto;
   }
 
   .l-main-container {

@@ -47,7 +47,9 @@ const modelOptions = ref([
     { name: 'Research', link: 'mrm8488/t5-base-finetuned-summarize-news' }
 ]);
 
-
+defineExpose({
+  selectedModel
+})
 </script>
 
 <style scoped lang="scss">

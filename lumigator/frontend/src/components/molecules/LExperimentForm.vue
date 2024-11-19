@@ -85,7 +85,7 @@
       <h3>Model Selection</h3>
       <h4>Hugging Face Model Hub & Mistral</h4>
       <div class="l-experiment-form__models">
-        <l-model-cards  />
+        <l-model-cards  ref="modelSelection"/>
       </div>
     </div>
     <div class="l-experiment-form__submit-container">
@@ -121,9 +121,15 @@ const { datasets } = storeToRefs(datasetStore);
 const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
 const experimentType = experimentTypeOptions.value[0];
 const dataset = ref(null);
-const experimentTitle = ref('')
-const experimentDescription = ref('')
-const maxSamples = ref(null)
+const experimentTitle = ref('');
+const experimentDescription = ref('');
+const maxSamples = ref(null);
+const modelSelection = ref(null);
+
+function triggerExperiment() {
+  console.log(modelSelection.value.selectedModel);
+}
+
 </script>
 
 <style scoped lang="scss">

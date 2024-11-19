@@ -1,13 +1,13 @@
 name: Documentation - Build and publish
 
 on:
-  # required to enable manual triggers on the GH web ui
+  push:
+    branches:
+        - main
+  pull_request:
+    branches:
+      - "**"
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Documentation - Link checker
-    types:
-      - completed
 
 permissions:
   contents: write
@@ -31,6 +31,14 @@ jobs:
         filters: |
           docs_changes:
             - 'docs/**'
+
+    - name: Check links
+      if: steps.filter.outputs.changes == 'true'
+      id: lychee
+      uses: lycheeverse/lychee-action@v2
+      with:
+        # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
+        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost'
 
     - name: Set up Python 3.11
       if: steps.filter.outputs.docs_changes == 'true'

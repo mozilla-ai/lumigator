@@ -3,7 +3,7 @@ name: Link checker
 on:
   push:
     branches:
-        - '*'
+        - main
   pull_request:
     branches:
       - "**"
@@ -16,7 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            changes:
+              - 'docs/**'
+
       - name: Link Checker
+        if: steps.filter.outputs.changes == 'true'
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:

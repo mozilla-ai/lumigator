@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class JobType(str, Enum):
@@ -55,6 +55,7 @@ class JobSubmissionResponse(BaseModel):
 
 
 class JobEvalCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: str
     description: str = ""
     model: str

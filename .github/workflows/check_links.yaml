@@ -17,7 +17,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check links
-        if: steps.filter.outputs.changes == 'true'
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:

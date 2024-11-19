@@ -2,7 +2,7 @@
   <div class="l-dataset-empty">
     <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
     <p class="l-dataset-empty__instructions">
-      Please make sure you have the correct column structure.
+      The dataset file should contain a header row with the following columns: 'examples', 'ground_truth'. <br> The 'ground_truth' column is optional since you can generate it using Lumigator. </br>
       <a
         class="l-dataset-empty__-more"
       >Learn more.</a>

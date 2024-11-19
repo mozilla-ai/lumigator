@@ -82,10 +82,6 @@ defineProps({
 	tableData: {
 		type: Array,
 		required: true,
-	},
-	entityType: {
-		type: String,
-		required: false,
 	}
 })
 

@@ -7,6 +7,12 @@
         @l-header-action="onCreateExperiment()"
       />
     </div>
+    <div
+      v-if="experiments.length > 0"
+      class="l-experiments__table-container"
+    >
+      <l-experiment-table :table-data="experiments" />
+    </div>
     <Teleport to=".sliding-panel">
       <transition name="transtion-fade">
         <l-experiment-form
@@ -23,6 +29,7 @@ import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
+import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import { useExperimentStore } from '@/stores/experiments/store'
 
@@ -35,7 +42,6 @@ const onCreateExperiment = () => {
 }
 onMounted(async () => {
   await experimentStore.loadExperiments();
-  console.log(experiments.value)
 })
 </script>
 

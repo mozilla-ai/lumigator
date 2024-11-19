@@ -41,7 +41,7 @@ start-lumigator-external-services: .env
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local-fe -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local --profile local-fe -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 clean-docker-buildcache:
 	docker builder prune --all -f

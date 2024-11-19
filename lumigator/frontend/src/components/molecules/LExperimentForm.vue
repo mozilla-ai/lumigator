@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store';
 import { useExperimentStore } from '@/stores/experiments/store';
@@ -157,6 +157,12 @@ function resetForm() {
   modelSelection.value.selectedModel = null;
   maxSamples.value = null;
 }
+
+onMounted(async () => {
+  if (datasets.value?.length === 0) {
+    await datasetStore.loadDatasets();
+  }
+})
 </script>
 
 <style scoped lang="scss">

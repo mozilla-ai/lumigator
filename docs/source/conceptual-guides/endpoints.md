@@ -28,9 +28,9 @@ the backend itself relies on:
 
 ```{admonition} Notation
 In the following, we will refer to paths inside Lumigator's repo relative to the
-`/lumigator/python/mzai` folder, e.g. the relative path `backend/api/routes/` (note the lack of a
+`/lumigator/python/mzai/backend` folder, e.g. the relative path `backend/api/routes` (note the lack of a
 trailing slash) will map to the absolute path from the root of the repo
-`/lumigator/python/mzai/backend/backend/api/routes/`.
+`/lumigator/python/mzai/backend/backend/api/routes`.
 ```
 
 ## Lumigator endpoints
@@ -104,7 +104,6 @@ you will see that a `DatasetServiceDep` is nothing more than a `DatasetService` 
 def get_dataset_service(
     session: DBSessionDep, s3_client: S3ClientDep, s3_filesystem: S3FileSystemDep
 ) -> DatasetService:
-    dataset_repo = DatasetRepository(session)
     dataset_repo = DatasetRepository(session)
     return DatasetService(dataset_repo, s3_client, s3_filesystem)
 

@@ -1,13 +1,17 @@
 <template>
   <div class="l-dataset-empty">
     <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
-    <p class="l-dataset-empty__instructions">
-      Please make sure you have the correct column structure.
-      <a
-        href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#upload-a-dataset"
-        target="_blank"
-        class="l-dataset-empty__-more"
-      >Learn more.</a>
+    <p class="l-dataset-empty__instructions-text">
+      <span>
+        The dataset file should contain a
+        header row with the following columns: 'examples', 'ground_truth'.
+      </span>
+      <span>
+        The 'ground_truth' column is optional since you can generate it using Lumigator.
+        <a
+          class="l-dataset-empty__-more"
+        >Learn more</a>
+      </span>
     </p>
     <Button
       rounded
@@ -35,6 +39,13 @@ const emit  = defineEmits(['l-add-dataset'])
     color: $l-grey-100;
     font-size: $l-font-size;
     font-weight: $l-font-weight-normal;
+    &-text {
+      display: grid;
+      place-items: center;
+      color: $l-grey-100;
+      font-size: $l-font-size;
+      font-weight: $l-font-weight-normal;
+    }
   }
 
   &__note {

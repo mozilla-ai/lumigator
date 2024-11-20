@@ -85,7 +85,7 @@ defineProps({
 	}
 })
 
-const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
+const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected', 'l-experiment'])
 
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {

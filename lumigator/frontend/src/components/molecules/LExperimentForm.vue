@@ -119,7 +119,7 @@ const emit = defineEmits([
 
 const datasetStore = useDatasetStore();
 const experimentStore = useExperimentStore();
-;const { datasets } = storeToRefs(datasetStore);
+const { datasets, selectedDataset } = storeToRefs(datasetStore);
 
 const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
 const experimentType = experimentTypeOptions.value[0];
@@ -162,6 +162,9 @@ function resetForm() {
 onMounted(async () => {
   if (datasets.value?.length === 0) {
     await datasetStore.loadDatasets();
+  }
+  if (selectedDataset.value) {
+    dataset.value = selectedDataset.value;
   }
 })
 </script>

@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch} from 'vue'
+import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
@@ -116,24 +116,18 @@ const onClearSelection = () => {
 }
 
 const onExperimentDataset = (dataset) => {
+  router.push('experiments')
+  selectedDataset.value = dataset;
   datasetStore.loadDatasetInfo(dataset.id);
-  router.push(`experiments`)
 }
 
 onMounted(async () => {
-  await datasetStore.loadDatasets();
   if (route.query.dataset) {
     const selection = datasets.value.filter((dataset) => dataset.id === route.query.dataset)[0];
     onDatasetSelected(selection);
   }
 })
 
-watch(
-  () => datasetStore.selectedDataset?.id,
-  (newId) => {
-    router.replace({query: { dataset: newId }})
-  }
-)
 </script>
 
 <style scoped lang="scss">

@@ -26,12 +26,21 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import LMenu from '@/components/organisms/LMenu.vue';
 import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 
-const { showSlidingPanel } = useSlidePanel();
+const datasetStore = useDatasetStore();
+const experimentStore = useExperimentStore();
 
+const { showSlidingPanel } = useSlidePanel();
+onMounted(async () => {
+  await experimentStore.loadExperiments();
+  await datasetStore.loadDatasets();
+})
 </script>
 
 <style scoped lang="scss">

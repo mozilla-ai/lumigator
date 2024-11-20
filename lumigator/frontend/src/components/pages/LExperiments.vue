@@ -24,7 +24,7 @@
       <transition name="transtion-fade">
         <l-experiment-form
           v-if="showSlidingPanel && selectedExperiment === null"
-          @l-close-form="showSlidingPanel= false"
+          @l-close-form="onDismissForm"
         />
       </transition>
       <transition name="transtion-fade">
@@ -40,15 +40,18 @@
 <script setup>
 import { onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia';
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
-import { useExperimentStore } from '@/stores/experiments/store'
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
+const datasetStore = useDatasetStore();
+const { selectedDataset } = storeToRefs(datasetStore);
 const { experiments, selectedExperiment } = storeToRefs(experimentStore);
 
 const onCreateExperiment = () => {
@@ -61,12 +64,19 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
+const onDismissForm = () => {
+  selectedDataset.value = null;
+  showSlidingPanel.value = false;
+}
+
 const onCloseDetails = () => {
   showSlidingPanel.value = false;
 }
 
 onMounted(async () => {
-  await experimentStore.loadExperiments();
+   if (selectedDataset.value) {
+     onCreateExperiment();
+  }
 })
 
 watch(showSlidingPanel, () => {

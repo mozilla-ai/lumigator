@@ -15,7 +15,10 @@
       v-if="experiments.length > 0"
       class="l-experiments__table-container"
     >
-      <l-experiment-table :table-data="experiments" />
+      <l-experiment-table
+        :table-data="experiments"
+        @l-experiment-selected="onSelectExperiment($event)"
+      />
     </div>
     <Teleport to=".sliding-panel">
       <transition name="transtion-fade">
@@ -44,6 +47,11 @@ const { experiments } = storeToRefs(experimentStore);
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
 }
+
+const onSelectExperiment = (experiment) => {
+  experimentStore.loadDetails(experiment.id);
+}
+
 onMounted(async () => {
   await experimentStore.loadExperiments();
 })

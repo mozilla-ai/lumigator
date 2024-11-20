@@ -1,5 +1,9 @@
 import http from '@/services/http';
-import { PATH_EXPERIMENTS_ROOT, PATH_EXPERIMENTS_EVALUATE } from './api';
+import {
+  PATH_EXPERIMENTS_ROOT,
+  PATH_EXPERIMENTS_EVALUATE,
+  PATH_EXPERIMENT_DETAILS
+} from './api';
 
 
 async function fetchExperiments() {
@@ -10,6 +14,11 @@ async function fetchExperiments() {
     console.error("Error fetching experiments:", error.message || error);
     return [];
   }
+}
+
+async function fetchExperimentDetails(id) {
+  const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+  return response.data
 }
 
 async function triggerExperiment(experimentPayload) {
@@ -28,5 +37,6 @@ async function triggerExperiment(experimentPayload) {
 
 export default {
   fetchExperiments,
+  fetchExperimentDetails,
   triggerExperiment
 }

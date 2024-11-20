@@ -83,6 +83,8 @@ const props = defineProps({
     required: true,
   }
 });
+const emit = defineEmits(['l-experiment-selected'])
+
 
 const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();

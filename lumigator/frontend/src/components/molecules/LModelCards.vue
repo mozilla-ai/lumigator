@@ -42,9 +42,9 @@ defineProps({
 
 const modelOptions = ref([
   { id: '1', link: 'hf://facebook/bart-large-cnn', externalLink: '' },
-  { id: '2', link: 'mikeadimech/longformer-qmsum-meeting-summarization', externalLink: '' },
-  { id: '3', link: 'mrm8488/t5-base-finetuned-summarize-news', externalLink: '' },
-  { id: '4', link: 'mrm8488/t5-base-finetuned-summarize-news', externalLink: '' }
+  { id: '2', link: 'hf://mikeadimech/longformer-qmsum-meeting-summarization', externalLink: '' },
+  { id: '3', link: 'hf://mrm8488/t5-base-finetuned-summarize-news', externalLink: '' },
+  { id: '4', link: 'hf://mrm8488/t5-base-finetuned-summarize-news', externalLink: '' }
 ]);
 
 

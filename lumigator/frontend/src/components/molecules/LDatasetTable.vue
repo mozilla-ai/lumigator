@@ -85,13 +85,13 @@ defineProps({
 	}
 })
 
+const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
+
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
   return showSlidingPanel.value ?
     'min-width: min(40vw, 1200px)' : 'min-width: min(80vw, 1200px)'
 })
-
-const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
 
 const focusedDataset = ref(null);
 const tableVisible = ref(true)

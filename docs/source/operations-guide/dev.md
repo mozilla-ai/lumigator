@@ -17,7 +17,7 @@ user@host:~/lumigator$ make local-up
 This creates three container services networked together to make up all the components of the
 Lumigator application:
 
-- `localstack`: :ocal storage for datasets that mimics S3-API compatible functionality.
+- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: a Ray cluster for submitting lm-buddy jobs and serving Ray Serve.
 

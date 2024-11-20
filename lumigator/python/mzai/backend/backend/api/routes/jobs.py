@@ -4,10 +4,12 @@ from fastapi import APIRouter, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
+    JobCreate,
     JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
+    JobType
 )
 from starlette.requests import Request
 from starlette.responses import Response
@@ -16,6 +18,22 @@ from backend.api.deps import JobServiceDep
 from backend.api.http_headers import HttpHeaders
 
 router = APIRouter()
+
+
+@router.post("/alt/{type}/", status_code=status.HTTP_201_CREATED)
+def create_inference_job(
+    service: JobServiceDep,
+    job_create_request: JobCreate,
+    request: Request,
+    response: Response
+) -> JobResponse:
+    job_create_request.type = JobType(type)
+    job_response = service.create_job_alt(job_create_request)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
 
 
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)

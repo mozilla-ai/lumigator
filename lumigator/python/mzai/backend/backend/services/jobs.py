@@ -15,6 +15,13 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.inference_config import (
+    InferenceJobConfig,
+    COMMAND as INFERENCE_COMMAND,
+    PIP_REQS as INFERENCE_PIP_REQS,
+    WORK_DIR as INFERENCE_WORK_DIR,
+    CONFIG_MODEL as INFERENCE_CONFIG_MODEL
+)
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 
@@ -25,15 +32,35 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
 
-from lumigator_schemas.jobs import InferenceJobConfig
-
+# from lumigator_schemas import inference_config
 
 class JobService:
     # set storage path
     storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
 
+    # A more generic implementation could be:
+    # job_settings = {}
+    # job_imports = [inference_config]
+    # for config in job_imports:
+    #     job_settings[config.JOB_TYPE] = {
+    #         "command": config.COMMAND,
+    #         "pip": config.PIP_REQS,
+    #         "work_dir": config.WORK_DIR,
+    #         "model": config.CONFIG_MODEL,
+    #         "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
+    #         "ray_worker_gpus": settings.RAY_WORKER_GPUS,
+    #     }
+
     job_settings = {
         JobType.INFERENCE: {
+            "command": INFERENCE_COMMAND,
+            "pip": INFERENCE_PIP_REQS,
+            "work_dir": INFERENCE_WORK_DIR,
+            "model": INFERENCE_CONFIG_MODEL,
+            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
+            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
+        },
+        JobType.MULTI_INFERENCE: {
             "command": settings.INFERENCE_COMMAND,
             "pip": settings.INFERENCE_PIP_REQS,
             "work_dir": settings.INFERENCE_WORK_DIR,

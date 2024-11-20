@@ -7,7 +7,7 @@ from pathlib import Path
 
 import s3fs
 from datasets import load_from_disk
-from inference_config import InferenceJobConfig
+from lumigator_schemas.inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import (
     BaseModelClient,

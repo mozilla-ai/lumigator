@@ -4,3 +4,4 @@ datasets==2.20.0
 python-box==7.2.0
 mistralai==0.4.2
 openai==1.52.0
+lumigator-schemas==0.1.0-rc.2

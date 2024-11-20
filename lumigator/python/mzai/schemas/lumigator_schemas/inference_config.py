@@ -1,8 +1,5 @@
 from pydantic import BaseModel, ConfigDict
 
-from lumigator_schemas.jobs import JobType
-
-# Model class definitions
 
 class DatasetConfig(BaseModel):
     path: str
@@ -40,12 +37,3 @@ class InferenceJobConfig(BaseModel):
     inference_server: InferenceServerConfig
     params: SamplingParameters
     model_config = ConfigDict(extra="forbid")
-
-# Job properties
-# NOTE maybe make a @property and/or a dict/obj/pydantic model
-# typing.Protocol might be used to allow IDE support
-COMMAND = "python inference.py"
-PIP_REQS = "requirements.txt"
-WORK_DIR = None
-MODEL = InferenceJobConfig
-JOB_TYPE = JobType.INFERENCE

@@ -23,8 +23,14 @@
     <Teleport to=".sliding-panel">
       <transition name="transtion-fade">
         <l-experiment-form
-          v-if="showSlidingPanel"
+          v-if="showSlidingPanel && selectedExperiment === null"
           @l-close-form="showSlidingPanel= false"
+        />
+      </transition>
+      <transition name="transtion-fade">
+        <l-experiment-details
+          v-if="showSlidingPanel && selectedExperiment !== null"
+          @l-close-details="onCloseDetails"
         />
       </transition>
     </Teleport>
@@ -32,29 +38,40 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import { useExperimentStore } from '@/stores/experiments/store'
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
-const { experiments } = storeToRefs(experimentStore);
+const { experiments, selectedExperiment } = storeToRefs(experimentStore);
 
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
+  selectedExperiment.value = null;
 }
 
 const onSelectExperiment = (experiment) => {
   experimentStore.loadDetails(experiment.id);
+  showSlidingPanel.value = true;
+}
+
+const onCloseDetails = () => {
+  showSlidingPanel.value = false;
 }
 
 onMounted(async () => {
   await experimentStore.loadExperiments();
 })
+
+watch(showSlidingPanel, () => {
+  selectedExperiment.value = null;
+});
 </script>
 
 <style scoped lang="scss">

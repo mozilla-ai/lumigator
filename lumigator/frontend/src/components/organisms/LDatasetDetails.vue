@@ -138,6 +138,7 @@ function onCloseDetails() {
     &-label {
       color: $l-grey-200;
       text-transform: uppercase;
+      font-weight: $l-font-weight-bold;
     }
 
   }

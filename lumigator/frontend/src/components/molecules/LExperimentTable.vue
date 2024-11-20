@@ -161,6 +161,7 @@ watch(() => props.tableData.length, () => {
 
   &__tag {
     font-size: $l-font-size-sm;
+    line-height: 1;
     font-weight: $l-font-weight-normal;
   }
 }

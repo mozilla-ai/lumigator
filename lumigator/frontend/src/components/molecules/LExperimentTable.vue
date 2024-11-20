@@ -82,8 +82,6 @@ function updateJobStatuses() {
     id: experiment.id,
     status: experiment.status
   }));
-  console.log('props', props.tableData)
-  console.log(runningJobs.value)
 }
 
 // Throttle ensures the function is invoked at most once every defined period.

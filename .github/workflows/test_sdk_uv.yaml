@@ -17,13 +17,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            run_sdk_unit_tests:
+              - 'lumigator/python/mzai/sdk/**'
+
       - name: Install uv
+        if: steps.filter.outputs.run_sdk_unit_tests == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.run_sdk_unit_tests == 'true'
         run: uv python install
         working-directory: lumigator/python/mzai/sdk
 
       - name: Run tests
+        if: steps.filter.outputs.run_sdk_unit_tests == 'true'
         run: uv run pytest
         working-directory: lumigator/python/mzai/sdk

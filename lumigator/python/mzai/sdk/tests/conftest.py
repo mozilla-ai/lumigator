@@ -27,12 +27,7 @@ def mock_requests(mock_requests_response):
 
 @pytest.fixture(scope="session")
 def lumi_client() -> LumigatorClient:
-    with mock.patch("requests.request") as req_mock:
-        with mock.patch("requests.Response") as resp_mock:
-            resp_mock.status_code = 200
-            resp_mock.json = lambda: json.loads('["openai", "mistral"]')
-            req_mock.return_value = resp_mock
-            return LumigatorClient(LUMI_HOST)
+    yield LumigatorClient(LUMI_HOST)
 
 
 @pytest.fixture(scope="session")
@@ -149,6 +144,7 @@ def json_data_job_response(resources_dir) -> Path:
 def dialog_data(common_resources_dir):
     with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
         yield file
+
 
 @pytest.fixture(scope="session")
 def simple_eval_template():

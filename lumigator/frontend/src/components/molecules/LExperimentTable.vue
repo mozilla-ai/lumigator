@@ -26,8 +26,31 @@
           field="status"
           header="status"
         >
+
           <template #body="slotProps">
-            {{ retrieveStatus(slotProps.data.id) }}
+            <div v-show="retrieveStatus(slotProps.data.id)">
+              <Tag
+                v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED' "
+                severity="success"
+                rounded
+                :value="retrieveStatus(slotProps.data.id)"
+                :pt="{root:'l-experiment-table__tag'}"
+              />
+              <Tag
+                v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED' "
+                severity="danger"
+                rounded
+                :value="retrieveStatus(slotProps.data.id)"
+                :pt="{root:'l-experiment-table__tag'}"
+              />
+              <Tag
+                v-else
+                severity="warn"
+                rounded
+                :value="` · ${retrieveStatus(slotProps.data.id)}`"
+                :pt="{root:'l-experiment-table__tag'}"
+              />
+            </div>
           </template>
         </Column>
         <Column header="options">
@@ -52,6 +75,7 @@ import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { useHealthStore } from '@/stores/health/store';
+import Tag from 'primevue/tag';
 
 const props = defineProps({
   tableData: {
@@ -68,12 +92,12 @@ const tableVisible = ref(true)
 
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'min-width: min(40vw, 1200px)' : 'min-width: min(80vw, 1200px)'
+    'min-width: min(60vw, 1200px)' : 'min-width: min(80vw, 1200px)'
 })
 
 function retrieveStatus(jobID) {
  const job = runningJobs.value.find(job => job.id === jobID);
-  return job ? job.status.toLowerCase() : null;
+  return job ? job.status : null;
 }
 
 
@@ -130,7 +154,12 @@ watch(() => props.tableData.length, () => {
 
     &__options-trigger {
 		padding: 0;
-		margin-left: 20% !important;
+		margin-left: 10% !important;
 	}
+
+  &__tag {
+    font-size: $l-font-size-sm;
+    font-weight: $l-font-weight-normal;
+  }
 }
 </style>

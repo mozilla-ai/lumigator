@@ -1,18 +1,18 @@
 backend:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/backend/*'
+  - any-glob-to-any-file: 'lumigator/python/mzai/backend/**'
 dependencies:
 - changed-files:
   - any-glob-to-any-file: 'pyproject.toml'
 documentation:
 - changed-files:
-  - any-glob-to-any-file: 'docs/*'
+  - any-glob-to-any-file: 'docs/**'
 frontend:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/frontend/*'
+  - any-glob-to-any-file: 'lumigator/frontend/**'
 gha:
 - changed-files:
-  - any-glob-to-any-file: '.github/workflows/*'
+  - any-glob-to-any-file: '.github/workflows/**'
 sdk:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/sdk/*'
+  - any-glob-to-any-file: 'lumigator/python/mzai/sdk/**'

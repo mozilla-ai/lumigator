@@ -1,9 +1,13 @@
 <template>
-  <div class="l-experiments">
+  <div
+    class="l-experiments"
+    :class="{'no-data':experiments.length === 0}"
+  >
     <div class="l-experiments__header-container">
       <l-page-header
         title="Experiments"
         button-label="Create Experiment"
+        :column="experiments.length === 0"
         @l-header-action="onCreateExperiment()"
       />
     </div>
@@ -45,9 +49,27 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .l-experiments {
-	display: grid;
-	place-items: center;
+  $root: &;
+  max-width: $l-main-width;
+  margin: 0 auto;
+
+  &__header-container {
+    padding:$l-spacing-1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+  }
+
+  &__table-container {
+		padding: $l-spacing-1;
+    display: grid;
+    width: 100%;
+  }
+  &.no-data {
+    display: grid;
+    place-items: center;
+  }
 }
 </style>

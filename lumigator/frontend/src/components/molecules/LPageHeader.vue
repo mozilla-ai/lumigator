@@ -1,10 +1,10 @@
 <template>
   <div
     class="l-page-header"
-    :class="{'column': !subtitle.length > 0}"
+    :class="{'column': column}"
   >
     <div class="l-page-header__text-content">
-      <h3>{{ title }}</h3>
+      <h3>{{ title }} </h3>
       <p>{{ subtitle }}</p>
     </div>
     <Button
@@ -35,6 +35,11 @@ defineProps({
   buttonLabel: {
     type: String,
     default: '',
+    required: false
+  },
+  column: {
+    type: Boolean,
+    default: false,
     required: false
   }
 });
@@ -80,6 +85,7 @@ const handleAction = () => {
   &.column{
    width: 100%;
    min-width: 60vw;
+   flex-direction: column;
   }
 
 }

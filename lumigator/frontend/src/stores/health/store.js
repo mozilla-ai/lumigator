@@ -24,8 +24,7 @@ export const useHealthStore = defineStore('health', () => {
 
   async function updateAllJobs() {
     const promises = runningJobs.value
-      // Skip jobs that are complete or failed
-      .filter((job) => job.status === 'RUNNING' || job.status === 'created')
+      .filter((job) => job.status !== 'SUCCEEDED' && job.status !== 'FAILED') // Exclude completed or failed jobs
       .map((job) => updateJobStatus(job.id));
     await Promise.all(promises);
   }

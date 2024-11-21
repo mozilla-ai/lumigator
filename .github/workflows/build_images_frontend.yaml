@@ -24,11 +24,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Get repo version
-
         run: |
           echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
           echo "Version of the repo for this build: $REPOVERSION"
@@ -42,6 +39,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          file: "lumigator/frontend/Dockerfile"
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           target: "server"
           tags: |

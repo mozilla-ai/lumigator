@@ -27,7 +27,7 @@ models released in 2023 compared to the previous year](https://hai.stanford.edu/
 Yet, in spite of the wealth of metrics available, there’s still no standard way to compare these
 models.
 
-[The 2024 AI Index Report](https://aiindex.stanford.edu/wp-content/uploads/2024/05/HAI_AI-Index-Report-2024.pdf)
+[The 2024 AI Index Report](https://arxiv.org/pdf/2405.19522)
 highlighted that AI evaluation tools aren’t (yet) keeping up with the pace of development, making it
 harder for developers and businesses to make informed choices. Without a clear single method for
 comparing models, many teams end up using suboptimal solutions, or just choosing models based on

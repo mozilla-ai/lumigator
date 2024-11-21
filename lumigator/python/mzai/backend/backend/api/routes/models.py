@@ -3,6 +3,7 @@ from pathlib import Path
 import yaml
 from fastapi import APIRouter, HTTPException
 from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.models import ModelsResponse
 
 MODELS_PATH = Path(__file__).resolve().parents[2] / "models.yaml"
 
@@ -19,7 +20,7 @@ def _get_supported_tasks(data: dict) -> list[str]:
 
 
 @router.get("/{task_name}")
-def get_suggested_models(task_name: str) -> ListingResponse[dict]:
+def get_suggested_models(task_name: str) -> ListingResponse[ModelsResponse]:
     """Get a list of suggested models for the given task.
 
     Args:
@@ -44,4 +45,4 @@ def get_suggested_models(task_name: str) -> ListingResponse[dict]:
         "total": len(data),
         "items": data,
     }
-    return ListingResponse[dict].model_validate(return_data)
+    return ListingResponse[ModelsResponse].model_validate(return_data)

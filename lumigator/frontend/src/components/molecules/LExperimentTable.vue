@@ -15,11 +15,11 @@
           header="experiment title"
         />
         <Column
-          field="created_at"
+          field="created"
           header="created"
         >
           <template #body="slotProps">
-            {{ formatDate(slotProps.data.created_at) }}
+            {{ formatDate(slotProps.data.created) }}
           </template>
         </Column>
         <Column
@@ -28,7 +28,7 @@
         >
 
           <template #body="slotProps">
-            <div v-show="retrieveStatus(slotProps.data.id)">
+            <div>
               <Tag
                 v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED' "
                 severity="success"
@@ -57,8 +57,9 @@
           <template #body="slotProps">
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
+              style="cursor: not-allowed; pointer-events: all"
               aria-controls="optionsMenu"
-              @click.stop="togglePopover($event, slotProps.data)"
+              @click.stop="console.log(slotProps)"
             />
           </template>
         </Column>

@@ -147,6 +147,7 @@ async function triggerExperiment() {
   const success = await experimentStore.runExperiment(experimentPayload);
   if (success === experimentTitle.value) {
     await experimentStore.loadExperiments();
+    emit('l-close-form');
     resetForm();
   }
 }

@@ -9,7 +9,7 @@ import {
 async function fetchExperiments() {
   try {
     const response = await http.get(PATH_EXPERIMENTS_ROOT());
-    return response.data.items;
+    return response.data;
   } catch (error) {
     console.error("Error fetching experiments:", error.message || error);
     return [];
@@ -28,7 +28,7 @@ async function triggerExperiment(experimentPayload) {
         'Content-Type': 'application/json',
       },
     });
-    console.log(response);
+    // console.log(response);
     return response.data
   } catch (error) {
     console.log('error while creating Experiment', error)

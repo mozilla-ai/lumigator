@@ -40,9 +40,15 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  async function loadResults(experiment_id) {
+    const results = await experimentService.fetchResults(experiment_id);
+    console.log(results.download_url);
+  }
+
   return {
     experiments,
     loadDetails,
+    loadResults,
     selectedExperiment,
     loadExperiments,
     runExperiment

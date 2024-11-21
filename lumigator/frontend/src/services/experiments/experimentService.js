@@ -2,7 +2,8 @@ import http from '@/services/http';
 import {
   PATH_EXPERIMENTS_ROOT,
   PATH_EXPERIMENTS_EVALUATE,
-  PATH_EXPERIMENT_DETAILS
+  PATH_EXPERIMENT_DETAILS,
+  PATH_EXPERIMENT_RESULTS
 } from './api';
 
 
@@ -35,8 +36,33 @@ async function triggerExperiment(experimentPayload) {
   }
 }
 
+async function fetchResults(id) {
+  try {
+    const response = await http.get(PATH_EXPERIMENT_RESULTS(id));
+    const downloadUrl = response.data.download_url;
+    // console.log('service', results);
+    const jsonRes = jsonFetch(downloadUrl);
+    console.log(jsonRes);
+    // window.open(downloadUrl, "_blank");
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching experiments:", error.message || error);
+    return [];
+  }
+}
+
+async function jsonFetch(url) {
+  console.log(url)
+  const res = await fetch(url);
+  const jsonData = await res.json;
+  console.log(jsonData)
+  return res;
+}
+
 export default {
   fetchExperiments,
+  fetchResults,
   fetchExperimentDetails,
   triggerExperiment
 }

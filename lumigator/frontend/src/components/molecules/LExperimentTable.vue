@@ -1,6 +1,9 @@
 <template>
   <div class="l-experiment-table">
-    <transition name="transition-fade">
+    <transition
+      name="transition-fade"
+      mode="out-in"
+    >
       <DataTable
         v-if="tableVisible"
         :value="tableData"
@@ -15,11 +18,11 @@
           header="experiment title"
         />
         <Column
-          field="created_at"
+          field="created"
           header="created"
         >
           <template #body="slotProps">
-            {{ formatDate(slotProps.data.created_at) }}
+            {{ formatDate(slotProps.data.created) }}
           </template>
         </Column>
         <Column
@@ -28,7 +31,7 @@
         >
 
           <template #body="slotProps">
-            <div v-show="retrieveStatus(slotProps.data.id)">
+            <div>
               <Tag
                 v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED' "
                 severity="success"
@@ -47,7 +50,7 @@
                 v-else
                 severity="warn"
                 rounded
-                :value="` · ${retrieveStatus(slotProps.data.id)}`"
+                :value="retrieveStatus(slotProps.data.id)"
                 :pt="{root:'l-experiment-table__tag'}"
               />
             </div>
@@ -57,8 +60,9 @@
           <template #body="slotProps">
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
+              style="cursor: not-allowed; pointer-events: all"
               aria-controls="optionsMenu"
-              @click.stop="togglePopover($event, slotProps.data)"
+              @click.stop="console.log(slotProps)"
             />
           </template>
         </Column>
@@ -160,6 +164,7 @@ watch(() => props.tableData.length, () => {
 	}
 
   &__tag {
+    color: $l-grey-150;
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;

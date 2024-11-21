@@ -98,6 +98,7 @@ watch(showSlidingPanel, () => {
   margin: 0 auto;
 
   &__header-container {
+    margin: auto;
     padding:$l-spacing-1;
     display: grid;
     place-items: center;
@@ -110,8 +111,14 @@ watch(showSlidingPanel, () => {
     width: 100%;
   }
   &.no-data {
+    max-width: $l-main-width;
+    padding: $l-spacing-1;
     display: grid;
-    place-items: center;
+    place-items: start;
+
+    .l-experiments__header-container {
+      margin-top: 120px;
+    }
   }
 }
 </style>

@@ -1,6 +1,9 @@
 <template>
   <div class="l-dataset-table">
-    <transition name="transition-fade">
+    <transition
+      name="transition-fade"
+      mode="out-in"
+    >
       <DataTable
         v-if="tableVisible"
         :value="tableData"

@@ -36,7 +36,7 @@
             v-else
             severity="warn"
             rounded
-            :value="` · ${selectedExperiment.status}`"
+            :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
           />
 
@@ -100,7 +100,7 @@ import { computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useHealthStore } from '@/stores/health/store'
-import { formatDate } from '@/helpers/index'
+import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
@@ -119,6 +119,10 @@ const experimentStatus = computed(() => {
 
 watch(experimentStatus, (newStatus) => {
   selectedExperiment.value.status = newStatus;
+  if (selectedExperiment.value.end_time) {
+    selectedExperiment.value.runTime =
+      calculateDuration(selectedExperiment.value.start_time, selectedExperiment.value.end_time);
+    }
 });
 </script>
 
@@ -173,6 +177,7 @@ watch(experimentStatus, (newStatus) => {
 
   &__tag {
     font-size: $l-font-size-sm;
+    color: $l-grey-150;
     line-height: 1;
     font-weight: $l-font-weight-normal;
   }

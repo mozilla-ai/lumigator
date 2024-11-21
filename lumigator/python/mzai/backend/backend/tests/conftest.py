@@ -27,6 +27,7 @@ from backend.tests.fakes.fake_ray_client import FakeJobSubmissionClient
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
 
+
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
 
@@ -38,6 +39,7 @@ def format_dataset(data: list[list[str]]) -> str:
     buffer.seek(0)
     return buffer.read()
 
+
 @pytest.fixture
 def valid_experiment_dataset() -> str:
     data = [
@@ -45,6 +47,7 @@ def valid_experiment_dataset() -> str:
         ["Hello World", "Hello"],
     ]
     return format_dataset(data)
+
 
 @pytest.fixture(scope="session")
 def valid_experiment_dataset_without_gt() -> str:
@@ -78,6 +81,7 @@ def dialog_dataset():
     filename = common_resources_dir() / "sample_data" / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
+
 
 @pytest.fixture(scope="session", autouse=True)
 def db_engine():
@@ -127,10 +131,10 @@ def setup_aws(localstack_container: LocalStackContainer):
             raise e
     # add ENV vars for FSSPEC access to S3 (s3fs + HuggingFace datasets)
     os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
-    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack" # pragma: allowlist secret
+    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"  # pragma: allowlist secret
     os.environ["FSSPEC_S3_ENDPOINT_URL"] = localstack_container.get_url()
     os.environ["AWS_ACCESS_KEY_ID"] = "testcontainers-localstack"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack" # pragma: allowlist secret
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack"  # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = localstack_container.get_url()
 
 
@@ -154,12 +158,14 @@ def app():
     app = create_app()
     return app
 
+
 @pytest.fixture(scope="function")
 def app_client(app: FastAPI):
     """Create a test client for calling the FastAPI app."""
     base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
+
 
 @pytest.fixture(scope="function")
 def local_client(app: FastAPI):
@@ -185,44 +191,61 @@ def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client)
     app.dependency_overrides[get_db_session] = get_db_session_override
     app.dependency_overrides[get_s3_client] = get_s3_client_override
 
+
 @pytest.fixture(scope="session")
 def resources_dir() -> Path:
     return Path(__file__).parent / "data"
+
+
+@pytest.fixture(scope="session")
+def json_data_models(resources_dir) -> Path:
+    return resources_dir / "models.json"
+
 
 @pytest.fixture(scope="session")
 def json_data_health_job_metadata_ok(resources_dir) -> Path:
     return resources_dir / "health_job_metadata.json"
 
+
 @pytest.fixture(scope="session")
 def json_data_health_job_metadata_ray(resources_dir) -> Path:
     return resources_dir / "health_job_metadata_ray.json"
+
 
 @pytest.fixture(scope="function")
 def request_mock() -> requests_mock.Mocker:
     with requests_mock.Mocker() as cm:
         yield cm
 
+
 @pytest.fixture(scope="function")
 def job_repository(db_session):
     return JobRepository(session=db_session)
+
 
 @pytest.fixture(scope="function")
 def result_repository(db_session):
     return JobResultRepository(session=db_session)
 
+
 @pytest.fixture(scope="function")
 def fake_ray_client():
     return FakeJobSubmissionClient()
 
+
 @pytest.fixture(scope="function")
 def dataset_service(db_session):
     dataset_repo = DatasetRepository(db_session)
-    return DatasetService(dataset_repo=dataset_repo,s3_client=s3_client, s3_filesystem=S3FileSystem())
+    return DatasetService(
+        dataset_repo=dataset_repo, s3_client=s3_client, s3_filesystem=S3FileSystem()
+    )
+
 
 @pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
 
+
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository,fake_ray_client,dataset_service):
-    return JobService(job_repository, result_repository,fake_ray_client, dataset_service)
+def job_service(db_session, job_repository, result_repository, fake_ray_client, dataset_service):
+    return JobService(job_repository, result_repository, fake_ray_client, dataset_service)

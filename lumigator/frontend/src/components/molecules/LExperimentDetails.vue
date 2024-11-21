@@ -36,7 +36,7 @@
             v-else
             severity="warn"
             rounded
-            :value="` · ${selectedExperiment.status}`"
+            :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
           />
 
@@ -166,6 +166,7 @@ watch(experimentStatus, (newStatus) => {
 
   &__tag {
     font-size: $l-font-size-sm;
+    color: $l-grey-150;
     line-height: 1;
     font-weight: $l-font-weight-normal;
   }

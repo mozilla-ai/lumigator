@@ -1,6 +1,9 @@
 <template>
   <div class="l-experiment-table">
-    <transition name="transition-fade">
+    <transition
+      name="transition-fade"
+      mode="out-in"
+    >
       <DataTable
         v-if="tableVisible"
         :value="tableData"
@@ -47,7 +50,7 @@
                 v-else
                 severity="warn"
                 rounded
-                :value="` · ${retrieveStatus(slotProps.data.id)}`"
+                :value="retrieveStatus(slotProps.data.id)"
                 :pt="{root:'l-experiment-table__tag'}"
               />
             </div>
@@ -161,6 +164,7 @@ watch(() => props.tableData.length, () => {
 	}
 
   &__tag {
+    color: $l-grey-150;
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;

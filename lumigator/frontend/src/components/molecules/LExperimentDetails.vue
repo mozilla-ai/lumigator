@@ -181,5 +181,8 @@ watch(experimentStatus, (newStatus) => {
     line-height: 1;
     font-weight: $l-font-weight-normal;
   }
+  &__actions {
+    padding: $l-spacing-1 0;
+  }
 }
 </style>

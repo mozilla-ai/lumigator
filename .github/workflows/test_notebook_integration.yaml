@@ -28,10 +28,6 @@ jobs:
         run: uv pip install -r requirements.txt
         working-directory: notebooks
 
-      - name: Install sdk
-        run: uv pip install -e ../lumigator/python/mzai/sdk
-        working-directory: notebooks
-
       - name: Install kernel
         run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
         working-directory: notebooks

@@ -81,6 +81,17 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
+    <div class="l-experiment-details__actions">
+      <Button
+        rounded
+        severity="secondary"
+        size="small"
+        icon="pi pi-external-link"
+        label="View Results"
+        class="l-dataset-empty__action-btn"
+        @click="emit('l-results', selectedExperiment)"
+      />
+    </div>
   </div>
 </template>
 
@@ -93,7 +104,7 @@ import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details']);
+const emit = defineEmits(['l-close-details', 'l-results']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);

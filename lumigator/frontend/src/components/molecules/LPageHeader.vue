@@ -84,7 +84,6 @@ const handleAction = () => {
 
   &.column{
    width: 100%;
-   min-width: 60vw;
    flex-direction: column;
   }
 

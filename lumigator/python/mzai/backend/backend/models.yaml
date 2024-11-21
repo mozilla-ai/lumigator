@@ -22,9 +22,9 @@
   uri: oai://gpt-4o-mini
   description: OpenAI's GPT-4o-mini model.
 
-- name: gpt-4-turbo
-  uri: oai://gpt-4-turbo
-  description: OpenAI's GPT-4 Turbo model.
+- name: gpt-4o
+  uri: oai://gpt-4o
+  description: OpenAI's GPT-4o model.
 
 - name: open-mistral-7b
   uri: mistral://open-mistral-7b

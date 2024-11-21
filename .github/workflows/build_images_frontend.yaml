@@ -6,36 +6,41 @@ on:
       - "**"
     # synchronized is when you push new commits
     types: ["opened", "synchronize"]
-    paths:
-      - 'lumigator/lumigator/frontend/**'
-      - '.github/workflows/**'
   push:
     branches:
       - main
-    paths:
-      - 'lumigator/lumigator/frontend/**'
-      - '.github/workflows/**'
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build Docker image
+    name: Build Frontend Docker image
     runs-on: ubuntu-latest
 
     steps:
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rebuild:
+              - '.github/workflows/**'
+              - 'lumigator/lumigator/frontend/**'
 
       - name: Truncate commit SHA
         run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
+        if: steps.filter.outputs.rebuild == 'true'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
+        if: steps.filter.outputs.rebuild == 'true'
         with:
           file: "lumigator/frontend/Dockerfile"
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

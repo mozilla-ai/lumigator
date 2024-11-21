@@ -36,7 +36,7 @@
             v-else
             severity="warn"
             rounded
-            :value="` · ${retrieveStatus(selectedExperiment.jobid)}`"
+            :value="` · ${selectedExperiment.status}`"
             :pt="{root:'l-experiment-details__tag'}"
           />
 
@@ -81,14 +81,14 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
+import { useHealthStore } from '@/stores/health/store'
 import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -97,11 +97,18 @@ const emit = defineEmits(['l-close-details']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
+const healthStore = useHealthStore();
+const { runningJobs } = storeToRefs(healthStore);
 
-
-onMounted(() => {
-  console.log(selectedExperiment.value);
+const experimentStatus = computed(() => {
+  const selected = runningJobs.value
+    .filter((job) => job.id === selectedExperiment.value.jobId)[0]
+  return selected ? selected.status : selectedExperiment.value.status;
 })
+
+watch(experimentStatus, (newStatus) => {
+  selectedExperiment.value.status = newStatus;
+});
 </script>
 
 <style scoped lang="scss">

@@ -48,6 +48,7 @@ export const useExperimentStore = defineStore('experiment', () => {
         .find((experiment) => experiment.id === results.id);
       selectedExperimentRslts.value = results.resultsData;
     }
+    console.log(selectedExperimentRslts.value);
   }
 
   return {

@@ -3,16 +3,16 @@
 The SDK provides the communication and validation primitives needed to contact the Lumigator itself,
 either locally or remotely.
 
-You can install the lumigator SDK  via `pip` directly or via `uv`:
+You can install the lumigator SDK  via `pip` directly or via `uv` from the cloned repository:
 
 ```bash
-pip install lumigator-sdk
+pip install -e lumigator/python/mzai/sdk
 ```
 
-or 
+or
 
 ```bash
-uv pip install lumigator-sdk
+uv pip install -e lumigator/python/mzai/sdk
 ```
 
 Now that you have the SDK installed, you can use it to communicate with Lumigator. You can run the

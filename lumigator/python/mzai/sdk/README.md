@@ -44,10 +44,18 @@ make local-down # wait until all containers are removed
 popd
 ```
 
+<<<<<<< HEAD
 The tests include a unit test suite and an integration test suite. There are make targets available at the root folder, as follows:
+=======
+The tests have been separated into a unit test suite and an integration test suite, according to the external containers needed for each run. There are make targets available at the root folder, as follows:
+>>>>>>> 4e0b3ca (Update CI actions)
 
 * `sdk-test`: runs `sdk-unit-test` and `sdk-int-test`
   * `sdk-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
   * `sdk-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
 
+<<<<<<< HEAD
 A live Lumigator backend is started for integration tests.
+=======
+The test containers are started up appropriately.
+>>>>>>> 4e0b3ca (Update CI actions)

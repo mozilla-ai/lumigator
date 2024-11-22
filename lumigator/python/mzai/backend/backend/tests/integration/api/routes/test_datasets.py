@@ -10,6 +10,7 @@ from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, D
 from backend.api.http_headers import HttpHeaders
 
 
+# int test (dependency on s3)
 def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
     upload_filename = "dataset.csv"
 
@@ -53,6 +54,7 @@ def test_dataset_delete_error(app_client: TestClient):
         assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
 
 
+# int test (dependency on s3)
 def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str):
     upload_filename = "dataset.csv"
 
@@ -98,6 +100,7 @@ def test_experiment_format_validation(
     assert response.status_code == expected_status
 
 
+# int test (dependency on s3)
 def test_experiment_ground_truth(
     app_client: TestClient,
     valid_experiment_dataset: str,

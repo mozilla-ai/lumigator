@@ -89,8 +89,8 @@
         icon="pi pi-external-link"
         label="View Results"
         class="l-dataset-empty__action-btn"
-        :disabled="selectedExperiment.status !== 'SUCCEEDED'
-          || selectedExperiment.status !== 'FAILED'"
+        :disabled="!(selectedExperiment.status === 'SUCCEEDED'
+          || selectedExperiment.status === 'FAILED')"
         @click="emit('l-results', selectedExperiment)"
       />
     </div>

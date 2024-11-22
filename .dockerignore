@@ -75,6 +75,10 @@ target/
 .venv/
 venv/
 
+# Environment variable files
+# ALLOW .env files
+!.env
+
 # PyCharm
 .idea
 

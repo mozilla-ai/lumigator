@@ -29,6 +29,7 @@ jobs:
               - 'lumigator/lumigator/frontend/**'
 
       - name: Truncate commit SHA
+        if: steps.filter.outputs.rebuild == 'true'
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Login to DockerHub

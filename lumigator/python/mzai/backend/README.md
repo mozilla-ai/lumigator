@@ -28,6 +28,14 @@ SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
 
 Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests.
 
+The tests have been separated into a unit test suite and an integration test suite, according to the external containers needed for each run. There are make targets available at the root folder, as follows:
+
+* `backend-test`: runs `backend-unit-test` and `backend-int-test`
+  * `backend-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
+  * `backend-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
+
+The SQLite configuration and the test containers are started up appropriately.
+
 ## Data models
 
 As an engineer/contributor, when you change a data model or add a new model which needs to be

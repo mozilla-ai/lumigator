@@ -1,4 +1,9 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator
+.PHONY: local-up local-down local-logs \
+        clean-docker-buildcache clean-docker-images clean-docker-containers \
+		start-lumigator-external-services start-lumigator stop-lumigator \
+		test \
+		sdk-test sdk-unit-test sdk-int-test-exec sdk-int-test \
+		backend-test backend-unit-test backend-int-test
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -56,8 +61,28 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 
 clean-all: clean-docker-buildcache clean-docker-containers
 
-test:
-	make start-lumigator-build
-	cd lumigator/python/mzai/backend; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-	cd lumigator/python/mzai/sdk; uv run pytest -o python_files="test_*.py int_test_*.py"
-	make stop-lumigator
+sdk-unit-test:
+	cd lumigator/python/mzai/sdk; \
+	uv run pytest -o python_files="unit/*/test_*.py"
+
+sdk-int-test-exec:
+	cd lumigator/python/mzai/sdk; \
+	uv run pytest -o python_files="int/*/test_*.py"
+
+sdk-int-test: | start-lumigator-build sdk-int-test-exec stop-lumigator
+
+sdk-test: sdk-unit-test sdk-int-test
+
+backend-unit-test:
+	cd lumigator/python/mzai/backend; \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+
+backend-int-test-exec:
+	cd lumigator/python/mzai/backend; \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/int/*/test_*.py"
+
+backend-int-test: | start-lumigator-build backend-int-test-exec stop-lumigator
+
+backend-test: backend-unit-test backend-int-test
+
+test: sdk-test backend-test

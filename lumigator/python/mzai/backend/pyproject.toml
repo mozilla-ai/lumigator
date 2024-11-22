@@ -32,6 +32,7 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "requests-mock>=1.12.1",
     "testcontainers>=4.8.2",
+    "moto[s3]>=5.0,<6"
 ]
 
 [tool.uv.sources]

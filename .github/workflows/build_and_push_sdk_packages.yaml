@@ -11,14 +11,22 @@ jobs:
     name: Package SDK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add tools directory to path
+        run: echo ${PWD}/tools >> $GITHUB_PATH
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Install python
+      - name: Install python (SDK)
         run: uv python install
         working-directory: lumigator/python/mzai/sdk
+
+      - name: Install python (schemas)
+        run: uv python install
+        working-directory: lumigator/python/mzai/schemas
 
       - name: Package SDK
         run: uv build

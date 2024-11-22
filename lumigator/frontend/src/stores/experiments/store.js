@@ -5,7 +5,8 @@ import { retrieveEntrypoint, calculateDuration } from '@/helpers/index'
 
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
-  const selectedExperiment = ref(null)
+  const selectedExperiment = ref(null);
+  const selectedExperimentRslts = ref(null);
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
@@ -42,7 +43,11 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadResults(experiment_id) {
     const results = await experimentService.fetchResults(experiment_id);
-    console.log(results.download_url);
+    if (results?.id) {
+      selectedExperiment.value = experiments.value
+        .find((experiment) => experiment.id === results.id);
+      selectedExperimentRslts.value = results.resultsData;
+    }
   }
 
   return {

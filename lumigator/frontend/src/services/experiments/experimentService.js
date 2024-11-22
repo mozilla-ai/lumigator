@@ -36,33 +36,28 @@ async function triggerExperiment(experimentPayload) {
   }
 }
 
-async function fetchResults(id) {
+async function fetchResults(job_id) {
   try {
-    const response = await http.get(PATH_EXPERIMENT_RESULTS(id));
-    const downloadUrl = response.data.download_url;
-    // console.log('service', results);
-    const jsonRes = jsonFetch(downloadUrl);
-    console.log(jsonRes);
-    // window.open(downloadUrl, "_blank");
-
-    return response.data;
+    const response = await http.get(PATH_EXPERIMENT_RESULTS(job_id));
+    const { download_url, id } = response.data;
+    if (!download_url) {
+      console.error("No download_url found in the response.");
+      return;
+    }
+    const jsonData = await http.get(download_url)
+    return {
+      resultsData: jsonData.data,
+      id
+    }
   } catch (error) {
-    console.error("Error fetching experiments:", error.message || error);
-    return [];
+    console.error("Error fetching experiment results:", error.message || error);
+    return error;
   }
-}
-
-async function jsonFetch(url) {
-  console.log(url)
-  const res = await fetch(url);
-  const jsonData = await res.json;
-  console.log(jsonData)
-  return res;
 }
 
 export default {
   fetchExperiments,
   fetchResults,
   fetchExperimentDetails,
-  triggerExperiment
-}
+  triggerExperiment,
+};

@@ -16,6 +16,7 @@ services:
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
       - PERSISTENCE=1
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
+      - EXTRA_CORS_ALLOWED_ORIGINS=*
     volumes:
       - localstack-data:/var/lib/localstack
     profiles:

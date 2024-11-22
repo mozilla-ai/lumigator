@@ -34,7 +34,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedExperiment.value = {
       ...retrieveEntrypoint(details),
       status: details.status,
-      jobId: details.submission_id,
+      id: details.submission_id,
       useCase: `summarization`,
       created: details.start_time,
       runTime: details.end_time ? calculateDuration(details.start_time, details.end_time) : '-'

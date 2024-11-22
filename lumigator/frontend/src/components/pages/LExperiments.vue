@@ -74,7 +74,7 @@ const onSelectExperiment = (experiment) => {
 }
 
 const onShowResults = (experiment) => {
-  experimentStore.loadResults(experiment.jobId);
+  experimentStore.loadResults(experiment.id);
   showDrawer.value = true;
 }
 

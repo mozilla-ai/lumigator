@@ -15,6 +15,10 @@ export const useDatasetStore = defineStore('dataset', () => {
     selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID);
   }
 
+  function resetSelection() {
+    selectedDataset.value = null;
+  }
+
   async function uploadDataset(datasetFile) {
     if (!datasetFile) { return }
     // Create a new FormData object and append the selected file and the required format
@@ -30,8 +34,8 @@ export const useDatasetStore = defineStore('dataset', () => {
 
   async function deleteDataset(id) {
     if (!id) { return };
-    if (selectedDataset.value && id === selectedDataset.value.id) {
-      selectedDataset.value = null
+    if (selectedDataset.value?.id === id) {
+      resetSelection();
     }
     await datasetsService.deleteDataset(id);
     await loadDatasets();
@@ -42,6 +46,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     loadDatasets,
     selectedDataset,
     loadDatasetInfo,
+    resetSelection,
     uploadDataset,
     deleteDataset
   }

@@ -39,7 +39,9 @@
       v-if="showDrawer"
       ref="resultsDrawer"
       @l-close-results="showDrawer = false"
-    > Hello </l-results-drawer>
+    > <pre style="font-size: 12px;">
+    {{ selectedExperimentRslts }}
+    </pre> </l-results-drawer>
   </div>
 </template>
 
@@ -59,7 +61,11 @@ const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
-const { experiments, selectedExperiment } = storeToRefs(experimentStore);
+const {
+  experiments,
+  selectedExperiment,
+  selectedExperimentRslts
+} = storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
 const resultsDrawer = ref(null)

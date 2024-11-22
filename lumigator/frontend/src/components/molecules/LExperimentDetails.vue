@@ -89,6 +89,8 @@
         icon="pi pi-external-link"
         label="View Results"
         class="l-dataset-empty__action-btn"
+        :disabled="selectedExperiment.status !== 'SUCCEEDED'
+          || selectedExperiment.status !== 'FAILED'"
         @click="emit('l-results', selectedExperiment)"
       />
     </div>
@@ -113,7 +115,7 @@ const { runningJobs } = storeToRefs(healthStore);
 
 const experimentStatus = computed(() => {
   const selected = runningJobs.value
-    .filter((job) => job.id === selectedExperiment.value.jobId)[0]
+    .filter((job) => job.id === selectedExperiment.value.id)[0]
   return selected ? selected.status : selectedExperiment.value.status;
 })
 

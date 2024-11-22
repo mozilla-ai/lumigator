@@ -55,6 +55,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadDetails,
     loadResults,
     selectedExperiment,
+    selectedExperimentRslts,
     loadExperiments,
     runExperiment
   }

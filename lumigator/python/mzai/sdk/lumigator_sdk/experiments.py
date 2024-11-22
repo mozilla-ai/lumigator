@@ -1,4 +1,4 @@
-from http import HTTPMethod, HTTPStatus
+from http import HTTPMethod
 from json import dumps
 from uuid import UUID
 

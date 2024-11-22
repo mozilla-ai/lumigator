@@ -18,8 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Check for modified paths
         uses: dorny/paths-filter@v3
@@ -30,11 +28,8 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
 
-      - name: Get repo version
-        if: steps.filter.outputs.rebuild == 'true'
-        run: |
-          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
-          echo "Version of the repo for this build: $REPOVERSION"
+      - name: Truncate commit SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
         if: steps.filter.outputs.rebuild == 'true'
@@ -59,5 +54,5 @@ jobs:
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           target: "main_image"
           tags: |
-            mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
+            mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}

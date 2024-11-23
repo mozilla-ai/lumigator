@@ -42,9 +42,22 @@
 
         </div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <div
+        class="l-experiment-details__content-item"
+        @click="copyToClipboard(selectedExperiment.id)"
+      >
         <div class="l-experiment-details__content-label">experiment id</div>
-        <div class="l-experiment-details__content-field">{{ selectedExperiment.jobId }}</div>
+        <div
+          class="l-experiment-details__content-field"
+          style="display: flex; justify-content: space-between;cursor:pointer"
+        >
+          {{ selectedExperiment.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            class="pi pi-clone"
+            style="font-size: 12px;"
+          />
+        </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
@@ -118,6 +131,11 @@ const experimentStatus = computed(() => {
     .filter((job) => job.id === selectedExperiment.value.id)[0]
   return selected ? selected.status : selectedExperiment.value.status;
 })
+
+const copyToClipboard = async (longString) => {
+    await navigator.clipboard.writeText(longString);
+
+};
 
 watch(experimentStatus, (newStatus) => {
   selectedExperiment.value.status = newStatus;

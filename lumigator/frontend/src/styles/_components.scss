@@ -142,3 +142,10 @@
 .p-inputtext {
   font-size: 12px!important;
 }
+
+//Tooltip
+.p-tooltip {
+  font-size: $l-font-size-sm;
+  color: $l-grey-100;
+  background-color: $l-main-bg;
+}

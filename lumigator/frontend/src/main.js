@@ -7,6 +7,8 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import LumiPreset from './libs/primevue.config.js';
+import Tooltip from 'primevue/tooltip';
+
 const app = createApp(App);
 
 app.use(router)
@@ -24,3 +26,4 @@ app.use(PrimeVue, {
 app.use(ConfirmationService);
 app.use(ToastService);
 app.mount('#app');
+app.directive('tooltip', Tooltip);

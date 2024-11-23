@@ -36,12 +36,20 @@
       </transition>
     </Teleport>
     <l-results-drawer
-      v-if="showDrawer"
+      v-if="showDrawer && selectedExperimentRslts.length"
       ref="resultsDrawer"
+      :header="`Model: ${selectedExperimentRslts[0].model}`"
       @l-close-results="showDrawer = false"
-    > <pre style="font-size: 12px;">
-    {{ selectedExperimentRslts }}
-    </pre> </l-results-drawer>
+    >
+      <l-experiment-results
+        v-if="selectedExperimentRslts &&  selectedExperimentRslts.length"
+        :results="selectedExperimentRslts"
+      />
+      <h3
+        v-else
+        style="text-align: center"
+      >No results</h3>
+    </l-results-drawer>
   </div>
 </template>
 
@@ -56,6 +64,7 @@ import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LResultsDrawer from '@/components/molecules/LResultsDrawer.vue';
+import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();

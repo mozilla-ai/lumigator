@@ -2,7 +2,7 @@
   <div class="card flex justify-center">
     <Drawer
       v-model:visible="drawerVisible"
-      header="Drawer"
+      :header
       position="full"
       @hide="emit('l-close-results')"
     >
@@ -16,7 +16,13 @@ import { ref } from 'vue'
 import Drawer from 'primevue/drawer';
 
 const emit = defineEmits(['l-close-results'])
-
+defineProps({
+  header: {
+    type: String,
+    required: true,
+    default: 'Results'
+  }
+})
 const drawerVisible = ref(true);
 
 </script>

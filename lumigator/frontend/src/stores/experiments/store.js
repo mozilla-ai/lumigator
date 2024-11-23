@@ -6,7 +6,7 @@ import { retrieveEntrypoint, calculateDuration } from '@/helpers/index'
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const selectedExperiment = ref(null);
-  const selectedExperimentRslts = ref(null);
+  const selectedExperimentRslts = ref([]);
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
@@ -46,8 +46,46 @@ export const useExperimentStore = defineStore('experiment', () => {
     if (results?.id) {
       selectedExperiment.value = experiments.value
         .find((experiment) => experiment.id === results.id);
-      selectedExperimentRslts.value = results.resultsData;
+      selectedExperimentRslts.value = transformResultsArray(results.resultsData);
+     ;
     }
+  }
+
+  function transformResultsArray(objectData) {
+    const transformedArray = objectData.examples.map((example, index) => {
+      return {
+        example,
+        bertscore: {
+          f1: objectData.bertscore.f1[index],
+          f1_mean: objectData.bertscore.f1_mean,
+          hashcode: objectData.bertscore.hashcode,
+          precision: objectData.bertscore.precision[index],
+          precision_mean: objectData.bertscore.precision_mean,
+          recall: objectData.bertscore.recall[index],
+          recall_mean: objectData.bertscore.recall_mean,
+        },
+        evaluation_time: objectData.evaluation_time,
+        ground_truth: objectData.ground_truth[index],
+        meteor: {
+          meteor: objectData.meteor.meteor[index],
+          meteor_mean: objectData.meteor.meteor_mean,
+        },
+        model: objectData.model,
+        predictions: objectData.predictions[index],
+        rouge: {
+          rouge1: objectData.rouge.rouge1[index],
+          rouge1_mean: objectData.rouge.rouge1_mean,
+          rouge2: objectData.rouge.rouge2[index],
+          rouge2_mean: objectData.rouge.rouge2_mean,
+          rougeL: objectData.rouge.rougeL[index],
+          rougeL_mean: objectData.rouge.rougeL_mean,
+          rougeLsum: objectData.rouge.rougeLsum[index],
+          rougeLsum_mean: objectData.rouge.rougeLsum_mean,
+        },
+        summarization_time: objectData.summarization_time,
+        }
+    });
+    return transformedArray
   }
 
   return {

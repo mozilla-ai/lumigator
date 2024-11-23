@@ -55,7 +55,7 @@
 		td {
 			border: none;
 			color: $l-grey-100;
-			padding: $l-spacing-1/2 1.25rem!important
+			padding: 0.5rem 1rem;
 		}
 
 		&:hover td {
@@ -63,6 +63,19 @@
 		}
 
 	}
+}
+
+.gridlines {
+  .p-datatable-column-title {
+    text-wrap: nowrap;
+  }
+  tr {
+    box-shadow:inset 0px 1px 0px $l-grey-600;
+  }
+  td {
+    vertical-align: top;
+    font-size: $l-font-size-sm;
+  }
 }
 
 .p-datatable-header-cell {

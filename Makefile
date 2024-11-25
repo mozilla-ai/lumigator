@@ -62,12 +62,12 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers
 
 sdk-unit-test:
-	cd lumigator/python/mzai/sdk; \
-	uv run pytest -o python_files="unit/*/test_*.py"
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 sdk-int-test-exec:
-	cd lumigator/python/mzai/sdk; \
-	uv run pytest -o python_files="int/*/test_*.py"
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run pytest -o python_files="int/test_*.py int/*/test_*.py"
 
 sdk-int-test: | start-lumigator-build sdk-int-test-exec stop-lumigator
 

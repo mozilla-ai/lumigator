@@ -1,6 +1,5 @@
 from pytest import raises
 from requests.exceptions import HTTPError
-
 from tests.helpers import load_json
 
 

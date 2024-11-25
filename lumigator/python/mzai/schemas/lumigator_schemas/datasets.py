@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class DatasetFormat(str, Enum):
@@ -10,13 +10,11 @@ class DatasetFormat(str, Enum):
 
 
 class DatasetDownloadResponse(BaseModel):
-    model_config = ConfigDict(extra='forbid')
     id: UUID
     download_urls: list[str]
 
 
 class DatasetResponse(BaseModel, from_attributes=True):
-    model_config = ConfigDict(extra='forbid')
     id: UUID
     filename: str
     format: DatasetFormat

@@ -2,7 +2,7 @@ from http import HTTPMethod, HTTPStatus
 from json import dumps
 from uuid import UUID
 
-from lumigator_schemas.experiments import (
+from lumigator_sdk.strict_schemas import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
@@ -21,6 +21,7 @@ class Experiments:
 
     def create_experiment(self, experiment: ExperimentCreate) -> ExperimentResponse:
         """Creates a new experiment."""
+        ExperimentCreate.model_validate(experiment)
         response = self.__client.get_response(
             self.EXPERIMENTS_ROUTE, HTTPMethod.POST, dumps(experiment)
         )

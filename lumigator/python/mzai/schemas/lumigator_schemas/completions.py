@@ -1,12 +1,10 @@
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class CompletionResponse(BaseModel):
-    model_config = ConfigDict(extra='forbid')
     text: str
 
 
 class CompletionRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
     text: str

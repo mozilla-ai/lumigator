@@ -1,13 +1,12 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from lumigator_schemas.jobs import JobStatus
 
 
 class ExperimentCreate(BaseModel):
-    model_config = ConfigDict(extra='forbid')
     name: str
     description: str = ""
     model: str
@@ -19,7 +18,6 @@ class ExperimentCreate(BaseModel):
 
 
 class ExperimentResponse(BaseModel, from_attributes=True):
-    model_config = ConfigDict(extra='forbid')
     id: UUID
     name: str
     description: str
@@ -29,12 +27,10 @@ class ExperimentResponse(BaseModel, from_attributes=True):
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):
-    model_config = ConfigDict(extra='forbid')
     id: UUID
     experiment_id: UUID
 
 
 class ExperimentResultDownloadResponse(BaseModel):
-    model_config = ConfigDict(extra='forbid')
     id: UUID
     download_url: str

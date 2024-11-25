@@ -7,13 +7,15 @@ import time
 from http import HTTPMethod
 from uuid import UUID
 
-from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import (
+from lumigator_sdk.strict_schemas import ListingResponse
+from lumigator_sdk.strict_schemas import (
     JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
-    JobResultResponse,
-    JobType,
+    JobResultResponse
+)
+from lumigator_schemas.jobs import (
+    JobType
 )
 
 from lumigator_sdk.client import ApiClient
@@ -138,6 +140,7 @@ class Jobs:
         Returns:
             JobResponse: The information for the newly created job.
         """
+        JobEvalCreate.model_validate(request)
         response = self.client.get_response(
             f"{self.JOBS_ROUTE}/{type.value}/",
             method=HTTPMethod.POST,

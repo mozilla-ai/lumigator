@@ -7,8 +7,8 @@ from time import sleep
 
 import requests
 from loguru import logger
-from lumigator_schemas.datasets import DatasetFormat
-from lumigator_schemas.jobs import JobEvalCreate, JobType
+from lumigator_sdk.strict_schemas import DatasetFormat
+from lumigator_sdk.strict_schemas import JobEvalCreate, JobType
 
 '''
 Test the healthcheck endpoint.

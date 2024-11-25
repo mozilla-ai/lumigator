@@ -38,7 +38,7 @@
     <l-results-drawer
       v-if="showDrawer && selectedExperimentRslts.length"
       ref="resultsDrawer"
-      :header="`Model: ${selectedExperimentRslts[0].model}`"
+      :header="selectedExperiment.name"
       @l-close-results="showDrawer = false"
     >
       <l-experiment-results

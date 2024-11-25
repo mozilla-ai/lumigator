@@ -1,9 +1,10 @@
 <template>
-  <div class="card flex justify-center">
+  <div>
     <Drawer
       v-model:visible="drawerVisible"
       :header
       position="full"
+      class="l-results-drawer"
       @hide="emit('l-close-results')"
     >
       <slot />
@@ -27,8 +28,14 @@ const drawerVisible = ref(true);
 
 </script>
 
-<style scoped lang="scss">
+<!-- Style here cannot be scoped because Drawer is attached to the DOM
+after the LResultsDrawer is mounted -->
+<style lang="scss">
 .l-results-drawer {
   $root: &;
+  .p-drawer-title {
+    color: $l-grey-150;
+    font-size: $l-font-size-md;
+  }
 }
 </style>

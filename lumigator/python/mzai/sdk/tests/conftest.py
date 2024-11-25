@@ -145,10 +145,16 @@ def json_data_job_response(resources_dir) -> Path:
     return resources_dir / "job-resp.json"
 
 
+@pytest.fixture(scope="session")
+def json_data_models(resources_dir) -> Path:
+    return resources_dir / "models.json"
+
+
 @pytest.fixture(scope="function")
 def dialog_data(common_resources_dir):
     with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
         yield file
+
 
 @pytest.fixture(scope="session")
 def simple_eval_template():

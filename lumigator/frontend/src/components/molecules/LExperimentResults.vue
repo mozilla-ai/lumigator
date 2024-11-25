@@ -37,7 +37,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.rouge.rouge1 }}
+          {{ slotProps.data.rouge.rouge1.toFixed(2) }}
         </template>
       </Column>
       <Column
@@ -46,7 +46,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.rouge.rouge2 }}
+          {{ slotProps.data.rouge.rouge2.toFixed(2) }}
         </template>
       </Column>
       <Column
@@ -55,7 +55,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.rouge.rougeL }}
+          {{ slotProps.data.rouge.rougeL.toFixed(2) }}
         </template>
       </Column>
       <Column
@@ -64,7 +64,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.meteor.meteor }}
+          {{ slotProps.data.meteor.meteor.toFixed(2) }}
         </template>
       </Column>
       <Column
@@ -73,7 +73,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.bertscore.precision }}
+          {{ slotProps.data.bertscore.precision.toFixed(2) }}
         </template>
       </Column>
       <Column
@@ -82,7 +82,7 @@
         sortable
       >
         <template #body="slotProps">
-          {{ slotProps.data.bertscore.f1 }}
+          {{ slotProps.data.bertscore.f1.toFixed(2) }}
         </template>
       </Column>
 

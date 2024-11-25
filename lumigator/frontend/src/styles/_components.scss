@@ -65,6 +65,8 @@
 	}
 }
 
+
+// Class for Datatable with visible lines and hover effect disabled
 .gridlines {
   .p-datatable-column-title {
     text-wrap: nowrap;
@@ -76,6 +78,19 @@
     vertical-align: top;
     font-size: $l-font-size-sm;
   }
+
+  [class*="p-row-"] {
+		background-color: $l-card-bg;
+
+		&:hover {
+		  background-color: $l-card-bg;
+		}
+
+		&:hover td {
+			color: $l-grey-100;
+		}
+
+	}
 }
 
 .p-datatable-header-cell {

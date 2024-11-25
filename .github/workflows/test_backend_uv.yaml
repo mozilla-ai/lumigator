@@ -29,8 +29,6 @@ jobs:
 
       - name: Run unit tests
         run: make backend-unit-test
-        working-directory: lumigator/python/mzai/backend
 
       - name: Run integration tests
         run: make backend-int-test
-        working-directory: lumigator/python/mzai/backend

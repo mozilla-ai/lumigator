@@ -37,4 +37,3 @@ jobs:
       - name: Run tests
         if: steps.filter.outputs.run_sdk_unit_tests == 'true'
         run: make sdk-unit-test
-        working-directory: lumigator/python/mzai/sdk

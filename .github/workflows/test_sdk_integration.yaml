@@ -22,8 +22,6 @@ jobs:
 
       - name: Install python
         run: uv python install
-        working-directory: lumigator/python/mzai/sdk
 
       - name: Run tests
         run: make sdk-int-test
-        working-directory: lumigator/python/mzai/sdk

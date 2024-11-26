@@ -20,9 +20,11 @@ Now that you have the SDK installed, you can use it to communicate with Lumigato
 [quickstart guide](https://mozilla-ai.github.io/lumigator/get-started/quickstart.html) in the
 documentation.
 
+The SDK uses the `lumigator-schemas` package models, but with stricter validations, so properties not explicitly defined in the schemas will be handled as errors.
+
 ## Test instructions
 
-The SDK contains both unit tests (requiring no additional containers) and integration tests (requiring a live Lumigator backend). By default only unit tests are run.
+The SDK includes both unit tests (requiring no additional containers) and integration tests (requiring a live Lumigator backend). By default only unit tests are run.
 
 To run unit tests, please use:
 
@@ -42,10 +44,10 @@ make local-down # wait until all containers are removed
 popd
 ```
 
-The tests have been separated into a unit test suite and an integration test suite, according to the external containers needed for each run. There are make targets available at the root folder, as follows:
+The tests include a unit test suite and an integration test suite. There are make targets available at the root folder, as follows:
 
 * `sdk-test`: runs `sdk-unit-test` and `sdk-int-test`
   * `sdk-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
   * `sdk-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
 
-The test containers are started up appropriately.
+A live Lumigator backend is started for integration tests.

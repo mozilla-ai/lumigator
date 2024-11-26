@@ -1,9 +1,4 @@
-.PHONY: local-up local-down local-logs \
-        clean-docker-buildcache clean-docker-images clean-docker-containers \
-		start-lumigator-external-services start-lumigator stop-lumigator \
-		test \
-		sdk-test sdk-unit-test sdk-int-test-exec sdk-int-test \
-		backend-test backend-unit-test backend-int-test
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test sdk-test sdk-unit-test sdk-integration-test-exec sdk-integration-test backend-test backend-unit-test backend-integration-test
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -62,27 +57,23 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers
 
 sdk-unit-test:
-	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+	cd lumigator/python/mzai/sdk/tests;	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
-sdk-int-test-exec:
-	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="int/test_*.py int/*/test_*.py"
+sdk-integration-test-exec:
+	cd lumigator/python/mzai/sdk/tests; uv run pytest -o python_files="integration/test_*.py integration/*/test_*.py"
 
-sdk-int-test: | start-lumigator-build sdk-int-test-exec stop-lumigator
+sdk-integration-test: | start-lumigator-build sdk-integration-test-exec stop-lumigator
 
-sdk-test: sdk-unit-test sdk-int-test
+sdk-test: sdk-unit-test sdk-integration-test
 
 backend-unit-test:
-	cd lumigator/python/mzai/backend; \
-	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+	cd lumigator/python/mzai/backend/backend/tests; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
 
-backend-int-test-exec:
-	cd lumigator/python/mzai/backend; \
-	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/int/*/test_*.py"
+backend-integration-test-exec:
+	cd lumigator/python/mzai/backend/backend/tests;	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
 
-backend-int-test: | start-lumigator-build backend-int-test-exec stop-lumigator
+backend-integration-test: | start-lumigator-build backend-integration-test-exec stop-lumigator
 
-backend-test: backend-unit-test backend-int-test
+backend-test: backend-unit-test backend-integration-test
 
 test: sdk-test backend-test

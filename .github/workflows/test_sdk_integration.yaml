@@ -23,5 +23,5 @@ jobs:
       - name: Install python
         run: uv python install
 
-      - name: Run tests
-        run: make sdk-int-test
+      - name: Run SDK integration tests
+        run: make sdk-integration-test

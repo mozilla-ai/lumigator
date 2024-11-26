@@ -20,6 +20,8 @@ source .venv/bin/activate
 
 ## Test instructions
 
+The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray server in the same server where the tests are running, and test LocalStack containers started up in a fixture within tests).
+
 The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
 
 ```bash
@@ -28,13 +30,13 @@ SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
 
 Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests.
 
-The tests have been separated into a unit test suite and an integration test suite, according to the external containers needed for each run. There are make targets available at the root folder, as follows:
+The tests include a unit test suite and an integration test suite. There are make targets available at the root folder, as follows:
 
 * `backend-test`: runs `backend-unit-test` and `backend-int-test`
   * `backend-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
   * `backend-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
 
-The SQLite configuration and the test containers are started for integration tests.
+The SQLite configuration making use of a local file is used in both unit and integration tests. Test containers are started for integration tests.
 
 ## Data models
 

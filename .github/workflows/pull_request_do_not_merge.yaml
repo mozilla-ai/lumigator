@@ -11,11 +11,12 @@ on:
 
 jobs:
   do-not-merge:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'do-not-merge') }}
     name: Prevent merge
     runs-on: ubuntu-latest
     steps:
       - name: Check for label
         run: |
-          echo "PR is labeled with 'do-not-merge', merging disabled"
-          exit 1
+          if ${{ contains(github.event.pull_request.labels.*.name, 'do-not-merge') }}; then
+            echo "PR is labeled with 'do-not-merge', merging disabled"
+            exit 1
+          fi

@@ -8,7 +8,7 @@
       tableStyle="min-width: 50rem;min-width:70vw"
     >
       <Column
-        style="vertical-align: middle; text-align: right"
+        style="vertical-align: middle; text-align: left;padding-right:0"
       >
         <template #body="{index}">
           {{ index+1 }}

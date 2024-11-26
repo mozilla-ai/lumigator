@@ -34,7 +34,7 @@ The tests have been separated into a unit test suite and an integration test sui
   * `backend-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
   * `backend-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
 
-The SQLite configuration and the test containers are started up appropriately.
+The SQLite configuration and the test containers are started for integration tests.
 
 ## Data models
 

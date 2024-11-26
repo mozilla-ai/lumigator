@@ -107,6 +107,7 @@ const options = ref([
 	{
 		label: 'Use in Experiment',
     icon: 'pi pi-microchip',
+    disabled: false,
      command: () => {
       emit('l-experiment', focusedItem.value)
     }
@@ -144,6 +145,10 @@ const shortenedID = (id) =>
 
 const togglePopover = (event, dataset) => {
   focusedItem.value = dataset;
+  const experimentOption = options.value.find(option => option.label === 'Use in Experiment');
+  if (experimentOption) {
+    experimentOption.disabled = !dataset.ground_truth;
+  }
 	optionsMenu.value.toggle(event);
 }
 

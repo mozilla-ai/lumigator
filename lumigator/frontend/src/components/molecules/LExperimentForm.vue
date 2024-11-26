@@ -38,7 +38,7 @@
           v-model="dataset"
           inputId="dataset"
           optionLabel="filename"
-          :options="datasets"
+          :options="filteredDatasets"
           variant="filled"
           size="small"
         />
@@ -135,6 +135,9 @@ const isInvalid = computed(() =>
   !dataset.value ||
   !modelSelection.value?.selectedModel
 );
+
+const filteredDatasets = computed(() =>
+  datasets.value.filter((dataset) => dataset.ground_truth === true))
 
 async function triggerExperiment() {
   const experimentPayload = {

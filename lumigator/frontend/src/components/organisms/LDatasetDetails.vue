@@ -69,6 +69,7 @@
           icon="pi pi-microchip"
           label="Use in Experiment"
           class="l-dataset-empty__action-btn"
+          :disabled="!selectedDataset.ground_truth"
           @click="emit('l-experiment', selectedDataset)"
         />
       </div>

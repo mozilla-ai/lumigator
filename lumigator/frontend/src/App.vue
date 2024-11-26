@@ -8,6 +8,11 @@
         <l-menu />
       </div>
       <div class="l-main-container">
+        <ConfirmDialog></ConfirmDialog>
+        <Toast
+          position="bottom-center"
+          group="bc"
+        />
         <router-view v-slot="{ Component }">
           <transition
             name="transition-fade"
@@ -35,6 +40,8 @@ import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 
 const datasetStore = useDatasetStore();
 const experimentStore = useExperimentStore();

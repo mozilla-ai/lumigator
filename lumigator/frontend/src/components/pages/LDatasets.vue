@@ -44,7 +44,6 @@
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </Teleport>
-    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
 
@@ -59,12 +58,13 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
+const toast = useToast();
 const datasetInput = ref(null);
 const confirm = useConfirm();
 const router = useRouter();
@@ -90,6 +90,13 @@ function deleteConfirmation(dataset) {
       if (!selectedDataset.value && showSlidingPanel.value) {
         showSlidingPanel.value = false
       }
+      toast.add({
+        severity: 'secondary',
+        summary: 'Dataset removed',
+        detail: `${dataset.filename}`,
+        group: 'bc',
+        life: 3000
+      })
     },
     reject: () => {}
   });

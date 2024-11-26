@@ -8,7 +8,7 @@ from time import sleep
 import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
-from lumigator_schemas.jobs import JobCreate, JobType
+from lumigator_schemas.jobs import JobEvalCreate, JobType
 
 '''
 Test the healthcheck endpoint.
@@ -71,7 +71,7 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template)
     assert jobs is not None
     logger.info(lumi_client.datasets.get_dataset(dataset.id))
 
-    job = JobCreate(
+    job = JobEvalCreate(
         name="test-job-int-001",
         model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
         dataset=dataset.id,

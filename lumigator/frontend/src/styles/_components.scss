@@ -1,15 +1,18 @@
 @import 'variables';
 
+// this file overrides some of the default styles from primevue
+// so the use of !important may be necessary
+
 // Menu Styling
 .p-menu {
-  background-color: $l-menu-bg;
+  background-color: $l-menu-bg!important;
   font-family: $l-font-family;
 	padding: $l-spacing-1 0;
-	border: none;
+	border: none!important;
 
   &-item {
 		cursor: pointer;
-		
+
 		:hover {
 			background-color: $l-menu-bg;
 		}
@@ -29,4 +32,100 @@
   &:hover {
     background-color: $l-button-hover-bg;
   }
+}
+
+// Datable styling
+.p-datatable-table-container {
+		border-radius: 8px;
+		border: 1px solid $l-grey-400;
+	.p-datatable-column-header-content {
+		color: $l-grey-200;
+		font-size: $l-font-size-sm;
+	}
+
+	[class*="p-row-"] {
+		background-color: $l-card-bg;
+		border: none;
+		cursor: pointer;
+
+		&:hover {
+			background-color: $l-grey-400;
+		}
+
+		td {
+			border: none;
+			color: $l-grey-100;
+			padding: $l-spacing-1/2 1.25rem!important
+		}
+
+		&:hover td {
+			color: $white;
+		}
+
+	}
+}
+
+.p-datatable-header-cell {
+	background-color: $l-main-bg;
+	text-transform: uppercase
+}
+
+.p-datatable-tbody {
+	background-color:$l-card-bg ;
+	font-size:$l-table-font-size;
+}
+.p-button-icon-only.p-button-rounded {
+  height:   $l-button-icon-only-width!important;
+  width:  $l-button-icon-only-width;
+  span {
+   font-size: 10px;
+
+  }
+}
+
+.p-select-label {
+  font-size: $l-font-size-sm;
+}
+
+.p-floatlabel-in {
+  font-size: $l-font-size-sm;
+}
+
+.p-select-option-label {
+  font-size: $l-font-size-sm;
+}
+
+.p-select.p-disabled {
+  background-color: $l-disabled-input-color!important;
+  color: $l-grey-600!important;
+
+   .p-select-label, .p-floatlabel-in {
+    color: $l-grey-600!important;
+  }
+
+  .p-select-dropdown {
+    color: $l-grey-600!important;
+  }
+
+}
+
+
+// Radio button
+.p-radiobutton-box {
+  border: 1px solid white!important;
+  background-color: $l-grey-300!important;
+  height: 18px!important;
+  width: 18px!important;
+}
+
+.p-radiobutton-checked .p-radiobutton-box {
+  border-color: var(--l-radiobutton-checked-border-color)!important;
+
+  .p-radiobutton-icon {
+    background: $l-primary-color!important;
+  }
+}
+
+.p-inputtext {
+  font-size: 12px!important;
 }

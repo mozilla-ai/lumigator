@@ -99,11 +99,20 @@ class BackendSettings(BaseSettings):
     def RAY_WORKER_GPUS_FRACTION(self) -> float:  # noqa: N802
         return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
 
+    # URL for the Ray Dashboard
     @computed_field
     @property
     def RAY_DASHBOARD_URL(self) -> str:  # noqa: N802
         return f"http://{self.RAY_HEAD_NODE_HOST}:{self.RAY_DASHBOARD_PORT}"
 
+    # URL for Ray jobs API
+    @computed_field
+    @property
+    def RAY_JOBS_URL(self) -> str:  # noqa: N802
+        return f"{self.RAY_DASHBOARD_URL}/api/jobs/"
+
+    # URL for the DB used by Alchemy, please refer to
+    # https://docs.sqlalchemy.org/en/20/core/engines.html#backend-specific-urls
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802

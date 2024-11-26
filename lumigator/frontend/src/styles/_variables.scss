@@ -2,6 +2,12 @@
 $l-primary-color: #e0c414; // Main brand color (gold/yellow)
 $l-primary-color-text: #ffffff;
 $white: #ffffff;
+$l-grey-100: #A4A4A4;
+$l-grey-150: #B8B8B8;
+$l-grey-200: #7F7F7F;
+$l-grey-300: #3F3F46;
+$l-grey-400: #323232;
+$l-grey-600: #4D4D4D;
 $l-menu-bg: #161616;
 $l-menu-item-color: #7F7F7F;
 $l-main-bg: #161616;
@@ -9,13 +15,18 @@ $l-card-bg: #222222;
 $l-overlay-color: rgba(0, 0, 0, 0.6);
 $l-text-color: #eaeaea;
 $l-text-secondary-color: #b3b3b3;
+$l-disabled-input-color: #363636;
 
 // Typography
 $l-font-family: 'Inter', sans-serif;
 $l-font-size: 1rem;
+$l-font-size-sm: 12px;
+$l-font-size-md: 16px;
 $l-menu-font-size: 14px;
+$l-table-font-size: 14px;
 $l-font-weight-normal: 400;
 $l-font-weight-bold: 600;
+$l-button-icon-only-width: 1.5rem;
 
 // Spacing and Borders
 $l-main-radius: 8px;
@@ -24,6 +35,7 @@ $l-button-border-radius: 4px;
 $l-input-border-radius: 4px;
 $l-spacing-1: 1rem;
 $l-app-width: 1800px;
+$l-main-width: 1300px;
 
 // Shadows
 $l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -32,3 +44,7 @@ $l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 $l-button-bg: $l-primary-color;
 $l-button-text-color: #000000;
 $l-button-hover-bg: darken($l-primary-color, 10%);
+
+// Sizes
+$l-sliding-panel-size: 300px;
+$l-input-height: 50px;

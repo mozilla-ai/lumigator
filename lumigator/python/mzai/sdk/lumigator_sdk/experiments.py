@@ -3,13 +3,16 @@ from json import dumps
 from uuid import UUID
 
 from lumigator_schemas.extras import ListingResponse
-
-from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import (
+from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
+)
+
+from lumigator_sdk.client import ApiClient
+from lumigator_sdk.strict_schemas import (
+    ExperimentCreate as ExperimentCreateStrict
 )
 
 
@@ -21,7 +24,7 @@ class Experiments:
 
     def create_experiment(self, experiment: ExperimentCreate) -> ExperimentResponse:
         """Creates a new experiment."""
-        ExperimentCreate.model_validate(experiment)
+        ExperimentCreateStrict.model_validate(ExperimentCreate.model_dump(experiment))
         response = self.__client.get_response(
             self.EXPERIMENTS_ROUTE, HTTPMethod.POST, dumps(experiment)
         )

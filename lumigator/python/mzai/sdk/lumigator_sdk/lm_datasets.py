@@ -2,10 +2,11 @@ from http import HTTPMethod
 from io import IOBase
 from uuid import UUID
 
-from lumigator_schemas.datasets import DatasetFormat
+from lumigator_schemas.datasets import DatasetFormat, DatasetDownloadResponse, DatasetResponse
+
+from lumigator_schemas.extras import ListingResponse
 
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import DatasetDownloadResponse, DatasetResponse, ListingResponse
 
 
 class Datasets:

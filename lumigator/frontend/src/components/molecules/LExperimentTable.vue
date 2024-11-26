@@ -6,12 +6,16 @@
     >
       <DataTable
         v-if="tableVisible"
+        v-model:selection="focusedItem"
+        selectionMode="single"
+        dataKey="id"
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"
+        @row-unselect="showSlidingPanel = false"
       >
         <Column
           field="name"
@@ -94,7 +98,8 @@ const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
 const healthStore = useHealthStore();
 const { runningJobs } = storeToRefs(healthStore);
-const tableVisible = ref(true)
+const tableVisible = ref(true);
+const focusedItem = ref();
 
 const style = computed(() => {
   return showSlidingPanel.value ?
@@ -139,8 +144,9 @@ onUnmounted(() => {
   clearInterval(pollingId);
 });
 
-watch(showSlidingPanel, () => {
+watch(showSlidingPanel, (newValue) => {
   tableVisible.value = false;
+  focusedItem.value = newValue ? focusedItem.value : null;
   setTimeout(() => {
     tableVisible.value = true;
   }, 100);

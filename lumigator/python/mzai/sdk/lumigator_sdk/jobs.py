@@ -7,18 +7,16 @@ import time
 from http import HTTPMethod
 from uuid import UUID
 
-from lumigator_sdk.strict_schemas import ListingResponse
+from lumigator_schemas.jobs import JobType
+
+from lumigator_sdk.client import ApiClient
 from lumigator_sdk.strict_schemas import (
     JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
-    JobResultResponse
+    JobResultResponse,
+    ListingResponse,
 )
-from lumigator_schemas.jobs import (
-    JobType
-)
-
-from lumigator_sdk.client import ApiClient
 
 
 class Jobs:

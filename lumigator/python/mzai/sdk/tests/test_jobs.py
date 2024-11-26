@@ -2,8 +2,9 @@ import json
 from http import HTTPStatus
 from pathlib import Path
 
-from lumigator_sdk.strict_schemas import JobEvalCreate
 from lumigator_schemas.jobs import JobType
+from lumigator_sdk.strict_schemas import JobEvalCreate
+from pydantic import ValidationError
 from pytest import raises
 from requests.exceptions import HTTPError
 
@@ -58,8 +59,8 @@ def test_create_job_ok_extra(
     mock_requests_response.json = lambda: data
 
     job_json = load_json(json_data_job_extra)
-    with raises(BaseException):
-        job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
+    with raises(ValidationError):
+        lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
 
 
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client, json_data_jobs):

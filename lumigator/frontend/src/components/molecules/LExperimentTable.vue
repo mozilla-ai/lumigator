@@ -66,7 +66,6 @@
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
               style="cursor: not-allowed; pointer-events: all"
               aria-controls="optionsMenu"
-              @click.stop="console.log(slotProps)"
             />
           </template>
         </Column>

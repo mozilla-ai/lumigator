@@ -36,4 +36,4 @@ jobs:
 
       - name: Run SDK unit tests
         if: steps.filter.outputs.run_sdk_unit_tests == 'true'
-        run: make sdk-unit-test
+        run: make test-sdk-unit

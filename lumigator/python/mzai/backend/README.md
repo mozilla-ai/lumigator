@@ -20,7 +20,7 @@ source .venv/bin/activate
 
 ## Test instructions
 
-The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray server in the same server where the tests are running, and test LocalStack containers started up in a fixture within tests).
+The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray instance in the same network where the application and tests are running, and test LocalStack containers also in the same configuration).
 
 The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
 

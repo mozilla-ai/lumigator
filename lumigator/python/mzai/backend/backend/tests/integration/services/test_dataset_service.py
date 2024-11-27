@@ -4,7 +4,6 @@ from backend.repositories.datasets import DatasetRepository
 from backend.services.datasets import DatasetService
 
 
-# int test
 def test_delete_dataset_file_not_found(db_session, s3_client):
     filename = "dataset.csv"
     format = "job"

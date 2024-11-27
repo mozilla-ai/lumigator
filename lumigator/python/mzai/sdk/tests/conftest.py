@@ -66,6 +66,11 @@ def json_data_job(resources_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
+def json_data_job_extra(resources_dir) -> Path:
+    return resources_dir / "job-extra.json"
+
+
+@pytest.fixture(scope="session")
 def json_data_experiments(resources_dir) -> Path:
     return resources_dir / "experiments.json"
 

@@ -10,9 +10,22 @@
       <div class="l-main-container">
         <ConfirmDialog></ConfirmDialog>
         <Toast
-          position="bottom-center"
-          group="bc"
-        />
+          position="bottom-right"
+          group="br"
+        >
+          <template #message="slotProps">
+            <div
+              class="toaster-content"
+              :class="slotProps.message.severity"
+            >
+              <span :class="slotProps.message.messageicon" />
+              <div class="toaster-content__text">
+                <h4>   {{ slotProps.message.summary }}</h4>
+                <p v-if="slotProps.message.detail ">{{ slotProps.message.detail  }}  </p>
+              </div>
+            </div>
+          </template>
+        </Toast>
         <router-view v-slot="{ Component }">
           <transition
             name="transition-fade"
@@ -109,4 +122,20 @@ onMounted(async () => {
     margin-right: 0;
   }
 }
+</style>
+
+<style lang="scss">
+  .toaster-content {
+    width: 100%;
+    display: flex;
+    gap: 5px;
+
+    span {
+      padding: 5px;
+    }
+
+    p {
+      font-size: $l-menu-font-size;
+    }
+  }
 </style>

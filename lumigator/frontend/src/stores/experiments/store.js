@@ -25,7 +25,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   async function runExperiment(experimentData) {
     const experimentResponse = await experimentService.triggerExperiment(experimentData);
     if (experimentResponse) {
-      return experimentResponse.name
+      return experimentResponse;
     }
   }
 

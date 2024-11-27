@@ -92,9 +92,10 @@ function deleteConfirmation(dataset) {
       }
       toast.add({
         severity: 'secondary',
-        summary: 'Dataset removed',
+        summary: `Dataset removed`,
+        messageicon: 'pi pi-trash',
         detail: `${dataset.filename}`,
-        group: 'bc',
+        group: 'br',
         life: 3000
       })
     },

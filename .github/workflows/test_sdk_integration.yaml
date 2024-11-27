@@ -22,14 +22,6 @@ jobs:
 
       - name: Install python
         run: uv python install
-        working-directory: lumigator/python/mzai/sdk
 
-      - name: Setup containers
-        run: make start-lumigator-build
-
-      - name: Run tests
-        run: uv run pytest -o "python_files=int_test_*.py" tests
-        working-directory: lumigator/python/mzai/sdk
-
-      - name: Teardown containers
-        run: make stop-lumigator
+      - name: Run SDK integration tests
+        run: make sdk-integration-test

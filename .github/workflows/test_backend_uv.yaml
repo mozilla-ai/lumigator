@@ -27,12 +27,8 @@ jobs:
         run: uvx ruff check --config ruff.toml
         continue-on-error: false
 
-      - name: Start backend
-        run: make start-lumigator-build
+      - name: Run backend unit tests
+        run: make backend-unit-test
 
-      - name: Run tests
-        run: SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-        working-directory: lumigator/python/mzai/backend
-
-      - name: Stop backend
-        run: make stop-lumigator
+      - name: Run backend integration tests
+        run: make backend-integration-test

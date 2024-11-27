@@ -5,7 +5,6 @@ from pathlib import Path
 from uuid import UUID
 
 from lumigator_schemas.datasets import DatasetFormat
-
 from tests.helpers import check_method, load_json
 
 

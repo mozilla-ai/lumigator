@@ -7,7 +7,6 @@ from lumigator_sdk.strict_schemas import JobEvalCreate
 from pydantic import ValidationError
 from pytest import raises
 from requests.exceptions import HTTPError
-
 from tests.helpers import load_json
 
 

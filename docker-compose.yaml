@@ -133,6 +133,8 @@ services:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"
       target: "server"
+      args:
+      - VUE_APP_BASE_URL=${VUE_APP_BASE_URL}
     depends_on:
       backend:
         condition: "service_started"

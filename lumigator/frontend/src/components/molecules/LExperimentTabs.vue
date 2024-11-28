@@ -48,7 +48,6 @@ const emit = defineEmits(['l-close-details']);
   &__list {
     position: sticky; top: 0;z-index:100;
     padding-bottom: $l-spacing-1;
-    //  style="position: sticky; top: 0;z-index:100"
   }
 }
 </style>

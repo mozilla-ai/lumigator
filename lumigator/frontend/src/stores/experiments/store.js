@@ -9,7 +9,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   const selectedExperimentRslts = ref([]);
   const isPolling = ref(false);
   let experimentInterval = null;
-  const logs = ref([]);
+  const experimentLogs = ref([]);
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
@@ -42,6 +42,8 @@ export const useExperimentStore = defineStore('experiment', () => {
       created: details.start_time,
       runTime: details.end_time ? calculateDuration(details.start_time, details.end_time) : '-'
     }
+    experimentLogs.value = [];
+    retrieveLogs();
   }
 
   async function loadResults(experiment_id) {
@@ -92,10 +94,11 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function retrieveLogs() {
     const logs = await experimentService.fetchLogs(selectedExperiment.value.id);
-    return logs
+    experimentLogs.value.push(logs);
   }
 
   function startPolling() {
+    experimentLogs.value = [];
     if (!isPolling.value) {
       isPolling.value = true;
       retrieveLogs();
@@ -109,7 +112,6 @@ export const useExperimentStore = defineStore('experiment', () => {
       isPolling.value = false;
       clearInterval(experimentInterval);
       experimentInterval = null;
-      logs.value = [];
     }
   }
 
@@ -127,6 +129,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadDetails,
     loadResults,
     selectedExperiment,
+    experimentLogs,
     selectedExperimentRslts,
     loadExperiments,
     runExperiment

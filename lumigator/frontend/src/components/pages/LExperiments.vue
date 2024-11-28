@@ -21,7 +21,7 @@
       />
     </div>
     <Teleport to=".sliding-panel">
-      <transition name="transtion-fade">
+      <transition name="transition-fade">
         <l-experiment-form
           v-if="showSlidingPanel && selectedExperiment === null"
           @l-close-form="onDismissForm"
@@ -39,7 +39,9 @@
           </transition>
 
         </template>
-        <template v-slot:logs>logs here</template>
+        <template v-slot:logs>
+          <l-experiment-logs />
+        </template>
 
       </l-experiment-tabs>
     </Teleport>
@@ -74,6 +76,7 @@ import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LExperimentTabs from '@/components/molecules/LExperimentTabs.vue';
 import LResultsDrawer from '@/components/molecules/LResultsDrawer.vue';
 import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();

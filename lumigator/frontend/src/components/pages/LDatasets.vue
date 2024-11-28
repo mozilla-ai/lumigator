@@ -25,6 +25,7 @@
       <l-dataset-table
         :table-data="datasets"
         @l-dataset-selected="onDatasetSelected($event)"
+        @l-experiment="onExperimentDataset($event)"
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </div>
@@ -38,6 +39,8 @@
     >
       <l-dataset-details
         v-if="selectedDataset"
+        @l-experiment="onExperimentDataset($event)"
+        @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </Teleport>
@@ -50,6 +53,7 @@ import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import { useRouter, useRoute } from 'vue-router';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
@@ -63,6 +67,8 @@ const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
 const datasetInput = ref(null);
 const confirm = useConfirm();
+const router = useRouter();
+const route = useRoute();
 
 function deleteConfirmation(dataset) {
   confirm.require({
@@ -105,9 +111,23 @@ const onDatasetSelected = (dataset) => {
   showSlidingPanel.value = true;
 }
 
+const onClearSelection = () => {
+  datasetStore.resetSelection();
+}
+
+const onExperimentDataset = (dataset) => {
+  router.push('experiments')
+  selectedDataset.value = dataset;
+  datasetStore.loadDatasetInfo(dataset.id);
+}
+
 onMounted(async () => {
-	await datasetStore.loadDatasets()
+  if (route.query.dataset) {
+    const selection = datasets.value.filter((dataset) => dataset.id === route.query.dataset)[0];
+    onDatasetSelected(selection);
+  }
 })
+
 </script>
 
 <style scoped lang="scss">

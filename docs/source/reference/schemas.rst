@@ -1,14 +1,14 @@
 Schemas
 =======
 
-.. automodule:: schemas.completions
+.. automodule:: lumigator_schemas.completions
    :members:
 
-.. automodule:: schemas.datasets
+.. automodule:: lumigator_schemas.datasets
    :members:
 
-.. automodule:: schemas.jobs
+.. automodule:: lumigator_schemas.jobs
    :members:
 
-.. automodule:: schemas.extras
+.. automodule:: lumigator_schemas.extras
    :members:

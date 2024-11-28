@@ -34,7 +34,6 @@
   }
 }
 
-
 // Datable styling
 .p-datatable-table-container {
 		border-radius: 8px;
@@ -82,4 +81,51 @@
    font-size: 10px;
 
   }
+}
+
+.p-select-label {
+  font-size: $l-font-size-sm;
+}
+
+.p-floatlabel-in {
+  font-size: $l-font-size-sm;
+}
+
+.p-select-option-label {
+  font-size: $l-font-size-sm;
+}
+
+.p-select.p-disabled {
+  background-color: $l-disabled-input-color!important;
+  color: $l-grey-600!important;
+
+   .p-select-label, .p-floatlabel-in {
+    color: $l-grey-600!important;
+  }
+
+  .p-select-dropdown {
+    color: $l-grey-600!important;
+  }
+
+}
+
+
+// Radio button
+.p-radiobutton-box {
+  border: 1px solid white!important;
+  background-color: $l-grey-300!important;
+  height: 18px!important;
+  width: 18px!important;
+}
+
+.p-radiobutton-checked .p-radiobutton-box {
+  border-color: var(--l-radiobutton-checked-border-color)!important;
+
+  .p-radiobutton-icon {
+    background: $l-primary-color!important;
+  }
+}
+
+.p-inputtext {
+  font-size: 12px!important;
 }

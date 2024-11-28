@@ -1,7 +1,10 @@
 <template>
-  <div class="l-page-header">
+  <div
+    class="l-page-header"
+    :class="{'column': column}"
+  >
     <div class="l-page-header__text-content">
-      <h3>{{ title }}</h3>
+      <h3>{{ title }} </h3>
       <p>{{ subtitle }}</p>
     </div>
     <Button
@@ -18,10 +21,27 @@
 <script setup>
 import Button from 'primevue/button';
 
- defineProps({
-  title: String,
-  subtitle: String,
-  buttonLabel: String
+defineProps({
+  title: {
+    type: String,
+    default: '',
+    required: false
+  },
+  subtitle: {
+    type: String,
+    default: '',
+    required: false
+  },
+  buttonLabel: {
+    type: String,
+    default: '',
+    required: false
+  },
+  column: {
+    type: Boolean,
+    default: false,
+    required: false
+  }
 });
 
 const emit = defineEmits(['l-header-action']);
@@ -38,6 +58,7 @@ const handleAction = () => {
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  gap: 2 * $l-spacing-1;
 
   &__text-content {
     color: $l-grey-200;
@@ -59,6 +80,11 @@ const handleAction = () => {
     &:hover {
       color:$white;
     }
+  }
+
+  &.column{
+   width: 100%;
+   flex-direction: column;
   }
 
 }

@@ -6,7 +6,7 @@
       rounded
       aria-label="Close"
       class="l-dataset-details__close"
-      @click="showSlidingPanel = false"
+      @click="onCloseDetails"
     />
     <div class="l-dataset-details__header">
       <h3>Dataset Details</h3>
@@ -61,6 +61,17 @@
         <span class="l-dataset-details__content-label">ground truth</span>
         <span class="l-dataset-details__content-field">{{ selectedDataset.ground_truth }}</span>
       </div>
+      <div class="l-dataset-details__actions">
+        <Button
+          rounded
+          severity="secondary"
+          size="small"
+          icon="pi pi-microchip"
+          label="Use in Experiment"
+          class="l-dataset-empty__action-btn"
+          @click="emit('l-experiment', selectedDataset)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -69,24 +80,23 @@
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button';
 
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 
-const emit = defineEmits(['l-delete-dataset'])
-const formatDate = (dateString) => {
-	const date = new Date(dateString);
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).format(date).replace(/(\d{4})(\s)/, '$1,$2');
-};
+const emit = defineEmits([
+  'l-delete-dataset',
+  'l-details-closed',
+  'l-experiment'
+])
+
+function onCloseDetails() {
+  showSlidingPanel.value = false;
+  emit('l-details-closed')
+}
 
 </script>
 
@@ -128,11 +138,18 @@ const formatDate = (dateString) => {
     &-label {
       color: $l-grey-200;
       text-transform: uppercase;
+      font-weight: $l-font-weight-bold;
     }
 
   }
    &__content-item {
     padding: $l-spacing-1/2 0;
+   }
+
+   &__actions {
+    padding: $l-spacing-1 0;
+    display: flex;
+    justify-content: center;
    }
 
 }

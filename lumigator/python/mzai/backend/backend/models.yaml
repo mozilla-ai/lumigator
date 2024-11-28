@@ -1,0 +1,95 @@
+- name: facebook/bart-large-cnn
+  uri: hf://facebook/bart-large-cnn
+  description: BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.
+  info:
+    parameter_count: 406M
+    tensor_type: F32
+    model_size: 1.63GB
+  tasks:
+    - summarization:
+        max_length: 142
+        min_length: 56
+        length_penalty: 2.0
+        early_stopping: true
+        no_repeat_ngram_size: 3
+        num_beams: 4
+
+- name: mikeadimech/longformer-qmsum-meeting-summarization
+  uri: hf://mikeadimech/longformer-qmsum-meeting-summarization
+  description: Longformer is a transformer model that is capable of processing long sequences.
+  info:
+    parameter_count: 162M
+    tensor_type: F32
+    model_size: 648MB
+  tasks:
+    - summarization:
+
+- name: mrm8488/t5-base-finetuned-summarize-news
+  uri: hf://mrm8488/t5-base-finetuned-summarize-news
+  description: Google's T5 base fine-tuned on News Summary dataset for summarization downstream task.
+  info:
+    parameter_count: 223M
+    tensor_type: F32
+    model_size: 892MB
+  tasks:
+    - summarization:
+        max_length: 200
+        min_length: 30
+        length_penalty: 2.0
+        early_stopping: true
+        no_repeat_ngram_size: 3
+        num_beams: 4
+
+- name: Falconsai/text_summarization
+  uri: hf://Falconsai/text_summarization
+  description: A fine-tuned variant of the T5 transformer model, designed for the task of text summarization.
+  info:
+    parameter_count: 60.5M
+    tensor_type: F32
+    model_size: 242MB
+  tasks:
+    - summarization:
+        max_length: 200
+        min_length: 30
+        length_penalty: 2.0
+        early_stopping: true
+        no_repeat_ngram_size: 3
+        num_beams: 4
+
+- name: mistralai/Mistral-7B-Instruct-v0.3
+  uri: hf://mistralai/Mistral-7B-Instruct-v0.3
+  description: Mistral-7B-Instruct-v0.3 is an instruct fine-tuned version of the Mistral-7B-v0.3.
+  info:
+    parameter_count: 7.25B
+    tensor_type: BF16
+    model_size: 14.5GB
+  tasks:
+    - summarization:
+
+- name: gpt-4o-mini
+  uri: oai://gpt-4o-mini
+  description: OpenAI's GPT-4o-mini model.
+  tasks:
+    - summarization:
+
+- name: gpt-4o
+  uri: oai://gpt-4o
+  description: OpenAI's GPT-4o model.
+  tasks:
+    - summarization:
+
+- name: open-mistral-7b
+  uri: mistral://open-mistral-7b
+  description: Mistral's 7B model.
+  tasks:
+    - summarization:
+
+- name: mistralai/Mistral-7B-Instruct-v0.2
+  uri: llamafile://mistralai/Mistral-7B-Instruct-v0.2
+  description: A llamafile package of Mistral's 7B Instruct model.
+  info:
+    parameter_count: 7.24B
+    tensor_type: BF16
+    model_size: 14.5GB
+  tasks:
+    - summarization:

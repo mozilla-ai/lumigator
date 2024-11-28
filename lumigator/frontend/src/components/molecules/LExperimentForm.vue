@@ -112,6 +112,7 @@ import Textarea from 'primevue/textarea';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import LModelCards from '@/components/molecules/LModelCards.vue';
+import { useToast } from "primevue/usetoast";
 
 const emit = defineEmits([
   'l-close-form',
@@ -128,6 +129,7 @@ const experimentTitle = ref('');
 const experimentDescription = ref('');
 const maxSamples = ref();
 const modelSelection = ref(null);
+const toast = useToast();
 
 const isInvalid = computed(() =>
   !experimentTitle.value ||
@@ -148,11 +150,25 @@ async function triggerExperiment() {
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
   const success = await experimentStore.runExperiment(experimentPayload);
-  if (success === experimentTitle.value) {
+  if (success.name === experimentTitle.value) {
     await experimentStore.loadExperiments();
     emit('l-close-form');
     resetForm();
+    toast.add({
+      severity: 'secondary',
+      summary: `${success.name } Started`,
+      messageicon: 'pi pi-verified',
+      group: 'br',
+      life: 3000
+    })
+    return;
   }
+    toast.add({
+    severity: 'error',
+    summary: `Experiment failed to start`,
+    messageicon: 'pi pi-exclamation-triangle',
+    group: 'br',
+  })
 }
 
 function resetForm() {

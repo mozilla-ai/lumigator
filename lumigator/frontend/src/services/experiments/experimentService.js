@@ -3,7 +3,8 @@ import {
   PATH_EXPERIMENTS_ROOT,
   PATH_EXPERIMENTS_EVALUATE,
   PATH_EXPERIMENT_DETAILS,
-  PATH_EXPERIMENT_RESULTS
+  PATH_EXPERIMENT_RESULTS,
+  PATH_EXPERIMENT_LOGS,
 } from './api';
 
 
@@ -56,9 +57,19 @@ async function fetchResults(job_id) {
   }
 }
 
+async function fetchLogs(id) {
+  try {
+    const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id));
+    return logsResponse.data.logs
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export default {
   fetchExperiments,
   fetchResults,
   fetchExperimentDetails,
   triggerExperiment,
+  fetchLogs
 };

@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { defineStore } from 'pinia'
 import experimentService from "@/services/experiments/experimentService";
 import { retrieveEntrypoint, calculateDuration } from '@/helpers/index'
@@ -7,6 +7,9 @@ export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const selectedExperiment = ref(null);
   const selectedExperimentRslts = ref([]);
+  const isPolling = ref(false);
+  let experimentInterval = null;
+  const logs = ref([]);
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
@@ -47,7 +50,6 @@ export const useExperimentStore = defineStore('experiment', () => {
       selectedExperiment.value = experiments.value
         .find((experiment) => experiment.id === results.id);
       selectedExperimentRslts.value = transformResultsArray(results.resultsData);
-     ;
     }
   }
 
@@ -83,10 +85,42 @@ export const useExperimentStore = defineStore('experiment', () => {
           rougeLsum_mean: objectData.rouge.rougeLsum_mean,
         },
         summarization_time: objectData.summarization_time,
-        }
+      }
     });
     return transformedArray
   }
+
+  async function retrieveLogs() {
+    const logs = await experimentService.fetchLogs(selectedExperiment.value.id);
+    return logs
+  }
+
+  function startPolling() {
+    if (!isPolling.value) {
+      isPolling.value = true;
+      retrieveLogs();
+      // Poll every 3 seconds
+      experimentInterval = setInterval(retrieveLogs, 3000);
+    }
+  }
+
+  function stopPolling() {
+    if (isPolling.value) {
+      isPolling.value = false;
+      clearInterval(experimentInterval);
+      experimentInterval = null;
+      logs.value = [];
+    }
+  }
+
+  watch(selectedExperiment, (newValue) => {
+    if (newValue?.status === 'RUNNING') {
+      startPolling()
+      return;
+    } else if (isPolling.value) {
+      stopPolling();
+    }
+  }, { deep: true });
 
   return {
     experiments,

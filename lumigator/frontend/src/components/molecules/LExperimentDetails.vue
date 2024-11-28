@@ -161,7 +161,7 @@ watch(experimentStatus, (newStatus) => {
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
-      color: $l-grey-150;
+      color: $l-grey-100;
     }
 
     button {
@@ -177,7 +177,7 @@ watch(experimentStatus, (newStatus) => {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
-    font-size: $l-font-size-sm;
+    font-size: $l-table-font-size;
     &.row {
       flex-direction: row;
       justify-content: space-between;
@@ -197,7 +197,7 @@ watch(experimentStatus, (newStatus) => {
 
   &__tag {
     font-size: $l-font-size-sm;
-    color: $l-grey-150;
+    color: $l-grey-100;
     line-height: 1;
     font-weight: $l-font-weight-normal;
   }

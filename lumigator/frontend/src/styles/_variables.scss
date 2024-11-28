@@ -2,15 +2,16 @@
 $l-primary-color: #e0c414; // Main brand color (gold/yellow)
 $l-primary-color-text: #ffffff;
 $white: #ffffff;
-$l-grey-100: #A4A4A4;
-$l-grey-150: #B8B8B8;
-$l-grey-200: #7F7F7F;
-$l-grey-300: #3F3F46;
-$l-grey-400: #323232;
-$l-grey-600: #4D4D4D;
-$l-menu-bg: #161616;
+$black: #000000;
+$l-grey-100: #BBBBBB;
+$l-grey-150: #A2A2A2;
+$l-grey-200: #888888;
+$l-grey-300: #363636;
+$l-grey-400: #222222;
+$l-grey-600: #111111;
+$l-menu-bg: #111111;
 $l-menu-item-color: #7F7F7F;
-$l-main-bg: #161616;
+$l-main-bg: #111111;
 $l-card-bg: #222222;
 $l-overlay-color: rgba(0, 0, 0, 0.6);
 $l-text-color: #eaeaea;
@@ -25,6 +26,7 @@ $l-font-size-md: 16px;
 $l-menu-font-size: 14px;
 $l-table-font-size: 14px;
 $l-font-weight-normal: 400;
+$l-font-weight-semibold: 500;
 $l-font-weight-bold: 600;
 $l-button-icon-only-width: 1.5rem;
 

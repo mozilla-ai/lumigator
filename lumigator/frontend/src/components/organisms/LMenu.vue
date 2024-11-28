@@ -72,7 +72,6 @@ const { showSlidingPanel  } = useSlidePanel();
 
     :hover,:focus {
       background-color: $l-menu-bg;
-			text-shadow: 0px 0px 2px $white;
     }
 
 		&-label {

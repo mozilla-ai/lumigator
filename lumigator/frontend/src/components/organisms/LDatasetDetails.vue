@@ -134,7 +134,7 @@ function onCloseDetails() {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
-    font-size:$l-font-size-sm;
+    font-size: $l-table-font-size;
 
     &-label {
       color: $l-grey-200;

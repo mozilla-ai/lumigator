@@ -13,7 +13,6 @@
         :tableStyle="style"
         columnResizeMode="expand"
         scrollable
-        sortField="created"
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
@@ -63,7 +62,7 @@
           </template>
         </Column>
         <Column header="options">
-          <template #body="slotProps">
+          <template #body>
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
               style="cursor: not-allowed; pointer-events: all"

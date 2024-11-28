@@ -2,17 +2,9 @@
   <div class="l-experiment-details">
     <div
       class="l-experiment-details__header"
-      style="position: sticky; top: 0;z-index:100"
     >
-      <h3>Experiment Details</h3>
-      <Button
-        icon="pi pi-times"
-        severity="secondary"
-        rounded
-        aria-label="Close"
-        class="l-experiment-form__close"
-        @click="emit('l-close-details')"
-      />
+      <h3>{{ selectedExperiment.name }}</h3>
+      <p v-if="selectedExperiment.description">{{ selectedExperiment.description }}</p>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item row">
@@ -155,7 +147,8 @@ watch(experimentStatus, (newStatus) => {
   &__header {
     padding-bottom: $l-spacing-1;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
     background-color: $l-main-bg;
 
     h3 {
@@ -164,12 +157,11 @@ watch(experimentStatus, (newStatus) => {
       color: $l-grey-150;
     }
 
-    button {
-      margin: 0 2px;
-      background-color: $l-main-bg;
-      border: none;
-      color: $l-grey-100;
+    p {
+      color: $l-grey-150;
+      font-size: $l-menu-font-size;
     }
+
   }
 
   &__content,

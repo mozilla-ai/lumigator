@@ -27,13 +27,21 @@
           @l-close-form="onDismissForm"
         />
       </transition>
-      <transition name="transtion-fade">
-        <l-experiment-details
-          v-if="showSlidingPanel && selectedExperiment !== null"
-          @l-results="onShowResults($event)"
-          @l-close-details="onCloseDetails"
-        />
-      </transition>
+      <l-experiment-tabs
+        v-if="showSlidingPanel && selectedExperiment !== null"
+        @l-close-details="onCloseDetails"
+      >
+        <template v-slot:experiment-details>
+          <transition name="transition-fade">
+            <l-experiment-details
+              @l-results="onShowResults($event)"
+            />
+          </transition>
+
+        </template>
+        <template v-slot:logs>logs here</template>
+
+      </l-experiment-tabs>
     </Teleport>
     <l-results-drawer
       v-if="showDrawer && selectedExperimentRslts.length"
@@ -63,6 +71,7 @@ import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
+import LExperimentTabs from '@/components/molecules/LExperimentTabs.vue';
 import LResultsDrawer from '@/components/molecules/LResultsDrawer.vue';
 import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 

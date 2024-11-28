@@ -39,7 +39,7 @@
       v-if="showDrawer && selectedExperimentRslts.length"
       ref="resultsDrawer"
       :header="selectedExperiment.name"
-      @l-close-results="showDrawer = false"
+      @l-close-results="resetResults()"
     >
       <l-experiment-results
         v-if="selectedExperimentRslts &&  selectedExperimentRslts.length"
@@ -100,6 +100,11 @@ const onDismissForm = () => {
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false;
+}
+
+const resetResults = () => {
+  selectedExperimentRslts.value = [];
+  showDrawer.value = false
 }
 
 onMounted(async () => {

@@ -13,6 +13,7 @@
         :tableStyle="style"
         columnResizeMode="expand"
         scrollable
+        sortField="created"
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
@@ -24,6 +25,7 @@
         <Column
           field="created"
           header="created"
+          sortable
         >
           <template #body="slotProps">
             {{ formatDate(slotProps.data.created) }}

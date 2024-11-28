@@ -32,7 +32,8 @@ async function triggerExperiment(experimentPayload) {
     // console.log(response);
     return response.data
   } catch (error) {
-    console.log('error while creating Experiment', error)
+    console.log('error while creating Experiment', error);
+    return error.message;
   }
 }
 

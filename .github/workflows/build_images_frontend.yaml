@@ -1,0 +1,51 @@
+name: Frontend Docker image CI
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
+  push:
+    branches:
+      - main
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Frontend Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rebuild_fe:
+              - '.github/workflows/**'
+              - 'lumigator/lumigator/frontend/**'
+
+      - name: Truncate commit SHA
+        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        if: steps.filter.outputs.rebuild_fe == 'true'
+        with:
+          file: "lumigator/frontend/Dockerfile"
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          target: "server"
+          tags: |
+            mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}

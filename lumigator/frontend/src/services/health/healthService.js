@@ -2,7 +2,7 @@ import http from '@/services/http';
 import { PATH_HEALTH_ROOT, PATH_HEALTH_JOB_METADATA } from './api';
 
 async function fetchHealthStatus() {
-    try {
+  try {
     const response = await http.get(PATH_HEALTH_ROOT());
     return response.data.status
   } catch (error) {
@@ -10,6 +10,7 @@ async function fetchHealthStatus() {
     return error;
   }
 }
+
 async function fetchJobStatus(id) {
   try {
     const response = await http.get(PATH_HEALTH_JOB_METADATA(id));

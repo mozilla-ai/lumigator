@@ -170,7 +170,7 @@ watch(() => props.tableData.length, () => {
 	}
 
   &__tag {
-    color: $l-grey-150;
+    color: $l-grey-100;
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;

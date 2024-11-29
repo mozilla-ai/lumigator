@@ -34,7 +34,7 @@ after the LResultsDrawer is mounted -->
 .l-results-drawer {
   $root: &;
   .p-drawer-title {
-    color: $l-grey-150;
+    color: $l-grey-100;
     font-size: $l-font-size-md;
   }
 }

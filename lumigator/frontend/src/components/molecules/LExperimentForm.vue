@@ -204,7 +204,7 @@ onMounted(async () => {
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
-      color: $l-grey-150;
+      color: $l-grey-100;
     }
 
     button {
@@ -246,7 +246,7 @@ onMounted(async () => {
     flex-direction: column;
     h4 {
       font-size: $l-font-size-sm;
-      color: $l-grey-150;
+      color: $l-grey-100;
       font-weight:$l-font-weight-bold ;
     }
   }

@@ -228,6 +228,17 @@ class JobService:
 
     def get_job(self, job_id: UUID) -> JobResponse:
         record = self._get_job_record(job_id)
+
+        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+            return JobResponse.model_validate(record)
+
+        # get job status from ray
+        job_status = self.ray_client.get_job_status(job_id)
+
+        # update job status in the DB if it differs from the current status
+        if job_status.lower() != record.status.value.lower():
+            record = self._update_job_record(job_id, status=job_status.lower())
+
         return JobResponse.model_validate(record)
 
     def list_jobs(

@@ -203,6 +203,11 @@ def json_data_models(resources_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
+def json_ray_version(resources_dir) -> Path:
+    return resources_dir / "ray_version.json"
+
+
+@pytest.fixture(scope="session")
 def json_data_health_job_metadata_ok(resources_dir) -> Path:
     return resources_dir / "health_job_metadata.json"
 

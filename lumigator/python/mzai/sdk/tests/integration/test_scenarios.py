@@ -8,9 +8,9 @@ from time import sleep
 
 import requests
 from loguru import logger
-from lumigator_sdk.strict_schemas import JobEvalCreate
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
+from lumigator_sdk.strict_schemas import JobEvalCreate
 
 
 def test_sdk_healthcheck_ok(lumi_client):

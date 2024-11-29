@@ -7,20 +7,17 @@ import time
 from http import HTTPMethod
 from uuid import UUID
 
-from lumigator_schemas.jobs import (
-    JobType, 
-    JobEvalCreate, 
-    JobResponse, 
-    JobResultDownloadResponse, 
-    JobResultResponse
-)
 from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import (
+    JobEvalCreate,
+    JobResponse,
+    JobResultDownloadResponse,
+    JobResultResponse,
+    JobType,
+)
 
 from lumigator_sdk.client import ApiClient
-
-from lumigator_sdk.strict_schemas import (
-    JobEvalCreate as JobEvalCreateStrict
-)
+from lumigator_sdk.strict_schemas import JobEvalCreate as JobEvalCreateStrict
 
 
 class Jobs:
@@ -105,7 +102,7 @@ class Jobs:
               job has finished
         """
         for _ in range(1, retries):
-            response = self.client.get_ray_job_response(f'{id}')
+            response = self.client.get_ray_job_response(f"{id}")
             jobinfo = response.json()
             if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
                 time.sleep(poll_wait)
@@ -118,7 +115,7 @@ class Jobs:
                 return jobinfo
         raise Exception(
             f"Job {id} did not complete in the polling "
-             "time (retries: {retries}, poll_wait: {poll_wait})"
+            "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
     def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:

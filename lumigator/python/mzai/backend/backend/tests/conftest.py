@@ -22,7 +22,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import BaseRepository, JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
-from backend.settings import settings
+from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_ray_client import FakeJobSubmissionClient
 
 # TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
@@ -249,3 +249,8 @@ def job_record(db_session):
 @pytest.fixture(scope="function")
 def job_service(db_session, job_repository, result_repository, fake_ray_client, dataset_service):
     return JobService(job_repository, result_repository, fake_ray_client, dataset_service)
+
+
+@pytest.fixture(scope="function")
+def backend_settings():
+    return BackendSettings()

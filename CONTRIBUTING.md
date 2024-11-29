@@ -13,7 +13,7 @@ As long as this text is here, we are able to accept:
 * [suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
 
 
-# Whare to go
+# Where to go
 
 * [Lumigator documentation](https://mozilla-ai.github.io/lumigator/), describing all the components and including usage guides;
 * [open issues](https://github.com/mozilla-ai/lumigator/issues);

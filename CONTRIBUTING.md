@@ -3,17 +3,16 @@
 Lumigator is still in early stages of development and as such will have
 large variance between even PATCH versions in terms of feature development.
 
-We do want encourage both suggestions and contributions from the community in the near future. Being very transparent, please understand that we cannot accept all PRs, so please first open the discussion in the issues.
+We want to encourage both suggestions and contributions from the community in the near future. Before submitting a PR, please open a discussion in a related issue.
 
-
-As long as this text is here, we are able to accept:
+Currently, we are able to accept:
 
 * PRs for [**bugfixes**](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D+) and **documentation** only. Please include as much information as possible;
-* [suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
+* [Suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
 
 
 # Where to go
 
-* [Lumigator documentation](https://mozilla-ai.github.io/lumigator/): Describes all the components and includes usage guides;
+* [Lumigator documentation](https://mozilla-ai.github.io/lumigator/): Describes all the components and includes usage guides.
 * [Open issues](https://github.com/mozilla-ai/lumigator/issues): Browse the open issues to check if the topic you want to raise is already being discussed.
 * [Contributing](https://github.com/mozilla-ai/lumigator/blob/19b9adefe4a78c42b784461d92b92838b9662564/CONTRIBUTING.md) options.

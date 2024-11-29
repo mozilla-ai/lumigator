@@ -9,7 +9,7 @@ Being very transparent, please understand that we cannot accept all PRs, so plea
 
 As long as this text is here, we are able to accept:
 
-* PRs for **bugfixes** and clarification in **documentation** only;
+* PRs for [**bugfixes**](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D+) and **documentation** only. Please include as much information as possible;
 * [suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
 
 

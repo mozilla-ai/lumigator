@@ -4,8 +4,8 @@ import pytest
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        ("", ["*"]),
-        ("   ", ["*"]),
+        ("", []),
+        ("   ", []),
         ("http://localhost:3000", ["http://localhost:3000"]),
         (
             "http://localhost:3000,http://localhost:8080",
@@ -14,6 +14,19 @@ import pytest
         (
             " http://localhost:3000 , http://localhost:8080 ",
             ["http://localhost:3000", "http://localhost:8080"],
+        ),
+        ("*", ["*"]),
+        (
+            "http://localhost:3000,*",
+            ["*"],
+        ),
+        (
+            " http://localhost:3000,http://localhost:8080,",
+            ["http://localhost:3000", "http://localhost:8080"],
+        ),
+        (
+            ",,,",
+            [],
         ),
     ],
 )

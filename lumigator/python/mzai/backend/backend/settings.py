@@ -13,7 +13,7 @@ class BackendSettings(BaseSettings):
     MAX_DATASET_SIZE: ByteSize = "50MB"
 
     # Backend API env vars
-    _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "*")
+    _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "")
 
     # Postgres
     POSTGRES_HOST: str = "localhost"
@@ -127,13 +127,25 @@ class BackendSettings(BaseSettings):
         """Retrieves the (comma separated) list of allowed origin URLs for CORS requests
         against the Lumigator backend API.
 
-        Defaults to "*" (allows all) when no environment variable is set.
+        If the wildcard '*' appears as an origin, only it will be returned, ignoring other origins.
         """
+        wildcard = "*"
+        result = []
         origins = self._api_cors_allowed_origins.strip()
-        if origins == "":
-            return ["*"]
 
-        return [o.strip() for o in origins.split(",")]
+        # Return early if there are no origin settings.
+        if origins == "":
+            return result
+
+        for origin in origins.split(","):
+            o = origin.strip()
+            if o == wildcard:
+                # Return only the wildcard if we encountered it, as the other settings are moot.
+                return [o]
+            if o != "":
+                result.append(o)
+
+        return result
 
 
 settings = BackendSettings()

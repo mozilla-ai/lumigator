@@ -11,10 +11,15 @@ services:
       -  database_volume:/mzai/backend/local.db
     develop:
       watch:
-        - path: ./
-          target: /mzai
+        - path: lumigator/python/mzai/backend/
+          target: /mzai/lumigator/python/mzai/backend
           action: sync
           ignore:
-           - lumigator/python/mzai/backend/.venv/
+            - .venv/
+        - path: lumigator/python/mzai/schemas/
+          target: /mzai/lumigator/python/mzai/schemas
+          action: sync
+          ignore:
+            - .venv/
         - path: lumigator/python/mzai/backend/pyproject.toml
           action: rebuild

@@ -2,8 +2,7 @@ from http import HTTPMethod
 from io import IOBase
 from uuid import UUID
 
-from lumigator_schemas.datasets import DatasetFormat, DatasetDownloadResponse, DatasetResponse
-
+from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 
 from lumigator_sdk.client import ApiClient
@@ -69,11 +68,7 @@ class Datasets:
 
         return DatasetResponse(**(response.json()))
 
-    def create_dataset(
-            self,
-            dataset: IOBase,
-            format: DatasetFormat
-        ) -> DatasetResponse:
+    def create_dataset(self, dataset: IOBase, format: DatasetFormat) -> DatasetResponse:
         """Create a new dataset.
 
         .. admonition:: Example

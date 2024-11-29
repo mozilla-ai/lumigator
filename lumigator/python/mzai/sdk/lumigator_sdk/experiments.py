@@ -2,18 +2,16 @@ from http import HTTPMethod, HTTPStatus
 from json import dumps
 from uuid import UUID
 
-from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
 )
+from lumigator_schemas.extras import ListingResponse
 
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import (
-    ExperimentCreate as ExperimentCreateStrict
-)
+from lumigator_sdk.strict_schemas import ExperimentCreate as ExperimentCreateStrict
 
 
 class Experiments:

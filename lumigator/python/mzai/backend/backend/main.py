@@ -43,6 +43,7 @@ def _configure_logger():
         colorize=True,
     )
 
+
 def create_app() -> FastAPI:
     _configure_logger()
 
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     origins = [
         "http://localhost",
         "http://localhost:3000",
+        "http://localhost:4566",
     ]
     app.add_middleware(
         CORSMiddleware,
@@ -70,5 +72,6 @@ def create_app() -> FastAPI:
         return {"Hello": "Lumigator!🐊"}
 
     return app
+
 
 app = create_app()

@@ -6,12 +6,16 @@
     >
       <DataTable
         v-if="tableVisible"
+        v-model:selection="focusedItem"
+        selectionMode="single"
+        dataKey="id"
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"
+        @row-unselect="showSlidingPanel = false"
       >
         <Column
           field="name"
@@ -62,7 +66,6 @@
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
               style="cursor: not-allowed; pointer-events: all"
               aria-controls="optionsMenu"
-              @click.stop="console.log(slotProps)"
             />
           </template>
         </Column>
@@ -94,7 +97,8 @@ const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
 const healthStore = useHealthStore();
 const { runningJobs } = storeToRefs(healthStore);
-const tableVisible = ref(true)
+const tableVisible = ref(true);
+const focusedItem = ref();
 
 const style = computed(() => {
   return showSlidingPanel.value ?
@@ -139,8 +143,9 @@ onUnmounted(() => {
   clearInterval(pollingId);
 });
 
-watch(showSlidingPanel, () => {
+watch(showSlidingPanel, (newValue) => {
   tableVisible.value = false;
+  focusedItem.value = newValue ? focusedItem.value : null;
   setTimeout(() => {
     tableVisible.value = true;
   }, 100);
@@ -164,7 +169,7 @@ watch(() => props.tableData.length, () => {
 	}
 
   &__tag {
-    color: $l-grey-150;
+    color: $l-grey-100;
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;

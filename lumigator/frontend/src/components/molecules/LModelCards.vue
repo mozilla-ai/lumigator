@@ -74,7 +74,7 @@ defineExpose({
 
       label {
         font-size: $l-font-size-sm;
-        color: $l-grey-150;
+        color: $l-grey-100;
       }
     }
 

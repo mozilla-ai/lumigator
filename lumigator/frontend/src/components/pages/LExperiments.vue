@@ -30,15 +30,31 @@
       <transition name="transtion-fade">
         <l-experiment-details
           v-if="showSlidingPanel && selectedExperiment !== null"
+          @l-results="onShowResults($event)"
           @l-close-details="onCloseDetails"
         />
       </transition>
     </Teleport>
+    <l-results-drawer
+      v-if="showDrawer && selectedExperimentRslts.length"
+      ref="resultsDrawer"
+      :header="selectedExperiment.name"
+      @l-close-results="resetResults()"
+    >
+      <l-experiment-results
+        v-if="selectedExperimentRslts &&  selectedExperimentRslts.length"
+        :results="selectedExperimentRslts"
+      />
+      <h3
+        v-else
+        style="text-align: center"
+      >No results</h3>
+    </l-results-drawer>
   </div>
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -47,13 +63,21 @@ import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
+import LResultsDrawer from '@/components/molecules/LResultsDrawer.vue';
+import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
-const { experiments, selectedExperiment } = storeToRefs(experimentStore);
+const {
+  experiments,
+  selectedExperiment,
+  selectedExperimentRslts
+} = storeToRefs(experimentStore);
 
+const showDrawer = ref(false);
+const resultsDrawer = ref(null)
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
   selectedExperiment.value = null;
@@ -64,6 +88,11 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
+const onShowResults = (experiment) => {
+  experimentStore.loadResults(experiment.id);
+  showDrawer.value = true;
+}
+
 const onDismissForm = () => {
   selectedDataset.value = null;
   showSlidingPanel.value = false;
@@ -71,6 +100,11 @@ const onDismissForm = () => {
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false;
+}
+
+const resetResults = () => {
+  selectedExperimentRslts.value = [];
+  showDrawer.value = false
 }
 
 onMounted(async () => {

@@ -42,9 +42,22 @@
 
         </div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <div
+        class="l-experiment-details__content-item"
+        @click="copyToClipboard(selectedExperiment.id)"
+      >
         <div class="l-experiment-details__content-label">experiment id</div>
-        <div class="l-experiment-details__content-field">{{ selectedExperiment.jobId }}</div>
+        <div
+          class="l-experiment-details__content-field"
+          style="display: flex; justify-content: space-between;cursor:pointer"
+        >
+          {{ selectedExperiment.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            class="pi pi-clone"
+            style="font-size: 12px;"
+          />
+        </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
@@ -81,6 +94,19 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
+    <div class="l-experiment-details__actions">
+      <Button
+        rounded
+        severity="secondary"
+        size="small"
+        icon="pi pi-external-link"
+        label="View Results"
+        class="l-dataset-empty__action-btn"
+        :disabled="!(selectedExperiment.status === 'SUCCEEDED'
+          || selectedExperiment.status === 'FAILED')"
+        @click="emit('l-results', selectedExperiment)"
+      />
+    </div>
   </div>
 </template>
 
@@ -93,7 +119,7 @@ import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details']);
+const emit = defineEmits(['l-close-details', 'l-results']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
@@ -102,9 +128,14 @@ const { runningJobs } = storeToRefs(healthStore);
 
 const experimentStatus = computed(() => {
   const selected = runningJobs.value
-    .filter((job) => job.id === selectedExperiment.value.jobId)[0]
+    .filter((job) => job.id === selectedExperiment.value.id)[0]
   return selected ? selected.status : selectedExperiment.value.status;
 })
+
+const copyToClipboard = async (longString) => {
+    await navigator.clipboard.writeText(longString);
+
+};
 
 watch(experimentStatus, (newStatus) => {
   selectedExperiment.value.status = newStatus;
@@ -130,7 +161,7 @@ watch(experimentStatus, (newStatus) => {
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
-      color: $l-grey-150;
+      color: $l-grey-100;
     }
 
     button {
@@ -146,7 +177,7 @@ watch(experimentStatus, (newStatus) => {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
-    font-size: $l-font-size-sm;
+    font-size: $l-table-font-size;
     &.row {
       flex-direction: row;
       justify-content: space-between;
@@ -166,9 +197,12 @@ watch(experimentStatus, (newStatus) => {
 
   &__tag {
     font-size: $l-font-size-sm;
-    color: $l-grey-150;
+    color: $l-grey-100;
     line-height: 1;
     font-weight: $l-font-weight-normal;
+  }
+  &__actions {
+    padding: $l-spacing-1 0;
   }
 }
 </style>

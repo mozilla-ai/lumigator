@@ -69,6 +69,7 @@
           icon="pi pi-microchip"
           label="Use in Experiment"
           class="l-dataset-empty__action-btn"
+          :disabled="!selectedDataset.ground_truth"
           @click="emit('l-experiment', selectedDataset)"
         />
       </div>
@@ -133,7 +134,7 @@ function onCloseDetails() {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
-    font-size:$l-font-size-sm;
+    font-size: $l-table-font-size;
 
     &-label {
       color: $l-grey-200;

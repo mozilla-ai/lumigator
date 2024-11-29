@@ -1,0 +1,55 @@
+name: "\U0001F680 Feature Request"
+description: Suggest an idea for this project
+title: "[FEATURE]: "
+projects:
+  - "Lumigator"
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this form!
+        Please make sure you have searched for a similar [issue](https://github.com/mozilla-ai/lumigator/issues?q=is%3Aissue) before submitting a new one.
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: |
+        A clear and concise description of the proposal and why this is important.
+      placeholder: |
+          I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: |
+        A clear and concise description of any alternative solutions or features you've considered.
+      placeholder: |
+          I've considered...
+    validations:
+      required: false
+
+  - type: textarea
+    id: contribution
+    attributes:
+      label: Contribution
+      description: |
+        Is there any way that you could help, e.g. by submitting a PR?
+        Make sure to read the [contribution guidelines](https://github.com/mozilla-ai/lumigator/blob/main/CONTRIBUTING.md).
+      placeholder: |
+        I could help by...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Have you searched for similar issues before submitting this one?
+      options:
+        - label: Yes, I have searched for similar issues
+          required: true

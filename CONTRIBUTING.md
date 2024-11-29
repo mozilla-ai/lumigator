@@ -3,7 +3,7 @@
 Lumigator is still in early stages of development and as such will have
 large variance between even PATCH versions in terms of feature development.
 
-We do want encourage both suggestions and contributions from the community in the near future.
+We do want encourage both suggestions and contributions from the community in the near future. Being very transparent, please understand that we cannot accept all PRs, so please first open the discussion in the issues.
 
 Being very transparent, please understand that we cannot accept all PRs, so please first open the discussion in the issues.
 

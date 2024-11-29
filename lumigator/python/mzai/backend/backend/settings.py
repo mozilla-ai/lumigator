@@ -92,6 +92,12 @@ class BackendSettings(BaseSettings):
         # as the default shell in the container is /bin/sh
         return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'
 
+    # URL for Ray jobs API
+    @computed_field
+    @property
+    def RAY_VERSION_URL(self) -> str:  # noqa: N802
+        return f"{self.RAY_DASHBOARD_URL}/api/version"
+
     @computed_field
     @property
     def RAY_WORKER_GPUS(self) -> float:  # noqa: N802

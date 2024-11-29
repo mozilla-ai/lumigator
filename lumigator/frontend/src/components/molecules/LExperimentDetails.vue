@@ -54,8 +54,8 @@
           {{ selectedExperiment.id }}
           <i
             v-tooltip="'Copy ID'"
-            class="pi pi-clone"
-            style="font-size: 12px;"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 10px;padding-left: 3px;"
           />
         </div>
       </div>
@@ -111,7 +111,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, ref} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useHealthStore } from '@/stores/health/store'
@@ -125,6 +125,7 @@ const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
 const healthStore = useHealthStore();
 const { runningJobs } = storeToRefs(healthStore);
+const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
   const selected = runningJobs.value
@@ -133,8 +134,11 @@ const experimentStatus = computed(() => {
 })
 
 const copyToClipboard = async (longString) => {
-    await navigator.clipboard.writeText(longString);
-
+  isCopied.value = true;
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 3000);
+  await navigator.clipboard.writeText(longString);
 };
 
 watch(experimentStatus, (newStatus) => {

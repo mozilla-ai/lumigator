@@ -100,6 +100,8 @@ onMounted(async () => {
     border-radius: $l-main-radius;
     display: grid;
     text-align: center;
+    border: 1px solid black
+
   }
 
   .sliding-panel {

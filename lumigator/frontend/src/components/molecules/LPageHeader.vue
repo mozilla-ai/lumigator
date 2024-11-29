@@ -61,13 +61,14 @@ const handleAction = () => {
   gap: 2 * $l-spacing-1;
 
   &__text-content {
-    color: $l-grey-200;
+    color: $l-grey-100;
     display: flex;
     align-items: start;
     flex-direction: column;
 
     h3 {
       font-size: $l-font-size;
+      font-weight: $l-font-weight-semibold;
     }
 
     p {

@@ -37,7 +37,7 @@
 // Datable styling
 .p-datatable-table-container {
 		border-radius: 8px;
-		border: 1px solid $l-grey-400;
+		border: 1px solid $l-grey-300;
 	.p-datatable-column-header-content {
 		color: $l-grey-200;
 		font-size: $l-font-size-sm;
@@ -109,7 +109,7 @@
   height:   $l-button-icon-only-width!important;
   width:  $l-button-icon-only-width;
   span {
-   font-size: 10px;
+   font-size: 12px;
 
   }
 }

@@ -15,6 +15,6 @@ As long as this text is here, we are able to accept:
 
 # Where to go
 
-* [Lumigator documentation](https://mozilla-ai.github.io/lumigator/), describing all the components and including usage guides;
+* [Lumigator documentation](https://mozilla-ai.github.io/lumigator/): Describes all the components and includes usage guides;
 * [Open issues](https://github.com/mozilla-ai/lumigator/issues): Browse the open issues to check if the topic you want to raise is already being discussed.
 * [Contributing](https://github.com/mozilla-ai/lumigator/blob/19b9adefe4a78c42b784461d92b92838b9662564/CONTRIBUTING.md) options.

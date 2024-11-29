@@ -26,61 +26,120 @@
       <Column
         field="ground_truth"
         header="Ground Truth"
-      ></Column>
+      />
       <Column
         field="predictions"
         header="predictions"
-      ></Column>
+      />
       <Column
         field="rouge.rouge1"
-        header="rouge-1"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.rouge1"
+            class="p-datatable-column-title"
+          >ROUGe-1
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            /></span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.rouge.rouge1.toFixed(2) }}
         </template>
       </Column>
       <Column
         field="rouge.rouge2"
-        header="rouge-2"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.rouge2"
+            class="p-datatable-column-title"
+          >ROUGe-2
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            />
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.rouge.rouge2.toFixed(2) }}
         </template>
       </Column>
       <Column
         field="rouge.rougeL"
-        header="Rouge-l"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.rougeL"
+            class="p-datatable-column-title"
+          >ROUGe-L
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            />
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.rouge.rougeL.toFixed(2) }}
         </template>
       </Column>
       <Column
         field="meteor"
-        header="meteor"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.meteor"
+            class="p-datatable-column-title"
+          >meteor
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            />
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.meteor.meteor.toFixed(2) }}
         </template>
       </Column>
       <Column
         field="bertscore"
-        header="Bert P"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.bertPrecision"
+            class="p-datatable-column-title"
+          >Bert P
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            />
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.bertscore.precision.toFixed(2) }}
         </template>
       </Column>
       <Column
         field="bertscore.f1"
-        header="Bert f1"
         sortable
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.bertF1"
+            class="p-datatable-column-title"
+          >Bert f1
+            <i
+              class="pi pi-sort-alt"
+              style="font-size: 8px;padding-left: 3px"
+            />
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.bertscore.f1.toFixed(2) }}
         </template>
@@ -96,16 +155,65 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
 const props = defineProps({
-  	results: {
-		type: Object,
-		required: true,
-	}
+  results: {
+    type: Object,
+    required: true,
+  }
 })
 
 const tableData = ref([]);
+const tooltips = ref({
+  rouge1: {
+    value: `Measures the overlap of individual words
+     between the predicted and ground-truth summaries, focusing on basic word-level similarity.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+  rouge2: {
+    value: `Calculates the overlap of two-word sequences (bigrams) capturing
+    both word choices and their immediate order.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+  rougeL: {
+    value: `Identifies the longest matching sequence of words (not necessarily consecutive),
+    considering overall structure while allowing for gaps between words.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+  meteor: {
+    value: `Evaluates predictions by comparing words, synonyms, and flexible word orders
+     balancing precision and recall for semantic similarity.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+  bertPrecision: {
+    value: `Measures the precision of predictions,
+    calculated as the proportion of predicted tokens that are semantically
+    similar to tokens in the ground truth.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+  bertF1: {
+    value: `Harmonic mean of BERT Precision and BERT Recall, providing a balanced
+    measure of how well the prediction aligns with the ground truth both in accuracy and coverage.`,
+    class: 'metric-tooltip',
+    pt: { text: 'tooltip-content' }
+  },
+})
 
 
 onMounted(() => {
   tableData.value = props.results;
 })
 </script>
+
+<style lang="scss">
+.metric-tooltip {
+  border-radius: $l-border-radius;
+
+  .tooltip-content {
+    background-color: #000;
+  }
+}
+</style>

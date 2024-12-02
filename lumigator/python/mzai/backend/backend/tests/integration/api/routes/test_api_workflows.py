@@ -17,8 +17,7 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-# int test (ray, localstack)
-def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
+def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, boto_s3fs, boto_s3_client):
     response = local_client.get("/health")
     assert response.status_code == 200
 
@@ -28,6 +27,7 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
 
+    print(f'response: {create_response.text}')
     assert create_response.status_code == 201
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
@@ -62,7 +62,6 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         assert mock.called
 
 
-# int test (ray, localstack)
 def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
     response = local_client.get("/health")
     assert response.status_code == 200
@@ -71,6 +70,7 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
+    print(f'response: {create_response.text}')
     assert create_response.status_code == 201
     created_dataset = DatasetResponse.model_validate(create_response.json())
     headers = {
@@ -104,7 +104,6 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
     assert get_experiment_response.status_code == 200
 
 
-# int test (ray)
 def test_experiment_non_existing(local_client: TestClient):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/{non_existing_id}")
@@ -112,7 +111,6 @@ def test_experiment_non_existing(local_client: TestClient):
     assert response.json()["detail"] == f"Job {non_existing_id} not found."
 
 
-# int test (ray)
 def test_job_non_existing(local_client: TestClient):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/jobs/{non_existing_id}")

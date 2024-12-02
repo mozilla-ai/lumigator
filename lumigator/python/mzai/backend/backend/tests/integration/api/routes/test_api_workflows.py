@@ -77,18 +77,16 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
         "max_samples": 2,
     }
 
-    create_experiments_response = local_client.post(
-        "/experiments/", headers=headers, json=payload
-    )
+    create_experiments_response = local_client.post("/experiments/", headers=headers, json=payload)
     assert create_experiments_response.status_code == 201
 
-    get_experiments_response = local_client.get(
-        "/experiments/")
-    get_experiments = ListingResponse[ExperimentResponse].model_validate(get_experiments_response.json())
+    get_experiments_response = local_client.get("/experiments/")
+    get_experiments = ListingResponse[ExperimentResponse].model_validate(
+        get_experiments_response.json()
+    )
     assert get_experiments.total > 0
 
-    get_experiment_response = local_client.get(
-        f"/experiments/{get_experiments.items[0].id}")
+    get_experiment_response = local_client.get(f"/experiments/{get_experiments.items[0].id}")
     assert get_experiment_response.status_code == 200
 
 

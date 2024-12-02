@@ -1,6 +1,9 @@
 <template>
   <div class="l-dataset-table">
-    <transition name="transition-fade">
+    <transition
+      name="transition-fade"
+      mode="out-in"
+    >
       <DataTable
         v-if="tableVisible"
         :value="tableData"
@@ -76,17 +79,16 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
 import { useSlidePanel } from '@/composables/SlidingPanel';
+import { formatDate } from '@/helpers/index'
 
 defineProps({
 	tableData: {
 		type: Array,
 		required: true,
-	},
-	entityType: {
-		type: String,
-		required: false,
 	}
 })
+
+const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected', 'l-experiment'])
 
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
@@ -94,15 +96,16 @@ const style = computed(() => {
     'min-width: min(40vw, 1200px)' : 'min-width: min(80vw, 1200px)'
 })
 
-const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected'])
-
 const focusedDataset = ref(null);
 const tableVisible = ref(true)
 const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
-		icon: 'pi pi-microchip',
+    icon: 'pi pi-microchip',
+     command: () => {
+      emit('l-experiment', focusedDataset.value)
+    }
 	},
 	{
 		separator: true,
@@ -134,17 +137,6 @@ const ptConfigOptionsMenu = ref({
 const shortenedID = (id) =>
 	id.length <= 20 ? id : `${id.slice(0, 20)}...`;
 
-const formatDate = (dateString) => {
-	const date = new Date(dateString);
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	}).format(date).replace(/(\d{4})(\s)/, '$1,$2');
-};
 
 const togglePopover = (event, dataset) => {
   focusedDataset.value = dataset;

@@ -1,0 +1,25 @@
+name: Do not merge
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+jobs:
+  do-not-merge:
+    name: Prevent merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for label
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'do-not-merge') }}; then
+            echo "PR is labeled with 'do-not-merge', merging disabled"
+            exit 1
+          fi

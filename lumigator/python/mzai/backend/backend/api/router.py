@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from backend.api.routes import completions, datasets, experiments, health, jobs
+from backend.api.routes import completions, datasets, experiments, health, jobs, models
 from backend.api.tags import Tags
 
 API_V1_PREFIX = "/api/v1"
@@ -11,3 +11,4 @@ api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASE
 api_router.include_router(jobs.router, prefix="/jobs", tags=[Tags.JOBS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
+api_router.include_router(models.router, prefix="/models", tags=[Tags.MODELS])

@@ -3,6 +3,7 @@ from lumigator_sdk.completions import Completions
 from lumigator_sdk.health import Health
 from lumigator_sdk.jobs import Jobs
 from lumigator_sdk.lm_datasets import Datasets
+from lumigator_sdk.models import Models
 
 
 class LumigatorClient:
@@ -35,3 +36,4 @@ class LumigatorClient:
         self.jobs = Jobs(self.client)
         self.health = Health(self.client)
         self.datasets = Datasets(self.client)
+        self.models = Models(self.client)

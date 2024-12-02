@@ -9,7 +9,7 @@
       </div>
       <div class="l-main-container">
         <router-view v-slot="{ Component }">
-          <transition name="transition-fade">
+          <transition name="transition-fade" mode="out-in">
             <component
               :is="Component"
               @s-disable-scroll="disableScroll = $event"
@@ -26,12 +26,21 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import LMenu from '@/components/organisms/LMenu.vue';
 import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 
-const { showSlidingPanel } = useSlidePanel();
+const datasetStore = useDatasetStore();
+const experimentStore = useExperimentStore();
 
+const { showSlidingPanel } = useSlidePanel();
+onMounted(async () => {
+  await experimentStore.loadExperiments();
+  await datasetStore.loadDatasets();
+})
 </script>
 
 <style scoped lang="scss">
@@ -79,6 +88,7 @@ const { showSlidingPanel } = useSlidePanel();
 
   .sliding-panel.open {
     width: $l-sliding-panel-size;
+    overflow-y: auto;
   }
 
   .l-main-container {

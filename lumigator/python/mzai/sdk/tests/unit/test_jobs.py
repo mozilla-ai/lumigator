@@ -2,10 +2,11 @@ import json
 from http import HTTPStatus
 from pathlib import Path
 
-from lumigator_schemas.jobs import JobEvalCreate, JobType
+from lumigator_schemas.jobs import JobType
+from lumigator_sdk.strict_schemas import JobEvalCreate
+from pydantic import ValidationError
 from pytest import raises
 from requests.exceptions import HTTPError
-
 from tests.helpers import load_json
 
 
@@ -43,6 +44,22 @@ def test_create_job_ok_minimal(
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
     assert job_ret.status == "created"
+
+
+def test_create_job_ok_extra(
+    mock_requests_response,
+    mock_requests,
+    lumi_client,
+    json_data_job_response,
+    json_data_job_extra,
+):
+    mock_requests_response.status_code = 200
+    data = load_json(json_data_job_response)
+    mock_requests_response.json = lambda: data
+
+    job_json = load_json(json_data_job_extra)
+    with raises(ValidationError):
+        lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
 
 
 def test_get_jobs_ok(mock_requests_response, mock_requests, lumi_client, json_data_jobs):

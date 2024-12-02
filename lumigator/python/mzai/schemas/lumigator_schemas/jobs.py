@@ -13,6 +13,7 @@ class JobType(str, Enum):
 
 class JobStatus(str, Enum):
     CREATED = "created"
+    PENDING = "pending"
     RUNNING = "running"
     FAILED = "failed"
     SUCCEEDED = "succeeded"
@@ -59,7 +60,7 @@ class JobEvalCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None
@@ -70,7 +71,7 @@ class JobInferenceCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     output_field: str | None = "prediction"

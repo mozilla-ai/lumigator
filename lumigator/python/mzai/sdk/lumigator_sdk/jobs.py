@@ -17,6 +17,7 @@ from lumigator_schemas.jobs import (
 )
 
 from lumigator_sdk.client import ApiClient
+from lumigator_sdk.strict_schemas import JobEvalCreate as JobEvalCreateStrict
 
 
 class Jobs:
@@ -101,7 +102,7 @@ class Jobs:
               job has finished
         """
         for _ in range(1, retries):
-            response = self.client.get_ray_job_response(f'{id}')
+            response = self.client.get_ray_job_response(f"{id}")
             jobinfo = response.json()
             if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
                 time.sleep(poll_wait)
@@ -114,7 +115,7 @@ class Jobs:
                 return jobinfo
         raise Exception(
             f"Job {id} did not complete in the polling "
-             "time (retries: {retries}, poll_wait: {poll_wait})"
+            "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
     def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:
@@ -138,6 +139,7 @@ class Jobs:
         Returns:
             JobResponse: The information for the newly created job.
         """
+        JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
         response = self.client.get_response(
             f"{self.JOBS_ROUTE}/{type.value}/",
             method=HTTPMethod.POST,

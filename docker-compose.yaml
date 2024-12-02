@@ -119,6 +119,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
+      - LUMI_API_CORS_ALLOWED_ORIGINS=${LUMI_API_CORS_ALLOWED_ORIGINS}
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
@@ -133,6 +134,8 @@ services:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"
       target: "server"
+      args:
+      - VUE_APP_BASE_URL=${VUE_APP_BASE_URL}
     depends_on:
       backend:
         condition: "service_started"

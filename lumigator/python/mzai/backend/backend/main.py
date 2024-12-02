@@ -10,6 +10,7 @@ from loguru import logger
 
 from backend.api.router import api_router
 from backend.api.tags import TAGS_METADATA
+from backend.settings import settings
 
 LUMIGATOR_APP_TAGS = {
     "title": "Lumigator Backend",
@@ -43,6 +44,7 @@ def _configure_logger():
         colorize=True,
     )
 
+
 def create_app() -> FastAPI:
     _configure_logger()
 
@@ -50,14 +52,14 @@ def create_app() -> FastAPI:
 
     app = FastAPI(**LUMIGATOR_APP_TAGS)
 
+    # Get the allowed origins for CORS requests.
+    origins = settings.API_CORS_ALLOWED_ORIGINS
+    logger.info(f"Configuring CORS for API, allowed origins: {origins}")
+
     # Adding CORS middleware
-    origins = [
-        "http://localhost",
-        "http://localhost:3000",
-    ]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,  # Adjust this list as needed for security (e.g., ["http://localhost:3000"])
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -70,5 +72,6 @@ def create_app() -> FastAPI:
         return {"Hello": "Lumigator!🐊"}
 
     return app
+
 
 app = create_app()

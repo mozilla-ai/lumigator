@@ -1,4 +1,5 @@
 import csv
+import traceback
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -89,11 +90,13 @@ class DatasetService:
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
         self.s3_filesystem = s3_filesystem
+        print(self.s3_filesystem)
 
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _raise_unhandled_exception(self, e: Exception) -> None:
+        traceback.print_exception(type(e), e, e.__traceback__)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
@@ -116,9 +119,12 @@ class DatasetService:
             # Load the CSV file as HF dataset
             dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
 
+            print(dataset_hf)
+
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
+            # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
         except Exception as e:
             # if a record was already created, delete it from the DB
@@ -219,7 +225,9 @@ class DatasetService:
                 )
 
             download_urls = []
+            print(f'---> returned {s3_response}')
             for s3_object in s3_response["Contents"]:
+                print(f'  ---> returned object {s3_object}')
                 download_url = self.s3_client.generate_presigned_url(
                     "get_object",
                     Params={

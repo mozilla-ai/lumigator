@@ -13,14 +13,6 @@ from lumigator_schemas.jobs import JobType
 from lumigator_sdk.strict_schemas import JobEvalCreate
 
 
-<<<<<<<< HEAD:lumigator/python/mzai/sdk/tests/integration/test_scenarios.py
-========
-"""
-Test the healthcheck endpoint.
-"""
-
-
->>>>>>>> a06de84 (Test rearrangement):lumigator/python/mzai/sdk/tests/int/test_scenarios.py
 def test_sdk_healthcheck_ok(lumi_client):
     """Test the healthcheck endpoint."""
     healthy = False
@@ -35,29 +27,12 @@ def test_sdk_healthcheck_ok(lumi_client):
     assert healthy
 
 
-<<<<<<<< HEAD:lumigator/python/mzai/sdk/tests/integration/test_scenarios.py
-========
-"""
-Test the `get_datasets` endpoint.
-"""
-
-
->>>>>>>> a06de84 (Test rearrangement):lumigator/python/mzai/sdk/tests/int/test_scenarios.py
 def test_get_datasets_remote_ok(lumi_client):
     """Test the `get_datasets` endpoint."""
     datasets = lumi_client.datasets.get_datasets()
     assert datasets is not None
 
 
-<<<<<<<< HEAD:lumigator/python/mzai/sdk/tests/integration/test_scenarios.py
-========
-"""
-Test a complete dataset lifecycle test: add a new dataset,
-list datasets, remove the dataset
-"""
-
-
->>>>>>>> a06de84 (Test rearrangement):lumigator/python/mzai/sdk/tests/int/test_scenarios.py
 def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
     """Test a complete dataset lifecycle test: add a new dataset,
     list datasets, remove the dataset
@@ -74,20 +49,10 @@ def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
     assert n_current_datasets - n_initial_datasets == 1
 
 
-<<<<<<<< HEAD:lumigator/python/mzai/sdk/tests/integration/test_scenarios.py
 def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template):
     """Test a complete job lifecycle test: add a new dataset,
     create a new job, run the job, get the results
     """
-========
-"""
-Test a complete job lifecycle test: add a new dataset,
-create a new job, run the job, get the results
-"""
-
-
-def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template):
->>>>>>>> a06de84 (Test rearrangement):lumigator/python/mzai/sdk/tests/int/test_scenarios.py
     logger.info("Starting jobs lifecycle")
     datasets = lumi_client.datasets.get_datasets()
     if datasets.total > 0:

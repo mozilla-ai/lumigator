@@ -1,7 +1,7 @@
 {
     "name": "full_inference_config",
     "dataset": { "path": "s3://lumigator-storage/datasets/deaddead-dead-dead-dead-deaddeaddead/dataset_name.csv" },
-    "pipeline": { "model_path": "hf://facebook/bart-large-cnn", "task": "summarization" },
+    "pipeline": { "model_uri": "hf://facebook/bart-large-cnn", "task": "summarization" },
     "job": {
         "max_samples": 10,
         "storage_path": "s3://lumigator-storage/jobs/results/",

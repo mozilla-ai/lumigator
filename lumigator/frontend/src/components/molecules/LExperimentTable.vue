@@ -103,7 +103,7 @@ const focusedItem = ref();
 
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'min-width: min(60vw, 1200px)' : 'min-width: min(80vw, 1200px)'
+    'min-width: 54vw' : 'min-width: min(80vw, 1200px)'
 })
 
 function retrieveStatus(jobID) {

@@ -48,7 +48,7 @@
             style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
-            @click="emit('l-close-details')"
+            @click="emit('l-show-logs')"
           />
         </div>
       </div>
@@ -128,7 +128,7 @@ import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details', 'l-results']);
+const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);

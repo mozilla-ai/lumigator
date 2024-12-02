@@ -2,10 +2,6 @@
   <div
     class="l-experiment-logs"
   >
-    <div class="header">
-      <h3>Ray logs</h3>
-      <p>Lumigator uses Ray as its orchestrator for running LLM workloads.</p>
-    </div>
     <div
       ref="logContainer"
       class="l-experiment-logs__container"
@@ -45,27 +41,19 @@ watch(logsLength, () => scrollToBottom())
 .l-experiment-logs {
   $root: &;
   border-radius: $l-main-radius;
+  height: 100%;
 
-  h3 {
-    font-weight: $l-font-weight-normal;
-    font-size: $l-font-size-md;
-    color: $l-grey-150;
-  }
-
-  p {
-    color: $l-grey-150;
-    font-size: $l-menu-font-size;
-  }
   &__container {
-    height: 77vh;
+    height: calc($l-bottom-drawer-height * 0.8);
+    min-height: 100%;
     overflow-y: auto;
-    background-color: #000;
+    background-color: $l-card-bg;
     color: $l-grey-100;
     font-family: monospace;
     font-size: $l-font-size-sm;
-    padding: 10px;
+    line-height: 1.9;
+    padding: 10px $l-spacing-1;
     border-radius: $l-main-radius;
-    margin-top: $l-spacing-1;
 
     &-log-entry {
       margin-bottom: $l-spacing-1 *2;

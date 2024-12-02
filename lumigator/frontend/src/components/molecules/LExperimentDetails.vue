@@ -2,9 +2,17 @@
   <div class="l-experiment-details">
     <div
       class="l-experiment-details__header"
+      style="position: sticky; top: 0;z-index:100"
     >
-      <h3>{{ selectedExperiment.name }}</h3>
-      <p v-if="selectedExperiment.description">{{ selectedExperiment.description }}</p>
+      <h3>Experiment Details</h3>
+      <Button
+        icon="pi pi-times"
+        severity="secondary"
+        rounded
+        aria-label="Close"
+        class="l-experiment-details__close"
+        @click="emit('l-close-details')"
+      />
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item row">
@@ -31,7 +39,17 @@
             :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
           />
-
+          <Button
+            icon="pi pi-external-link"
+            severity="secondary"
+            size="small"
+            label="Logs"
+            aria-label="Logs"
+            style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+            class="l-experiment-details__content-item-logs"
+            iconClass="logs-btn"
+            @click="emit('l-close-details')"
+          />
         </div>
       </div>
       <div
@@ -93,7 +111,6 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        class="l-dataset-empty__action-btn"
         :disabled="!(selectedExperiment.status === 'SUCCEEDED'
           || selectedExperiment.status === 'FAILED')"
         @click="emit('l-results', selectedExperiment)"
@@ -138,7 +155,7 @@ watch(experimentStatus, (newStatus) => {
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .l-experiment-details {
   $root: &;
   display: flex;
@@ -147,8 +164,7 @@ watch(experimentStatus, (newStatus) => {
   &__header {
     padding-bottom: $l-spacing-1;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
     background-color: $l-main-bg;
 
     h3 {
@@ -157,9 +173,11 @@ watch(experimentStatus, (newStatus) => {
       color: $l-grey-100;
     }
 
-    p {
-      color: $l-grey-150;
-      font-size: $l-menu-font-size;
+    button {
+      margin: 0 2px;
+      background-color: $l-main-bg;
+      border: none;
+      color: $l-grey-100;
     }
 
   }
@@ -181,6 +199,22 @@ watch(experimentStatus, (newStatus) => {
       font-weight: $l-font-weight-bold;
     }
 
+    &-logs {
+      font-size: $l-font-size-sm;
+      padding: 0;
+
+      span {
+        color: $l-grey-100;
+      }
+      .logs-btn{
+        font-size: 12px!important;
+      }
+    }
+
+    &-field {
+      display: flex;
+      gap: 9px;
+    }
   }
 
   &__content-item {

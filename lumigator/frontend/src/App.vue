@@ -1,8 +1,5 @@
 <template>
   <div id="app">
-    <div class="header">
-      <l-health-status />
-    </div>
     <div class="content-wrapper">
       <div class="l-menu-container">
         <l-menu />

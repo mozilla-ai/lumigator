@@ -134,7 +134,6 @@ const onExperimentDataset = (dataset) => {
 }
 
 onMounted(async () => {
-  datasets.value=[]
   if (route.query.dataset) {
     const selection = datasets.value.filter((dataset) => dataset.id === route.query.dataset)[0];
     onDatasetSelected(selection);

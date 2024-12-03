@@ -56,7 +56,7 @@ watch(logsLength, () => scrollToBottom())
     border-radius: $l-main-radius;
 
     &-log-entry {
-      margin-bottom: $l-spacing-1 *2;
+      margin-bottom: $l-spacing-1;
       word-wrap: break-word;
     }
 

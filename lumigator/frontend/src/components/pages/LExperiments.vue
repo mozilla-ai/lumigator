@@ -9,6 +9,7 @@
     />
     <div class="l-experiments__header-container">
       <l-page-header
+        v-if="experiments.length > 0"
         title="Experiments"
         button-label="Create Experiment"
         :column="experiments.length === 0"
@@ -128,6 +129,7 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
+  experiments.value = [];
    if (selectedDataset.value) {
      onCreateExperiment();
   }
@@ -161,7 +163,7 @@ watch(showSlidingPanel, () => {
     max-width: $l-main-width;
     padding: $l-spacing-1;
     display: grid;
-    place-items: start;
+    place-content: center;
 
     .l-experiments__header-container {
       margin-top: 120px;

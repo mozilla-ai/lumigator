@@ -1,17 +1,11 @@
 <template>
   <div class="l-experiment-empty">
     <h2 class="l-experiment-empty__instructions">
-      Experiments are a logical sequence of inference and evaluationtasks that
+      Experiments are a logical sequence of inference and evaluation tasks that
       run sequentially to evaluate an LLM.</h2>
     <p class="l-experiment-empty__instructions-text">
 
-      <span>
-        We evaluate Summarization tasks using ROUGE, METEOR, and BERT score,
-        each focusing on different aspects of prediction-ground truth similarity.
-        <a href="https://mozilla-ai.github.io/lumigator/"
-           target="_blank"
-        >Learn more <span class="pi pi-arrow-up-right" /></a>
-      </span>
+
     </p>
     <Button
       rounded
@@ -21,7 +15,13 @@
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
     />
-    <p class="l-experiment-empty__note">Currently only CSV files are supported.</p>
+    <p class="l-experiment-empty__note">   <span>
+      We evaluate Summarization tasks using ROUGE, METEOR, and BERT score,
+      each focusing on different aspects of prediction-ground truth similarity.
+      <a href="https://mozilla-ai.github.io/lumigator/"
+         target="_blank"
+      >Learn more <span class="pi pi-arrow-up-right" /></a>
+    </span></p>
   </div>
 </template>
 
@@ -34,6 +34,7 @@ const emit  = defineEmits(['l-add-experiment'])
 .l-experiment-empty {
   $root: &;
   margin: auto;
+  max-width: 500px;
 
   &__instructions {
     color: $l-grey-100;
@@ -49,6 +50,7 @@ const emit  = defineEmits(['l-add-experiment'])
   }
 
   &__note {
+    padding-top: $l-spacing-1/2;
     font-size: $l-font-size-sm;
     color: $l-grey-100;
   }

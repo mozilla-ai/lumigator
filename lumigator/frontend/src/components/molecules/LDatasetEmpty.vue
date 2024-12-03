@@ -21,7 +21,16 @@
       class="l-dataset-empty__action-btn"
       @click="emit('l-add-dataset')"
     />
-    <p class="l-dataset-empty__note">Currently only CSV files are supported.</p>
+    <p class="l-dataset-empty__note">
+      Your dataset should be a CSV file and include the following columns:
+      <span  class="l-dataset-empty__note-item">examples</span>,
+      <span  class="l-dataset-empty__note-item">ground_truth</span>.
+    </p>
+    <p class="l-dataset-empty__note">
+      The
+      <span  class="l-dataset-empty__note-item">ground_truth</span>
+      column is optional, as it can be generated using Lumigator.
+    </p>
   </div>
 </template>
 

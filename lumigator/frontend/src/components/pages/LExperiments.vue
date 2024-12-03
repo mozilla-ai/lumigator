@@ -11,6 +11,7 @@
       <l-page-header
         v-if="experiments.length > 0"
         title="Experiments"
+        :description="headerDescription"
         button-label="Create Experiment"
         :column="experiments.length === 0"
         @l-header-action="onCreateExperiment()"
@@ -88,6 +89,8 @@ const {
 const showDrawer = ref(false);
 const experimentsDrawer = ref(null);
 const showLogs = ref(null);
+const headerDescription = ref(`Experiments are a logical sequence of inference and
+evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const getDrawerHeader = () => {
   return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;

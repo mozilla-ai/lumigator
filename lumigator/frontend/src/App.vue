@@ -117,7 +117,7 @@ onMounted(async () => {
         font-weight: $l-font-weight-normal;
 
         span.pi {
-          font-size: $l-font-size-sm;
+          font-size: $l-font-size-xs;
         }
       }
     }

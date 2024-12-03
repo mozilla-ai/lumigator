@@ -106,7 +106,7 @@ const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
-    icon: 'pi pi-microchip',
+    icon: 'pi pi-experiments',
     disabled: false,
      command: () => {
       emit('l-experiment', focusedItem.value)

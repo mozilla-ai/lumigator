@@ -129,7 +129,6 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
-  experiments.value = [];
    if (selectedDataset.value) {
      onCreateExperiment();
   }

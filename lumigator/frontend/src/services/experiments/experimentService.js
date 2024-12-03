@@ -60,7 +60,7 @@ async function fetchResults(job_id) {
 async function fetchLogs(id) {
   try {
     const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id));
-    return logsResponse.data.logs
+    return logsResponse.data
   } catch (error) {
     console.log(error);
   }

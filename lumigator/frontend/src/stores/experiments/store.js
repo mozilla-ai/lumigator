@@ -93,8 +93,14 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function retrieveLogs() {
-    const logs = await experimentService.fetchLogs(selectedExperiment.value.id);
-    experimentLogs.value.push(logs);
+    const logsData = await experimentService.fetchLogs(selectedExperiment.value.id);
+    const logs = splitByEscapeCharacter(logsData.logs);
+    logs.forEach(log => experimentLogs.value.push(log));
+  }
+
+  function splitByEscapeCharacter(input) {
+    const result = input.split('\n');
+    return result;
   }
 
   function startPolling() {

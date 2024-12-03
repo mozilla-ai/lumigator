@@ -8,9 +8,9 @@
       </span>
       <span>
         The 'ground_truth' column is optional since you can generate it using Lumigator.
-        <a
-          class="l-dataset-empty__-more"
-        >Learn more</a>
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+        >Learn more <span class="pi pi-arrow-up-right" /></a>
       </span>
     </p>
     <Button

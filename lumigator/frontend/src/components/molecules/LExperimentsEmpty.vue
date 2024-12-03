@@ -7,10 +7,10 @@
 
       <span>
         We evaluate Summarization tasks using ROUGE, METEOR, and BERT score,
-        each focusing on different aspects of prediction-ground truth similarity. Learn more↗
-        <a
-          class="l-experiment-empty__-more"
-        >Learn more</a>
+        each focusing on different aspects of prediction-ground truth similarity.
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+        >Learn more <span class="pi pi-arrow-up-right" /></a>
       </span>
     </p>
     <Button

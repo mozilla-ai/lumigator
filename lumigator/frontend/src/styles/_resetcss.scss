@@ -26,6 +26,12 @@ a:focus,
 a:active {
   background-color: $l-menu-bg;
 	text-decoration: none;
+  color: $l-grey-100;
+  font-weight: $l-font-weight-bold;
+
+   span.pi {
+    font-size: $l-font-size-xs;
+   }
 }
 
 ul {

@@ -33,7 +33,11 @@
 
       <p>Summarization jobs are evaluated with ROUGE, METEOR, and BERT
         score, each focusing on different aspects of prediction-ground
-        truth similarity. Learn more</p>
+        truth similarity.
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+        >Learn more <span class="pi pi-arrow-up-right" /></a>
+      </p>
       <FloatLabel
         variant="in"
         class="l-experiment-form__field"

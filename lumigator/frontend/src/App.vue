@@ -3,6 +3,25 @@
     <div class="content-wrapper">
       <div class="l-menu-container">
         <l-menu />
+        <div class="external-links-container">
+          <ul>
+            <li>
+              <a
+                href="https://github.com/mozilla-ai/lumigator"
+                target="_blank"
+              >GitHub <span class="pi pi-arrow-up-right" />
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://mozilla-ai.github.io/lumigator/"
+                target="_blank"
+              >Documentation <span class="pi pi-arrow-up-right" />
+              </a>
+            </li>
+
+          </ul>
+        </div>
       </div>
       <div class="l-main-container">
         <ConfirmDialog></ConfirmDialog>
@@ -46,7 +65,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import LMenu from '@/components/organisms/LMenu.vue';
-import LHealthStatus from '@/components/molecules/LHealthStatus.vue';
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
@@ -84,9 +102,25 @@ onMounted(async () => {
   }
 
   .l-menu-container {
-    height: 90vh;
-    width: minmax(200px, 15%);
+    height: 95vh;
     background-color: $l-main-bg;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .external-links-container {
+      padding: 0 1.5rem;
+
+      a {
+        font-size: $l-font-size-sm;
+        color: $l-grey-100;
+        font-weight: $l-font-weight-normal;
+
+        span.pi {
+          font-size: $l-font-size-sm;
+        }
+      }
+    }
   }
 
   .l-main-container {

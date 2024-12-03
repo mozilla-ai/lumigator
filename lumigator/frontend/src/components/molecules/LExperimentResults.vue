@@ -18,6 +18,7 @@
       <Column
         field="example"
         header="examples"
+        bodyStyle="width: 300px"
       >
         <template #body="slotProps">
           {{ slotProps.data.example }}
@@ -26,10 +27,12 @@
       <Column
         field="ground_truth"
         header="Ground Truth"
+        bodyStyle="width: 300px"
       ></Column>
       <Column
         field="predictions"
         header="predictions"
+        bodyStyle="width: 300px"
       ></Column>
       <Column
         field="rouge.rouge1"

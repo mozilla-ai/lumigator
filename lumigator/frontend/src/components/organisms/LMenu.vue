@@ -75,7 +75,8 @@ const { showSlidingPanel  } = useSlidePanel();
     }
 
 		&-label {
-			font-size: $l-menu-font-size
+			font-size: $l-menu-font-size;
+      font-weight: $l-font-weight-normal;
 		}
   }
 }

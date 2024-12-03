@@ -116,6 +116,10 @@ onMounted(async () => {
         color: $l-grey-100;
         font-weight: $l-font-weight-normal;
 
+        &:hover {
+          color: $white;
+        }
+
         span.pi {
           font-size: $l-font-size-xs;
         }

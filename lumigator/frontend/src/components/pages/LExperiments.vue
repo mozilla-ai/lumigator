@@ -3,6 +3,10 @@
     class="l-experiments"
     :class="{'no-data':experiments.length === 0}"
   >
+    <l-experiments-empty
+      v-if="experiments.length === 0"
+      @l-add-experiment="console.log('new')"
+    />
     <div class="l-experiments__header-container">
       <l-page-header
         title="Experiments"
@@ -68,6 +72,7 @@ import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
 import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
+import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();

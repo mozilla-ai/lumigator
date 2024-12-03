@@ -43,10 +43,7 @@
             v-tooltip.bottom="tooltips.rouge1"
             class="p-datatable-column-title"
           >ROUGe-1
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            /></span>
+          </span>
         </template>
         <template #body="slotProps">
           {{ slotProps.data.rouge.rouge1.toFixed(2) }}
@@ -61,10 +58,6 @@
             v-tooltip.bottom="tooltips.rouge2"
             class="p-datatable-column-title"
           >ROUGe-2
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            />
           </span>
         </template>
         <template #body="slotProps">
@@ -80,10 +73,6 @@
             v-tooltip.bottom="tooltips.rougeL"
             class="p-datatable-column-title"
           >ROUGe-L
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            />
           </span>
         </template>
         <template #body="slotProps">
@@ -99,10 +88,6 @@
             v-tooltip.bottom="tooltips.meteor"
             class="p-datatable-column-title"
           >meteor
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            />
           </span>
         </template>
         <template #body="slotProps">
@@ -118,10 +103,6 @@
             v-tooltip.bottom="tooltips.bertPrecision"
             class="p-datatable-column-title"
           >Bert P
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            />
           </span>
         </template>
         <template #body="slotProps">
@@ -137,10 +118,6 @@
             v-tooltip.bottom="tooltips.bertF1"
             class="p-datatable-column-title"
           >Bert f1
-            <i
-              class="pi pi-sort-alt"
-              style="font-size: 8px;padding-left: 3px"
-            />
           </span>
         </template>
         <template #body="slotProps">

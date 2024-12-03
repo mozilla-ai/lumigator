@@ -78,6 +78,7 @@
 .gridlines {
   .p-datatable-column-title {
     text-wrap: nowrap;
+    font-size: $l-font-size-sm;
   }
   tr {
     box-shadow:inset 0px 1px 0px $l-gridlines-stroke;

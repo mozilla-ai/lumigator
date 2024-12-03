@@ -10,7 +10,7 @@
         severity="secondary"
         rounded
         aria-label="Close"
-        class="l-experiment-form__close"
+        class="l-experiment-details__close"
         @click="emit('l-close-details')"
       />
     </div>
@@ -39,7 +39,17 @@
             :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
           />
-
+          <Button
+            icon="pi pi-external-link"
+            severity="secondary"
+            size="small"
+            label="Logs"
+            aria-label="Logs"
+            style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+            class="l-experiment-details__content-item-logs"
+            iconClass="logs-btn"
+            @click="emit('l-show-logs')"
+          />
         </div>
       </div>
       <div
@@ -101,7 +111,6 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        class="l-dataset-empty__action-btn"
         :disabled="!(selectedExperiment.status === 'SUCCEEDED'
           || selectedExperiment.status === 'FAILED')"
         @click="emit('l-results', selectedExperiment)"
@@ -119,7 +128,7 @@ import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details', 'l-results']);
+const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
@@ -146,7 +155,7 @@ watch(experimentStatus, (newStatus) => {
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .l-experiment-details {
   $root: &;
   display: flex;
@@ -170,6 +179,7 @@ watch(experimentStatus, (newStatus) => {
       border: none;
       color: $l-grey-100;
     }
+
   }
 
   &__content,
@@ -189,18 +199,36 @@ watch(experimentStatus, (newStatus) => {
       font-weight: $l-font-weight-bold;
     }
 
+    &-logs {
+      font-size: $l-font-size-sm;
+      padding: 0;
+
+      span {
+        color: $l-grey-100;
+      }
+      .logs-btn{
+        font-size: 12px!important;
+      }
+    }
+
+    &-field {
+      display: flex;
+      gap: 9px;
+    }
   }
 
   &__content-item {
     padding: $l-spacing-1/2 0;
+
+    .p-tag-label {
+      font-size: $l-font-size-sm;
+     color: $l-grey-100;
+      line-height: 1;
+      font-weight: $l-font-weight-normal;
+    }
   }
 
-  &__tag {
-    font-size: $l-font-size-sm;
-    color: $l-grey-100;
-    line-height: 1;
-    font-weight: $l-font-weight-normal;
-  }
+
   &__actions {
     padding: $l-spacing-1 0;
   }

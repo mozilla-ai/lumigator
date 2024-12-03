@@ -11,6 +11,7 @@ $l-grey-400: #222222;
 $l-grey-600: #111111;
 $l-menu-bg: #111111;
 $l-menu-item-color: #7F7F7F;
+$l-logs-bg: #080808;
 $l-main-bg: #111111;
 $l-card-bg: #222222;
 $l-overlay-color: rgba(0, 0, 0, 0.6);
@@ -48,5 +49,6 @@ $l-button-text-color: #000000;
 $l-button-hover-bg: darken($l-primary-color, 10%);
 
 // Sizes
-$l-sliding-panel-size: 300px;
+$l-sliding-panel-size: 370px;
 $l-input-height: 50px;
+$l-bottom-drawer-height: 40vh;

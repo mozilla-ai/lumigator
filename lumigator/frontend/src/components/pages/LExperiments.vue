@@ -21,35 +21,37 @@
       />
     </div>
     <Teleport to=".sliding-panel">
-      <transition name="transtion-fade">
+      <transition name="transition-fade">
         <l-experiment-form
           v-if="showSlidingPanel && selectedExperiment === null"
           @l-close-form="onDismissForm"
         />
       </transition>
-      <transition name="transtion-fade">
+      <transition name="transition-fade">
         <l-experiment-details
-          v-if="showSlidingPanel && selectedExperiment !== null"
+          v-if="selectedExperiment !== null"
           @l-results="onShowResults($event)"
+          @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
         />
       </transition>
     </Teleport>
-    <l-results-drawer
-      v-if="showDrawer && selectedExperimentRslts.length"
-      ref="resultsDrawer"
-      :header="selectedExperiment.name"
-      @l-close-results="resetResults()"
+    <l-experiments-drawer
+      v-if="showDrawer"
+      ref="experimentsDrawer"
+      :header="getDrawerHeader()"
+      :position="showLogs ? 'bottom' : 'full'"
+      @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="selectedExperimentRslts &&  selectedExperimentRslts.length"
+        v-if="selectedExperimentRslts.length"
         :results="selectedExperimentRslts"
       />
-      <h3
-        v-else
-        style="text-align: center"
-      >No results</h3>
-    </l-results-drawer>
+      <l-experiment-logs
+        v-if="selectedExperimentRslts.length === 0"
+      />
+
+    </l-experiments-drawer>
   </div>
 </template>
 
@@ -63,8 +65,9 @@ import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
-import LResultsDrawer from '@/components/molecules/LResultsDrawer.vue';
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
 import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
@@ -77,7 +80,13 @@ const {
 } = storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
-const resultsDrawer = ref(null)
+const experimentsDrawer = ref(null);
+const showLogs = ref(null);
+
+const getDrawerHeader = () => {
+  return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
+};
+
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
   selectedExperiment.value = null;
@@ -93,6 +102,11 @@ const onShowResults = (experiment) => {
   showDrawer.value = true;
 }
 
+const onShowLogs = () => {
+  showLogs.value = true;
+  showDrawer.value = true;
+}
+
 const onDismissForm = () => {
   selectedDataset.value = null;
   showSlidingPanel.value = false;
@@ -102,9 +116,10 @@ const onCloseDetails = () => {
   showSlidingPanel.value = false;
 }
 
-const resetResults = () => {
+const resetDrawerContent = () => {
   selectedExperimentRslts.value = [];
-  showDrawer.value = false
+  showLogs.value = false;
+  showDrawer.value = false;
 }
 
 onMounted(async () => {

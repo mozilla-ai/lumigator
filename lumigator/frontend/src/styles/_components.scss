@@ -66,6 +66,11 @@
    .p-datatable-row-selected {
 			background-color: $l-grey-400!important;
    }
+
+   .p-datatable-column-sorted {
+      background: inherit;
+    }
+
 }
 
 
@@ -161,9 +166,40 @@
   font-size: 12px!important;
 }
 
-//Tooltip
+// Tooltip
 .p-tooltip {
   font-size: $l-font-size-sm;
   color: $l-grey-100;
   background-color: $l-main-bg;
+}
+
+// Tabs
+.p-tabs {
+
+  .p-tablist-content > .p-tablist-tab-list {
+    align-items: center;
+    background: $l-menu-bg;
+    gap: $l-spacing-1;
+
+    .p-tab {
+      padding: 0.5rem 0;
+      font-size: $l-menu-font-size;
+      font-weight: $l-font-weight-normal;
+    }
+
+    .p-tab-active {
+      border-color: $white;
+      color: $white;
+    }
+
+    .p-tablist-active-bar {
+      background-color: $white;
+    }
+  }
+
+  .p-tabpanels {
+    padding: 0;
+    background: transparent;
+  }
+
 }

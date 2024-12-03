@@ -24,6 +24,7 @@
         <Column
           field="created"
           header="created"
+          sortable
         >
           <template #body="slotProps">
             {{ formatDate(slotProps.data.created) }}
@@ -61,7 +62,7 @@
           </template>
         </Column>
         <Column header="options">
-          <template #body="slotProps">
+          <template #body>
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
               style="cursor: not-allowed; pointer-events: all"
@@ -102,7 +103,7 @@ const focusedItem = ref();
 
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'min-width: min(60vw, 1200px)' : 'min-width: min(80vw, 1200px)'
+    'min-width: 54vw' : 'min-width: min(80vw, 1200px)'
 })
 
 function retrieveStatus(jobID) {

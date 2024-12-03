@@ -43,6 +43,10 @@ const emit  = defineEmits(['l-add-dataset'])
   max-width: 600px;
   margin: auto;
 
+  h2 {
+    margin-bottom: $l-spacing-1/2;
+  }
+
   &__instructions {
     color: $l-grey-100;
     font-size: $l-font-size;

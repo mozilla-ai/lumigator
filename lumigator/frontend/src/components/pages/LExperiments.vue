@@ -7,9 +7,11 @@
       v-if="experiments.length === 0"
       @l-add-experiment="console.log('new')"
     />
-    <div class="l-experiments__header-container">
+    <div
+      v-if="experiments.length > 0"
+      class="l-experiments__header-container"
+    >
       <l-page-header
-        v-if="experiments.length > 0"
         title="Experiments"
         :description="headerDescription"
         button-label="Create Experiment"

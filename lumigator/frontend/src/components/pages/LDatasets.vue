@@ -164,6 +164,6 @@ onMounted(async () => {
 
 .is-empty {
   display: grid;
-  place-items: center;
+  place-content: center;
 }
 </style>

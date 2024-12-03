@@ -20,6 +20,7 @@
       each focusing on different aspects of prediction-ground truth similarity.
       <a href="https://mozilla-ai.github.io/lumigator/"
          target="_blank"
+         style="background-color: transparent;"
       >Learn more <span class="pi pi-arrow-up-right" /></a>
     </span></p>
   </div>
@@ -66,11 +67,6 @@ const emit  = defineEmits(['l-add-experiment'])
   }
   p {
     margin-bottom: $l-spacing-1;
-  }
-
-  a {
-    background-color: $l-card-bg;
-    color: $l-primary-color;
   }
 
 }

@@ -1,9 +1,18 @@
 # Contributing
 
-Lumigator is still in early stages of development and as such will have 
-large variance between even PATCH versions in terms of feature development. 
-While we're in this phase, we're accepting PRs for clarification in documentation. 
+Lumigator is still in early stages of development and as such will have
+large variance between even PATCH versions in terms of feature development.
 
-## Project structure
+We want to encourage both suggestions and contributions from the community in the near future. Before submitting a PR, please open a discussion in a related issue.
 
-The lumigator project contains several packages: the `lumigator/python/mzai/backend` package that powers the lumigator server functionality, the `lumigator/python/mzai/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/python/mzai/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
+Currently, we are able to accept:
+
+* PRs for [**bugfixes**](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D+) and **documentation** only. Please include as much information as possible;
+* [Suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
+
+
+# Where to go
+
+* [Lumigator documentation](https://mozilla-ai.github.io/lumigator/): Describes all the components and includes usage guides.
+* [Open issues](https://github.com/mozilla-ai/lumigator/issues): Browse the open issues to check if the topic you want to raise is already being discussed.
+[Contribute](https://github.com/mozilla-ai/lumigator/contribute): Explore the list of "good first issues" to start contributing.

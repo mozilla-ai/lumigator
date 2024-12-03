@@ -219,14 +219,15 @@ watch(experimentStatus, (newStatus) => {
 
   &__content-item {
     padding: $l-spacing-1/2 0;
+
+    .p-tag-label {
+      font-size: $l-font-size-sm;
+     color: $l-grey-100;
+      line-height: 1;
+      font-weight: $l-font-weight-normal;
+    }
   }
 
-  &__tag {
-    font-size: $l-font-size-sm;
-    color: $l-grey-100;
-    line-height: 1;
-    font-weight: $l-font-weight-normal;
-  }
   &__actions {
     padding: $l-spacing-1 0;
   }

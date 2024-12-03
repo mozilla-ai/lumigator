@@ -84,6 +84,7 @@ after the LResultsDrawer is mounted -->
 
     .p-drawer-header {
       color: $l-grey-100;
+      padding: 0.5rem 2rem;
     }
   }
 }

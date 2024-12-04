@@ -45,6 +45,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
+            :disabled="selectedExperiment.status === 'PENDING'"
             style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"

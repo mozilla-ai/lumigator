@@ -2,7 +2,22 @@
   <div id="app">
     <div class="content-wrapper">
       <div class="l-menu-container">
-        <l-menu />
+        <div class="l-menu__top">
+          <div class="l-mode">
+            <Button
+              v-tooltip.right="tooltipConfig"
+              icon="pi pi-check"
+              severity="secondary"
+              size="small"
+              label="Hybrid"
+              aria-label="Logs"
+              style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+              iconClass="mode-icon"
+              class="l-mode__selector"
+            />
+          </div>
+          <l-menu />
+        </div>
         <div class="external-links-container">
           <ul>
             <li>
@@ -63,16 +78,39 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import LMenu from '@/components/organisms/LMenu.vue';
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
+import Button from 'primevue/button';
 
 const datasetStore = useDatasetStore();
 const experimentStore = useExperimentStore();
+
+const tooltipConfig = ref({
+  value: `Lumigator is connected to external GPUs.`,
+  hideDelay: 30000,
+  pt: {
+    root: {
+      style: {
+      background: `transparent`
+      }
+    },
+    text: {
+      style: {
+      background: `black`
+      }
+    },
+    arrow: {
+      style: {
+      ['border-color']: `black`
+      }
+    }
+  }
+})
 
 const { showSlidingPanel } = useSlidePanel();
 onMounted(async () => {
@@ -107,6 +145,15 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    .l-mode {
+      padding-left: $l-spacing-1;
+
+      .l-mode__selector {
+        color: $l-menu-item-color;
+        font-size: $l-font-size-sm;
+      }
+    }
 
     .external-links-container {
       padding: 0 1.5rem;
@@ -174,5 +221,9 @@ onMounted(async () => {
     p {
       font-size: $l-menu-font-size;
     }
+  }
+
+  .mode-icon {
+    font-size: $l-font-size-xs!important;
   }
 </style>

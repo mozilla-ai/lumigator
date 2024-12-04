@@ -76,7 +76,9 @@ import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
 import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
+
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
+
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
@@ -91,8 +93,10 @@ const {
 const showDrawer = ref(false);
 const experimentsDrawer = ref(null);
 const showLogs = ref(null);
+
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
+
 
 const getDrawerHeader = () => {
   return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;

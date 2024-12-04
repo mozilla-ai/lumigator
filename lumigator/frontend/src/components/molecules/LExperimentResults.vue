@@ -42,7 +42,7 @@
           <span
             v-tooltip.bottom="tooltips.rouge1"
             class="p-datatable-column-title"
-          >ROUGe-1
+          >ROUGE-1
           </span>
         </template>
         <template #body="slotProps">

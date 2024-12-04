@@ -5,7 +5,7 @@
   >
     <l-experiments-empty
       v-if="experiments.length === 0"
-      @l-add-experiment="console.log('new')"
+      @l-add-experiment="onCreateExperiment()"
     />
     <div
       v-if="experiments.length > 0"

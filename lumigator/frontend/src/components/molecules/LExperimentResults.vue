@@ -102,7 +102,7 @@
           <span
             v-tooltip.bottom="tooltips.bertPrecision"
             class="p-datatable-column-title"
-          >Bert P
+          >BERT P
           </span>
         </template>
         <template #body="slotProps">

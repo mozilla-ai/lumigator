@@ -90,7 +90,6 @@ class DatasetService:
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
         self.s3_filesystem = s3_filesystem
-        print(self.s3_filesystem)
 
     def _raise_not_found(self, dataset_id: UUID) -> None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
@@ -118,8 +117,6 @@ class DatasetService:
         try:
             # Load the CSV file as HF dataset
             dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
-
-            print(dataset_hf)
 
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
@@ -225,9 +222,7 @@ class DatasetService:
                 )
 
             download_urls = []
-            print(f'---> returned {s3_response}')
             for s3_object in s3_response["Contents"]:
-                print(f'  ---> returned object {s3_object}')
                 download_url = self.s3_client.generate_presigned_url(
                     "get_object",
                     Params={

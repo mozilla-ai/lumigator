@@ -67,7 +67,6 @@ const modelOptions = ref([
     label: 'falconsai/text_summarization'
   },
 ]);
-//
 
 
 defineExpose({

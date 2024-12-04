@@ -117,7 +117,7 @@
           <span
             v-tooltip.bottom="tooltips.bertF1"
             class="p-datatable-column-title"
-          >Bert f1
+          >BERT F1
           </span>
         </template>
         <template #body="slotProps">

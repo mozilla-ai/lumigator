@@ -92,7 +92,6 @@ const experimentStore = useExperimentStore();
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,
-  hideDelay: 30000,
   pt: {
     root: {
       style: {

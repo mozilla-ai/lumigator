@@ -49,12 +49,14 @@ class HuggingFaceAssetLoader:
         """
         raw_path = strip_path_prefix(path)
         if path.startswith(
-    (
-        PathPrefix.FILE, PathPrefix.HUGGINGFACE, PathPrefix.OPENAI, 
-        PathPrefix.MISTRAL, PathPrefix.LLAMAFILE
-    )
-):
-
+            (
+                PathPrefix.FILE,
+                PathPrefix.HUGGINGFACE,
+                PathPrefix.OPENAI,
+                PathPrefix.MISTRAL,
+                PathPrefix.LLAMAFILE,
+            )
+        ):
             return raw_path
         elif path.startswith(PathPrefix.WANDB):
             artifact = get_artifact_from_api(raw_path)
@@ -136,7 +138,7 @@ class HuggingFaceModelLoader(HuggingFaceAssetLoader):
 
         # TODO: HuggingFace has many AutoModel classes with different "language model heads"
         #   Can we abstract this to load with any type of AutoModel class?
-        model_path = self.resolve_asset_path(config.path)
+        model_uri = self.resolve_asset_path(config.path)
 
         # load config first to get the model type
         model_config = self.load_pretrained_config(config)
@@ -150,7 +152,7 @@ class HuggingFaceModelLoader(HuggingFaceAssetLoader):
             automodel_class = AutoModelForCausalLM
 
         return automodel_class.from_pretrained(
-            pretrained_model_name_or_path=model_path,
+            pretrained_model_name_or_path=model_uri,
             trust_remote_code=config.trust_remote_code,
             torch_dtype=config.torch_dtype,
             quantization_config=bnb_config,

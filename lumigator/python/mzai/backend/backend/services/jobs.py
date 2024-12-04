@@ -130,7 +130,7 @@ class JobService:
             job_params = {
                 "job_id": record.id,
                 "job_name": request.name,
-                "model_path": request.model,
+                "model_uri": request.model,
                 "dataset_path": dataset_s3_path,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
@@ -141,7 +141,7 @@ class JobService:
             job_params = {
                 "job_id": record.id,
                 "job_name": request.name,
-                "model_path": request.model,
+                "model_uri": request.model,
                 "dataset_path": dataset_s3_path,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,

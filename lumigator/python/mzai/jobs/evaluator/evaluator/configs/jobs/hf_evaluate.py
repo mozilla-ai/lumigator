@@ -18,7 +18,7 @@ class HuggingFaceEvaluationConfig(EvaluatorConfig):
     metrics: conlist(str, min_length=1)
     use_pipeline: bool = False
     enable_tqdm: bool = False
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     storage_path: str | None = None
     return_input_data: bool = False
     return_predictions: bool = False
@@ -41,8 +41,8 @@ class HuggingFaceEvalJobConfig(JobConfig):
         if values.get("tokenizer") is None:
             values["tokenizer"] = {}
             match values["model"]:
-                case str() as model_path:
-                    values["tokenizer"]["path"] = model_path
+                case str() as model_uri:
+                    values["tokenizer"]["path"] = model_uri
                 case dict() as model_data:
                     # if dict we might have model.path specified
                     # if we don't it is VLLMCompletion and we are ok

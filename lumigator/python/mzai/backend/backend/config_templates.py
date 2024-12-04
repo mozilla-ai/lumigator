@@ -3,7 +3,7 @@ from lumigator_schemas.jobs import JobType
 
 seq2seq_eval_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "dataset": {{ "path": "{dataset_path}" }},
     "evaluation": {{
         "metrics": ["rouge", "meteor", "bertscore"],
@@ -17,8 +17,8 @@ seq2seq_eval_template = """{{
 
 bart_eval_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
-    "tokenizer": {{ "path": "{model_path}", "mod_max_length": 1024 }},
+    "model": {{ "path": "{model_uri}" }},
+    "tokenizer": {{ "path": "{model_uri}", "mod_max_length": 1024 }},
     "dataset": {{ "path": "{dataset_path}" }},
     "evaluation": {{
         "metrics": ["rouge", "meteor", "bertscore"],
@@ -32,7 +32,7 @@ bart_eval_template = """{{
 
 causal_eval_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "dataset": {{ "path": "{dataset_path}" }},
     "evaluation": {{
         "metrics": ["rouge", "meteor", "bertscore"],
@@ -49,7 +49,7 @@ oai_eval_template = """{{
     "model": {{
         "inference": {{
             "base_url": "{model_url}",
-            "engine": "{model_path}",
+            "engine": "{model_uri}",
             "system_prompt": "{system_prompt}",
             "max_retries": 3
         }}
@@ -68,20 +68,20 @@ oai_eval_template = """{{
 
 seq2seq_infer_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "dataset": {{ "path": "{dataset_path}" }},
 }}"""
 
 bart_infer_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
-    "tokenizer": {{ "path": "{model_path}", "mod_max_length": 1024 }},
+    "model": {{ "path": "{model_uri}" }},
+    "tokenizer": {{ "path": "{model_uri}", "mod_max_length": 1024 }},
     "dataset": {{ "path": "{dataset_path}" }},
 }}"""
 
 causal_infer_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "dataset": {{ "path": "{dataset_path}" }},
 }}"""
 
@@ -96,7 +96,7 @@ oai_infer_template = """{{
     }},
     "inference_server": {{
         "base_url": "{model_url}",
-        "engine": "{model_path}",
+        "engine": "{model_uri}",
         "system_prompt": "{system_prompt}",
         "max_retries": 3
     }},

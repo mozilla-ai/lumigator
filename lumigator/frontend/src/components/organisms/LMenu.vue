@@ -29,7 +29,7 @@
 import Menu from 'primevue/menu';
 import { routes } from '@/router'
 import { useSlidePanel } from '@/composables/SlidingPanel';
-const { showSlidingPanel  } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel();
 
 </script>
 
@@ -42,7 +42,7 @@ const { showSlidingPanel  } = useSlidePanel();
 .l-main-menu {
 
   &__logo {
-    height: 6rem;
+    height: 5rem;
     will-change: filter;
     transition: filter 300ms;
     font-family: 'Zilla Slab', sans-serif;

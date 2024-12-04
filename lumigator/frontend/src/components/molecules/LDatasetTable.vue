@@ -106,7 +106,7 @@ const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
-    icon: 'pi pi-microchip',
+    icon: 'pi pi-experiments',
     disabled: false,
      command: () => {
       emit('l-experiment', focusedItem.value)
@@ -196,6 +196,11 @@ watch(showSlidingPanel, (newValue) => {
 		color: white;
     text-shadow: 0 0 1px white;
 	}
+
+  &-icon,  span.pi {
+	  color: $l-grey-100;
+    font-size: $l-font-size-sm;
+  }
 }
 
 .separator {

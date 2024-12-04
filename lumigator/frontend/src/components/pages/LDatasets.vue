@@ -9,6 +9,7 @@
     >
       <l-page-header
         title="Datasets"
+        :description="headerDescription"
         subtitle="Only CSV files are currently supported."
         button-label="Provide Dataset"
         @l-header-action="onDatasetAdded()"
@@ -69,6 +70,9 @@ const datasetInput = ref(null);
 const confirm = useConfirm();
 const router = useRouter();
 const route = useRoute();
+
+const headerDescription = ref(`Use a dataset as the basis for your evaluation.
+It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
 function deleteConfirmation(dataset) {
   confirm.require({
@@ -160,6 +164,6 @@ onMounted(async () => {
 
 .is-empty {
   display: grid;
-  place-items: center;
+  place-content: center;
 }
 </style>

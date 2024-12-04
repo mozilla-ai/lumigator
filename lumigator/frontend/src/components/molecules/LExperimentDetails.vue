@@ -45,6 +45,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
+            :disabled="selectedExperiment.status === 'PENDING'"
             style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
@@ -64,8 +65,8 @@
           {{ selectedExperiment.id }}
           <i
             v-tooltip="'Copy ID'"
-            class="pi pi-clone"
-            style="font-size: 12px;"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 10px;padding-left: 3px;"
           />
         </div>
       </div>
@@ -120,7 +121,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, ref} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useHealthStore } from '@/stores/health/store'
@@ -134,6 +135,7 @@ const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
 const healthStore = useHealthStore();
 const { runningJobs } = storeToRefs(healthStore);
+const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
   const selected = runningJobs.value
@@ -142,8 +144,11 @@ const experimentStatus = computed(() => {
 })
 
 const copyToClipboard = async (longString) => {
-    await navigator.clipboard.writeText(longString);
-
+  isCopied.value = true;
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 3000);
+  await navigator.clipboard.writeText(longString);
 };
 
 watch(experimentStatus, (newStatus) => {
@@ -227,7 +232,6 @@ watch(experimentStatus, (newStatus) => {
       font-weight: $l-font-weight-normal;
     }
   }
-
 
   &__actions {
     padding: $l-spacing-1 0;

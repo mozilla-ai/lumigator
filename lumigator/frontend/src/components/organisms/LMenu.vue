@@ -6,7 +6,7 @@
           <img
             src="@/assets/lumigator.svg"
             alt="lumigator-logo"
-          > Lumigator</div>
+          ></div>
       </template>
       <template #item="{ item }">
         <router-link
@@ -53,6 +53,7 @@ const { showSlidingPanel  } = useSlidePanel();
 		display: flex;
 		padding: $l-spacing-1/2;
     padding-top: 0;
+    align-items: center;
 
     img {
       height: 1.5em;
@@ -75,7 +76,8 @@ const { showSlidingPanel  } = useSlidePanel();
     }
 
 		&-label {
-			font-size: $l-menu-font-size
+			font-size: $l-menu-font-size;
+      font-weight: $l-font-weight-normal;
 		}
   }
 }

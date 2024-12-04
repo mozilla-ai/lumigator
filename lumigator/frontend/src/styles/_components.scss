@@ -64,7 +64,7 @@
 
 	}
    .p-datatable-row-selected {
-			background-color: $l-grey-400!important;
+			background-color: $l-grey-300!important;
    }
 
    .p-datatable-column-sorted {
@@ -78,9 +78,10 @@
 .gridlines {
   .p-datatable-column-title {
     text-wrap: nowrap;
+    font-size: $l-font-size-sm;
   }
   tr {
-    box-shadow:inset 0px 1px 0px $l-grey-600;
+    box-shadow:inset 0px 1px 0px $l-gridlines-stroke;
   }
   td {
     vertical-align: top;

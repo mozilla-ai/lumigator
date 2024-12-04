@@ -5,7 +5,8 @@
   >
     <div class="l-page-header__text-content">
       <h3>{{ title }} </h3>
-      <p>{{ subtitle }}</p>
+      <p class="l-page-header__text-content-description">{{ description }}</p>
+      <!-- <p>{{ subtitle }}</p> -->
     </div>
     <Button
       rounded
@@ -28,6 +29,11 @@ defineProps({
     required: false
   },
   subtitle: {
+    type: String,
+    default: '',
+    required: false
+  },
+  description: {
     type: String,
     default: '',
     required: false
@@ -73,6 +79,12 @@ const handleAction = () => {
 
     p {
       font-size: $l-font-size-sm;
+    }
+
+    &-description {
+      padding-top: $l-spacing-1/2;
+      max-width: 400px;
+      text-align: left;
     }
   }
 

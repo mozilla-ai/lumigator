@@ -3,14 +3,8 @@
     <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
     <p class="l-dataset-empty__instructions-text">
       <span>
-        The dataset file should contain a
-        header row with the following columns: 'examples', 'ground_truth'.
-      </span>
-      <span>
-        The 'ground_truth' column is optional since you can generate it using Lumigator.
-        <a
-          class="l-dataset-empty__-more"
-        >Learn more</a>
+        Use a dataset as the basis for your evaluation.
+        It includes data for the model you'd like to evaluate and possibly a ground truth "answer".
       </span>
     </p>
     <Button
@@ -21,7 +15,20 @@
       class="l-dataset-empty__action-btn"
       @click="emit('l-add-dataset')"
     />
-    <p class="l-dataset-empty__note">Currently only CSV files are supported.</p>
+    <p class="l-dataset-empty__note">
+      Your dataset should be a CSV file and include the following columns:
+      <span  class="l-dataset-empty__note-item">examples</span>,
+      <span  class="l-dataset-empty__note-item">ground_truth</span>.
+    </p>
+    <p class="l-dataset-empty__note">
+      The
+      <span  class="l-dataset-empty__note-item">ground_truth</span>
+      column is optional, as it can be generated using Lumigator.
+      <a href="https://mozilla-ai.github.io/lumigator/"
+         target="_blank"
+         style="background-color: transparent;"
+      >Learn more <span class="pi pi-arrow-up-right" /></a>
+    </p>
   </div>
 </template>
 
@@ -33,7 +40,12 @@ const emit  = defineEmits(['l-add-dataset'])
 <style scoped lang="scss">
 .l-dataset-empty {
   $root: &;
+  max-width: 600px;
   margin: auto;
+
+  h2 {
+    margin-bottom: $l-spacing-1/2;
+  }
 
   &__instructions {
     color: $l-grey-100;
@@ -45,6 +57,7 @@ const emit  = defineEmits(['l-add-dataset'])
       color: $l-grey-100;
       font-size: $l-font-size;
       font-weight: $l-font-weight-normal;
+      margin-bottom: $l-spacing-1;
     }
   }
 
@@ -62,13 +75,12 @@ const emit  = defineEmits(['l-add-dataset'])
       color: $white;
     }
   }
-  p {
-    margin-bottom: $l-spacing-1;
-  }
 
-  a {
-    background-color: $l-card-bg;
-    color: $l-primary-color;
+  &__note {
+    margin-bottom: 0;
+    &-item {
+      background: $black;
+    }
   }
 
 }

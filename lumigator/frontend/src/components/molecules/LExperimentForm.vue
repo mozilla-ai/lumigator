@@ -30,6 +30,14 @@
         />
         <label for="use_case">Use case</label>
       </FloatLabel>
+
+      <p>Summarization jobs are evaluated with ROUGE, METEOR, and BERT
+        score, each focusing on different aspects of prediction-ground
+        truth similarity.
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+        >Learn more <span class="pi pi-arrow-up-right" /></a>
+      </p>
       <FloatLabel
         variant="in"
         class="l-experiment-form__field"
@@ -194,6 +202,12 @@ onMounted(async () => {
   $root: &;
   display: flex;
   flex-direction: column;
+
+  p {
+    font-size: $l-font-size-sm;
+    color: $l-grey-100;
+    padding: 0 $l-spacing-1 $l-spacing-1 $l-spacing-1;
+  }
 
   &__header, &__models-container{
     padding-bottom: $l-spacing-1;

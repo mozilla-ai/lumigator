@@ -312,6 +312,7 @@ class JobService:
             config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
         )
         loguru.logger.info("Submitting Ray job...")
+        loguru.logger.info(f"{entrypoint}")
         submit_ray_job(self.ray_client, entrypoint)
 
         background_tasks.add_task(self._watch_job, record.id, request)

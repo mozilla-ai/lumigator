@@ -66,23 +66,16 @@ oai_eval_template = """{{
 
 # Inference templates
 
-seq2seq_infer_template = """{{
+default_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_path}" }},
+    "tokenizer": {{ "path": "{model_path}" }},
     "dataset": {{ "path": "{dataset_path}" }},
-}}"""
-
-bart_infer_template = """{{
-    "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
-    "tokenizer": {{ "path": "{model_path}", "mod_max_length": 1024 }},
-    "dataset": {{ "path": "{dataset_path}" }},
-}}"""
-
-causal_infer_template = """{{
-    "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
-    "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
+    }}
 }}"""
 
 
@@ -111,7 +104,7 @@ oai_infer_template = """{{
 
 templates = {
     JobType.INFERENCE: {
-        "default": causal_infer_template,
+        "default": default_infer_template,
         "oai://gpt-4o-mini": oai_infer_template,
         "oai://gpt-4-turbo": oai_infer_template,
         "oai://gpt-3.5-turbo-0125": oai_infer_template,

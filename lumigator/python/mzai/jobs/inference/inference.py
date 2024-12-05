@@ -11,9 +11,11 @@ from inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import (
     BaseModelClient,
+    HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
 )
+from paths import PathPrefix
 from tqdm import tqdm
 
 
@@ -101,10 +103,17 @@ def run_inference(config: InferenceJobConfig) -> Path:
             # run the openai client
             logger.info(f"Using OAI client. Endpoint: {base_url}")
             model_client = OpenAIModelClient(base_url, config)
+    elif config.model.path.startswith(PathPrefix.HUGGINGFACE):
+        logger.info("Using HuggingFace client.")
+        model_client = HuggingFaceModelClient(config)
+        output_model_name = config.model.path
+    else:
+        raise ValueError("No valid model URI provided.")
 
     # run inference
     output[config.job.output_field] = predict(dataset_iterable, model_client)
     output["examples"] = dataset["examples"]
+    # TODO: What if there's no ground_truth?
     output["ground_truth"] = dataset["ground_truth"]
     output["model"] = output_model_name
 

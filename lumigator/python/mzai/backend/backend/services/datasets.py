@@ -95,7 +95,7 @@ class DatasetService:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _raise_unhandled_exception(self, e: Exception) -> None:
-        traceback.print_exception(type(e), e, e.__traceback__)
+        traceback.print_exc()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:

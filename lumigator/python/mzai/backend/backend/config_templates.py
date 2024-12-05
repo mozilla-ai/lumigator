@@ -92,12 +92,12 @@ oai_infer_template = """{{
     "job": {{
         "max_samples": {max_samples},
         "storage_path": "{storage_path}",
-        "output_field": "{output_field}"
+        "output_field": "{output_field}",
+        "system_prompt": "{system_prompt}"
     }},
     "inference_server": {{
         "base_url": "{model_url}",
         "engine": "{model_path}",
-        "system_prompt": "{system_prompt}",
         "max_retries": 3
     }},
     "params": {{

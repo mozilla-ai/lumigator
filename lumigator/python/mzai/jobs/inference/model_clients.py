@@ -39,7 +39,7 @@ class APIModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self._config = config
         self._engine = strip_path_prefix(config.inference_server.engine)
-        self._system = config.inference_server.system_prompt
+        self._system = config.job.system_prompt
 
     @abstractmethod
     def _chat_completion(

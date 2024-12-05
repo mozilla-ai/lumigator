@@ -7,8 +7,9 @@ class DatasetConfig(BaseModel):
 
 
 class JobConfig(BaseModel):
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     storage_path: str
+    system_prompt: str | None = None
     output_field: str = "prediction"
     enable_tqdm: bool = True
     model_config = ConfigDict(extra="forbid")
@@ -17,7 +18,6 @@ class JobConfig(BaseModel):
 class InferenceServerConfig(BaseModel):
     base_url: str
     engine: str
-    system_prompt: str | None
     max_retries: int = 3
     model_config = ConfigDict(extra="forbid")
 

@@ -2,30 +2,30 @@ import csv
 import io
 import os
 from pathlib import Path
+from unittest.mock import Mock, patch
 
+import boto3
+import fsspec
 import pytest
 import requests_mock
-from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from fsspec.implementations.memory import MemoryFileSystem
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
-from testcontainers.localstack import LocalStackContainer
 
-from backend.api.deps import get_db_session, get_s3_client
+from backend.api.deps import get_db_session, get_s3_client, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
-from backend.records.jobs import JobRecord, JobResultRecord
+from backend.records.jobs import JobRecord
 from backend.repositories.datasets import DatasetRepository
-from backend.repositories.jobs import BaseRepository, JobRepository, JobResultRepository
+from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.settings import BackendSettings, settings
-from backend.tests.fakes.fake_ray_client import FakeJobSubmissionClient
-
-# TODO: Break tests into "unit" and "integration" folders based on fixture dependencies
+from backend.tests.fakes.fake_s3 import FakeS3Client
 
 
 def common_resources_dir() -> Path:
@@ -107,40 +107,41 @@ def db_session(db_engine: Engine):
             session.rollback()
 
 
-@pytest.fixture(scope="session")
-def localstack_container():
-    """Initialize a LocalStack test container."""
-    with LocalStackContainer("localstack/localstack:3.4.0") as localstack:
-        yield localstack
-
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_aws(localstack_container: LocalStackContainer):
-    """Setup env vars/AWS resources for use with the LocalStack container."""
-    # Initialize S3
-    s3 = localstack_container.get_client("s3")
-    try:
-        s3.create_bucket(
-            Bucket=settings.S3_BUCKET,
-            CreateBucketConfiguration={"LocationConstraint": localstack_container.region_name},
-        )
-    except ClientError as e:
-        if e.response["Error"]["Code"] == "BucketAlreadyOwnedByYou":
-            print("Bucket already created, continue")
-        else:
-            raise e
-    # add ENV vars for FSSPEC access to S3 (s3fs + HuggingFace datasets)
-    os.environ["FSSPEC_S3_KEY"] = "testcontainers-localstack"
-    os.environ["FSSPEC_S3_SECRET"] = "testcontainers-localstack"  # pragma: allowlist secret
-    os.environ["FSSPEC_S3_ENDPOINT_URL"] = localstack_container.get_url()
-    os.environ["AWS_ACCESS_KEY_ID"] = "testcontainers-localstack"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testcontainers-localstack"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = localstack_container.get_url()
+@pytest.fixture(scope="function")
+def fake_s3fs() -> S3FileSystem:
+    # ...and patch the s3fs name with the Fake
+    fsspec.register_implementation("s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS")
+    yield MemoryFileSystem()
+    print(f'final s3fs contents: {str(MemoryFileSystem.store)}')
 
 
 @pytest.fixture(scope="function")
-def s3_client(localstack_container: LocalStackContainer) -> S3Client:
-    return localstack_container.get_client("s3")
+def fake_s3_client(fake_s3fs) -> S3Client:
+    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    # Please check https://github.com/localstack/localstack/issues/5894
+    # for info about the test region used
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = "http://example.com:4566"
+    return FakeS3Client(MemoryFileSystem.store)
+
+@pytest.fixture(scope="function")
+def boto_s3_client() -> S3Client:
+    # Initialize S3
+    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    # Please check https://github.com/localstack/localstack/issues/5894
+    # for info about the test region used
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = "http://localhost:4566"
+    return boto3.client("s3")
+
+@pytest.fixture(scope="function")
+def boto_s3fs() -> S3FileSystem:
+    s3fs = S3FileSystem()
+    mock_s3fs = Mock(wraps=s3fs)
+    yield mock_s3fs
+    print(f'intercepted s3fs calls: {str(mock_s3fs.mock_calls)}')
 
 
 @pytest.fixture(scope="session")
@@ -175,9 +176,9 @@ def local_client(app: FastAPI):
         yield c
 
 
-@pytest.fixture(scope="function", autouse=True)
-def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client) -> None:
-    """Override the FastAPI dependency injection for test DB sessions.
+@pytest.fixture(scope="function")
+def dependency_overrides_fakes(app: FastAPI, db_session: Session, fake_s3_client: S3Client, fake_s3fs: S3FileSystem) -> None:
+    """Override the FastAPI dependency injection for test DB sessions. Uses mocks/fakes for unit tests.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
     """
@@ -186,10 +187,35 @@ def dependency_overrides(app: FastAPI, db_session: Session, s3_client: S3Client)
         yield db_session
 
     def get_s3_client_override():
-        yield s3_client
+        yield fake_s3_client
+
+    def get_s3_filesystem_override():
+        yield fake_s3fs
 
     app.dependency_overrides[get_db_session] = get_db_session_override
     app.dependency_overrides[get_s3_client] = get_s3_client_override
+    app.dependency_overrides[get_s3_filesystem] = get_s3_filesystem_override
+
+
+@pytest.fixture(scope="function")
+def dependency_overrides_services(app: FastAPI, db_session: Session, boto_s3_client: S3Client, boto_s3fs: S3FileSystem) -> None:
+    """Override the FastAPI dependency injection for test DB sessions. Uses real clients for integration tests.
+
+    Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
+    """
+
+    def get_db_session_override():
+        yield db_session
+
+    def get_s3_client_override():
+        yield boto_s3_client
+
+    def get_s3_filesystem_override():
+        yield boto_s3fs
+
+    app.dependency_overrides[get_db_session] = get_db_session_override
+    app.dependency_overrides[get_s3_client] = get_s3_client_override
+    app.dependency_overrides[get_s3_filesystem] = get_s3_filesystem_override
 
 
 @pytest.fixture(scope="session")
@@ -233,16 +259,12 @@ def result_repository(db_session):
     return JobResultRepository(session=db_session)
 
 
+# FIXME investigate where this is used
 @pytest.fixture(scope="function")
-def fake_ray_client():
-    return FakeJobSubmissionClient()
-
-
-@pytest.fixture(scope="function")
-def dataset_service(db_session):
+def dataset_service(db_session, fake_s3_client, fake_s3fs):
     dataset_repo = DatasetRepository(db_session)
     return DatasetService(
-        dataset_repo=dataset_repo, s3_client=s3_client, s3_filesystem=S3FileSystem()
+        dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs
     )
 
 
@@ -252,10 +274,40 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, fake_ray_client, dataset_service):
-    return JobService(job_repository, result_repository, fake_ray_client, dataset_service)
+def job_service(db_session, job_repository, result_repository, dataset_service):
+    return JobService(job_repository, result_repository, None, dataset_service)
 
 
 @pytest.fixture(scope="function")
 def backend_settings():
     return BackendSettings()
+
+
+@pytest.fixture(scope="session")
+def simple_eval_template():
+    return """{{
+        "name": "{job_name}/{job_id}",
+        "model": {{ "path": "{model_path}" }},
+        "dataset": {{ "path": "{dataset_path}" }},
+        "evaluation": {{
+            "metrics": ["meteor", "rouge"],
+            "use_pipeline": false,
+            "max_samples": {max_samples},
+            "return_input_data": true,
+            "return_predictions": true,
+            "storage_path": "{storage_path}"
+        }}
+    }}"""
+
+@pytest.fixture(scope="session")
+def simple_infer_template():
+    return """{{
+    "name": "{job_name}/{job_id}",
+    "model": {{ "path": "{model_path}" }},
+    "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
+    }}
+}}"""

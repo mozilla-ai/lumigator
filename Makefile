@@ -118,12 +118,14 @@ else
 endif
 
 test-backend-unit:
-	cd lumigator/python/mzai/backend/backend/tests; \
+	cd lumigator/python/mzai/backend/; \
+	rm local.db; \
 	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
 
 test-backend-integration-target:
-	cd lumigator/python/mzai/backend/backend/tests;	\
-	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
+	cd lumigator/python/mzai/backend/; \
+	rm local.db; \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" INFERENCE_PIP_REQS=../jobs/inference/requirements.txt INFERENCE_WORK_DIR=../jobs/inference EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt EVALUATOR_WORK_DIR=../jobs/evaluator uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration:
 ifeq ($(CONTAINERS_RUNNING),)

@@ -36,7 +36,7 @@ The tests include a unit test suite and an integration test suite. There are mak
   * `backend-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
   * `backend-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
 
-The SQLite configuration making use of a local file is used in both unit and integration tests. Test containers are started for integration tests.
+The SQLite configuration making use of a local file is used in both unit and integration tests. Test containers are needed for integration tests. Fake or mock services are used in unit tests, usually via the [`requests-mock`](https://pypi.org/project/requests-mock/) package in the case of HTTP APIs. Specifically, the S3 file system driver is replaced with an [in-memory implementation](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.implementations.memory.MemoryFileSystem) of the `AbstractFileSystem` interface via [registry modification](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.registry.register_implementation).
 
 ## Data models
 

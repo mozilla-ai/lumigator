@@ -71,9 +71,6 @@ const emit  = defineEmits(['l-add-dataset'])
     margin-top: $l-spacing-1;
     margin-bottom: $l-spacing-1/2;
 
-    &:hover {
-      color: $white;
-    }
   }
 
   &__note {

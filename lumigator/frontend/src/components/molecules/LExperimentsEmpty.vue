@@ -60,11 +60,8 @@ const emit  = defineEmits(['l-add-experiment'])
     font-weight: $l-font-weight-normal;
     margin-top: $l-spacing-1;
     margin-bottom: $l-spacing-1/2;
-
-    &:hover {
-      color: $white;
-    }
   }
+
   p {
     margin-bottom: $l-spacing-1;
   }

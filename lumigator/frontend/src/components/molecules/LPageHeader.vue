@@ -90,9 +90,6 @@ const handleAction = () => {
 
   &__action-btn {
     font-weight: $l-font-weight-normal;
-    &:hover {
-      color:$white;
-    }
   }
 
   &.column{

@@ -142,8 +142,6 @@ services:
         required: true
     ports:
       - 80:80
-    profiles:
-      - local-fe
 
 volumes:
 

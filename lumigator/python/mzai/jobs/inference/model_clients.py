@@ -2,6 +2,8 @@ import os
 import re
 from abc import abstractmethod
 
+import torch
+from asset_loader import HuggingFaceModelLoader, HuggingFaceTokenizerLoader
 from inference_config import InferenceJobConfig
 from loguru import logger
 from mistralai.client import MistralClient
@@ -145,3 +147,59 @@ class MistralModelClient(APIModelClient):
             temperature=config.params.temperature,
             top_p=config.params.top_p,
         )
+
+
+class HuggingFaceModelClient(BaseModelClient):
+    """Model client for HF models (model is loaded locally, both Seq2SeqLM
+    and CausalLM are supported).
+    - Provide model path to load the model locally
+    - Make sure you add quantization details if the model is too large
+    - Optionally, add a tokenizer (the one matching the specified model name is the default)
+    """
+
+    def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        hf_model_loader = HuggingFaceModelLoader()
+        hf_tokenizer_loader = HuggingFaceTokenizerLoader()
+        self._model = hf_model_loader.load_pretrained_model(config.model).to(self._device)
+        self._tokenizer = hf_tokenizer_loader.load_pretrained_tokenizer(config.tokenizer)
+        self._prefix = self._get_task_specific_prefix()
+
+    def _get_task_specific_prefix(self) -> str:
+        task = self._config.job.task
+
+        model_config = self._model.config.to_dict()
+        model_config.setdefault("task_specific_params", {})
+
+        if task in model_config["task_specific_params"]:
+            prefix = model_config["task_specific_params"][task].get("prefix", "")
+            if not prefix:
+                logger.warning(
+                    f"The model config does not include a prefix for the {task} task. "
+                    f"The system prompt will be used instead."
+                    f"If the system prompt is not set, the model inputs will have no prefix."
+                )
+                return self._config.job.system_prompt + " "
+            if prefix and self._config.job.system_prompt:
+                logger.warning(
+                    f"The model config includes a prefix for the {task} task, "
+                    f"but the job config also includes a system prompt. "
+                    f"The model config prefix will be used."
+                )
+            return prefix
+
+        logger.info("Using system prompt as prefix.")
+        return self._config.job.system_prompt
+
+    def _preprocess(self, prompt: str) -> str:
+        return self._prefix + prompt
+
+    def predict(self, prompt):
+        inputs = self._tokenizer(
+            self._preprocess(prompt), truncation=True, padding=True, return_tensors="pt"
+        ).to(self._device)
+
+        generated_ids = self._model.generate(**inputs, max_new_tokens=256)
+        return self._tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]

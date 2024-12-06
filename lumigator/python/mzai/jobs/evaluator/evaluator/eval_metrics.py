@@ -11,7 +11,7 @@ class EvaluationMetrics:
             "bertscore": self._bertscore,
         }
 
-        # chosen metrics are the intersection between the provided and the supporterd ones
+        # chosen metrics are the intersection between the provided and the supported ones
         self._chosen_metrics = set(metrics) & set(self._supported_metrics.keys())
         # unsupported metrics are the difference between the provided and the supporterd ones
         self._unsupported_metrics = set(metrics) - set(self._supported_metrics.keys())

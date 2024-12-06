@@ -122,7 +122,7 @@ class JobService:
         model_url = self._set_model_type(request)
 
         # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
+        if not request.system_prompt and not request.model.startswith("hf://"):
             request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
         # this section differs between inference and eval
@@ -152,6 +152,7 @@ class JobService:
                 "frequency_penalty": request.frequency_penalty,
                 "temperature": request.temperature,
                 "top_p": request.top_p,
+                "task": request.task,
             }
 
         return job_params

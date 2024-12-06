@@ -190,8 +190,11 @@ class HuggingFaceModelClient(BaseModelClient):
                 )
             return prefix
 
-        logger.info("Using system prompt as prefix.")
-        return self._config.job.system_prompt
+        logger.info(
+            "Using system prompt as prefix. "
+            "If the system prompt is not set, the model inputs will have no prefix."
+        )
+        return self._config.job.system_prompt + " "
 
     def _preprocess(self, prompt: str) -> str:
         return self._prefix + prompt

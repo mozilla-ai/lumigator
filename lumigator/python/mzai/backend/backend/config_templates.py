@@ -73,8 +73,10 @@ default_infer_template = """{{
     "dataset": {{ "path": "{dataset_path}" }},
     "job": {{
         "max_samples": {max_samples},
+        "task": "{task}",
         "storage_path": "{storage_path}",
-        "output_field": "{output_field}"
+        "output_field": "{output_field}",
+        "system_prompt": "{system_prompt}"
     }}
 }}"""
 

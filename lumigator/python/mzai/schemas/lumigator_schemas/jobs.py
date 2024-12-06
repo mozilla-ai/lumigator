@@ -71,9 +71,10 @@ class JobInferenceCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
+    task: str | None = None
     max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
-    system_prompt: str | None = None
+    system_prompt: str | None = ""
     output_field: str | None = "prediction"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0

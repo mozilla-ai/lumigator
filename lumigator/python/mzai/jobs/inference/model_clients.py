@@ -7,6 +7,7 @@ from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion
+from transformers import pipeline
 
 
 def strip_path_prefix(path: str) -> str:
@@ -145,3 +146,31 @@ class MistralModelClient(APIModelClient):
             temperature=config.params.temperature,
             top_p=config.params.top_p,
         )
+
+
+class HuggingFaceModelClient(BaseModelClient):
+    def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._pipeline = pipeline(**config.pipeline.model_dump())
+        self._pipeline_kwargs = self._get_pipeline_kwargs()
+
+    def _get_pipeline_kwargs(self):
+        from transformers.pipelines import check_task
+
+        pipeline_kwargs = {}
+        normalized_task, _, _ = check_task(self._config.pipeline.task)
+
+        if normalized_task == "translation":
+            pipeline_kwargs["src_lang"] = self._config.pipeline.src_lang
+            pipeline_kwargs["tgt_lang"] = self._config.pipeline.tgt_lang
+
+        return pipeline_kwargs
+
+    def predict(self, prompt):
+        prediction = self._pipeline(prompt, **self._pipeline_kwargs)[0]
+
+        # The result is a dictionary with a single key, which name depends on the task
+        # (e.g., 'summary_text' for summarization)
+        # Get the name of the key and return its value
+        result_key = list(prediction.keys())[0]
+        return prediction[result_key]

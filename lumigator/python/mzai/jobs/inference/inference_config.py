@@ -170,7 +170,7 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    inference_server: InferenceServerConfig
-    params: SamplingParameters
+    inference_server: InferenceServerConfig | None = None
+    params: SamplingParameters | None = None
     pipeline: PipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

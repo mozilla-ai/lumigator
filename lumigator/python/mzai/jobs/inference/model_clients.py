@@ -150,10 +150,24 @@ class MistralModelClient(APIModelClient):
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
+        self._config = config
         self._pipeline = pipeline(**config.pipeline.model_dump())
+        self._pipeline_kwargs = self._get_pipeline_kwargs()
+
+    def _get_pipeline_kwargs(self):
+        from transformers.pipelines import check_task
+
+        pipeline_kwargs = {}
+        normalized_task, _, _ = check_task(self._config.pipeline.task)
+
+        if normalized_task == "translation":
+            pipeline_kwargs["src_lang"] = self._config.pipeline.src_lang
+            pipeline_kwargs["tgt_lang"] = self._config.pipeline.tgt_lang
+
+        return pipeline_kwargs
 
     def predict(self, prompt):
-        prediction = self._pipeline(prompt)[0]
+        prediction = self._pipeline(prompt, **self._pipeline_kwargs)[0]
 
         # The result is a dictionary with a single key, which name depends on the task
         # (e.g., 'summary_text' for summarization)

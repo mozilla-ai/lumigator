@@ -28,7 +28,7 @@ Anything you'd like to add to help the reviewer understand the changes you're pr
 
 # I already...
 
-- [ ] Tested the changes in a working envvironment to ensure they work as expected
+- [ ] Tested the changes in a working environment to ensure they work as expected
 - [ ] Added some tests for any new functionality
 - [ ] Updated the documentation (both comments in code and [product documentation](https://mozilla-ai.github.io/lumigator) under `/docs`)
 - [ ] Checked if a (backend) DB migration step was required and included it if required

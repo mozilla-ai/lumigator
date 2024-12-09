@@ -71,7 +71,12 @@ default_infer_template = """{{
     "dataset": {{ "path": "{dataset_path}" }},
     "hf_pipeline": {{
         "model_path": "{model_path}",
-        "task": "{task}"
+        "task": "{task}",
+        "accelerator": "{accelerator}",
+        "revision": "{revision}",
+        "use_fast": "{use_fast}",
+        "trust_remote_code": "{trust_remote_code}",
+        "torch_dtype": "{torch_dtype}"
     }},
      "job": {{
         "max_samples": {max_samples},

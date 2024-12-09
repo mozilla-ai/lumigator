@@ -10,6 +10,7 @@ from uuid import UUID
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
+    JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -18,6 +19,7 @@ from lumigator_schemas.jobs import (
 
 from lumigator_sdk.client import ApiClient
 from lumigator_sdk.strict_schemas import JobEvalCreate as JobEvalCreateStrict
+from lumigator_sdk.strict_schemas import JobInferenceCreate as JobInferenceCreateStrict
 
 
 class Jobs:
@@ -118,7 +120,7 @@ class Jobs:
             "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
-    def create_job(self, type: JobType, request: JobEvalCreate) -> JobResponse:
+    def create_job(self, type: JobType, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
         """Create a new job.
 
         .. admonition:: Example
@@ -139,7 +141,13 @@ class Jobs:
         Returns:
             JobResponse: The information for the newly created job.
         """
-        JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
+        if type == JobType.EVALUATION:
+            JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
+        elif type == JobType.INFERENCE:
+            JobInferenceCreateStrict.model_validate(JobInferenceCreate.model_dump(request))
+        else:
+            raise ValueError(f"Invalid job type: {type}")
+
         response = self.client.get_response(
             f"{self.JOBS_ROUTE}/{type.value}/",
             method=HTTPMethod.POST,

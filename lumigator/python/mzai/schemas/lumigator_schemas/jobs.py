@@ -72,6 +72,7 @@ class JobInferenceCreate(BaseModel):
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
+    task: str | None = "summarization"
     model_url: str | None = None
     system_prompt: str | None = None
     output_field: str | None = "prediction"

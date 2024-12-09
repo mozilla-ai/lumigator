@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, computed_field
+from utils import resolve_model_repo
 
 
 class DatasetConfig(BaseModel):
@@ -7,7 +8,7 @@ class DatasetConfig(BaseModel):
 
 
 class JobConfig(BaseModel):
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     storage_path: str
     output_field: str = "prediction"
     enable_tqdm: bool = True
@@ -30,10 +31,27 @@ class SamplingParameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
+    model_path: str = Field(title="The Model HF Hub repo ID", exclude=True)
+    task: str
+    model_config = ConfigDict(extra="forbid")
+
+    @computed_field
+    @property
+    def model(self) -> str:
+        """Returns the model name.
+
+        Returns:
+            str: The model name.
+        """
+        return resolve_model_repo(self.model_path)
+
+
 class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    inference_server: InferenceServerConfig
-    params: SamplingParameters
+    inference_server: InferenceServerConfig | None = None
+    params: SamplingParameters | None = None
+    hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

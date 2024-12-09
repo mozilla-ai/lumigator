@@ -30,7 +30,6 @@ async function triggerExperiment(experimentPayload) {
         'Content-Type': 'application/json',
       },
     });
-    // console.log(response);
     return response.data
   } catch (error) {
     console.log('error while creating Experiment', error);

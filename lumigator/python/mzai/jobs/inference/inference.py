@@ -11,9 +11,11 @@ from inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import (
     BaseModelClient,
+    HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
 )
+from paths import PathPrefix
 from tqdm import tqdm
 
 
@@ -101,6 +103,15 @@ def run_inference(config: InferenceJobConfig) -> Path:
             # run the openai client
             logger.info(f"Using OAI client. Endpoint: {base_url}")
             model_client = OpenAIModelClient(base_url, config)
+    elif config.pipeline:
+        if config.pipeline.model_path.startswith(PathPrefix.HUGGINGFACE):
+            logger.info("Using HuggingFace client.")
+            model_client = HuggingFaceModelClient(config)
+            output_model_name = config.pipeline.model
+        else:
+            raise ValueError("Unsupported model type.")
+    else:
+        raise NotImplementedError("Inference pipeline not supported.")
 
     # run inference
     output[config.job.output_field] = predict(dataset_iterable, model_client)

@@ -143,6 +143,7 @@ class JobService:
                 "job_name": request.name,
                 "model_path": request.model,
                 "dataset_path": dataset_s3_path,
+                "task": request.task,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
                 "model_url": model_url,

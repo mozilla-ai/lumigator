@@ -50,14 +50,41 @@ def test_minimal_cfg(json_config_minimal: dict):
             InferenceJobConfig.model_validate(json_config_minus_field)
 
 
-def test_full_cfg(json_config_full: dict):
+def test_full_cfg(json_config_full_api: dict, json_config_full_hf: dict):
     # the full config is always a valid config
     try:
-        InferenceJobConfig.model_validate(json_config_full)
+        InferenceJobConfig.model_validate(json_config_full_api)
+        InferenceJobConfig.model_validate(json_config_full_hf)
     except Exception as e:
         pytest.fail(f"Exception: {e}")
 
     # if you add any extra field to the full config, pydantic should raise an exception
-    for json_config_plus_field in configs_with_extra_field(json_config_full):
+    for json_config_plus_field in configs_with_extra_field(json_config_full_api):
         with pytest.raises(ValidationError):
             InferenceJobConfig.model_validate(json_config_plus_field)
+
+    for json_config_plus_field in configs_with_extra_field(json_config_full_hf):
+        with pytest.raises(ValidationError):
+            InferenceJobConfig.model_validate(json_config_plus_field)
+
+
+def test_invalid_hf_config(json_config_minimal):
+    # the invalid task config is always an invalid config
+
+    json_config_minimal.setdefault("pipeline", {})
+
+    invalid_task = json_config_minimal["pipeline"]["task"] = "foo"
+    with pytest.raises(ValidationError):
+        InferenceJobConfig.model_validate(invalid_task)
+
+    invalid_model_repo_id = json_config_minimal["pipeline"]["model_path"] = "hf://foo"
+    with pytest.raises(ValidationError):
+        InferenceJobConfig.model_validate(invalid_model_repo_id)
+
+    invalid_torch_dtype = json_config_minimal["pipeline"]["torch_dtype"] = "foo"
+    with pytest.raises(ValidationError):
+        InferenceJobConfig.model_validate(invalid_torch_dtype)
+
+    invalid_accelerator = json_config_minimal["pipeline"]["accelerator"] = "foo"
+    with pytest.raises(ValidationError):
+        InferenceJobConfig.model_validate(invalid_accelerator)

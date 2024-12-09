@@ -72,6 +72,12 @@ class JobInferenceCreate(BaseModel):
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
+    task: str | None = "summarization"
+    accelerator: str | None = "auto"
+    revision: str | None = "main"
+    use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
+    trust_remote_code: bool = False
+    torch_dtype: str = "auto"
     model_url: str | None = None
     system_prompt: str | None = None
     output_field: str | None = "prediction"

@@ -221,6 +221,7 @@ class JobService:
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
         )
         loguru.logger.info("Submitting Ray job...")
+        loguru.logger.info(f"{entrypoint}")
         submit_ray_job(self.ray_client, entrypoint)
 
         loguru.logger.info("Getting response...")

@@ -69,20 +69,31 @@ oai_eval_template = """{{
 seq2seq_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_path}" }},
-    "dataset": {{ "path": "{dataset_path}" }},
+    "dataset": {{ "path": "{dataset_path}" }}
 }}"""
 
 bart_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_path}" }},
     "tokenizer": {{ "path": "{model_path}", "mod_max_length": 1024 }},
-    "dataset": {{ "path": "{dataset_path}" }},
+    "dataset": {{ "path": "{dataset_path}" }}
 }}"""
 
 causal_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_path}" }},
     "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
+    }},
+    "params": {{
+        "max_tokens": {max_tokens},
+        "frequency_penalty": {frequency_penalty},
+        "temperature": {temperature},
+        "top_p": {top_p}
+    }}
 }}"""
 
 

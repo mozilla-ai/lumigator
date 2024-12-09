@@ -12,6 +12,9 @@ class BackendSettings(BaseSettings):
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE: ByteSize = "50MB"
 
+    # Backend API env vars
+    _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "")
+
     # Postgres
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
@@ -89,6 +92,12 @@ class BackendSettings(BaseSettings):
         # as the default shell in the container is /bin/sh
         return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'
 
+    # URL for Ray jobs API
+    @computed_field
+    @property
+    def RAY_VERSION_URL(self) -> str:  # noqa: N802
+        return f"{self.RAY_DASHBOARD_URL}/api/version"
+
     @computed_field
     @property
     def RAY_WORKER_GPUS(self) -> float:  # noqa: N802
@@ -117,6 +126,32 @@ class BackendSettings(BaseSettings):
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> URL:  # noqa: N802
         return make_url(os.environ.get("SQLALCHEMY_DATABASE_URL", None))
+
+    @computed_field
+    @property
+    def API_CORS_ALLOWED_ORIGINS(self) -> list[str]:  # noqa: N802
+        """Retrieves the (comma separated) list of allowed origin URLs for CORS requests
+        against the Lumigator backend API.
+
+        If the wildcard '*' appears as an origin, only it will be returned, ignoring other origins.
+        """
+        wildcard = "*"
+        result = []
+        origins = self._api_cors_allowed_origins.strip()
+
+        # Return early if there are no origin settings.
+        if origins == "":
+            return result
+
+        for origin in origins.split(","):
+            o = origin.strip()
+            if o == wildcard:
+                # Return only the wildcard if we encountered it, as the other settings are moot.
+                return [o]
+            if o != "":
+                result.append(o)
+
+        return result
 
 
 settings = BackendSettings()

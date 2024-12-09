@@ -2,18 +2,19 @@
 be started prior to running these tests using
 `make start-lumigator-build`.
 """
+
 from pathlib import Path
 from time import sleep
 
 import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
-from lumigator_schemas.jobs import JobEvalCreate, JobType
+from lumigator_schemas.jobs import JobType
+from lumigator_sdk.strict_schemas import JobEvalCreate
 
-'''
-Test the healthcheck endpoint.
-'''
+
 def test_sdk_healthcheck_ok(lumi_client):
+    """Test the healthcheck endpoint."""
     healthy = False
     for i in range(10):
         try:
@@ -26,18 +27,16 @@ def test_sdk_healthcheck_ok(lumi_client):
     assert healthy
 
 
-'''
-Test the `get_datasets` endpoint.
-'''
 def test_get_datasets_remote_ok(lumi_client):
+    """Test the `get_datasets` endpoint."""
     datasets = lumi_client.datasets.get_datasets()
     assert datasets is not None
 
-'''
-Test a complete dataset lifecycle test: add a new dataset,
-list datasets, remove the dataset
-'''
+
 def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
+    """Test a complete dataset lifecycle test: add a new dataset,
+    list datasets, remove the dataset
+    """
     datasets = lumi_client.datasets.get_datasets()
     n_initial_datasets = datasets.total
     lumi_client.datasets.create_dataset(dataset=dialog_data, format=DatasetFormat.JOB)
@@ -50,12 +49,11 @@ def test_dataset_lifecycle_remote_ok(lumi_client, dialog_data):
     assert n_current_datasets - n_initial_datasets == 1
 
 
-'''
-Test a complete job lifecycle test: add a new dataset,
-create a new job, run the job, get the results
-'''
 def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template):
-    logger.info('Starting jobs lifecycle')
+    """Test a complete job lifecycle test: add a new dataset,
+    create a new job, run the job, get the results
+    """
+    logger.info("Starting jobs lifecycle")
     datasets = lumi_client.datasets.get_datasets()
     if datasets.total > 0:
         for removed_dataset in datasets.items:
@@ -88,5 +86,5 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template)
     logger.info(job_status)
 
     download_info = lumi_client.jobs.get_job_download(job_creation_result.id)
-    logger.info(f'getting result from {download_info.download_url}')
+    logger.info(f"getting result from {download_info.download_url}")
     requests.get(download_info.download_url, allow_redirects=True)

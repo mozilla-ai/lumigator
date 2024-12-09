@@ -5,7 +5,5 @@
     "dataset": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
     "max_samples": 5,
     "model_url": "https://huggingface.co/facebook/bart-large-cnn",
-    "system_prompt": "some prompt",
-    "config_infer_template": "some_infer_template",
-    "config_eval_template": "some_eval_template"
+    "system_prompt": "some prompt"
   }

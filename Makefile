@@ -1,7 +1,9 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-target test-sdk-target test-backend-unit test-backend-integration test-backend-integration-target test-backend-target test-all-target test-%
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
+PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
+CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -10,6 +12,50 @@ RAY_ARCH_SUFFIX :=
 ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
 endif
+
+define run_with_containers
+	@echo "No Lumigator containers are running. Starting containers..."
+	make start-lumigator-build
+	trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; \
+	make $(1)
+endef
+
+define run_with_existing_containers
+	@echo "Lumigator containers are already running."
+	@if [ -n "$(AUTO_TEST_RUN)" ]; then \
+		echo "AUTO_TEST_RUN is set to '$(AUTO_TEST_RUN)'"; \
+		case "$(AUTO_TEST_RUN)" in \
+			[Yy]* ) \
+				echo "Running tests..."; \
+				make $(1); \
+				;; \
+			[Nn]* ) \
+				echo "Tests aborted due to AUTO_TEST_RUN setting."; \
+				exit 1; \
+				;; \
+			* ) \
+				echo "Invalid AUTO_TEST_RUN value: $(AUTO_TEST_RUN). Tests aborted."; \
+				exit 1; \
+				;; \
+		esac; \
+	else \
+		read -p "Do you want to run tests with the current Lumigator deployment? (Y/n): " choice; \
+		case $${choice:-Y} in \
+			[Yy]* ) \
+				echo "Running tests..."; \
+				make $(1); \
+				;; \
+			[Nn]* ) \
+				echo "Tests aborted."; \
+				exit 1; \
+				;; \
+			* ) \
+				echo "Invalid input. Tests aborted."; \
+				exit 1; \
+				;; \
+		esac; \
+	fi
+endef
 
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
@@ -56,8 +102,45 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 
 clean-all: clean-docker-buildcache clean-docker-containers
 
-test:
-	make start-lumigator-build
-	cd lumigator/python/mzai/backend; SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-	cd lumigator/python/mzai/sdk; uv run pytest -o python_files="test_*.py int_test_*.py"
-	make stop-lumigator
+test-sdk-unit:
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+
+test-sdk-integration-target:
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run pytest -o python_files="integration/test_*.py integration/*/test_*.py"
+
+test-sdk-integration:
+ifeq ($(CONTAINERS_RUNNING),)
+	$(call run_with_containers, test-sdk-integration-target)
+else
+	$(call run_with_existing_containers, test-sdk-integration-target)
+endif
+
+test-backend-unit:
+	cd lumigator/python/mzai/backend/backend/tests; \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+
+test-backend-integration-target:
+	cd lumigator/python/mzai/backend/backend/tests;	\
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
+
+test-backend-integration:
+ifeq ($(CONTAINERS_RUNNING),)
+	$(call run_with_containers, test-backend-integration-target)
+else
+	$(call run_with_existing_containers, test-backend-integration-target)
+endif
+
+test-sdk-target: test-sdk-unit test-sdk-integration
+
+test-backend-target: test-backend-unit test-backend-integration
+
+test-all-target: test-sdk-target test-backend-target
+
+# Check whether there are already running containers before starting tests:
+#   If so, ask user if they want to proceed with the current deployment.
+#   If not: (1) start containers, (2) run tests, (3) tear down containers
+#   (regardless of tests outcome).
+test-%:
+	$(MAKE) test-$*-target

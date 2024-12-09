@@ -34,7 +34,6 @@ jobs:
         run: uv python install
         working-directory: lumigator/python/mzai/sdk
 
-      - name: Run tests
+      - name: Run SDK unit tests
         if: steps.filter.outputs.run_sdk_unit_tests == 'true'
-        run: uv run pytest
-        working-directory: lumigator/python/mzai/sdk
+        run: make test-sdk-unit

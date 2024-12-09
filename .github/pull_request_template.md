@@ -1,11 +1,34 @@
-## What's changing
+# What's changing
 
-## How to test it
+Provide a clear and concise description of the content changes you're proposing. List all the
+changes you are making to the content.
 
-## Additional notes for reviewers
+* Updated section...
+* Added new...
+* Removed outdated information from...
+* Fixed a typo in...
+* ...
 
-## I already...
+> If this PR is related to an issue or closes one, please link it here.
 
-- [ ] added some tests for any new functionality
-- [ ] updated the documentation
-- [ ] checked if a (backend) DB migration step was required and included it if required
+Refs #...
+Closes #...
+
+# How to test it
+
+Steps to test the changes:
+
+1.
+2.
+3.
+
+# Additional notes for reviewers
+
+Anything you'd like to add to help the reviewer understand the changes you're proposing.
+
+# I already...
+
+- [ ] Tested the changes in a working environment to ensure they work as expected
+- [ ] Added some tests for any new functionality
+- [ ] Updated the documentation (both comments in code and [product documentation](https://mozilla-ai.github.io/lumigator) under `/docs`)
+- [ ] Checked if a (backend) DB migration step was required and included it if required

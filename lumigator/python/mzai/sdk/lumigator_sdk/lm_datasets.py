@@ -68,11 +68,7 @@ class Datasets:
 
         return DatasetResponse(**(response.json()))
 
-    def create_dataset(
-            self,
-            dataset: IOBase,
-            format: DatasetFormat
-        ) -> DatasetResponse:
+    def create_dataset(self, dataset: IOBase, format: DatasetFormat) -> DatasetResponse:
         """Create a new dataset.
 
         .. admonition:: Example

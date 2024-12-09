@@ -41,7 +41,7 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
         "config_template": simple_eval_template,
         "max_samples": 10,
@@ -76,7 +76,7 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
         "config_template": simple_infer_template,
         "max_samples": 10,
@@ -127,7 +127,7 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
     }

@@ -71,7 +71,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
 
     job = JobEvalCreate(
         name="test-job-int-001",
-        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         dataset=dataset.id,
         config_template=simple_eval_template,
     )

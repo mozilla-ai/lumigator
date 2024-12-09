@@ -43,14 +43,14 @@ def load_harness_model(config: LMHarnessJobConfig) -> HFLM | OpenaiCompletionsLM
     hf_model_loader = HuggingFaceModelLoader()
     match config.model:
         case AutoModelConfig() as model_config:
-            model_path, peft_path = hf_model_loader.resolve_peft_and_pretrained(model_config.path)
+            model_uri, peft_path = hf_model_loader.resolve_peft_and_pretrained(model_config.path)
             quantization_kwargs: dict[str, Any] = (
                 config.quantization.model_dump() if config.quantization else {}
             )
             # TODO: Fix this up by passing in the instantiated model directly
             return HFLM(
-                pretrained=model_path,
-                tokenizer=model_path,
+                pretrained=model_uri,
+                tokenizer=model_uri,
                 peft=peft_path,
                 device="cuda" if torch.cuda.device_count() > 0 else "cpu",
                 trust_remote_code=model_config.trust_remote_code,

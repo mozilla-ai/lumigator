@@ -4,21 +4,37 @@ on:
   push:
     tags:
     # Not the right semver regexp, but good enough
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   sdk-packaging:
     name: Package SDK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add tools directory to path
+        run: echo ${PWD}/tools >> $GITHUB_PATH
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Install python
+      - name: Check tag consistency (SDK)
+        run: check_version.sh
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Check tag consistency (schemas)
+        run: check_version.sh
+        working-directory: lumigator/python/mzai/schemas
+
+      - name: Install python (SDK)
         run: uv python install
         working-directory: lumigator/python/mzai/sdk
+
+      - name: Install python (schemas)
+        run: uv python install
+        working-directory: lumigator/python/mzai/schemas
 
       - name: Package SDK
         run: uv build

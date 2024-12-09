@@ -6,7 +6,7 @@
           <img
             src="@/assets/lumigator.svg"
             alt="lumigator-logo"
-          > Lumigator</div>
+          ></div>
       </template>
       <template #item="{ item }">
         <router-link
@@ -29,7 +29,7 @@
 import Menu from 'primevue/menu';
 import { routes } from '@/router'
 import { useSlidePanel } from '@/composables/SlidingPanel';
-const { showSlidingPanel  } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel();
 
 </script>
 
@@ -42,7 +42,7 @@ const { showSlidingPanel  } = useSlidePanel();
 .l-main-menu {
 
   &__logo {
-    height: 6rem;
+    height: 5rem;
     will-change: filter;
     transition: filter 300ms;
     font-family: 'Zilla Slab', sans-serif;
@@ -53,6 +53,7 @@ const { showSlidingPanel  } = useSlidePanel();
 		display: flex;
 		padding: $l-spacing-1/2;
     padding-top: 0;
+    align-items: center;
 
     img {
       height: 1.5em;
@@ -72,11 +73,11 @@ const { showSlidingPanel  } = useSlidePanel();
 
     :hover,:focus {
       background-color: $l-menu-bg;
-			text-shadow: 0px 0px 2px $white;
     }
 
 		&-label {
-			font-size: $l-menu-font-size
+			font-size: $l-menu-font-size;
+      font-weight: $l-font-weight-normal;
 		}
   }
 }

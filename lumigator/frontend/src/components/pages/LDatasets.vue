@@ -9,6 +9,7 @@
     >
       <l-page-header
         title="Datasets"
+        :description="headerDescription"
         subtitle="Only CSV files are currently supported."
         button-label="Provide Dataset"
         @l-header-action="onDatasetAdded()"
@@ -44,7 +45,6 @@
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </Teleport>
-    <ConfirmDialog></ConfirmDialog>
   </div>
 </template>
 
@@ -59,16 +59,20 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
+const toast = useToast();
 const datasetInput = ref(null);
 const confirm = useConfirm();
 const router = useRouter();
 const route = useRoute();
+
+const headerDescription = ref(`Use a dataset as the basis for your evaluation.
+It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
 function deleteConfirmation(dataset) {
   confirm.require({
@@ -90,6 +94,14 @@ function deleteConfirmation(dataset) {
       if (!selectedDataset.value && showSlidingPanel.value) {
         showSlidingPanel.value = false
       }
+      toast.add({
+        severity: 'secondary',
+        summary: `Dataset removed`,
+        messageicon: 'pi pi-trash',
+        detail: `${dataset.filename}`,
+        group: 'br',
+        life: 3000
+      })
     },
     reject: () => {}
   });
@@ -152,6 +164,6 @@ onMounted(async () => {
 
 .is-empty {
   display: grid;
-  place-items: center;
+  place-content: center;
 }
 </style>

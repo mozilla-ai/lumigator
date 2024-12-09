@@ -3,9 +3,17 @@
     class="l-experiments"
     :class="{'no-data':experiments.length === 0}"
   >
-    <div class="l-experiments__header-container">
+    <l-experiments-empty
+      v-if="experiments.length === 0"
+      @l-add-experiment="onCreateExperiment()"
+    />
+    <div
+      v-if="experiments.length > 0"
+      class="l-experiments__header-container"
+    >
       <l-page-header
         title="Experiments"
+        :description="headerDescription"
         button-label="Create Experiment"
         :column="experiments.length === 0"
         @l-header-action="onCreateExperiment()"
@@ -21,24 +29,42 @@
       />
     </div>
     <Teleport to=".sliding-panel">
-      <transition name="transtion-fade">
+      <transition name="transition-fade">
         <l-experiment-form
           v-if="showSlidingPanel && selectedExperiment === null"
           @l-close-form="onDismissForm"
         />
       </transition>
-      <transition name="transtion-fade">
+      <transition name="transition-fade">
         <l-experiment-details
-          v-if="showSlidingPanel && selectedExperiment !== null"
+          v-if="selectedExperiment !== null"
+          @l-results="onShowResults($event)"
+          @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
         />
       </transition>
     </Teleport>
+    <l-experiments-drawer
+      v-if="showDrawer"
+      ref="experimentsDrawer"
+      :header="getDrawerHeader()"
+      :position="showLogs ? 'bottom' : 'full'"
+      @l-drawer-closed="resetDrawerContent()"
+    >
+      <l-experiment-results
+        v-if="selectedExperimentRslts.length"
+        :results="selectedExperimentRslts"
+      />
+      <l-experiment-logs
+        v-if="selectedExperimentRslts.length === 0"
+      />
+
+    </l-experiments-drawer>
   </div>
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -47,12 +73,30 @@ import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
+import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
+import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
-const { experiments, selectedExperiment } = storeToRefs(experimentStore);
+const {
+  experiments,
+  selectedExperiment,
+  selectedExperimentRslts
+} = storeToRefs(experimentStore);
+
+const showDrawer = ref(false);
+const experimentsDrawer = ref(null);
+const showLogs = ref(null);
+const headerDescription = ref(`Experiments are a logical sequence of inference and
+evaluation tasks that run sequentially to evaluate an LLM.`)
+
+const getDrawerHeader = () => {
+  return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
+};
 
 const onCreateExperiment = () => {
   showSlidingPanel.value = true;
@@ -64,6 +108,16 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
+const onShowResults = (experiment) => {
+  experimentStore.loadResults(experiment.id);
+  showDrawer.value = true;
+}
+
+const onShowLogs = () => {
+  showLogs.value = true;
+  showDrawer.value = true;
+}
+
 const onDismissForm = () => {
   selectedDataset.value = null;
   showSlidingPanel.value = false;
@@ -71,6 +125,12 @@ const onDismissForm = () => {
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false;
+}
+
+const resetDrawerContent = () => {
+  selectedExperimentRslts.value = [];
+  showLogs.value = false;
+  showDrawer.value = false;
 }
 
 onMounted(async () => {
@@ -107,7 +167,7 @@ watch(showSlidingPanel, () => {
     max-width: $l-main-width;
     padding: $l-spacing-1;
     display: grid;
-    place-items: start;
+    place-content: center;
 
     .l-experiments__header-container {
       margin-top: 120px;

@@ -6,12 +6,16 @@
     >
       <DataTable
         v-if="tableVisible"
+        v-model:selection="focusedItem"
+        selectionMode="single"
+        dataKey="id"
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-dataset-selected', $event.data)"
+        @row-unselect="showSlidingPanel = false"
       >
         <Column
           field="filename"
@@ -93,18 +97,19 @@ const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected', 'l-experimen
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'min-width: min(40vw, 1200px)' : 'min-width: min(80vw, 1200px)'
+    'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 })
 
-const focusedDataset = ref(null);
+const focusedItem = ref(null);
 const tableVisible = ref(true)
 const optionsMenu = ref();
 const options = ref([
 	{
 		label: 'Use in Experiment',
-    icon: 'pi pi-microchip',
+    icon: 'pi pi-experiments',
+    disabled: false,
      command: () => {
-      emit('l-experiment', focusedDataset.value)
+      emit('l-experiment', focusedItem.value)
     }
 	},
 	{
@@ -122,7 +127,7 @@ const options = ref([
 		label: 'Delete',
     icon: 'pi pi-trash',
     command: () => {
-      emit('l-delete-dataset', focusedDataset.value)
+      emit('l-delete-dataset', focusedItem.value)
     }
 	},
 ])
@@ -139,12 +144,17 @@ const shortenedID = (id) =>
 
 
 const togglePopover = (event, dataset) => {
-  focusedDataset.value = dataset;
+  focusedItem.value = dataset;
+  const experimentOption = options.value.find(option => option.label === 'Use in Experiment');
+  if (experimentOption) {
+    experimentOption.disabled = !dataset.ground_truth;
+  }
 	optionsMenu.value.toggle(event);
 }
 
-watch(showSlidingPanel, () => {
+watch(showSlidingPanel, (newValue) => {
   tableVisible.value = false;
+  focusedItem.value = newValue ? focusedItem.value : null;
   setTimeout(() => {
     tableVisible.value = true;
   }, 100);
@@ -186,6 +196,11 @@ watch(showSlidingPanel, () => {
 		color: white;
     text-shadow: 0 0 1px white;
 	}
+
+  &-icon,  span.pi {
+	  color: $l-grey-100;
+    font-size: $l-font-size-sm;
+  }
 }
 
 .separator {

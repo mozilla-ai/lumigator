@@ -12,14 +12,14 @@ export const routes = [
 		name: 'datasets',
 		disabled: false,
 		component: LDatasetes,
-		icon: 'pi pi-fw pi-database'
+		icon: 'pi pi-dataset'
 	},
 	{
 		path: '/experiments',
 		name: 'experiments',
 		disabled: false,
 		component: LExperiments,
-		icon: 'pi pi-fw pi-database'
+		icon: 'pi pi-experiments'
   },
   {
     path: '/:pathMatch(.*)*', // Catch-all route for undefined paths

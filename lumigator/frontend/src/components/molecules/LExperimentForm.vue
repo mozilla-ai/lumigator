@@ -30,6 +30,14 @@
         />
         <label for="use_case">Use case</label>
       </FloatLabel>
+
+      <p>Summarization jobs are evaluated with ROUGE, METEOR, and BERT
+        score, each focusing on different aspects of prediction-ground
+        truth similarity.
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+        >Learn more <span class="pi pi-arrow-up-right" /></a>
+      </p>
       <FloatLabel
         variant="in"
         class="l-experiment-form__field"
@@ -38,7 +46,7 @@
           v-model="dataset"
           inputId="dataset"
           optionLabel="filename"
-          :options="datasets"
+          :options="filteredDatasets"
           variant="filled"
           size="small"
         />
@@ -112,6 +120,7 @@ import Textarea from 'primevue/textarea';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import LModelCards from '@/components/molecules/LModelCards.vue';
+import { useToast } from "primevue/usetoast";
 
 const emit = defineEmits([
   'l-close-form',
@@ -128,6 +137,7 @@ const experimentTitle = ref('');
 const experimentDescription = ref('');
 const maxSamples = ref();
 const modelSelection = ref(null);
+const toast = useToast();
 
 const isInvalid = computed(() =>
   !experimentTitle.value ||
@@ -135,6 +145,9 @@ const isInvalid = computed(() =>
   !dataset.value ||
   !modelSelection.value?.selectedModel
 );
+
+const filteredDatasets = computed(() =>
+  datasets.value.filter((dataset) => dataset.ground_truth === true))
 
 async function triggerExperiment() {
   const experimentPayload = {
@@ -145,11 +158,25 @@ async function triggerExperiment() {
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
   const success = await experimentStore.runExperiment(experimentPayload);
-  if (success === experimentTitle.value) {
+  if (success.name === experimentTitle.value) {
     await experimentStore.loadExperiments();
     emit('l-close-form');
     resetForm();
+    toast.add({
+      severity: 'secondary',
+      summary: `${success.name } Started`,
+      messageicon: 'pi pi-verified',
+      group: 'br',
+      life: 3000
+    })
+    return;
   }
+    toast.add({
+    severity: 'error',
+    summary: `Experiment failed to start`,
+    messageicon: 'pi pi-exclamation-triangle',
+    group: 'br',
+  })
 }
 
 function resetForm() {
@@ -176,6 +203,12 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
 
+  p {
+    font-size: $l-font-size-sm;
+    color: $l-grey-100;
+    padding: 0 $l-spacing-1 $l-spacing-1 $l-spacing-1;
+  }
+
   &__header, &__models-container{
     padding-bottom: $l-spacing-1;
     display: flex;
@@ -185,7 +218,7 @@ onMounted(async () => {
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
-      color: $l-grey-150;
+      color: $l-grey-100;
     }
 
     button {
@@ -227,7 +260,7 @@ onMounted(async () => {
     flex-direction: column;
     h4 {
       font-size: $l-font-size-sm;
-      color: $l-grey-150;
+      color: $l-grey-100;
       font-weight:$l-font-weight-bold ;
     }
   }

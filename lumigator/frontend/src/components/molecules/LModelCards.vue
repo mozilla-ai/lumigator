@@ -1,4 +1,3 @@
-
 <template>
   <div class="l-models-list">
     <div class="l-models-list__options-container">
@@ -13,7 +12,7 @@
           name="dynamic"
           :value="model"
         />
-        <label :for="model.link">{{ model.link }}</label>
+        <label :for="model.link">{{ model.label }}</label>
         <Button
           as="a"
           icon="pi pi-external-link"
@@ -41,10 +40,32 @@ defineProps({
 })
 
 const modelOptions = ref([
-  { id: '1', link: 'hf://facebook/bart-large-cnn', externalLink: '' },
-  { id: '2', link: 'hf://mikeadimech/longformer-qmsum-meeting-summarization', externalLink: '' },
-  { id: '3', link: 'hf://mrm8488/t5-base-finetuned-summarize-news', externalLink: '' },
-  { id: '4', link: 'hf://mrm8488/t5-base-finetuned-summarize-news', externalLink: '' }
+  {
+    id: '1',
+    link: 'hf://facebook/bart-large-cnn',
+    externalLink: 'https://huggingface.co/facebook/bart-large-cnn',
+    label: 'facebook/bart-large-cnn'
+  },
+
+  {
+    id: '2',
+    link: 'hf://mikeadimech/longformer-qmsum-meeting-summarization',
+    externalLink: 'https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization',
+    label: 'mikeadimech/longformer-qmsum-meeting-summarization'
+  },
+
+  {
+    id: '3',
+    link: 'hf://mrm8488/t5-base-finetuned-summarize-news',
+    externalLink: 'https://huggingface.co/mrm8488/t5-base-finetuned-summarize-news',
+    label: 'mrm8488/t5-base-finetuned-summarize-news'
+  },
+  {
+    id: '4',
+    link: 'hf://falconsai/text_summarization',
+    externalLink: 'https://huggingface.co/Falconsai/text_summarization',
+    label: 'falconsai/text_summarization'
+  },
 ]);
 
 
@@ -74,7 +95,7 @@ defineExpose({
 
       label {
         font-size: $l-font-size-sm;
-        color: $l-grey-150;
+        color: $l-grey-100;
       }
     }
 

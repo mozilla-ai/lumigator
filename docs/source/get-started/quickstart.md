@@ -46,7 +46,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
 :sync: tab2
 ```python
 from lumigator_sdk.lumigator import LumigatorClient
-from schemas.datasets import DatasetFormat
+from lumigator_schemas.datasets import DatasetFormat
 
 dataset_path = 'path/to/dataset.csv'
 lm_client = LumigatorClient('localhost:8000')
@@ -84,7 +84,7 @@ dataset.csv
 :sync: tab2
 ```python
 datasets = lm_client.datasets.get_datasets()
-print(datasets.items[0].filename)
+print(datasets.items[-1].filename)
 ```
 :::
 
@@ -151,9 +151,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/evaluate/ \
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-from schemas.jobs import JobType, JobCreate
+from lumigator_schemas.jobs import JobType, JobEvalCreate
 
-dataset_id = datasets.items[0].id
+dataset_id = datasets.items[-1].id
 
 models = ['hf://facebook/bart-large-cnn',]
 
@@ -164,7 +164,7 @@ team_name = "lumigator_enthusiasts"
 
 responses = []
 for model in models:
-    job_args = JobCreate(
+    job_args = JobEvalCreate(
         name=team_name,
         description="Test",
         model=model,
@@ -219,8 +219,6 @@ job_id = responses[0].id
 
 job = lm_client.jobs.wait_for_job(job_id)  # Create the coroutine object
 result = await job  # Await the coroutine to get the result
-
-print(result)
 ```
 :::
 

@@ -12,6 +12,7 @@ from backend.main import app
 
 @app.on_event("startup")
 def test_health_ok(local_client: TestClient):
+    # dummy change
     response = local_client.get("/health/")
     assert response.status_code == 200
 

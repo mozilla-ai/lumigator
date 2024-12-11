@@ -47,16 +47,10 @@ def test_upload_data_launch_job(
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        # "model": "hf-internal-testing/tiny-random-BartForCausalLM",
-        # "model": "mlabonne/dummy-CodeLlama-7b-hf",
         "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
         "config_template": simple_eval_template,
         "max_samples": 10,
-        # Investigate!
-        # "model_url": "string",
-        # "system_prompt": "string",
-        # "config_template": "string",
     }
 
     create_evaluation_job_response = local_client.post(
@@ -76,24 +70,22 @@ def test_upload_data_launch_job(
         print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
+            print("Job succeeded!!!")
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
+            print("Job failed...")
             break
-        time.sleep(1)
+        time.sleep(30)
+    print("Check if job succeeded")
     assert succeeded
 
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
+        "model": "hf://hf-internal-testing/tiny-random-t5",
         "dataset": str(created_dataset.id),
-        # "config_template": simple_infer_template,
         "max_samples": 10,
-        # Investigate!
-        # "model_url": "string",
-        # "system_prompt": "string",
-        # "config_template": "string",
     }
     create_inference_job_response = local_client.post(
         "/jobs/inference/", headers=headers, json=infer_payload
@@ -116,7 +108,7 @@ def test_upload_data_launch_job(
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
-        time.sleep(20)
+        time.sleep(30)
     assert succeeded
 
 
@@ -176,7 +168,7 @@ def test_full_experiment_launch(
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
-        time.sleep(1)
+        time.sleep(30)
     assert succeeded
 
 

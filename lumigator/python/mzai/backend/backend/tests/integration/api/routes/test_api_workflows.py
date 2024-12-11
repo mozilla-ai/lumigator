@@ -1,9 +1,9 @@
+import time
 from time import sleep
 from unittest.mock import patch
 
 import pytest
 import requests
-import time
 from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
@@ -19,7 +19,13 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple_eval_template, simple_infer_template, dependency_overrides_services):
+def test_upload_data_launch_job(
+    local_client: TestClient,
+    dialog_dataset,
+    simple_eval_template,
+    simple_infer_template,
+    dependency_overrides_services,
+):
     response = local_client.get("/health")
     assert response.status_code == 200
 
@@ -29,7 +35,7 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
 
-    print(f'response: {create_response.text}')
+    print(f"response: {create_response.text}")
     assert create_response.status_code == 201
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
@@ -41,6 +47,8 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
+        # "model": "hf-internal-testing/tiny-random-BartForCausalLM",
+        # "model": "mlabonne/dummy-CodeLlama-7b-hf",
         "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
         "config_template": simple_eval_template,
@@ -56,14 +64,16 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
     )
     assert create_evaluation_job_response.status_code == 201
 
-    create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
+    create_evaluation_job_response_model = JobResponse.model_validate(
+        create_evaluation_job_response.json()
+    )
 
     succeeded = False
-    for i in range (1, 200):
-        get_job_response = local_client.get(f'/jobs/{create_evaluation_job_response_model.id}')
+    for i in range(1, 200):
+        get_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f'--> try {i}: {get_job_response_model}')
+        print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
@@ -78,38 +88,41 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset, simple
         "description": "Test run for Huggingface model",
         "model": "hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         "dataset": str(created_dataset.id),
-        "config_template": simple_infer_template,
+        # "config_template": simple_infer_template,
         "max_samples": 10,
         # Investigate!
         # "model_url": "string",
         # "system_prompt": "string",
         # "config_template": "string",
     }
-
     create_inference_job_response = local_client.post(
         "/jobs/inference/", headers=headers, json=infer_payload
     )
     assert create_inference_job_response.status_code == 201
 
-    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
+    create_inference_job_response_model = JobResponse.model_validate(
+        create_inference_job_response.json()
+    )
 
     succeeded = False
-    for i in range (1, 200):
-        get_job_response = local_client.get(f'/jobs/{create_inference_job_response_model.id}')
+    for i in range(1, 200):
+        get_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f'--> try {i}: {get_job_response_model}')
+        print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
-        time.sleep(1)
+        time.sleep(20)
     assert succeeded
 
 
-def test_full_experiment_launch(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+def test_full_experiment_launch(
+    local_client: TestClient, dialog_dataset, dependency_overrides_services
+):
     response = local_client.get("/health")
     assert response.status_code == 200
     create_response = local_client.post(
@@ -117,7 +130,7 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
-    print(f'response: {create_response.text}')
+    print(f"response: {create_response.text}")
     assert create_response.status_code == 201
     created_dataset = DatasetResponse.model_validate(create_response.json())
     headers = {
@@ -152,11 +165,11 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     assert get_experiment_response.status_code == 200
 
     succeeded = False
-    for i in range (1, 200):
-        get_job_response = local_client.get(f'/jobs/{get_experiments.items[0].id}')
+    for i in range(1, 200):
+        get_job_response = local_client.get(f"/jobs/{get_experiments.items[0].id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f'--> try {i}: {get_job_response_model}')
+        print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break

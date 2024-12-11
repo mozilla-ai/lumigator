@@ -31,7 +31,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    - A database to track platform-level lifecycle, job, and dataset metadata.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Get Started
 
    get-started/installation
@@ -46,12 +46,11 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    operations-guide/alembic
    operations-guide/dev
 
-.. TODO: Add user-guides and examples here.
-.. .. toctree::
-..    :maxdepth: 2
-..    :caption: User Guides
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guides
 
-..    user-guides/evaluation
+   user-guides/inference
 
 .. toctree::
    :maxdepth: 2

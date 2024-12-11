@@ -165,7 +165,7 @@ def dialog_data(common_resources_dir):
 def simple_eval_template():
     return """{{
         "name": "{job_name}/{job_id}",
-        "model": {{ "path": "{model_path}" }},
+        "model": {{ "path": "{model_uri}" }},
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],

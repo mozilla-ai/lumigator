@@ -116,13 +116,13 @@ def format_s3_path(bucket: str, key: str) -> AssetPath:
     return f"{PathPrefix.S3.value}{bucket}/{key}"
 
 
-def format_openai_model_path(model_name: str) -> AssetPath:
+def format_openai_model_uri(model_name: str) -> AssetPath:
     return f"{PathPrefix.OPENAI.value}{model_name}"
 
 
-def format_mistral_model_path(model_name: str) -> AssetPath:
+def format_mistral_model_uri(model_name: str) -> AssetPath:
     return f"{PathPrefix.MISTRAL.value}{model_name}"
 
 
-def format_llamafile_model_path(model_name: str) -> AssetPath:
+def format_llamafile_model_uri(model_name: str) -> AssetPath:
     return f"{PathPrefix.LLAMAFILE.value}{model_name}"

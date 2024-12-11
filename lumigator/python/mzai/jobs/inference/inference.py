@@ -104,7 +104,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
             logger.info(f"Using OAI client. Endpoint: {base_url}")
             model_client = OpenAIModelClient(base_url, config)
     elif config.hf_pipeline:
-        if config.hf_pipeline.model_path.startswith(PathPrefix.HUGGINGFACE):
+        if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
             logger.info("Using HuggingFace client.")
             model_client = HuggingFaceModelClient(config)
             output_model_name = config.hf_pipeline.model

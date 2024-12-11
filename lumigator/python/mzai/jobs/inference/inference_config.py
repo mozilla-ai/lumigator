@@ -35,13 +35,13 @@ def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
 TorchDtype = Annotated[torch.dtype | str, BeforeValidator(lambda x: _validate_torch_dtype(x))]
 
 
-def _validate_model_path(path: str) -> str:
-    """Validate the given model path.
+def _validate_model_uri(path: str) -> str:
+    """Validate the given model RI.
 
     Resorve the model repo ID and check if it is a valid HuggingFace repo ID.
 
     Args:
-        path (str): The model path to validate.
+        path (str): The model URI to validate.
 
     Raises:
         ValueError: If the path is not a valid HuggingFace repo ID.
@@ -54,7 +54,7 @@ def _validate_model_path(path: str) -> str:
     return path
 
 
-AssetPath = Annotated[str, AfterValidator(lambda x: _validate_model_path(x))]
+AssetPath = Annotated[str, AfterValidator(lambda x: _validate_model_uri(x))]
 
 
 def _validate_task(task: str) -> None:
@@ -119,7 +119,7 @@ class SamplingParameters(BaseModel):
 
 
 class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
-    model_path: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
+    model_uri: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
     task: SupportedTask
     revision: str = "main"  # Model version: branch, tag, or commit ID
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
@@ -136,7 +136,7 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
         Returns:
             str: The model name.
         """
-        return resolve_model_repo(self.model_path)
+        return resolve_model_repo(self.model_uri)
 
     @computed_field
     @property

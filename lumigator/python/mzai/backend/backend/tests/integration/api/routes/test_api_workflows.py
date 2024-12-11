@@ -17,6 +17,7 @@ from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_INFER_MODEL
 
 @app.on_event("startup")
 def test_health_ok(local_client: TestClient):
+    # dummy change
     response = local_client.get("/health/")
     assert response.status_code == 200
 

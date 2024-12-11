@@ -110,9 +110,11 @@ def db_session(db_engine: Engine):
 @pytest.fixture(scope="function")
 def fake_s3fs() -> S3FileSystem:
     # ...and patch the s3fs name with the Fake
-    fsspec.register_implementation("s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS")
+    fsspec.register_implementation(
+        "s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS"
+    )
     yield MemoryFileSystem()
-    print(f'final s3fs contents: {str(MemoryFileSystem.store)}')
+    print(f"final s3fs contents: {str(MemoryFileSystem.store)}")
 
 
 @pytest.fixture(scope="function")
@@ -125,6 +127,7 @@ def fake_s3_client(fake_s3fs) -> S3Client:
     os.environ["AWS_ENDPOINT_URL"] = "http://example.com:4566"
     return FakeS3Client(MemoryFileSystem.store)
 
+
 @pytest.fixture(scope="function")
 def boto_s3_client() -> S3Client:
     # Initialize S3
@@ -136,12 +139,13 @@ def boto_s3_client() -> S3Client:
     os.environ["AWS_ENDPOINT_URL"] = "http://localhost:4566"
     return boto3.client("s3")
 
+
 @pytest.fixture(scope="function")
 def boto_s3fs() -> S3FileSystem:
     s3fs = S3FileSystem()
     mock_s3fs = Mock(wraps=s3fs)
     yield mock_s3fs
-    print(f'intercepted s3fs calls: {str(mock_s3fs.mock_calls)}')
+    print(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")
 
 
 @pytest.fixture(scope="session")
@@ -177,7 +181,9 @@ def local_client(app: FastAPI):
 
 
 @pytest.fixture(scope="function")
-def dependency_overrides_fakes(app: FastAPI, db_session: Session, fake_s3_client: S3Client, fake_s3fs: S3FileSystem) -> None:
+def dependency_overrides_fakes(
+    app: FastAPI, db_session: Session, fake_s3_client: S3Client, fake_s3fs: S3FileSystem
+) -> None:
     """Override the FastAPI dependency injection for test DB sessions. Uses mocks/fakes for unit tests.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
@@ -198,7 +204,9 @@ def dependency_overrides_fakes(app: FastAPI, db_session: Session, fake_s3_client
 
 
 @pytest.fixture(scope="function")
-def dependency_overrides_services(app: FastAPI, db_session: Session, boto_s3_client: S3Client, boto_s3fs: S3FileSystem) -> None:
+def dependency_overrides_services(
+    app: FastAPI, db_session: Session, boto_s3_client: S3Client, boto_s3fs: S3FileSystem
+) -> None:
     """Override the FastAPI dependency injection for test DB sessions. Uses real clients for integration tests.
 
     Reference: https://fastapi.tiangolo.com/he/advanced/testing-database/
@@ -287,7 +295,7 @@ def backend_settings():
 def simple_eval_template():
     return """{{
         "name": "{job_name}/{job_id}",
-        "model": {{ "path": "{model_path}" }},
+        "model": {{ "path": "{model_uri}" }},
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],
@@ -299,15 +307,24 @@ def simple_eval_template():
         }}
     }}"""
 
+
 @pytest.fixture(scope="session")
 def simple_infer_template():
     return """{{
-    "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_path}" }},
-    "dataset": {{ "path": "{dataset_path}" }},
-    "job": {{
-        "max_samples": {max_samples},
-        "storage_path": "{storage_path}",
-        "output_field": "{output_field}"
-    }}
-}}"""
+        "name": "{job_name}/{job_id}",
+        "dataset": {{ "path": "{dataset_path}" }},
+        "hf_pipeline": {{
+            "model_uri": "{model_uri}",
+            "task": "{task}",
+            "accelerator": "{accelerator}",
+            "revision": "{revision}",
+            "use_fast": "{use_fast}",
+            "trust_remote_code": "{trust_remote_code}",
+            "torch_dtype": "{torch_dtype}",
+            "max_length": 200
+        }},
+        "job": {{
+            "max_samples": {max_samples},
+            "storage_path": "{storage_path}"
+        }}
+    }}"""

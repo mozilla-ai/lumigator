@@ -66,6 +66,24 @@ oai_eval_template = """{{
 
 # Inference templates
 
+default_infer_template = """{{
+    "name": "{job_name}/{job_id}",
+    "dataset": {{ "path": "{dataset_path}" }},
+    "hf_pipeline": {{
+        "model_path": "{model_path}",
+        "task": "{task}",
+        "accelerator": "{accelerator}",
+        "revision": "{revision}",
+        "use_fast": "{use_fast}",
+        "trust_remote_code": "{trust_remote_code}",
+        "torch_dtype": "{torch_dtype}"
+    }},
+     "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}"
+    }}
+}}"""
+
 seq2seq_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_path}" }},
@@ -111,7 +129,7 @@ oai_infer_template = """{{
 
 templates = {
     JobType.INFERENCE: {
-        "default": causal_infer_template,
+        "default": default_infer_template,
         "oai://gpt-4o-mini": oai_infer_template,
         "oai://gpt-4-turbo": oai_infer_template,
         "oai://gpt-3.5-turbo-0125": oai_infer_template,

@@ -143,6 +143,12 @@ class JobService:
                 "job_name": request.name,
                 "model_path": request.model,
                 "dataset_path": dataset_s3_path,
+                "task": request.task,
+                "accelerator": request.accelerator,
+                "revision": request.revision,
+                "use_fast": request.use_fast,
+                "trust_remote_code": request.trust_remote_code,
+                "torch_dtype": request.torch_dtype,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
                 "model_url": model_url,
@@ -182,7 +188,7 @@ class JobService:
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
         # appear on the command line and the values are the respective params.
-        eval_config_args = {
+        job_config_args = {
             "--config": config_template.format(**config_params),
         }
 
@@ -195,7 +201,7 @@ class JobService:
             job_id=record.id,
             job_type=job_type,
             command=job_settings["command"],
-            args=eval_config_args,
+            args=job_config_args,
         )
 
         # build runtime ENV for workers

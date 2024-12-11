@@ -10,7 +10,7 @@
         severity="secondary"
         rounded
         aria-label="Close"
-        class="l-experiment-form__close"
+        class="l-experiment-details__close"
         @click="emit('l-close-details')"
       />
     </div>
@@ -39,12 +39,36 @@
             :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
           />
-
+          <Button
+            icon="pi pi-external-link"
+            severity="secondary"
+            size="small"
+            label="Logs"
+            aria-label="Logs"
+            :disabled="selectedExperiment.status === 'PENDING'"
+            style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+            class="l-experiment-details__content-item-logs"
+            iconClass="logs-btn"
+            @click="emit('l-show-logs')"
+          />
         </div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <div
+        class="l-experiment-details__content-item"
+        @click="copyToClipboard(selectedExperiment.id)"
+      >
         <div class="l-experiment-details__content-label">experiment id</div>
-        <div class="l-experiment-details__content-field">{{ selectedExperiment.jobId }}</div>
+        <div
+          class="l-experiment-details__content-field"
+          style="display: flex; justify-content: space-between;cursor:pointer"
+        >
+          {{ selectedExperiment.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 10px;padding-left: 3px;"
+          />
+        </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
@@ -81,11 +105,23 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
+    <div class="l-experiment-details__actions">
+      <Button
+        rounded
+        severity="secondary"
+        size="small"
+        icon="pi pi-external-link"
+        label="View Results"
+        :disabled="!(selectedExperiment.status === 'SUCCEEDED'
+          || selectedExperiment.status === 'FAILED')"
+        @click="emit('l-results', selectedExperiment)"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, ref} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useHealthStore } from '@/stores/health/store'
@@ -93,18 +129,27 @@ import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details']);
+const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
 const healthStore = useHealthStore();
 const { runningJobs } = storeToRefs(healthStore);
+const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
   const selected = runningJobs.value
-    .filter((job) => job.id === selectedExperiment.value.jobId)[0]
+    .filter((job) => job.id === selectedExperiment.value.id)[0]
   return selected ? selected.status : selectedExperiment.value.status;
 })
+
+const copyToClipboard = async (longString) => {
+  isCopied.value = true;
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 3000);
+  await navigator.clipboard.writeText(longString);
+};
 
 watch(experimentStatus, (newStatus) => {
   selectedExperiment.value.status = newStatus;
@@ -115,7 +160,7 @@ watch(experimentStatus, (newStatus) => {
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .l-experiment-details {
   $root: &;
   display: flex;
@@ -130,7 +175,7 @@ watch(experimentStatus, (newStatus) => {
     h3 {
       font-weight: $l-font-weight-normal;
       font-size: $l-font-size-md;
-      color: $l-grey-150;
+      color: $l-grey-100;
     }
 
     button {
@@ -139,6 +184,7 @@ watch(experimentStatus, (newStatus) => {
       border: none;
       color: $l-grey-100;
     }
+
   }
 
   &__content,
@@ -146,7 +192,7 @@ watch(experimentStatus, (newStatus) => {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
-    font-size: $l-font-size-sm;
+    font-size: $l-table-font-size;
     &.row {
       flex-direction: row;
       justify-content: space-between;
@@ -158,17 +204,37 @@ watch(experimentStatus, (newStatus) => {
       font-weight: $l-font-weight-bold;
     }
 
+    &-logs {
+      font-size: $l-font-size-sm;
+      padding: 0;
+
+      span {
+        color: $l-grey-100;
+      }
+      .logs-btn{
+        font-size: 12px!important;
+      }
+    }
+
+    &-field {
+      display: flex;
+      gap: 9px;
+    }
   }
 
   &__content-item {
     padding: $l-spacing-1/2 0;
+
+    .p-tag-label {
+      font-size: $l-font-size-sm;
+     color: $l-grey-100;
+      line-height: 1;
+      font-weight: $l-font-weight-normal;
+    }
   }
 
-  &__tag {
-    font-size: $l-font-size-sm;
-    color: $l-grey-150;
-    line-height: 1;
-    font-weight: $l-font-weight-normal;
+  &__actions {
+    padding: $l-spacing-1 0;
   }
 }
 </style>

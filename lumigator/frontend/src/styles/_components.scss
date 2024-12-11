@@ -37,7 +37,7 @@
 // Datable styling
 .p-datatable-table-container {
 		border-radius: 8px;
-		border: 1px solid $l-grey-400;
+		border: 1px solid $l-grey-300;
 	.p-datatable-column-header-content {
 		color: $l-grey-200;
 		font-size: $l-font-size-sm;
@@ -55,11 +55,48 @@
 		td {
 			border: none;
 			color: $l-grey-100;
-			padding: $l-spacing-1/2 1.25rem!important
+			padding: 0.5rem 1rem;
 		}
 
 		&:hover td {
 			color: $white;
+		}
+
+	}
+   .p-datatable-row-selected {
+			background-color: $l-grey-300!important;
+   }
+
+   .p-datatable-column-sorted {
+      background: inherit;
+    }
+
+}
+
+
+// Class for Datatable with visible lines and hover effect disabled
+.gridlines {
+  .p-datatable-column-title {
+    text-wrap: nowrap;
+    font-size: $l-font-size-sm;
+  }
+  tr {
+    box-shadow:inset 0px 1px 0px $l-gridlines-stroke;
+  }
+  td {
+    vertical-align: top;
+    font-size: $l-font-size-sm;
+  }
+
+  [class*="p-row-"] {
+		background-color: $l-card-bg;
+
+		&:hover {
+		  background-color: $l-card-bg;
+		}
+
+		&:hover td {
+			color: $l-grey-100;
 		}
 
 	}
@@ -78,7 +115,7 @@
   height:   $l-button-icon-only-width!important;
   width:  $l-button-icon-only-width;
   span {
-   font-size: 10px;
+   font-size: 12px;
 
   }
 }
@@ -128,4 +165,42 @@
 
 .p-inputtext {
   font-size: 12px!important;
+}
+
+// Tooltip
+.p-tooltip {
+  font-size: $l-font-size-sm;
+  color: $l-grey-100;
+  background-color: $l-main-bg;
+}
+
+// Tabs
+.p-tabs {
+
+  .p-tablist-content > .p-tablist-tab-list {
+    align-items: center;
+    background: $l-menu-bg;
+    gap: $l-spacing-1;
+
+    .p-tab {
+      padding: 0.5rem 0;
+      font-size: $l-menu-font-size;
+      font-weight: $l-font-weight-normal;
+    }
+
+    .p-tab-active {
+      border-color: $white;
+      color: $white;
+    }
+
+    .p-tablist-active-bar {
+      background-color: $white;
+    }
+  }
+
+  .p-tabpanels {
+    padding: 0;
+    background: transparent;
+  }
+
 }

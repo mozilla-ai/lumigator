@@ -17,6 +17,7 @@ from backend.records.datasets import DatasetRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.settings import settings
 
+PREDICTION_FIELD: str = "predictions"
 GT_FIELD: str = "ground_truth"
 REQUIRED_EXPERIMENT_FIELDS: set[str] = {"examples"}
 

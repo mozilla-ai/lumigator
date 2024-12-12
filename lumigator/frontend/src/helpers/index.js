@@ -60,7 +60,7 @@ export function calculateDuration(start, finish) {
   return duration;
 }
 
-export function dowloadContent(blob, filename) {
+export function downloadContent(blob, filename) {
   const downloadUrl = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.className = 'hidden';

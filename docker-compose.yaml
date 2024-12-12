@@ -79,7 +79,6 @@ services:
     profiles:
       - local
 
-
   backend:
     image: mzdotai/lumigator:latest
     build:

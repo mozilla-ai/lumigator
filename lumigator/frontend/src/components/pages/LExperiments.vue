@@ -39,6 +39,7 @@
         <l-experiment-details
           v-if="selectedExperiment !== null"
           @l-results="onShowResults($event)"
+          @l-dnld-results="onDnldResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
         />
@@ -111,6 +112,10 @@ const onSelectExperiment = (experiment) => {
 const onShowResults = (experiment) => {
   experimentStore.loadResults(experiment.id);
   showDrawer.value = true;
+}
+
+const onDnldResults = (experiment) => {
+  experimentStore.loadResultsFile(experiment.id);
 }
 
 const onShowLogs = () => {

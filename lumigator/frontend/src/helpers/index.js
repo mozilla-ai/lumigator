@@ -59,3 +59,15 @@ export function calculateDuration(start, finish) {
   ${String(seconds).padStart(2, '0')}`;
   return duration;
 }
+
+export function dowloadContent(blob, filename) {
+  const downloadUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.className = 'hidden';
+  anchor.href = downloadUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  URL.revokeObjectURL(downloadUrl);
+  document.body.removeChild(anchor);
+}

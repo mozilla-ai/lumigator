@@ -38,7 +38,7 @@ class JobService:
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
         JobType.EVALUATION: {
-            "command": settings.EVALUATOR_COMMAND,
+            "command": settings.EVALUATOR_COMMAND_WITH_LD_PRELOAD,
             "pip": settings.EVALUATOR_PIP_REQS,
             "work_dir": settings.EVALUATOR_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
@@ -178,11 +178,8 @@ class JobService:
         # (request) and on the job type
         config_params = self._get_job_params(job_type, record, request)
 
-        # load a config template and fill it up with config_params
-        if request.config_template is not None:
-            config_template = request.config_template
-        else:
-            config_template = self._get_config_template(job_type, request.model)
+        loguru.logger.info(f"config params...{config_params}")
+        config_template = self._get_config_template(job_type, request.model)
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
@@ -221,7 +218,6 @@ class JobService:
         }
 
         loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
 
         entrypoint = RayJobEntrypoint(
             config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus

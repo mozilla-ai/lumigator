@@ -5,6 +5,10 @@ class DatasetConfig(BaseModel):
     path: str
 
 
+class ModelConfig(BaseModel):
+    path: str
+
+
 class EvaluationJobConfig(BaseModel):
     metrics: list[str] = Field(default=["rouge", "meteor", "bertscore"])
     use_pipeline: bool = False
@@ -21,7 +25,6 @@ class TokenizerConfig(BaseModel):
 class EvalJobConfig(BaseModel):
     name: str | None
     dataset: DatasetConfig
-    model: str | None = None
-    tokenizer: TokenizerConfig
+    model: ModelConfig
     evaluation: EvaluationJobConfig
     model_config = ConfigDict(extra="forbid")

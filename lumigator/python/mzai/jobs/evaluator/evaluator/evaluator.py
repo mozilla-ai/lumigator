@@ -4,8 +4,8 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
-from eval_lite_config import EvalJobConfig
 from eval_metrics import EvaluationMetrics
+from evaluate_config import EvalJobConfig
 from loguru import logger
 
 
@@ -85,7 +85,8 @@ def run_eval(config: EvalJobConfig) -> Path:
 def eval_command(config: str) -> None:
     config_dict = json.loads(config)
     logger.info(f"{config_dict}")
-    run_eval(config_dict)
+    config_model = EvalJobConfig(**config_dict)
+    run_eval(config_model)
 
 
 if __name__ == "__main__":

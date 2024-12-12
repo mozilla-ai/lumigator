@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import JobResponse, JobStatus
+from lumigator_schemas.jobs import JobLogsResponse, JobResponse, JobStatus
 
 from backend.main import app
 
@@ -109,6 +109,15 @@ def test_upload_data_launch_job(
             succeeded = False
             break
         time.sleep(30)
+
+    logs_infer_job_response = local_client.get(
+        f"/health/jobs/{create_inference_job_response_model.id}/logs"
+    )
+    logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
+    print(f"-- logs -- {create_inference_job_response_model.id}")
+    print(logs_infer_job_response_model.logs)
+    print("----------")
+
     assert succeeded
 
 

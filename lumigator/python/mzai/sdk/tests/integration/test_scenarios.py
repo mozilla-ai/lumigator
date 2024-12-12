@@ -71,7 +71,7 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template)
 
     job = JobEvalCreate(
         name="test-job-int-001",
-        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         dataset=dataset.id,
         config_template=simple_eval_template,
     )
@@ -82,7 +82,7 @@ def test_job_lifecycle_remote_ok(lumi_client, dialog_data, simple_eval_template)
     assert job_creation_result is not None
     assert lumi_client.jobs.get_jobs() is not None
 
-    job_status = lumi_client.jobs.wait_for_job(job_creation_result.id)
+    job_status = lumi_client.jobs.wait_for_job(id=job_creation_result.id, retries=30, poll_wait=30)
     logger.info(job_status)
 
     download_info = lumi_client.jobs.get_job_download(job_creation_result.id)

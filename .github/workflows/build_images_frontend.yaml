@@ -9,6 +9,9 @@ on:
   push:
     branches:
       - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
@@ -46,8 +49,9 @@ jobs:
         if: steps.filter.outputs.rebuild_fe == 'true'
         with:
           file: "lumigator/frontend/Dockerfile"
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.ref.startsWith('refs/tags/') }}
           target: "server"
           tags: |
             mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
+            ${{ github.ref.startsWith('refs/tags/') && github.ref_name || '' }}

@@ -115,7 +115,7 @@ def test_upload_data_launch_job(
     )
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     print(f"-- logs -- {create_inference_job_response_model.id}")
-    print(logs_infer_job_response_model.logs)
+    print(f"#{logs_infer_job_response_model.logs}#")
     print("----------")
 
     assert succeeded

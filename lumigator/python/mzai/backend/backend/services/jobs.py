@@ -322,12 +322,14 @@ class JobService:
 
     def get_job(self, job_id: UUID) -> JobResponse:
         record = self._get_job_record(job_id)
+        loguru.logger.info(f"Obtaining info for job {job_id}: {record}")
 
         if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
             return JobResponse.model_validate(record)
 
         # get job status from ray
         job_status = self.ray_client.get_job_status(job_id)
+        loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
 
         # update job status in the DB if it differs from the current status
         if job_status.lower() != record.status.value.lower():

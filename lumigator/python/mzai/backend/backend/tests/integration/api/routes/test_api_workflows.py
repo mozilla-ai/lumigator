@@ -80,6 +80,16 @@ def test_upload_data_launch_job(
     print("Check if job succeeded")
     assert succeeded
 
+    logs_evaluation_job_response = local_client.get(
+        f"/health/jobs/{create_evaluation_job_response_model.id}/logs"
+    )
+    logs_evaluation_job_response_model = JobLogsResponse.model_validate(
+        logs_evaluation_job_response.json()
+    )
+    print(f"-- eval logs -- {create_evaluation_job_response_model.id}")
+    print(f"#{logs_evaluation_job_response_model.logs}#")
+    print("----------")
+
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
@@ -102,6 +112,22 @@ def test_upload_data_launch_job(
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
         print(f"--> try {i}: {get_job_response_model}")
+        logs_infer_job_response = local_client.get(
+            f"/health/jobs/{create_inference_job_response_model.id}/logs"
+        )
+        logs_infer_job_response_model = JobLogsResponse.model_validate(
+            logs_infer_job_response.json()
+        )
+        # ray_url = "http://localhost:8265/api/jobs/"  # Fake base URL for the app
+        job_details = requests.get(
+            f"http://localhost:8265/api/jobs/{create_inference_job_response_model.id}"
+        )
+        print(f"-- infer job_details -- {create_inference_job_response_model.id}")
+        print(f"#{job_details.json()}#")
+        print("----------")
+        print(f"-- infer logs -- {create_inference_job_response_model.id}")
+        print(f"#{logs_infer_job_response_model.logs}#")
+        print("----------")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
@@ -110,13 +136,21 @@ def test_upload_data_launch_job(
             break
         time.sleep(30)
 
-    logs_infer_job_response = local_client.get(
-        f"/health/jobs/{create_inference_job_response_model.id}/logs"
-    )
-    logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
-    print(f"-- logs -- {create_inference_job_response_model.id}")
-    print(f"#{logs_infer_job_response_model.logs}#")
-    print("----------")
+    for i in range(1, 5):
+        if i != 1:
+            time.sleep(30)
+        print(f"Log retrieval for inference, take {i}")
+        logs_infer_job_response = local_client.get(
+            f"/health/jobs/{create_inference_job_response_model.id}/logs"
+        )
+        logs_infer_job_response_model = JobLogsResponse.model_validate(
+            logs_infer_job_response.json()
+        )
+        print(f"-- infer logs -- {create_inference_job_response_model.id}")
+        print(f"#{logs_infer_job_response_model.logs}#")
+        print("----------")
+        if logs_infer_job_response_model.logs:
+            break
 
     assert succeeded
 

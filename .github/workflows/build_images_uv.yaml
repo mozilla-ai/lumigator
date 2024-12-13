@@ -64,4 +64,4 @@ jobs:
           tags: |
             mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && mzdotai/lumigator:github.ref_name || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && 'mzdotai/lumigator-frontend:' + github.ref_name || '' }}

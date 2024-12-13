@@ -115,6 +115,15 @@
         :disabled="selectedExperiment.status !== 'SUCCEEDED'"
         @click="emit('l-results', selectedExperiment)"
       />
+      <Button
+        rounded
+        severity="secondary"
+        size="small"
+        icon="pi pi-download"
+        label="Download Results"
+        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
+        @click="emit('l-dnld-results', selectedExperiment)"
+      />
     </div>
   </div>
 </template>
@@ -128,7 +137,7 @@ import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs']);
+const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
 
 const experimentStore = useExperimentStore();
 const { selectedExperiment } = storeToRefs(experimentStore);
@@ -234,6 +243,8 @@ watch(experimentStatus, (newStatus) => {
 
   &__actions {
     padding: $l-spacing-1 0;
+    display: flex;
+    gap: $l-spacing-1;
   }
 }
 </style>

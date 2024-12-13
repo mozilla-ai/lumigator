@@ -48,10 +48,30 @@ async function fetchResults(job_id) {
     const jsonData = await http.get(download_url)
     return {
       resultsData: jsonData.data,
-      id
+      id,
+      download_url
     }
   } catch (error) {
     console.error("Error fetching experiment results:", error.message || error);
+    return error;
+  }
+}
+
+async function downloadResults(experiment_id) {
+  try {
+    const response = await http.get(PATH_EXPERIMENT_RESULTS(experiment_id));
+    const { download_url } = response.data;
+    if (!download_url) {
+      console.error("No download_url found in the response.");
+      return;
+    }
+    const fileResponse = await http.get(download_url, {
+      responseType: 'blob', // Important: Receive the file as a binary blob
+    })
+    const blob = fileResponse.data;
+    return blob;
+  } catch (error) {
+    console.error("Error downloading experiment results:", error.message || error);
     return error;
   }
 }
@@ -68,6 +88,7 @@ async function fetchLogs(id) {
 export default {
   fetchExperiments,
   fetchResults,
+  downloadResults,
   fetchExperimentDetails,
   triggerExperiment,
   fetchLogs

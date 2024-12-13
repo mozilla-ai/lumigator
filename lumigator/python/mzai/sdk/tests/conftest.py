@@ -1,43 +1,41 @@
 import json
 import sys
 import unittest.mock as mock
+from http import HTTPStatus
 from pathlib import Path
 from typing import BinaryIO
 
 import pytest
+import requests_mock
+from lumigator_sdk.completions import Completions
 from lumigator_sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost:8000"
 
 
 @pytest.fixture(scope="function")
-def mock_requests_response():
-    """Mocks calls to `requests.Response`."""
-    with mock.patch("requests.Response") as resp_mock:
-        yield resp_mock
-
-
-@pytest.fixture(scope="function")
-def mock_requests(mock_requests_response):
-    """Mocks calls to `requests.request`."""
-    with mock.patch("requests.request") as req_mock:
-        req_mock.return_value = mock_requests_response
-        yield req_mock
-
-
-@pytest.fixture(scope="session")
-def lumi_client() -> LumigatorClient:
-    with mock.patch("requests.request") as req_mock:
-        with mock.patch("requests.Response") as resp_mock:
-            resp_mock.status_code = 200
-            resp_mock.json = lambda: json.loads('["openai", "mistral"]')
-            req_mock.return_value = resp_mock
-            return LumigatorClient(LUMI_HOST)
-
+def request_mock() -> requests_mock.Mocker:
+    with requests_mock.Mocker() as cm:
+        yield cm
 
 @pytest.fixture(scope="session")
 def mock_vendor_data() -> str:
     return '["openai", "mistral"]'
+
+
+@pytest.fixture(scope="function")
+def lumi_client(request_mock, mock_vendor_data) -> LumigatorClient:
+    request_mock.get(
+        url=f"http://{LUMI_HOST}/api/v1/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
+    return LumigatorClient(LUMI_HOST)
+
+
+@pytest.fixture(scope="function")
+def lumi_client_int() -> LumigatorClient:
+    return LumigatorClient(LUMI_HOST)
 
 
 @pytest.fixture(scope="session")
@@ -176,3 +174,4 @@ def simple_eval_template():
             "storage_path": "{storage_path}"
         }}
     }}"""
+

@@ -2,35 +2,45 @@ import json
 from http import HTTPStatus
 from pathlib import Path
 
+from lumigator_sdk.health import Health
 from pytest import raises
+from requests import Response
 from requests.exceptions import HTTPError
 
 
-def test_sdk_healthcheck_ok(mock_requests_response, mock_requests, lumi_client):
-    deployment_type = "local"
+def test_sdk_healthcheck_ok(lumi_client, request_mock):
+    deployment = "local"
     status = "ok"
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(
-        f'{{"deployment_type": "{deployment_type}", "status": "{status}"}}'
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json={"deployment_type": deployment, "status": status},
     )
     check = lumi_client.health.healthcheck()
     assert check.status == status
-    assert check.deployment_type == deployment_type
+    assert check.deployment_type == deployment
 
 
-def test_sdk_healthcheck_server_error(mock_requests_response, mock_requests, lumi_client):
-    mock_requests_response.status_code = 500
-    mock_requests_response.json = lambda: None
-    error = HTTPError(response=mock_requests_response)
-    mock_requests.side_effect = error
+def test_sdk_healthcheck_server_error(lumi_client, request_mock):
+    response = Response()
+    response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+    error = HTTPError(response=response)
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}",
+        exc=error
+    )
     with raises(HTTPError):
-        lumi_client.health.healthcheck()
+        result = lumi_client.health.healthcheck()
+        print(result)
 
 
-def test_sdk_healthcheck_missing_deployment(mock_requests_response, mock_requests, lumi_client):
+def test_sdk_healthcheck_missing_deployment(lumi_client, request_mock):
     status = "ok"
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(f'{{"status": "{status}"}}')
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json={"status": status},
+    )
     check = lumi_client.health.healthcheck()
     assert check.status == status
     assert check.deployment_type is None

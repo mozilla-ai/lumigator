@@ -62,6 +62,6 @@ jobs:
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}
           target: "main_image"
           tags: |
-            mzdotai/lumigator:backend_dev_${{ env.REPOVERSION }}
+            ${{ contains(github.ref, 'refs/tags/') && '' || format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator:{0}', github.ref_name) || '' }}

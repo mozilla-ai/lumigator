@@ -11,6 +11,7 @@ from lumigator_schemas.jobs import (
     Job,
     JobEvalCreate,
     JobInferenceCreate,
+    JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -114,6 +115,50 @@ def list_jobs(
     )
 
 
+@router.get("/{job_id}")
+def get_job(service: JobServiceDep, job_id: UUID) -> Job:
+    job = service.get_job(job_id)
+    ray_job = _get_ray_job(job_id)
+
+    # Combine both types of response.
+    x = ray_job.model_dump()  # JobSubmissionResponse
+    y = job.model_dump()  # JobResponse
+    merged = {**x, **y}
+    return Job(**merged)
+
+
+@router.get("/{job_id}/logs")
+def get_job_logs(job_id: UUID) -> JobLogsResponse:
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"))
+
+    if resp.status_code == HTTPStatus.NOT_FOUND:
+        loguru.logger.error(
+            f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}"
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job logs for ID: {job_id} not found",
+        )
+    elif resp.status_code != HTTPStatus.OK:
+        loguru.logger.error(
+            f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}"
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error getting job logs for ID: {job_id}",
+        )
+
+    try:
+        metadata = json.loads(resp.text)
+        return JobLogsResponse(**metadata)
+    except json.JSONDecodeError as e:
+        loguru.logger.error(f"JSON decode error: {e}")
+        loguru.logger.error(f"Response text: {resp.text}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
+        ) from e
+
+
 @router.get("/{job_id}/result")
 def get_job_result(
     service: JobServiceDep,
@@ -133,6 +178,7 @@ def get_job_result_download(
 
 
 def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
+    """Returns metadata that exists in the Ray cluster for all jobs."""
     resp = requests.get(settings.RAY_JOBS_URL)
     if resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
@@ -155,6 +201,7 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
 
 
 def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
+    """Returns metadata on the specified job if it exists in the Ray cluster."""
     resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
 
     if resp.status_code == HTTPStatus.NOT_FOUND:

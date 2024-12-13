@@ -220,11 +220,13 @@ class JobService:
             "env_vars": runtime_env_vars,
         }
 
+        metadata = {"job_type": job_type}
+
         loguru.logger.info("runtime env setup...")
         loguru.logger.info(f"{runtime_env}")
 
         entrypoint = RayJobEntrypoint(
-            config=ray_config, runtime_env=runtime_env, num_gpus=worker_gpus
+            config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
         )
         loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)

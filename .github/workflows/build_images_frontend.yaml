@@ -9,6 +9,9 @@ on:
   push:
     branches:
       - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
@@ -31,12 +34,12 @@ jobs:
               - 'lumigator/lumigator/frontend/**'
 
       - name: Truncate commit SHA
-        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
-        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/')
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -46,8 +49,9 @@ jobs:
         if: steps.filter.outputs.rebuild_fe == 'true'
         with:
           file: "lumigator/frontend/Dockerfile"
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}
           target: "server"
           tags: |
-            mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}

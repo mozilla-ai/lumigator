@@ -44,24 +44,14 @@ jobs:
         run: uv build
         working-directory: lumigator/python/mzai/schemas
 
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: SDK packages
-          path: |
-            lumigator/python/mzai/schemas/dist/*.whl
-            lumigator/python/mzai/schemas/dist/*.tar.gz
-            lumigator/python/mzai/sdk/dist/*.whl
-            lumigator/python/mzai/sdk/dist/*.tar.gz
-
       - name: Upload SDK packages to Test PyPI
         working-directory: lumigator/python/mzai/sdk
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_sdk*
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/
 
       - name: Upload schemas packages to Test PyPI
         working-directory: lumigator/python/mzai/schemas
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/ lumigator_schemas*
+          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/

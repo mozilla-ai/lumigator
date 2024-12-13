@@ -1,4 +1,6 @@
+import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import loguru
@@ -23,6 +25,9 @@ from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
+
+if TYPE_CHECKING:
+    from fastapi import BackgroundTasks
 
 
 class JobService:
@@ -162,7 +167,28 @@ class JobService:
 
         return job_params
 
-    def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
+    def _watch_job(self, job_id: UUID):
+        job_status = self.ray_client.get_job_status(job_id)
+        valid_status = [
+            JobStatus.CREATED.value.lower(),
+            JobStatus.PENDING.value.lower(),
+            JobStatus.RUNNING.value.lower(),
+        ]
+        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
+
+        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
+            time.sleep(5)
+            job_status = self.ray_client.get_job_status(job_id)
+
+        if job_status.lower() == JobStatus.FAILED.value.lower():
+            loguru.logger.error(f"Job {job_id} failed.")
+
+        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
+            loguru.logger.info(f"Job {job_id} finished successfully.")
+
+    def create_job(
+        self, request: JobEvalCreate | JobInferenceCreate, background_tasks: "BackgroundTasks"
+    ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
@@ -230,6 +256,8 @@ class JobService:
         )
         loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
+
+        background_tasks.add_task(self._watch_job, record.id)
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

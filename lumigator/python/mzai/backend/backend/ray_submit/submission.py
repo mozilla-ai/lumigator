@@ -10,6 +10,7 @@ from ray.job_submission import JobSubmissionClient
 @dataclass(kw_only=True)
 class RayJobEntrypoint(ABC):
     config: JobConfig
+    metadata: dict[str, Any] | None = None
     runtime_env: dict[str, Any] | None = None
     num_cpus: int | float | None = None
     num_gpus: int | float | None = None
@@ -36,6 +37,7 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
     loguru.logger.info(f"Submitting {entrypoint.command_with_params}...{entrypoint.runtime_env}")
     return client.submit_job(
         entrypoint=entrypoint.command_with_params,
+        metadata=entrypoint.metadata,
         entrypoint_num_cpus=entrypoint.num_cpus,
         entrypoint_num_gpus=entrypoint.num_gpus,
         entrypoint_memory=entrypoint.memory,

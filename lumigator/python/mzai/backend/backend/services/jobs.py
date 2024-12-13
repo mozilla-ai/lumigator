@@ -73,7 +73,7 @@ class JobService:
             self._raise_not_found(job_id)
         return record
 
-    def _get_results_s3_key(self, job_id: UUID) -> str:
+    def _get_results_s3_key(self, job_id: UUID, job_type: JobType) -> str:
         """Given an job ID, returns the S3 key for the job results.
 
         The S3 key is built from:
@@ -88,7 +88,9 @@ class JobService:
 
         return str(
             Path(settings.S3_JOB_RESULTS_PREFIX)
-            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
+            / settings.S3_JOB_RESULTS_FILENAME.format(
+                job_name=record.name, job_id=record.id, job_type=job_type.value
+            )
         )
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
@@ -286,7 +288,17 @@ class JobService:
     def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
-        result_key = self._get_results_s3_key(job_id)
+        job_info = self.ray_client.get_job_info(job_id)
+        if job_info is None:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                f"Job {job_id} not found.",
+            )
+
+        job_metadata = job_info.metadata
+        job_type = JobType(job_metadata["job_type"])
+
+        result_key = self._get_results_s3_key(job_id, job_type)
         download_url = self.data_service.s3_client.generate_presigned_url(
             "get_object",
             Params={

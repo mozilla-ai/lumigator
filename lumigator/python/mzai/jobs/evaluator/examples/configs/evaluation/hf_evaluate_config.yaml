@@ -18,7 +18,7 @@ evaluation:
   max_samples: 10
   # output file path
   # - if you provide a path complete with a filename, results will be stored in it
-  # - if you provide a dir, results will be stored in <dir>/<config.name>/eval_results.json
+  # - if you provide a dir, results will be stored in <dir>/<config.name>/evaluate_results.json
   # - if you don't provide a storage path, results will be stored locally (see ~/.lm-buddy/results)
   # storage_path: "s3://platform-storage/experiments/results/"
   # return input data in the output file

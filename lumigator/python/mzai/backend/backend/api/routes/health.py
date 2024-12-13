@@ -82,28 +82,3 @@ def get_job_logs(job_id: UUID) -> JobLogsResponse:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e
-
-
-@router.get("/jobs/")
-def get_all_jobs() -> list[JobSubmissionResponse]:
-    resp = requests.get(settings.RAY_JOBS_URL)
-    if resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(
-            f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}"
-        )
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Unexpected error getting job logs",
-        )
-    try:
-        metadata = json.loads(resp.text)
-        submissions: list[JobSubmissionResponse] = [
-            JobSubmissionResponse(**item) for item in metadata
-        ]
-        return submissions
-    except json.JSONDecodeError as e:
-        loguru.logger.error(f"JSON decode error: {e}")
-        loguru.logger.error(f"Response text: {resp.text}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e

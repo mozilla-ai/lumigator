@@ -39,7 +39,6 @@ class JobLogsResponse(BaseModel):
 
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
-    job_id: str | None = None
     submission_id: str | None = None
     driver_info: str | None = None
     status: str | None = None
@@ -105,3 +104,7 @@ class JobResultResponse(BaseModel, from_attributes=True):
 class JobResultDownloadResponse(BaseModel):
     id: UUID
     download_url: str
+
+
+class Job(JobResponse, JobSubmissionResponse):
+    pass

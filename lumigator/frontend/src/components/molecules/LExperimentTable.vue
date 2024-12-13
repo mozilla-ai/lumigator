@@ -174,6 +174,7 @@ watch(() => props.tableData.length, () => {
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;
+    text-transform: uppercase;
   }
 }
 </style>

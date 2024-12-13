@@ -11,7 +11,7 @@ import {
 async function fetchExperiments() {
   try {
     const response = await http.get(PATH_EXPERIMENTS_ROOT());
-    return response.data;
+    return response.data.items;
   } catch (error) {
     console.error("Error fetching experiments:", error.message || error);
     return [];

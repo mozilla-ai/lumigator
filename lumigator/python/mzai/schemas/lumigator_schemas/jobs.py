@@ -121,5 +121,4 @@ class Job(JobResponse, JobSubmissionResponse):
     consumers. Tt was not conceived as a type that will be around for long, as
     the API needs to be refactored to better support experiments.
     """
-
     pass

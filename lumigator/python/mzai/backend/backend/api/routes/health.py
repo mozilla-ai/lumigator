@@ -9,3 +9,4 @@ router = APIRouter()
 @router.get("/")
 def get_health() -> HealthResponse:
     return HealthResponse(deployment_type=settings.DEPLOYMENT_TYPE, status="OK")
+

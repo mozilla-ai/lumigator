@@ -54,4 +54,4 @@ jobs:
           tags: |
             mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && github.ref_name || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && mzdotai/lumigator-frontend:github.ref_name || '' }}

@@ -46,7 +46,7 @@ jobs:
 
       - name: Validate Tags
         run: |
-          echo "Tag 1: ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
+          echo "Tag 1: ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}"
           echo "Tag 2: ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}"
           echo "Tag 3: ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}"
 

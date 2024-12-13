@@ -1,11 +1,17 @@
 import json
+from http import HTTPStatus
 
+from lumigator_sdk.completions import Completions
 from pytest import raises
+from tests.helpers import load_json
 
 
-def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client, mock_vendor_data):
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
+def test_get_vendors_ok(lumi_client, mock_vendor_data, request_mock):
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
 
     vendors = lumi_client.completions.get_vendors()
 
@@ -15,9 +21,12 @@ def test_get_vendors_ok(mock_requests_response, mock_requests, lumi_client, mock
     assert "mistral" in vendors
 
 
-def test_get_vendors_none(mock_requests_response, mock_requests, lumi_client):
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads("[]")
+def test_get_vendors_none(lumi_client, request_mock):
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=[],
+    )
 
     vendors = lumi_client.completions.get_vendors()
     assert vendors is not None
@@ -25,68 +34,84 @@ def test_get_vendors_none(mock_requests_response, mock_requests, lumi_client):
 
 
 def test_get_completion_invalid_vendor(
-    mock_requests_response, mock_requests, lumi_client, mock_vendor_data
+    lumi_client, mock_vendor_data, request_mock
 ):
-    # Mock vendors response.
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
 
     with raises(ValueError):
         lumi_client.completions.get_completion("foo", "juan?")
 
 
 def test_get_completion_invalid_text_empty(
-    mock_requests_response, mock_requests, lumi_client, mock_vendor_data
+    lumi_client, mock_vendor_data, request_mock
 ):
-    # Mock vendors response.
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
 
     with raises(ValueError):
         lumi_client.completions.get_completion("openai", "")
 
 
 def test_get_completion_invalid_text_spacey(
-    mock_requests_response, mock_requests, lumi_client, mock_vendor_data
+    lumi_client, mock_vendor_data, request_mock
 ):
-    # Mock vendors response.
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
 
     with raises(ValueError):
         lumi_client.completions.get_completion("openai", "  ")
 
 
 def test_get_completion_openai_ok(
-    mock_requests_response, mock_requests, lumi_client, mock_vendor_data
+    lumi_client, mock_vendor_data, request_mock
 ):
-    # Mock vendors response and prep the cache.
-    # As we don't have this mocked during client creation.
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
+
     lumi_client.completions.get_vendors()
+    vendor = "openai"
 
-    # Now set the mock response data up as we'd expect it for the actual request
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads('{"text": "thanks"}')
+    request_mock.post(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}/{vendor}/",
+        status_code=HTTPStatus.OK,
+        json={"text": "thanks"},
+    )
 
-    response = lumi_client.completions.get_completion("openai", "please")
+    response = lumi_client.completions.get_completion(vendor, "please")
     assert response is not None
     assert response.text == "thanks"
 
 
 def test_get_completion_mistral_ok(
-    mock_requests_response, mock_requests, lumi_client, mock_vendor_data
+    lumi_client, mock_vendor_data, request_mock
 ):
-    # Mock vendors response and prep the cache.
-    # As we don't have this mocked during client creation.
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads(mock_vendor_data)
-    lumi_client.completions.get_vendors()
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
 
-    # Now set the mock response data up as we'd expect it for the actual request
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads('{"text": "thanks"}')
+    lumi_client.completions.get_vendors()
+    vendor = "mistral"
+
+    request_mock.post(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}/{vendor}/",
+        status_code=HTTPStatus.OK,
+        json={"text": "thanks"},
+    )
 
     response = lumi_client.completions.get_completion("mistral", "please")
     assert response is not None

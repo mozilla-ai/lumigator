@@ -1,25 +1,31 @@
 import io
 import json
-from http import HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from pathlib import Path
 from uuid import UUID
 
 from lumigator_schemas.datasets import DatasetFormat
+from lumigator_sdk.lm_datasets import Datasets
 from tests.helpers import check_method, load_json
 
 
-def test_get_datasets_ok(mock_requests_response, mock_requests, lumi_client, json_data_datasets):
-    mock_requests_response.status_code = 200
-    data = load_json(json_data_datasets)
-    mock_requests_response.json = lambda: data
+def test_get_datasets_ok(lumi_client, json_data_datasets, request_mock):
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=load_json(json_data_datasets),
+    )
 
     datasets = lumi_client.datasets.get_datasets()
     assert datasets is not None
 
 
-def test_get_datasets_none(mock_requests_response, mock_requests, lumi_client):
-    mock_requests_response.status_code = 200
-    mock_requests_response.json = lambda: json.loads('{"total": 0, "items": []}')
+def test_get_datasets_none(lumi_client, request_mock):
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json={"total": 0, "items": []},
+    )
 
     datasets = lumi_client.datasets.get_datasets()
     assert datasets is not None
@@ -27,40 +33,49 @@ def test_get_datasets_none(mock_requests_response, mock_requests, lumi_client):
     assert datasets.items == []
 
 
-def test_get_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
-    mock_requests_response.status_code = 200
+def test_get_dataset_ok(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
-    mock_requests_response.json = lambda: data
+    request_mock.get(
+        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        status_code=HTTPStatus.OK,
+        json=data,
+    )
 
     dataset = lumi_client.datasets.get_dataset(UUID(data["id"]))
     assert dataset is not None
 
 
-def test_delete_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
-    mock_requests_response.status_code = 204
+def test_delete_dataset_ok(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
-    mock_requests_response.json = lambda: None
-    mock_requests.side_effect = lambda **kwargs: check_method(str(HTTPMethod.DELETE), **kwargs)
+    request_mock.delete(
+        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        status_code=HTTPStatus.OK,
+        json=data,
+    )
 
     lumi_client.datasets.delete_dataset(UUID(data["id"]))
 
 
 def test_delete_dataset_not_found(
-    mock_requests_response, mock_requests, lumi_client, json_data_dataset
+    lumi_client, json_data_dataset, request_mock
 ):
-    mock_requests_response.status_code = 404
     data = load_json(json_data_dataset)
-    mock_requests_response.json = lambda: None
-    mock_requests.side_effect = lambda **kwargs: check_method(str(HTTPMethod.DELETE), **kwargs)
+    request_mock.delete(
+        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        status_code=HTTPStatus.NOT_FOUND,
+        json=data,
+    )
 
     lumi_client.datasets.delete_dataset(UUID(data["id"]))
 
 
-def test_create_dataset_ok(mock_requests_response, mock_requests, lumi_client, json_data_dataset):
-    mock_requests_response.status_code = 201
+def test_create_dataset_ok(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
-    mock_requests_response.json = lambda: data
-    mock_requests.side_effect = lambda **kwargs: check_method(str(HTTPMethod.POST), **kwargs)
+    request_mock.post(
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}",
+        status_code=HTTPStatus.CREATED,
+        json=load_json(json_data_dataset),
+    )
 
     content = io.BytesIO(bytearray(b"0" * 20))
     dataset = lumi_client.datasets.create_dataset(

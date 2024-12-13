@@ -246,5 +246,9 @@ watch(experimentStatus, (newStatus) => {
     display: flex;
     gap: $l-spacing-1;
   }
+
+  &__tag {
+    text-transform: uppercase;
+  }
 }
 </style>

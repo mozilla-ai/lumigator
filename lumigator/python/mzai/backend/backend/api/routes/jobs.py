@@ -1,5 +1,6 @@
 import json
 from http import HTTPStatus
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
@@ -63,8 +64,15 @@ def create_evaluation_job(
 
 
 @router.get("/{job_id}")
-def get_job(service: JobServiceDep, job_id: UUID) -> JobResponse:
-    return service.get_job(job_id)
+def get_job(service: JobServiceDep, job_id: UUID) -> Job:
+    job = service.get_job(job_id)
+    ray_job = _get_ray_job(job_id)
+
+    # Combine both types of response.
+    x = ray_job.model_dump()  # JobSubmissionResponse
+    y = job.model_dump()  # JobResponse
+    merged = {**x, **y}
+    return Job(**merged)
 
 
 @router.get("/")
@@ -141,6 +149,38 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
+        ) from e
+
+
+def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
+
+    if resp.status_code == HTTPStatus.NOT_FOUND:
+        loguru.logger.error(
+            f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}"
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job metadata for ID: {job_id} not found",
+        )
+    elif resp.status_code != HTTPStatus.OK:
+        loguru.logger.error(
+            "Unexpected status code getting job metadata text: "
+            f"{resp.status_code}, error: {resp.text or ''}"
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error getting job metadata for ID: {job_id}",
+        )
+
+    try:
+        metadata = json.loads(resp.text)
+        return JobSubmissionResponse(**metadata)
+    except json.JSONDecodeError as e:
+        loguru.logger.error(f"JSON decode error: {e}")
+        loguru.logger.error(f"Response text: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e

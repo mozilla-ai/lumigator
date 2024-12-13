@@ -7,7 +7,7 @@ import loguru
 import requests
 from fastapi import APIRouter, HTTPException
 from lumigator_schemas.extras import HealthResponse
-from lumigator_schemas.jobs import JobLogsResponse, JobSubmissionResponse
+from lumigator_schemas.jobs import JobLogsResponse
 
 from backend.settings import settings
 
@@ -17,39 +17,6 @@ router = APIRouter()
 @router.get("/")
 def get_health() -> HealthResponse:
     return HealthResponse(deployment_type=settings.DEPLOYMENT_TYPE, status="OK")
-
-
-@router.get("/jobs/{job_id}")
-def get_job_metadata(job_id: UUID) -> JobSubmissionResponse:
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
-
-    if resp.status_code == HTTPStatus.NOT_FOUND:
-        loguru.logger.error(
-            f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}"
-        )
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job metadata for ID: {job_id} not found",
-        )
-    elif resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(
-            "Unexpected status code getting job metadata text: "
-            f"{resp.status_code}, error: {resp.text or ''}"
-        )
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error getting job metadata for ID: {job_id}",
-        )
-
-    try:
-        metadata = json.loads(resp.text)
-        return JobSubmissionResponse(**metadata)
-    except json.JSONDecodeError as e:
-        loguru.logger.error(f"JSON decode error: {e}")
-        loguru.logger.error(f"Response text: {resp.text or ''}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
 
 
 @router.get("/jobs/{job_id}/logs")

@@ -9,7 +9,7 @@
   "error_type": null,
   "start_time": 1730999068650,
   "end_time": null,
-  "metadata": {},
+  "metadata": {"job_type": "evaluate"},
   "runtime_env": {
     "working_dir": "gcs://_ray_pkg_d5f068763637bcac.zip",
     "pip": {

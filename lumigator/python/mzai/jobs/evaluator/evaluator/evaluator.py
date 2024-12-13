@@ -59,6 +59,7 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
+    logger.info(f"Retrieving {config.dataset.path} for evaluation")
     if max_samples:
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
         # select data between the minimum and total length of dataset
@@ -68,6 +69,9 @@ def run_eval(config: EvalJobConfig) -> Path:
     # run evaluation and append to results dict
     predictions = dataset["predictions"]
     ground_truth = dataset["ground_truth"]
+
+    logger.info(f"Predictions: {predictions}")
+    logger.info(f"Ground truth: {ground_truth}")
 
     evaluation_results = run_eval_metrics(predictions, ground_truth, config.evaluation.metrics)
 

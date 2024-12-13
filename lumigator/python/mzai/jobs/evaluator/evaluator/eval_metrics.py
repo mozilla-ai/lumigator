@@ -24,7 +24,7 @@ class EvaluationMetrics:
         if len(self._unsupported_metrics) > 0:
             logger.info(f"Unsupported metrics: {self._unsupported_metrics}")
 
-    def _rouge(self, pred, ref):
+    def _rouge(self, pred: list, ref: list):
         ev = evaluate.load("rouge")
 
         # compute with use_aggregator = False to get individual scores
@@ -36,7 +36,7 @@ class EvaluationMetrics:
 
         return evals
 
-    def _meteor(self, pred, ref):
+    def _meteor(self, pred: list, ref: list):
         ev = evaluate.load("meteor")
 
         # initialize dictionary with metric name
@@ -51,7 +51,17 @@ class EvaluationMetrics:
 
         return evals
 
-    def _bertscore(self, pred, ref):
+    def _bertscore(self, pred: list, ref: list):
+        """https://huggingface.co/spaces/evaluate-metric/bertscore
+        BERTScore leverages the pre-trained contextual embeddings from BERT
+        and matches words in candidate and reference sentences by cosine similarity.
+
+        It uses two lists of strings of type Any (in our case, mostly strings) for comparsion
+
+        predictions = ["hello world", "general kenobi"]
+        references = ["goodnight moon", "the sun is shining"]
+        results = bertscore.compute(predictions=predictions)
+        """
         ev = evaluate.load("bertscore")
 
         # calculate evals (the default is not to aggregate them)
@@ -63,7 +73,7 @@ class EvaluationMetrics:
 
         return evals
 
-    def run_all(self, pred, ref):
+    def run_all(self, pred: list, ref: list):
         results = {}
 
         for metric in self._chosen_metrics:

@@ -112,8 +112,7 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="!(selectedExperiment.status === 'SUCCEEDED'
-          || selectedExperiment.status === 'FAILED')"
+        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
         @click="emit('l-results', selectedExperiment)"
       />
       <Button

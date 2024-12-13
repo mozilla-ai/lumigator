@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue';
 import { defineStore } from 'pinia'
 import experimentService from "@/services/experiments/experimentService";
-import { retrieveEntrypoint, calculateDuration } from '@/helpers/index'
+import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
 
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
@@ -44,6 +44,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
     experimentLogs.value = [];
     retrieveLogs();
+  }
+
+  async function loadResultsFile(experiment_id) {
+    const blob = await experimentService.downloadResults(experiment_id);
+    downloadContent(blob, `${selectedExperiment.value.name}_results`)
   }
 
   async function loadResults(experiment_id) {
@@ -134,6 +139,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments,
     loadDetails,
     loadResults,
+    loadResultsFile,
     selectedExperiment,
     experimentLogs,
     selectedExperimentRslts,

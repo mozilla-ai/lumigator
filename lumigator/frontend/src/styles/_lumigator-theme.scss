@@ -11,6 +11,11 @@
   &:hover {
     background-color: $l-button-hover-bg;
   }
+
+  &:disabled:hover {
+    background-color: var(--l-button-secondary-background);
+    cursor:not-allowed;
+  }
 }
 
 .p-card {

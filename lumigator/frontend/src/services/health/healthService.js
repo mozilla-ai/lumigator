@@ -11,17 +11,8 @@ async function fetchHealthStatus() {
   }
 }
 
-async function fetchJobStatus(id) {
-  try {
-    const response = await http.get(PATH_HEALTH_JOB_METADATA(id));
-    return response.data.status
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-}
+
 
 export default {
-  fetchHealthStatus,
-  fetchJobStatus
+  fetchHealthStatus
 }

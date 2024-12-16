@@ -23,6 +23,16 @@ async function fetchExperimentDetails(id) {
   return response.data
 }
 
+async function fetchJobStatus(id) {
+  try {
+    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+    return response.data.status
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+}
+
 async function triggerExperiment(experimentPayload) {
   try {
     const response = await http.post(PATH_EXPERIMENTS_EVALUATE(), experimentPayload, {
@@ -87,6 +97,7 @@ async function fetchLogs(id) {
 
 export default {
   fetchExperiments,
+  fetchJobStatus,
   fetchResults,
   downloadResults,
   fetchExperimentDetails,

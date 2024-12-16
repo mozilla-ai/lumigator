@@ -10,6 +10,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   const isPolling = ref(false);
   let experimentInterval = null;
   const experimentLogs = ref([]);
+  const runningJobs = ref([])
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
@@ -126,6 +127,25 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  async function updateJobStatus(jobId) {
+    try {
+      const status = await experimentService.fetchJobStatus(jobId);
+      const job = runningJobs.value.find((job) => job.id === jobId);
+      if (job) {
+        job.status = status;
+      }
+    } catch (error) {
+      console.error(`Failed to update status for job ${jobId} ${error}`);
+    }
+  }
+
+  async function updateAllJobs() {
+    const promises = runningJobs.value
+      .filter((job) => job.status.toUpperCase() !== ExperimentStatus.Succ && job.status !== 'FAILED') // Exclude complete or failed jobs
+      .map((job) => updateJobStatus(job.id));
+    await Promise.all(promises);
+  }
+
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
       startPolling()
@@ -143,7 +163,9 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedExperiment,
     experimentLogs,
     selectedExperimentRslts,
+    updateAllJobs,
     loadExperiments,
-    runExperiment
+    runExperiment,
+    runningJobs,
   }
 })

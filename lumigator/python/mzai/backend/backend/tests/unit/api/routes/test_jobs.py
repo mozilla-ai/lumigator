@@ -75,3 +75,29 @@ def test_get_job_results(
     extracted_url_path = match.group(0) if match else None
 
     assert extracted_url_path == expected_url_path
+
+    
+def test_annotate_job(
+    app_client: TestClient,
+):
+    payload = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "dataset": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "max_samples": 2,
+        "task": "summarization",
+    }
+
+    post_response = app_client.post(
+        "/jobs/annotate/",
+        json=payload,
+    )
+
+    assert post_response.status_code == 201
+
+    job_id = post_response.json()["id"]
+    response = app_client.get(f"/jobs/{job_id}")
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["status"].lower() == "pending"

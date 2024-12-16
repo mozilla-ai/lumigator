@@ -88,6 +88,14 @@ class JobInferenceCreate(BaseModel):
     config_template: str | None = None
 
 
+class JobAnnotateCreate(BaseModel):
+    name: str
+    description: str = ""
+    dataset: UUID
+    max_samples: int = -1  # set to all samples by default
+    task: str | None = "summarization"
+
+
 class JobResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str

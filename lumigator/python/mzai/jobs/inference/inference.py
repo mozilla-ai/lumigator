@@ -38,9 +38,7 @@ def save_to_disk(local_path: Path, data_dict: dict):
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
-        storage_path = "s3://" + str(
-            Path(storage_path[5:]) / config.name / "inference_results.json"
-        )
+        storage_path = "s3://" + str(Path(storage_path[5:]) / config.name / "results.json")
     logger.info(f"Storing into {storage_path}...")
     s3.put_file(local_path, storage_path)
 
@@ -51,9 +49,7 @@ def save_outputs(config: InferenceJobConfig, inference_results: dict) -> Path:
     # generate local temp file ANYWAY:
     # - if storage_path is not provided, it will be stored and kept into a default dir
     # - if storage_path is provided AND saving to S3 is successful, local file is deleted
-    local_path = Path(
-        Path.home() / ".lumigator" / "results" / config.name / "inference_results.json"
-    )
+    local_path = Path(Path.home() / ".lumigator" / "results" / config.name / "results.json")
 
     try:
         save_to_disk(local_path, inference_results)

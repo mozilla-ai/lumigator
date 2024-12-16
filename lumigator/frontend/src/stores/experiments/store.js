@@ -128,7 +128,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function updateJobStatus(jobId) {
-    try {
+       try {
       const status = await experimentService.fetchJobStatus(jobId);
       const job = runningJobs.value.find((job) => job.id === jobId);
       if (job) {

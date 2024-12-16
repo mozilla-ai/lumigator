@@ -185,3 +185,12 @@ weights for a given open LLM, as well as everything needed to actually run that 
 computer. There's nothing to install or configure.
 
 There are no summarization-specific parameters for this model.
+
+
+# Reference models
+
+We encourage using human-annotated dataset in your evaluations. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) to get you started.
+
+You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
+
+Under the hood, this will launch an inference job with the reference model for summarization (Bart, described above).

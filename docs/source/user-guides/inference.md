@@ -73,7 +73,7 @@ Refer to the `.env.example` file in the repository for more details.
     lm_client.jobs.wait_for_job(job.id, poll_wait=10)
 
     # Retrieve the job results
-    url = f"http://{HOST}:{RAY_PORT}/{BUCKET}/jobs/results/{name}/{job.id}/inference_results.json"
+    url = f"http://{HOST}:{RAY_PORT}/{BUCKET}/jobs/results/{name}/{job.id}/results.json"
     response = requests.get(url=url)
 
     if response.status_code != 200:
@@ -81,7 +81,7 @@ Refer to the `.env.example` file in the repository for more details.
     results = response.json()
 
     # Write the JSON results to a file
-    with open("inference_results.json", "w") as f:
+    with open("results.json", "w") as f:
         json.dump(results, f, indent=4)
     ```
 
@@ -93,11 +93,11 @@ Refer to the `.env.example` file in the repository for more details.
 
 ## Verify
 
-Review the contents of the `inference_results.json` file to ensure that the inference job ran
+Review the contents of the `results.json` file to ensure that the inference job ran
 successfully:
 
 ```console
-user@host:~/lumigator$ cat inference_results.json | jq
+user@host:~/lumigator$ cat results.json | jq
 {
 "prediction": [
     "A man has trouble breathing. He is sent to see a pulmonary specialist. The doctor tests him for asthma. He does not have any allergies that he knows of. He also has a heavy feeling in his chest when he tries to breathe. This happens a lot when he works out, he says.",

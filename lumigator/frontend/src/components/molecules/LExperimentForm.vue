@@ -206,7 +206,7 @@ onMounted(async () => {
   p {
     font-size: $l-font-size-sm;
     color: $l-grey-100;
-    padding: 0 $l-spacing-1 $l-spacing-1 $l-spacing-1;
+    padding: 0 $l-spacing-sm $l-spacing-1 $l-spacing-sm;
   }
 
   &__header, &__models-container{

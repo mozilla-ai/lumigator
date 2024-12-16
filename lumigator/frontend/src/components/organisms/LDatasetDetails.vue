@@ -12,12 +12,6 @@
       <h3>Dataset Details</h3>
       <span class="l-dataset-details__header-actions">
         <Button
-          icon="pi pi-external-link"
-          severity="secondary"
-          variant="text"
-          rounded
-        />
-        <Button
           icon="pi pi-download"
           severity="secondary"
           variant="text"
@@ -25,7 +19,7 @@
         />
         <Button
           severity="secondary"
-          icon="pi pi-trash"
+          icon="pi pi-bin"
           variant="text"
           rounded
           @click="emit('l-delete-dataset', selectedDataset)"
@@ -116,6 +110,7 @@ function onCloseDetails() {
     display: flex;
     padding: $l-spacing-1 0;
     justify-content: space-between;
+    align-items: center;
 
     h3 {
       font-weight: $l-font-weight-normal;
@@ -127,6 +122,15 @@ function onCloseDetails() {
       background-color: $l-main-bg;
       border: none;
       color: $l-grey-100;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+
+      > * {
+        height: 14px;
+      }
     }
   }
 

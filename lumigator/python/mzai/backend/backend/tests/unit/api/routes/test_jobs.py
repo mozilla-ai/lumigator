@@ -1,4 +1,5 @@
 import json
+import re
 import urllib
 from pathlib import Path
 
@@ -43,3 +44,34 @@ def test_get_job_status(
 
     data = response.json()
     assert data["status"].lower() == "running"
+
+
+def test_get_job_results(
+    app_client: TestClient,
+    job_repository,
+    request_mock,
+    json_ray_version,
+    json_data_health_job_metadata_ray,
+):
+    created_job = job_repository.create(name="test", description="")
+
+    expected_url_path = f"lumigator-storage/jobs/results/test/{created_job.id}/results.json"
+
+    # The Ray client will call the Ray API to get the version during initialization
+    request_mock.get(
+        url=settings.RAY_VERSION_URL,
+        status_code=status.HTTP_200_OK,
+        text=json.dumps(load_json(json_ray_version)),
+    )
+
+    response = app_client.get(f"/jobs/{created_job.id}/result/download")
+
+    assert response is not None
+    assert response.status_code == status.HTTP_200_OK
+    response_json = response.json()
+    download_url = response_json["download_url"]
+
+    match = re.search(r"lumigator-storage/.+?\.json", download_url)
+    extracted_url_path = match.group(0) if match else None
+
+    assert extracted_url_path == expected_url_path

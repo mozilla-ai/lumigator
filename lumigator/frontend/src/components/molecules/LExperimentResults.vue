@@ -17,23 +17,43 @@
 
       <Column
         field="example"
-        header="examples"
         bodyStyle="max-width: 300px"
       >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.examples"
+            class="p-datatable-column-title"
+          >Examples
+          </span>
+        </template>
         <template #body="slotProps">
           {{ slotProps.data.example }}
         </template>
       </Column>
       <Column
         field="ground_truth"
-        header="Ground Truth"
         bodyStyle="max-width: 300px"
-      ></Column>
+      >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.ground_truth"
+            class="p-datatable-column-title"
+          >Ground Truth
+          </span>
+        </template>
+      </Column>
       <Column
         field="predictions"
-        header="predictions"
         bodyStyle="max-width: 300px"
-      ></Column>
+      >
+        <template #header>
+          <span
+            v-tooltip.bottom="tooltips.predictions"
+            class="p-datatable-column-title"
+          >Predictions
+          </span>
+        </template>
+      </Column>
       <Column
         field="rouge.rouge1"
         sortable
@@ -141,44 +161,79 @@ const props = defineProps({
   }
 })
 
+const tooltipColorsConfig = ref({
+  root: {
+    style: {
+      background: `transparent`,
+    }
+  },
+  text: {
+    style: {
+    background: `black`
+    }
+  },
+  arrow: {
+    style: {
+      ['border-bottom-color']: `black`,
+    }
+  }
+})
+
 const tableData = ref([]);
 const tooltips = ref({
+  examples: {
+    value: `Text which is passed as an input to the model, together
+    with a task-dependent prompt.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value
+  },
+  ground_truth: {
+    value: `Expected output we are comparing the model's predictions with
+     - all metrics are results of such a comparison.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value
+  },
+  predictions: {
+    value: `Answers provided by the model after being prompted with the input.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value
+  },
   rouge1: {
     value: `Measures the overlap of individual words
      between the predicted and ground-truth summaries, focusing on basic word-level similarity.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
   rouge2: {
     value: `Calculates the overlap of two-word sequences (bigrams) capturing
     both word choices and their immediate order.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
   rougeL: {
     value: `Identifies the longest matching sequence of words (not necessarily consecutive),
     considering overall structure while allowing for gaps between words.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
   meteor: {
     value: `Evaluates predictions by comparing words, synonyms, and flexible word orders
      balancing precision and recall for semantic similarity.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
   bertPrecision: {
     value: `Measures the precision of predictions,
     calculated as the proportion of predicted tokens that are semantically
     similar to tokens in the ground truth.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
   bertF1: {
     value: `Harmonic mean of BERT Precision and BERT Recall, providing a balanced
     measure of how well the prediction aligns with the ground truth both in accuracy and coverage.`,
     class: 'metric-tooltip',
-    pt: { text: 'tooltip-content' }
+    pt: tooltipColorsConfig.value
   },
 })
 
@@ -189,11 +244,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-.metric-tooltip {
-  border-radius: $l-border-radius;
-
-  .tooltip-content {
-    background-color: #000;
-  }
+.p-datatable-column-title {
+  cursor: pointer;
 }
 </style>

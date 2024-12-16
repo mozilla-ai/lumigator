@@ -240,7 +240,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/$SUBMISSION_ID/
   -H 'accept: application/json' | jq
 {
   "id": "5195c9a5-938d-475e-b0fc-cf866492909d",
-  "download_url": "http://localhost:4566/lumigator-storage/jobs/results/lumigator_enthusiasts/5195c9a5-938d-475e-b0fc-cf866492909d/eval_results.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=test%2F20241031%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20241031T104126Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0309fe4825bc2358180c607a4a4ad4e8d36946133574d8b9416df228ce62944e"
+  "download_url": "http://localhost:4566/lumigator-storage/jobs/results/lumigator_enthusiasts/5195c9a5-938d-475e-b0fc-cf866492909d/results.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=test%2F20241031%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20241031T104126Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0309fe4825bc2358180c607a4a4ad4e8d36946133574d8b9416df228ce62944e"
 }
 ```
 

@@ -210,6 +210,7 @@ watch(experimentStatus, (newStatus) => {
       color: $l-grey-200;
       text-transform: uppercase;
       font-weight: $l-font-weight-bold;
+      font-size: $l-font-size-sm;
     }
 
     &-logs {

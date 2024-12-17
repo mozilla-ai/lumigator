@@ -124,6 +124,7 @@ test-backend-unit:
 
 test-backend-integration-target:
 	cd lumigator/python/mzai/backend/; \
+	docker container list --all; \
 	rm local.db; \
 	SQLALCHEMY_DATABASE_URL=sqlite:///local.db RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" INFERENCE_PIP_REQS=../jobs/inference/requirements.txt INFERENCE_WORK_DIR=../jobs/inference EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt EVALUATOR_WORK_DIR=../jobs/evaluator uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 

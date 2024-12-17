@@ -44,14 +44,14 @@ jobs:
         run: uv build
         working-directory: lumigator/python/mzai/schemas
 
-      - name: Upload SDK packages to Test PyPI
+      - name: Upload SDK packages to PyPI
         working-directory: lumigator/python/mzai/sdk
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/
+          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose --publish-url https://upload.pypi.org/legacy/
 
-      - name: Upload schemas packages to Test PyPI
+      - name: Upload schemas packages to PyPI
         working-directory: lumigator/python/mzai/schemas
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.TESTPYPI_TOKEN }} --verbose --publish-url https://test.pypi.org/legacy/
+          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose --publish-url https://upload.pypi.org/legacy/

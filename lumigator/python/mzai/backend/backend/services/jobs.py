@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import json
 import time
@@ -217,7 +218,7 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _watch_job(self, job_id: UUID, request: JobEvalCreate | JobInferenceCreate):
+    async def _watch_job(self, job_id: UUID, request: JobEvalCreate | JobInferenceCreate):
         job_status = self.ray_client.get_job_status(job_id)
         job_info = self.ray_client.get_job_info(job_id)
         job_metadata = job_info.metadata
@@ -231,7 +232,7 @@ class JobService:
         stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
 
         while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            time.sleep(5)
+            await asyncio.sleep(5)
             job_status = self.ray_client.get_job_status(job_id)
 
         if job_status.lower() == JobStatus.FAILED.value.lower():

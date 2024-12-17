@@ -48,6 +48,8 @@ class BackendSettings(BaseSettings):
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
     EVALUATOR_PIP_REQS: str | None = None
+    # TODO: change once we remove old eval
+    NEW_EVALUATOR_COMMAND: str = "python evaluator/evaluator.py"
 
     @computed_field
     @property
@@ -58,6 +60,15 @@ class BackendSettings(BaseSettings):
         on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
         """
         return f"{self.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
+
+    # TODO: CHANGE JOB TO POINT HERE ONCE NEW INFER-EVAL WORKFLOW WORKS
+    def EVALUATOR_COMMAND_WITH_LD_PRELOAD(self) -> str:  # noqa: N802
+        """Returns the command required to run evaluator.
+
+        The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
+        on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
+        """
+        return f"{self.LD_PRELOAD_PREFIX} {self.EVALUATOR_COMMAND}"
 
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None

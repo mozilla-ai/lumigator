@@ -120,5 +120,5 @@ def test_get_job_id_does_not_exist(lumi_client, request_mock):
     )
 
     # We expect the SDK to handle the 404 and return None.
-    job = lumi_client.health.get_job(job_id)
-    assert job is None
+    with raises(HTTPError):
+        job = lumi_client.health.get_job(job_id)

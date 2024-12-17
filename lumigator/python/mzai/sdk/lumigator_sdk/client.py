@@ -122,13 +122,8 @@ class ApiClient:
             # e.g. 307 - Temporary Redirect
             if HTTPStatus.OK <= response.status_code <= HTTPStatus.NO_CONTENT:
                 return response
-        except HTTPError as e:
-            if e.response.status_code == HTTPStatus.NOT_FOUND:
-                return e.response
-            else:
-                # Re-raise the exception if it's not a 404 error
-                # This happens for status codes such as 400 - Bad Request etc.
-                raise
+        except HTTPError:
+            raise
         except requests.RequestException:
             raise
 

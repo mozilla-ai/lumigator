@@ -176,7 +176,7 @@ class JobService:
         loguru.logger.info("The job completed")
 
     def create_job(
-        self, request: JobEvalCreate | JobInferenceCreate, background_tasks: BackgroundTasks
+        self, request: JobEvalCreate | JobInferenceCreate, background_tasks: BackgroundTasks = None
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
@@ -246,7 +246,8 @@ class JobService:
         loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        background_tasks.add_task(self.job_specific_background_task, record.id)
+        if background_tasks is not None:
+            background_tasks.add_task(self.job_specific_background_task, record.id)
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

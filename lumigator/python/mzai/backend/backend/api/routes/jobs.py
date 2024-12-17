@@ -82,6 +82,13 @@ def list_jobs(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[Job]:
+    """Attempts to retrieve job data from the Lumigator repository where Ray
+    metadata is also available.
+
+    Results are a merged representation which form an augmented view of a 'job'.
+
+    NOTE: Lumigator repository data takes precedence over Ray metadata.
+    """
     jobs = service.list_jobs(skip, limit)
     if not jobs or jobs.total == 0 or len(jobs.items) == 0:
         return jobs
@@ -117,6 +124,10 @@ def list_jobs(
 
 @router.get("/{job_id}")
 def get_job(service: JobServiceDep, job_id: UUID) -> Job:
+    """Attempts to retrieve merged job data from the Lumigator repository and Ray.
+
+    NOTE: Lumigator repository data takes precedence over Ray metadata.
+    """
     job = service.get_job(job_id)
     ray_job = _get_ray_job(job_id)
 

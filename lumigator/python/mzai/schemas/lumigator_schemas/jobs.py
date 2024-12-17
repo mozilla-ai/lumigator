@@ -107,4 +107,19 @@ class JobResultDownloadResponse(BaseModel):
 
 
 class Job(JobResponse, JobSubmissionResponse):
+    """Job represents the composition of JobResponse and JobSubmissionResponse.
+
+    JobSubmissionResponse was formerly returned from some /health/jobs related
+    endpoints, while JobResponse was used by /jobs related endpoints.
+
+    The only conflicting field in the two schemas is 'status' which is consistent
+    in what it intends to represent, but uses different types (JobStatus/str).
+
+    The Job type has both id and submission_id which will contain the same data.
+
+    NOTE: Job is intended to reduce breaking changes experienced by the UI and other
+    consumers. Tt was not conceived as a type that will be around for long, as
+    the API needs to be refactored to better support experiments.
+    """
+
     pass

@@ -320,7 +320,8 @@ class JobService:
         loguru.logger.info("Submitting Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        background_tasks.add_task(self.job_specific_background_task, record.id)
+        if background_tasks is not None:
+            background_tasks.add_task(self.job_specific_background_task, record.id)
 
         loguru.logger.info(f"Job type: {job_type}")
 

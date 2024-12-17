@@ -16,7 +16,6 @@ endif
 define run_with_containers
 	@echo "No Lumigator containers are running. Starting containers..."
 	make start-lumigator-build
-	trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; \
 	make $(1)
 endef
 

@@ -204,7 +204,13 @@ class JobService:
             filename=dataset_filename,
             headers={"content-type": "text/csv"},
         )
-        dataset_record = self.data_service.upload_dataset(upload_file, format=DatasetFormat.JOB)
+        dataset_record = self.data_service.upload_dataset(
+            upload_file,
+            format=DatasetFormat.JOB,
+            run_id=job_id,
+            generated=True,
+            generated_by=results["model"],
+        )
 
         loguru.logger.info(
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."

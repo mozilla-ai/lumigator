@@ -66,7 +66,7 @@
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
-            style="font-size: 10px;padding-left: 3px;"
+            style="font-size: 14px;padding-left: 3px;"
           />
         </div>
       </div>

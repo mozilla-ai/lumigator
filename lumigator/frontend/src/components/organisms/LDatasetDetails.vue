@@ -33,10 +33,18 @@
           {{ selectedDataset.filename }}
         </span>
       </div>
-      <div class="l-dataset-details__content-item">
+      <div
+        class="l-dataset-details__content-item"
+        @click="copyToClipboard(selectedDataset.id)"
+      >
         <span class="l-dataset-details__content-label">dataset id</span>
         <span class="l-dataset-details__content-field">
           {{ selectedDataset.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 14px;padding-left: 3px;cursor: pointer;"
+          />
         </span>
       </div>
       <div class="l-dataset-details__content-item">
@@ -72,6 +80,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
@@ -81,12 +90,21 @@ import Button from 'primevue/button';
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
+const isCopied = ref(false);
 
 const emit = defineEmits([
   'l-delete-dataset',
   'l-details-closed',
   'l-experiment'
 ])
+
+const copyToClipboard = async (longString) => {
+  isCopied.value = true;
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 3000);
+  await navigator.clipboard.writeText(longString);
+};
 
 function onCloseDetails() {
   showSlidingPanel.value = false;
@@ -145,6 +163,11 @@ function onCloseDetails() {
       text-transform: uppercase;
       font-weight: $l-font-weight-bold;
       font-size: $l-font-size-sm;
+    }
+
+    &-field {
+      display: flex;
+      justify-content: space-between;
     }
 
   }

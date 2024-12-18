@@ -1,5 +1,5 @@
 import http from '@/services/http';
-import { PATH_HEALTH_ROOT, PATH_HEALTH_JOB_METADATA } from './api';
+import { PATH_HEALTH_ROOT } from './api';
 
 async function fetchHealthStatus() {
   try {

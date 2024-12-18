@@ -196,7 +196,6 @@ watch(showSlidingPanel, (newValue) => {
 
 	&:hover {
 		color: white;
-    text-shadow: 0 0 1px white;
 	}
 
   &-icon,  span.pi {

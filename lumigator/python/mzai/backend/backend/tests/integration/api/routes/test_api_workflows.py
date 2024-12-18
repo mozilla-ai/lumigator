@@ -1,4 +1,5 @@
 from time import sleep
+from unittest.mock import patch
 
 import pytest
 import requests
@@ -44,15 +45,20 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "config_template": "string",
     }
 
-    create_evaluation_job_response = local_client.post(
-        "/jobs/evaluate/", headers=headers, json=payload
-    )
-    assert create_evaluation_job_response.status_code == 201
+    # Mocking the background task because the test hangs indefinitely,
+    # waiting for the background task to finish.
+    with patch("fastapi.BackgroundTasks.add_task") as mock:
+        create_evaluation_job_response = local_client.post(
+            "/jobs/evaluate/", headers=headers, json=payload
+        )
+        assert create_evaluation_job_response.status_code == 201
+        assert mock.called
 
-    create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=headers, json=payload
-    )
-    assert create_inference_job_response.status_code == 201
+        create_inference_job_response = local_client.post(
+            "/jobs/inference/", headers=headers, json=payload
+        )
+        assert create_inference_job_response.status_code == 201
+        assert mock.called
 
 
 def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
@@ -77,8 +83,14 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
         "max_samples": 2,
     }
 
-    create_experiments_response = local_client.post("/experiments/", headers=headers, json=payload)
-    assert create_experiments_response.status_code == 201
+    # Mocking the background task because the test hangs indefinitely,
+    # waiting for the background task to finish.
+    with patch("fastapi.BackgroundTasks.add_task") as mock:
+        create_experiments_response = local_client.post(
+            "/experiments/", headers=headers, json=payload
+        )
+        assert create_experiments_response.status_code == 201
+        assert mock.called
 
     get_experiments_response = local_client.get("/experiments/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(

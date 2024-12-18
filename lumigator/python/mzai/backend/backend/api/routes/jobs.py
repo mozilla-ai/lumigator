@@ -27,55 +27,6 @@ from backend.settings import settings
 router = APIRouter()
 
 
-@router.post("/inference/", status_code=status.HTTP_201_CREATED)
-def create_inference_job(
-    service: JobServiceDep,
-    job_create_request: JobInferenceCreate,
-    request: Request,
-    response: Response,
-    background_tasks: BackgroundTasks,
-) -> JobResponse:
-    # The FastAPI BackgroundTasks object is used to run a function in the background.
-    # It is a wrapper arount Starlette's BackgroundTasks object.
-    # A background task should be attached to a response,
-    # and will run only once the response has been sent.
-    # See here: https://www.starlette.io/background/
-    job_response = service.create_job(job_create_request, background_tasks)
-
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
-    response.headers[HttpHeaders.LOCATION] = f"{url}"
-
-    return job_response
-
-
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_job(
-    service: JobServiceDep,
-    job_create_request: JobEvalCreate,
-    request: Request,
-    response: Response,
-    background_tasks: BackgroundTasks,
-) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
-
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
-    response.headers[HttpHeaders.LOCATION] = f"{url}"
-
-    return job_response
-
-
-@router.get("/{job_id}")
-def get_job(service: JobServiceDep, job_id: UUID) -> Job:
-    job = service.get_job(job_id)
-    ray_job = _get_ray_job(job_id)
-
-    # Combine both types of response.
-    x = ray_job.model_dump()  # JobSubmissionResponse
-    y = job.model_dump()  # JobResponse
-    merged = {**x, **y}
-    return Job(**merged)
-
-
 @router.get("/")
 def list_jobs(
     service: JobServiceDep,
@@ -209,6 +160,43 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
         ) from e
+
+
+@router.post("/inference/", status_code=status.HTTP_201_CREATED)
+def create_inference_job(
+    service: JobServiceDep,
+    job_create_request: JobInferenceCreate,
+    request: Request,
+    response: Response,
+    background_tasks: BackgroundTasks,
+) -> JobResponse:
+    # The FastAPI BackgroundTasks object is used to run a function in the background.
+    # It is a wrapper arount Starlette's BackgroundTasks object.
+    # A background task should be attached to a response,
+    # and will run only once the response has been sent.
+    # See here: https://www.starlette.io/background/
+    job_response = service.create_job(job_create_request, background_tasks)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
+
+
+@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
+def create_evaluation_job(
+    service: JobServiceDep,
+    job_create_request: JobEvalCreate,
+    request: Request,
+    response: Response,
+    background_tasks: BackgroundTasks,
+) -> JobResponse:
+    job_response = service.create_job(job_create_request, background_tasks)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
 
 
 def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:

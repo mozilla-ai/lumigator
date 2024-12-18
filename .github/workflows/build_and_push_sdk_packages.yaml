@@ -48,10 +48,10 @@ jobs:
         working-directory: lumigator/python/mzai/sdk
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose --publish-url https://upload.pypi.org/legacy/
+          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
 
       - name: Upload schemas packages to PyPI
         working-directory: lumigator/python/mzai/schemas
         run: |
           source .venv/bin/activate
-          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose --publish-url https://upload.pypi.org/legacy/
+          uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose

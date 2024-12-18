@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(
+async def create_experiment(
     service: ExperimentServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
 ) -> ExperimentResponse:
     return ExperimentResponse.model_validate(service.create_experiment(request, background_tasks))

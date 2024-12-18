@@ -1,10 +1,8 @@
-import json
-import time
+import asyncio
 from pathlib import Path
 from uuid import UUID
 
 import loguru
-import requests
 from fastapi import BackgroundTasks, HTTPException, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -165,14 +163,13 @@ class JobService:
 
         return job_params
 
-    def job_specific_background_task(self, job_id: str):
-        status = "PENDING"
+    async def job_specific_background_task(self, job_id: str):
+        job_status = "PENDING"
         loguru.logger.info(f"Job id: {job_id}")
-        while status != "SUCCEEDED" and status != "FAILED":
-            res = requests.get(f"http://localhost:8000/api/v1/health/jobs/{job_id}")
-            status = json.loads(res.text)["status"]
-            loguru.logger.info(f"Job id: {job_id}, status: {status}")
-            time.sleep(5)
+        while str(job_status) != "SUCCEEDED" and status != "FAILED":
+            job_status = self.ray_client.get_job_status(job_id)
+            loguru.logger.info(f"Job id: {job_id}, status: {job_status}")
+            await asyncio.sleep(5)
         loguru.logger.info("The job completed")
 
     def create_job(

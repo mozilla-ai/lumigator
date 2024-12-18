@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
@@ -23,9 +23,15 @@ def create_inference_job(
     service: JobServiceDep,
     job_create_request: JobInferenceCreate,
     request: Request,
-    response: Response
+    response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request)
+    # The FastAPI BackgroundTasks object is used to run a function in the background.
+    # It is a wrapper arount Starlette's BackgroundTasks object.
+    # A background task should be attached to a response,
+    # and will run only once the response has been sent.
+    # See here: https://www.starlette.io/background/
+    job_response = service.create_job(job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -38,9 +44,10 @@ def create_evaluation_job(
     service: JobServiceDep,
     job_create_request: JobEvalCreate,
     request: Request,
-    response: Response
+    response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request)
+    job_response = service.create_job(job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

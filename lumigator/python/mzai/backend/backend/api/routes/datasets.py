@@ -20,9 +20,18 @@ def upload_dataset(
     dataset: UploadFile,
     format: Annotated[DatasetFormat, Form()],
     request: Request,
-    response: Response
+    response: Response,
+    run_id: Annotated[
+        UUID | None, Form(description="Provide the Jod ID that generated this dataset.")
+    ] = None,
+    generated: Annotated[bool, Form(description="Is the dataset is AI-generated?")] = False,
+    generated_by: Annotated[
+        str | None, Form(description="The name of the AI model that generated this dataset.")
+    ] = None,
 ) -> DatasetResponse:
-    ds_response = service.upload_dataset(dataset, format)
+    ds_response = service.upload_dataset(
+        dataset, format, run_id=run_id, generated=generated, generated_by=generated_by
+    )
 
     url = request.url_for(get_dataset.__name__, dataset_id=ds_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -47,8 +56,7 @@ def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
     try:
         service.delete_dataset(dataset_id)
     except Exception as e:
-        logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. "
-                            f"{e}")
+        logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error deleting dataset for ID: {dataset_id}",

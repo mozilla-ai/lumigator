@@ -141,7 +141,8 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function updateAllJobs() {
     const promises = runningJobs.value
-      .filter((job) => job.status.toUpperCase() !== ExperimentStatus.Succ && job.status !== 'FAILED') // Exclude complete or failed jobs
+      .filter((job) => job.status.toUpperCase() !== 'SUCCEEDED' &&
+        job.status.toUpperCase() !== 'FAILED') // Exclude complete or failed jobs
       .map((job) => updateJobStatus(job.id));
     await Promise.all(promises);
   }

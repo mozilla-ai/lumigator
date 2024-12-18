@@ -1,15 +1,22 @@
 import asyncio
+<<<<<<< HEAD
 import csv
 import json
 import time
 from io import BytesIO, StringIO
+=======
+>>>>>>> 08aaeda (Use ray client for status - move tasks to async so they won't run in threads)
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
 import loguru
+<<<<<<< HEAD
 from fastapi import HTTPException, UploadFile, status
 from lumigator_schemas.datasets import DatasetFormat
+=======
+from fastapi import BackgroundTasks, HTTPException, status
+>>>>>>> 08aaeda (Use ray client for status - move tasks to async so they won't run in threads)
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
@@ -174,6 +181,7 @@ class JobService:
 
         return job_params
 
+<<<<<<< HEAD
     def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
         loguru.logger.info("Adding a new dataset entry to the database...")
         s3 = S3FileSystem()
@@ -244,6 +252,16 @@ class JobService:
             # Add the dataset to the (local) database
             if job_type == JobType.INFERENCE:
                 self._add_dataset_to_db(job_id, request)
+=======
+    async def job_specific_background_task(self, job_id: str):
+        job_status = "PENDING"
+        loguru.logger.info(f"Job id: {job_id}")
+        while str(job_status) != "SUCCEEDED" and status != "FAILED":
+            job_status = self.ray_client.get_job_status(job_id)
+            loguru.logger.info(f"Job id: {job_id}, status: {job_status}")
+            await asyncio.sleep(5)
+        loguru.logger.info("The job completed")
+>>>>>>> 08aaeda (Use ray client for status - move tasks to async so they won't run in threads)
 
     def create_job(
         self, request: JobEvalCreate | JobInferenceCreate, background_tasks: "BackgroundTasks"

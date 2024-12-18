@@ -35,7 +35,6 @@ def test_upload_data_launch_job(
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
 
-    print(f"response: {create_response.text}")
     assert create_response.status_code == 201
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
@@ -63,21 +62,17 @@ def test_upload_data_launch_job(
     )
 
     succeeded = False
-    for i in range(1, 200):
+    for _ in range(1, 200):
         get_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
-            print("Job succeeded!!!")
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
-            print("Job failed...")
             break
-        time.sleep(30)
-    print("Check if job succeeded")
+        time.sleep(10)
     assert succeeded
 
     logs_evaluation_job_response = local_client.get(
@@ -107,52 +102,32 @@ def test_upload_data_launch_job(
     )
 
     succeeded = False
-    for i in range(1, 200):
+    for _ in range(1, 200):
         get_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f"--> try {i}: {get_job_response_model}")
         logs_infer_job_response = local_client.get(
             f"/health/jobs/{create_inference_job_response_model.id}/logs"
         )
         logs_infer_job_response_model = JobLogsResponse.model_validate(
             logs_infer_job_response.json()
         )
-        # ray_url = "http://localhost:8265/api/jobs/"  # Fake base URL for the app
-        job_details = requests.get(
-            f"http://localhost:8265/api/jobs/{create_inference_job_response_model.id}"
-        )
-        print(f"-- infer job_details -- {create_inference_job_response_model.id}")
-        print(f"#{job_details.json()}#")
-        print("----------")
-        print(f"-- infer logs -- {create_inference_job_response_model.id}")
-        print(f"#{logs_infer_job_response_model.logs}#")
-        print("----------")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
-        time.sleep(30)
-
-    for i in range(1, 5):
-        if i != 1:
-            time.sleep(30)
-        print(f"Log retrieval for inference, take {i}")
-        logs_infer_job_response = local_client.get(
-            f"/health/jobs/{create_inference_job_response_model.id}/logs"
-        )
-        logs_infer_job_response_model = JobLogsResponse.model_validate(
-            logs_infer_job_response.json()
-        )
-        print(f"-- infer logs -- {create_inference_job_response_model.id}")
-        print(f"#{logs_infer_job_response_model.logs}#")
-        print("----------")
-        if logs_infer_job_response_model.logs:
-            break
-
+        time.sleep(10)
     assert succeeded
+
+    logs_infer_job_response = local_client.get(
+        f"/health/jobs/{create_inference_job_response_model.id}/logs"
+    )
+    logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
+    print(f"-- infer logs -- {create_inference_job_response_model.id}")
+    print(f"#{logs_infer_job_response_model.logs}#")
+    print("----------")
 
 
 def test_full_experiment_launch(
@@ -165,7 +140,6 @@ def test_full_experiment_launch(
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
-    print(f"response: {create_response.text}")
     assert create_response.status_code == 201
     created_dataset = DatasetResponse.model_validate(create_response.json())
     headers = {
@@ -193,25 +167,23 @@ def test_full_experiment_launch(
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
-    print(get_experiments)
     assert get_experiments.total > 0
 
     get_experiment_response = local_client.get(f"/experiments/{get_experiments.items[0].id}")
     assert get_experiment_response.status_code == 200
 
     succeeded = False
-    for i in range(1, 200):
+    for _ in range(1, 200):
         get_job_response = local_client.get(f"/jobs/{get_experiments.items[0].id}")
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        print(f"--> try {i}: {get_job_response_model}")
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
-        time.sleep(30)
+        time.sleep(10)
     assert succeeded
 
 

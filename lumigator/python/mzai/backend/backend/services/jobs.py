@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
 
 class JobService:
+    pass
     # set storage path
     storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
 

@@ -1,6 +1,6 @@
 [project]
 name = "lumigator-schemas"
-version = "0.1.0-rc.2"
+version = "v0.0.2"
 description = "Schemas used for REST API communication"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,4 +14,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.envs.default]
 installer = "uv"
-

@@ -46,7 +46,7 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v6
-        if: steps.filter.outputs.rebuild_fe == 'true'
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}

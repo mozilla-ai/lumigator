@@ -10,7 +10,7 @@ from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, D
 from backend.api.http_headers import HttpHeaders
 
 
-def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
+def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
     upload_filename = "dataset.csv"
 
     # Create
@@ -41,7 +41,7 @@ def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str):
     assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_dataset_delete_error(app_client: TestClient):
+def test_dataset_delete_error(app_client: TestClient, dependency_overrides_fakes):
     dataset_id = uuid.uuid4()
     with patch(
         "backend.services.datasets.DatasetService.delete_dataset",
@@ -53,7 +53,7 @@ def test_dataset_delete_error(app_client: TestClient):
         assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
 
 
-def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str):
+def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
     upload_filename = "dataset.csv"
 
     # Create
@@ -62,6 +62,7 @@ def test_presigned_download(app_client: TestClient, valid_experiment_dataset: st
         data={"format": DatasetFormat.JOB.value},
         files={"dataset": (upload_filename, valid_experiment_dataset)},
     )
+    assert create_response.status_code == status.HTTP_201_CREATED
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
     # Get download
@@ -81,6 +82,7 @@ def test_presigned_download(app_client: TestClient, valid_experiment_dataset: st
 @pytest.mark.parametrize(
     "dataset, expected_status",
     [
+        # FIXME: maybe bad request????
         ("missing_examples_dataset", status.HTTP_403_FORBIDDEN),
         ("extra_column_dataset", status.HTTP_403_FORBIDDEN),
     ],
@@ -89,6 +91,7 @@ def test_experiment_format_validation(
     app_client: TestClient,
     dataset: str,
     expected_status: int,
+    dependency_overrides_fakes
 ):
     response = app_client.post(
         url="/datasets",
@@ -102,6 +105,7 @@ def test_experiment_ground_truth(
     app_client: TestClient,
     valid_experiment_dataset: str,
     valid_experiment_dataset_without_gt: str,
+    dependency_overrides_fakes
 ):
     ground_truth_response = app_client.post(
         url="/datasets",

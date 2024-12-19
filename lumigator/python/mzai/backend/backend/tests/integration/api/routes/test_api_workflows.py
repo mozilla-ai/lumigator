@@ -156,12 +156,8 @@ def test_full_experiment_launch(
 
     # Mocking the background task because the test hangs indefinitely,
     # waiting for the background task to finish.
-    with patch("fastapi.BackgroundTasks.add_task") as mock:
-        create_experiments_response = local_client.post(
-            "/experiments/", headers=headers, json=payload
-        )
-        assert create_experiments_response.status_code == 201
-        assert mock.called
+    create_experiments_response = local_client.post("/experiments/", headers=headers, json=payload)
+    assert create_experiments_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(

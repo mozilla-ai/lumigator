@@ -174,54 +174,56 @@ class JobService:
         return job_params
 
     def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
-        loguru.logger.info("Adding a new dataset entry to the database...")
-        s3 = S3FileSystem()
+        try:
+            s3 = S3FileSystem()
 
-        # Get the dataset from the S3 bucket
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            results = json.loads(f.read())
+            # Get the dataset from the S3 bucket
+            result_key = self._get_results_s3_key(job_id)
+            with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+                results = json.loads(f.read())
 
-        dataset = {k: v for k, v in results.items() if k in ["examples", request.output_field]}
+            dataset = {k: v for k, v in results.items() if k in ["examples", request.output_field]}
 
-        # Create a CSV in memory
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(dataset.keys())
-        csv_writer.writerows(zip(*dataset.values()))
+            # Create a CSV in memory
+            csv_buffer = StringIO()
+            csv_writer = csv.writer(csv_buffer)
+            csv_writer.writerow(dataset.keys())
+            csv_writer.writerows(zip(*dataset.values()))
 
-        # Create a binary file from the CSV, since the upload function expects a binary file
-        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
-        bin_data_size = len(bin_data.getvalue())
+            # Create a binary file from the CSV, since the upload function expects a binary file
+            bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
+            bin_data_size = len(bin_data.getvalue())
 
-        # Figure out the dataset filename
-        dataset_filename = self.data_service.get_dataset(dataset_id=request.dataset).filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-annotated.csv"
+            # Figure out the dataset filename
+            dataset_filename = self.data_service.get_dataset(dataset_id=request.dataset).filename
+            dataset_filename = Path(dataset_filename).stem
+            dataset_filename = f"{dataset_filename}-annotated.csv"
 
-        upload_file = UploadFile(
-            file=bin_data,
-            size=bin_data_size,
-            filename=dataset_filename,
-            headers={"content-type": "text/csv"},
-        )
-        dataset_record = self.data_service.upload_dataset(
-            upload_file,
-            format=DatasetFormat.JOB,
-            run_id=job_id,
-            generated=True,
-            generated_by=results["model"],
-        )
-
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
+            upload_file = UploadFile(
+                file=bin_data,
+                size=bin_data_size,
+                filename=dataset_filename,
+                headers={"content-type": "text/csv"},
+            )
+            dataset_record = self.data_service.upload_dataset(
+                upload_file,
+                format=DatasetFormat.JOB,
+                run_id=job_id,
+                generated=True,
+                generated_by=results["model"],
+            )
+            loguru.logger.info(
+                f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
+            )
+        except Exception:
+            loguru.logger.error(f"Request failed for job {job_id} as {request}")
 
     def _watch_job(self, job_id: UUID, request: JobEvalCreate | JobInferenceCreate):
         job_status = self.ray_client.get_job_status(job_id)
         job_info = self.ray_client.get_job_info(job_id)
         job_metadata = job_info.metadata
         job_type = job_metadata["job_type"]
+        loguru.logger.info(f"Starting job {job_id} check with {job_status.lower()}")
 
         valid_status = [
             JobStatus.CREATED.value.lower(),

@@ -132,7 +132,6 @@
 import { computed, watch, ref} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
-import { useHealthStore } from '@/stores/health/store'
 import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -140,9 +139,7 @@ import Tag from 'primevue/tag';
 const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
 
 const experimentStore = useExperimentStore();
-const { selectedExperiment } = storeToRefs(experimentStore);
-const healthStore = useHealthStore();
-const { runningJobs } = storeToRefs(healthStore);
+const { selectedExperiment, runningJobs } = storeToRefs(experimentStore);
 const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
@@ -245,6 +242,10 @@ watch(experimentStatus, (newStatus) => {
     padding: $l-spacing-1 0;
     display: flex;
     gap: $l-spacing-1;
+  }
+
+  &__tag {
+    text-transform: uppercase;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-PYVERSION=$(uv run yq -p toml -oy ".project.version" pyproject.toml)
+PYVERSION=$(yq -p toml -oy ".project.version" pyproject.toml)
 TAG=$(git describe --exact-match --tags)
 
 if [ "v${PYVERSION}" != "${TAG}" ]; then

@@ -222,7 +222,7 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    async def _run_after_job(self, job_id: UUID, task: Callable, *args):
+    async def _run_after_job(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
 
         Inputs:
@@ -240,7 +240,7 @@ class JobService:
         stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
 
         while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            loguru.logger.error(f"Watching {job_id}: {job_status}...")
+            loguru.logger.info(f"Watching {job_id}")
             await asyncio.sleep(5)
             job_status = self.ray_client.get_job_status(job_id)
 
@@ -249,9 +249,8 @@ class JobService:
 
         if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
             loguru.logger.info(f"Job {job_id} finished successfully.")
-            # Inference jobs produce a new dataset
-            # Add the dataset to the (local) database
-            task(*args)
+            if task is not None:
+                task(*args)
 
     def create_job(
         self, request: JobEvalCreate | JobInferenceCreate, background_tasks: "BackgroundTasks"
@@ -321,12 +320,12 @@ class JobService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info("Submitting Ray job...")
+        loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        loguru.logger.info(f"Job type: {job_type}")
-
         if job_type == JobType.INFERENCE:
+            # Inference jobs produce a new dataset
+            # Add the dataset to the (local) database
             background_tasks.add_task(
                 self._run_after_job, record.id, self._add_dataset_to_db, record.id, request
             )

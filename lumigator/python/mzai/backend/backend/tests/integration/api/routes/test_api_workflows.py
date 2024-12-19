@@ -1,8 +1,5 @@
-from time import sleep
 from unittest.mock import patch
 
-import pytest
-import requests
 from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse

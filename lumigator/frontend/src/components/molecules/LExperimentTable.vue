@@ -12,6 +12,8 @@
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
+        sortField="created"
+        :sortOrder="-1"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"
@@ -82,8 +84,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel';
-import { useHealthStore } from '@/stores/health/store';
 import Tag from 'primevue/tag';
+import {useExperimentStore} from "@/stores/experiments/store.js";
 
 const props = defineProps({
   tableData: {
@@ -96,8 +98,8 @@ const emit = defineEmits(['l-experiment-selected'])
 
 const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
-const healthStore = useHealthStore();
-const { runningJobs } = storeToRefs(healthStore);
+const experimentStore = useExperimentStore();
+const { runningJobs } = storeToRefs(experimentStore);
 const tableVisible = ref(true);
 const focusedItem = ref();
 
@@ -124,7 +126,7 @@ async function throttledUpdateAllJobs() {
   if (isThrottled.value) { return }; // Skip if throttle is active
 
   isThrottled.value = true;
-  await healthStore.updateAllJobs();
+  await experimentStore.updateAllJobs();
   setTimeout(() => {
     isThrottled.value = false; // Release throttle after delay
   }, 5000); // 5 seconds throttle
@@ -174,6 +176,7 @@ watch(() => props.tableData.length, () => {
     font-size: $l-font-size-sm;
     line-height: 1;
     font-weight: $l-font-weight-normal;
+    text-transform: uppercase;
   }
 }
 </style>

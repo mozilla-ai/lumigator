@@ -50,7 +50,6 @@ export const useExperimentStore = defineStore('experiment', () => {
   async function updateExperimentStatus(id) {
     try {
       const status = await experimentService.fetchJobStatus(id);
-
       const experiment = experiments.value.find((experiment) => experiment.id === id);
       if (experiment) {
         experiment.status = status;

@@ -30,10 +30,10 @@ class HuggingFaceEvalJobConfig(JobConfig):
     dataset: DatasetConfig = Field(
         description="Dataset of text completions to evaluate using the Prometheus judge model."
     )
-    evaluation: HuggingFaceEvaluationConfig | None = None
+    evaluation: HuggingFaceEvaluationConfig
     model: AutoModelConfig | VLLMCompletionsConfig
     quantization: QuantizationConfig | None = None
-    tokenizer: AutoTokenizerConfig | None = None
+    tokenizer: AutoTokenizerConfig
 
     @model_validator(mode="before")
     def ensure_tokenizer_config(cls, values):

@@ -349,7 +349,7 @@ class JobService:
         records = self.job_repo.list(skip, limit)
         return ListingResponse(
             total=total,
-            items=[self.get_job(x.id) for x in records],
+            items=[self.get_job(record.id) for record in records],
         )
 
     def update_job_status(

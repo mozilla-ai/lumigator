@@ -97,7 +97,7 @@ class DatasetConfig(BaseModel):
 class JobConfig(BaseModel):
     max_samples: int = -1  # set to all samples by default
     storage_path: str
-    output_field: str = "prediction"
+    output_field: str = "predictions"
     enable_tqdm: bool = True
     model_config = ConfigDict(extra="forbid")
 

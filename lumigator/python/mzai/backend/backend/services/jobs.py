@@ -1,6 +1,7 @@
+import asyncio
 import csv
 import json
-import time
+from collections.abc import Callable
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -146,6 +147,7 @@ class JobService:
                 "storage_path": self.storage_path,
                 "model_url": model_url,
                 "system_prompt": request.system_prompt,
+                "skip_inference": request.skip_inference,
             }
         else:
             job_params = {
@@ -181,7 +183,11 @@ class JobService:
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             results = json.loads(f.read())
 
-        dataset = {k: v for k, v in results.items() if k in ["examples", request.output_field]}
+        dataset = {
+            k: v
+            for k, v in results.items()
+            if k in ["examples", "ground_truth", request.output_field]
+        }
 
         # Create a CSV in memory
         csv_buffer = StringIO()
@@ -216,11 +222,15 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _watch_job(self, job_id: UUID, request: JobEvalCreate | JobInferenceCreate):
+    async def _run_after_job(self, job_id: UUID, task: Callable = None, *args):
+        """Watches a submitted job and, when it terminates successfully, runs a given task.
+
+        Inputs:
+        - job_id: the UUID of the job to watch
+        - task: the function to be called after the job completes successfully
+        - args: the arguments to be passed to the function `task()`
+        """
         job_status = self.ray_client.get_job_status(job_id)
-        job_info = self.ray_client.get_job_info(job_id)
-        job_metadata = job_info.metadata
-        job_type = job_metadata["job_type"]
 
         valid_status = [
             JobStatus.CREATED.value.lower(),
@@ -230,7 +240,8 @@ class JobService:
         stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
 
         while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            time.sleep(5)
+            loguru.logger.info(f"Watching {job_id}")
+            await asyncio.sleep(5)
             job_status = self.ray_client.get_job_status(job_id)
 
         if job_status.lower() == JobStatus.FAILED.value.lower():
@@ -238,10 +249,8 @@ class JobService:
 
         if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
             loguru.logger.info(f"Job {job_id} finished successfully.")
-            # Inference jobs produce a new dataset
-            # Add the dataset to the (local) database
-            if job_type == JobType.INFERENCE:
-                self._add_dataset_to_db(job_id, request)
+            if task is not None:
+                task(*args)
 
     def create_job(
         self, request: JobEvalCreate | JobInferenceCreate, background_tasks: "BackgroundTasks"
@@ -311,10 +320,15 @@ class JobService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info("Submitting Ray job...")
+        loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        background_tasks.add_task(self._watch_job, record.id, request)
+        if job_type == JobType.INFERENCE:
+            # Inference jobs produce a new dataset
+            # Add the dataset to the (local) database
+            background_tasks.add_task(
+                self._run_after_job, record.id, self._add_dataset_to_db, record.id, request
+            )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

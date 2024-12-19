@@ -1,8 +1,5 @@
-from time import sleep
 from unittest.mock import patch
 
-import pytest
-import requests
 from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
@@ -52,7 +49,6 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
             "/jobs/evaluate/", headers=headers, json=payload
         )
         assert create_evaluation_job_response.status_code == 201
-        assert mock.called
 
         create_inference_job_response = local_client.post(
             "/jobs/inference/", headers=headers, json=payload
@@ -90,7 +86,13 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
             "/experiments/", headers=headers, json=payload
         )
         assert create_experiments_response.status_code == 201
-        assert mock.called
+        # - the current /experiments runs nothing in background.
+        # - the current /experiments_new runs inference followed by evaluation
+        #   and it makes use of background tasks, so we can expect the mock will
+        #   be called
+        # - as soon as we move experiments_new to experiments this test will fail,
+        #   reminding us we have to switch to `assert mock.called` here
+        assert not mock.called
 
     get_experiments_response = local_client.get("/experiments/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(

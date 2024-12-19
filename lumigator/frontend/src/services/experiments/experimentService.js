@@ -20,7 +20,7 @@ async function fetchExperiments() {
 
 async function fetchExperimentDetails(id) {
   const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
-  if (response.data) {
+  if (response?.data?.status) {
     // Ensure that we transform status at the point the API returns it.
     response.data.status = response.data.status.toUpperCase()
   }

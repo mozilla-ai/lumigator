@@ -127,7 +127,14 @@ class DatasetService:
 
             self._raise_unhandled_exception(e)
 
-    def upload_dataset(self, dataset: UploadFile, format: DatasetFormat) -> DatasetResponse:
+    def upload_dataset(
+        self,
+        dataset: UploadFile,
+        format: DatasetFormat,
+        run_id: UUID | None = None,
+        generated: bool = False,
+        generated_by: str | None = None,
+    ) -> DatasetResponse:
         temp = NamedTemporaryFile(delete=False)
         try:
             # Write to tempfile and validate size
@@ -144,7 +151,13 @@ class DatasetService:
 
             # Create DB record
             record = self.dataset_repo.create(
-                filename=dataset.filename, format=format, size=actual_size, ground_truth=has_gt
+                filename=dataset.filename,
+                format=format,
+                size=actual_size,
+                ground_truth=has_gt,
+                run_id=run_id,
+                generated=generated,
+                generated_by=generated_by,
             )
 
             # convert the dataset to HF format and save it to S3

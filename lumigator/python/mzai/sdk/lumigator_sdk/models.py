@@ -38,7 +38,4 @@ class Models:
         """
         response = self.client.get_response(f"{self.MODELS_ROUTE}/{task_name}")
 
-        if not response:
-            return []
-
         return ListingResponse[ModelsResponse](**response.json())

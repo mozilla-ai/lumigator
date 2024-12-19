@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
@@ -21,15 +21,14 @@ router = APIRouter()
 def create_experiment(
     service: JobServiceDep,
     request: ExperimentCreate,
+    background_tasks: BackgroundTasks,
 ) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
+    return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
 
 
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
-    return ExperimentResponse.model_validate(
-        service.get_job(experiment_id).model_dump()
-        )
+    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
 
 
 @router.get("/")
@@ -40,7 +39,7 @@ def list_experiments(
 ) -> ListingResponse[ExperimentResponse]:
     return ListingResponse[ExperimentResponse].model_validate(
         service.list_jobs(skip, limit).model_dump()
-        )
+    )
 
 
 @router.get("/{experiment_id}/result")
@@ -51,7 +50,7 @@ def get_experiment_result(
     """Return experiment results metadata if available in the DB."""
     return ExperimentResultResponse.model_validate(
         service.get_job_result(experiment_id).model_dump()
-        )
+    )
 
 
 @router.get("/{experiment_id}/result/download")
@@ -62,4 +61,4 @@ def get_experiment_result_download(
     """Return experiment results file URL for downloading."""
     return ExperimentResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
-        )
+    )

@@ -34,17 +34,17 @@ jobs:
               - 'lumigator/**'
 
       - name: Get repo version
-        if: steps.filter.outputs.rebuild == 'true'
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
           echo "Version of the repo for this build: $REPOVERSION"
 
       - name: Set up QEMU
-        if: steps.filter.outputs.rebuild == 'true'
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker buildx
-        if: steps.filter.outputs.rebuild == 'true'
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
@@ -55,7 +55,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        if: steps.filter.outputs.rebuild == 'true'
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64

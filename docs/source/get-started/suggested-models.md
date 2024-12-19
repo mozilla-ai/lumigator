@@ -193,4 +193,4 @@ We encourage using human-annotated dataset in your evaluations. Failing that, Lu
 
 You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
 
-Under the hood, this will launch an inference job with the reference model for summarization (Bart, described above).
+Under the hood, this will launch an inference job with the reference model for summarization (BART, described above).

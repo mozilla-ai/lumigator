@@ -80,7 +80,7 @@ class JobInferenceCreate(BaseModel):
     torch_dtype: str = "auto"
     model_url: str | None = None
     system_prompt: str | None = None
-    output_field: str | None = "prediction"
+    output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0

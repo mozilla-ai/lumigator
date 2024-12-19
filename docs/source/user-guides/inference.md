@@ -99,7 +99,7 @@ successfully:
 ```console
 user@host:~/lumigator$ cat results.json | jq
 {
-"prediction": [
+"predictions": [
     "A man has trouble breathing. He is sent to see a pulmonary specialist. The doctor tests him for asthma. He does not have any allergies that he knows of. He also has a heavy feeling in his chest when he tries to breathe. This happens a lot when he works out, he says.",
 ...
 ```

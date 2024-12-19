@@ -99,7 +99,7 @@ const emit = defineEmits(['l-experiment-selected'])
 const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
-const { runningJobs } = storeToRefs(experimentStore);
+const { experiments } = storeToRefs(experimentStore);
 const tableVisible = ref(true);
 const focusedItem = ref();
 
@@ -109,16 +109,8 @@ const style = computed(() => {
 })
 
 function retrieveStatus(jobID) {
-  const job = runningJobs.value.find(job => job.id === jobID);
+  const job = experiments.value.find(job => job.id === jobID);
   return job ? job.status : null;
-}
-
-
-function updateJobStatuses() {
-  runningJobs.value =  props.tableData.map(experiment => ({
-    id: experiment.id,
-    status: experiment.status
-  }));
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
@@ -126,7 +118,7 @@ async function throttledUpdateAllJobs() {
   if (isThrottled.value) { return }; // Skip if throttle is active
 
   isThrottled.value = true;
-  await experimentStore.updateAllJobs();
+  experimentStore.updateStatusForIncompleteExperiments()
   setTimeout(() => {
     isThrottled.value = false; // Release throttle after delay
   }, 5000); // 5 seconds throttle
@@ -136,7 +128,7 @@ async function throttledUpdateAllJobs() {
 // updates the status of each experiment
 let pollingId;
 onMounted(() => {
-  updateJobStatuses();
+  experimentStore.updateStatusForIncompleteExperiments();
   pollingId = setInterval(() => {
     throttledUpdateAllJobs();
   }, 1000); // Check every second, throttled to execute every 5 seconds
@@ -155,7 +147,7 @@ watch(showSlidingPanel, (newValue) => {
 });
 
 watch(() => props.tableData.length, () => {
-  updateJobStatuses();
+  experimentStore.updateStatusForIncompleteExperiments();
 });
 </script>
 

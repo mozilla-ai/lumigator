@@ -7,11 +7,14 @@ import {
   PATH_EXPERIMENT_LOGS,
 } from './api';
 
-
 async function fetchExperiments() {
   try {
     const response = await http.get(PATH_EXPERIMENTS_ROOT());
-    return response.data.items;
+
+    return response.data.items.map(p => ({
+      ...p,
+      status: p.status.toUpperCase(),
+    }));
   } catch (error) {
     console.error("Error fetching experiments:", error.message || error);
     return [];
@@ -22,20 +25,14 @@ async function fetchExperimentDetails(id) {
   const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
   if (response?.data?.status) {
     // Ensure that we transform status at the point the API returns it.
-    response.data.status = response.data.status.toUpperCase()
+    response.data.status = response.data.status.toUpperCase();
   }
-  return response.data
+  return response.data;
 }
 
 async function fetchJobStatus(id) {
-  try {
-    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
-    // Ensure that we transform status at the point the API returns it.
-    return response.data.status.toUpperCase()
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
+  const job = await fetchExperimentDetails(id)
+  return job.status
 }
 
 async function triggerExperiment(experimentPayload) {

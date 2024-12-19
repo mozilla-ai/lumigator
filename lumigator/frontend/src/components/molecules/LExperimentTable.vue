@@ -12,6 +12,8 @@
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
+        sortField="created"
+        :sortOrder="-1"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-experiment-selected', $event.data)"

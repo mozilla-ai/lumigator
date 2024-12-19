@@ -100,12 +100,12 @@ const tooltipConfig = ref({
     },
     text: {
       style: {
-      background: `black`
+      background: `black`,
       }
     },
     arrow: {
       style: {
-      ['border-color']: `black`
+      ['border-right-color']: `black`
       }
     }
   }

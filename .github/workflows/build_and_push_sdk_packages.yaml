@@ -22,7 +22,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Install yq package
-        run: snap install yq
+        run: sudo snap install yq
 
       - name: Check tag consistency (SDK)
         run: check_version.sh

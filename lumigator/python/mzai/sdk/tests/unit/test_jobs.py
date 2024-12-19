@@ -13,9 +13,7 @@ from requests.exceptions import HTTPError
 from tests.helpers import load_json
 
 
-def test_create_job_ok_all(
-    lumi_client, json_data_job_response, json_data_job_all, request_mock
-):
+def test_create_job_ok_all(lumi_client, json_data_job_response, json_data_job_all, request_mock):
     request_mock.post(
         url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.EVALUATION.value}/",
         status_code=HTTPStatus.OK,
@@ -33,10 +31,7 @@ def test_create_job_ok_all(
 
 
 def test_create_job_ok_minimal(
-    lumi_client,
-    json_data_job_response,
-    json_data_job_minimal,
-    request_mock
+    lumi_client, json_data_job_response, json_data_job_minimal, request_mock
 ):
     request_mock.post(
         url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.INFERENCE.value}/",
@@ -53,10 +48,7 @@ def test_create_job_ok_minimal(
 
 
 def test_create_job_ok_extra(
-    lumi_client,
-    json_data_job_response,
-    json_data_job_extra,
-    request_mock
+    lumi_client, json_data_job_response, json_data_job_extra, request_mock
 ):
     request_mock.post(
         url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.INFERENCE.value}/",
@@ -85,7 +77,7 @@ def test_get_jobs_none(lumi_client, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}",
         status_code=HTTPStatus.OK,
-        json={"total":0,"items":[]},
+        json={"total": 0, "items": []},
     )
 
     jobs = lumi_client.jobs.get_jobs()
@@ -96,16 +88,16 @@ def test_get_jobs_none(lumi_client, request_mock):
 def test_get_job_ok(lumi_client, json_data_job, request_mock):
     job_id = "6f6487ac-7170-4a11-af7a-0f6db1ec9a74"
     request_mock.get(
-        url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}/{Jobs.JOBS_ROUTE}/{job_id}",
+        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{job_id}",
         status_code=HTTPStatus.OK,
         json=load_json(json_data_job),
     )
 
-    job = lumi_client.health.get_job(job_id)
+    job = lumi_client.jobs.get_job(job_id)
 
     assert job is not None
     assert job.type == "SUBMISSION"
-    assert job.status == "PENDING"
+    assert job.status == "pending"
     assert job.submission_id == job_id
 
 
@@ -113,12 +105,11 @@ def test_get_job_id_does_not_exist(lumi_client, request_mock):
     job_id = "00000000-0000-0000-0000-000000000000"
     response = Response()
     response.status_code = HTTPStatus.NOT_FOUND
+    response._content = b"Content not found"
     error = HTTPError(response=response)
-    request_mock.get(
-        url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}/{Jobs.JOBS_ROUTE}/{job_id}",
-        exc = error
-    )
+    request_mock.get(url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{job_id}", exc=error)
 
     # We expect the SDK to handle the 404 and return None.
-    job = lumi_client.health.get_job(job_id)
-    assert job is None
+    with raises(HTTPError) as exc_info:
+        lumi_client.jobs.get_job(job_id)
+    assert exc_info.value.response.text == response.text

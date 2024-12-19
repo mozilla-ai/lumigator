@@ -39,9 +39,6 @@ class Datasets:
         """
         response = self.client.get_response(self.DATASETS_ROUTE)
 
-        if not response:
-            return []
-
         return ListingResponse[DatasetResponse](**response.json())
 
     def get_dataset(self, id: UUID) -> DatasetResponse:
@@ -62,9 +59,6 @@ class Datasets:
             DatasetResponse: the dataset information for the provided ID.
         """
         response = self.client.get_response(f"{self.DATASETS_ROUTE}/{id}")
-
-        if not response:
-            return []
 
         return DatasetResponse(**(response.json()))
 
@@ -91,9 +85,6 @@ class Datasets:
         response = self.client.get_response(
             self.DATASETS_ROUTE, method=HTTPMethod.POST, data=None, files=files
         )
-
-        if not response:
-            return []
 
         return DatasetResponse(**(response.json()))
 
@@ -136,8 +127,5 @@ class Datasets:
         """
         endpoint = f"{self.DATASETS_ROUTE}/{id}/download"
         response = self.client.get_response(endpoint)
-
-        if not response:
-            return []
 
         return DatasetDownloadResponse(**(response.json()))

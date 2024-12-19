@@ -24,6 +24,7 @@ jobs:
           filters: |
             run_sdk_unit_tests:
               - 'lumigator/python/mzai/sdk/**'
+              - 'lumigator/python/mzai/schemas/**'
 
       - name: Install uv
         if: steps.filter.outputs.run_sdk_unit_tests == 'true'

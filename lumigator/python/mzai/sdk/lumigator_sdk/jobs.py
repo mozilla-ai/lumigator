@@ -9,6 +9,7 @@ from uuid import UUID
 
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
+    Job,
     JobEvalCreate,
     JobInferenceCreate,
     JobResponse,
@@ -36,7 +37,7 @@ class Jobs:
         """
         self.client = c
 
-    def get_jobs(self) -> ListingResponse[JobResponse]:
+    def get_jobs(self) -> ListingResponse[Job]:
         """Return information on all jobs.
 
         .. admonition:: Example
@@ -53,12 +54,9 @@ class Jobs:
         """
         response = self.client.get_response(self.JOBS_ROUTE)
 
-        if not response:
-            return []
+        return ListingResponse[Job](**response.json())
 
-        return ListingResponse[JobResponse](**response.json())
-
-    def get_job(self, id: UUID) -> JobResponse:
+    def get_job(self, id: UUID) -> Job:
         """Return information on a specific job.
 
         .. admonition:: Example
@@ -77,10 +75,7 @@ class Jobs:
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
 
-        if not response:
-            return []
-
-        return JobResponse(**(response.json()))
+        return Job(**(response.json()))
 
     def wait_for_job(self, id: UUID, retries: int = 180, poll_wait: int = 5) -> JobResponse:
         """Wait for a job to succeed and return latest retrieved information.
@@ -154,9 +149,6 @@ class Jobs:
             data=request.model_dump_json(),
         )
 
-        if not response:
-            return []
-
         return JobResponse(**(response.json()))
 
     def get_job_result(self, id: UUID) -> JobResultResponse:
@@ -178,9 +170,6 @@ class Jobs:
             JobResultResponse: The job results for the provided ID.
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
-
-        if not response:
-            return []
 
         return JobResultResponse(**(response.json()))
 
@@ -204,8 +193,5 @@ class Jobs:
                 ID.
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}/result/download")
-
-        if not response:
-            return []
 
         return JobResultDownloadResponse(**(response.json()))

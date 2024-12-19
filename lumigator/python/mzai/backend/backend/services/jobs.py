@@ -147,6 +147,7 @@ class JobService:
                 "storage_path": self.storage_path,
                 "model_url": model_url,
                 "system_prompt": request.system_prompt,
+                "skip_inference": request.skip_inference,
             }
         else:
             job_params = {
@@ -182,7 +183,11 @@ class JobService:
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             results = json.loads(f.read())
 
-        dataset = {k: v for k, v in results.items() if k in ["examples", request.output_field]}
+        dataset = {
+            k: v
+            for k, v in results.items()
+            if k in ["examples", "ground_truth", request.output_field]
+        }
 
         # Create a CSV in memory
         csv_buffer = StringIO()

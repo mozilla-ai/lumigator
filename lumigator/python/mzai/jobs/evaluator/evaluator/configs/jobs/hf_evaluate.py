@@ -22,6 +22,7 @@ class HuggingFaceEvaluationConfig(EvaluatorConfig):
     storage_path: str | None = None
     return_input_data: bool = False
     return_predictions: bool = False
+    skip_inference: bool = False
 
 
 class HuggingFaceEvalJobConfig(JobConfig):

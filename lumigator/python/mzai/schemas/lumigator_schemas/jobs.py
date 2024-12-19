@@ -64,6 +64,7 @@ class JobEvalCreate(BaseModel):
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None
+    skip_inference: bool = False
 
 
 class JobInferenceCreate(BaseModel):

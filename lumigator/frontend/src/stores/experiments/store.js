@@ -17,7 +17,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments.value = experimentsList.map((job) => {
       return {
         ...retrieveEntrypoint(job),
-        status: job.status,
+        status: job.status.toUpperCase(),
         id: job.submission_id,
         useCase: `summarization`,
         created: job.start_time,
@@ -132,7 +132,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       const status = await experimentService.fetchJobStatus(jobId);
       const job = runningJobs.value.find((job) => job.id === jobId);
       if (job) {
-        job.status = status;
+        job.status = status.toUpperCase();
       }
     } catch (error) {
       console.error(`Failed to update status for job ${jobId} ${error}`);
@@ -141,8 +141,8 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function updateAllJobs() {
     const promises = runningJobs.value
-      .filter((job) => job.status.toUpperCase() !== 'SUCCEEDED' &&
-        job.status.toUpperCase() !== 'FAILED') // Exclude complete or failed jobs
+      .filter((job) => job.status !== 'SUCCEEDED' &&
+        job.status !== 'FAILED') // Exclude complete or failed jobs
       .map((job) => updateJobStatus(job.id));
     await Promise.all(promises);
   }

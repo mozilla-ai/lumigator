@@ -112,7 +112,7 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="selectedExperiment.status.toUpperCase() !== 'SUCCEEDED'"
+        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
         @click="emit('l-results', selectedExperiment)"
       />
       <Button
@@ -121,7 +121,7 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="selectedExperiment.status.toUpperCase() !== 'SUCCEEDED'"
+        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
         @click="emit('l-dnld-results', selectedExperiment)"
       />
     </div>

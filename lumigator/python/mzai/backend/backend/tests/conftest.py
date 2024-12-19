@@ -42,6 +42,7 @@ def format_dataset(data: list[list[str]]) -> str:
 
 @pytest.fixture
 def valid_experiment_dataset() -> str:
+    """Minimal valid dataset with groundtruth."""
     data = [
         ["examples", "ground_truth"],
         ["Hello World", "Hello"],
@@ -51,6 +52,7 @@ def valid_experiment_dataset() -> str:
 
 @pytest.fixture(scope="session")
 def valid_experiment_dataset_without_gt() -> str:
+    """Minimal valid dataset without groundtruth."""
     data = [
         ["examples"],
         ["Hello World"],
@@ -60,6 +62,7 @@ def valid_experiment_dataset_without_gt() -> str:
 
 @pytest.fixture(scope="session")
 def missing_examples_dataset() -> str:
+    """Minimal invalid dataset without examples."""
     data = [
         ["ground_truth"],
         ["Hello"],
@@ -69,6 +72,7 @@ def missing_examples_dataset() -> str:
 
 @pytest.fixture(scope="session")
 def extra_column_dataset() -> str:
+    """Minimal valid dataset with groundtruth and extra fields."""
     data = [
         ["examples", "ground_truth", "extra"],
         ["Hello World", "Hello", "Nope"],
@@ -109,7 +113,7 @@ def db_session(db_engine: Engine):
 
 @pytest.fixture(scope="function")
 def fake_s3fs() -> S3FileSystem:
-    # ...and patch the s3fs name with the Fake
+    """Replace the filesystem registry for S3 with a MemoryFileSystem implementation."""
     fsspec.register_implementation(
         "s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS"
     )
@@ -119,6 +123,7 @@ def fake_s3fs() -> S3FileSystem:
 
 @pytest.fixture(scope="function")
 def fake_s3_client(fake_s3fs) -> S3Client:
+    """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
     os.environ["AWS_ACCESS_KEY_ID"] = "test"
     # Please check https://github.com/localstack/localstack/issues/5894
     # for info about the test region used
@@ -130,7 +135,7 @@ def fake_s3_client(fake_s3fs) -> S3Client:
 
 @pytest.fixture(scope="function")
 def boto_s3_client() -> S3Client:
-    # Initialize S3
+    """Provide a real S3 client."""
     os.environ["AWS_ACCESS_KEY_ID"] = "test"
     # Please check https://github.com/localstack/localstack/issues/5894
     # for info about the test region used
@@ -142,6 +147,7 @@ def boto_s3_client() -> S3Client:
 
 @pytest.fixture(scope="function")
 def boto_s3fs() -> S3FileSystem:
+    """Provide a real s3fs client."""
     s3fs = S3FileSystem()
     mock_s3fs = Mock(wraps=s3fs)
     yield mock_s3fs
@@ -268,8 +274,21 @@ def result_repository(db_session):
 
 
 @pytest.fixture(scope="function")
+def dataset_service(db_session, fake_s3_client, fake_s3fs):
+    dataset_repo = DatasetRepository(db_session)
+    return DatasetService(
+        dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs
+    )
+
+
+@pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
+
+
+@pytest.fixture(scope="function")
+def job_service(db_session, job_repository, result_repository, dataset_service):
+    return JobService(job_repository, result_repository, None, dataset_service)
 
 
 @pytest.fixture(scope="function")

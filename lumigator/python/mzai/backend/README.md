@@ -28,7 +28,7 @@ The backend needs to retrieve the location of the database used in tests via the
 SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
 ```
 
-Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests.
+Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests. Also note that the tests as invoked in the Makefile will remove and recreate a file called `local.db` in the `lumigator/python/mzai/backend` directory.
 
 The tests include a unit test suite and an integration test suite. There are make targets available at the root folder, as follows:
 

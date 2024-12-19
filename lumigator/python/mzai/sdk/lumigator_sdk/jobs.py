@@ -53,9 +53,6 @@ class Jobs:
         """
         response = self.client.get_response(self.JOBS_ROUTE)
 
-        if not response:
-            return []
-
         return ListingResponse[JobResponse](**response.json())
 
     def get_job(self, id: UUID) -> JobResponse:
@@ -76,9 +73,6 @@ class Jobs:
             JobResponse: The job information for the provided ID.
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
-
-        if not response:
-            return []
 
         return JobResponse(**(response.json()))
 
@@ -154,9 +148,6 @@ class Jobs:
             data=request.model_dump_json(),
         )
 
-        if not response:
-            return []
-
         return JobResponse(**(response.json()))
 
     def get_job_result(self, id: UUID) -> JobResultResponse:
@@ -178,9 +169,6 @@ class Jobs:
             JobResultResponse: The job results for the provided ID.
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
-
-        if not response:
-            return []
 
         return JobResultResponse(**(response.json()))
 
@@ -204,8 +192,5 @@ class Jobs:
                 ID.
         """
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}/result/download")
-
-        if not response:
-            return []
 
         return JobResultDownloadResponse(**(response.json()))

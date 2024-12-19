@@ -113,6 +113,7 @@ def test_get_job_id_does_not_exist(lumi_client, request_mock):
     job_id = "00000000-0000-0000-0000-000000000000"
     response = Response()
     response.status_code = HTTPStatus.NOT_FOUND
+    response._content = b"Content not found"
     error = HTTPError(response=response)
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Health.HEALTH_ROUTE}/{Jobs.JOBS_ROUTE}/{job_id}",
@@ -120,5 +121,6 @@ def test_get_job_id_does_not_exist(lumi_client, request_mock):
     )
 
     # We expect the SDK to handle the 404 and return None.
-    job = lumi_client.health.get_job(job_id)
-    assert job is None
+    with raises(HTTPError) as exc_info:
+        lumi_client.health.get_job(job_id)
+    assert exc_info.value.response.text == response.text

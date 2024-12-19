@@ -6,7 +6,9 @@ from uuid import UUID
 
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_sdk.lm_datasets import Datasets
-from tests.helpers import check_method, load_json
+from pytest import raises
+from requests.exceptions import HTTPError
+from tests.helpers import load_json
 
 
 def test_get_datasets_ok(lumi_client, json_data_datasets, request_mock):
@@ -66,7 +68,8 @@ def test_delete_dataset_not_found(
         json=data,
     )
 
-    lumi_client.datasets.delete_dataset(UUID(data["id"]))
+    with raises(HTTPError):
+        lumi_client.datasets.delete_dataset(UUID(data["id"]))
 
 
 def test_create_dataset_ok(lumi_client, json_data_dataset, request_mock):

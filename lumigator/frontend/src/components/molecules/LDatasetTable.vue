@@ -12,6 +12,8 @@
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
+        sortField="created_at"
+        :sortOrder="-1"
         scrollable
         :pt="{table:'table-root'}"
         @row-click="emit('l-dataset-selected', $event.data)"
@@ -194,7 +196,6 @@ watch(showSlidingPanel, (newValue) => {
 
 	&:hover {
 		color: white;
-    text-shadow: 0 0 1px white;
 	}
 
   &-icon,  span.pi {

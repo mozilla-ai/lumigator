@@ -66,7 +66,7 @@
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
-            style="font-size: 10px;padding-left: 3px;"
+            style="font-size: 14px;padding-left: 3px;"
           />
         </div>
       </div>
@@ -207,6 +207,7 @@ watch(experimentStatus, (newStatus) => {
       color: $l-grey-200;
       text-transform: uppercase;
       font-weight: $l-font-weight-bold;
+      font-size: $l-font-size-sm;
     }
 
     &-logs {

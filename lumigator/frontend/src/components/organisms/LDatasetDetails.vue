@@ -12,12 +12,6 @@
       <h3>Dataset Details</h3>
       <span class="l-dataset-details__header-actions">
         <Button
-          icon="pi pi-external-link"
-          severity="secondary"
-          variant="text"
-          rounded
-        />
-        <Button
           icon="pi pi-download"
           severity="secondary"
           variant="text"
@@ -25,7 +19,7 @@
         />
         <Button
           severity="secondary"
-          icon="pi pi-trash"
+          icon="pi pi-bin"
           variant="text"
           rounded
           @click="emit('l-delete-dataset', selectedDataset)"
@@ -39,10 +33,18 @@
           {{ selectedDataset.filename }}
         </span>
       </div>
-      <div class="l-dataset-details__content-item">
+      <div
+        class="l-dataset-details__content-item"
+        @click="copyToClipboard(selectedDataset.id)"
+      >
         <span class="l-dataset-details__content-label">dataset id</span>
         <span class="l-dataset-details__content-field">
           {{ selectedDataset.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 14px;padding-left: 3px;cursor: pointer;"
+          />
         </span>
       </div>
       <div class="l-dataset-details__content-item">
@@ -78,6 +80,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
@@ -87,12 +90,21 @@ import Button from 'primevue/button';
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
+const isCopied = ref(false);
 
 const emit = defineEmits([
   'l-delete-dataset',
   'l-details-closed',
   'l-experiment'
 ])
+
+const copyToClipboard = async (longString) => {
+  isCopied.value = true;
+  setTimeout(() => {
+    isCopied.value = false;
+  }, 3000);
+  await navigator.clipboard.writeText(longString);
+};
 
 function onCloseDetails() {
   showSlidingPanel.value = false;
@@ -116,6 +128,7 @@ function onCloseDetails() {
     display: flex;
     padding: $l-spacing-1 0;
     justify-content: space-between;
+    align-items: center;
 
     h3 {
       font-weight: $l-font-weight-normal;
@@ -127,6 +140,15 @@ function onCloseDetails() {
       background-color: $l-main-bg;
       border: none;
       color: $l-grey-100;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+
+      > * {
+        height: 14px;
+      }
     }
   }
 
@@ -140,6 +162,12 @@ function onCloseDetails() {
       color: $l-grey-200;
       text-transform: uppercase;
       font-weight: $l-font-weight-bold;
+      font-size: $l-font-size-sm;
+    }
+
+    &-field {
+      display: flex;
+      justify-content: space-between;
     }
 
   }

@@ -43,7 +43,7 @@ async function triggerExperiment(experimentPayload) {
     });
     return response.data
   } catch (error) {
-    console.log('error while creating Experiment', error);
+    console.error('Error while creating experiment', error);
     return error.message;
   }
 }
@@ -82,7 +82,7 @@ async function downloadResults(experiment_id) {
     const blob = fileResponse.data;
     return blob;
   } catch (error) {
-    console.error("Error downloading experiment results:", error.message || error);
+    console.error("Error downloading experiment results", error.message || error);
     return error;
   }
 }
@@ -92,7 +92,7 @@ async function fetchLogs(id) {
     const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id));
     return logsResponse.data
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching logs for job', id, error);
   }
 }
 

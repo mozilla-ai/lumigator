@@ -102,11 +102,9 @@ class JobService:
         )
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
-        loguru.logger.info("process model name...")
         job_templates = config_templates.templates[job_type]
 
         if model_name in job_templates:
-            loguru.logger.info("model here!")
             # if no config template is provided, get the default one for the model
             config_template = job_templates[model_name]
         else:

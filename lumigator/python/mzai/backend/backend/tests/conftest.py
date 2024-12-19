@@ -267,23 +267,9 @@ def result_repository(db_session):
     return JobResultRepository(session=db_session)
 
 
-# FIXME investigate where this is used
-@pytest.fixture(scope="function")
-def dataset_service(db_session, fake_s3_client, fake_s3fs):
-    dataset_repo = DatasetRepository(db_session)
-    return DatasetService(
-        dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs
-    )
-
-
 @pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
-
-
-@pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service):
-    return JobService(job_repository, result_repository, None, dataset_service)
 
 
 @pytest.fixture(scope="function")

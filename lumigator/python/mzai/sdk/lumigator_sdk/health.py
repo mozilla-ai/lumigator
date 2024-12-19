@@ -1,7 +1,4 @@
-from http import HTTPStatus
-
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import JobSubmissionResponse
 
 
 class HealthCheck:
@@ -66,53 +63,3 @@ class Health:
         check.deployment_type = data.get("deployment_type")
 
         return check
-
-    def get_jobs(self) -> list[JobSubmissionResponse]:
-        """Return information on all job submissions.
-
-        .. admonition:: Example
-
-            .. code-block:: python
-
-                from sdk.lumigator import LumigatorClient
-
-                lm_client = LumigatorClient("http://localhost:8000")
-                jobs = lm_client.health.get_jobs()
-
-        Returns:
-            list[JobSubmissionResponse]: A list of job submission information.
-        """
-        endpoint = f"{self.HEALTH_ROUTE}/jobs/"
-        response = self.__client.get_response(endpoint)
-
-        if not response:
-            return []
-
-        return [JobSubmissionResponse(**job) for job in response.json()]
-
-    def get_job(self, job_id: str) -> JobSubmissionResponse | None:
-        """Return information on the job submission for the specified ID.
-
-        .. admonition:: Example
-
-            .. code-block:: python
-
-                from sdk.lumigator import LumigatorClient
-
-                lm_client = LumigatorClient("http://localhost:8000")
-                job_info = lm_client.health.get_job(job_id)
-
-        Args:
-            job_id (str): The ID of the job submission.
-
-        Returns:
-            JobSubmissionResponse | ``None``: The job submission information.
-        """
-        endpoint = f"{self.HEALTH_ROUTE}/jobs/{job_id}"
-        response = self.__client.get_response(endpoint)
-
-        if not response or response.status_code != HTTPStatus.OK:
-            return None
-
-        data = response.json()
-        return JobSubmissionResponse(**data)

@@ -189,7 +189,7 @@ There are no summarization-specific parameters for this model.
 
 # Reference models
 
-We encourage using human-annotated dataset in your evaluations. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) to get you started.
+We encourage using human-annotated dataset in your evaluations. However,  Lumigator also enables the user to do automatic annotation with a selection of [well-tested models](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) to get you started.
 
 You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
 

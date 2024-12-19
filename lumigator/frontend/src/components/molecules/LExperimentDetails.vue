@@ -139,11 +139,11 @@ import Tag from 'primevue/tag';
 const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
 
 const experimentStore = useExperimentStore();
-const { selectedExperiment, runningJobs } = storeToRefs(experimentStore);
+const { selectedExperiment, experiments } = storeToRefs(experimentStore);
 const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
-  const selected = runningJobs.value
+  const selected = experiments.value
     .filter((job) => job.id === selectedExperiment.value.id)[0]
   return selected ? selected.status : selectedExperiment.value.status;
 })

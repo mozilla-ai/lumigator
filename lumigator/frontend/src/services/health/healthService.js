@@ -6,7 +6,7 @@ async function fetchHealthStatus() {
     const response = await http.get(PATH_HEALTH_ROOT());
     return response.data.status
   } catch (error) {
-    console.log(error);
+    console.error('Error getting health status', error);
     return error;
   }
 }

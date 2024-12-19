@@ -109,7 +109,7 @@ const style = computed(() => {
 })
 
 function retrieveStatus(jobID) {
- const job = runningJobs.value.find(job => job.id === jobID);
+  const job = runningJobs.value.find(job => job.id === jobID);
   return job ? job.status : null;
 }
 

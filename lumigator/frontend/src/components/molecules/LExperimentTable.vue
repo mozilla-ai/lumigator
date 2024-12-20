@@ -118,7 +118,7 @@ async function throttledUpdateAllJobs() {
   if (isThrottled.value) { return }; // Skip if throttle is active
 
   isThrottled.value = true;
-  experimentStore.updateStatusForIncompleteExperiments()
+  await experimentStore.updateStatusForIncompleteExperiments()
   setTimeout(() => {
     isThrottled.value = false; // Release throttle after delay
   }, 5000); // 5 seconds throttle
@@ -127,12 +127,11 @@ async function throttledUpdateAllJobs() {
 // This is a temporary solution until 'experiments/' endpoint
 // updates the status of each experiment
 let pollingId;
-onMounted(() => {
-  experimentStore.updateStatusForIncompleteExperiments();
+onMounted(async () => {
+  await experimentStore.updateStatusForIncompleteExperiments()
   pollingId = setInterval(() => {
     throttledUpdateAllJobs();
-  }, 1000); // Check every second, throttled to execute every 5 seconds
-})
+  }, 1000)}); // Check every second, throttled to execute every 5 seconds
 
 onUnmounted(() => {
   clearInterval(pollingId);
@@ -146,8 +145,8 @@ watch(showSlidingPanel, (newValue) => {
   }, 100);
 });
 
-watch(() => props.tableData.length, () => {
-  experimentStore.updateStatusForIncompleteExperiments();
+watch(() => props.tableData.length, async () => {
+  await experimentStore.updateStatusForIncompleteExperiments();
 });
 </script>
 

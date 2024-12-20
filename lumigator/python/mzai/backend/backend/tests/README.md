@@ -30,6 +30,13 @@ class. This class inherits from the
 class and reads its values from the environment when instantiated. These settings are then used for
 instantiating various clients/controlling business logic throughout the application.
 
+The Makefile used to run tests will take the following environment variables from the environment
+or the `.env` file (with this file taking precedence) if they exist:
+
+* RAY_WORKER_GPUS (default value `0.0`)
+* RAY_WORKER_GPUS_FRACTION (default value `0.0`)
+* INFERENCE_PIP_REQS (default value `../jobs/inference/requirements_cpu.txt`)
+
 In cases where a test requires a different dependency than those defined by the `BackendSettings`
 class (e.g., for creating a test client for a mock service), a test dependency override can be
 pecified in the `conftest.py` fixture.

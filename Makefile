@@ -5,6 +5,13 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
+-include .env
+# GPU related settings
+#
+RAY_WORKER_GPUS ?= "0.0"
+RAY_WORKER_GPUS_FRACTION ?= "0.0"
+INFERENCE_PIP_REQS ?= ../jobs/inference/requirements_cpu.txt
+
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
 RAY_ARCH_SUFFIX :=

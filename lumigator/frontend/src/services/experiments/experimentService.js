@@ -30,8 +30,8 @@ async function fetchExperimentDetails(id) {
 }
 
 async function fetchJobStatus(id) {
-  const job = await fetchExperimentDetails(id)
-  return job.status
+  const job = await fetchExperimentDetails(id);
+  return job.status;
 }
 
 async function triggerExperiment(experimentPayload) {

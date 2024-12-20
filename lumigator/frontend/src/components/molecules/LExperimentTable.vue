@@ -118,7 +118,7 @@ async function throttledUpdateAllJobs() {
   if (isThrottled.value) { return }; // Skip if throttle is active
 
   isThrottled.value = true;
-  await experimentStore.updateStatusForIncompleteExperiments()
+  await experimentStore.updateStatusForIncompleteExperiments();
   setTimeout(() => {
     isThrottled.value = false; // Release throttle after delay
   }, 5000); // 5 seconds throttle
@@ -128,7 +128,7 @@ async function throttledUpdateAllJobs() {
 // updates the status of each experiment
 let pollingId;
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteExperiments()
+  await experimentStore.updateStatusForIncompleteExperiments();
   pollingId = setInterval(() => {
     throttledUpdateAllJobs();
   }, 1000)}); // Check every second, throttled to execute every 5 seconds

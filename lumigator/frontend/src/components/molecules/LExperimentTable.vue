@@ -129,9 +129,10 @@ async function throttledUpdateAllJobs() {
 let pollingId;
 onMounted(async () => {
   await experimentStore.updateStatusForIncompleteExperiments();
-  pollingId = setInterval(() => {
-    throttledUpdateAllJobs();
-  }, 1000)}); // Check every second, throttled to execute every 5 seconds
+  pollingId = setInterval(async () => {
+    await throttledUpdateAllJobs();
+  }, 1000)}
+); // Check every second, throttled to execute every 5 seconds
 
 onUnmounted(() => {
   clearInterval(pollingId);

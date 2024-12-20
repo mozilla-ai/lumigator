@@ -15,23 +15,28 @@ async function fetchExperiments() {
       status: p.status.toUpperCase(),
     }));
   } catch (error) {
-    console.error("Error fetching experiments:", error.message || error);
+    console.error("Error fetching experiments", error.message || error);
     return [];
   }
 }
 
 async function fetchExperimentDetails(id) {
-  const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
-  if (response?.data?.status) {
-    // Ensure that we transform status at the point the API returns it.
-    response.data.status = response.data.status.toUpperCase();
+  try {
+    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+    if (response?.data?.status) {
+      // Ensure that we transform status at the point the API returns it.
+      response.data.status = response.data.status.toUpperCase();
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching experiment details", error.message || error);
+    return null;
   }
-  return response.data;
 }
 
 async function fetchJobStatus(id) {
   const job = await fetchExperimentDetails(id);
-  return job.status;
+  return job?.status;
 }
 
 async function triggerExperiment(experimentPayload) {
@@ -63,7 +68,7 @@ async function fetchResults(job_id) {
       download_url
     }
   } catch (error) {
-    console.error("Error fetching experiment results:", error.message || error);
+    console.error("Error fetching experiment results", error.message || error);
     return error;
   }
 }

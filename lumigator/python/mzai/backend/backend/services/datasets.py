@@ -99,6 +99,9 @@ class DatasetService:
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
         return self.dataset_repo.get(dataset_id)
 
+    def _get_dataset_record_by_job_id(self, job_id: UUID) -> DatasetRecord | None:
+        return self.dataset_repo.get_by_job_id(job_id)
+
     def _get_s3_path(self, dataset_key: str) -> str:
         return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
 
@@ -171,6 +174,13 @@ class DatasetService:
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return None
+
+        return DatasetResponse.model_validate(record)
+
+    def get_dataset_by_job_id(self, job_id: UUID) -> DatasetResponse | None:
+        record = self._get_dataset_record_by_job_id(job_id)
         if record is None:
             return None
 

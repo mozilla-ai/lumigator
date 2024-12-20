@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
@@ -8,21 +8,17 @@ from lumigator_schemas.experiments import (
     ExperimentResultResponse,
 )
 from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import (
-    JobEvalCreate,
-)
 
-from backend.api.deps import JobServiceDep
+from backend.api.deps import ExperimentServiceDep, JobServiceDep
 
 router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(
-    service: JobServiceDep,
-    request: ExperimentCreate,
+async def create_experiment(
+    service: ExperimentServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
 ) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
+    return ExperimentResponse.model_validate(service.create_experiment(request, background_tasks))
 
 
 @router.get("/{experiment_id}")

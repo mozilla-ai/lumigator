@@ -5,7 +5,7 @@
     "job": {
         "max_samples": 10,
         "storage_path": "s3://lumigator-storage/jobs/results/",
-        "output_field": "prediction",
+        "output_field": "predictions",
         "enable_tqdm": true
     }
 }

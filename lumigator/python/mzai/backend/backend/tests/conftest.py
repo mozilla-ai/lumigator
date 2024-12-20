@@ -1,6 +1,7 @@
 import csv
 import io
 import os
+import uuid
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,7 @@ import requests_mock
 from botocore.exceptions import ClientError
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from lumigator_schemas.jobs import JobConfig, JobType
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
@@ -259,3 +261,26 @@ def job_service(db_session, job_repository, result_repository, fake_ray_client, 
 @pytest.fixture(scope="function")
 def backend_settings():
     return BackendSettings()
+
+
+@pytest.fixture(scope="function")
+def create_job_config() -> JobConfig:
+    conf_args = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "model": "hf://facebook/bart-large-cnn",
+        "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
+        "max_samples": 10,
+        "model_url": "hf://facebook/bart-large-cnn",
+        "system_prompt": "Hello Lumigator",
+        "config_template": str,
+    }
+
+    conf = JobConfig(
+        job_id=uuid.uuid4(),
+        job_type=JobType.EVALUATION,
+        command=settings.EVALUATOR_COMMAND,
+        args=conf_args,
+    )
+
+    return conf

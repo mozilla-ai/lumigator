@@ -16,7 +16,6 @@ endif
 define run_with_containers
 	@echo "No Lumigator containers are running. Starting containers..."
 	make start-lumigator-build
-	trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; \
 	make $(1)
 endef
 
@@ -118,12 +117,15 @@ else
 endif
 
 test-backend-unit:
-	cd lumigator/python/mzai/backend/backend/tests; \
+	cd lumigator/python/mzai/backend/; \
+	rm local.db; \
 	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
 
 test-backend-integration-target:
-	cd lumigator/python/mzai/backend/backend/tests;	\
-	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
+	cd lumigator/python/mzai/backend/; \
+	docker container list --all; \
+	rm local.db; \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt INFERENCE_WORK_DIR=../jobs/inference EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt EVALUATOR_WORK_DIR=../jobs/evaluator uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration:
 ifeq ($(CONTAINERS_RUNNING),)

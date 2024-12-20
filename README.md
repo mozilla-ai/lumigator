@@ -74,6 +74,12 @@ To start Lumigator locally, follow these steps:
     cd lumigator
     ```
 
+1. Create a `.env` file and copy the content of `.env.example`:
+
+    ```bash
+    cp .env.example .env
+    ```
+
 1. Start Lumigator using Docker Compose:
 
     ```bash

@@ -3,7 +3,7 @@
 # This script supports the initial setup of Lumigator for developing and using all functionalities locally.
 # It requires Docker and Docker Compose to run. If they are not present on your machine, the script will install and activate them for you.
 # If the local option (`-l`) is selected, Lumigator code is expected to be located in the current folder or in the provided folder.
-# If a method is selected, it will install Lumigator using Git or a Zip file, depending on the case, and will place the files in selected_folder/lumigator.
+# If the installation method (`-m`) is selected, it will install Lumigator using Git or a Zip file, depending on the case, and will place the files in selected_folder/lumigator.
 
 # Help
 show_help() {

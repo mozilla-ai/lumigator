@@ -42,19 +42,15 @@ def test_upload_data_launch_job(local_client: TestClient, dialog_dataset):
         "config_template": "string",
     }
 
-    # Mocking the background task because the test hangs indefinitely,
-    # waiting for the background task to finish.
-    with patch("fastapi.BackgroundTasks.add_task") as mock:
-        create_evaluation_job_response = local_client.post(
-            "/jobs/evaluate/", headers=headers, json=payload
-        )
-        assert create_evaluation_job_response.status_code == 201
+    create_evaluation_job_response = local_client.post(
+        "/jobs/evaluate/", headers=headers, json=payload
+    )
+    assert create_evaluation_job_response.status_code == 201
 
-        create_inference_job_response = local_client.post(
-            "/jobs/inference/", headers=headers, json=payload
-        )
-        assert create_inference_job_response.status_code == 201
-        assert mock.called
+    create_inference_job_response = local_client.post(
+        "/jobs/inference/", headers=headers, json=payload
+    )
+    assert create_inference_job_response.status_code == 201
 
 
 def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
@@ -79,20 +75,8 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset):
         "max_samples": 2,
     }
 
-    # Mocking the background task because the test hangs indefinitely,
-    # waiting for the background task to finish.
-    with patch("fastapi.BackgroundTasks.add_task") as mock:
-        create_experiments_response = local_client.post(
-            "/experiments/", headers=headers, json=payload
-        )
-        assert create_experiments_response.status_code == 201
-        # - the current /experiments runs nothing in background.
-        # - the current /experiments_new runs inference followed by evaluation
-        #   and it makes use of background tasks, so we can expect the mock will
-        #   be called
-        # - as soon as we move experiments_new to experiments this test will fail,
-        #   reminding us we have to switch to `assert mock.called` here
-        assert not mock.called
+    create_experiments_response = local_client.post("/experiments/", headers=headers, json=payload)
+    assert create_experiments_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(

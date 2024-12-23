@@ -50,7 +50,7 @@ def create_annotation_job(
     request: Request,
     response: Response,
 ) -> JobResponse:
-    """This uses a hardcoded model, that is, Lumigator's opinion on what
+    """This uses a hardcoded model, that is, Lumigator's opinion on the what
     reference model should be used to generate annotations.
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """

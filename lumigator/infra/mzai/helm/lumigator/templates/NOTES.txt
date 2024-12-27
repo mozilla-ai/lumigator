@@ -1,12 +1,26 @@
 1. Get the application URL by running these commands:
-{{- if contains "LoadBalancer" .Values.service.type }}
+{{- if contains "LoadBalancer" .Values.backend.service.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "lumigator.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "lumigator.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.service.port }}
-{{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "lumigator.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+           You can watch the status of the backend service by running:
+           'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "lumigator.fullname" . }}-backend'
+  export BACKEND_SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "lumigator.fullname" . }}-backend --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$BACKEND_SERVICE_IP:{{ .Values.backend.service.port }}
+{{- else if contains "ClusterIP" .Values.backend.service.type }}
+  export BACKEND_POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "lumigator.name" . }},app.kubernetes.io/instance={{ .Release.Name }},component=backend" -o jsonpath="{.items[0].metadata.name}")
+  export BACKEND_CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $BACKEND_POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use the backend service"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $BACKEND_POD_NAME 8080:$BACKEND_CONTAINER_PORT
+{{- end }}
+
+{{- if contains "LoadBalancer" .Values.frontend.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of the frontend service by running:
+           'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "lumigator.fullname" . }}-frontend'
+  export FRONTEND_SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "lumigator.fullname" . }}-frontend --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$FRONTEND_SERVICE_IP:{{ .Values.frontend.service.port }}
+{{- else if contains "ClusterIP" .Values.frontend.service.type }}
+  export FRONTEND_POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "lumigator.name" . }},app.kubernetes.io/instance={{ .Release.Name }},component=frontend" -o jsonpath="{.items[0].metadata.name}")
+  export FRONTEND_CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $FRONTEND_POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8081 to use the frontend service"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $FRONTEND_POD_NAME 8081:$FRONTEND_CONTAINER_PORT
 {{- end }}

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
-from backend.services.completions import MistralCompletionService, OpenAICompletionService
+from backend.services.completions import LiteLLMCompletionService, MistralCompletionService
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.settings import settings
@@ -68,10 +68,10 @@ MistralCompletionServiceDep = Annotated[
 ]
 
 
-def get_openai_completion_service() -> OpenAICompletionService:
-    return OpenAICompletionService()
+def get_openai_completion_service() -> LiteLLMCompletionService:
+    return LiteLLMCompletionService()
 
 
-OpenAICompletionServiceDep = Annotated[
-    OpenAICompletionService, Depends(get_mistral_completion_service)
+LiteLLMCompletionServiceDep = Annotated[
+    LiteLLMCompletionService, Depends(get_mistral_completion_service)
 ]

@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
+import litellm
 import mistralai.client
 from lumigator_schemas.completions import CompletionRequest, CompletionResponse
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-from openai import OpenAI
 
 from backend.settings import settings
 
@@ -44,21 +44,20 @@ class MistralCompletionService(CompletionService):
         return CompletionResponse(text=response)
 
 
-class OpenAICompletionService(CompletionService):
+class LiteLLMCompletionService(CompletionService):
     def __init__(self):
-        self.client = OpenAI(api_key=settings.OAI_API_KEY)
         self.model = "gpt-4o-mini"
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
 
     def get_models(self) -> mistralai.client.ModelList:
-        response = self.client.list_models()
+        response = litellm.get_model_info(self.model)
 
         return response
 
     def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:
-        response = self.client.chat.completions.create(
+        response = litellm.completion(
             model=self.model,
             messages=[
                 {"role": "system", "content": self.prompt},

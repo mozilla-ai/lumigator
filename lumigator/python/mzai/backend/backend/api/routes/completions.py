@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from lumigator_schemas.completions import CompletionRequest
 
-from backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
+from backend.api.deps import LiteLLMCompletionServiceDep, MistralCompletionServiceDep
 
 router = APIRouter()
 
@@ -20,5 +20,5 @@ def get_mistral_completion(request: CompletionRequest, service: MistralCompletio
 
 
 @router.post(f"/{VENDOR_OPENAI}")
-def get_openai_completion(request: CompletionRequest, service: OpenAICompletionServiceDep):
+def get_openai_completion(request: CompletionRequest, service: LiteLLMCompletionServiceDep):
     return service.get_completions_response(request)

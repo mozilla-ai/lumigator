@@ -51,8 +51,8 @@ class LiteLLMCompletionService(CompletionService):
         self.temperature = 1
         self.top_p = 1
 
-    def get_models(self) -> mistralai.client.ModelList:
-        response = litellm.get_model_info(self.model)
+    def get_models(self) -> list[str]:
+        response = litellm.models_by_provider.get("openai")
 
         return response
 

@@ -19,5 +19,10 @@ def json_config_minimal() -> dict:
 
 
 @pytest.fixture(scope="session")
-def json_config_full_eval() -> dict:
-    return load_json(resources_dir() / "config_full_eval.json")
+def json_config_full_api() -> dict:
+    return load_json(resources_dir() / "config_full_api.json")
+
+
+@pytest.fixture(scope="session")
+def json_config_full_hf() -> dict:
+    return load_json(resources_dir() / "config_full_hf.json")

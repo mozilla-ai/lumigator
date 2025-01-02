@@ -20,4 +20,4 @@ def json_config_minimal() -> dict:
 
 @pytest.fixture(scope="session")
 def json_config_full() -> dict:
-    return load_json(resources_dir() / "config_full.json")
+    return load_json(resources_dir() / "config_full_eval.json")

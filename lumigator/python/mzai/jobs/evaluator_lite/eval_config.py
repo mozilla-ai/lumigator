@@ -9,7 +9,7 @@ class ModelConfig(BaseModel):
     path: str
 
 
-class EvaluationJobConfig(BaseModel):
+class EvaluationConfig(BaseModel):
     metrics: list[str] = Field(default=["rouge", "meteor", "bertscore"])
     use_pipeline: bool = False
     max_samples: int = 0
@@ -26,5 +26,5 @@ class EvalJobConfig(BaseModel):
     name: str | None
     dataset: DatasetConfig
     model: ModelConfig
-    evaluation: EvaluationJobConfig
+    evaluation: EvaluationConfig
     model_config = ConfigDict(extra="forbid")

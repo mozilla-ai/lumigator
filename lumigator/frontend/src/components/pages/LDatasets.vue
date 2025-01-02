@@ -26,6 +26,7 @@
       <l-dataset-table
         :table-data="datasets"
         @l-dataset-selected="onDatasetSelected($event)"
+        @l-dnld-dataset="onDatasetDownload($event)"
         @l-experiment="onExperimentDataset($event)"
         @l-delete-dataset="deleteConfirmation($event)"
       />
@@ -42,6 +43,7 @@
         v-if="selectedDataset"
         @l-experiment="onExperimentDataset($event)"
         @l-details-closed="onClearSelection()"
+        @l-dnld-dataset="onDatasetDownload($event)"
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </Teleport>
@@ -112,6 +114,10 @@ const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {
   datasetStore.uploadDataset(datasetFile);
+}
+
+const onDatasetDownload = (datasetID) => {
+  datasetStore.loadDatasetFile(datasetID);
 }
 
 const onDeleteDataset = (datasetID) => {

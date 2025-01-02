@@ -94,7 +94,12 @@ defineProps({
 	}
 })
 
-const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected', 'l-experiment'])
+const emit = defineEmits([
+  'l-delete-dataset',
+  'l-dataset-selected',
+  'l-experiment',
+  'l-dnld-dataset'
+])
 
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
@@ -123,7 +128,10 @@ const options = ref([
 	},
 	{
 		label: 'Download',
-		icon: 'pi pi-download'
+    icon: 'pi pi-download',
+     command: () => {
+      emit('l-dnld-dataset', focusedItem.value.id)
+    }
 	},
 	{
 		label: 'Delete',

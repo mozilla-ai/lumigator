@@ -16,6 +16,7 @@
           severity="secondary"
           variant="text"
           rounded
+          @click="emit('l-dnld-dataset', selectedDataset.id)"
         />
         <Button
           severity="secondary"
@@ -93,6 +94,7 @@ const { showSlidingPanel } = useSlidePanel();
 const isCopied = ref(false);
 
 const emit = defineEmits([
+  'l-dnld-dataset',
   'l-delete-dataset',
   'l-details-closed',
   'l-experiment'

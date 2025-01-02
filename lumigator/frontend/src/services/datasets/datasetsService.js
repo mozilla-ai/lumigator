@@ -1,5 +1,5 @@
 import http from '@/services/http';
-import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET } from './api';
+import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_DATASET_DOWNLOAD } from './api';
 
 async function fetchDatasets() {
   try {
@@ -34,6 +34,24 @@ async function postDataset(formData) {
   }
 }
 
+async function downloadDataset(dataset_id) {
+  try {
+    const response = await http.get(PATH_DATASET_DOWNLOAD(dataset_id))
+    const  download_url = response.data.download_urls[0];
+    if (!download_url) {
+      console.error("No download_url found in the response.");
+      return;
+    }
+    const fileResponse = await http.get(download_url, {
+      responseType: 'blob', // Important: Receive the file as a binary blob
+    })
+    const blob = fileResponse.data;
+    return blob;
+  } catch (error) {
+    console.log(`Error dowloading dataset ${dataset_id}`, error)
+  }
+}
+
 async function deleteDataset(id) {
 
   try {
@@ -52,5 +70,6 @@ export default {
   fetchDatasets,
   fetchDatasetInfo,
   postDataset,
+  downloadDataset,
   deleteDataset
 }

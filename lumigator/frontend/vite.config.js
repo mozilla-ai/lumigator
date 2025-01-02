@@ -8,6 +8,7 @@ import path from 'path';
 
 export default defineConfig({
   envPrefix: 'VUE_APP_',
+  envDir: '../../',
   plugins: [vue()],
   resolve: {
     alias: {

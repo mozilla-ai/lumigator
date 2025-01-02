@@ -1,4 +1,3 @@
-import csv
 from collections.abc import Generator
 from typing import Annotated
 
@@ -23,7 +22,6 @@ def get_db_session() -> Generator[Session, None, None]:
         yield session
 
 
-csv.writer()
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 

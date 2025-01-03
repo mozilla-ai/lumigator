@@ -9,7 +9,7 @@
       @click="onCloseDetails"
     />
     <div class="l-dataset-details__header">
-      <h3>Dataset Details</h3>
+      <h3>{{  t('datasets.details.title') }}</h3>
       <span class="l-dataset-details__header-actions">
         <Button
           icon="pi pi-download"
@@ -28,7 +28,7 @@
     </div>
     <div class="l-dataset-details__content">
       <div class="l-dataset-details__content-item">
-        <span class="l-dataset-details__content-label">filename</span>
+        <span class="l-dataset-details__content-label">{{ t('datasets.labels.filename')  }}</span>
         <span class="l-dataset-details__content-field">
           {{ selectedDataset.filename }}
         </span>
@@ -37,30 +37,32 @@
         class="l-dataset-details__content-item"
         @click="copyToClipboard(selectedDataset.id)"
       >
-        <span class="l-dataset-details__content-label">dataset id</span>
+        <span class="l-dataset-details__content-label">{{ t('datasets.labels.datasetId')  }}</span>
         <span class="l-dataset-details__content-field">
           {{ selectedDataset.id }}
           <i
-            v-tooltip="'Copy ID'"
+            v-tooltip="t('datasets.details.copyId')"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
             style="font-size: 14px;padding-left: 3px;cursor: pointer;"
           />
         </span>
       </div>
       <div class="l-dataset-details__content-item">
-        <span class="l-dataset-details__content-label">submitted</span>
+        <span class="l-dataset-details__content-label">{{ t('datasets.labels.submitted')  }}</span>
         <span class="l-dataset-details__content-field">
           {{ formatDate(selectedDataset.created_at) }}
         </span>
       </div>
       <div class="l-dataset-details__content-item">
-        <span class="l-dataset-details__content-label">file size</span>
+        <span class="l-dataset-details__content-label">{{ t('datasets.labels.size')  }}</span>
         <span class="l-dataset-details__content-field">
           {{ Math.floor(selectedDataset.size / 1000) }} KB
         </span>
       </div>
       <div class="l-dataset-details__content-item">
-        <span class="l-dataset-details__content-label">ground truth</span>
+        <span class="l-dataset-details__content-label">
+          {{ t('datasets.labels.groundTruth')  }}
+        </span>
         <span class="l-dataset-details__content-field">{{ selectedDataset.ground_truth }}</span>
       </div>
       <div class="l-dataset-details__actions">
@@ -69,7 +71,7 @@
           severity="secondary"
           size="small"
           icon="pi pi-microchip"
-          label="Use in Experiment"
+          :label="t('datasets.details.useInExperiment')"
           class="l-dataset-empty__action-btn"
           :disabled="!selectedDataset.ground_truth"
           @click="emit('l-experiment', selectedDataset)"
@@ -80,6 +82,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -87,6 +90,7 @@ import { useSlidePanel } from '@/composables/SlidingPanel';
 import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button';
 
+const { t } = useI18n();
 const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();

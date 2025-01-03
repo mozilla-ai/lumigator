@@ -21,11 +21,11 @@
       >
         <Column
           field="filename"
-          header="Filename"
+          :header="t('datasets.labels.filename')"
         />
         <Column
           field="id"
-          header="dataset id"
+          :header="t('datasets.labels.datasetId')"
         >
           <template #body="slotProps">
             {{ shortenedID(slotProps.data.id) }}
@@ -33,7 +33,7 @@
         </Column>
         <Column
           field="created_at"
-          header="submitted"
+          :header="t('datasets.labels.submitted')"
         >
           <template #body="slotProps">
             {{ formatDate(slotProps.data.created_at) }}
@@ -41,7 +41,7 @@
         </Column>
         <Column
           field="size"
-          header="size"
+          :header="t('datasets.labels.size')"
         >
           <template #body="slotProps">
             {{ Math.floor(slotProps.data.size / 1000) }} KB
@@ -49,7 +49,7 @@
         </Column>
         <Column
           field="ground_truth"
-          header="Ground Truth"
+          :header="t('datasets.labels.groundTruth')"
         >
           <template #body="slotProps">
             <span class="capitalize"
@@ -57,7 +57,7 @@
             />
           </template>
         </Column>
-        <Column header="options">
+        <Column :header="t('datasets.labels.options')">
           <template #body="slotProps">
             <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
                   aria-controls="optionsMenu"
@@ -80,6 +80,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { ref, computed, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -102,6 +103,7 @@ const style = computed(() => {
     'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 })
 
+const { t } = useI18n();
 const focusedItem = ref(null);
 const tableVisible = ref(true)
 const optionsMenu = ref();

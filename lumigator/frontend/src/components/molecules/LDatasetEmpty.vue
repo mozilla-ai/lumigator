@@ -1,10 +1,11 @@
 <template>
   <div class="l-dataset-empty">
-    <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
+    <h2 class="l-dataset-empty__instructions">
+      {{ t('datasets.emptyDataset.title') }}
+    </h2>
     <p class="l-dataset-empty__instructions-text">
       <span>
-        Use a dataset as the basis for your evaluation.
-        It includes data for the model you'd like to evaluate and possibly a ground truth "answer".
+        {{ t('datasets.header.description') }}
       </span>
     </p>
     <Button
@@ -16,24 +17,29 @@
       @click="emit('l-add-dataset')"
     />
     <p class="l-dataset-empty__note">
-      Your dataset should be a CSV file and include the following columns:
-      <span  class="l-dataset-empty__note-item">examples</span>,
-      <span  class="l-dataset-empty__note-item">ground_truth</span>.
+      {{ t('datasets.emptyDataset.note') }}
+      <span  class="l-dataset-empty__note-item"> {{ t('datasets.emptyDataset.examples') }}</span>,
+      <span  class="l-dataset-empty__note-item">
+        {{ t('datasets.emptyDataset.ground_truth') }}
+      </span>.
     </p>
     <p class="l-dataset-empty__note">
-      The
-      <span  class="l-dataset-empty__note-item">ground_truth</span>
-      column is optional, as it can be generated using Lumigator.
+      {{ t('datasets.emptyDataset.the') }}
+      <span  class="l-dataset-empty__note-item">{{ t('datasets.emptyDataset.ground_truth') }}</span>
+      {{ t('datasets.emptyDataset.columnOptional') }}
       <a href="https://mozilla-ai.github.io/lumigator/"
          target="_blank"
          style="background-color: transparent;"
-      >Learn more <span class="pi pi-arrow-up-right" /></a>
+      >{{ t('datasets.emptyDataset.learnMore') }} <span class="pi pi-arrow-up-right" /></a>
     </p>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
+
+const { t } = useI18n();
 const emit  = defineEmits(['l-add-dataset'])
 </script>
 

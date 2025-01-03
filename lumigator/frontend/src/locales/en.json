@@ -1,0 +1,32 @@
+{
+  "datasets": {
+    "header": {
+      "title": "Datasets",
+      "subtitle": "Only CSV files are currently supported.",
+      "description": "Use a dataset as the basis for your evaluation. It includes data for the model you'd like to evaluate and possibly a ground truth answer."
+    },
+    "provideDataset": "Provide Dataset",
+    "emptyDataset": {
+      "title": "Submit a dataset to start using Lumigator.",
+      "note": "Your dataset should be a CSV file and include the following columns:",
+      "examples": "examples",
+      "ground_truth": "ground_truth",
+      "the": "The",
+      "columnOptional": "column is optional, as it can be generated using Lumigator.",
+      "learnMore": "Learn more"
+    },
+    "labels": {
+      "filename": "Filename",
+      "datasetId": "Dataset ID",
+      "submitted": "Submitted",
+      "size": "Size",
+      "groundTruth": "Ground Truth",
+      "options": "Options"
+    },
+    "details": {
+      "title": "Dataset Details",
+      "copyId": "Copy ID",
+      "useInExperiment": "Use in Experiment"
+    }
+  }
+}

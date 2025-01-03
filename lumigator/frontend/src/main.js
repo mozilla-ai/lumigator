@@ -2,6 +2,7 @@ import '@/styles/app.scss';
 import { createApp } from 'vue';
 import Tooltip from 'primevue/tooltip';
 import App from './App.vue';
+import i18n from '@/libs/i18n';
 import { createPinia } from 'pinia';
 import router from '@/router';
 import PrimeVue from 'primevue/config';
@@ -23,6 +24,7 @@ app.use(PrimeVue, {
     }
   },
 });
+app.use(i18n)
 app.use(ConfirmationService);
 app.use(ToastService);
 app.directive('tooltip', Tooltip);

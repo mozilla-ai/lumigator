@@ -8,10 +8,10 @@
       class="l-datasets__header-container"
     >
       <l-page-header
-        title="Datasets"
-        :description="headerDescription"
-        subtitle="Only CSV files are currently supported."
-        button-label="Provide Dataset"
+        :title="t('datasets.header.title')"
+        :description="t('datasets.header.description')"
+        :subtitle="t('datasets.header.description')"
+        :button-label="t('datasets.provideDataset')"
         @l-header-action="onDatasetAdded()"
       />
     </div>
@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { onMounted, ref} from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -62,6 +63,7 @@ import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 
+const { t } = useI18n();
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel  } = useSlidePanel();
@@ -70,9 +72,6 @@ const datasetInput = ref(null);
 const confirm = useConfirm();
 const router = useRouter();
 const route = useRoute();
-
-const headerDescription = ref(`Use a dataset as the basis for your evaluation.
-It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
 function deleteConfirmation(dataset) {
   confirm.require({

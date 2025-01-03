@@ -185,3 +185,35 @@ weights for a given open LLM, as well as everything needed to actually run that 
 computer. There's nothing to install or configure.
 
 There are no summarization-specific parameters for this model.
+
+
+# Reference models
+
+Before you jump into evaluating datasets, you should consider the following importance of quality ground-truth and annotations.
+
+Ground-truth would be the actual, expected output or correct answer in for a given task (such as summarization), serving as a reference to compare the model's predictions. Typically, a human with enough expertise in the task will annotate or label a dataset with those references for each sample (for example, an acceptable summary of the input text).
+
+To evaluate a model as reliably as possible, we encourage using human-provided ground-truth to compare against. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) to get you started.
+
+You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
+
+::::{tab-set}
+
+:::{tab-item} cURL
+:sync: tab1
+
+```console
+user@host:~/lumigator$
+curl -X 'POST' \
+  'http://localhost:8000/api/v1/jobs/annotate/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "test_annotate",
+  "description": "annotate",
+  "dataset": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "max_samples": -1,
+  "task": "summarization"
+}'
+```
+Under the hood, this will launch an inference job with the reference model for summarization (BART, described above).

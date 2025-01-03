@@ -10,7 +10,7 @@ from loguru import logger
 
 
 def save_to_disk(local_path: Path, data_dict: dict):
-    logger.info(f"Storing into {local_path}...")
+    logger.info(f"Storing evaluation results into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
         json.dump(data_dict, f)
@@ -22,7 +22,7 @@ def save_to_s3(config: dict, local_path: Path, storage_path: str):
         storage_path = "s3://" + str(
             Path(storage_path[5:]) / config.get("name") / "eval_results.json"
         )
-    logger.info(f"Storing into {storage_path}...")
+    logger.info(f"Storing evaluation results into {local_path}...")
     s3.put_file(local_path, storage_path)
 
 
@@ -69,9 +69,6 @@ def run_eval(config: EvalJobConfig) -> Path:
     # run evaluation and append to results dict
     predictions = dataset["predictions"]
     ground_truth = dataset["ground_truth"]
-
-    logger.info(f"Predictions: {predictions}")
-    logger.info(f"Ground truth: {ground_truth}")
 
     evaluation_results = run_eval_metrics(predictions, ground_truth, config.evaluation.metrics)
 

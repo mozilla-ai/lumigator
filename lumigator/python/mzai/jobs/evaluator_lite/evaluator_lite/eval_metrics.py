@@ -22,7 +22,7 @@ class EvaluationMetrics:
             logger.info(f"Chosen metrics: {self._chosen_metrics}")
 
         if len(self._unsupported_metrics) > 0:
-            logger.info(f"Unsupported metrics: {self._unsupported_metrics}")
+            logger.warning(f"Unsupported metrics: {self._unsupported_metrics}")
 
     def _rouge(self, pred: list, ref: list):
         ev = evaluate.load("rouge")

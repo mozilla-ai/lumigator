@@ -132,11 +132,15 @@ else
 	$(call run_with_existing_containers, test-backend-integration-target)
 endif
 
+test-jobs-unit:
+	cd lumigator/python/mzai/jobs/evaluator_lite; \
+	uv run pytest -o python_files="evaluator_lite/tests/test_*.py"
+
 test-sdk-target: test-sdk-unit test-sdk-integration
 
-test-backend-target: test-backend-unit test-backend-integration
+test-backend-target: test-backend-unit test-backend-integration test-jobs-unit
 
-test-all-target: test-sdk-target test-backend-target
+test-all-target: test-sdk-target test-backend-target test-jobs-unit
 
 # Check whether there are already running containers before starting tests:
 #   If so, ask user if they want to proceed with the current deployment.

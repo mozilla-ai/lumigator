@@ -1,0 +1,15 @@
+{
+  "name": "full_eval_config",
+  "dataset": { "path": "s3://lumigator-storage/datasets/deaddead-dead-dead-dead-deaddeaddead/dataset_name.csv" },
+  "model": {
+    "path": "hf://facebook/bart-large-cnn"
+  },
+  "evaluation": {
+    "metrics": ["rouge", "meteor", "bertscore"],
+    "use_pipeline": false,
+    "max_samples": 0,
+    "return_input_data": false,
+    "return_predictions": false,
+    "storage_path": "s3://lumigator-storage/jobs/results/"
+  }
+}

@@ -77,6 +77,7 @@ ignore = [
   "D415", # First line should end with a period, question mark, or exclamation point
   "D205",  # 1 blank line required between summary line and description
   "B905", # `zip()` without an explicit `strict=` parameter
+  "ISC001" # cause conflicts when used with the formatter
 
 ]
 

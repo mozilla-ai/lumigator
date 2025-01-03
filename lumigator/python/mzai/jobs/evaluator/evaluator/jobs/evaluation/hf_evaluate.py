@@ -123,8 +123,12 @@ def run_eval(config: HuggingFaceEvalJobConfig) -> Path:
             logger.info(f"Using direct HF model invocation. Model: {model_name}")
             model_client = HuggingFaceModelClient(model_name, config)
 
-    # run inference
-    predictions, summarization_time = predict(dataset_iterable, model_client)
+    if config.evaluation.skip_inference:
+        predictions = dataset["predictions"]
+        summarization_time = 0.0
+    else:
+        # run inference
+        predictions, summarization_time = predict(dataset_iterable, model_client)
 
     # run evaluation
     ground_truth = dataset["ground_truth"]

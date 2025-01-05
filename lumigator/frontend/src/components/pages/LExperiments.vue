@@ -12,9 +12,9 @@
       class="l-experiments__header-container"
     >
       <l-page-header
-        title="Experiments"
-        :description="headerDescription"
-        button-label="Create Experiment"
+        :title="t('experiments.header.title')"
+        :description="t('experiments.header.description')"
+        :button-label="t('experiments.header.createExperiment')"
         :column="experiments.length === 0"
         @l-header-action="onCreateExperiment()"
       />
@@ -65,6 +65,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { onMounted, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
@@ -79,6 +80,7 @@ import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 
+const { t } = useI18n();
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const datasetStore = useDatasetStore();
@@ -92,8 +94,6 @@ const {
 const showDrawer = ref(false);
 const experimentsDrawer = ref(null);
 const showLogs = ref(null);
-const headerDescription = ref(`Experiments are a logical sequence of inference and
-evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const getDrawerHeader = () => {
   return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;

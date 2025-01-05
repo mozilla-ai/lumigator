@@ -28,5 +28,30 @@
       "copyId": "Copy ID",
       "useInExperiment": "Use in Experiment"
     }
+  },
+  "experiments": {
+    "header": {
+      "title": "Experiments",
+      "description": "Experiments are a logical sequence of inference and evaluation tasks that run sequentially to evaluate an LLM.",
+      "createExperiment": "Create Experiment",
+      "learnMore": "Learn more"
+    },
+    "emptyExperiments": {
+      "note": " We evaluate Summarization tasks using ROUGE, METEOR, and BERT score, each focusing on different aspects of prediction-ground truth similarity.",
+      "learnMore": "Learn more"
+    },
+    "form": {
+      "text": "Summarization jobs are evaluated with ROUGE, METEOR, and BERT score, each focusing on different aspects of prediction-ground truth similarity.",
+      "labels": {
+        "useCase": "Use Case",
+        "selectDataset": "Select Dataset",
+        "experimentTitle": "Experiment Title",
+        "experimentDescription": "Experiment Description",
+        "maximumSamples": "Maximum Samples (optional)",
+        "modelSelection": "Model Selection",
+        "huggingFaceMistral": "Hugging Face Model Hub & Mistral",
+        "runExperiment": "Run Experiment"
+      }
+    }
   }
 }

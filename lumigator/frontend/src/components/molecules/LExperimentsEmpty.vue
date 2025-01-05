@@ -1,8 +1,8 @@
 <template>
   <div class="l-experiment-empty">
     <h2 class="l-experiment-empty__instructions">
-      Experiments are a logical sequence of inference and evaluation tasks that
-      run sequentially to evaluate an LLM.</h2>
+      {{ t('experiments.header.description') }}
+    </h2>
     <p class="l-experiment-empty__instructions-text">
 
 
@@ -11,23 +11,27 @@
       rounded
       size="small"
       icon="pi pi-plus"
-      label="Create experiment"
+      :label="t('experiments.header.createExperiment')"
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
     />
-    <p class="l-experiment-empty__note">   <span>
-      We evaluate Summarization tasks using ROUGE, METEOR, and BERT score,
-      each focusing on different aspects of prediction-ground truth similarity.
-      <a href="https://mozilla-ai.github.io/lumigator/"
-         target="_blank"
-         style="background-color: transparent;"
-      >Learn more <span class="pi pi-arrow-up-right" /></a>
-    </span></p>
+    <p class="l-experiment-empty__note">
+      <span>
+        {{ t('experiments.emptyExperiments.note') }}
+        <a href="https://mozilla-ai.github.io/lumigator/"
+           target="_blank"
+           style="background-color: transparent;"
+        >{{ t('experiments.emptyExperiments.learnMore') }}
+          <span class="pi pi-arrow-up-right" /></a>
+      </span></p>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import Button from 'primevue/button';
+
+const { t } = useI18n();
 const emit  = defineEmits(['l-add-experiment'])
 </script>
 

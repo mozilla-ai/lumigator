@@ -4,7 +4,7 @@
       class="l-experiment-form__header"
       style="position: sticky; top: 0;z-index:100"
     >
-      <h3>Create Experiment</h3>
+      <h3>{{ t('experiments.header.createExperiment') }}</h3>
       <Button
         icon="pi pi-times"
         severity="secondary"
@@ -28,15 +28,13 @@
           variant="filled"
           disabled
         />
-        <label for="use_case">Use case</label>
+        <label for="use_case">{{ t('experiments.form.labels.useCase') }}</label>
       </FloatLabel>
 
-      <p>Summarization jobs are evaluated with ROUGE, METEOR, and BERT
-        score, each focusing on different aspects of prediction-ground
-        truth similarity.
+      <p>{{ t('experiments.form.text') }}
         <a href="https://mozilla-ai.github.io/lumigator/"
            target="_blank"
-        >Learn more <span class="pi pi-arrow-up-right" /></a>
+        >{{ t('experiments.header.learnMore') }} <span class="pi pi-arrow-up-right" /></a>
       </p>
       <FloatLabel
         variant="in"
@@ -50,7 +48,7 @@
           variant="filled"
           size="small"
         />
-        <label for="dataset">Select Dataset</label>
+        <label for="dataset">{{ t('experiments.form.labels.selectDataset') }}</label>
       </FloatLabel>
       <FloatLabel
         variant="in"
@@ -61,7 +59,7 @@
           v-model="experimentTitle"
           variant="filled"
         />
-        <label for="title">Experiment Title</label>
+        <label for="title">{{ t('experiments.form.labels.experimentTitle') }}</label>
       </FloatLabel>
       <FloatLabel
         variant="in"
@@ -73,7 +71,9 @@
           rows="3"
           style="resize: none"
         />
-        <label for="description_input">Experiment description</label>
+        <label for="description_input">
+          {{ t('experiments.form.labels.experimentDescription') }}
+        </label>
       </FloatLabel>
       <FloatLabel
         variant="in"
@@ -85,12 +85,12 @@
           variant="filled"
           class="number-input"
         />
-        <label for="max_samples">Maximum samples (optional)</label>
+        <label for="max_samples">{{ t('experiments.form.labels.maximumSamples') }}</label>
       </FloatLabel>
     </div>
     <div class="l-experiment-form__models-container">
-      <h3>Model Selection</h3>
-      <h4>Hugging Face Model Hub & Mistral</h4>
+      <h3>{{ t('experiments.form.labels.modelSelection') }}</h3>
+      <h4>{{ t('experiments.form.labels.huggingFaceMistral') }}</h4>
       <div class="l-experiment-form__models">
         <l-model-cards  ref="modelSelection"/>
       </div>
@@ -99,7 +99,7 @@
       <Button
         rounded
         size="small"
-        label="Run experiment"
+        :label="t('experiments.form.labels.runExperiment')"
         class="l-page-header__action-btn"
         :disabled="isInvalid"
         @click="triggerExperiment"
@@ -109,6 +109,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store';
@@ -126,6 +127,7 @@ const emit = defineEmits([
   'l-close-form',
 ])
 
+const { t } = useI18n();
 const datasetStore = useDatasetStore();
 const experimentStore = useExperimentStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);

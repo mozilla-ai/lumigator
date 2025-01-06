@@ -10,10 +10,6 @@ AWSSecretKey: ""
 s3EndpointURL: ""
 AWSEndpointURL: ""
 
-postgresHost: "lumigator-postgresql" # Releasename postgres
-postgresPort: "5432"
-postgresPassword: ""
-
 rayAddress: "blah"
 rayPort: "5432"
 rayWorkerGPUs: ""

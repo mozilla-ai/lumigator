@@ -19,9 +19,7 @@ def save_to_disk(local_path: Path, data_dict: dict):
 def save_to_s3(config: dict, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
-        storage_path = "s3://" + str(
-            Path(storage_path[5:]) / config.get("name") / "eval_results.json"
-        )
+        storage_path = "s3://" + str(Path(storage_path[5:]) / config.get("name") / "results.json")
     logger.info(f"Storing evaluation results into {local_path}...")
     s3.put_file(local_path, storage_path)
 
@@ -29,7 +27,7 @@ def save_to_s3(config: dict, local_path: Path, storage_path: str):
 def save_outputs(config: dict, eval_results: dict) -> Path:
     storage_path = config.get("evaluation").get("storage_path")
 
-    local_path = Path("eval_results.json")
+    local_path = Path("results.json")
 
     try:
         save_to_disk(local_path, eval_results)

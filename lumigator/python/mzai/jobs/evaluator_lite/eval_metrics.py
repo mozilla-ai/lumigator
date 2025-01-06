@@ -13,7 +13,7 @@ class EvaluationMetrics:
 
         # chosen metrics are the intersection between the provided and the supported ones
         self._chosen_metrics = set(metrics) & set(self._supported_metrics.keys())
-        # unsupported metrics are the difference between the provided and the supporterd ones
+        # unsupported metrics are the difference between the provided and the supported ones
         self._unsupported_metrics = set(metrics) - set(self._supported_metrics.keys())
 
         if len(self._chosen_metrics) == 0:

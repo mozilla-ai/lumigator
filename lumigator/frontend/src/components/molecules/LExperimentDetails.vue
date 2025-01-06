@@ -77,6 +77,12 @@
         </div>
       </div>
       <div class="l-experiment-details__content-item">
+        <div class="l-experiment-details__content-label">dataset id</div>
+        <div class="l-experiment-details__content-field">
+          {{ selectedExperiment.dataset.id }}
+        </div>
+      </div>
+      <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">{{ selectedExperiment.useCase }}</div>
       </div>

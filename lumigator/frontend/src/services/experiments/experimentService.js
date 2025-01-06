@@ -7,35 +7,36 @@ import {
   PATH_EXPERIMENT_LOGS,
 } from './api';
 
-
 async function fetchExperiments() {
   try {
     const response = await http.get(PATH_EXPERIMENTS_ROOT());
-    return response.data.items;
+    return response.data.items.map(p => ({
+      ...p,
+      status: p.status.toUpperCase(),
+    }));
   } catch (error) {
-    console.error("Error fetching experiments:", error.message || error);
+    console.error("Error fetching experiments", error.message || error);
     return [];
   }
 }
 
 async function fetchExperimentDetails(id) {
-  const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
-  if (response?.data?.status) {
-    // Ensure that we transform status at the point the API returns it.
-    response.data.status = response.data.status.toUpperCase()
+  try {
+    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+    if (response?.data?.status) {
+      // Ensure that we transform status at the point the API returns it.
+      response.data.status = response.data.status.toUpperCase();
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching experiment details", error.message || error);
+    return null;
   }
-  return response.data
 }
 
 async function fetchJobStatus(id) {
-  try {
-    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
-    // Ensure that we transform status at the point the API returns it.
-    return response.data.status.toUpperCase()
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
+  const job = await fetchExperimentDetails(id);
+  return job?.status;
 }
 
 async function triggerExperiment(experimentPayload) {
@@ -47,7 +48,7 @@ async function triggerExperiment(experimentPayload) {
     });
     return response.data
   } catch (error) {
-    console.log('error while creating Experiment', error);
+    console.error('Error while creating experiment', error);
     return error.message;
   }
 }
@@ -67,7 +68,7 @@ async function fetchResults(job_id) {
       download_url
     }
   } catch (error) {
-    console.error("Error fetching experiment results:", error.message || error);
+    console.error("Error fetching experiment results", error.message || error);
     return error;
   }
 }
@@ -86,7 +87,7 @@ async function downloadResults(experiment_id) {
     const blob = fileResponse.data;
     return blob;
   } catch (error) {
-    console.error("Error downloading experiment results:", error.message || error);
+    console.error("Error downloading experiment results", error.message || error);
     return error;
   }
 }
@@ -96,7 +97,7 @@ async function fetchLogs(id) {
     const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id));
     return logsResponse.data
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching logs for job', id, error);
   }
 }
 

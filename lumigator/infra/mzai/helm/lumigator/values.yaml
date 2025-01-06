@@ -2,9 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-global:
-  storageClass: shared-nvme-lga1 # For Postgresql
-
 replicaCount: 1
 
 s3Bucket: ""
@@ -13,8 +10,6 @@ AWSSecretKey: ""
 s3EndpointURL: ""
 AWSEndpointURL: ""
 
-postgresDb: "postgres"
-postgresUser: "postgres"
 postgresHost: "lumigator-postgresql" # Releasename postgres
 postgresPort: "5432"
 postgresPassword: ""

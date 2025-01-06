@@ -18,10 +18,6 @@ class EvaluationConfig(BaseModel):
     storage_path: str = ""
 
 
-class TokenizerConfig(BaseModel):
-    path: str
-
-
 class EvalJobConfig(BaseModel):
     name: str | None
     dataset: DatasetConfig

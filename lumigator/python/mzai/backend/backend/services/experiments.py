@@ -75,7 +75,7 @@ class ExperimentService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    async def run_after_job(self, job_id: UUID, task: Callable = None, *args):
+    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
 
         Inputs:
@@ -152,7 +152,7 @@ class ExperimentService:
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
         background_tasks.add_task(
-            self.run_after_job,
+            self.on_job_complete,
             job_response.id,
             self._add_dataset_to_db,
             job_response.id,
@@ -162,7 +162,7 @@ class ExperimentService:
         # run evaluation job afterwards
         # (NOTE: tasks in starlette are executed sequentially: https://www.starlette.io/background/)
         background_tasks.add_task(
-            self.run_after_job, job_response.id, self._run_eval, job_response.id, request
+            self.on_job_complete, job_response.id, self._run_eval, job_response.id, request
         )
 
         return job_response

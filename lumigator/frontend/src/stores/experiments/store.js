@@ -69,10 +69,20 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function runExperiment(experimentData) {
-    const experimentResponse = await experimentService.triggerExperiment(experimentData);
-    if (experimentResponse) {
-      return experimentResponse;
-    }
+    const modelArray = experimentData.models;
+    const jobRequests = modelArray.map((singleModel) => {
+      // trigger one job per model
+      const jobPayload = {
+        ...experimentData,
+        model: singleModel.link,
+      };
+      return experimentService.triggerExperiment(jobPayload);
+    });
+
+    // Execute all requests in parallel
+    // and wait for all of them to resolve or reject
+    const results = await Promise.all(jobRequests);
+    return results;
   }
 
   async function loadDetails(id) {

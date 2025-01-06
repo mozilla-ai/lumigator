@@ -6,10 +6,10 @@
         :key="model.name"
         class="l-models-list__options-container--option"
       >
-        <RadioButton
-          v-model="selectedModel"
-          :inputId="model.link"
-          name="dynamic"
+        <Checkbox
+          v-model="selectedModels"
+          :inputId="model.id"
+          name="model"
           :value="model"
         />
         <label :for="model.link">{{ model.label }}</label>
@@ -31,9 +31,9 @@
 <script setup>
 import { ref } from 'vue';
 import Button from 'primevue/button';
-import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
 
-const selectedModel = ref('')
+const selectedModels = ref()
 
 defineProps({
   modelLink: String
@@ -70,7 +70,7 @@ const modelOptions = ref([
 
 
 defineExpose({
-  selectedModel
+  selectedModels
 })
 </script>
 

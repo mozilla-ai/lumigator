@@ -70,7 +70,7 @@
         <Textarea
           id="description_input"
           v-model="experimentDescription"
-          rows="3"
+          rows="2"
           style="resize: none"
         />
         <label for="description_input">Experiment description</label>
@@ -143,7 +143,7 @@ const isInvalid = computed(() =>
   !experimentTitle.value ||
   !experimentDescription.value ||
   !dataset.value ||
-  !modelSelection.value?.selectedModel
+  !(modelSelection.value?.selectedModels?.length)
 );
 
 const filteredDatasets = computed(() =>
@@ -153,12 +153,12 @@ async function triggerExperiment() {
   const experimentPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
-    model: modelSelection.value.selectedModel.link,
+    models: modelSelection.value.selectedModels,
     dataset: dataset.value.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
   const success = await experimentStore.runExperiment(experimentPayload);
-  if (success.name === experimentTitle.value) {
+  if (success.length) {
     await experimentStore.loadExperiments();
     emit('l-close-form');
     resetForm();
@@ -183,7 +183,7 @@ function resetForm() {
   experimentTitle.value = '';
   experimentDescription.value = '';
   dataset.value = null;
-  modelSelection.value.selectedModel = null;
+  modelSelection.value.selectedModels = [];
   maxSamples.value = null;
 }
 

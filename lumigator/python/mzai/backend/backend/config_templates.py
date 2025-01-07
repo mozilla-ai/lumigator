@@ -11,7 +11,8 @@ seq2seq_eval_template = """{{
         "max_samples": {max_samples},
         "return_input_data": true,
         "return_predictions": true,
-        "storage_path": "{storage_path}"
+        "storage_path": "{storage_path}",
+        "skip_inference": "{skip_inference}"
     }}
 }}"""
 
@@ -26,7 +27,8 @@ bart_eval_template = """{{
         "max_samples": {max_samples},
         "return_input_data": true,
         "return_predictions": true,
-        "storage_path": "{storage_path}"
+        "storage_path": "{storage_path}",
+        "skip_inference": "{skip_inference}"
     }}
 }}"""
 
@@ -40,7 +42,8 @@ causal_eval_template = """{{
         "max_samples": {max_samples},
         "return_input_data": true,
         "return_predictions": true,
-        "storage_path": "{storage_path}"
+        "storage_path": "{storage_path}",
+        "skip_inference": "{skip_inference}"
     }}
 }}"""
 
@@ -60,7 +63,8 @@ oai_eval_template = """{{
         "max_samples": {max_samples},
         "return_input_data": true,
         "return_predictions": true,
-        "storage_path": "{storage_path}"
+        "storage_path": "{storage_path}",
+        "skip_inference": "{skip_inference}"
     }}
 }}"""
 

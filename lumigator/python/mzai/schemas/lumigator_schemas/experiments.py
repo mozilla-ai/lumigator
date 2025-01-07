@@ -11,9 +11,10 @@ class ExperimentCreate(BaseModel):
     description: str = ""
     model: str
     dataset: UUID
-    max_samples: int = -1 # set to all samples by default
+    max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
+    inference_output_field: str = "predictions"
     config_template: str | None = None
 
 

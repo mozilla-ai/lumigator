@@ -1,14 +1,8 @@
-import csv
-import json
-import time
-from io import BytesIO, StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 import loguru
-from fastapi import HTTPException, UploadFile, status
-from lumigator_schemas.datasets import DatasetFormat
+from fastapi import HTTPException, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
@@ -22,7 +16,6 @@ from lumigator_schemas.jobs import (
 )
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
-from s3fs import S3FileSystem
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -30,9 +23,6 @@ from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
-
-if TYPE_CHECKING:
-    from fastapi import BackgroundTasks
 
 
 class JobService:
@@ -146,6 +136,7 @@ class JobService:
                 "storage_path": self.storage_path,
                 "model_url": model_url,
                 "system_prompt": request.system_prompt,
+                "skip_inference": request.skip_inference,
             }
         else:
             job_params = {
@@ -172,80 +163,7 @@ class JobService:
 
         return job_params
 
-    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
-        loguru.logger.info("Adding a new dataset entry to the database...")
-        s3 = S3FileSystem()
-
-        # Get the dataset from the S3 bucket
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            results = json.loads(f.read())
-
-        dataset = {k: v for k, v in results.items() if k in ["examples", request.output_field]}
-
-        # Create a CSV in memory
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(dataset.keys())
-        csv_writer.writerows(zip(*dataset.values()))
-
-        # Create a binary file from the CSV, since the upload function expects a binary file
-        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
-        bin_data_size = len(bin_data.getvalue())
-
-        # Figure out the dataset filename
-        dataset_filename = self.data_service.get_dataset(dataset_id=request.dataset).filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-annotated.csv"
-
-        upload_file = UploadFile(
-            file=bin_data,
-            size=bin_data_size,
-            filename=dataset_filename,
-            headers={"content-type": "text/csv"},
-        )
-        dataset_record = self.data_service.upload_dataset(
-            upload_file,
-            format=DatasetFormat.JOB,
-            run_id=job_id,
-            generated=True,
-            generated_by=results["model"],
-        )
-
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
-
-    def _watch_job(self, job_id: UUID, request: JobEvalCreate | JobInferenceCreate):
-        job_status = self.ray_client.get_job_status(job_id)
-        job_info = self.ray_client.get_job_info(job_id)
-        job_metadata = job_info.metadata
-        job_type = job_metadata["job_type"]
-
-        valid_status = [
-            JobStatus.CREATED.value.lower(),
-            JobStatus.PENDING.value.lower(),
-            JobStatus.RUNNING.value.lower(),
-        ]
-        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
-
-        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            time.sleep(5)
-            job_status = self.ray_client.get_job_status(job_id)
-
-        if job_status.lower() == JobStatus.FAILED.value.lower():
-            loguru.logger.error(f"Job {job_id} failed.")
-
-        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
-            loguru.logger.info(f"Job {job_id} finished successfully.")
-            # Inference jobs produce a new dataset
-            # Add the dataset to the (local) database
-            if job_type == JobType.INFERENCE:
-                self._add_dataset_to_db(job_id, request)
-
-    def create_job(
-        self, request: JobEvalCreate | JobInferenceCreate, background_tasks: "BackgroundTasks"
-    ) -> JobResponse:
+    def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
@@ -315,10 +233,8 @@ class JobService:
         entrypoint = RayJobEntrypoint(
             config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
         )
-        loguru.logger.info("Submitting Ray job...")
+        loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
-
-        background_tasks.add_task(self._watch_job, record.id, request)
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

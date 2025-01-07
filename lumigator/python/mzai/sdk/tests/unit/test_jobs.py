@@ -5,7 +5,7 @@ from pathlib import Path
 from lumigator_schemas.jobs import JobType
 from lumigator_sdk.health import Health
 from lumigator_sdk.jobs import Jobs
-from lumigator_sdk.strict_schemas import JobEvalCreate
+from lumigator_sdk.strict_schemas import JobEvalCreate, JobInferenceCreate
 from pydantic import ValidationError
 from pytest import raises
 from requests import Response
@@ -40,7 +40,9 @@ def test_create_job_ok_minimal(
     )
 
     job_json = load_json(json_data_job_minimal)
-    job_ret = lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
+    job_ret = lumi_client.jobs.create_job(
+        JobType.INFERENCE, JobInferenceCreate.model_validate(job_json)
+    )
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
@@ -58,7 +60,7 @@ def test_create_job_ok_extra(
 
     job_json = load_json(json_data_job_extra)
     with raises(ValidationError):
-        lumi_client.jobs.create_job(JobType.INFERENCE, JobEvalCreate.model_validate(job_json))
+        lumi_client.jobs.create_job(JobType.INFERENCE, JobInferenceCreate.model_validate(job_json))
 
 
 def test_get_jobs_ok(lumi_client, json_data_jobs, request_mock):

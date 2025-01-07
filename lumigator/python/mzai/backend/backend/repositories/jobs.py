@@ -10,6 +10,13 @@ class JobRepository(BaseRepository[JobRecord]):
     def __init__(self, session: Session):
         super().__init__(JobRecord, session)
 
+    def get_by_job_type(self, job_type: str) -> list[JobRecord] | None:
+        return (
+            self.session.query(JobRecord)
+            .where(JobRecord.type == job_type)
+            .all()
+        )
+
 
 class JobResultRepository(BaseRepository[JobResultRecord]):
     def __init__(self, session: Session):

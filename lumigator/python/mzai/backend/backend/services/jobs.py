@@ -67,6 +67,12 @@ class JobService:
             self._raise_not_found(job_id)
         return record
 
+    def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
+        records = self.job_repo.get_by_job_type(job_type)
+        if records is None:
+            return []
+        return records
+
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
         record = self.job_repo.update(job_id, **updates)
         if record is None:
@@ -256,6 +262,21 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
+    def get_job_per_type(self, job_type: str) -> ListingResponse[JobResponse]:
+        records = self._get_job_records_per_type(job_type)
+
+        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+            return JobResponse.model_validate(record)
+
+        # get job status from ray
+        job_status = self.ray_client.get_job_status(job_id)
+
+        # update job status in the DB if it differs from the current status
+        if job_status.lower() != record.status.value.lower():
+            record = self._update_job_record(job_id, status=job_status.lower())
+
+        return JobResponse.model_validate(record)
+
     def list_jobs(
         self,
         skip: int = 0,
@@ -268,13 +289,24 @@ class JobService:
             items=[self.get_job(record.id) for record in records],
         )
 
-    def update_job_status(
+    def _update_job_status(
         self,
         job_id: UUID,
-        status: JobStatus,
     ) -> JobResponse:
-        record = self._update_job_record(job_id, status=status)
+        record = self._get_job_record(job_id)
+
+        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+            return JobResponse.model_validate(record)
+
+        # get job status from ray
+        job_status = self.ray_client.get_job_status(job_id)
+
+        # update job status in the DB if it differs from the current status
+        if job_status.lower() != record.status.value.lower():
+            record = self._update_job_record(job_id, status=job_status.lower())
+
         return JobResponse.model_validate(record)
+
 
     def get_job_result(self, job_id: UUID) -> JobResultResponse:
         """Return job results metadata if available in the DB."""

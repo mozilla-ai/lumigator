@@ -17,18 +17,20 @@ from lumigator_schemas.jobs import (
     JobResultDownloadResponse,
     JobResultResponse,
     JobSubmissionResponse,
+    JobType,
 )
 from starlette.requests import Request
 from starlette.responses import Response
 
 from backend.api.deps import JobServiceDep
 from backend.api.http_headers import HttpHeaders
+from backend.api.tags import SERVICES_PATHS
 from backend.settings import settings
 
 router = APIRouter()
 
 
-@router.post("/inference/", status_code=status.HTTP_201_CREATED)
+@router.post(f"/{SERVICES_PATHS[JobType.INFERENCE]}/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
     job_create_request: JobInferenceCreate,
@@ -67,7 +69,7 @@ def create_annotation_job(
     return job_response
 
 
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
+@router.post(f"/{SERVICES_PATHS[JobType.EVALUATION]}/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
     job_create_request: JobEvalCreate,
@@ -128,20 +130,51 @@ def list_jobs(
     )
 
 
-@router.get("/{job_id}")
-def get_job(service: JobServiceDep, job_id: UUID) -> Job:
+@router.get("/{job_spec}")
+def get_job(service: JobServiceDep, job_spec: str) -> Job | ListingResponse[Job]:
     """Attempts to retrieve merged job data from the Lumigator repository and Ray.
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
-    job = service.get_job(job_id)
-    ray_job = _get_ray_job(job_id)
+    try: 
+        job_id = UUID(job_spec)
+        job = service.get_job(job_id)
+        ray_job = _get_ray_job(job_id)
 
-    # Combine both types of response.
-    x = ray_job.model_dump()  # JobSubmissionResponse
-    y = job.model_dump()  # JobResponse
-    merged = {**x, **y}
-    return Job(**merged)
+        # Combine both types of response.
+        x = ray_job.model_dump()  # JobSubmissionResponse
+        y = job.model_dump()  # JobResponse
+        merged = {**x, **y}
+        return Job(**merged)
+    except ValueError:
+        # If job_spec is not a UUID, it's assumed to be a 
+        if job_spec not in SERVICES_PATHS.values():
+            raise ValueError(f"Unknown job type {job_spec}") from None
+        jobs = service.get_job_per_type(job_spec)
+
+        # Get all jobs Ray knows about.
+        ray_jobs = _get_all_ray_jobs()
+
+        results = list[Job]()
+
+        # Merge Ray jobs into the repositories jobs
+        for job in jobs.items:
+            found_job = next(
+                (x for x in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
+            )
+            if found_job is None:
+                continue
+
+            # Combine both types of response.
+            x = found_job.model_dump()  # JobSubmissionResponse
+            y = job.model_dump()  # JobResponse
+            merged = {**x, **y}
+            results.append(Job(**merged))
+
+        return ListingResponse[Job](
+            total=jobs.total,
+            items=results
+        )
 
 
 @router.get("/{job_id}/logs")

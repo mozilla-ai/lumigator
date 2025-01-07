@@ -31,17 +31,31 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Return lumigator repo
+Return backend lumigator Image
 */}}
-{{- define "lumigator.repo" -}}
-{{- required "The repository for the Lumigator image is missing" .Values.image.repository }}
+{{- define "lumigator.backend.image.repository" -}}
+{{- required "The repository for the Lumigator backend image is missing" .Values.backend.image.repository }}
 {{- end }}
 
 {{/*
-Return lumigator tag
+Return frontend lumigator Image
 */}}
-{{- define "lumigator.tag" -}}
-{{- .Values.image.tag | default .Chart.AppVersion | required "The tag for the Lumigator image is missing" }}
+{{- define "lumigator.frontend.image.repository" -}}
+{{- required "The repository for the Lumigator frontend image is missing" .Values.frontend.image.repository }}
+{{- end }}
+
+{{/*
+Return lumigator frontend tag
+*/}}
+{{- define "lumigator.frontend.tag" -}}
+{{- .Values.frontend.image.tag | default .Chart.AppVersion | required "The tag for the Lumigator frontend image is missing" }}
+{{- end }}
+
+{{/*
+Return lumigator backend tag
+*/}}
+{{- define "lumigator.backend.tag" -}}
+{{- .Values.backend.image.tag | default .Chart.AppVersion | required "The tag for the Lumigator backend image is missing" }}
 {{- end }}
 
 {{/*

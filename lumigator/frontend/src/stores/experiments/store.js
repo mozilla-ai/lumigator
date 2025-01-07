@@ -10,20 +10,62 @@ export const useExperimentStore = defineStore('experiment', () => {
   const isPolling = ref(false);
   let experimentInterval = null;
   const experimentLogs = ref([]);
-  const runningJobs = ref([])
+  const completedStatus = ["SUCCEEDED", "FAILED"];
 
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
-    experiments.value = experimentsList.map((job) => {
-      return {
-        ...retrieveEntrypoint(job),
-        status: job.status.toUpperCase(),
-        id: job.submission_id,
-        useCase: `summarization`,
-        created: job.start_time,
-        runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
+    experiments.value = experimentsList.map(job => parseExperiment(job));
+  }
+
+  /**
+   *
+   * @param {*} job - the job data to parse
+   * @returns job data parsed for display as an experiment
+   */
+  function parseExperiment(job) {
+    return {
+      ...retrieveEntrypoint(job),
+      status: job.status.toUpperCase(),
+      id: job.submission_id,
+      useCase: `summarization`,
+      created: job.start_time,
+      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
+    };
+  }
+
+  /**
+   *
+   * @returns {string[]} IDs of stored experiments that have not completed
+   */
+  function getIncompleteExperimentIds() {
+    return experiments.value
+      .filter(experiment => !completedStatus.includes(experiment.status))
+      .map(experiment => experiment.id);
+  }
+
+  /**
+   *
+   * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
+   */
+  async function updateExperimentStatus(id) {
+    try {
+      const status = await experimentService.fetchJobStatus(id);
+      const experiment = experiments.value.find((experiment) => experiment.id === id);
+      if (experiment) {
+        experiment.status = status;
       }
-    })
+    } catch (error) {
+      console.error(`Failed to update status for experiment ${id} ${error}`);
+    }
+  }
+
+  /**
+   * Updates the status for stored experiments that are not completed
+   */
+  async function updateStatusForIncompleteExperiments() {
+    await Promise.all(
+      getIncompleteExperimentIds()
+      .map(id => updateExperimentStatus(id)));
   }
 
   async function runExperiment(experimentData) {
@@ -35,14 +77,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadDetails(id) {
     const details = await experimentService.fetchExperimentDetails(id);
-    selectedExperiment.value = {
-      ...retrieveEntrypoint(details),
-      status: details.status,
-      id: details.submission_id,
-      useCase: `summarization`,
-      created: details.start_time,
-      runTime: details.end_time ? calculateDuration(details.start_time, details.end_time) : '-'
-    }
+    selectedExperiment.value = parseExperiment(details);
     experimentLogs.value = [];
     retrieveLogs();
   }
@@ -127,26 +162,6 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
-  async function updateJobStatus(jobId) {
-    try {
-      const status = await experimentService.fetchJobStatus(jobId);
-      const job = runningJobs.value.find((job) => job.id === jobId);
-      if (job) {
-        job.status = status.toUpperCase();
-      }
-    } catch (error) {
-      console.error(`Failed to update status for job ${jobId} ${error}`);
-    }
-  }
-
-  async function updateAllJobs() {
-    const promises = runningJobs.value
-      .filter((job) => job.status !== 'SUCCEEDED' &&
-        job.status !== 'FAILED') // Exclude complete or failed jobs
-      .map((job) => updateJobStatus(job.id));
-    await Promise.all(promises);
-  }
-
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
       startPolling()
@@ -158,15 +173,14 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   return {
     experiments,
+    loadExperiments,
+    updateStatusForIncompleteExperiments,
     loadDetails,
     loadResults,
     loadResultsFile,
     selectedExperiment,
     experimentLogs,
     selectedExperimentRslts,
-    updateAllJobs,
-    loadExperiments,
-    runExperiment,
-    runningJobs,
+    runExperiment
   }
 })

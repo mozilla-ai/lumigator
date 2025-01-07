@@ -52,6 +52,43 @@ def test_get_job_status(
     assert data["driver_agent_http_address"] == "http://172.18.0.3:52365"
 
 
+def test_create_and_get_job_by_type(
+    app_client: TestClient,
+    job_repository,
+    request_mock,
+    json_ray_version,
+    json_data_health_job_metadata_ray,
+):
+    created_job = job_repository.create(name="test", description="test desc")
+
+    # The Ray client will call the Ray API to get the version before getting the job status
+    # Mock the Ray version API
+    request_mock.get(
+        url=settings.RAY_VERSION_URL,
+        status_code=status.HTTP_200_OK,
+        text=json.dumps(load_json(json_ray_version)),
+    )
+
+    request_mock.get(
+        url=urllib.parse.urljoin(f"{settings.RAY_JOBS_URL}", f"{created_job.id}"),
+        status_code=status.HTTP_200_OK,
+        text=json.dumps(load_json(json_data_health_job_metadata_ray)),
+    )
+
+    response = app_client.get(f"/jobs/{created_job.id}")
+
+    assert response is not None
+    assert response.status_code == status.HTTP_200_OK
+
+    data = response.json()
+    assert data["status"].lower() == "running"
+    assert data["name"] == "test"
+    assert data["description"] == "test desc"
+    assert data["type"] == "SUBMISSION"
+    assert data["id"] == str(created_job.id)
+    assert data["driver_agent_http_address"] == "http://172.18.0.3:52365"
+
+
 def test_get_job_results(
     app_client: TestClient,
     job_repository,

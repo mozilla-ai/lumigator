@@ -12,6 +12,13 @@ class JobRepository(BaseRepository[JobRecord]):
 
     def get_by_experiment_id(self, experiment_id: UUID) -> list[JobRecord] | None:
         return self.session.query(JobRecord).where(JobRecord.experiment_id == experiment_id).all()
+    
+    def get_by_job_type(self, job_type: str) -> list[JobRecord] | None:
+        return (
+            self.session.query(JobRecord)
+            .where(JobRecord.type == job_type)
+            .all()
+        )
 
 
 class JobResultRepository(BaseRepository[JobResultRecord]):

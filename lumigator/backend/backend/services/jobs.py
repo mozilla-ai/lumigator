@@ -94,6 +94,12 @@ class JobService:
         self.ray_client = ray_client
         self._dataset_service = dataset_service
 
+    def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
+        records = self.job_repo.get_by_job_type(job_type)
+        if records is None:
+            return []
+        return records
+
     def _get_job_record(self, job_id: UUID) -> JobRecord:
         """Gets a job from the repository (database) by ID.
 
@@ -306,7 +312,7 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request) -> str:
+    def _set_model_type(self, request: BaseModel) -> str:
         """Sets model URL based on protocol address"""
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
@@ -329,6 +335,8 @@ class JobService:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
+        model_url = self._set_model_type(request)
+
         # provide a reasonable system prompt for services where none was specified
         if (
             job_type in [JobType.EVALUATION, JobType.INFERENCE]
@@ -350,7 +358,7 @@ class JobService:
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
             job_params = job_params | {
-                "model_url": self._set_model_type(request),
+                "model_url": model_url,
                 "skip_inference": request.skip_inference,
                 "system_prompt": request.system_prompt,
             }
@@ -359,7 +367,7 @@ class JobService:
                 "accelerator": request.accelerator,
                 "frequency_penalty": request.frequency_penalty,
                 "max_tokens": request.max_tokens,
-                "model_url": self._set_model_type(request),
+                "model_url": model_url,
                 "output_field": request.output_field,
                 "revision": request.revision,
                 "system_prompt": request.system_prompt,
@@ -484,6 +492,21 @@ class JobService:
         # get job status from ray
         job_status = self.ray_client.get_job_status(job_id)
         loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
+
+        # update job status in the DB if it differs from the current status
+        if job_status.lower() != record.status.value.lower():
+            record = self._update_job_record(job_id, status=job_status.lower())
+
+        return JobResponse.model_validate(record)
+
+    def get_job_per_type(self, job_type: str) -> ListingResponse[JobResponse]:
+        records = self._get_job_records_per_type(job_type)
+
+        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+            return JobResponse.model_validate(record)
+
+        # get job status from ray
+        job_status = self.ray_client.get_job_status(job_id)
 
         # update job status in the DB if it differs from the current status
         if job_status.lower() != record.status.value.lower():

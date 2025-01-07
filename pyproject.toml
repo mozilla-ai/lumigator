@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Common deps to develop"
 requires-python = ">=3.11"
 dependencies = [
+    "huggingface-hub>=0.27.0",
+    "pandas>=2.2.3",
     "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "wandb>=0.19.1",
 ]
 
 [project.optional-dependencies]

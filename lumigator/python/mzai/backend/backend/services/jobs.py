@@ -179,11 +179,15 @@ class JobService:
         # (request) and on the job type
         config_params = self._get_job_params(job_type, record, request)
 
+        loguru.logger.info(f"sending config_params...{config_params}")
+
         # load a config template and fill it up with config_params
-        if request.config_template is not None:
+        if request.config_template is not None and request.config_template != "":
             config_template = request.config_template
         else:
             config_template = self._get_config_template(job_type, request.model)
+
+        loguru.logger.info(f"template...{config_template, job_type, request.model}")
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.

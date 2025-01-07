@@ -27,20 +27,12 @@ class ExperimentService:
         self._job_service = job_service
         self._dataset_service = dataset_service
 
-    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
-        loguru.logger.info("Adding a new dataset entry to the database...")
-        s3 = S3FileSystem()
-
-        # Get the dataset from the S3 bucket
-        result_key = self._job_service._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            results = json.loads(f.read())
-
-        dataset = {
-            k: v
-            for k, v in results.items()
-            if k in ["examples", "ground_truth", request.output_field]
-        }
+    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
+        """Given a JSON string containing inference results and the fields
+        we want to read from it, generate a binary file (as a BytesIO
+        object) to be passed to the fastapi UploadFile method.
+        """
+        dataset = {k: v for k, v in results.items() if k in fields}
 
         # Create a CSV in memory
         csv_buffer = StringIO()
@@ -50,6 +42,22 @@ class ExperimentService:
 
         # Create a binary file from the CSV, since the upload function expects a binary file
         bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
+
+        return bin_data
+
+    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
+        loguru.logger.info("Adding a new dataset entry to the database...")
+        s3 = S3FileSystem()
+
+        # Get the dataset from the S3 bucket
+        result_key = self._job_service._get_results_s3_key(job_id)
+        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            results = json.loads(f.read())
+
+        # define the fields we want to keep from the results JSON
+        # and build a CSV file from it as a BytesIO object
+        fields = ["examples", "ground_truth", request.output_field]
+        bin_data = self._results_to_binary_file(results, fields)
         bin_data_size = len(bin_data.getvalue())
 
         # Figure out the dataset filename

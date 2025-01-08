@@ -100,3 +100,27 @@ def test_job_non_existing(local_client: TestClient):
     response = local_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job {non_existing_id} not found."
+
+
+def test_annotation_job(
+    local_client: TestClient,
+):
+    payload = {
+        "name": "test_annotate",
+        "description": "Test run for Huggingface model",
+        "dataset": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "max_samples": 2,
+        "task": "summarization",
+    }
+
+    post_response = local_client.post(
+        "/jobs/annotate/",
+        json=payload,
+    )
+
+    assert post_response.status_code == 201
+
+    job_id = post_response.json()["id"]
+    response = local_client.get(f"/jobs/{job_id}")
+
+    assert response.status_code == 200

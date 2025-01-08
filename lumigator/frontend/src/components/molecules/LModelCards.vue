@@ -2,18 +2,19 @@
   <div class="l-models-list">
     <div class="l-models-list__options-container">
       <div
-        v-for="model in modelOptions"
+        v-for="model in models"
         :key="model.name"
         class="l-models-list__options-container--option"
       >
         <RadioButton
           v-model="selectedModel"
-          :inputId="model.link"
+          :inputId="model.uri"
           name="dynamic"
           :value="model"
         />
-        <label :for="model.link">{{ model.label }}</label>
-        <Button
+        <label :for="model.name">{{ model.name }}</label>
+        <!-- add eternal link to model documentation here -->
+        <!-- <Button
           as="a"
           icon="pi pi-external-link"
           severity="secondary"
@@ -22,7 +23,7 @@
           class="l-models__external-link"
           :href="model.externalLink"
           target="_blank"
-        />
+        /> -->
       </div>
     </div>
   </div>
@@ -30,44 +31,18 @@
 
 <script setup>
 import { ref } from 'vue';
-import Button from 'primevue/button';
+import { storeToRefs } from 'pinia'
+import { useModelStore } from '@/stores/models/store';
+// import Button from 'primevue/button';
 import RadioButton from 'primevue/radiobutton';
 
+const modelStore = useModelStore();
+const { models } = storeToRefs(modelStore);
 const selectedModel = ref('')
 
 defineProps({
   modelLink: String
 })
-
-const modelOptions = ref([
-  {
-    id: '1',
-    link: 'hf://facebook/bart-large-cnn',
-    externalLink: 'https://huggingface.co/facebook/bart-large-cnn',
-    label: 'facebook/bart-large-cnn'
-  },
-
-  {
-    id: '2',
-    link: 'hf://mikeadimech/longformer-qmsum-meeting-summarization',
-    externalLink: 'https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization',
-    label: 'mikeadimech/longformer-qmsum-meeting-summarization'
-  },
-
-  {
-    id: '3',
-    link: 'hf://mrm8488/t5-base-finetuned-summarize-news',
-    externalLink: 'https://huggingface.co/mrm8488/t5-base-finetuned-summarize-news',
-    label: 'mrm8488/t5-base-finetuned-summarize-news'
-  },
-  {
-    id: '4',
-    link: 'hf://falconsai/text_summarization',
-    externalLink: 'https://huggingface.co/Falconsai/text_summarization',
-    label: 'falconsai/text_summarization'
-  },
-]);
-
 
 defineExpose({
   selectedModel

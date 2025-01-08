@@ -153,7 +153,7 @@ async function triggerExperiment() {
   const experimentPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
-    model: modelSelection.value.selectedModel.link,
+    model: modelSelection.value.selectedModel.uri,
     dataset: dataset.value.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
@@ -188,6 +188,7 @@ function resetForm() {
 }
 
 onMounted(async () => {
+  console.log("❗️ ❗️❗️ FORM mounted")
   if (datasets.value?.length === 0) {
     await datasetStore.loadDatasets();
   }

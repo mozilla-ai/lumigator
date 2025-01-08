@@ -10,10 +10,12 @@ class JobRepository(BaseRepository[JobRecord]):
     def __init__(self, session: Session):
         super().__init__(JobRecord, session)
 
-    def get_by_job_type(self, job_type: str) -> list[JobRecord] | None:
+    def list_by_job_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord] | None:
         return (
             self.session.query(JobRecord)
-            .where(JobRecord.type == job_type)
+            .where(JobRecord.job_type == job_type)
+            .offset(skip)
+            .limit(limit)
             .all()
         )
 
@@ -23,8 +25,4 @@ class JobResultRepository(BaseRepository[JobResultRecord]):
         super().__init__(JobResultRecord, session)
 
     def get_by_job_id(self, job_id: UUID) -> JobResultRecord | None:
-        return (
-            self.session.query(JobResultRecord)
-            .where(JobResultRecord.job_id == job_id)
-            .first()
-        )
+        return self.session.query(JobResultRecord).where(JobResultRecord.job_id == job_id).first()

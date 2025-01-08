@@ -11,7 +11,7 @@ from backend.records.mixins import DateTimeMixin, JobStatusMixin, NameDescriptio
 class JobRecord(BaseRecord, NameDescriptionMixin, JobStatusMixin, DateTimeMixin):
     __tablename__ = "jobs"
 
-    type: Mapped[str]
+    job_type: Mapped[str]
 
 
 class JobResultRecord(BaseRecord):

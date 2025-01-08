@@ -129,6 +129,13 @@ def test_upload_data_launch_job(
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
 
+    get_all_jobs = local_client.get("/jobs")
+    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
+    get_jobs_infer = local_client.get("/jobs/inference")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
+    get_jobs_eval = local_client.get("/jobs/evaluate")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
+
 
 def test_full_experiment_launch(
     local_client: TestClient, dialog_dataset, dependency_overrides_services

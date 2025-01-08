@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from backend.records.base import BaseRecord
 from backend.records.datasets import *  # noqa: F403
+from backend.records.experiments import *  # noqa: F403
 from backend.records.jobs import *  # noqa: F403
 from sqlalchemy import engine_from_config, pool
 
@@ -33,8 +34,9 @@ target_metadata = BaseRecord.metadata
 
 # Override the SQLAlchemy URL with the one we have stored in our environment.
 config.set_main_option(
-    'sqlalchemy.url',
-    os.environ.get("SQLALCHEMY_DATABASE_URL", config.get_main_option("sqlalchemy.url")))
+    "sqlalchemy.url",
+    os.environ.get("SQLALCHEMY_DATABASE_URL", config.get_main_option("sqlalchemy.url")),
+)
 
 
 def run_migrations_offline() -> None:
@@ -75,9 +77,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

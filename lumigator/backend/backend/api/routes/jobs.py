@@ -184,6 +184,10 @@ def get_job(
     limit: int = 100,
 ) -> Job | ListingResponse[Job]:
     """Attempts to retrieve merged job data from the Lumigator repository and Ray.
+    If a valid UUID is provided, a single record is returned. If a valid
+    job type (currently `inference` or `evaluation`) is provided, then a list
+    of all jobs of the appropriate type is returned. Any other input results
+    in an error.
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """

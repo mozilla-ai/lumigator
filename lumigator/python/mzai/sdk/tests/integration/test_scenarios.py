@@ -3,7 +3,6 @@ be started prior to running these tests using
 `make start-lumigator-build`.
 """
 
-from pathlib import Path
 from time import sleep
 
 import requests

@@ -17,13 +17,20 @@ from lumigator_schemas.jobs import (
 )
 from s3fs import S3FileSystem
 
+from backend.repositories.experiments import ExperimentRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.settings import settings
 
 
 class ExperimentService:
-    def __init__(self, job_service: JobService, dataset_service: DatasetService):
+    def __init__(
+        self,
+        experiment_repo: ExperimentRepository,
+        job_service: JobService,
+        dataset_service: DatasetService,
+    ):
+        self._experiment_repo = experiment_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
 
@@ -139,6 +146,9 @@ class ExperimentService:
         # A background task should be attached to a response,
         # and will run only once the response has been sent.
         # See here: https://www.starlette.io/background/
+
+        # Create a db record for the experiment
+        self._experiment_repo.create(name=request.name, description=request.description)
 
         # input is ExperimentCreate, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate

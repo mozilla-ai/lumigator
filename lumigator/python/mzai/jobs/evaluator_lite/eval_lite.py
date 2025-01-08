@@ -4,8 +4,8 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
+from eval_config import EvalJobConfig
 from eval_metrics import EvaluationMetrics
-from evaluate_config import EvalJobConfig
 from loguru import logger
 
 
@@ -16,18 +16,21 @@ def save_to_disk(local_path: Path, data_dict: dict):
         json.dump(data_dict, f)
 
 
-def save_to_s3(config: dict, local_path: Path, storage_path: str):
+def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
     if storage_path.endswith("/"):
-        storage_path = "s3://" + str(Path(storage_path[5:]) / config.get("name") / "results.json")
-    logger.info(f"Storing evaluation results into {local_path}...")
+        storage_path = "s3://" + str(Path(storage_path[5:]) / config.name / "results.json")
+    logger.info(f"Storing evaluation results into {storage_path}...")
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: dict, eval_results: dict) -> Path:
-    storage_path = config.get("evaluation").get("storage_path")
+def save_outputs(config: EvalJobConfig, eval_results: dict) -> Path:
+    storage_path = config.evaluation.storage_path
 
-    local_path = Path("results.json")
+    # generate local temp file ANYWAY:
+    # - if storage_path is not provided, it will be stored and kept into a default dir
+    # - if storage_path is provided AND saving to S3 is successful, local file is deleted
+    local_path = Path(Path.home() / ".lumigator" / "results" / config.name / "results.json")
 
     try:
         save_to_disk(local_path, eval_results)

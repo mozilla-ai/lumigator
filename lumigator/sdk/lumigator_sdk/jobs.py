@@ -39,7 +39,7 @@ class Jobs:
         """
         self.client = c
 
-    def get_jobs(self) -> ListingResponse[Job]:
+    def get_jobs(self, skip=0, limit=None) -> ListingResponse[Job]:
         """Return information on all jobs.
 
         .. admonition:: Example
@@ -55,6 +55,25 @@ class Jobs:
             ListingResponse[JobResponse]: All existing jobs.
         """
         response = self.client.get_response(self.JOBS_ROUTE)
+
+        return ListingResponse[Job](**response.json())
+
+    def get_jobs_per_type(self, job_type: JobType, skip=0, limit=None) -> ListingResponse[Job]:
+        """Return information on jobs of a specific type.
+
+        .. admonition:: Example
+
+            .. code-block:: python
+
+                from sdk.lumigator import LumigatorClient
+
+                lm_client = LumigatorClient("http://localhost:8000")
+                lm_client.jobs.get_jobs()
+
+        Returns:
+            ListingResponse[JobResponse]: All existing jobs.
+        """
+        response = self.client.get_response(f"{self.JOBS_ROUTE}/{job_type.value}")
 
         return ListingResponse[Job](**response.json())
 

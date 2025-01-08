@@ -12,7 +12,7 @@ class JobRecord(BaseRecord, NameDescriptionMixin, JobStatusMixin, DateTimeMixin)
     __tablename__ = "jobs"
 
     experiment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("experiments.id"), nullable=True)
-    type: Mapped[str]
+    job_type: Mapped[str]
 
 
 class JobResultRecord(BaseRecord):

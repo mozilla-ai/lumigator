@@ -407,7 +407,9 @@ class JobService:
             raise JobTypeUnsupportedError(request) from None
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name, description=request.description, job_type=job_type, experiment_id=experiment_id
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -499,6 +501,12 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
+    def _list_job_records_per_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord]:
+        records = self.job_repo.list_by_job_type(job_type, skip, limit)
+        if records is None:
+            return []
+        return records
+
     def get_job_per_type(self, job_type: str) -> ListingResponse[JobResponse]:
         records = self._get_job_records_per_type(job_type)
 
@@ -513,6 +521,19 @@ class JobService:
             record = self._update_job_record(job_id, status=job_status.lower())
 
         return JobResponse.model_validate(record)
+
+    def list_jobs_per_type(
+        self,
+        job_type: str,
+        skip: int,
+        limit: int,
+    ) -> ListingResponse[JobResponse]:
+        records = self._list_job_records_per_type(job_type, skip, limit)
+        responses = [self.update_job_status(record) for record in records]
+        return ListingResponse(
+            total=len(responses),
+            items=responses,
+        )
 
     def list_jobs(
         self,

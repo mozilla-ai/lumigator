@@ -92,7 +92,7 @@ def create_annotation_job(
         inference_job_create_request,
     )
 
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    url = request.url_for(get_job.__name__, job_spec=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
 
     return job_response
@@ -124,7 +124,7 @@ def create_evaluation_lite_job(
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
 
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    url = request.url_for(get_job.__name__, job_spec=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
 
     return job_response
@@ -177,12 +177,17 @@ def list_jobs(
 
 
 @router.get("/{job_spec}")
-def get_job(service: JobServiceDep, job_spec: str) -> Job | ListingResponse[Job]:
+def get_job(
+    service: JobServiceDep,
+    job_spec: str,
+    skip: int = 0,
+    limit: int = 100,
+) -> Job | ListingResponse[Job]:
     """Attempts to retrieve merged job data from the Lumigator repository and Ray.
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
-    try: 
+    try:
         job_id = UUID(job_spec)
         job = service.get_job(job_id)
         ray_job = _get_ray_job(job_id)
@@ -193,10 +198,10 @@ def get_job(service: JobServiceDep, job_spec: str) -> Job | ListingResponse[Job]
         merged = {**x, **y}
         return Job(**merged)
     except ValueError:
-        # If job_spec is not a UUID, it's assumed to be a 
+        # If job_spec is not a UUID, it's assumed to be a
         if job_spec not in SERVICES_PATHS.values():
             raise ValueError(f"Unknown job type {job_spec}") from None
-        jobs = service.get_job_per_type(job_spec)
+        jobs = service.list_jobs_per_type(job_spec, skip, limit)
 
         # Get all jobs Ray knows about.
         ray_jobs = _get_all_ray_jobs()
@@ -217,10 +222,7 @@ def get_job(service: JobServiceDep, job_spec: str) -> Job | ListingResponse[Job]
             merged = {**x, **y}
             results.append(Job(**merged))
 
-        return ListingResponse[Job](
-            total=jobs.total,
-            items=results
-        )
+        return ListingResponse[Job](total=jobs.total, items=results)
 
 
 @router.get("/{job_id}/logs")

@@ -135,6 +135,17 @@ def test_upload_data_launch_job(
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds.total + 1
+
+    get_all_jobs = local_client.get("/jobs")
+    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
+    get_jobs_infer = local_client.get("/jobs?job_types=inference")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
+    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
@@ -373,3 +384,25 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
         workflow_status = workflow_details.status
         logger.info(f"Workflow status: {workflow_status}")
     return workflow_details
+
+
+def test_annotation_job(local_client: TestClient, dependency_overrides_services):
+    payload = {
+        "name": "test_annotate",
+        "description": "Test run for Huggingface model",
+        "dataset": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "max_samples": 2,
+        "task": "summarization",
+    }
+
+    post_response = local_client.post(
+        "/jobs/annotate/",
+        json=payload,
+    )
+
+    assert post_response.status_code == 201
+
+    job_id = post_response.json()["id"]
+    response = local_client.get(f"/jobs/{job_id}")
+
+    assert response.status_code == 200

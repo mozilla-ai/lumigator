@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
+    JobAnnotateCreate,
     JobEvalCreate,
     JobInferenceCreate,
     JobLogsResponse,
@@ -35,6 +36,30 @@ def create_inference_job(
     response: Response,
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
+
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
+    response.headers[HttpHeaders.LOCATION] = f"{url}"
+
+    return job_response
+
+
+@router.post("/annotate/", status_code=status.HTTP_201_CREATED)
+def create_annotation_job(
+    service: JobServiceDep,
+    job_create_request: JobAnnotateCreate,
+    request: Request,
+    response: Response,
+) -> JobResponse:
+    """This uses a hardcoded model, that is, Lumigator's opinion on what
+    reference model should be used to generate annotations.
+    See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
+    """
+    inference_job_create_request = JobInferenceCreate(
+        **job_create_request.dict(),
+        model="hf://facebook/bart-large-cnn",
+        output_field="ground_truth",
+    )
+    job_response = service.create_job(inference_job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

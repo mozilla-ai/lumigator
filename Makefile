@@ -123,7 +123,8 @@ test-backend-unit:
 
 test-backend-integration-target:
 	cd lumigator/python/mzai/backend/backend/tests;	\
-	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -o python_files="backend/tests/integration/*/test_*.py"
+	RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" \
+	SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration:
 ifeq ($(CONTAINERS_RUNNING),)

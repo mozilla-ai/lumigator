@@ -32,8 +32,10 @@ class LumigatorClient:
         """
         self.client = ApiClient(api_host, ray_host)
 
+        self.health = Health(self.client)
+        if self.health.healthcheck() is None:
+            raise Exception("LumigatorClient cannot connect")
         self.completions = Completions(self.client)
         self.jobs = Jobs(self.client)
-        self.health = Health(self.client)
         self.datasets = Datasets(self.client)
         self.models = Models(self.client)

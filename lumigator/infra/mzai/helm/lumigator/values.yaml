@@ -10,7 +10,7 @@ AWSSecretKey: ""
 s3EndpointURL: ""
 AWSEndpointURL: ""
 
-rayAddress: "blah"
+rayAddress: ""
 rayPort: "5432"
 rayWorkerGPUs: ""
 

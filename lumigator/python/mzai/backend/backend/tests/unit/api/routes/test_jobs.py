@@ -13,13 +13,13 @@ def load_json(path: Path) -> str:
     with Path.open(path) as file:
         return json.load(file)
 
-
 def test_get_job_status(
     app_client: TestClient,
     job_repository,
     request_mock,
     json_ray_version,
     json_data_health_job_metadata_ray,
+    dependency_overrides_fakes
 ):
     created_job = job_repository.create(name="test", description="test desc")
 
@@ -57,6 +57,7 @@ def test_get_job_results(
     request_mock,
     json_ray_version,
     json_data_health_job_metadata_ray,
+    dependency_overrides_fakes,
 ):
     created_job = job_repository.create(name="test", description="")
     expected_url_path = f"lumigator-storage/jobs/results/test/{created_job.id}/results.json"

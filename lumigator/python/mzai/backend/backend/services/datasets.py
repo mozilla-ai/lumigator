@@ -1,4 +1,5 @@
 import csv
+import traceback
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -94,6 +95,7 @@ class DatasetService:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _raise_unhandled_exception(self, e: Exception) -> None:
+        traceback.print_exc()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
@@ -122,6 +124,7 @@ class DatasetService:
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
+            # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
         except Exception as e:
             # if a record was already created, delete it from the DB

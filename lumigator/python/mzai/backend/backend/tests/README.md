@@ -14,6 +14,15 @@ library to provide some of these dependencies for testing.
 as part of the testing lifecycle. This is configured in the `conftest.py` file that contains
 fixtures for the entire test suite.
 
+## Test Dependencies
+
+The backend tests offer two sets of service dependencies as fixtures:
+
+* `dependency_overrides_fakes`, to be used in unit tests, mocks all external services.
+* `dependency_overrides_services`, to be used in integration tests, provides real clients for external services (except the DB).
+
+By default, an embedded SQLite database is used in both cases.
+
 ## Running Tests
 
 To run the tests, you can use the following command:

@@ -68,32 +68,9 @@ tolerations: []
 
 affinity: {}
 
-# Sets up PVC which does not get deleted on helm delete..
+# Note: Need to manually delete PVC after helm delete
 postgresql:
   enabled: true
   #  auth:
   #    username: lumigator
   #    database: lumigator
-
-  # TODO Double check user ID set here is correct..
-  primary:
-    initContainers:
-      - command:
-          - sh
-          - -c
-          - |
-            uid
-            mkdir -p $VOLUME_DATA_DIR
-            chown -R 1001:1001 $VOLUME_DATA_DIR
-            echo 'Volume permissions OK ✓'
-        env:
-          - name: VOLUME_DATA_DIR
-            value: /bitnami/postgresql
-        image: busybox
-        imagePullPolicy: IfNotPresent
-        name: volumepermissions
-        securityContext:
-          runAsUser: 0
-        volumeMounts:
-          - mountPath: /bitnami/postgresql
-            name: data

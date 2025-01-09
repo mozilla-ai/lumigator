@@ -4,26 +4,22 @@ from typing import Any, Dict  # noqa: UP035
 
 import requests
 from loguru import logger
-from urllib3 import Retry
 
-DEFAULT_RETRY = Retry(
-    total=5,
-    backoff_factor=1,
-    backoff_max = 20
-)
 
 class ApiClient:
-    def __init__(self, api_host: str, ray_host: str, retry_conf = DEFAULT_RETRY):
+    def __init__(self, api_host: str, ray_host: str, retry_conf):
         """Base class for the Lumigator API client.
 
         Args:
             api_host (str): The host of the Lumigator backend API.
             ray_host (str): The host of the Ray cluster.
+            retry_conf: an optional urllib3 retry strategy
         """
         adapter = requests.adapters.HTTPAdapter(max_retries=retry_conf)
 
         self.session = requests.Session()
         self.session.mount('https://', adapter)
+        self.session.mount('http://', adapter)
 
         self.api_host = api_host
         self.ray_host = ray_host

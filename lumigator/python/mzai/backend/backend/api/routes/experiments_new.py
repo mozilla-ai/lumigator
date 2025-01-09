@@ -50,10 +50,10 @@ def get_experiment_result(
 
 @router.get("/{experiment_id}/result/download")
 def get_experiment_result_download(
-    service: JobServiceDep,
+    service: ExperimentServiceDep,
     experiment_id: UUID,
 ) -> ExperimentResultDownloadResponse:
     """Return experiment results file URL for downloading."""
     return ExperimentResultDownloadResponse.model_validate(
-        service.get_job_result_download(experiment_id).model_dump()
+        service.get_experiment_result_download(experiment_id).model_dump()
     )

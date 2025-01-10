@@ -5,7 +5,7 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
--include .env
+KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
 
 KEEP_CONTAINERS_UP ?= "FALSE"
 

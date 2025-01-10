@@ -4,10 +4,11 @@ from typing import Any, Dict  # noqa: UP035
 
 import requests
 from loguru import logger
+from urllib3 import Retry
 
 
 class ApiClient:
-    def __init__(self, api_host: str, ray_host: str, retry_conf):
+    def __init__(self, api_host: str, ray_host: str, retry_conf: Retry | None):
         """Base class for the Lumigator API client.
 
         Args:
@@ -18,8 +19,8 @@ class ApiClient:
         adapter = requests.adapters.HTTPAdapter(max_retries=retry_conf)
 
         self.session = requests.Session()
-        self.session.mount('https://', adapter)
-        self.session.mount('http://', adapter)
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
 
         self.api_host = api_host
         self.ray_host = ray_host
@@ -77,7 +78,6 @@ class ApiClient:
             logger.error(f"Request failed: {e}")
             raise
         return response
-
 
     def get_response(
         self,

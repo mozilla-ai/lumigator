@@ -13,8 +13,14 @@ DEFAULT_RETRY = Retry(
     backoff_max=20,
 )
 
+
 class LumigatorClient:
-    def __init__(self, api_host: str, ray_host: str = "127.0.0.1:8265", retry_conf = DEFAULT_RETRY):
+    def __init__(
+        self,
+        api_host: str,
+        ray_host: str = "127.0.0.1:8265",
+        retry_conf: Retry | None = DEFAULT_RETRY,
+    ):
         """Construct a new LumigatorClient instance.
 
         Construct a new LumigatorClient instance with a given API and Ray host.

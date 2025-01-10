@@ -16,6 +16,8 @@ class CompletionService(ABC):
 
 
 class MistralCompletionService(CompletionService):
+    pass
+
     def __init__(self):
         self.client = MistralClient(api_key=settings.MISTRAL_API_KEY)
         self.model = "open-mistral-7b"
@@ -51,8 +53,11 @@ class OpenAICompletionService(CompletionService):
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
+        self.prompt = """You are a helpful assistant, expert in text summarization.
+                For every prompt you receive,
+                provide a summary of its contents in at most two sentences."""
 
-    def get_models(self) -> mistralai.client.ModelList:
+    def get_models(self):
         response = self.client.list_models()
 
         return response

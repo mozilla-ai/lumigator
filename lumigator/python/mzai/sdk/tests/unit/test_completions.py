@@ -33,9 +33,7 @@ def test_get_vendors_none(lumi_client, request_mock):
     assert vendors == []
 
 
-def test_get_completion_invalid_vendor(
-    lumi_client, mock_vendor_data, request_mock
-):
+def test_get_completion_invalid_vendor(lumi_client, mock_vendor_data, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,
@@ -43,12 +41,21 @@ def test_get_completion_invalid_vendor(
     )
 
     with raises(ValueError):
-        lumi_client.completions.get_completion("foo", "juan?")
+        lumi_client.completions.get_completion("foo", "test")
 
 
-def test_get_completion_invalid_text_empty(
-    lumi_client, mock_vendor_data, request_mock
-):
+def test_get_completion_invalid_vendor_empty(lumi_client, mock_vendor_data, request_mock):
+    request_mock.get(
+        url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json=json.loads(mock_vendor_data),
+    )
+
+    with raises(ValueError):
+        lumi_client.completions.get_completion("", "test")
+
+
+def test_get_completion_invalid_text_empty(lumi_client, mock_vendor_data, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,
@@ -59,9 +66,7 @@ def test_get_completion_invalid_text_empty(
         lumi_client.completions.get_completion("openai", "")
 
 
-def test_get_completion_invalid_text_spacey(
-    lumi_client, mock_vendor_data, request_mock
-):
+def test_get_completion_invalid_text_spacey(lumi_client, mock_vendor_data, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,
@@ -72,9 +77,7 @@ def test_get_completion_invalid_text_spacey(
         lumi_client.completions.get_completion("openai", "  ")
 
 
-def test_get_completion_openai_ok(
-    lumi_client, mock_vendor_data, request_mock
-):
+def test_get_completion_openai_ok(lumi_client, mock_vendor_data, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,
@@ -95,9 +98,7 @@ def test_get_completion_openai_ok(
     assert response.text == "thanks"
 
 
-def test_get_completion_mistral_ok(
-    lumi_client, mock_vendor_data, request_mock
-):
+def test_get_completion_mistral_ok(lumi_client, mock_vendor_data, request_mock):
     request_mock.get(
         url=lumi_client.client._api_url + f"/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,

@@ -63,6 +63,7 @@ class JobEvalCreate(BaseModel):
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None
+    skip_inference: bool = False
 
 
 class JobInferenceCreate(BaseModel):
@@ -79,12 +80,20 @@ class JobInferenceCreate(BaseModel):
     torch_dtype: str = "auto"
     model_url: str | None = None
     system_prompt: str | None = None
-    output_field: str | None = "prediction"
+    output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
     config_template: str | None = None
+
+
+class JobAnnotateCreate(BaseModel):
+    name: str
+    description: str = ""
+    dataset: UUID
+    max_samples: int = -1  # set to all samples by default
+    task: str | None = "summarization"
 
 
 class JobResponse(BaseModel, from_attributes=True):
@@ -121,4 +130,5 @@ class Job(JobResponse, JobSubmissionResponse):
     consumers. Tt was not conceived as a type that will be around for long, as
     the API needs to be refactored to better support experiments.
     """
+
     pass

@@ -1,4 +1,5 @@
 import csv
+import traceback
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
@@ -94,10 +95,14 @@ class DatasetService:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
 
     def _raise_unhandled_exception(self, e: Exception) -> None:
+        traceback.print_exc()
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
         return self.dataset_repo.get(dataset_id)
+
+    def _get_dataset_record_by_job_id(self, job_id: UUID) -> DatasetRecord | None:
+        return self.dataset_repo.get_by_job_id(job_id)
 
     def _get_s3_path(self, dataset_key: str) -> str:
         return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
@@ -119,6 +124,7 @@ class DatasetService:
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
+            # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
         except Exception as e:
             # if a record was already created, delete it from the DB
@@ -171,6 +177,13 @@ class DatasetService:
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            return None
+
+        return DatasetResponse.model_validate(record)
+
+    def get_dataset_by_job_id(self, job_id: UUID) -> DatasetResponse | None:
+        record = self._get_dataset_record_by_job_id(job_id)
         if record is None:
             return None
 

@@ -3,7 +3,6 @@ be started prior to running these tests using
 `make start-lumigator-build`.
 """
 
-from pathlib import Path
 from time import sleep
 
 import requests
@@ -71,7 +70,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
 
     job = JobEvalCreate(
         name="test-job-int-001",
-        model="hf://trl-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
         dataset=dataset.id,
         config_template=simple_eval_template,
     )
@@ -82,7 +81,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
     assert job_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id)
+    job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
     logger.info(job_status)
 
     download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)

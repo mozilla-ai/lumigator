@@ -4,7 +4,6 @@ from typing import Any, Dict  # noqa: UP035
 
 import requests
 from loguru import logger
-from requests.exceptions import HTTPError
 
 
 def _make_request(
@@ -129,7 +128,7 @@ class ApiClient:
         data=None,
         files=None,
         json_data=None,
-        verbose= True,
+        verbose=True,
     ) -> requests.Response:
         """Make a request to the specified endpoint.
 

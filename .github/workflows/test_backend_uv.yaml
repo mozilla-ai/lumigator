@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - "**"
+  workflow_dispatch:
 
 jobs:
   backend-integration-tests:
@@ -31,4 +32,17 @@ jobs:
         run: make test-backend-unit
 
       - name: Run backend integration tests
-        run: AUTO_TEST_RUN=y make test-backend-integration
+        run: KEEP_CONTAINERS_UP=FALSE AUTO_TEST_RUN=y make test-backend-integration
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/

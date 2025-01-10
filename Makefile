@@ -67,7 +67,6 @@ DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 .env:
 	@if [ ! -f .env ]; then cp .env.example .env; echo ".env created from .env.example"; fi
 
-
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: .env
 	uv run pre-commit install

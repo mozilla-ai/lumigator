@@ -5,9 +5,9 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
--include .env
+KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
 
-KEEP_CONTAINERS_UP ?= "FALSE"
+KEEP_CONTAINERS_UP := $(or $(KEEP_CONTAINERS_UP),FALSE)
 
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -66,6 +66,7 @@ DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 .env:
 	@if [ ! -f .env ]; then cp .env.example .env; echo ".env created from .env.example"; fi
+
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: .env

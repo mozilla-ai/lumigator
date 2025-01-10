@@ -12,7 +12,7 @@
           name="dynamic"
           :value="model"
         />
-        <label :for="model.name">{{ model.name }}</label>
+        <label :for="model.uri">{{ model.name }}</label>
       </div>
     </div>
   </div>

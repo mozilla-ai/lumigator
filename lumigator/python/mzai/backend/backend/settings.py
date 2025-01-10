@@ -15,13 +15,6 @@ class BackendSettings(BaseSettings):
     # Backend API env vars
     _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "")
 
-    # Postgres
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str | None = None
-    POSTGRES_PASSWORD: str | None = None
-    POSTGRES_DB: str | None = None
-
     # AWS
     S3_ENDPOINT_URL: str | None = None
     S3_BUCKET: str = "lumigator-storage"

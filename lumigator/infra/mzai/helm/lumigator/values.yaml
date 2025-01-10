@@ -10,18 +10,11 @@ AWSSecretKey: ""
 s3EndpointURL: ""
 AWSEndpointURL: ""
 
-postgresDb: ""
-postgresHost: ""
-postgresPort: ""
-postgresUser: ""
-postgresPassword: ""
-
 rayAddress: ""
-rayPort: ""
+rayPort: "5432"
 rayWorkerGPUs: ""
 
 serviceAccountName: ""
-
 
 existingMistralAPISecret: ""
 mistralAPIKey: ""
@@ -74,3 +67,10 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# Note: Need to manually delete PVC after helm delete
+postgresql:
+  enabled: true
+  #  auth:
+  #    username: lumigator
+  #    database: lumigator

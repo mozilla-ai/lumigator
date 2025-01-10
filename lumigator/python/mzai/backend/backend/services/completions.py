@@ -53,6 +53,9 @@ class OpenAICompletionService(CompletionService):
         self.prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
     def get_models(self):
+        """Response is stdout write
+        See OpenAI Client src/openai/cli/_utils.py#L35
+        """
         response = self.client.list_models()
 
         return response

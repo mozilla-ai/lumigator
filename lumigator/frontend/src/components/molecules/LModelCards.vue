@@ -13,17 +13,6 @@
           :value="model"
         />
         <label :for="model.name">{{ model.name }}</label>
-        <!-- add eternal link to model documentation here -->
-        <!-- <Button
-          as="a"
-          icon="pi pi-external-link"
-          severity="secondary"
-          variant="text"
-          rounded
-          class="l-models__external-link"
-          :href="model.externalLink"
-          target="_blank"
-        /> -->
       </div>
     </div>
   </div>
@@ -33,7 +22,6 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia'
 import { useModelStore } from '@/stores/models/store';
-// import Button from 'primevue/button';
 import RadioButton from 'primevue/radiobutton';
 
 const modelStore = useModelStore();

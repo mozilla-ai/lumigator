@@ -188,7 +188,6 @@ function resetForm() {
 }
 
 onMounted(async () => {
-  console.log("❗️ ❗️❗️ FORM mounted")
   if (datasets.value?.length === 0) {
     await datasetStore.loadDatasets();
   }

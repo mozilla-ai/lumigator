@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 import mistralai.client
-from loguru import logger
 from lumigator_schemas.completions import CompletionRequest, CompletionResponse
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
@@ -17,16 +16,13 @@ class CompletionService(ABC):
 
 
 class MistralCompletionService(CompletionService):
-    pass
-
     def __init__(self):
         self.client = MistralClient(api_key=settings.MISTRAL_API_KEY)
         self.model = "open-mistral-7b"
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
-        self.prompt = """You are a helpful assistant, expert in text summarization.
-        For every prompt you receive, provide a summary of its contents in at most two sentences."""
+        self.prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
@@ -54,9 +50,7 @@ class OpenAICompletionService(CompletionService):
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
-        self.prompt = """You are a helpful assistant, expert in text summarization.
-                For every prompt you receive,
-                provide a summary of its contents in at most two sentences."""
+        self.prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
     def get_models(self):
         response = self.client.list_models()
@@ -64,7 +58,6 @@ class OpenAICompletionService(CompletionService):
         return response
 
     def get_completions_response(self, request: CompletionRequest) -> CompletionResponse:
-        logger.info(f"oai key...{settings.OAI_API_KEY}")
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[

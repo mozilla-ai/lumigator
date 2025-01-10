@@ -1,5 +1,6 @@
 import os
 from collections.abc import Mapping
+from typing import Final
 
 from lumigator_schemas.extras import DeploymentType
 from pydantic import ByteSize, computed_field
@@ -10,7 +11,8 @@ from sqlalchemy.engine import URL, make_url
 class BackendSettings(BaseSettings):
     # Backend
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
-    MAX_DATASET_SIZE: ByteSize = "50MB"
+    MAX_DATASET_SIZE_HUMAN_READABLE: Final[str] = "50MB"
+    MAX_DATASET_SIZE: Final[ByteSize] = MAX_DATASET_SIZE_HUMAN_READABLE
 
     # Backend API env vars
     _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "")

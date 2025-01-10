@@ -15,6 +15,9 @@ export const useExperimentStore = defineStore('experiment', () => {
   async function loadExperiments() {
     const experimentsList = await experimentService.fetchExperiments();
     experiments.value = experimentsList.map(job => parseExperiment(job));
+    // console.log(experiments.value);
+    // const res = Object.groupBy(experiments.value, ({ experimentStart, name }) => name)
+    // console.log(res);
   }
 
   /**
@@ -29,6 +32,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       id: job.submission_id,
       useCase: `summarization`,
       created: job.start_time,
+      experimentStart: job.start_time.slice(0, 16),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
     };
   }

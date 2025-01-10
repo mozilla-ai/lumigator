@@ -67,6 +67,13 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
 
+    if os.environ.get("DEBUG"):
+        import debugpy  # type: ignore
+
+        debug_port = os.environ.get("DEBUG_PORT", 5678)
+        logger.info(f"Starting debugpy on port {debug_port}")
+        debugpy.listen(("0.0.0.0", debug_port))
+
     @app.get("/")
     def get_root():
         return {"Hello": "Lumigator!🐊"}

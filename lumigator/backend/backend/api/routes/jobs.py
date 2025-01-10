@@ -18,9 +18,8 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
-    JobSubmissionResponse,
-    JobType,
 )
+from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -92,13 +91,13 @@ def create_annotation_job(
         inference_job_create_request,
     )
 
-    url = request.url_for(get_job.__name__, job_spec=job_response.id)
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
 
     return job_response
 
 
-@router.post(f"/evaluate/", status_code=status.HTTP_201_CREATED)
+@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
     job_create_request: JobEvalCreate,
@@ -124,7 +123,7 @@ def create_evaluation_lite_job(
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
 
-    url = request.url_for(get_job.__name__, job_spec=job_response.id)
+    url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
 
     return job_response
@@ -165,7 +164,7 @@ def list_jobs(
             continue
 
         # Combine both types of response.
-        x = found_job.model_dump()  # JobSubmissionResponse
+        x = found_job.dict()  # JobSubmissionResponse
         y = job.model_dump()  # JobResponse
         merged = {**x, **y}
         results.append(Job(**merged))
@@ -176,57 +175,66 @@ def list_jobs(
     )
 
 
-@router.get("/{job_spec}")
+@router.get("/{job_id}")
 def get_job(
     service: JobServiceDep,
-    job_spec: str,
-    skip: int = 0,
-    limit: int = 100,
+    job_id: UUID,
 ) -> Job | ListingResponse[Job]:
-    """Attempts to retrieve merged job data from the Lumigator repository and Ray.
-    If a valid UUID is provided, a single record is returned. If a valid
-    job type (currently `inference` or `evaluation`) is provided, then a list
-    of all jobs of the appropriate type is returned. Any other input results
-    in an error.
+    """Attempts to retrieve merged job data from the Lumigator repository and Ray
+    for a valid UUID.
+
+    The result is a merged representation which forms an augmented view of a 'job'.
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
-    try:
-        job_id = UUID(job_spec)
-        job = service.get_job(job_id)
-        ray_job = _get_ray_job(job_id)
+    job = service.get_job(job_id)
+    ray_job = _get_ray_job(job_id)
+
+    # Combine both types of response.
+    x = ray_job.dict()  # JobSubmissionResponse
+    y = job.model_dump()  # JobResponse
+    merged = {**x, **y}
+    return Job(**merged)
+
+
+@router.get("/{job_type}/")
+def get_job_per_type(
+    service: JobServiceDep,
+    job_type: str,
+    skip: int = 0,
+    limit: int = 100,
+) -> Job | ListingResponse[Job]:
+    """Attempts to retrieve merged job data from the Lumigator repository and Ray
+    for a valid job type (currently `inference` or `evaluation`).
+
+    Results are a merged representation which form an augmented view of a 'job'.
+
+    NOTE: Lumigator repository data takes precedence over Ray metadata.
+    """
+    if job_type not in ["inference", "annotate", "evaluate"]:
+        raise ValueError(f"Unknown job type {job_type}") from None
+    jobs = service.list_jobs_per_type(job_type, skip, limit)
+
+    # Get all jobs Ray knows about.
+    ray_jobs = _get_all_ray_jobs()
+
+    results = list[Job]()
+
+    # Merge Ray jobs into the repositories jobs
+    for job in jobs.items:
+        found_job = next(
+            (x for x in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
+        )
+        if found_job is None:
+            continue
 
         # Combine both types of response.
-        x = ray_job.model_dump()  # JobSubmissionResponse
+        x = found_job.dict()  # JobSubmissionResponse
         y = job.model_dump()  # JobResponse
         merged = {**x, **y}
-        return Job(**merged)
-    except ValueError:
-        # If job_spec is not a UUID, it's assumed to be a
-        if job_spec not in SERVICES_PATHS.values():
-            raise ValueError(f"Unknown job type {job_spec}") from None
-        jobs = service.list_jobs_per_type(job_spec, skip, limit)
+        results.append(Job(**merged))
 
-        # Get all jobs Ray knows about.
-        ray_jobs = _get_all_ray_jobs()
-
-        results = list[Job]()
-
-        # Merge Ray jobs into the repositories jobs
-        for job in jobs.items:
-            found_job = next(
-                (x for x in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
-            )
-            if found_job is None:
-                continue
-
-            # Combine both types of response.
-            x = found_job.model_dump()  # JobSubmissionResponse
-            y = job.model_dump()  # JobResponse
-            merged = {**x, **y}
-            results.append(Job(**merged))
-
-        return ListingResponse[Job](total=jobs.total, items=results)
+    return ListingResponse[Job](total=jobs.total, items=results)
 
 
 @router.get("/{job_id}/logs")
@@ -289,7 +297,7 @@ def get_job_result_download(
     return service.get_job_result_download(job_id)
 
 
-def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
+def _get_all_ray_jobs() -> list[RayJobDetails]:
     """Returns metadata that exists in the Ray cluster for all jobs."""
     resp = requests.get(settings.RAY_JOBS_URL, timeout=5)  # 5 seconds
     if resp.status_code != HTTPStatus.OK:
@@ -303,7 +311,7 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
 
     try:
         metadata = json.loads(resp.text)
-        return [JobSubmissionResponse(**item) for item in metadata]
+        return [RayJobDetails(**item) for item in metadata]
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
@@ -312,7 +320,7 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
         ) from e
 
 
-def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
+def _get_ray_job(job_id: UUID) -> RayJobDetails:
     """Returns metadata on the specified job if it exists in the Ray cluster."""
     resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"), timeout=5)  # 5 seconds
 
@@ -336,7 +344,7 @@ def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
 
     try:
         metadata = json.loads(resp.text)
-        return JobSubmissionResponse(**metadata)
+        return RayJobDetails(**metadata)
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text or ''}")

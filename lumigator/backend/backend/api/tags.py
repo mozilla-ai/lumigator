@@ -1,9 +1,5 @@
 from enum import Enum
 
-from lumigator_schemas.jobs import (
-    JobType,
-)
-
 
 class Tags(str, Enum):
     HEALTH = "health"
@@ -13,10 +9,6 @@ class Tags(str, Enum):
     WORKFLOWS = "workflows"
     MODELS = "models"
 
-SERVICES_PATHS = {
-    JobType.INFERENCE : "inference",
-    JobType.EVALUATION : "evaluate"
-}
 
 TAGS_METADATA = [
     {

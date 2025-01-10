@@ -24,22 +24,16 @@ services:
       - local
 
   minio-admin:
-    image: ubuntu
+    image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     platform: linux/amd64
     depends_on:
       minio:
         condition: service_healthy
-    command:
+    entrypoint:
       - /bin/bash
       - -c
       - |
           set -ex
-          apt update
-          apt install -y curl
-          curl --create-dirs -o /etc/lumigator/minio/mc https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x /etc/lumigator/minio/mc
-          export PATH=$PATH:/etc/lumigator/minio
-          export MC_CONFIG_DIR=/etc/lumigator/minio/config
           mc alias set lumigator_s3 http://minio:9000 minioadmin minioadmin
           mc admin user add lumigator_s3 lumigator lumigator
           mc admin policy attach lumigator_s3 readwrite --user lumigator

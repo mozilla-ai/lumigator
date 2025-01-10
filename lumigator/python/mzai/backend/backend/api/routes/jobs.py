@@ -5,7 +5,7 @@ from uuid import UUID
 
 import loguru
 import requests
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
@@ -34,8 +34,9 @@ def create_inference_job(
     job_create_request: JobInferenceCreate,
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request)
+    job_response = service.create_job(job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -49,6 +50,7 @@ def create_annotation_job(
     job_create_request: JobAnnotateCreate,
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
     """This uses a hardcoded model, that is, Lumigator's opinion on what
     reference model should be used to generate annotations.
@@ -59,7 +61,7 @@ def create_annotation_job(
         model="hf://facebook/bart-large-cnn",
         output_field="ground_truth",
     )
-    job_response = service.create_job(inference_job_create_request)
+    job_response = service.create_job(inference_job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -73,8 +75,9 @@ def create_evaluation_job(
     job_create_request: JobEvalCreate,
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request)
+    job_response = service.create_job(job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

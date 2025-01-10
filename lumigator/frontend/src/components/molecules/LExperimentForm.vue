@@ -90,7 +90,6 @@
     </div>
     <div class="l-experiment-form__models-container">
       <h3>Model Selection</h3>
-      <h4>Hugging Face Model Hub & Mistral</h4>
       <div class="l-experiment-form__models">
         <l-model-cards  ref="modelSelection"/>
       </div>

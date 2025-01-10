@@ -7,7 +7,7 @@ CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
 KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
 
-KEEP_CONTAINERS_UP := $(or $(KEEP_CONTAINERS_UP),FALSE)
+KEEP_CONTAINERS_UP ?= "FALSE"
 
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)

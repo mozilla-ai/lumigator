@@ -29,6 +29,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       id: job.submission_id,
       useCase: `summarization`,
       created: job.start_time,
+      experimentStart: job.start_time.slice(0, 16),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
     };
   }
@@ -65,14 +66,24 @@ export const useExperimentStore = defineStore('experiment', () => {
   async function updateStatusForIncompleteExperiments() {
     await Promise.all(
       getIncompleteExperimentIds()
-      .map(id => updateExperimentStatus(id)));
+        .map(id => updateExperimentStatus(id)));
   }
 
   async function runExperiment(experimentData) {
-    const experimentResponse = await experimentService.triggerExperiment(experimentData);
-    if (experimentResponse) {
-      return experimentResponse;
-    }
+    const modelArray = experimentData.models;
+    const jobRequests = modelArray.map((singleModel) => {
+      // trigger one job per model
+      const jobPayload = {
+        ...experimentData,
+        model: singleModel.uri,
+      };
+      return experimentService.triggerExperiment(jobPayload);
+    });
+
+    // Execute all requests in parallel
+    // and wait for all of them to resolve or reject
+    const results = await Promise.all(jobRequests);
+    return results;
   }
 
   async function loadDetails(id) {

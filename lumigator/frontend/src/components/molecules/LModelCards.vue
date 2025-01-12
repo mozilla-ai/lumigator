@@ -15,6 +15,17 @@
           @click.stop
         />
         <label :for="model.uri">{{ model.name }}</label>
+        <Button
+          as="a"
+          icon="pi pi-external-link"
+          severity="secondary"
+          variant="text"
+          rounded
+          class="l-models__external-link"
+          :href="model.website_url"
+          target="_blank"
+          @click.stop
+        />
       </div>
     </div>
   </div>
@@ -25,6 +36,7 @@ import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useModelStore } from '@/stores/models/store';
 import RadioButton from 'primevue/radiobutton';
+import Button from 'primevue/button';
 
 const modelStore = useModelStore();
 const { models } = storeToRefs(modelStore);

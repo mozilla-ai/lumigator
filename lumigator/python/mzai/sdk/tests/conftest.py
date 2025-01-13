@@ -8,6 +8,7 @@ from typing import BinaryIO
 import pytest
 import requests_mock
 from lumigator_sdk.completions import Completions
+from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
 
 LUMI_HOST = "localhost:8000"
@@ -29,6 +30,11 @@ def lumi_client(request_mock, mock_vendor_data) -> LumigatorClient:
         url=f"http://{LUMI_HOST}/api/v1/{Completions.COMPLETIONS_ROUTE}",
         status_code=HTTPStatus.OK,
         json=json.loads(mock_vendor_data),
+    )
+    request_mock.get(
+        url=f"http://{LUMI_HOST}/api/v1/{Health.HEALTH_ROUTE}",
+        status_code=HTTPStatus.OK,
+        json={'status': 'OK', 'dpeloymentType': 'local'},
     )
     return LumigatorClient(LUMI_HOST)
 

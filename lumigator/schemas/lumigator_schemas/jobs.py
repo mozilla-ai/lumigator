@@ -48,6 +48,9 @@ class JobLogsResponse(BaseModel):
     logs: str | None = None
 
 
+# Check Ray items actually used and copy
+# those from the schema
+# ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     submission_id: str | None = None

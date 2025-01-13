@@ -158,15 +158,15 @@ def list_jobs(
     # Merge Ray jobs into the repositories jobs
     for job in jobs.items:
         found_job = next(
-            (x for x in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
+            (job for job in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
         )
         if found_job is None:
             continue
 
         # Combine both types of response.
-        x = found_job.dict()  # JobSubmissionResponse
-        y = job.model_dump()  # JobResponse
-        merged = {**x, **y}
+        ray_info = found_job.dict()
+        lm_info = job.model_dump()
+        merged = {**ray_info, **lm_info}
         results.append(Job(**merged))
 
     return ListingResponse[Job](
@@ -179,7 +179,7 @@ def list_jobs(
 def get_job(
     service: JobServiceDep,
     job_id: UUID,
-) -> Job | ListingResponse[Job]:
+) -> Job:
     """Attempts to retrieve merged job data from the Lumigator repository and Ray
     for a valid UUID.
 
@@ -191,9 +191,9 @@ def get_job(
     ray_job = _get_ray_job(job_id)
 
     # Combine both types of response.
-    x = ray_job.dict()  # JobSubmissionResponse
-    y = job.model_dump()  # JobResponse
-    merged = {**x, **y}
+    ray_info = ray_job.dict()
+    lm_info = job.model_dump()
+    merged = {**ray_info, **lm_info}
     return Job(**merged)
 
 
@@ -203,7 +203,7 @@ def get_job_per_type(
     job_type: str,
     skip: int = 0,
     limit: int = 100,
-) -> Job | ListingResponse[Job]:
+) -> ListingResponse[Job]:
     """Attempts to retrieve merged job data from the Lumigator repository and Ray
     for a valid job type (currently `inference` or `evaluation`).
 
@@ -223,15 +223,15 @@ def get_job_per_type(
     # Merge Ray jobs into the repositories jobs
     for job in jobs.items:
         found_job = next(
-            (x for x in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
+            (job for job in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
         )
         if found_job is None:
             continue
 
         # Combine both types of response.
-        x = found_job.dict()  # JobSubmissionResponse
-        y = job.model_dump()  # JobResponse
-        merged = {**x, **y}
+        ray_info = found_job.dict()
+        lm_info = job.model_dump()
+        merged = {**ray_info, **lm_info}
         results.append(Job(**merged))
 
     return ListingResponse[Job](total=jobs.total, items=results)

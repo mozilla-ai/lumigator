@@ -42,6 +42,8 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.settings import settings
 
+DEFAULT_SKIP = 0
+DEFAULT_LIMIT = 100
 
 class JobService:
     # set storage path
@@ -501,12 +503,6 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
-    def _list_job_records_per_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord]:
-        records = self.job_repo.list_by_job_type(job_type, skip, limit)
-        if records is None:
-            return []
-        return records
-
     def get_job_per_type(self, job_type: str) -> ListingResponse[JobResponse]:
         records = self._get_job_records_per_type(job_type)
 
@@ -522,11 +518,22 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
-    def list_jobs_per_type(
+    def _list_job_records_per_type(
         self,
         job_type: str,
         skip: int,
-        limit: int,
+        limit: int
+    ) -> list[JobRecord]:
+        records = self.job_repo.list_by_job_type(job_type, skip, limit)
+        if records is None:
+            return []
+        return records
+
+    def list_jobs_per_type(
+        self,
+        job_type: str,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
     ) -> ListingResponse[JobResponse]:
         records = self._list_job_records_per_type(job_type, skip, limit)
         responses = [self.update_job_status(record) for record in records]
@@ -537,8 +544,8 @@ class JobService:
 
     def list_jobs(
         self,
-        skip: int = 0,
-        limit: int = 100,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
     ) -> ListingResponse[JobResponse]:
         total = self.job_repo.count()
         records = self.job_repo.list(skip, limit)

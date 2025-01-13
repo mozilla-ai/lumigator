@@ -7,6 +7,8 @@ from lumigator_sdk.jobs import Jobs
 from lumigator_sdk.lm_datasets import Datasets
 from lumigator_sdk.models import Models
 
+# Only retries initial connections
+# No HTTP errors are retried
 DEFAULT_RETRY = Retry(
     connect=5,
     backoff_factor=1,

@@ -8,7 +8,7 @@ from urllib3 import Retry
 
 
 class ApiClient:
-    def __init__(self, api_host: str, ray_host: str, retry_conf: Retry | None):
+    def __init__(self, api_host: str, ray_host: str, retry_conf: Retry):
         """Base class for the Lumigator API client.
 
         Args:

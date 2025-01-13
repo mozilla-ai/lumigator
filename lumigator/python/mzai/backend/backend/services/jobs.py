@@ -24,6 +24,9 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
 
+DEFAULT_SKIP = 0
+DEFAULT_LIMIT = 100
+
 
 class JobService:
     # set storage path
@@ -283,8 +286,8 @@ class JobService:
     def list_jobs_per_type(
         self,
         job_type: str,
-        skip: int,
-        limit: int,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
     ) -> ListingResponse[JobResponse]:
         records = self._list_job_records_per_type(job_type, skip, limit)
         responses = [self._update_job_status(record) for record in records]
@@ -295,8 +298,8 @@ class JobService:
 
     def list_jobs(
         self,
-        skip: int = 0,
-        limit: int = 100,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
     ) -> ListingResponse[JobResponse]:
         total = self.job_repo.count()
         records = self.job_repo.list(skip, limit)

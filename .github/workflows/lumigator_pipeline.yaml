@@ -2,15 +2,11 @@ name: Lumigator pipeline
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
     branches:
       - "**"
     # synchronized is when you push new commits
     types: ["opened", "synchronize"]
   push:
-    paths-ignore:
-      - 'docs/**'
     branches:
       - main
     tags:

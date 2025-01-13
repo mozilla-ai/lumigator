@@ -6,7 +6,7 @@ FROM node:${NODE_VERSION}-alpine AS base
 COPY ../../ /mzai
 
 WORKDIR /mzai/
-ARG VUE_APP_BASE_URL=http://localhost:8000/api/v1/
+ARG VUE_APP_BASE_URL
 
 # Install dependencies
 RUN npm --prefix /mzai/lumigator/frontend install

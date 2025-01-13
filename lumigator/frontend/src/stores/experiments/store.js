@@ -25,6 +25,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       // initialize a grouping object
       if (!acc[key]) {
         acc[key] = {
+          id: key, // temporary key until BE provides one
           created: job.created,
           dataset: job.dataset,
           description: job.description,

@@ -10,11 +10,22 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
 from backend.api.http_headers import HttpHeaders
+from backend.settings import settings
 
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_201_CREATED: {"description": "Dataset successfully uploaded"},
+        status.HTTP_413_REQUEST_ENTITY_TOO_LARGE: {
+            "description": f"Max dataset size ({settings.MAX_DATASET_SIZE_HUMAN_READABLE})"
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"description": "Invalid CSV file"},
+    },
+)
 def upload_dataset(
     service: DatasetServiceDep,
     dataset: UploadFile,

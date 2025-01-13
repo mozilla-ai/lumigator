@@ -5,9 +5,8 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
-KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
-
-KEEP_CONTAINERS_UP ?= "FALSE"
+# Use the .env file if it exists, ignore it if it doesn't.
+-include .env
 
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -18,10 +17,10 @@ ifeq ($(ARCH), arm64)
 endif
 
 define run_with_containers
-	@echo "No Lumigator containers are running. Starting containers..."
-	make start-lumigator-build
-	@if [ $(KEEP_CONTAINERS_UP) = "FALSE" ]; then echo "The script will remove containers after tests"; trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; fi; \
-	make $(1)
+    @echo "No Lumigator containers are running. Starting containers..."
+    make start-lumigator-build
+    @if [ "${KEEP_CONTAINERS_UP:-FALSE}" = "FALSE" ]; then echo "The script will remove containers after tests"; trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; fi; \
+    make $(1)
 endef
 
 define run_with_existing_containers
@@ -64,11 +63,8 @@ endef
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-.env:
-	@if [ ! -f .env ]; then cp .env.example .env; echo ".env created from .env.example"; fi
-
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
-local-up: .env
+local-up:
 	uv run pre-commit install
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
@@ -79,15 +75,15 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
-start-lumigator: .env
+start-lumigator:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build: .env
+start-lumigator-build:
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
-start-lumigator-external-services: .env
+start-lumigator-external-services:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator:

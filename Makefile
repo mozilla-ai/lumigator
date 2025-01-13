@@ -5,9 +5,9 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
--include .env
+KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
 
-KEEP_CONTAINERS_UP ?= "TRUE"
+KEEP_CONTAINERS_UP ?= "FALSE"
 
 #used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -20,7 +20,7 @@ endif
 define run_with_containers
 	@echo "No Lumigator containers are running. Starting containers..."
 	make start-lumigator-build
-	@if [ $(KEEP_CONTAINERS_UP) = "TRUE" ]; then trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; fi; \
+	@if [ $(KEEP_CONTAINERS_UP) = "FALSE" ]; then echo "The script will remove containers after tests"; trap "cd $(PROJECT_ROOT); make stop-lumigator" EXIT; fi; \
 	make $(1)
 endef
 

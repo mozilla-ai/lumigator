@@ -51,6 +51,11 @@ class BackendSettings(BaseSettings):
     # TODO: change once we remove old eval
     NEW_EVALUATOR_COMMAND: str = "python evaluator/evaluator.py"
 
+    # DEBUGPY Settings
+    ENABLE_DEBUGPY: bool = False
+    DEBUGPY_PORT: int = 5678
+    DEBUGPY_HOST: str = "0.0.0.0"
+
     @computed_field
     @property
     def EVALUATOR_COMMAND(self) -> str:  # noqa: N802

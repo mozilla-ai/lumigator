@@ -67,12 +67,13 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
 
-    if os.environ.get("ENABLE_DEBUGPY"):
+    if settings.ENABLE_DEBUGPY:
         import debugpy  # type: ignore
 
-        debug_port = os.environ.get("DEBUG_PORT", 5678)
-        logger.info(f"Starting debugpy on port {debug_port}")
-        debugpy.listen(("0.0.0.0", debug_port))
+        debug_port = settings.DEBUGPY_PORT
+        debug_host = settings.DEBUGPY_HOST
+        logger.info(f"Starting debugpy on {debug_host}:{debug_port}")
+        debugpy.listen((debug_host, debug_port))
 
     @app.get("/")
     def get_root():

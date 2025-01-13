@@ -264,17 +264,22 @@ def test_full_experiment_launch(
     assert get_experiments.total > 0
 
     get_experiment_response = local_client.get(f"/experiments_new/{get_experiments.items[0].id}")
+    logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
 
     succeeded = False
     for _ in range(1, 200):
-        get_job_response = local_client.get(f"/jobs/{get_experiments.items[0].id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+        get_experiment_response = local_client.get(
+            f"/experiments_new/{get_experiments.items[0].id}"
+        )
+        assert get_experiment_response.status_code == 200
+        get_experiment_response_model = ExperimentResponse.model_validate(
+            get_experiment_response.json()
+        )
+        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             break
-        if get_job_response_model.status == JobStatus.FAILED.value:
+        if get_experiment_response_model.status == JobStatus.FAILED.value:
             succeeded = False
             break
         time.sleep(10)

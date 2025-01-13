@@ -12,7 +12,10 @@ from lumigator_schemas.jobs import (
     JobStatus,
 )
 
+from backend.records.experiments import ExperimentRecord
+from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
+from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 
@@ -21,12 +24,23 @@ class ExperimentService:
     def __init__(
         self,
         experiment_repo: ExperimentRepository,
+        job_repo: JobRepository,
         job_service: JobService,
         dataset_service: DatasetService,
     ):
         self._experiment_repo = experiment_repo
+        self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
+
+    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
+        record = self._experiment_repo.get(experiment_id)
+        if record is None:
+            self._raise_not_found(experiment_id)
+        return record
+
+    def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
+        return self._job_repo.get_by_experiment_id(experiment_id)
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -64,7 +78,7 @@ class ExperimentService:
         inference_job_id: UUID,
         request: ExperimentCreate,
         background_tasks: BackgroundTasks,
-        experiment_id: UUID = None
+        experiment_id: UUID = None,
     ):
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
@@ -82,7 +96,7 @@ class ExperimentService:
         self._job_service.create_job(
             JobEvalLiteCreate.model_validate(job_eval_dict),
             background_tasks,
-            experiment_id=experiment_id
+            experiment_id=experiment_id,
         )
 
     def create_experiment(
@@ -132,6 +146,23 @@ class ExperimentService:
         )
 
         return ExperimentResponse.model_validate(experiment_record)
+
+    # TODO Move this into a "composite job" impl
+    def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
+        record = self._get_experiment_record(experiment_id)
+        loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
+
+        all_succeeded = True
+        for job in self._get_all_owned_jobs(experiment_id):
+            loguru.logger.info(f"Checking sub job: {job}")
+            if self._job_service.get_job(job.id).status != JobStatus.SUCCEEDED:
+                all_succeeded = False
+                break
+
+        if all_succeeded:
+            record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
+
+        return ExperimentResponse.model_validate(record)
 
     def list_experiments(
         self, skip: int = 0, limit: int = 100

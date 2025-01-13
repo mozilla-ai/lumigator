@@ -256,7 +256,10 @@ class JobService:
         return job_params
 
     def create_job(
-        self, request: JobEvalCreate | JobInferenceCreate, background_tasks: BackgroundTasks, experiment_id: UUID = None
+        self,
+        request: JobEvalCreate | JobInferenceCreate,
+        background_tasks: BackgroundTasks,
+        experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):

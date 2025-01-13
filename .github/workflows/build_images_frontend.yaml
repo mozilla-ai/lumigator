@@ -51,6 +51,7 @@ jobs:
         with:
           file: "lumigator/frontend/Dockerfile"
           target: "server"
+          push: true
           tags: |
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}

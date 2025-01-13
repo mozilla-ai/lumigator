@@ -12,7 +12,7 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - DEBUG=1
+      - ENABLE_DEBUGPY=1
     develop:
       watch:
         - path: lumigator/python/mzai/backend/

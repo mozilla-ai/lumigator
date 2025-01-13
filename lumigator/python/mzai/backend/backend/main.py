@@ -67,7 +67,7 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
 
-    if os.environ.get("DEBUG"):
+    if os.environ.get("ENABLE_DEBUGPY"):
         import debugpy  # type: ignore
 
         debug_port = os.environ.get("DEBUG_PORT", 5678)

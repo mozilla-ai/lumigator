@@ -5,6 +5,7 @@ import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helper
 
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
+  const jobs = ref([]);
   const selectedExperiment = ref(null);
   const selectedExperimentRslts = ref([]);
   const isPolling = ref(false);
@@ -13,8 +14,36 @@ export const useExperimentStore = defineStore('experiment', () => {
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
   async function loadExperiments() {
-    const experimentsList = await experimentService.fetchExperiments();
-    experiments.value = experimentsList.map(job => parseExperiment(job));
+    const allJobs = await experimentService.fetchJobs();
+    jobs.value = allJobs.map(job => parseJobDetails(job));
+    experiments.value = getJobsPerExperiement();
+  }
+
+  function getJobsPerExperiement() {
+    const experimentMap = jobs.value.reduce((acc, job) => {
+      const key = `${job.name}-${job.experimentStart}`;
+      // initialize a grouping object
+      if (!acc[key]) {
+        acc[key] = {
+          created: job.created,
+          dataset: job.dataset,
+          description: job.description,
+          name: job.name, experimentStart: job.experimentStart,
+          jobs: [],
+          useCase: job.useCase,
+          runTime: '',
+          samples: job.evaluation.max_samples,
+          models: [],
+          status: 'SUCCEEDED'
+        };
+      }
+      acc[key].jobs.push(job);
+      acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model.path);
+      return acc;
+
+    }, {})
+
+    return Object.values(experimentMap);
   }
 
   /**
@@ -22,13 +51,14 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseExperiment(job) {
+  function parseJobDetails(job) {
     return {
       ...retrieveEntrypoint(job),
       status: job.status.toUpperCase(),
       id: job.submission_id,
       useCase: `summarization`,
       created: job.start_time,
+      description: job.description,
       experimentStart: job.start_time.slice(0, 16),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
     };
@@ -88,7 +118,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadDetails(id) {
     const details = await experimentService.fetchExperimentDetails(id);
-    selectedExperiment.value = parseExperiment(details);
+    selectedExperiment.value = parseJobDetails(details);
     experimentLogs.value = [];
     retrieveLogs();
   }
@@ -184,6 +214,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   return {
     experiments,
+    jobs,
     loadExperiments,
     updateStatusForIncompleteExperiments,
     loadDetails,

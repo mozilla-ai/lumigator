@@ -90,7 +90,6 @@
     </div>
     <div class="l-experiment-form__models-container">
       <h3>Model Selection</h3>
-      <h4>Hugging Face Model Hub & Mistral</h4>
       <div class="l-experiment-form__models">
         <l-model-cards  ref="modelSelection"/>
       </div>
@@ -153,7 +152,7 @@ async function triggerExperiment() {
   const experimentPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
-    model: modelSelection.value.selectedModel.link,
+    model: modelSelection.value.selectedModel.uri,
     dataset: dataset.value.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }

@@ -13,7 +13,7 @@ services:
     environment:
       - SERVICES=s3:4566
       - CREATE_BUCKETS=lumigator-storage
-      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - LOCALSTACK_AUTH_TOKEN
       - PERSISTENCE=1
       - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
       - EXTRA_CORS_ALLOWED_ORIGINS=*
@@ -61,13 +61,13 @@ services:
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY
       - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - MISTRAL_API_KEY
+      - OPENAI_API_KEY
+      - HF_TOKEN
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_DEFAULT_REGION
+      - AWS_ENDPOINT_URL
 
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
@@ -101,23 +101,23 @@ services:
       # if persistence is needed
       - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
       - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
-      - S3_BUCKET=${S3_BUCKET}
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_DEFAULT_REGION
+      - AWS_ENDPOINT_URL
+      - S3_BUCKET
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
       - INFERENCE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/inference/requirements.txt
       - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
-      - RAY_DASHBOARD_PORT=${RAY_DASHBOARD_PORT}
-      - RAY_HEAD_NODE_HOST=${RAY_HEAD_NODE_HOST}
-      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RAY_DASHBOARD_PORT
+      - RAY_HEAD_NODE_HOST
+      - MISTRAL_API_KEY
+      - OPENAI_API_KEY
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
-      - LUMI_API_CORS_ALLOWED_ORIGINS=${LUMI_API_CORS_ALLOWED_ORIGINS}
+      - LUMI_API_CORS_ALLOWED_ORIGINS
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking

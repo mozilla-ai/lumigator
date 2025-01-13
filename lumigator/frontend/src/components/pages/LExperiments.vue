@@ -69,6 +69,7 @@ import { onMounted, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
+import { useModelStore } from '@/stores/models/store';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
@@ -82,6 +83,7 @@ import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const datasetStore = useDatasetStore();
+const modelStore = useModelStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const {
   experiments,
@@ -139,6 +141,7 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
+  await modelStore.loadModels();
    if (selectedDataset.value) {
      onCreateExperiment();
   }

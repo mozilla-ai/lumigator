@@ -54,10 +54,10 @@ export function calculateDuration(start, finish) {
   const seconds = totalSeconds % 60;
 
   // Format the result as hh:mm:ss
-  const duration = `${String(hours).padStart(2, '0')}:
+  const formatedDuration = `${String(hours).padStart(2, '0')}:
   ${String(minutes).padStart(2, '0')}:
   ${String(seconds).padStart(2, '0')}`;
-  return duration;
+  return formatedDuration;
 }
 
 export function downloadContent(blob, filename) {

@@ -47,7 +47,7 @@ need to have the following prerequisites installed on your machine:
     - On a Mac, you need Docker Desktop `4.3` or later and docker-compose `1.28` or later.
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
-- The system Python; no version manager, such as pyenv, should be active.
+- The system Python; no version manager, such as uv, should be active.
 
 You can run and develop Lumigator locally using Docker Compose. This creates three container
 services networked together to make up all the components of the Lumigator application:
@@ -59,6 +59,11 @@ services networked together to make up all the components of the Lumigator appli
 > [!NOTE]
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 > uses SQLite for this purpose.
+>
+> [!NOTE]
+> If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
+> environment variable set locally for Lumigator pick it up at runtime, or, alternately, inject
+> into the running `backend` docker container.
 
 To start Lumigator locally, follow these steps:
 

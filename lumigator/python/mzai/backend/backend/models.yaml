@@ -17,7 +17,7 @@
 
 - name: mikeadimech/longformer-qmsum-meeting-summarization
   uri: hf://mikeadimech/longformer-qmsum-meeting-summarization
-  website_url: https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization/discussions
+  website_url: https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization
   description: Longformer is a transformer model that is capable of processing long sequences.
   info:
     parameter_count: 162M

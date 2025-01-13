@@ -7,7 +7,7 @@ text data.
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistal API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
-Refer to the `.env.example` file in the repository for more details.
+Refer to the `.env.template` file in the repository for more details.
 ```
 
 ## What You'll Need

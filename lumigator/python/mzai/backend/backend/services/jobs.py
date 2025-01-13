@@ -24,6 +24,9 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.settings import settings
 
+DEFAULT_SKIP = 0
+DEFAULT_LIMIT = 100
+
 
 class JobService:
     # set storage path
@@ -67,11 +70,33 @@ class JobService:
             self._raise_not_found(job_id)
         return record
 
+    def _list_job_records_per_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord]:
+        records = self.job_repo.list_by_job_type(job_type, skip, limit)
+        if records is None:
+            return []
+        return records
+
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
         record = self.job_repo.update(job_id, **updates)
         if record is None:
             self._raise_not_found(job_id)
         return record
+
+    def _update_job_status(
+        self,
+        record: JobRecord,
+    ) -> JobResponse:
+        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+            return JobResponse.model_validate(record)
+
+        # get job status from ray
+        job_status = self.ray_client.get_job_status(record.id)
+
+        # update job status in the DB if it differs from the current status
+        if job_status.lower() != record.status.value.lower():
+            record = self._update_job_record(record.id, status=job_status.lower())
+
+        return JobResponse.model_validate(record)
 
     def _get_results_s3_key(self, job_id: UUID) -> str:
         """Given an job ID, returns the S3 key for the job results.
@@ -173,7 +198,9 @@ class JobService:
             raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name, description=request.description, job_type=job_type
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -256,10 +283,23 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
+    def list_jobs_per_type(
+        self,
+        job_type: str,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
+    ) -> ListingResponse[JobResponse]:
+        records = self._list_job_records_per_type(job_type, skip, limit)
+        responses = [self._update_job_status(record) for record in records]
+        return ListingResponse(
+            total=len(responses),
+            items=responses,
+        )
+
     def list_jobs(
         self,
-        skip: int = 0,
-        limit: int = 100,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
     ) -> ListingResponse[JobResponse]:
         total = self.job_repo.count()
         records = self.job_repo.list(skip, limit)
@@ -267,14 +307,6 @@ class JobService:
             total=total,
             items=[self.get_job(record.id) for record in records],
         )
-
-    def update_job_status(
-        self,
-        job_id: UUID,
-        status: JobStatus,
-    ) -> JobResponse:
-        record = self._update_job_record(job_id, status=status)
-        return JobResponse.model_validate(record)
 
     def get_job_result(self, job_id: UUID) -> JobResultResponse:
         """Return job results metadata if available in the DB."""

@@ -123,12 +123,26 @@ endif
 
 test-backend-unit:
 	cd lumigator/python/mzai/backend/; \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
 
 test-backend-integration-target:
 	cd lumigator/python/mzai/backend/; \
 	docker container list --all; \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt INFERENCE_WORK_DIR=../jobs/inference EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt EVALUATOR_WORK_DIR=../jobs/evaluator uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	RAY_WORKER_GPUS="0.0" \
+	RAY_WORKER_GPUS_FRACTION="0.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration:
 ifeq ($(CONTAINERS_RUNNING),)

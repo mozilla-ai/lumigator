@@ -17,6 +17,8 @@ class CompletionService(ABC):
 
 class MistralCompletionService(CompletionService):
     def __init__(self):
+        if settings.MISTRAL_API_KEY is None:
+            raise Exception("MISTRAL_API_KEY is not set")
         self.client = MistralClient(api_key=settings.MISTRAL_API_KEY)
         self.model = "open-mistral-7b"
         self.max_tokens = 256
@@ -45,6 +47,8 @@ class MistralCompletionService(CompletionService):
 
 class OpenAICompletionService(CompletionService):
     def __init__(self):
+        if settings.OPENAI_API_KEY is None:
+            raise Exception("OPENAI_API_KEY is not set")
         self.client = OpenAI(api_key=settings.OAI_API_KEY)
         self.model = "gpt-4o-mini"
         self.max_tokens = 256

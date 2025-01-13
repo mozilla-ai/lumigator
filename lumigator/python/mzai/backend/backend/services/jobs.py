@@ -1,6 +1,8 @@
 import asyncio
+import csv
 import json
 from collections.abc import Callable
+from io import BytesIO, StringIO
 from pathlib import Path
 from uuid import UUID
 
@@ -69,7 +71,7 @@ class JobService:
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
-        self.data_service = data_service
+        self._dataset_service = data_service
 
     def _raise_not_found(self, job_id: UUID):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
@@ -103,6 +105,24 @@ class JobService:
             Path(settings.S3_JOB_RESULTS_PREFIX)
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
+
+    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
+        """Given a JSON string containing inference results and the fields
+        we want to read from it, generate a binary file (as a BytesIO
+        object) to be passed to the fastapi UploadFile method.
+        """
+        dataset = {k: v for k, v in results.items() if k in fields}
+
+        # Create a CSV in memory
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(dataset.keys())
+        csv_writer.writerows(zip(*dataset.values()))
+
+        # Create a binary file from the CSV, since the upload function expects a binary file
+        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
+
+        return bin_data
 
     def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate, s3: S3FileSystem):
         loguru.logger.info("Adding a new dataset entry to the database...")
@@ -149,7 +169,7 @@ class JobService:
         - task: the function to be called after the job completes successfully
         - args: the arguments to be passed to the function `task()`
         """
-        job_status = self._job_service.ray_client.get_job_status(job_id)
+        job_status = self.ray_client.get_job_status(job_id)
 
         valid_status = [
             JobStatus.CREATED.value.lower(),
@@ -161,7 +181,7 @@ class JobService:
         loguru.logger.info(f"Watching {job_id}")
         while job_status.lower() not in stop_status and job_status.lower() in valid_status:
             await asyncio.sleep(5)
-            job_status = self._job_service.ray_client.get_job_status(job_id)
+            job_status = self.ray_client.get_job_status(job_id)
 
         if job_status.lower() == JobStatus.FAILED.value.lower():
             loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
@@ -197,7 +217,7 @@ class JobService:
 
     def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
-        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+        dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
         model_url = self._set_model_type(request)
 
@@ -347,6 +367,7 @@ class JobService:
                 self._add_dataset_to_db,
                 record.id,
                 JobInferenceCreate.model_validate(request),
+                self._dataset_service.s3_filesystem,
             )
         # FIXME The ray status is now _not enough_ to set the job status,
         # since the dataset may still be under creation
@@ -409,7 +430,7 @@ class JobService:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
         result_key = self._get_results_s3_key(job_id)
-        download_url = self.data_service.s3_client.generate_presigned_url(
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,

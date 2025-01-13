@@ -1,7 +1,5 @@
 import asyncio
-import csv
 from collections.abc import Callable
-from io import BytesIO, StringIO
 from uuid import UUID
 
 import loguru
@@ -29,24 +27,6 @@ class ExperimentService:
         self._experiment_repo = experiment_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
-
-    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
-        """Given a JSON string containing inference results and the fields
-        we want to read from it, generate a binary file (as a BytesIO
-        object) to be passed to the fastapi UploadFile method.
-        """
-        dataset = {k: v for k, v in results.items() if k in fields}
-
-        # Create a CSV in memory
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(dataset.keys())
-        csv_writer.writerows(zip(*dataset.values()))
-
-        # Create a binary file from the CSV, since the upload function expects a binary file
-        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
-
-        return bin_data
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -129,6 +109,7 @@ class ExperimentService:
             "model_url": request.model_url,
             "output_field": request.inference_output_field,
             "system_prompt": request.system_prompt,
+            "store_to_dataset": True,
         }
 
         # submit inference job first

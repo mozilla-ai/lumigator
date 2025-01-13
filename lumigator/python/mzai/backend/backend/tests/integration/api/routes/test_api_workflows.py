@@ -46,6 +46,10 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
+    get_ds_response = local_client.get("/datasets/")
+    assert get_ds_response.status_code == 200
+    get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
+
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
@@ -97,6 +101,7 @@ def test_upload_data_launch_job(
         "model": TEST_INFER_MODEL,
         "dataset": str(created_dataset.id),
         "max_samples": 10,
+        "store_to_dataset": True,
     }
     create_inference_job_response = local_client.post(
         "/jobs/inference/", headers=headers, json=infer_payload
@@ -133,6 +138,11 @@ def test_upload_data_launch_job(
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
+
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds.total + 1
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
@@ -238,16 +248,22 @@ def test_full_experiment_launch(
         "max_samples": 2,
     }
 
-    create_experiments_response = local_client.post("/experiments/", headers=headers, json=payload)
+    get_ds_response = local_client.get("/datasets/")
+    assert get_ds_response.status_code == 200
+    get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
+
+    create_experiments_response = local_client.post(
+        "/experiments_new/", headers=headers, json=payload
+    )
     assert create_experiments_response.status_code == 201
 
-    get_experiments_response = local_client.get("/experiments/")
+    get_experiments_response = local_client.get("/experiments_new/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
     assert get_experiments.total > 0
 
-    get_experiment_response = local_client.get(f"/experiments/{get_experiments.items[0].id}")
+    get_experiment_response = local_client.get(f"/experiments_new/{get_experiments.items[0].id}")
     assert get_experiment_response.status_code == 200
 
     succeeded = False
@@ -263,6 +279,11 @@ def test_full_experiment_launch(
             break
         time.sleep(10)
     assert succeeded
+
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds.total + 1
 
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):

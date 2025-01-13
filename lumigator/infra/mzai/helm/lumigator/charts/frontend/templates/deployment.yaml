@@ -34,6 +34,11 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LUMIGATOR_API_PORT
+              value: "8000"
+            - name: LUMIGATOR_API_HOST
+              value: {{ .Release.name }}-backend
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

@@ -60,6 +60,14 @@ should use when creating a new evaluation job. The response also includes other 
 such the model size and the default parameters used for evaluation. These fields are not applicable
 to every model, but they are included for the ones we have tested.
 
+```{note}
+These are the models we recommend users try for specific tasks, meaning they are suggested for
+evaluation on user-provided datasets. Note that Lumigator may also use additional models indirectly
+during evaluation, through third-party libraries it uses. For instance, calculating the BERTScore
+metric requires the [`roberta-large`](https://huggingface.co/FacebookAI/roberta-large) model by
+default. While this model is not listed among the recommended ones, it is still used under the hood.
+```
+
 ## Model Types and Parameters
 
 The following table shows the models we have tested and their respective types.

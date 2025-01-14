@@ -28,12 +28,12 @@ def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentRes
 
 @router.get("/")
 def list_experiments(
-    service: JobServiceDep,
+    service: ExperimentServiceDep,
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[ExperimentResponse]:
     return ListingResponse[ExperimentResponse].model_validate(
-        service.list_jobs(skip, limit).model_dump()
+        service.list_experiments(skip, limit).model_dump()
     )
 
 

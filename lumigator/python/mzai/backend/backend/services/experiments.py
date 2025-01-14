@@ -10,6 +10,7 @@ import loguru
 from fastapi import BackgroundTasks, UploadFile
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
+from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
     JobInferenceCreate,
@@ -17,13 +18,20 @@ from lumigator_schemas.jobs import (
 )
 from s3fs import S3FileSystem
 
+from backend.repositories.experiments import ExperimentRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.settings import settings
 
 
 class ExperimentService:
-    def __init__(self, job_service: JobService, dataset_service: DatasetService):
+    def __init__(
+        self,
+        experiment_repo: ExperimentRepository,
+        job_service: JobService,
+        dataset_service: DatasetService,
+    ):
+        self._experiment_repo = experiment_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
 
@@ -113,7 +121,9 @@ class ExperimentService:
             if task is not None:
                 task(*args)
 
-    def _run_eval(self, inference_job_id: UUID, request: ExperimentCreate):
+    def _run_eval(
+        self, inference_job_id: UUID, request: ExperimentCreate, experiment_id: UUID = None
+    ):
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
 
@@ -127,9 +137,9 @@ class ExperimentService:
         }
 
         # submit the job
-        self._job_service.create_job(JobEvalCreate.model_validate(job_eval_dict))
-
-        # TODO: do something with the job_response.id (e.g. add to the experiments' job list)
+        self._job_service.create_job(
+            JobEvalCreate.model_validate(job_eval_dict), experiment_id=experiment_id
+        )
 
     def create_experiment(
         self, request: ExperimentCreate, background_tasks: BackgroundTasks
@@ -139,6 +149,11 @@ class ExperimentService:
         # A background task should be attached to a response,
         # and will run only once the response has been sent.
         # See here: https://www.starlette.io/background/
+
+        experiment_record = self._experiment_repo.create(
+            name=request.name, description=request.description
+        )
+        loguru.logger.info(f"Created experiment '{request.name}' with ID '{experiment_record.id}'.")
 
         # input is ExperimentCreate, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
@@ -154,7 +169,8 @@ class ExperimentService:
 
         # submit inference job first
         job_response = self._job_service.create_job(
-            JobInferenceCreate.model_validate(job_inference_dict)
+            JobInferenceCreate.model_validate(job_inference_dict),
+            experiment_id=experiment_record.id,
         )
 
         # Inference jobs produce a new dataset
@@ -170,7 +186,21 @@ class ExperimentService:
         # run evaluation job afterwards
         # (NOTE: tasks in starlette are executed sequentially: https://www.starlette.io/background/)
         background_tasks.add_task(
-            self.on_job_complete, job_response.id, self._run_eval, job_response.id, request
+            self.on_job_complete,
+            job_response.id,
+            self._run_eval,
+            job_response.id,
+            request,
+            experiment_record.id,
         )
 
-        return job_response
+        return ExperimentResponse.model_validate(experiment_record)
+
+    def list_experiments(
+        self, skip: int = 0, limit: int = 100
+    ) -> ListingResponse[ExperimentResponse]:
+        records = self._experiment_repo.list(skip, limit)
+        return ListingResponse(
+            total=self._experiment_repo.count(),
+            items=[ExperimentResponse.model_validate(x) for x in records],
+        )

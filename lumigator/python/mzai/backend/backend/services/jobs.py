@@ -163,7 +163,9 @@ class JobService:
 
         return job_params
 
-    def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
+    def create_job(
+        self, request: JobEvalCreate | JobInferenceCreate, experiment_id: UUID = None
+    ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
@@ -173,7 +175,9 @@ class JobService:
             raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name, description=request.description, experiment_id=experiment_id
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type

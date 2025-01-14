@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from backend.records.base import BaseRecord
 from backend.records.datasets import *  # noqa: F403
+from backend.records.experiments import *  # noqa: F403
 from backend.records.jobs import *  # noqa: F403
 from sqlalchemy import engine_from_config, pool
 
@@ -33,8 +34,9 @@ target_metadata = BaseRecord.metadata
 
 # Override the SQLAlchemy URL with the one we have stored in our environment.
 config.set_main_option(
-    'sqlalchemy.url',
-    os.environ.get("SQLALCHEMY_DATABASE_URL", config.get_main_option("sqlalchemy.url")))
+    "sqlalchemy.url",
+    os.environ.get("SQLALCHEMY_DATABASE_URL", config.get_main_option("sqlalchemy.url")),
+)
 
 
 def run_migrations_offline() -> None:
@@ -55,6 +57,11 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        # SQLite does not support altering tables. To work around this, we need to enable the
+        # generation of batch mode operations. This means that Alembic will create a new table with
+        # the constraint, copy the existing data over, and remove the old table.
+        # See more here: https://alembic.sqlalchemy.org/en/latest/batch.html
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
@@ -76,7 +83,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,
         )
 
         with context.begin_transaction():

@@ -11,6 +11,8 @@ from backend.records.mixins import DateTimeMixin, JobStatusMixin, NameDescriptio
 class JobRecord(BaseRecord, NameDescriptionMixin, JobStatusMixin, DateTimeMixin):
     __tablename__ = "jobs"
 
+    experiment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("experiments.id"), nullable=True)
+
 
 class JobResultRecord(BaseRecord):
     __tablename__ = "job-results"

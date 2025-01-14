@@ -12,7 +12,7 @@ from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalCreate,
+    JobEvalLiteCreate,
     JobInferenceCreate,
     JobStatus,
 )
@@ -138,7 +138,7 @@ class ExperimentService:
 
         # submit the job
         self._job_service.create_job(
-            JobEvalCreate.model_validate(job_eval_dict), experiment_id=experiment_id
+            JobEvalLiteCreate.model_validate(job_eval_dict), experiment_id=experiment_id
         )
 
     def create_experiment(

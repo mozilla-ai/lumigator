@@ -64,6 +64,7 @@ class JobEvalCreate(BaseModel):
     system_prompt: str | None = None
     config_template: str | None = None
     skip_inference: bool = False
+    store_to_dataset: bool = False
 
 
 class JobInferenceCreate(BaseModel):
@@ -86,6 +87,7 @@ class JobInferenceCreate(BaseModel):
     temperature: float = 1.0
     top_p: float = 1.0
     config_template: str | None = None
+    store_to_dataset: bool = False
 
 
 class JobAnnotateCreate(BaseModel):

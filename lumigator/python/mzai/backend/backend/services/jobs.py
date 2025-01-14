@@ -1,8 +1,14 @@
+import asyncio
+import csv
+import json
+from collections.abc import Callable
+from io import BytesIO, StringIO
 from pathlib import Path
 from uuid import UUID
 
 import loguru
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
@@ -16,6 +22,7 @@ from lumigator_schemas.jobs import (
 )
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
+from s3fs import S3FileSystem
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -56,7 +63,7 @@ class JobService:
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
-        self.data_service = data_service
+        self._dataset_service = data_service
 
     def _raise_not_found(self, job_id: UUID):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
@@ -91,6 +98,91 @@ class JobService:
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
+    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
+        """Given a JSON string containing inference results and the fields
+        we want to read from it, generate a binary file (as a BytesIO
+        object) to be passed to the fastapi UploadFile method.
+        """
+        dataset = {k: v for k, v in results.items() if k in fields}
+
+        # Create a CSV in memory
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(dataset.keys())
+        csv_writer.writerows(zip(*dataset.values()))
+
+        # Create a binary file from the CSV, since the upload function expects a binary file
+        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
+
+        return bin_data
+
+    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate, s3: S3FileSystem):
+        loguru.logger.info("Adding a new dataset entry to the database...")
+
+        # Get the dataset from the S3 bucket
+        result_key = self._get_results_s3_key(job_id)
+        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            results = json.loads(f.read())
+
+        # define the fields we want to keep from the results JSON
+        # and build a CSV file from it as a BytesIO object
+        fields = ["examples", "ground_truth", request.output_field]
+        bin_data = self._results_to_binary_file(results, fields)
+        bin_data_size = len(bin_data.getvalue())
+
+        # Figure out the dataset filename
+        dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
+        dataset_filename = Path(dataset_filename).stem
+        dataset_filename = f"{dataset_filename}-annotated.csv"
+
+        upload_file = UploadFile(
+            file=bin_data,
+            size=bin_data_size,
+            filename=dataset_filename,
+            headers={"content-type": "text/csv"},
+        )
+        dataset_record = self._dataset_service.upload_dataset(
+            upload_file,
+            format=DatasetFormat.JOB,
+            run_id=job_id,
+            generated=True,
+            generated_by=results["model"],
+        )
+
+        loguru.logger.info(
+            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
+        )
+
+    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
+        """Watches a submitted job and, when it terminates successfully, runs a given task.
+
+        Inputs:
+        - job_id: the UUID of the job to watch
+        - task: the function to be called after the job completes successfully
+        - args: the arguments to be passed to the function `task()`
+        """
+        job_status = self.ray_client.get_job_status(job_id)
+
+        valid_status = [
+            JobStatus.CREATED.value.lower(),
+            JobStatus.PENDING.value.lower(),
+            JobStatus.RUNNING.value.lower(),
+        ]
+        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
+
+        loguru.logger.info(f"Watching {job_id}")
+        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
+            await asyncio.sleep(5)
+            job_status = self.ray_client.get_job_status(job_id)
+
+        if job_status.lower() == JobStatus.FAILED.value.lower():
+            loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
+
+        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
+            loguru.logger.info(f"Job {job_id} finished successfully.")
+            if task is not None:
+                task(*args)
+
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]
 
@@ -117,7 +209,7 @@ class JobService:
 
     def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
-        dataset_s3_path = self.data_service.get_dataset_s3_path(request.dataset)
+        dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
         model_url = self._set_model_type(request)
 
@@ -164,7 +256,10 @@ class JobService:
         return job_params
 
     def create_job(
-        self, request: JobEvalCreate | JobInferenceCreate, experiment_id: UUID = None
+        self,
+        request: JobEvalCreate | JobInferenceCreate,
+        background_tasks: BackgroundTasks,
+        experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
@@ -240,6 +335,20 @@ class JobService:
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
+        # Inference jobs produce a new dataset
+        # Add the dataset to the (local) database
+        if request.store_to_dataset:
+            background_tasks.add_task(
+                self.on_job_complete,
+                record.id,
+                self._add_dataset_to_db,
+                record.id,
+                JobInferenceCreate.model_validate(request),
+                self._dataset_service.s3_filesystem,
+            )
+        # FIXME The ray status is now _not enough_ to set the job status,
+        # since the dataset may still be under creation
+
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
@@ -298,7 +407,7 @@ class JobService:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
         result_key = self._get_results_s3_key(job_id)
-        download_url = self.data_service.s3_client.generate_presigned_url(
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,

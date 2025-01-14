@@ -163,7 +163,7 @@ async function triggerExperiment() {
     resetForm();
     toast.add({
       severity: 'secondary',
-      summary: `${success.name } Started`,
+      summary: `${success[0].name } Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
       life: 3000

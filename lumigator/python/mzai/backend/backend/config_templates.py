@@ -50,6 +50,7 @@ causal_eval_template = """{{
 oai_eval_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{
+        "path": "{model_uri}",
         "inference": {{
             "base_url": "{model_url}",
             "engine": "{model_uri}",
@@ -73,6 +74,7 @@ oai_eval_template = """{{
 default_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "dataset": {{ "path": "{dataset_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "hf_pipeline": {{
         "model_uri": "{model_uri}",
         "task": "{task}",
@@ -111,6 +113,7 @@ causal_infer_template = """{{
 oai_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "dataset": {{ "path": "{dataset_path}" }},
+    "model": {{ "path": "{model_uri}" }},
     "job": {{
         "max_samples": {max_samples},
         "storage_path": "{storage_path}",

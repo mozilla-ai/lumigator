@@ -211,8 +211,6 @@ jobs:
           file: "lumigator/frontend/Dockerfile"
           push: true
           target: "server"
-          build-args: |
-            "VUE_APP_BASE_URL=http://localhost:8000/api/v1/"
           tags: |
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}

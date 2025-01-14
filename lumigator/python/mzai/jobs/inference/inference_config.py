@@ -169,4 +169,6 @@ class InferenceJobConfig(BaseModel):
     inference_server: InferenceServerConfig | None = None
     params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None
-    model_config = ConfigDict(extra="forbid")
+    # NOTE: Disabling prevention of extra parameters so that the config templates
+    # can be aligned for MVP.
+    # model_config = ConfigDict(extra="forbid")

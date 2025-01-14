@@ -13,6 +13,9 @@ seq2seq_eval_template = """{{
         "return_predictions": true,
         "storage_path": "{storage_path}",
         "skip_inference": "{skip_inference}"
+    }},
+    "job": {{
+        "max_samples": {max_samples}
     }}
 }}"""
 
@@ -29,6 +32,9 @@ bart_eval_template = """{{
         "return_predictions": true,
         "storage_path": "{storage_path}",
         "skip_inference": "{skip_inference}"
+    }},
+    "job": {{
+        "max_samples": {max_samples}
     }}
 }}"""
 
@@ -44,6 +50,9 @@ causal_eval_template = """{{
         "return_predictions": true,
         "storage_path": "{storage_path}",
         "skip_inference": "{skip_inference}"
+    }},
+    "job": {{
+        "max_samples": {max_samples}
     }}
 }}"""
 
@@ -66,6 +75,9 @@ oai_eval_template = """{{
         "return_predictions": true,
         "storage_path": "{storage_path}",
         "skip_inference": "{skip_inference}"
+    }},
+    "job": {{
+        "max_samples": {max_samples}
     }}
 }}"""
 
@@ -112,6 +124,9 @@ seq2seq_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_uri}" }},
     "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples}
+    }}
 }}"""
 
 bart_infer_template = """{{
@@ -119,12 +134,18 @@ bart_infer_template = """{{
     "model": {{ "path": "{model_uri}" }},
     "tokenizer": {{ "path": "{model_uri}", "mod_max_length": 1024 }},
     "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples}
+    }}
 }}"""
 
 causal_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_uri}" }},
-    "dataset": {{ "path": "{dataset_path}" }}
+    "dataset": {{ "path": "{dataset_path}" }},
+    "job": {{
+        "max_samples": {max_samples}
+    }}
 }}"""
 
 

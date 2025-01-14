@@ -18,7 +18,6 @@
         scrollable
         scrollHeight="80vh"
         :pt="{table:'table-root'}"
-        @rowExpand="console.log(expandedRows)"
         @row-unselect="showSlidingPanel = false"
       >
         <Column

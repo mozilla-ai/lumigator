@@ -52,7 +52,6 @@ jobs:
           file: "lumigator/frontend/Dockerfile"
           target: "server"
           push: true
-          tags: |
-            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
-            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}
+          build-args: |
+            "VUE_APP_BASE_URL=http://localhost:8000/api/v1/"
+          tags: "mzdotai/lumigator-frontend:mario-test-2"

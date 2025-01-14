@@ -19,4 +19,6 @@ FROM nginx:1.27.2-alpine-slim AS server
 # Copy built files to the Nginx image
 COPY --from=base /mzai/lumigator/frontend/dist /usr/share/nginx/html
 
+COPY --from=base /mzai/lumigator/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80

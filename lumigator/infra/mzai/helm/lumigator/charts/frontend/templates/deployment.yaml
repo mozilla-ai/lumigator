@@ -38,7 +38,7 @@ spec:
             - name: LUMIGATOR_API_PORT
               value: "8000"
             - name: LUMIGATOR_API_HOST
-              value: {{ .Release.name }}-backend
+              value: {{ .Release.Name }}-backend
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -49,6 +49,18 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/templates/default.conf.template
+              subPath: default.conf.template
+              readOnly: true
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+            items:
+              - key: default.conf.template
+                path: default.conf.template
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

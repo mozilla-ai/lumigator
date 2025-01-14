@@ -62,7 +62,7 @@ services networked together to make up all the components of the Lumigator appli
 >
 > [!NOTE]
 > If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
-> environment variable set locally for Lumigator pick it up at runtime, or, alternately, inject
+> environment variable [set locally](https://github.com/mozilla-ai/lumigator/blob/main/.env.example) for Lumigator pick it up at runtime, or, alternately, inject
 > into the running `backend` docker container.
 
 To start Lumigator locally, follow these steps:

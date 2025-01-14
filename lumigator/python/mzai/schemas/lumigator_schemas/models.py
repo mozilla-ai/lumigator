@@ -10,6 +10,7 @@ class ModelInfo(BaseModel):
 class ModelsResponse(BaseModel):
     name: str
     uri: str
+    website_url: str
     description: str
     info: ModelInfo | None = None
     tasks: list[dict[str, dict | None]]

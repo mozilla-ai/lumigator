@@ -163,7 +163,9 @@ class JobService:
 
         return job_params
 
-    def create_job(self, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
+    def create_job(
+        self, request: JobEvalCreate | JobInferenceCreate, experiment_id: UUID = None
+    ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
@@ -173,7 +175,9 @@ class JobService:
             raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name, description=request.description, experiment_id=experiment_id
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -241,12 +245,14 @@ class JobService:
 
     def get_job(self, job_id: UUID) -> JobResponse:
         record = self._get_job_record(job_id)
+        loguru.logger.info(f"Obtaining info for job {job_id}: {record}")
 
         if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
             return JobResponse.model_validate(record)
 
         # get job status from ray
         job_status = self.ray_client.get_job_status(job_id)
+        loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
 
         # update job status in the DB if it differs from the current status
         if job_status.lower() != record.status.value.lower():
@@ -263,7 +269,7 @@ class JobService:
         records = self.job_repo.list(skip, limit)
         return ListingResponse(
             total=total,
-            items=[JobResponse.model_validate(x) for x in records],
+            items=[self.get_job(record.id) for record in records],
         )
 
     def update_job_status(

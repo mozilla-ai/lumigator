@@ -17,7 +17,7 @@ class Completions:
             Completions: A new Completions instance.
         """
         self.__client = c
-        self.__cached_vendors = self.get_vendors()
+        self.__cached_vendors = []
 
     def get_vendors(self) -> list[str]:
         """Return the list of supported external vendors.
@@ -65,23 +65,27 @@ class Completions:
                 the request failed.
         """
         # Sanitize the inputs.
-        vendor = vendor.lower()
+        vendor = vendor.lower().strip()
         text = text.strip()
+
+        # Validate we have some text input as our prompt.
+        if vendor == "":
+            raise ValueError("vendor: cannot be empty or whitespace")
+
+        # Update the cache if we cannot find the vendor.
+        if vendor not in self.__cached_vendors:
+            self.__cached_vendors = self.get_vendors()
 
         # Attempt to validate vendors using the cache.
         if vendor not in self.__cached_vendors:
-            raise ValueError(
-                f"vendor: '{vendor}' was not found in cache, 'get_vendors' to update cache)"
-            )
+            raise ValueError(f"vendor: '{vendor}' not found")
 
         # Validate we have some text input as our prompt.
         if text == "":
             raise ValueError("text: cannot be empty or whitespace")
 
         endpoint = f"{self.COMPLETIONS_ROUTE}/{vendor}/"
-        response = self.__client.get_response(
-            endpoint, HTTPMethod.POST, json_data={"text": text}
-        )
+        response = self.__client.get_response(endpoint, HTTPMethod.POST, json_data={"text": text})
 
         if not response or response.status_code != HTTPStatus.OK:
             return None

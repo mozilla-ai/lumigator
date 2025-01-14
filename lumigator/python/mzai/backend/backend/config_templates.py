@@ -104,7 +104,7 @@ bart_infer_template = """{{
 causal_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_uri}" }},
-    "dataset": {{ "path": "{dataset_path}" }},
+    "dataset": {{ "path": "{dataset_path}" }}
 }}"""
 
 

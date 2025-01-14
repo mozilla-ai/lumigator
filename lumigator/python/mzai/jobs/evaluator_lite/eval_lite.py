@@ -61,11 +61,12 @@ def run_eval(config: EvalJobConfig) -> Path:
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
-    if max_samples:
+
+    # Limit dataset length if max_samples is specified
+    if max_samples < 1 or max_samples > len(dataset):
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
-        # select data between the minimum and total length of dataset
-        num_samples = range(min(max_samples, len(dataset)))
-        dataset = dataset.select(num_samples)
+        max_samples = len(dataset)
+    dataset = dataset.select(range(max_samples))
 
     # run evaluation and append to results dict
     predictions = dataset["predictions"]

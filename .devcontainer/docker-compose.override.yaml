@@ -11,8 +11,6 @@ services:
       -  database_volume:/mzai/backend/local.db
     ports:
       - "5678:5678"
-    environment:
-      - ENABLE_DEBUGPY=1
     develop:
       watch:
         - path: lumigator/python/mzai/backend/

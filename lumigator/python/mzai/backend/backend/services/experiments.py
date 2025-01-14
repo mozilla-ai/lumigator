@@ -145,7 +145,7 @@ class ExperimentService:
         self, request: ExperimentCreate, background_tasks: BackgroundTasks
     ) -> ExperimentResponse:
         # The FastAPI BackgroundTasks object is used to run a function in the background.
-        # It is a wrapper arount Starlette's BackgroundTasks object.
+        # It is a wrapper around Starlette's BackgroundTasks object.
         # A background task should be attached to a response,
         # and will run only once the response has been sent.
         # See here: https://www.starlette.io/background/

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
@@ -57,3 +57,12 @@ def get_experiment_result_download(
     return ExperimentResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
     )
+
+
+@router.delete("/{experiment_id}")
+def delete_experiment(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
+    try:
+        experiment_record = service.delete_experiment(experiment_id)
+        return ExperimentResponse.model_validate(experiment_record)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e

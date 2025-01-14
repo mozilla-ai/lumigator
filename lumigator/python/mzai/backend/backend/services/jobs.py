@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from uuid import UUID
 
@@ -308,3 +309,31 @@ class JobService:
         )
 
         return JobResultDownloadResponse(id=job_id, download_url=download_url)
+
+    def delete_job(self, job_id: UUID) -> JobResponse:
+        """Delete a job and its associated results."""
+        record = self._get_job_record(job_id)
+
+        if not record:
+            raise ValueError(f"Job {job_id} not found.")
+
+        loguru.logger.info(f"Deleting job '{record.name}' with ID '{job_id}'.")
+
+        # If the job is running, stop it first.
+        # Otherwise, Ray considers the job to be in a non-terminal state and refuses to delete it.
+        if record.status in [JobStatus.CREATED, JobStatus.PENDING, JobStatus.RUNNING]:
+            loguru.logger.info(f"Stopping job {job_id}...")
+            try:
+                self.ray_client.stop_job(job_id)
+                # `stop_job` attempts to terminate process first, then kills process after timeout.
+                # Wait for the job to stop before continuing.
+                loguru.logger.info(f"Waiting for job {job_id} to stop...")
+                while self.ray_client.get_job_status(job_id) == JobStatus.RUNNING.value.lower():
+                    time.sleep(1)
+            except RuntimeError as e:
+                loguru.logger.error(f"Failed to stop job {job_id}: {e}")
+
+        self.ray_client.delete_job(job_id)
+        self.job_repo.delete(job_id)
+
+        return JobResponse.model_validate(record)

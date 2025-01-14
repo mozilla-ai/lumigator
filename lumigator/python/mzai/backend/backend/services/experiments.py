@@ -204,3 +204,20 @@ class ExperimentService:
             total=self._experiment_repo.count(),
             items=[ExperimentResponse.model_validate(x) for x in records],
         )
+
+    def delete_experiment(self, experiment_id: UUID):
+        record = self._experiment_repo.get(experiment_id)
+
+        if not record:
+            raise ValueError(f"Experiment with ID {experiment_id} not found.")
+
+        loguru.logger.info(f"Deleting experiment '{record.name}' with ID '{experiment_id}'.")
+
+        paired_jobs = self._job_service.job_repo.get_by_experiment_id(experiment_id)
+        if paired_jobs:
+            loguru.logger.info(f"Deleting {len(paired_jobs)} jobs associated with this experiment.")
+            for job in paired_jobs:
+                self._job_service.delete_job(job.id)
+
+        self._experiment_repo.delete(experiment_id)
+        return record

@@ -76,7 +76,24 @@
       background: inherit;
     }
 
+    .p-datatable-row-expansion {
+      background: $l-main-bg!important;
+      &:hover {
+        background: $l-main-bg!important;
+      }
+
+      &:hover td {
+        background: $l-main-bg!important;
+      }
+
+      & > td:first-child {
+        padding: 0;
+      }
+    }
+
 }
+
+    .p-datatable
 
 
 // Class for Datatable with visible lines and hover effect disabled

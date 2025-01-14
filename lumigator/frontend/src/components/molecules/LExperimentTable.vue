@@ -7,6 +7,7 @@
       <DataTable
         v-if="tableVisible"
         v-model:selection="focusedItem"
+        v-model:expandedRows="expandedRows"
         selectionMode="single"
         dataKey="id"
         :value="tableData"
@@ -15,18 +16,25 @@
         sortField="created"
         :sortOrder="-1"
         scrollable
+        scrollHeight="80vh"
         :pt="{table:'table-root'}"
-        @row-click="emit('l-experiment-selected', $event.data)"
+        @rowExpand="console.log(expandedRows)"
         @row-unselect="showSlidingPanel = false"
       >
         <Column
+          expander
+          :style="columnStyles.expander"
+        />
+        <Column
           field="name"
+          :style="columnStyles.name"
           header="experiment title"
         />
         <Column
           field="created"
           header="created"
           sortable
+          :style="columnStyles.created"
         >
           <template #body="slotProps">
             {{ formatDate(slotProps.data.created) }}
@@ -72,6 +80,14 @@
             />
           </template>
         </Column>
+        <template #expansion="slotProps">
+          <div class="l-experiment-table__jobs-table-container">
+            <l-jobs-table
+              :column-styles="columnStyles"
+              :table-data="slotProps.data.jobs"
+            />
+          </div>
+        </template>
       </DataTable>
     </transition>
   </div>
@@ -85,6 +101,7 @@ import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import Tag from 'primevue/tag';
+import LJobsTable from '@/components/molecules/LJobsTable.vue';
 import {useExperimentStore} from "@/stores/experiments/store.js";
 
 const props = defineProps({
@@ -102,11 +119,18 @@ const experimentStore = useExperimentStore();
 const { experiments } = storeToRefs(experimentStore);
 const tableVisible = ref(true);
 const focusedItem = ref();
+const expandedRows = ref({});
 
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'min-width: 54vw' : 'min-width: min(80vw, 1200px)'
+    'table-layout: fixed; width: 100%;' : 'min-width: min(80vw, 1200px)'
 })
+
+const columnStyles = {
+  expander: "width: 4rem",
+  name: "width: 24rem",
+  created: "width: 12rem",
+}
 
 function retrieveStatus(jobID) {
   const job = experiments.value.find(job => job.id === jobID);

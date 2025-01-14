@@ -11,7 +11,7 @@ on:
       - main
     tags:
       # Not the right semver regexp, but good enough
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
@@ -24,6 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Use filter action here instead of path filter in main workflow so required checks
+      # are not blocked when workflow runs.
       - name: Check for modified paths
         uses: dorny/paths-filter@v3
         id: filter
@@ -38,7 +40,7 @@ jobs:
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
-        if: steps.filter.outputs.rebuild_fe == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -48,8 +50,8 @@ jobs:
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}
           target: "server"
+          push: true
           tags: |
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}

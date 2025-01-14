@@ -76,9 +76,15 @@ class BackendSettings(BaseSettings):
             if env_var is not None:
                 runtime_env_vars[env_var_name] = env_var
 
-    OAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+    @computed_field
+    @property
+    def OAI_API_KEY(self) -> str:  # noqa: N802
+        return os.environ.get("OPENAI_API_KEY", "")
 
-    MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY", "")
+    @computed_field
+    @property
+    def MISTRAL_API_KEY(self) -> str:  # noqa: N802
+        return os.environ.get("MISTRAL_API_KEY", "")
 
     @computed_field
     @property

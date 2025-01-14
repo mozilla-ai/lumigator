@@ -47,7 +47,7 @@ class MistralCompletionService(CompletionService):
 
 class OpenAICompletionService(CompletionService):
     def __init__(self):
-        if settings.OPENAI_API_KEY is None:
+        if settings.OAI_API_KEY is None:
             raise Exception("OPENAI_API_KEY is not set")
         self.client = OpenAI(api_key=settings.OAI_API_KEY)
         self.model = "gpt-4o-mini"

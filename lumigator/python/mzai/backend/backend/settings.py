@@ -43,8 +43,6 @@ class BackendSettings(BaseSettings):
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
     EVALUATOR_PIP_REQS: str | None = None
-    # TODO: change once we remove old eval
-    NEW_EVALUATOR_COMMAND: str = "python evaluator/evaluator.py"
 
     @computed_field
     @property
@@ -64,6 +62,12 @@ class BackendSettings(BaseSettings):
         on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
         """
         return f"{self.LD_PRELOAD_PREFIX} {self.NEW_EVALUATOR_COMMAND}"
+
+    # TODO: the following should all be refactored to EVALUATOR_* and the above should
+    #       be removed when we deprecate evaluator
+    EVALUATOR_LITE_WORK_DIR: str | None = None
+    EVALUATOR_LITE_PIP_REQS: str | None = None
+    EVALUATOR_LITE_COMMAND: str = "python eval_lite.py"
 
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None

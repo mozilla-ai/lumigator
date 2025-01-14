@@ -19,15 +19,15 @@ class BackendSettings(BaseSettings):
 
     # AWS
     S3_ENDPOINT_URL: str | None = None
-    S3_BUCKET: str = "lumigator-storage"
+    S3_BUCKET: str  # Default is specified in .env file
     S3_URL_EXPIRATION: int = 3600  # Time in seconds for pre-signed url expiration
     S3_DATASETS_PREFIX: str = "datasets"
     S3_JOB_RESULTS_PREFIX: str = "jobs/results"
     S3_JOB_RESULTS_FILENAME: str = "{job_name}/{job_id}/results.json"
 
     # Ray
-    RAY_HEAD_NODE_HOST: str = "localhost"
-    RAY_DASHBOARD_PORT: int = 8265
+    RAY_HEAD_NODE_HOST: str  # Default is specified in .env file
+    RAY_DASHBOARD_PORT: int  # Default is specified in .env file
     RAY_SERVE_INFERENCE_PORT: int = 8000
     # the following vars will be copied, if present, from Ray head to workers
     # Secrets should be added directly to ray by setting env vars on the ray head/worker nodes

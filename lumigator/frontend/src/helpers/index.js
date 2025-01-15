@@ -34,24 +34,28 @@ export function retrieveEntrypoint(job) {
     }
     jsonObject.name = jsonObject.name.split('/')[0];
 
+    // NOTE: Normalization is required because the config templates used per-model sometimes vary,
+    // meaning that the location of the data we are trying to parse isn't always the same.
+    // See: lumigator/python/mzai/backend/backend/config_templates.py
+
     // Normalize the max_samples
-    const jobMax = jsonObject?.job?.max_samples;
-    const evalMax = jsonObject?.evaluation?.max_samples;
-    if (jobMax === undefined && evalMax !== undefined) {
-      (jsonObject.job ??= {}).max_samples = evalMax;
-    } else if (jobMax === undefined) {
+    if (jsonObject?.job?.max_samples) {
+      jsonObject.max_samples = jsonObject.job.max_samples;
+    } else if (jsonObject?.evaluation?.max_samples) {
+      jsonObject.max_samples = jsonObject.evaluation.max_samples;
+    } else {
       throw new Error("Unable to parse max_samples from entrypoint config: " + configString);
     }
 
     // Normalize the model path
     let modelPath = '';
-    if (jsonObject?.model?.path !== undefined) {
+    if (jsonObject?.model?.path) {
       modelPath = jsonObject.model.path;
-    } else if (jsonObject?.model?.inference?.engine !== undefined) {
+    } else if (jsonObject?.model?.inference?.engine) {
       modelPath = jsonObject.model.inference.engine;
-    } else if (jsonObject?.hf_pipeline?.model_uri !== undefined) {
+    } else if (jsonObject?.hf_pipeline?.model_uri) {
       modelPath = jsonObject.hf_pipeline.model_uri;
-    } else if (jsonObject?.inference_server?.engine !== undefined) {
+    } else if (jsonObject?.inference_server?.engine) {
       modelPath = jsonObject.inference_server.engine;
     } else {
       throw new Error("Unable to parse model path from entrypoint config: " + configString);

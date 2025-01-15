@@ -2,34 +2,41 @@ name: lumigator
 
 services:
 
-  localstack:
-    # if you want to enable local S3-style data persistence, use the following
-    # image and set LOCALSTACK_AUTH_TOKEN in your env
-    # image: localstack/localstack-pro:3.4.0
-    image: localstack/localstack:3.4.0
-    platform: linux/amd64
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
+    command: server /data --console-address ":9001"
     ports:
-      - 4566:4566
+      - 9000:9000
+      - 9001:9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
     environment:
-      - SERVICES=s3:4566
-      - CREATE_BUCKETS=lumigator-storage
-      - LOCALSTACK_AUTH_TOKEN
-      - PERSISTENCE=1
-      - SNAPSHOT_SAVE_STRATEGY=ON_REQUEST
-      - EXTRA_CORS_ALLOWED_ORIGINS=*
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_API_CORS_ALLOW_ORIGIN=*
     volumes:
-      - localstack-data:/var/lib/localstack
+    # - ${HOME}/minio/data:/data
+      - minio-data:/data
     profiles:
       - local
 
-  localstack-create-bucket:
-    image: localstack/localstack:3.4.0
-    platform: linux/amd64
+  minio-admin:
+    image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     depends_on:
-      localstack:
+      minio:
         condition: service_healthy
-    entrypoint: >
-       bash -c "awslocal s3 mb s3://lumigator-storage"
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+          set -ex
+          mc alias set lumigator_s3 http://minio:9000 minioadmin minioadmin
+          mc admin user add lumigator_s3 lumigator lumigator
+          mc admin policy attach lumigator_s3 readwrite --user lumigator
+          mc mb -p lumigator_s3/lumigator-storage
     extra_hosts:
       - "localhost:host-gateway"
     profiles:
@@ -87,7 +94,9 @@ services:
       target: "main_image"
     platform: linux/amd64
     depends_on:
-      localstack:
+      minio-admin:
+        condition: service_completed_successfully
+      minio:
         condition: "service_started"
         required: false
       ray:
@@ -152,5 +161,5 @@ services:
 
 volumes:
 
-    localstack-data:
+    minio-data:
     database_volume:

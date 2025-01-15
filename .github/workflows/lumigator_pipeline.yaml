@@ -42,7 +42,7 @@ jobs:
     if: ${{ needs.lint.result == 'success' }}
     strategy:
       matrix:
-        test: ["sdk", "backend" ]
+        test: ["sdk", "backend", "jobs"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,10 +78,7 @@ jobs:
         run: make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
-        run: make test-${{ matrix.test }}-integration-target
-
-      - name: Run Backend integration tests
-        run: make test-backend-integration-target
+        run: make test-${{ matrix.test }}-integration
 
       - name: Collect Ray logs in case of failure
         if: failure()

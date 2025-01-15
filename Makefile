@@ -173,8 +173,8 @@ test-jobs-inference-unit:
 	cd lumigator/python/mzai/jobs/inference; \
 	uv run --with pytest --with-requirements requirements.txt --isolated pytest
 
-test-jobs: test-jobs-evaluation-unit test-jobs-inference-unit
+test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
 
 # test everything
-test-all: test-sdk test-backend test-jobs
+test-all: test-sdk test-backend test-jobs-unit

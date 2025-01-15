@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 class JobType(str, Enum):
     INFERENCE = "inference"
     EVALUATION = "evaluate"
+    EVALUATION_LITE = "eval_lite"
 
 
 class JobStatus(str, Enum):
@@ -64,6 +65,17 @@ class JobEvalCreate(BaseModel):
     system_prompt: str | None = None
     config_template: str | None = None
     skip_inference: bool = False
+
+
+# TODO: this has to be renamed to JobEvalCreate and the code above
+#       has to be removed when we deprecate evaluator
+class JobEvalLiteCreate(BaseModel):
+    name: str
+    description: str = ""
+    model: str
+    dataset: UUID
+    max_samples: int = -1  # set to all samples by default
+    config_template: str | None = None
 
 
 class JobInferenceCreate(BaseModel):

@@ -146,11 +146,8 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
 
-      - name: Get repo version
-        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
-        run: |
-          echo "REPOVERSION=$(git describe --tags --dirty --match \"[0-9\.]*\" --always)" >> $GITHUB_ENV
-          echo "Version of the repo for this build: $REPOVERSION"
+      - name: Truncate commit SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
         if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')

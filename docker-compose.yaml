@@ -113,8 +113,8 @@ services:
       - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
+      - MISTRAL_API_KEY=$MISTRAL_API_KEY
+      - OPENAI_API_KEY=$OPENAI_API_KEY
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
       - LUMI_API_CORS_ALLOWED_ORIGINS

@@ -146,7 +146,12 @@ services:
       dockerfile: "./lumigator/frontend/Dockerfile"
       target: "server"
       args:
-       VUE_APP_BASE_URL: ${VUE_APP_BASE_URL}
+       VUE_APP_BASE_URL: http://localhost/api/v1/
+    environment:
+      LUMIGATOR_API_PORT: 8000
+      LUMIGATOR_API_HOST: backend
+    volumes:
+      - ./lumigator/frontend/nginx/:/etc/nginx/templates/
     depends_on:
       backend:
         condition: "service_started"

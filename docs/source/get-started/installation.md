@@ -11,7 +11,7 @@ Before you start, make sure you have the following:
 - A working installation of [Docker](https://docs.docker.com/engine/install/)
     - On MAC, Docker Desktop >= 4.3, and `docker-compose` >= 1.28.
     - On Linux, please also complete the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
-- The system Python; no version manager, such as `pyenv` or `uv`, should be active.
+- The system Python; no version manager, such as `uv`, should be active.
 
 ## Local Deployment
 
@@ -25,6 +25,15 @@ services networked together to make up all the components of the Lumigator appli
 ```{note}
 Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 uses SQLite for this purpose.
+```
+
+```{note}
+If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
+environment variable set locally for Lumigator pick it up at runtime, or, alternately, inject
+into the running `backend` docker container.
+
+export OPENAI_API_KEY=yourkey
+export MISTRAL_API_KEY=yourkey
 ```
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,

@@ -1,7 +1,7 @@
 # Mozilla.ai Lumigator 🐊
 
 [![Docs](https://github.com/mozilla-ai/lumigator/actions/workflows/build_and_publish_docs.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/build_and_publish_docs.yaml)
-[![Lumigator pipeline](https://github.com/mozilla-ai/lumigator/blob/main/.github/workflows/lumigator_pipeline.yaml/badge.svg?branch=main)](https://github.com/mozilla-ai/lumigator/blob/main/.github/workflows/lumigator_pipeline.yaml)
+[![Lumigator pipeline](https://github.com/mozilla-ai/lumigator/actions/workflows/lumigator_pipeline.yaml/badge.svg?branch=main)](https://github.com/mozilla-ai/lumigator/actions/workflows/lumigator_pipeline.yaml)
 
 Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
 users select the most suitable language model for their specific needs. Currently, Lumigator

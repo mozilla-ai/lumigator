@@ -39,7 +39,7 @@ export const useExperimentStore = defineStore('experiment', () => {
         };
       }
       acc[key].jobs.push(job);
-      acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model.path);
+      acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model);
       return acc;
 
     }, {})

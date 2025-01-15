@@ -106,7 +106,7 @@
             <li
               v-for="job in selectedExperiment.jobs"
               :key="job.id"
-            >· {{job.model.path }}</li>
+            >· {{job.model }}</li>
           </ul>
         </div>
       </div>

@@ -11,7 +11,7 @@
       :style="columnStyles.name"
     >
       <template #body="slotProps">
-        {{ shortenedModel(slotProps.data.model.path) }}
+        {{ shortenedModel(slotProps.data.model) }}
       </template>
     </Column>
     <Column

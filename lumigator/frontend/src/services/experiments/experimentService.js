@@ -2,7 +2,7 @@ import http from '@/services/http';
 import {
   PATH_JOBS_ROOT,
   PATH_EXPERIMENTS_EVALUATE,
-  PATH_EXPERIMENT_DETAILS,
+  PATH_JOB_DETAILS,
   PATH_EXPERIMENT_RESULTS,
   PATH_EXPERIMENT_LOGS,
 } from './api';
@@ -26,7 +26,7 @@ async function fetchJobs() {
 
 async function fetchExperimentDetails(id) {
   try {
-    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+    const response = await http.get(PATH_JOB_DETAILS(id));
     if (response?.data?.status) {
       // Ensure that we transform status at the point the API returns it.
       response.data.status = response.data.status.toUpperCase();

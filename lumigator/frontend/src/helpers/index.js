@@ -32,6 +32,8 @@ export function retrieveEntrypoint(job) {
       id: jsonObject.dataset.path.match(/datasets\/([^/]+)\/([^/]+)/)?.[1],
       name: jsonObject.dataset.path.match(/datasets\/([^/]+)\/([^/]+)/)?.[2],
     }
+    jsonObject.model = jsonObject.model.inference ?
+      jsonObject.model.inference.engine : jsonObject.model.path;
     jsonObject.name = jsonObject.name.split('/')[0];
     return jsonObject;
   } catch (error) {

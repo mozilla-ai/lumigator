@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DatasetConfig(BaseModel):
@@ -25,6 +25,4 @@ class EvalJobConfig(BaseModel):
     dataset: DatasetConfig
     model: ModelConfig
     evaluation: EvaluationConfig
-    # NOTE: Disabling prevention of extra parameters so that the config templates
-    # can be aligned for MVP.
-    # model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid")

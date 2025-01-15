@@ -203,7 +203,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
-      startPolling()
+      // startPolling()
       return;
     } else if (isPolling.value) {
       stopPolling();

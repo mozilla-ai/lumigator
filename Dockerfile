@@ -18,4 +18,4 @@ FROM base AS dev_image
 # Sync the project into a new environment, using the frozen lockfile and all dependencies
 RUN uv sync --frozen
 
-CMD ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000",  "--reload"]
+CMD ["uv","run", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]

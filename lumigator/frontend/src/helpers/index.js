@@ -40,19 +40,21 @@ export function retrieveEntrypoint(job) {
     if (jobMax === undefined && evalMax !== undefined) {
       (jsonObject.job ??= {}).max_samples = evalMax;
     } else if (jobMax === undefined) {
-      throw new Error("Unable to parse max_samples from entrypoint config: " + jsonObject);
+      throw new Error("Unable to parse max_samples from entrypoint config: " + configString);
     }
 
     // Normalize the model path
     let modelPath = '';
     if (jsonObject?.model?.path !== undefined) {
       modelPath = jsonObject.model.path;
+    } else if (jsonObject?.model?.inference?.engine !== undefined) {
+      modelPath = jsonObject.model.inference.engine;
     } else if (jsonObject?.hf_pipeline?.model_uri !== undefined) {
       modelPath = jsonObject.hf_pipeline.model_uri;
     } else if (jsonObject?.inference_server?.engine !== undefined) {
       modelPath = jsonObject.inference_server.engine;
     } else {
-      throw new Error("Unable to parse model path from entrypoint config: " + jsonObject);
+      throw new Error("Unable to parse model path from entrypoint config: " + configString);
     }
 
     (jsonObject.model ??= {}).path = modelPath;

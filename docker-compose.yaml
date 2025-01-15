@@ -109,12 +109,16 @@ services:
       - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
+      # TODO: the following two rows should be renamed to EVALUATOR_*
+      #       and the two above should be removed when we depreate evaluator
+      - EVALUATOR_LITE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator_lite/requirements.txt
+      - EVALUATOR_LITE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator_lite
       - INFERENCE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/inference/requirements.txt
       - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
+      - MISTRAL_API_KEY=$MISTRAL_API_KEY
+      - OPENAI_API_KEY=$OPENAI_API_KEY
       - RAY_WORKER_GPUS=0
       - RAY_WORKER_GPUS_FRACTION=0
       - LUMI_API_CORS_ALLOWED_ORIGINS

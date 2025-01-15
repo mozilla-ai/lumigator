@@ -33,6 +33,30 @@ export function retrieveEntrypoint(job) {
       name: jsonObject.dataset.path.match(/datasets\/([^/]+)\/([^/]+)/)?.[2],
     }
     jsonObject.name = jsonObject.name.split('/')[0];
+
+    // Normalize the max_samples
+    const jobMax = jsonObject?.job?.max_samples;
+    const evalMax = jsonObject?.evaluation?.max_samples;
+    if (jobMax === undefined && evalMax !== undefined) {
+      (jsonObject.job ??= {}).max_samples = evalMax;
+    } else if (jobMax === undefined) {
+      throw new Error("Unable to parse max_samples from entrypoint config: " + jsonObject);
+    }
+
+    // Normalize the model path
+    let modelPath = '';
+    if (jsonObject?.model?.path !== undefined) {
+      modelPath = jsonObject.model.path;
+    } else if (jsonObject?.hf_pipeline?.model_uri !== undefined) {
+      modelPath = jsonObject.hf_pipeline.model_uri;
+    } else if (jsonObject?.inference_server?.engine !== undefined) {
+      modelPath = jsonObject.inference_server.engine;
+    } else {
+      throw new Error("Unable to parse model path from entrypoint config: " + jsonObject);
+    }
+
+    (jsonObject.model ??= {}).path = modelPath;
+
     return jsonObject;
   } catch (error) {
     console.error("Failed to parse JSON in entrypoint:", error);

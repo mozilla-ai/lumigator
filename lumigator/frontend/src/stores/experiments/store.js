@@ -69,35 +69,35 @@ export const useExperimentStore = defineStore('experiment', () => {
    *
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteExperimentIds() {
-    return experiments.value
-      .filter(experiment => !completedStatus.includes(experiment.status))
-      .map(experiment => experiment.id);
+  function getIncompleteJobIds() {
+    return jobs.value
+      .filter(job => !completedStatus.includes(job.status))
+      .map(job => job.id);
   }
 
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  async function updateExperimentStatus(id) {
+  async function updateJobStatus(id) {
     try {
       const status = await experimentService.fetchJobStatus(id);
-      const experiment = experiments.value.find((experiment) => experiment.id === id);
-      if (experiment) {
-        experiment.status = status;
+      const job = jobs.value.find((job) => job.id === id);
+      if (job) {
+        job.status = status;
       }
     } catch (error) {
-      console.error(`Failed to update status for experiment ${id} ${error}`);
+      console.error(`Failed to update status for job ${id} ${error}`);
     }
   }
 
   /**
    * Updates the status for stored experiments that are not completed
    */
-  async function updateStatusForIncompleteExperiments() {
+  async function updateStatusForIncompleteJobs() {
     await Promise.all(
-      getIncompleteExperimentIds()
-        .map(id => updateExperimentStatus(id)));
+      getIncompleteJobIds()
+        .map(id => updateJobStatus(id)));
   }
 
   async function runExperiment(experimentData) {
@@ -117,11 +117,8 @@ export const useExperimentStore = defineStore('experiment', () => {
     return results;
   }
 
-  async function loadDetails(id) {
-    const details = await experimentService.fetchExperimentDetails(id);
-    selectedExperiment.value = parseJobDetails(details);
-    experimentLogs.value = [];
-    retrieveLogs();
+  function loadDetails(id) {
+    selectedExperiment.value = experiments.value.find(experiment => experiment.id === id);
   }
 
   async function loadResultsFile(experiment_id) {
@@ -217,7 +214,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments,
     jobs,
     loadExperiments,
-    updateStatusForIncompleteExperiments,
+    updateStatusForIncompleteJobs,
     loadDetails,
     loadResults,
     loadResultsFile,

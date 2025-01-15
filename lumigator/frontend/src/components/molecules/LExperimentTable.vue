@@ -9,7 +9,7 @@
         v-model:selection="focusedItem"
         v-model:expandedRows="expandedRows"
         selectionMode="single"
-        dataKey="id"
+        data-key="id"
         :value="tableData"
         :tableStyle="style"
         columnResizeMode="expand"
@@ -18,6 +18,7 @@
         scrollable
         scrollHeight="80vh"
         :pt="{table:'table-root'}"
+        @row-click="handleRowClick"
         @row-unselect="showSlidingPanel = false"
       >
         <Column
@@ -43,7 +44,6 @@
           field="status"
           header="status"
         >
-
           <template #body="slotProps">
             <div>
               <Tag
@@ -61,6 +61,13 @@
                 :pt="{root:'l-experiment-table__tag'}"
               />
               <Tag
+                v-else-if="retrieveStatus(slotProps.data.id) === 'INCOMPLETE' "
+                severity="info"
+                rounded
+                :value="retrieveStatus(slotProps.data.id)"
+                :pt="{root:'l-experiment-table__tag'}"
+              />
+              <Tag
                 v-else
                 severity="warn"
                 rounded
@@ -70,7 +77,10 @@
             </div>
           </template>
         </Column>
-        <Column header="options">
+        <Column
+          v-if="!showSlidingPanel"
+          header="options"
+        >
           <template #body>
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
@@ -111,29 +121,53 @@ const props = defineProps({
 });
 const emit = defineEmits(['l-experiment-selected'])
 
-
 const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
 const { experiments } = storeToRefs(experimentStore);
 const tableVisible = ref(true);
 const focusedItem = ref();
-const expandedRows = ref({});
+const expandedRows = ref([]);
+
+function handleRowClick(event) {
+  if (event.originalEvent.target.closest("svg.p-icon.p-datatable-row-toggle-icon")) {
+    // preventing experiment selection
+    return
+  }
+  emit('l-experiment-selected', event.data)
+}
 
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'table-layout: fixed; width: 100%;' : 'min-width: min(80vw, 1200px)'
+    'width: 100%;' : 'min-width: min(80vw, 1200px)'
 })
 
 const columnStyles = {
   expander: "width: 4rem",
-  name: "width: 24rem",
+  name: showSlidingPanel.value ? "width: 18rem" :"width: 24rem",
   created: "width: 12rem",
 }
 
-function retrieveStatus(jobID) {
-  const job = experiments.value.find(job => job.id === jobID);
-  return job ? job.status : null;
+function retrieveStatus(experimentId) {
+  const experiment = experiments.value.find(exp => exp.id === experimentId);
+  if (!experiment) {
+    return null;
+  }
+
+  const jobStatuses = experiment.jobs.map(job => job.status);
+  if (jobStatuses.includes('RUNNING')) {
+    experiment.status = 'RUNNING'
+    return 'RUNNING';
+  }
+  const uniqueStatuses = new Set(jobStatuses);
+  if (uniqueStatuses.size === 1) {
+    experiment.status = [...uniqueStatuses][0];
+    return [...uniqueStatuses][0];
+  }
+  if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
+    experiment.status = 'INCOMPLETE'
+    return 'INCOMPLETE';
+  }
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
@@ -141,7 +175,7 @@ async function throttledUpdateAllJobs() {
   if (isThrottled.value) { return }; // Skip if throttle is active
 
   isThrottled.value = true;
-  await experimentStore.updateStatusForIncompleteExperiments();
+  await experimentStore.updateStatusForIncompleteJobs();
   setTimeout(() => {
     isThrottled.value = false; // Release throttle after delay
   }, 5000); // 5 seconds throttle
@@ -151,7 +185,7 @@ async function throttledUpdateAllJobs() {
 // updates the status of each experiment
 let pollingId;
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteExperiments();
+  await experimentStore.updateStatusForIncompleteJobs();
   pollingId = setInterval(async () => {
     await throttledUpdateAllJobs();
   }, 1000)}
@@ -162,15 +196,11 @@ onUnmounted(() => {
 });
 
 watch(showSlidingPanel, (newValue) => {
-  tableVisible.value = false;
   focusedItem.value = newValue ? focusedItem.value : null;
-  setTimeout(() => {
-    tableVisible.value = true;
-  }, 100);
 });
 
 watch(() => props.tableData.length, async () => {
-  await experimentStore.updateStatusForIncompleteExperiments();
+  await experimentStore.updateStatusForIncompleteJobs();
 });
 </script>
 
@@ -182,7 +212,7 @@ watch(() => props.tableData.length, async () => {
     place-content: center;
 
     &__options-trigger {
-		padding: 0;
+		padding-left: $l-spacing-1;
 		margin-left: 10% !important;
 	}
 

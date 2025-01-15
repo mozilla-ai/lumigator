@@ -15,6 +15,18 @@
       />
     </div>
     <div class="l-experiment-details__content">
+      <div class="l-experiment-details__content-item">
+        <div class="l-experiment-details__content-label">Title</div>
+        <div class="l-experiment-details__content-field">
+          {{ selectedExperiment.name }}
+        </div>
+      </div>
+      <div class="l-experiment-details__content-item">
+        <div class="l-experiment-details__content-label">description</div>
+        <div class="l-experiment-details__content-field">
+          {{ selectedExperiment.description }}
+        </div>
+      </div>
       <div class="l-experiment-details__content-item row">
         <div class="l-experiment-details__content-label">status</div>
         <div class="l-experiment-details__content-field">
@@ -28,6 +40,13 @@
           <Tag
             v-else-if="selectedExperiment.status === 'FAILED' "
             severity="danger"
+            rounded
+            :value="selectedExperiment.status"
+            :pt="{root:'l-experiment-details__tag'}"
+          />
+          <Tag
+            v-else-if="selectedExperiment.status === 'INCOMPLETE' "
+            severity="info"
             rounded
             :value="selectedExperiment.status"
             :pt="{root:'l-experiment-details__tag'}"
@@ -51,9 +70,9 @@
             iconClass="logs-btn"
             @click="emit('l-show-logs')"
           />
-        </div>
+        </div> -->
       </div>
-      <div
+      <!-- <div
         class="l-experiment-details__content-item"
         @click="copyToClipboard(selectedExperiment.id)"
       >
@@ -69,7 +88,7 @@
             style="font-size: 14px;padding-left: 3px;"
           />
         </div>
-      </div>
+      </div> -->
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
@@ -81,8 +100,21 @@
         <div class="l-experiment-details__content-field">{{ selectedExperiment.useCase }}</div>
       </div>
       <div class="l-experiment-details__content-item">
+        <div class="l-experiment-details__content-label">Evaluated Models</div>
+        <div class="l-experiment-details__content-field">
+          <ul>
+            <li
+              v-for="job in selectedExperiment.jobs"
+              :key="job.id"
+            >· {{job.model.path }}</li>
+          </ul>
+        </div>
+      </div>
+      <div v-if="selectedExperiment.jobs?.length===0"
+           class="l-experiment-details__content-item"
+      >
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ selectedExperiment.model.path }}</div>
+        <!-- <div class="l-experiment-details__content-field">{{ selectedExperiment.model.path }}</div> -->
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
@@ -97,7 +129,7 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedExperiment.evaluation.max_samples }}
+          {{ selectedExperiment.jobs[0].evaluation.max_samples }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -105,7 +137,7 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
-    <div class="l-experiment-details__actions">
+    <!-- <div class="l-experiment-details__actions">
       <Button
         rounded
         severity="secondary"
@@ -124,7 +156,7 @@
         :disabled="selectedExperiment.status !== 'SUCCEEDED'"
         @click="emit('l-dnld-results', selectedExperiment)"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -143,9 +175,10 @@ const { selectedExperiment, experiments } = storeToRefs(experimentStore);
 const isCopied = ref(false);
 
 const experimentStatus = computed(() => {
-  const selected = experiments.value
-    .filter((job) => job.id === selectedExperiment.value.id)[0]
-  return selected ? selected.status : selectedExperiment.value.status;
+  // const selected = experiments.value
+  //   .filter((job) => job.id === selectedExperiment.value.id)[0]
+  // return selected ? selected.status : selectedExperiment.value.status;
+  return selectedExperiment.value.status;
 })
 
 const copyToClipboard = async (longString) => {
@@ -156,13 +189,13 @@ const copyToClipboard = async (longString) => {
   await navigator.clipboard.writeText(longString);
 };
 
-watch(experimentStatus, (newStatus) => {
-  selectedExperiment.value.status = newStatus;
-  if (selectedExperiment.value.end_time) {
-    selectedExperiment.value.runTime =
-      calculateDuration(selectedExperiment.value.start_time, selectedExperiment.value.end_time);
-    }
-});
+// watch(experimentStatus, (newStatus) => {
+//   selectedExperiment.value.status = newStatus;
+//   if (selectedExperiment.value.end_time) {
+//     selectedExperiment.value.runTime =
+//       calculateDuration(selectedExperiment.value.start_time, selectedExperiment.value.end_time);
+//     }
+// });
 </script>
 
 <style lang="scss">
@@ -226,6 +259,11 @@ watch(experimentStatus, (newStatus) => {
       display: flex;
       gap: 9px;
     }
+    li {
+      color: $white;
+      font-weight: $l-font-weight-semibold;
+      // margin-bottom: $l-spacing-1 / 2;
+    }
   }
 
   &__content-item {
@@ -233,7 +271,7 @@ watch(experimentStatus, (newStatus) => {
 
     .p-tag-label {
       font-size: $l-font-size-sm;
-     color: $l-grey-100;
+      color: $l-grey-100;
       line-height: 1;
       font-weight: $l-font-weight-normal;
     }

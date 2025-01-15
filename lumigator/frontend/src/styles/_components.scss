@@ -3,6 +3,10 @@
 // this file overrides some of the default styles from primevue
 // so the use of !important may be necessary
 
+  :root {
+    --l-tag-info-background: #874B0A!important;
+  }
+
 // Menu Styling
 .p-menu {
   background-color: $l-menu-bg!important;
@@ -92,8 +96,6 @@
     }
 
 }
-
-    .p-datatable
 
 
 // Class for Datatable with visible lines and hover effect disabled

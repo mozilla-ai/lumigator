@@ -3,8 +3,8 @@
     :value="tableData"
     dataKey="id"
     :showHeaders="false"
-    tableStyle="table-layout: fixed; width: 100%;"
-    :pt="{root:'l-job-table'}"
+    :tableStyle="columnStyles"
+    :pt="{root:'l-job-table', tableContainer:'width-100'}"
   >
     <Column  :style="columnStyles.expander"></Column>
     <Column
@@ -68,7 +68,7 @@ import { useExperimentStore } from "@/stores/experiments/store.js";
 
 const experimentStore = useExperimentStore();
 const { jobs } = storeToRefs(experimentStore);
-const props = defineProps({
+defineProps({
   tableData: {
     type: Array,
     required: true,
@@ -96,8 +96,10 @@ function retrieveStatus(jobID) {
     display: flex;
     place-content: center;
 
-    .p-datatable-table-container [class*=p-row-] {
-      background-color: $l-main-bg;
+    .p-datatable-table-container {
+      [class*=p-row-] {
+        background-color: $l-main-bg;
+      }
     }
 
   &__tag {

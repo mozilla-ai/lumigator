@@ -31,7 +31,7 @@
     <Teleport to=".sliding-panel">
       <transition name="transition-fade">
         <l-experiment-form
-          v-if="showSlidingPanel && selectedExperiment === null"
+          v-if="isFormVisible"
           @l-close-form="onDismissForm"
         />
       </transition>
@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -96,6 +96,8 @@ const experimentsDrawer = ref(null);
 const showLogs = ref(null);
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
+
+const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
 
 const getDrawerHeader = () => {
   return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
@@ -147,8 +149,10 @@ onMounted(async () => {
   }
 })
 
-watch(showSlidingPanel, () => {
-  selectedExperiment.value = null;
+watch(showSlidingPanel, (newValue) => {
+  if (!newValue) {
+    selectedExperiment.value = null;
+  }
 });
 </script>
 

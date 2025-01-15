@@ -85,7 +85,6 @@ services:
       context: .
       dockerfile: "Dockerfile"
       target: "main_image"
-    platform: linux/amd64
     depends_on:
       localstack:
         condition: "service_started"

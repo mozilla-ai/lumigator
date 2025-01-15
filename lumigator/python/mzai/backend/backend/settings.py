@@ -43,8 +43,6 @@ class BackendSettings(BaseSettings):
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
     EVALUATOR_PIP_REQS: str | None = None
-    # TODO: change once we remove old eval
-    NEW_EVALUATOR_COMMAND: str = "python evaluator/evaluator.py"
 
     @computed_field
     @property
@@ -65,6 +63,12 @@ class BackendSettings(BaseSettings):
         """
         return f"{self.LD_PRELOAD_PREFIX} {self.NEW_EVALUATOR_COMMAND}"
 
+    # TODO: the following should all be refactored to EVALUATOR_* and the above should
+    #       be removed when we deprecate evaluator
+    EVALUATOR_LITE_WORK_DIR: str | None = None
+    EVALUATOR_LITE_PIP_REQS: str | None = None
+    EVALUATOR_LITE_COMMAND: str = "python eval_lite.py"
+
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None
     INFERENCE_PIP_REQS: str | None = None
@@ -76,9 +80,15 @@ class BackendSettings(BaseSettings):
             if env_var is not None:
                 runtime_env_vars[env_var_name] = env_var
 
-    OAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+    @computed_field
+    @property
+    def OAI_API_KEY(self) -> str:  # noqa: N802
+        return os.environ.get("OPENAI_API_KEY", "")
 
-    MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY", "")
+    @computed_field
+    @property
+    def MISTRAL_API_KEY(self) -> str:  # noqa: N802
+        return os.environ.get("MISTRAL_API_KEY", "")
 
     @computed_field
     @property

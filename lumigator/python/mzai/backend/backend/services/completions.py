@@ -17,13 +17,14 @@ class CompletionService(ABC):
 
 class MistralCompletionService(CompletionService):
     def __init__(self):
+        if settings.MISTRAL_API_KEY is None:
+            raise Exception("MISTRAL_API_KEY is not set")
         self.client = MistralClient(api_key=settings.MISTRAL_API_KEY)
         self.model = "open-mistral-7b"
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
-        self.prompt = """You are a helpful assistant, expert in text summarization.
-        For every prompt you receive, provide a summary of its contents in at most two sentences."""
+        self.prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
     def get_models(self) -> mistralai.client.ModelList:
         response = self.client.list_models()
@@ -46,13 +47,19 @@ class MistralCompletionService(CompletionService):
 
 class OpenAICompletionService(CompletionService):
     def __init__(self):
+        if settings.OAI_API_KEY is None:
+            raise Exception("OPENAI_API_KEY is not set")
         self.client = OpenAI(api_key=settings.OAI_API_KEY)
         self.model = "gpt-4o-mini"
         self.max_tokens = 256
         self.temperature = 1
         self.top_p = 1
+        self.prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
-    def get_models(self) -> mistralai.client.ModelList:
+    def get_models(self):
+        """Response is stdout write
+        See OpenAI Client src/openai/cli/_utils.py#L35
+        """
         response = self.client.list_models()
 
         return response

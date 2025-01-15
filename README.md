@@ -1,8 +1,7 @@
 # Mozilla.ai Lumigator 🐊
 
+[![Lumigator pipeline](https://github.com/mozilla-ai/lumigator/actions/workflows/lumigator_pipeline.yaml/badge.svg?branch=main)](https://github.com/mozilla-ai/lumigator/actions/workflows/lumigator_pipeline.yaml)
 [![Docs](https://github.com/mozilla-ai/lumigator/actions/workflows/build_and_publish_docs.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/build_and_publish_docs.yaml)
-[![Lumigator Backend tests](https://github.com/mozilla-ai/lumigator/actions/workflows/test_backend_uv.yaml/badge.svg)](https://github.com/mozilla-ai/lumigator/actions/workflows/test_backend_uv.yaml)
-[![Lumigator SDK tests](https://github.com/mozilla-ai/lumigator/actions/workflows/test_sdk_uv.yaml/badge.svg?branch=main)](https://github.com/mozilla-ai/lumigator/actions/workflows/test_sdk_uv.yaml)
 
 Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
 users select the most suitable language model for their specific needs. Currently, Lumigator
@@ -47,7 +46,7 @@ need to have the following prerequisites installed on your machine:
     - On a Mac, you need Docker Desktop `4.3` or later and docker-compose `1.28` or later.
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
-- The system Python; no version manager, such as pyenv, should be active.
+- The system Python; no version manager, such as uv, should be active.
 
 You can run and develop Lumigator locally using Docker Compose. This creates three container
 services networked together to make up all the components of the Lumigator application:
@@ -59,6 +58,11 @@ services networked together to make up all the components of the Lumigator appli
 > [!NOTE]
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 > uses SQLite for this purpose.
+>
+> [!NOTE]
+> If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
+> environment variable [set locally](https://github.com/mozilla-ai/lumigator/blob/main/.env.example) for Lumigator pick it up at runtime, or, alternately, inject
+> into the running `backend` docker container.
 
 To start Lumigator locally, follow these steps:
 

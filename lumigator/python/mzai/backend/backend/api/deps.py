@@ -85,5 +85,5 @@ def get_openai_completion_service() -> OpenAICompletionService:
 
 
 OpenAICompletionServiceDep = Annotated[
-    OpenAICompletionService, Depends(get_mistral_completion_service)
+    OpenAICompletionService, Depends(get_openai_completion_service)
 ]

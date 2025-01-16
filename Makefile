@@ -104,10 +104,10 @@ clean-docker-buildcache:
 	docker builder prune --all -f
 
 clean-docker-containers:
-	docker rm -vf $$(docker container ls -aq)
+	docker container ls -aq | xargs -n1 docker rm -vf
 
 clean-docker-images:
-	docker rmi -f $$(docker image ls -aq)
+	docker image ls -aq | xargs -n1 docker rmi -f
 
 clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-images
 

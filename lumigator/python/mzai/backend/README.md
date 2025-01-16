@@ -18,6 +18,10 @@ uv sync --dev && \
 source .venv/bin/activate
 ```
 
+## Make usage
+
+The available Makefile will copy a `.env` file from the existing `.env.template` file. There are some targets to start the docker composition (`local-up`, `start-lumigator`, `start-lumigator-build`), to stop it (`local-down`) and to run tests (`test-backend`, `test-sdk`, `test-all`).
+
 ## Test instructions
 
 The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray instance in the same network where the application and tests are running, and test LocalStack containers also in the same configuration).

@@ -92,7 +92,6 @@ services:
       context: .
       dockerfile: "Dockerfile"
       target: "main_image"
-    platform: linux/amd64
     depends_on:
       minio-admin:
         condition: service_completed_successfully

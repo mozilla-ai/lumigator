@@ -7,7 +7,6 @@ services:
     # image and set LOCALSTACK_AUTH_TOKEN in your env
     # image: localstack/localstack-pro:3.4.0
     image: localstack/localstack:3.4.0
-    platform: linux/amd64
     ports:
       - 4566:4566
     environment:
@@ -24,7 +23,6 @@ services:
 
   localstack-create-bucket:
     image: localstack/localstack:3.4.0
-    platform: linux/amd64
     depends_on:
       localstack:
         condition: service_healthy
@@ -130,7 +128,7 @@ services:
       - "localhost:host-gateway"
 
   frontend:
-    image: mzdotai/lumigator-frontend:latest
+    image: mzdotai/lumigator-frontend:frontend_cdeec75
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"

@@ -111,9 +111,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
 
     # We keep any columns that were already there (not just the original input
     # samples, but also past predictions under another column name)
-    for k in dataset.column_names:
-        logger.info(f"Keeping original dataset's {k}")
-        output[k] = dataset[k]
+    output.update(dataset.to_dict())
 
     # We are trusting the user: if the dataset already had a column with the output_field
     # they selected, we overwrite it with the values from our inference.

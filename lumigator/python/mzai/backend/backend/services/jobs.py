@@ -201,6 +201,9 @@ class JobService:
             name=request.name, description=request.description, experiment_id=experiment_id
         )
 
+        if isinstance(request, JobInferenceCreate) and not request.output_field:
+            request.output_field = "predictions"
+
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
         config_params = self._get_job_params(job_type, record, request)
@@ -328,5 +331,4 @@ class JobService:
             },
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
-
         return JobResultDownloadResponse(id=job_id, download_url=download_url)

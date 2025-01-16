@@ -9,7 +9,12 @@ from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import JobLogsResponse, JobResponse, JobStatus
+from lumigator_schemas.jobs import (
+    JobLogsResponse,
+    JobResponse,
+    JobResultDownloadResponse,
+    JobStatus,
+)
 
 from backend.main import app
 from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_INFER_MODEL
@@ -78,7 +83,7 @@ def test_upload_data_launch_job(
     assert succeeded
 
     logs_evaluation_job_response = local_client.get(
-        f"/health/jobs/{create_evaluation_job_response_model.id}/logs"
+        f"/jobs/{create_evaluation_job_response_model.id}/logs"
     )
     logs_evaluation_job_response_model = JobLogsResponse.model_validate(
         logs_evaluation_job_response.json()
@@ -108,7 +113,7 @@ def test_upload_data_launch_job(
         assert get_job_response.status_code == 200
         get_job_response_model = JobResponse.model_validate(get_job_response.json())
         logs_infer_job_response = local_client.get(
-            f"/health/jobs/{create_inference_job_response_model.id}/logs"
+            f"/jobs/{create_inference_job_response_model.id}/logs"
         )
         logs_infer_job_response_model = JobLogsResponse.model_validate(
             logs_infer_job_response.json()
@@ -123,11 +128,87 @@ def test_upload_data_launch_job(
     assert succeeded
 
     logs_infer_job_response = local_client.get(
-        f"/health/jobs/{create_inference_job_response_model.id}/logs"
+        f"/jobs/{create_inference_job_response_model.id}/logs"
     )
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
+
+
+def test_upload_data_no_gt_launch_annotation(
+    local_client: TestClient,
+    dialog_no_gt_dataset,
+    simple_eval_template,
+    simple_infer_template,
+    dependency_overrides_services,
+):
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_no_gt_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
+
+    assert create_response.status_code == 201
+
+    created_dataset = DatasetResponse.model_validate(create_response.json())
+
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+    }
+
+    annotation_payload = {
+        "name": "test_annotate",
+        "description": "Test run for Huggingface model",
+        "dataset": str(created_dataset.id),
+        "max_samples": 2,
+        "task": "summarization",
+    }
+    create_annotation_job_response = local_client.post(
+        "/jobs/annotate/", headers=headers, json=annotation_payload
+    )
+    assert create_annotation_job_response.status_code == 201
+
+    create_annotation_job_response_model = JobResponse.model_validate(
+        create_annotation_job_response.json()
+    )
+
+    succeeded = False
+    for _ in range(1, 200):
+        get_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}")
+        assert get_job_response.status_code == 200
+        get_job_response_model = JobResponse.model_validate(get_job_response.json())
+        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            break
+        if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            break
+        time.sleep(10)
+    assert succeeded
+
+    logs_annotation_job_response = local_client.get(
+        f"/jobs/{create_annotation_job_response_model.id}/logs"
+    )
+    logger.info(logs_annotation_job_response)
+    logs_annotation_job_response_model = JobLogsResponse.model_validate(
+        logs_annotation_job_response.json()
+    )
+    logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
+    logger.info(f"#{logs_annotation_job_response_model.logs}#")
+
+    logs_annotation_job_results = local_client.get(
+        f"/jobs/{create_annotation_job_response_model.id}/result/download"
+    )
+    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(
+        logs_annotation_job_results.json()
+    )
+    logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
+    logs_annotation_job_results_url = requests.get(logs_annotation_job_results_model.download_url)
+    logs_annotation_job_results_json = logs_annotation_job_results_url.json()
+    assert "predictions" not in logs_annotation_job_results_json.keys()
+    assert "ground_truth" in logs_annotation_job_results_json.keys()
+    logger.info(f"Created results: {logs_annotation_job_results_json}")
 
 
 def test_full_experiment_launch(

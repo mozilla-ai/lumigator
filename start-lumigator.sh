@@ -3,7 +3,6 @@
 # This script supports the initial setup of Lumigator for developing and using all functionalities locally.
 # It requires Docker and Docker Compose to run. If they are not present on your machine, the script will install and activate them for you.
 # If the local option (`-l`) is selected, Lumigator code is expected to be located in the current folder or in the provided folder.
-# If the installation method (`-m`) is selected, it will install Lumigator using Git or a Zip file, depending on the case, and will place the files in selected_folder/lumigator.
 
 # Help
 show_help() {
@@ -11,43 +10,13 @@ show_help() {
     echo "Starts Lumigator by checking your setup or installing it."
     echo ""
     echo "Options:"
-    echo "  -d, --directory DIR   Specify root directory (default: current directory)"
-    echo "  -m, --method METHOD   Download method: 'git' or 'zip' (default: zip)"
+    echo "  -d, --directory DIR   Specify the directory for installing the code (default: inside current directory)"
     echo "  -o, --overwrite       Overwrite existing directory (lumigator)"
-    echo "  -l, --local           Use local files in the same directory as the script (execute everything from the current directory without downloading anything)"
     echo "  -h, --help            Display this help message"
     exit 0
 }
 
-# Install Git on Linux
-install_git_linux() {
-    if ! command -v git &> /dev/null
-    then
-        echo "Git not found. Installing Git..."
-        sudo apt-get update
-        sudo apt-get install -y git
-        echo "Git installed successfully."
-    else
-        echo "Git is already installed."
-    fi
-}
 
-# Install Git on macOS
-install_git_macos() {
-    if ! command -v git &> /dev/null
-    then
-        echo "Git not found. Installing Git..."
-        # Check if Homebrew is installed
-        if ! command -v brew &> /dev/null
-        then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-        brew install git
-        echo "Git installed successfully."
-    else
-        echo "Git is already installed."
-    fi
-}
 
 # Install Docker on Linux
 install_docker_linux() {
@@ -67,17 +36,29 @@ install_docker_linux() {
     fi
 }
 
+
+# Install Brew in OSX
+install_brew_macos() {
+    if [ -x "$BREW_PATH" ]; 
+    then
+        echo "Brew is already installed"
+    else
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        eval "$($BREW_PATH/brew shellenv)"     
+    fi
+}
+
+
 # Install Docker on macOS
 install_docker_macos() {
     if ! command -v docker &> /dev/null
     then
         echo "Docker not found. Installing Docker..."
+        echo "!!! Docker has some issues running on Mac OS with the latest version and it needs some workaournd to fix the issue. Please check docker website and install manually"
+        exit
+
         # Check if Homebrew is installed
-        if ! command -v brew &> /dev/null
-        then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
-        brew install --cask docker
+        $BREW_PATH/brew install --cask docker
         open -a Docker
         echo "Docker installed. Please complete the installation in the Docker Desktop app."
     else
@@ -85,9 +66,10 @@ install_docker_macos() {
     fi
 }
 
+
 # Install Docker Compose
 install_docker_compose() {
-    if ! command -v docker-compose &> /dev/null
+    if ! command -v "$BREW_PATH/docker-compose" &> /dev/null
     then
         echo "Docker Compose not found. Installing Docker Compose..."
         case "$OSTYPE" in
@@ -96,7 +78,7 @@ install_docker_compose() {
                 sudo chmod +x /usr/local/bin/docker-compose
                 ;;
             darwin*)
-                brew install docker-compose
+                "$BREW_PATH/brew" install docker-compose
                 ;;
             *)
                 echo "Unsupported OS for Docker Compose installation"
@@ -123,14 +105,7 @@ detect_os() {
     echo "Operating System detected: $OS"
 }
 
-# Check Git is installed
-check_git() {
-    if ! command -v git &> /dev/null
-    then
-        echo "Git not found. Please install Git and try again."
-        exit 1
-    fi
-}
+
 
 # Check if Docker is running
 check_docker_running() {
@@ -143,20 +118,21 @@ check_docker_running() {
 
 
 # Default values
-download_method="git"
-root_dir="$PWD"
-overwrite=false
-local_option=false
-repo_name="lumigator"
-repo_url="https://github.com/mozilla-ai/lumigator"
-target_dir=""
+ROOT_DIR="$PWD"
+OVERWRITE=false
+REPO_NAME="lumigator"
+FOLDER_NAME="lumigator_code"
+REPO_URL="https://github.com/mozilla-ai/lumigator"
+TARGET_DIR=""
+BREW_PATH="/opt/homebrew/bin/"
+LUMIGATOR_URL="http://localhost:80"
 
 
 # Command line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -d|--directory)
-            root_dir="$2"
+            ROOT_DIR="$2"
             shift ;;
         -m|--method)
             if [[ "$2" != "git" && "$2" != "zip" ]]; then
@@ -165,10 +141,12 @@ while [[ "$#" -gt 0 ]]; do
             fi
             download_method="$2";
             shift ;;
-        -o|--overwrite) overwrite=true ;;
+        -o|--overwrite) OVERWRITE=true ;;
         -l|--local) local_option=true ;;
         -h|--help) show_help ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+        *) echo "!!!! Unknown parameter passed: $1 Please check the help command"; 
+        show_help
+        exit 1 ;;
     esac
     shift
 done
@@ -177,46 +155,41 @@ done
 # Download and install function
 install_project() {
 
-    target_dir="$root_dir/$repo_name"
+    TARGET_DIR="$ROOT_DIR/$FOLDER_NAME"
     # Check if directory exists and handle overwrite
-    if [ -d "$target_dir" ]; then
-        if [ "$overwrite" = true ]; then
+    if [ -d "$TARGET_DIR" ]; then
+        if [ "$OVERWRITE" = true ]; then
             echo "Overwriting existing directory..."
-            echo "Deleting $target_dir"
-            rm -rf "$target_dir"
-            mkdir -p "$target_dir"
+            echo "Deleting $TARGET_DIR"
+            rm -rf "$TARGET_DIR"
+            mkdir -p "$TARGET_DIR"
 
         else
-            echo "Directory $target_dir already exists. Use -o to overwrite."
+            echo "Directory $TARGET_DIR already exists. Use -o to overwrite."
             exit 1
         fi
     else
         # Installation directory created, didn't exist
-        mkdir -p "$target_dir"
+        mkdir -p "$TARGET_DIR"
     fi
 
     # Download based on method
-    if [ "$download_method" == "git" ]; then
-        echo "Cloning repository using Git..."
-        cd "$target_dir" || exit 1
-        git clone "${repo_url}.git" "$target_dir"
-    elif [ "$download_method" == "zip" ]; then
+ 
         echo "Downloading ZIP file..."
-        curl -L "${repo_url}/archive/main.zip" -o lumigator.zip
+        curl -L "${REPO_URL}/archive/main.zip" -o lumigator.zip
         unzip lumigator.zip > /dev/null
-        echo "Moving extracted contents to $target_dir"
-        mv lumigator-main/* "$target_dir"
-        mv lumigator-main/.* "$target_dir" 2>/dev/null || true
+        echo "Moving extracted contents to $TARGET_DIR"
+        mv lumigator-main/* "$TARGET_DIR"
+        mv lumigator-main/.* "$TARGET_DIR" 2>/dev/null || true
         rmdir lumigator-main
         rm lumigator.zip
-    fi
 }
 
 # Main execution
 main() {
-    echo "          *****************************************************************************************"
-    echo "          *************************** STARTING LUMIGATOR BY MOZILLA.AI ****************************"
-    echo "          *****************************************************************************************"
+    echo "*****************************************************************************************"
+    echo "*************************** STARTING LUMIGATOR BY MOZILLA.AI ****************************"
+    echo "*****************************************************************************************"
 
     # Detect OS and install base software
     detect_os
@@ -224,11 +197,10 @@ main() {
     case "$OS" in
         linux)
             install_docker_linux
-            install_git_linux
             ;;
         macos)
+            install_brew_macos
             install_docker_macos
-            install_git_macos
             ;;
     esac
     # Check if Docker is running
@@ -237,19 +209,14 @@ main() {
     # Install additional dependencies
     install_docker_compose
 
-    # Verify Git is installed
-    check_git
 
-    if [ "$local_option" = false ]; then
-        # Install the project
         install_project
-    else
-        target_dir="$root_dir"
-        echo "Using local files..."
-    fi
 
 
-    cd $target_dir || error 1
+
+    cd $TARGET_DIR || error 1
+
+
 
     # Start the Lumigator service
     if [ -f "Makefile" ]; then
@@ -258,16 +225,17 @@ main() {
             exit 1        
         }
     else
-        echo "Makefile to build and start $repo_name not found"
+        echo "Makefile to build and start $REPO_NAME not found"
         exit 1
     fi
 
     # Open the browser
     case "$OSTYPE" in
-        linux-gnu*) xdg-open http://localhost:80 ;;
-        darwin*)    open http://localhost:80 ;;
-        *)          echo "Browser launch not supported for this OS" ;;
+        linux-gnu*) xdg-open $LUMIGATOR_URL ;;
+        darwin*)    open $LUMIGATOR_URL ;;
+        *)          echo "Browser launch not supported for this OS. Type $LUMIGATOR_URL in your browser" ;;
     esac
+    echo "To close $REPO_NAME, close $LUMIGATOR_URL in your browsers and type make stop-lumigator in your console inside the $TARGET_DIR folder"
 }
 
 # Run the main function

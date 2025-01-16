@@ -133,11 +133,13 @@ const style = computed(() => {
     'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
 })
 
-const columnStyles = {
-  expander: "width: 4rem",
-  name: showSlidingPanel.value ? "width: 18rem" :"width: 24rem",
-  created: "width: 12rem",
-}
+const columnStyles = computed(() => {
+  return {
+    expander: 'width: 4rem',
+    name: showSlidingPanel.value ?'width: 20rem' : 'width: 26rem',
+    created: 'width: 12rem',
+  }
+})
 
 function handleRowClick(event) {
   if (event.originalEvent.target.closest("svg.p-icon.p-datatable-row-toggle-icon")) {

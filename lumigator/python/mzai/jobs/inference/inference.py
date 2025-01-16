@@ -119,7 +119,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
     # they selected, we overwrite it with the values from our inference.
 
     if config.job.output_field in dataset.column_names:
-        logger.info(f"Overwriting {config.job.output_field}")
+        logger.warning(f"Overwriting {config.job.output_field}")
 
     output[config.job.output_field] = predict(dataset_iterable, model_client)
     output["model"] = output_model_name

@@ -291,11 +291,11 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request: BaseModel) -> str:
+    def _set_model_type(self, request) -> str:
         """Sets model URL based on protocol address"""
-        if request.model.startswith("oai://"):
+        if request.model_url.startswith("oai://"):
             model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
+        elif request.model_url.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
         else:
             model_url = request.model_url

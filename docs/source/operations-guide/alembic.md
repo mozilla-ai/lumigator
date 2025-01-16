@@ -14,6 +14,15 @@ Alembic creates an additional table (`alembic_version`) in the database which it
 matching revision ID.
 ```
 
+## Running commands
+
+Please run `alembic` commands in this document within the backend (`lumigator/python/mzai/backend`) folder, using `uv`. For example, where the Lumigator repository is cloned to your `$HOME` directory:
+
+```console
+user@host:~/$ cd lumigator/lumigator/python/mzai/backend
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic --version
+```
+
 ## Data model changes
 
 When code changes are made to the data models, or when new models are added, a manual step is
@@ -46,7 +55,7 @@ user@host:~/lumigator/lumigator/python/mzai/backend$ export SQLALCHEMY_DATABASE_
 or
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ SQLALCHEMY_DATABASE_URL=sqlite:///local.db alembic history
+user@host:~/lumigator/lumigator/python/mzai/backend$ SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run alembic history
 ```
 
 The rest of the document assumes `SQLALCHEMY_DATABASE_URL` is exported. If `SQLALCHEMY_DATABASE_URL`
@@ -75,7 +84,7 @@ manage going forward.
 If you believe your database already matches the most up-to-date models:
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ alembic stamp head
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic stamp head
 ```
 
 ## My database is in a different state (from a prior release)
@@ -94,7 +103,7 @@ To align your database with a specific revision (migration ID `e75fa022c781` ali
 state of our database):
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ alembic stamp e75fa022c781
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic stamp e75fa022c781
 ```
 
 ## Other Alembic commands
@@ -106,13 +115,13 @@ downgrading the database.
 - Viewing migration history
 
     ```console
-    user@host:~/lumigator/lumigator/python/mzai/backend$ alembic history
+    user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic history
     ```
 
 - Show your current revision
 
     ```console
-    user@host:~/lumigator/lumigator/python/mzai/backend$ alembic current
+    user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic current
     ```
 
 - Upgrading
@@ -120,19 +129,19 @@ downgrading the database.
     - Manually upgrade your database to match the latest models:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic upgrade head
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic upgrade head
         ```
 
     - You can also upgrade 'relative' to your current state, so to move forwards 1 revision:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic upgrade +1
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic upgrade +1
         ```
 
     - If you know the version you want to migrate to, you can specify it:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic upgrade cb3cf47d9259
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic upgrade cb3cf47d9259
         ```
 
 - Downgrading
@@ -140,19 +149,19 @@ downgrading the database.
     - To downgrade to the original state (not recommended) use:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic downgrade base
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic downgrade base
         ```
 
     - You can also downgrade 'relative' to your current state, so to move backwards 1 revision:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic downgrade -1
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic downgrade -1
         ```
 
     - If you know the version you want to migrate to, you can specify it:
 
         ```console
-        user@host:~/lumigator/lumigator/python/mzai/backend$ alembic upgrade cb3cf47d9259
+        user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic upgrade cb3cf47d9259
         ````
 
 ## Creating revisions
@@ -164,7 +173,7 @@ when moving between migrations).
 To create an empty revision that you populate manually:
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ alembic revision -m "{Explanatory commit-like message}"
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic revision -m "{Explanatory commit-like message}"
 ```
 
 This will create a new Python file under `[versions/](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/alembic/versions)`.
@@ -172,7 +181,7 @@ This will create a new Python file under `[versions/](https://github.com/mozilla
 For example:
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ alembic revision -m "added desc field to job"
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic revision -m "added desc field to job"
 ```
 
 should see a new Python file created with a commit/ID prepended to your message:
@@ -184,7 +193,7 @@ create a revision using the `--autogenerate` flag when creating a revision. This
 way to create revisions in Lumigator.
 
 ```console
-user@host:~/lumigator/lumigator/python/mzai/backend$ alembic revision --autogenerate -m {Explanatory commit-like message}
+user@host:~/lumigator/lumigator/python/mzai/backend$ uv run alembic revision --autogenerate -m {Explanatory commit-like message}
 ```
 
 Please note that "automatic" doesn't mean this can be completely automated, as manual steps are

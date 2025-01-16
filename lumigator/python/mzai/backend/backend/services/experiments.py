@@ -42,6 +42,10 @@ class ExperimentService:
     def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
         return self._job_repo.get_by_experiment_id(experiment_id)
 
+    def get_all_owned_jobs(self, experiment_id: UUID) -> ListingResponse[UUID]:
+        jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
+        return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
+
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
 

@@ -77,6 +77,7 @@ class JobEvalLiteCreate(BaseModel):
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     config_template: str | None = None
+    store_to_dataset: bool = False
 
 
 class JobInferenceCreate(BaseModel):

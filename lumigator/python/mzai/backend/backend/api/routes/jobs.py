@@ -6,6 +6,7 @@ from uuid import UUID
 import loguru
 import requests
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
@@ -22,7 +23,7 @@ from lumigator_schemas.jobs import (
 from starlette.requests import Request
 from starlette.responses import Response
 
-from backend.api.deps import JobServiceDep
+from backend.api.deps import DatasetServiceDep, JobServiceDep
 from backend.api.http_headers import HttpHeaders
 from backend.settings import settings
 
@@ -94,8 +95,9 @@ def create_evaluation_lite_job(
     job_create_request: JobEvalLiteCreate,
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request)
+    job_response = service.create_job(job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -204,6 +206,16 @@ def get_job_result(
 ) -> JobResultResponse:
     """Return job results metadata if available in the DB."""
     return service.get_job_result(job_id)
+
+
+# TODO refactor all job results handling
+@router.get("/{job_id}/dataset")
+def get_job_dataset(
+    service: DatasetServiceDep,
+    job_id: UUID,
+) -> DatasetResponse | None:
+    """Return the job-associated dataset if available in the DB."""
+    return service.get_dataset_by_job_id(job_id)
 
 
 @router.get("/{job_id}/result/download")

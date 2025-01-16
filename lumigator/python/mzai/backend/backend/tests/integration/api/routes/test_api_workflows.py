@@ -1,6 +1,7 @@
 import time
 from time import sleep
 from unittest.mock import patch
+from uuid import UUID
 
 import pytest
 import requests
@@ -17,7 +18,7 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.main import app
-from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_INFER_MODEL
+from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_INFER_MODEL, TEST_SUMMARY_MODEL
 
 
 @app.on_event("startup")
@@ -54,53 +55,14 @@ def test_upload_data_launch_job(
         "accept": "application/json",
         "Content-Type": "application/json",
     }
-    eval_payload = {
+    infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
         "model": TEST_CAUSAL_MODEL,
         "dataset": str(created_dataset.id),
-        "config_template": simple_eval_template,
         "max_samples": 10,
-    }
-
-    create_evaluation_job_response = local_client.post(
-        "/jobs/evaluate/", headers=headers, json=eval_payload
-    )
-    assert create_evaluation_job_response.status_code == 201
-
-    create_evaluation_job_response_model = JobResponse.model_validate(
-        create_evaluation_job_response.json()
-    )
-
-    succeeded = False
-    for _ in range(1, 200):
-        get_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            break
-        time.sleep(10)
-    assert succeeded
-
-    logs_evaluation_job_response = local_client.get(
-        f"/jobs/{create_evaluation_job_response_model.id}/logs"
-    )
-    logs_evaluation_job_response_model = JobLogsResponse.model_validate(
-        logs_evaluation_job_response.json()
-    )
-    logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
-    logger.info(f"#{logs_evaluation_job_response_model.logs}#")
-
-    infer_payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
-        "model": TEST_INFER_MODEL,
-        "dataset": str(created_dataset.id),
-        "max_samples": 10,
+        "config_template": simple_infer_template,
+        "output_field": "predictions",
         "store_to_dataset": True,
     }
     create_inference_job_response = local_client.post(
@@ -138,6 +100,60 @@ def test_upload_data_launch_job(
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
+
+    # retrieve the DS for the infer job...
+    output_infer_job_response = local_client.get(
+        f"/jobs/{create_inference_job_response_model.id}/dataset"
+    )
+    output_infer_job_response_model = DatasetResponse.model_validate(
+        output_infer_job_response.json()
+    )
+    assert output_infer_job_response_model is not None
+
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    eval_payload = {
+        "name": "test_run_hugging_face",
+        "description": "Test run for Huggingface model",
+        "model": TEST_CAUSAL_MODEL,
+        "dataset": str(output_infer_job_response_model.id),
+        "config_template": simple_eval_template,
+        "max_samples": 10,
+    }
+
+    create_evaluation_job_response = local_client.post(
+        "/jobs/eval_lite/", headers=headers, json=eval_payload
+    )
+    assert create_evaluation_job_response.status_code == 201
+
+    create_evaluation_job_response_model = JobResponse.model_validate(
+        create_evaluation_job_response.json()
+    )
+
+    succeeded = False
+    for _ in range(1, 200):
+        get_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}")
+        assert get_job_response.status_code == 200
+        get_job_response_model = JobResponse.model_validate(get_job_response.json())
+        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            break
+        if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            break
+        time.sleep(10)
+    assert succeeded
+
+    logs_evaluation_job_response = local_client.get(
+        f"/jobs/{create_evaluation_job_response_model.id}/logs"
+    )
+    logs_evaluation_job_response_model = JobLogsResponse.model_validate(
+        logs_evaluation_job_response.json()
+    )
+    logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
+    logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
     get_ds_after_response = local_client.get("/datasets/")
     assert get_ds_after_response.status_code == 200
@@ -283,6 +299,17 @@ def test_full_experiment_launch(
             succeeded = False
             break
         time.sleep(10)
+    get_jobs_per_experiment_response = local_client.get(
+        f"/experiments_new/{get_experiments.items[0].id}/jobs"
+    )
+    experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
+    for job in experiment_jobs.items:
+        logs_job_response = local_client.get(f"/jobs/{job}/logs")
+        logs_job_response_model = JobLogsResponse.model_validate(logs_job_response.json())
+        logger.info(f"Logs for job {job}: ------")
+        logger.info(f"{logs_job_response_model}")
+        logger.info("------")
+
     assert succeeded
 
     get_ds_after_response = local_client.get("/datasets/")
@@ -303,25 +330,3 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     response = local_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job {non_existing_id} not found."
-
-
-def test_annotation_job(local_client: TestClient, dependency_overrides_services):
-    payload = {
-        "name": "test_annotate",
-        "description": "Test run for Huggingface model",
-        "dataset": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "max_samples": 2,
-        "task": "summarization",
-    }
-
-    post_response = local_client.post(
-        "/jobs/annotate/",
-        json=payload,
-    )
-
-    assert post_response.status_code == 201
-
-    job_id = post_response.json()["id"]
-    response = local_client.get(f"/jobs/{job_id}")
-
-    assert response.status_code == 200

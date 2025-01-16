@@ -219,8 +219,6 @@ class JobService:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
-        model_url = self._set_model_type(request)
-
         # provide a reasonable system prompt for services where none was specified
         if job_type == JobType.EVALUATION or job_type == JobType.INFERENCE:
             if request.system_prompt is None and not request.model.startswith("hf://"):
@@ -235,7 +233,7 @@ class JobService:
                 "dataset_path": dataset_s3_path,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
-                "model_url": model_url,
+                "model_url": self._set_model_type(request),
                 "system_prompt": request.system_prompt,
                 "skip_inference": request.skip_inference,
             }
@@ -262,7 +260,7 @@ class JobService:
                 "torch_dtype": request.torch_dtype,
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
-                "model_url": model_url,
+                "model_url": self._set_model_type(request),
                 "system_prompt": request.system_prompt,
                 "output_field": request.output_field,
                 "max_tokens": request.max_tokens,

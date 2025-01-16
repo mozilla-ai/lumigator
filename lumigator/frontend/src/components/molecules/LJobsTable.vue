@@ -5,6 +5,7 @@
     :showHeaders="false"
     :tableStyle="columnStyles"
     :pt="{root:'l-job-table', tableContainer:'width-100'}"
+    @row-click="handleRowClick"
   >
     <Column  :style="columnStyles.expander"></Column>
     <Column
@@ -55,6 +56,7 @@
         </div>
       </template>
     </Column>
+    <Column  style="width: 6rem"></Column>
   </DataTable>
 </template>
 
@@ -79,8 +81,14 @@ defineProps({
   }
 });
 
+const emit = defineEmits(['l-job-selected'])
+
 const shortenedModel = (path) =>
-	path.length <= 40 ? path : `${path.slice(0, 40)}...`;
+  path.length <= 30 ? path : `${path.slice(0, 30)}...`;
+
+function handleRowClick(event) {
+  emit('l-job-selected', event.data)
+}
 
 function retrieveStatus(jobID) {
   const job = jobs.value.find(job => job.id === jobID);

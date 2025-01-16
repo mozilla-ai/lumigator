@@ -19,7 +19,6 @@
         scrollHeight="80vh"
         :pt="{table:'table-root'}"
         @row-click="handleRowClick"
-        @row-unselect="showSlidingPanel = false"
       >
         <Column
           expander
@@ -78,7 +77,6 @@
           </template>
         </Column>
         <Column
-          v-if="!showSlidingPanel"
           header="options"
         >
           <template #body>
@@ -94,6 +92,7 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.jobs"
+              @l-job-selected="onJobSelected($event,slotProps.data)"
             />
           </div>
         </template>
@@ -124,28 +123,38 @@ const emit = defineEmits(['l-experiment-selected'])
 const isThrottled = ref(false);
 const { showSlidingPanel } = useSlidePanel();
 const experimentStore = useExperimentStore();
-const { experiments } = storeToRefs(experimentStore);
+const { experiments, selectedJob } = storeToRefs(experimentStore);
 const tableVisible = ref(true);
 const focusedItem = ref();
 const expandedRows = ref([]);
 
-function handleRowClick(event) {
-  if (event.originalEvent.target.closest("svg.p-icon.p-datatable-row-toggle-icon")) {
-    // preventing experiment selection
-    return
-  }
-  emit('l-experiment-selected', event.data)
-}
-
 const style = computed(() => {
   return showSlidingPanel.value ?
-    'width: 100%;' : 'min-width: min(80vw, 1200px)'
+    'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
 })
 
 const columnStyles = {
   expander: "width: 4rem",
   name: showSlidingPanel.value ? "width: 18rem" :"width: 24rem",
   created: "width: 12rem",
+}
+
+function handleRowClick(event) {
+  if (event.originalEvent.target.closest("svg.p-icon.p-datatable-row-toggle-icon")) {
+    // preventing experiment selection on row expansion
+    return
+  }
+  // user selected an experiment, clear selected job
+  selectedJob.value = null;
+  emit('l-experiment-selected', event.data)
+}
+
+function onJobSelected(job, experiment) {
+  // fetching job details from BE instead of filtering
+  // because job might be still running
+  experimentStore.loadJobDetails(job.id)
+  // select the experiment that job belongs to
+  emit('l-experiment-selected',experiment)
 }
 
 function retrieveStatus(experimentId) {

@@ -31,64 +31,44 @@
         <div class="l-experiment-details__content-label">status</div>
         <div class="l-experiment-details__content-field">
           <Tag
-            v-if="selectedExperiment.status === 'SUCCEEDED' "
-            severity="success"
+            :severity="getTagSeverity()"
             rounded
-            :value="selectedExperiment.status"
-            :pt="{root:'l-experiment-details__tag'}"
-          />
-          <Tag
-            v-else-if="selectedExperiment.status === 'FAILED' "
-            severity="danger"
-            rounded
-            :value="selectedExperiment.status"
-            :pt="{root:'l-experiment-details__tag'}"
-          />
-          <Tag
-            v-else-if="selectedExperiment.status === 'INCOMPLETE' "
-            severity="info"
-            rounded
-            :value="selectedExperiment.status"
-            :pt="{root:'l-experiment-details__tag'}"
-          />
-          <Tag
-            v-else
-            severity="warn"
-            rounded
-            :value="selectedExperiment.status"
+            :value="getStatus()"
             :pt="{root:'l-experiment-details__tag'}"
           />
           <Button
+            v-if="isJobFocused"
             icon="pi pi-external-link"
             severity="secondary"
             size="small"
             label="Logs"
             aria-label="Logs"
-            :disabled="selectedExperiment.status === 'PENDING'"
+            :disabled="getStatus() === 'PENDING'"
             style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
             @click="emit('l-show-logs')"
           />
-        </div> -->
+        </div>
       </div>
-      <!-- <div
+      <div
+        v-if="isJobFocused"
         class="l-experiment-details__content-item"
-        @click="copyToClipboard(selectedExperiment.id)"
+        @click="copyToClipboard(selectedJob.id)"
       >
-        <div class="l-experiment-details__content-label">experiment id</div>
+        <div class="l-experiment-details__content-label">job id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between;cursor:pointer"
         >
-          {{ selectedExperiment.id }}
+          {{ selectedJob.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
             style="font-size: 14px;padding-left: 3px;"
           />
         </div>
-      </div> -->
+      </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
@@ -99,7 +79,10 @@
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">{{ selectedExperiment.useCase }}</div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <div
+        v-if="!isJobFocused"
+        class="l-experiment-details__content-item"
+      >
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
@@ -110,11 +93,12 @@
           </ul>
         </div>
       </div>
-      <div v-if="selectedExperiment.jobs?.length===0"
-           class="l-experiment-details__content-item"
+      <div
+        v-if="isJobFocused"
+        class="l-experiment-details__content-item"
       >
         <div class="l-experiment-details__content-label">model</div>
-        <!-- <div class="l-experiment-details__content-field">{{ selectedExperiment.model.path }}</div> -->
+        <div class="l-experiment-details__content-field">{{ selectedJob.model }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
@@ -124,7 +108,7 @@
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">run time</div>
-        <div class="l-experiment-details__content-field">{{ selectedExperiment.runTime }}</div>
+        <div class="l-experiment-details__content-field">{{ getRunTime() }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
@@ -137,14 +121,14 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
-    <!-- <div class="l-experiment-details__actions">
+    <div class="l-experiment-details__actions">
       <Button
         rounded
         severity="secondary"
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
+        :disabled="getStatus() !== 'SUCCEEDED'"
         @click="emit('l-results', selectedExperiment)"
       />
       <Button
@@ -153,10 +137,10 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="selectedExperiment.status !== 'SUCCEEDED'"
+        :disabled="getStatus() !== 'SUCCEEDED'"
         @click="emit('l-dnld-results', selectedExperiment)"
       />
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -171,15 +155,8 @@ import Tag from 'primevue/tag';
 const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
 
 const experimentStore = useExperimentStore();
-const { selectedExperiment, experiments } = storeToRefs(experimentStore);
+const { selectedExperiment, selectedJob } = storeToRefs(experimentStore);
 const isCopied = ref(false);
-
-const experimentStatus = computed(() => {
-  // const selected = experiments.value
-  //   .filter((job) => job.id === selectedExperiment.value.id)[0]
-  // return selected ? selected.status : selectedExperiment.value.status;
-  return selectedExperiment.value.status;
-})
 
 const copyToClipboard = async (longString) => {
   isCopied.value = true;
@@ -189,6 +166,44 @@ const copyToClipboard = async (longString) => {
   await navigator.clipboard.writeText(longString);
 };
 
+const isJobFocused = computed(() => selectedJob.value !== null)
+
+function getRunTime() {
+  if (isJobFocused.value) {
+    return selectedJob.value.runTime;
+  }
+  if (selectedExperiment.value.status !== 'RUNNING'
+    && selectedExperiment.value.status !== 'PENDING') {
+    let longestRunTime = 0;
+    selectedExperiment.value.jobs.forEach(job => {
+      let duration =  new Date( job.end_time) - new Date(job.created);
+      if (job.runTime !== null) {
+        duration = calculateDuration(job.created, job.end_time, false)
+        longestRunTime = duration > longestRunTime ? duration : longestRunTime;
+      }
+    });
+    return longestRunTime;
+  }
+  return 'N/A';
+}
+
+function getStatus() {
+  return isJobFocused.value ? selectedJob.value.status : selectedExperiment.value.status
+}
+
+function getTagSeverity() {
+  const status = getStatus();
+  switch (status) {
+    case 'SUCCEEDED':
+      return 'success';
+    case 'FAILED':
+      return 'danger';
+    case 'INCOMPLETE':
+      return 'info';
+    default:
+      return 'warn';
+  }
+}
 // watch(experimentStatus, (newStatus) => {
 //   selectedExperiment.value.status = newStatus;
 //   if (selectedExperiment.value.end_time) {

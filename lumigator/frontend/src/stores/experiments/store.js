@@ -117,8 +117,13 @@ export const useExperimentStore = defineStore('experiment', () => {
     return results;
   }
 
-  function loadDetails(id) {
+  function loadExperimentDetails(id) {
     selectedExperiment.value = experiments.value.find(experiment => experiment.id === id);
+  }
+
+  async function loadJobDetails(id) {
+    const jobData = await experimentService.fetchExperimentDetails(id);
+    selectedJob.value = parseJobDetails(jobData);
   }
 
   async function loadResultsFile(experiment_id) {
@@ -215,10 +220,12 @@ export const useExperimentStore = defineStore('experiment', () => {
     jobs,
     loadExperiments,
     updateStatusForIncompleteJobs,
-    loadDetails,
+    loadExperimentDetails,
+    loadJobDetails,
     loadResults,
     loadResultsFile,
     selectedExperiment,
+    selectedJob,
     experimentLogs,
     selectedExperimentRslts,
     runExperiment

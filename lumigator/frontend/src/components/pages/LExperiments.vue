@@ -109,7 +109,7 @@ const onCreateExperiment = () => {
 }
 
 const onSelectExperiment = (experiment) => {
-  experimentStore.loadDetails(experiment.id);
+  experimentStore.loadExperimentDetails(experiment.id);
   showSlidingPanel.value = true;
 }
 

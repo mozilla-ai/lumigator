@@ -5,8 +5,7 @@
 
 Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
 users select the most suitable language model for their specific needs. Currently, Lumigator
-supports the evaluation of summarization tasks using sequence-to-sequence models such as BART and
-BERT, as well as causal models like GPT and Mistral. We plan to expand support to additional machine
+supports the evaluation of summarization tasks using sequence-to-sequence models such as BART, as well as causal models like GPT and Mistral. We plan to expand support to additional machine
 learning tasks and use cases in the future.
 
 To learn more about Lumigator's features and capabilities, see the
@@ -23,12 +22,11 @@ To learn more about Lumigator's features and capabilities, see the
 As more organizations turn to AI for solutions, they face the challenge of selecting the best model
 from an ever-growing list of options. The AI landscape is evolving rapidly, with [twice as many new
 models released in 2023 compared to the previous year](https://hai.stanford.edu/research/ai-index-report).
-Yet, in spite of the wealth of metrics available, there’s still no standard way to compare these
-models.
+However, one may find it challenging to compare models for their specific domain and usecase.
 
 [The 2024 AI Index Report](https://arxiv.org/pdf/2405.19522)
 highlighted that AI evaluation tools aren’t (yet) keeping up with the pace of development, making it
-harder for developers and businesses to make informed choices. Without a clear single method for
+harder for developers and businesses to make informed choices. Without a clear method for
 comparing models, many teams end up using suboptimal solutions, or just choosing models based on
 hype, slowing down product progress and innovation.
 
@@ -46,7 +44,7 @@ need to have the following prerequisites installed on your machine:
     - On a Mac, you need Docker Desktop `4.3` or later and docker-compose `1.28` or later.
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
-- The system Python; no version manager, such as uv, should be active.
+- The system Python (version managers such as uv should be deactivated)
 
 You can run and develop Lumigator locally using Docker Compose. This creates three container
 services networked together to make up all the components of the Lumigator application:
@@ -58,7 +56,7 @@ services networked together to make up all the components of the Lumigator appli
 > [!NOTE]
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 > uses SQLite for this purpose.
->
+
 > [!NOTE]
 > If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
 > environment variable [set locally](https://github.com/mozilla-ai/lumigator/blob/main/.env.example) for Lumigator pick it up at runtime, or, alternately, inject

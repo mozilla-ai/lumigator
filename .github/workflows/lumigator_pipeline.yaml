@@ -217,6 +217,7 @@ jobs:
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
+          platforms: linux/amd64,linux/arm64
           push: true
           target: "server"
           build-args: |

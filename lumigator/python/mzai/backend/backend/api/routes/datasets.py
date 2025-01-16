@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Form, HTTPException, Query, UploadFile, status
 from loguru import logger
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
@@ -40,6 +40,14 @@ def upload_dataset(
         str | None, Form(description="The name of the AI model that generated this dataset.")
     ] = None,
 ) -> DatasetResponse:
+    """Uploads the dataset for use in Lumigator.
+
+    An uploaded dataset is parsed into HuggingFace format files and stored alongside a
+    recreated version of the input dataset.
+
+    NOTE: The recreated version of the CSV file may not have identical delimeters as it will follow
+    the format that HuggingFace uses when it generates the CSV.
+    """
     ds_response = service.upload_dataset(
         dataset, format, run_id=run_id, generated=generated, generated_by=generated_by
     )
@@ -84,5 +92,15 @@ def list_datasets(
 
 
 @router.get("/{dataset_id}/download")
-def get_dataset_download(service: DatasetServiceDep, dataset_id: UUID) -> DatasetDownloadResponse:
-    return service.get_dataset_download(dataset_id)
+def get_dataset_download(
+    service: DatasetServiceDep,
+    dataset_id: UUID,
+    extension: str | None = Query(
+        default=None,
+        description="When specified, will be used to return only URLs for files which have "
+        "a matching file extension. Wildcards are not accepted. "
+        "By default all files are returned. e.g. csv",
+    ),
+) -> DatasetDownloadResponse:
+    """Returns a collection of pre-signed URLs which can be used to download the dataset."""
+    return service.get_dataset_download(dataset_id, extension)

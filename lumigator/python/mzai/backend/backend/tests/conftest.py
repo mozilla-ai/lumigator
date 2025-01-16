@@ -3,7 +3,7 @@ import io
 import os
 import uuid
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, patch
 
 import boto3
 import fsspec
@@ -137,24 +137,24 @@ def fake_s3fs() -> S3FileSystem:
 @pytest.fixture(scope="function")
 def fake_s3_client(fake_s3fs) -> S3Client:
     """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
     # Please check https://github.com/localstack/localstack/issues/5894
     # for info about the test region used
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://example.com:4566"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = "http://example.com:9000"
     return FakeS3Client(MemoryFileSystem.store)
 
 
 @pytest.fixture(scope="function")
 def boto_s3_client() -> S3Client:
     """Provide a real S3 client."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
     # Please check https://github.com/localstack/localstack/issues/5894
     # for info about the test region used
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "test"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://localhost:4566"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = "http://localhost:9000"
     return boto3.client("s3")
 
 
@@ -162,7 +162,7 @@ def boto_s3_client() -> S3Client:
 def boto_s3fs() -> S3FileSystem:
     """Provide a real s3fs client."""
     s3fs = S3FileSystem()
-    mock_s3fs = Mock(wraps=s3fs)
+    mock_s3fs = MagicMock(wraps=s3fs)
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")
 

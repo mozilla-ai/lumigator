@@ -1,0 +1,264 @@
+name: Lumigator pipeline
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
+  push:
+    branches:
+      - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+permissions:
+  pull-requests: read
+  contents: read
+  packages: write
+
+jobs:
+  lint:
+    name: Code linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Lint
+        run: uvx ruff check --config ruff.toml
+        continue-on-error: false
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend", "jobs"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Run ${{ matrix.test }} unit tests
+        run: make test-${{ matrix.test }}-unit
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Spinning up containers for the tests
+        run: make start-lumigator-build
+
+      - name: Run ${{ matrix.test }} integration tests
+        run: make test-${{ matrix.test }}-integration
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/
+
+  notebook-integration-test:
+    name: Notebook integration tests
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Create a virtual environment
+        run: uv venv
+        working-directory: notebooks
+
+      - name: Install required packages
+        run: uv pip install -r requirements.txt
+        working-directory: notebooks
+
+      - name: Install kernel
+        run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
+        working-directory: notebooks
+
+      - name: Setup containers
+        run: make start-lumigator-build
+
+      - name: Run notebook
+        run: source .venv/bin/activate && jupyter execute --kernel_name=lumigator walkthrough.ipynb
+        working-directory: notebooks
+        shell: bash
+
+  build-backend-image:
+    name: Build Backend Docker image
+    runs-on: ubuntu-latest
+    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
+    if: ${{ needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rebuild:
+              - '.github/**'
+              - 'lumigator/**'
+
+      - name: Truncate commit SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Set up QEMU
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        if: steps.filter.outputs.rebuild == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}
+          target: "main_image"
+          tags: |
+            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) || '' }}
+            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator:{0}', github.ref_name) || '' }}
+
+  build-frontend-image:
+    name: Build Frontend Docker image
+    runs-on: ubuntu-latest
+    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
+    if: ${{ needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rebuild_fe:
+              - '.github/workflows/**'
+              - 'lumigator/frontend/**'
+
+      - name: Truncate commit SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        with:
+          file: "lumigator/frontend/Dockerfile"
+          push: true
+          target: "server"
+          tags: |
+            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
+            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
+            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}
+
+  sdk-packaging:
+    name: Package SDK
+    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
+    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add tools directory to path
+        run: echo ${PWD}/tools >> $GITHUB_PATH
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install yq package
+        run: sudo snap install yq
+
+      - name: Check tag consistency (SDK)
+        run: check_version.sh
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Check tag consistency (schemas)
+        run: check_version.sh
+        working-directory: lumigator/python/mzai/schemas
+
+      - name: Install python (SDK)
+        run: uv python install
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Install python (schemas)
+        run: uv python install
+        working-directory: lumigator/python/mzai/schemas
+
+      - name: Package SDK
+        run: uv build
+        working-directory: lumigator/python/mzai/sdk
+
+      - name: Package schemas
+        run: uv build
+        working-directory: lumigator/python/mzai/schemas
+
+      - name: Upload SDK packages to PyPI
+        working-directory: lumigator/python/mzai/sdk
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
+
+      - name: Upload schemas packages to PyPI
+        working-directory: lumigator/python/mzai/schemas
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose

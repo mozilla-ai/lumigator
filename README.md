@@ -104,6 +104,10 @@ Now that Lumigator is running, you can start using it. The platform provides a R
 you to interact with the system. Run the [example notebook](/notebooks/walkthrough.ipynb) for a
 quick walkthrough.
 
+### Lumigator UI
+Alternatively, you can also use the UI to interact with Lumigator. Once a Lumigator session is up and running, the UI can be accessed by visiting [`http://localhost:80`](http://localhost:80). On the **Datasets** tab, first upload a csv data with columns `examples`, and `ground_truth` (optional). Next, the dataset can be used to run an evaluation using the **Experiments** tab.
+
+### Terminate Lumigator session
 To stop the containers you started using Docker Compose, simply run the following command:
 
 ```bash

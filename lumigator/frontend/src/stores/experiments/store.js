@@ -7,6 +7,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const jobs = ref([]);
   const selectedExperiment = ref(null);
+  const selectedJob = ref(null);
   const selectedExperimentRslts = ref([]);
   const isPolling = ref(false);
   let experimentInterval = null;
@@ -61,6 +62,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       created: job.start_time,
       description: job.description,
       experimentStart: job.start_time.slice(0, 16),
+      end_time: job.end_time,
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
     };
   }

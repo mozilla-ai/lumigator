@@ -174,15 +174,18 @@ function getRunTime() {
   }
   if (selectedExperiment.value.status !== 'RUNNING'
     && selectedExperiment.value.status !== 'PENDING') {
-    let longestRunTime = 0;
-    selectedExperiment.value.jobs.forEach(job => {
-      let duration =  new Date( job.end_time) - new Date(job.created);
-      if (job.runTime !== null) {
-        duration = calculateDuration(job.created, job.end_time, false)
-        longestRunTime = duration > longestRunTime ? duration : longestRunTime;
-      }
-    });
-    return longestRunTime;
+    const runTimes = selectedExperiment.value.jobs.map(job => job.runTime);
+    return runTimes.reduce((maxTime, currentTime) => {
+      const cleaned = currentTime.replace(/\s+/g, '');
+      const [hh, mm, ss] = cleaned.split(':').map(Number);
+      const totalSeconds = hh * 3600 + mm * 60 + ss;
+      // Compare to current max
+      if (!maxTime) {return currentTime;} // first iteration
+      const [maxH, maxM, maxS] = maxTime.replace(/\s+/g, '').split(':').map(Number);
+      const maxSeconds = maxH * 3600 + maxM * 60 + maxS;
+
+      return totalSeconds > maxSeconds ? currentTime : maxTime;
+  }, null);
   }
   return 'N/A';
 }

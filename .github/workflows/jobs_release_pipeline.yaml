@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set-up s5cmd
+        uses: peak/action-setup-s5cmd@main
+        with:
+          version: v2.0.0
+
       - name: Zip Evaluator
         run: |
           cd lumigator/python/mzai/jobs/

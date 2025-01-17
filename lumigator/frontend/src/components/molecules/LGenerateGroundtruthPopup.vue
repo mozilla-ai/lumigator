@@ -35,33 +35,33 @@
     </div>
   </template>
 
-  <script>
-  import Button from 'primevue/button';
+  <script setup>
+  import { defineProps, defineEmits } from 'vue'
+  import Button from 'primevue/button'
 
-  export default {
-    components: {
-      Button,
+  // Define the props
+  const props = defineProps({
+    visible: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      visible: {
-        type: Boolean,
-        required: true,
-      },
-      dataset: {
-        type: Object,
-        required: true,
-      },
-    },
-    emits: ['close', 'accept'],
-    methods: {
-      close() {
-        this.$emit('close');
-      },
-      accept() {
-        this.$emit('accept', this.dataset);
-      },
-    },
-  };
+    dataset: {
+      type: Object,
+      required: true
+    }
+  })
+
+  // Define the emitted events
+  const emit = defineEmits(['close', 'accept'])
+
+  // Methods
+  function close() {
+    emit('close')
+  }
+
+  function accept() {
+    emit('accept', props.dataset)
+  }
   </script>
 
   <style scoped>

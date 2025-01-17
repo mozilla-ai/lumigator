@@ -1,16 +1,20 @@
 import http from '@/services/http';
 import {
-  PATH_EXPERIMENTS_ROOT,
+  PATH_JOBS_ROOT,
   PATH_EXPERIMENTS_EVALUATE,
-  PATH_EXPERIMENT_DETAILS,
+  PATH_JOB_DETAILS,
   PATH_EXPERIMENT_RESULTS,
   PATH_EXPERIMENT_LOGS,
   PATHS_EXPERIMENTS_ANNOTATE,
 } from './api';
 
-async function fetchExperiments() {
+/**
+ *
+ * @returns {array} of all jobs, regardless the experiment
+ */
+async function fetchJobs() {
   try {
-    const response = await http.get(PATH_EXPERIMENTS_ROOT());
+    const response = await http.get(PATH_JOBS_ROOT());
     return response.data.items.map(p => ({
       ...p,
       status: p.status.toUpperCase(),
@@ -23,7 +27,7 @@ async function fetchExperiments() {
 
 async function fetchExperimentDetails(id) {
   try {
-    const response = await http.get(PATH_EXPERIMENT_DETAILS(id));
+    const response = await http.get(PATH_JOB_DETAILS(id));
     if (response?.data?.status) {
       // Ensure that we transform status at the point the API returns it.
       response.data.status = response.data.status.toUpperCase();
@@ -118,7 +122,7 @@ async function fetchLogs(id) {
 }
 
 export default {
-  fetchExperiments,
+  fetchJobs,
   fetchJobStatus,
   fetchResults,
   downloadResults,

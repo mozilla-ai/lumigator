@@ -5,6 +5,7 @@
         <div class="l-menu__top">
           <div class="l-mode">
             <Button
+              v-show="false"
               v-tooltip.right="tooltipConfig"
               icon="pi pi-check"
               severity="secondary"

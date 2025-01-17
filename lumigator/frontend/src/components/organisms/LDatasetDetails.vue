@@ -70,7 +70,7 @@
           severity="secondary"
           size="small"
           icon="pi pi-microchip"
-          label="Use in Experiments"
+          label="Use in Experiment"
           class="l-dataset-empty__action-btn"
           :disabled="!selectedDataset.ground_truth"
           @click="emit('l-experiment', selectedDataset)"

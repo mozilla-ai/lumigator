@@ -166,10 +166,6 @@ function retrieveStatus(experimentId) {
   }
 
   const jobStatuses = experiment.jobs.map(job => job.status);
-  if (jobStatuses.includes('RUNNING')) {
-    experiment.status = 'RUNNING'
-    return 'RUNNING';
-  }
   const uniqueStatuses = new Set(jobStatuses);
   if (uniqueStatuses.size === 1) {
     experiment.status = [...uniqueStatuses][0];
@@ -178,6 +174,10 @@ function retrieveStatus(experimentId) {
   if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
     experiment.status = 'INCOMPLETE'
     return 'INCOMPLETE';
+  }
+  if (jobStatuses.includes('RUNNING')) {
+    experiment.status = 'RUNNING'
+    return 'RUNNING';
   }
 }
 

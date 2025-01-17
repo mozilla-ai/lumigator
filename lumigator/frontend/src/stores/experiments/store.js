@@ -8,6 +8,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   const jobs = ref([]);
   const selectedExperiment = ref(null);
   const selectedJob = ref(null);
+  const selectedJobRslts = ref([]);
   const selectedExperimentRslts = ref([]);
   const isPolling = ref(false);
   let experimentInterval = null;
@@ -142,6 +143,15 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  async function loadJobResults(jobId) {
+    const results = await experimentService.fetchResults(jobId);
+    if (results?.id) {
+      selectedJob.value = jobs.value
+        .find((job) => job.id === results.id);
+      selectedJobRslts.value = transformResultsArray(results.resultsData);
+    }
+  }
+
   function transformResultsArray(objectData) {
     const transformedArray = objectData.examples.map((example, index) => {
       return {
@@ -217,6 +227,16 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }, { deep: true });
 
+  watch(selectedJob, (newValue) => {
+    const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
+    selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+    if (newValue?.status === 'RUNNING') {
+      // startPolling()
+      return;
+    } else if (isPolling.value) {
+      stopPolling();
+    }
+  }, { deep: true });
   return {
     experiments,
     jobs,
@@ -225,11 +245,13 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadExperimentDetails,
     loadJobDetails,
     loadResults,
+    loadJobResults,
     loadResultsFile,
     selectedExperiment,
     selectedJob,
     experimentLogs,
     selectedExperimentRslts,
+    selectedJobRslts,
     runExperiment
   }
 })

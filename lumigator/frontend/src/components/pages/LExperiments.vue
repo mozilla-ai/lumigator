@@ -38,7 +38,7 @@
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment !== null"
-          @l-results="onShowResults($event)"
+          @l-results="onShowJobResults($event)"
           @l-dnld-results="onDnldResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
@@ -53,8 +53,8 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="selectedExperimentRslts.length"
-        :results="selectedExperimentRslts"
+        v-if="selectedJobRslts.length"
+        :results="selectedJobRslts"
       />
       <l-experiment-logs
         v-if="selectedExperimentRslts.length === 0"
@@ -88,7 +88,9 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const {
   experiments,
   selectedExperiment,
-  selectedExperimentRslts
+  selectedJob,
+  selectedExperimentRslts,
+  selectedJobRslts
 } = storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
@@ -100,7 +102,7 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
 
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
+  return showLogs.value ? 'Logs' : selectedJob.value.name;
 };
 
 const onCreateExperiment = () => {
@@ -113,8 +115,14 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
-const onShowResults = (experiment) => {
-  experimentStore.loadResults(experiment.id);
+// const onShowResults = (experiment) => {
+//   console.log(experiment);
+//   experimentStore.loadResults(experiment.id);
+//   showDrawer.value = true;
+// }
+
+const onShowJobResults = (job) => {
+  experimentStore.loadJobResults(job.id);
   showDrawer.value = true;
 }
 

@@ -31,9 +31,9 @@
         <div class="l-experiment-details__content-label">status</div>
         <div class="l-experiment-details__content-field">
           <Tag
-            :severity="getTagSeverity()"
+            :severity="tagSeverity"
             rounded
-            :value="getStatus()"
+            :value="currentItemStatus"
             :pt="{root:'l-experiment-details__tag'}"
           />
           <Button
@@ -129,7 +129,7 @@
         icon="pi pi-external-link"
         label="View Results"
         :disabled="getStatus() !== 'SUCCEEDED'"
-        @click="emit('l-results', selectedExperiment)"
+        @click="showResulsts"
       />
       <Button
         rounded
@@ -145,7 +145,7 @@
 </template>
 
 <script setup>
-import { computed, watch, ref} from 'vue';
+import { computed, ref} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { formatDate, calculateDuration } from '@/helpers/index'
@@ -155,7 +155,12 @@ import Tag from 'primevue/tag';
 const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
 
 const experimentStore = useExperimentStore();
-const { selectedExperiment, selectedJob } = storeToRefs(experimentStore);
+const {
+  experiments,
+  selectedExperiment,
+  jobs,
+  selectedJob,
+} = storeToRefs(experimentStore);
 const isCopied = ref(false);
 
 const copyToClipboard = async (longString) => {
@@ -168,34 +173,19 @@ const copyToClipboard = async (longString) => {
 
 const isJobFocused = computed(() => selectedJob.value !== null)
 
-function getRunTime() {
+// TODO: this needs refactor when the backend provides experiment id
+const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    return selectedJob.value.runTime;
-  }
-  if (selectedExperiment.value.status !== 'RUNNING'
-    && selectedExperiment.value.status !== 'PENDING') {
-    const runTimes = selectedExperiment.value.jobs.map(job => job.runTime);
-    return runTimes.reduce((maxTime, currentTime) => {
-      const cleaned = currentTime.replace(/\s+/g, '');
-      const [hh, mm, ss] = cleaned.split(':').map(Number);
-      const totalSeconds = hh * 3600 + mm * 60 + ss;
-      // Compare to current max
-      if (!maxTime) {return currentTime;} // first iteration
-      const [maxH, maxM, maxS] = maxTime.replace(/\s+/g, '').split(':').map(Number);
-      const maxSeconds = maxH * 3600 + maxM * 60 + maxS;
+    const selected = jobs.value.filter((job) => job.id === selectedJob.value.id)[0];
+    return selected ? selected.status : selectedJob.value.status;
+  };
+  const selected = experiments.value
+    .filter((experiment) => experiment.id === selectedExperiment.value.id)[0];
+  return selected ? selected.status : selectedExperiment.value.status;
+});
 
-      return totalSeconds > maxSeconds ? currentTime : maxTime;
-  }, null);
-  }
-  return 'N/A';
-}
-
-function getStatus() {
-  return isJobFocused.value ? selectedJob.value.status : selectedExperiment.value.status
-}
-
-function getTagSeverity() {
-  const status = getStatus();
+const tagSeverity = computed(() => {
+   const status = currentItemStatus.value;
   switch (status) {
     case 'SUCCEEDED':
       return 'success';
@@ -206,14 +196,32 @@ function getTagSeverity() {
     default:
       return 'warn';
   }
+})
+
+const showResulsts = () => {
+  emit('l-results', isJobFocused.value ? selectedJob.value : selectedExperiment.value.jobs)
 }
-// watch(experimentStatus, (newStatus) => {
-//   selectedExperiment.value.status = newStatus;
-//   if (selectedExperiment.value.end_time) {
-//     selectedExperiment.value.runTime =
-//       calculateDuration(selectedExperiment.value.start_time, selectedExperiment.value.end_time);
-//     }
-// });
+
+function getRunTime() {
+  if (isJobFocused.value) {
+    return selectedJob.value.runTime ? selectedJob.value.runTime : '-' ;
+  }
+  if (currentItemStatus.value !== 'RUNNING'
+    && currentItemStatus.value !== 'PENDING') {
+    const endTimes = selectedExperiment.value.jobs.map(job => job.end_time);
+    const lastEndTime = endTimes.reduce((latest, current) => {
+      return new Date(latest) > new Date(current) ? latest : current
+    });
+    if(lastEndTime) {
+      return calculateDuration(selectedExperiment.value.created, lastEndTime);
+    }
+  }
+  return '-';
+}
+
+function getStatus() {
+  return isJobFocused.value ? selectedJob.value.status : selectedExperiment.value.status
+}
 </script>
 
 <style lang="scss">

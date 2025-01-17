@@ -157,14 +157,30 @@ class ExperimentService:
         loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
 
         all_succeeded = True
+        any_running = False
+        any_failed = False
+        # Any running: running
+        # Any failed: failed
+        # All succeeded: succeeded
         for job in self._get_all_owned_jobs(experiment_id):
             loguru.logger.info(f"Checking sub job: {job}")
             if self._job_service.get_job(job.id).status != JobStatus.SUCCEEDED:
                 all_succeeded = False
-                break
+                if self._job_service.get_job(job.id).status == JobStatus.FAILED:
+                    any_failed = True
+                    # Any failed job makes further inspection unnecessary
+                    break
+                if self._job_service.get_job(job.id).status == JobStatus.RUNNING:
+                    any_running = True
+                    # Any running job will move status to running, but
+                    # searching for failures is still necessary
 
         if all_succeeded:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
+        if any_failed:
+            record = self._experiment_repo.update(experiment_id, status=JobStatus.FAILED)
+        if any_running:
+            record = self._experiment_repo.update(experiment_id, status=JobStatus.RUNNING)
 
         return ExperimentResponse.model_validate(record)
 

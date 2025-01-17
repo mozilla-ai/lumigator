@@ -109,10 +109,17 @@ def run_inference(config: InferenceJobConfig) -> Path:
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 
-    # run inference
+    # We keep any columns that were already there (not just the original input
+    # samples, but also past predictions under another column name)
+    output.update(dataset.to_dict())
+
+    # We are trusting the user: if the dataset already had a column with the output_field
+    # they selected, we overwrite it with the values from our inference.
+
+    if config.job.output_field in dataset.column_names:
+        logger.warning(f"Overwriting {config.job.output_field}")
+
     output[config.job.output_field] = predict(dataset_iterable, model_client)
-    output["examples"] = dataset["examples"]
-    output["ground_truth"] = dataset["ground_truth"]
     output["model"] = output_model_name
 
     output_path = save_outputs(config, output)

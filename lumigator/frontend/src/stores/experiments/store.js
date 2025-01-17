@@ -5,7 +5,10 @@ import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helper
 
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
+  const jobs = ref([]);
   const selectedExperiment = ref(null);
+  const selectedJob = ref(null);
+  const selectedJobRslts = ref([]);
   const selectedExperimentRslts = ref([]);
   const isPolling = ref(false);
   let experimentInterval = null;
@@ -13,8 +16,37 @@ export const useExperimentStore = defineStore('experiment', () => {
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
   async function loadExperiments() {
-    const experimentsList = await experimentService.fetchExperiments();
-    experiments.value = experimentsList.map(job => parseExperiment(job));
+    const allJobs = await experimentService.fetchJobs();
+    jobs.value = allJobs.map(job => parseJobDetails(job));
+    experiments.value = getJobsPerExperiement();
+  }
+
+  function getJobsPerExperiement() {
+    const experimentMap = jobs.value.reduce((acc, job) => {
+      const key = `${job.name}-${job.experimentStart}`;
+      // initialize a grouping object
+      if (!acc[key]) {
+        acc[key] = {
+          id: key, // temporary key until BE provides one
+          created: job.created,
+          dataset: job.dataset,
+          description: job.description,
+          name: job.name, experimentStart: job.experimentStart,
+          jobs: [],
+          useCase: job.useCase,
+          runTime: '',
+          samples: job.evaluation.max_samples,
+          models: [],
+          status: 'SUCCEEDED'
+        };
+      }
+      acc[key].jobs.push(job);
+      acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model);
+      return acc;
+
+    }, {})
+
+    return Object.values(experimentMap);
   }
 
   /**
@@ -22,13 +54,16 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseExperiment(job) {
+  function parseJobDetails(job) {
     return {
       ...retrieveEntrypoint(job),
       status: job.status.toUpperCase(),
       id: job.submission_id,
       useCase: `summarization`,
       created: job.start_time,
+      description: job.description,
+      experimentStart: job.start_time.slice(0, 16),
+      end_time: job.end_time,
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
     };
   }
@@ -37,54 +72,66 @@ export const useExperimentStore = defineStore('experiment', () => {
    *
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteExperimentIds() {
-    return experiments.value
-      .filter(experiment => !completedStatus.includes(experiment.status))
-      .map(experiment => experiment.id);
+  function getIncompleteJobIds() {
+    return jobs.value
+      .filter(job => !completedStatus.includes(job.status))
+      .map(job => job.id);
   }
 
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  async function updateExperimentStatus(id) {
+  async function updateJobStatus(id) {
     try {
       const status = await experimentService.fetchJobStatus(id);
-      const experiment = experiments.value.find((experiment) => experiment.id === id);
-      if (experiment) {
-        experiment.status = status;
+      const job = jobs.value.find((job) => job.id === id);
+      if (job) {
+        job.status = status;
       }
     } catch (error) {
-      console.error(`Failed to update status for experiment ${id} ${error}`);
+      console.error(`Failed to update status for job ${id} ${error}`);
     }
   }
 
   /**
    * Updates the status for stored experiments that are not completed
    */
-  async function updateStatusForIncompleteExperiments() {
+  async function updateStatusForIncompleteJobs() {
     await Promise.all(
-      getIncompleteExperimentIds()
-      .map(id => updateExperimentStatus(id)));
+      getIncompleteJobIds()
+        .map(id => updateJobStatus(id)));
   }
 
   async function runExperiment(experimentData) {
-    const experimentResponse = await experimentService.triggerExperiment(experimentData);
-    if (experimentResponse) {
-      return experimentResponse;
-    }
+    const modelArray = experimentData.models;
+    const jobRequests = modelArray.map((singleModel) => {
+      // trigger one job per model
+      const jobPayload = {
+        ...experimentData,
+        model: singleModel.uri,
+      };
+      return experimentService.triggerExperiment(jobPayload);
+    });
+
+    // Execute all requests in parallel
+    // and wait for all of them to resolve or reject
+    const results = await Promise.all(jobRequests);
+    return results;
   }
 
-  async function loadDetails(id) {
-    const details = await experimentService.fetchExperimentDetails(id);
-    selectedExperiment.value = parseExperiment(details);
-    experimentLogs.value = [];
-    retrieveLogs();
+  function loadExperimentDetails(id) {
+    selectedExperiment.value = experiments.value.find(experiment => experiment.id === id);
   }
 
-  async function loadResultsFile(experiment_id) {
-    const blob = await experimentService.downloadResults(experiment_id);
-    downloadContent(blob, `${selectedExperiment.value.name}_results`)
+  async function loadJobDetails(id) {
+    const jobData = await experimentService.fetchExperimentDetails(id);
+    selectedJob.value = parseJobDetails(jobData);
+  }
+
+  async function loadResultsFile(jobId) {
+    const blob = await experimentService.downloadResults(jobId);
+    downloadContent(blob, `${selectedJob.value.name}_results`)
   }
 
   async function loadResults(experiment_id) {
@@ -93,6 +140,15 @@ export const useExperimentStore = defineStore('experiment', () => {
       selectedExperiment.value = experiments.value
         .find((experiment) => experiment.id === results.id);
       selectedExperimentRslts.value = transformResultsArray(results.resultsData);
+    }
+  }
+
+  async function loadJobResults(jobId) {
+    const results = await experimentService.fetchResults(jobId);
+    if (results?.id) {
+      selectedJob.value = jobs.value
+        .find((job) => job.id === results.id);
+      selectedJobRslts.value = transformResultsArray(results.resultsData);
     }
   }
 
@@ -134,9 +190,14 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function retrieveLogs() {
-    const logsData = await experimentService.fetchLogs(selectedExperiment.value.id);
+    const logsData = await experimentService.fetchLogs(selectedJob.value.id);
     const logs = splitByEscapeCharacter(logsData.logs);
-    logs.forEach(log => experimentLogs.value.push(log));
+    logs.forEach(log => {
+      const lastEntry = experimentLogs.value[experimentLogs.value.length - 1];
+      if (experimentLogs.value.length === 0 || lastEntry !== log) {
+      experimentLogs.value.push(log);
+      }
+    });
   }
 
   function splitByEscapeCharacter(input) {
@@ -164,23 +225,43 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
-      startPolling()
+      // startPolling()
       return;
     } else if (isPolling.value) {
       stopPolling();
     }
   }, { deep: true });
 
+  watch(selectedJob, (newValue) => {
+    experimentLogs.value = [];
+    // switch to the experiment the job belongs
+    if (newValue) {
+      const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
+      selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+      retrieveLogs();
+    }
+    if (newValue?.status === 'RUNNING') {
+      startPolling()
+      return;
+    } else if (isPolling.value) {
+      stopPolling();
+    }
+  }, { deep: true });
   return {
     experiments,
+    jobs,
     loadExperiments,
-    updateStatusForIncompleteExperiments,
-    loadDetails,
+    updateStatusForIncompleteJobs,
+    loadExperimentDetails,
+    loadJobDetails,
     loadResults,
+    loadJobResults,
     loadResultsFile,
     selectedExperiment,
+    selectedJob,
     experimentLogs,
     selectedExperimentRslts,
+    selectedJobRslts,
     runExperiment
   }
 })

@@ -80,6 +80,16 @@ def valid_upload_file(valid_experiment_dataset) -> UploadFile:
 
 
 @pytest.fixture(scope="session")
+def valid_experiment_dataset_with_empty_gt() -> str:
+    """Minimal valid dataset without groundtruth."""
+    data = [
+        ["examples", "ground_truth"],
+        ["Hello World"],
+    ]
+    return format_dataset(data)
+
+
+@pytest.fixture(scope="session")
 def missing_examples_dataset() -> str:
     """Minimal invalid dataset without examples."""
     data = [

@@ -75,12 +75,13 @@ def validate_experiment_dataset(filename: str):
 
 
 def dataset_has_gt(filename: str) -> bool:
-    with Path(filename).open() as f:
-        reader = csv.DictReader(f)
-        fields = set(reader.fieldnames or [])
-        has_gt = GT_FIELD in fields
+    dataset = load_dataset("csv", data_files=filename, split="train")
 
-    return has_gt
+    if GT_FIELD not in dataset.column_names:
+        return False
+
+    # We'll accept that there's at least one value in the ground_truth column
+    return any(dataset[GT_FIELD])
 
 
 class DatasetService:
@@ -105,7 +106,7 @@ class DatasetService:
         return self.dataset_repo.get_by_job_id(job_id)
 
     def _get_s3_path(self, dataset_key: str) -> str:
-        return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        return f"s3://{Path(settings.S3_BUCKET) / dataset_key}"
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.

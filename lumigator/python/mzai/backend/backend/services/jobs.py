@@ -7,6 +7,7 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
     JobEvalCreate,
+    JobEvalLiteCreate,
     JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
@@ -41,6 +42,13 @@ class JobService:
             "command": settings.EVALUATOR_COMMAND,
             "pip": settings.EVALUATOR_PIP_REQS,
             "work_dir": settings.EVALUATOR_WORK_DIR,
+            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
+            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
+        },
+        JobType.EVALUATION_LITE: {
+            "command": settings.EVALUATOR_LITE_COMMAND,
+            "pip": settings.EVALUATOR_LITE_PIP_REQS,
+            "work_dir": settings.EVALUATOR_LITE_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -122,8 +130,9 @@ class JobService:
         model_url = self._set_model_type(request)
 
         # provide a reasonable system prompt for services where none was specified
-        if request.system_prompt is None and not request.model.startswith("hf://"):
-            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+        if job_type == JobType.EVALUATION or job_type == JobType.INFERENCE:
+            if request.system_prompt is None and not request.model.startswith("hf://"):
+                request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
 
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
@@ -137,6 +146,15 @@ class JobService:
                 "model_url": model_url,
                 "system_prompt": request.system_prompt,
                 "skip_inference": request.skip_inference,
+            }
+        elif job_type == JobType.EVALUATION_LITE:
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_uri": request.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
             }
         else:
             job_params = {
@@ -164,11 +182,15 @@ class JobService:
         return job_params
 
     def create_job(
-        self, request: JobEvalCreate | JobInferenceCreate, experiment_id: UUID = None
+        self,
+        request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate,
+        experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
+        elif isinstance(request, JobEvalLiteCreate):
+            job_type = JobType.EVALUATION_LITE
         elif isinstance(request, JobInferenceCreate):
             job_type = JobType.INFERENCE
         else:
@@ -178,6 +200,9 @@ class JobService:
         record = self.job_repo.create(
             name=request.name, description=request.description, experiment_id=experiment_id
         )
+
+        if isinstance(request, JobInferenceCreate) and not request.output_field:
+            request.output_field = "predictions"
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -306,5 +331,4 @@ class JobService:
             },
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
-
         return JobResultDownloadResponse(id=job_id, download_url=download_url)

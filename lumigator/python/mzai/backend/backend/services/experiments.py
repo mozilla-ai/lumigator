@@ -12,7 +12,7 @@ from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalCreate,
+    JobEvalLiteCreate,
     JobInferenceCreate,
     JobStatus,
 )
@@ -138,14 +138,14 @@ class ExperimentService:
 
         # submit the job
         self._job_service.create_job(
-            JobEvalCreate.model_validate(job_eval_dict), experiment_id=experiment_id
+            JobEvalLiteCreate.model_validate(job_eval_dict), experiment_id=experiment_id
         )
 
     def create_experiment(
         self, request: ExperimentCreate, background_tasks: BackgroundTasks
     ) -> ExperimentResponse:
         # The FastAPI BackgroundTasks object is used to run a function in the background.
-        # It is a wrapper arount Starlette's BackgroundTasks object.
+        # It is a wrapper around Starlette's BackgroundTasks object.
         # A background task should be attached to a response,
         # and will run only once the response has been sent.
         # See here: https://www.starlette.io/background/

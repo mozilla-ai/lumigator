@@ -113,7 +113,7 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedExperiment.jobs[0].evaluation.max_samples }}
+          {{ selectedExperiment.max_samples }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

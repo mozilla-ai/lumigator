@@ -11,7 +11,7 @@ def test_valid_config():
         name="my_eval_job",
         dataset=DatasetConfig(path="/path/to/dataset"),
         model=ModelConfig(path="/path/to/model"),
-        evaluation=EvaluationConfig(),
+        evaluation=EvaluationConfig(storage_path="/path/to/results"),
     )
     assert config
 
@@ -33,6 +33,6 @@ def test_valid_config_with_custom_metrics():
         name="my_eval_job",
         dataset=DatasetConfig(path="/path/to/dataset"),
         model=ModelConfig(path="/path/to/model"),
-        evaluation=EvaluationConfig(metrics=["bleu", "lumi"]),
+        evaluation=EvaluationConfig(metrics=["bleu", "lumi"], storage_path="/path/to/results"),
     )
     assert config

@@ -68,6 +68,24 @@ oai_eval_template = """{{
     }}
 }}"""
 
+# TODO: this default evaluation template should serve for most purposes
+#       after we deprecate evaluator, as it won't include predictions (model
+#       name is just passed for reference and not for actual inference).
+#       We can remove all the above templates then.
+default_eval_template = """{{
+    "name": "{job_name}/{job_id}",
+    "model": {{ "path": "{model_uri}" }},
+    "dataset": {{ "path": "{dataset_path}" }},
+    "evaluation": {{
+        "metrics": ["rouge", "meteor", "bertscore"],
+        "max_samples": {max_samples},
+        "return_input_data": true,
+        "return_predictions": true,
+        "storage_path": "{storage_path}"
+    }}
+}}"""
+
+
 # Inference templates
 
 default_infer_template = """{{
@@ -84,7 +102,8 @@ default_infer_template = """{{
     }},
      "job": {{
         "max_samples": {max_samples},
-        "storage_path": "{storage_path}"
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
     }}
 }}"""
 
@@ -135,8 +154,7 @@ templates = {
     JobType.INFERENCE: {
         "default": default_infer_template,
         "oai://gpt-4o-mini": oai_infer_template,
-        "oai://gpt-4-turbo": oai_infer_template,
-        "oai://gpt-3.5-turbo-0125": oai_infer_template,
+        "oai://gpt-4o": oai_eval_template,
         "mistral://open-mistral-7b": oai_infer_template,
         "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
     },
@@ -148,9 +166,14 @@ templates = {
         "hf://Falconsai/text_summarization": seq2seq_eval_template,
         "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
         "oai://gpt-4o-mini": oai_eval_template,
-        "oai://gpt-4-turbo": oai_eval_template,
-        "oai://gpt-3.5-turbo-0125": oai_eval_template,
+        "oai://gpt-4o": oai_eval_template,
         "mistral://open-mistral-7b": oai_eval_template,
         "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_eval_template,
+    },
+    # TODO: Remove the old EVALUATION section and rename EVALUATION_LITE
+    #       to EVALUATION after we deprecate evaluator. Also remove the
+    #       unused templates above (all the eval templates except default)
+    JobType.EVALUATION_LITE: {
+        "default": default_eval_template,
     },
 }

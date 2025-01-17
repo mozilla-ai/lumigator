@@ -9,10 +9,17 @@ services:
       target: "dev_image"
     volumes:
       -  database_volume:/mzai/backend/local.db
+    ports:
+      - "5678:5678"
     develop:
       watch:
         - path: lumigator/python/mzai/backend/
           target: /mzai/lumigator/python/mzai/backend
+          action: sync
+          ignore:
+            - .venv/
+        - path: lumigator/python/mzai/jobs/
+          target: /mzai/lumigator/python/mzai/jobs
           action: sync
           ignore:
             - .venv/

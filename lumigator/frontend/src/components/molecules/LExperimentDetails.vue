@@ -98,7 +98,7 @@
         class="l-experiment-details__content-item"
       >
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ selectedJob.mode.pathl }}</div>
+        <div class="l-experiment-details__content-field">{{ selectedJob.model.path }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>

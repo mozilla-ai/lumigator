@@ -100,7 +100,6 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDatasetStore } from '@/stores/datasets/store';
-import { useToast } from 'primevue/usetoast';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { formatDate } from '@/helpers/index';
 import Button from 'primevue/button';
@@ -114,7 +113,6 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 const isCopied = ref(false);
 const isGenerateGroundtruthPopupVisible = ref(false);
-const toast = useToast();
 const experimentStore = useExperimentStore();
 
 const emit = defineEmits([
@@ -203,7 +201,7 @@ async function refreshDatasetStatus() {
     }
   }
 
-  &__content,&__content-item {
+  &__content, &__content-item {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;

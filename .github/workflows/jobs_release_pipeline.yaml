@@ -1,0 +1,22 @@
+name: Jobs release pipeline
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Zip Evaluator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Zip Evaluator
+        run: |
+          cd mzai/lumigator/python/mzai/jobs/evaluator
+          zip -r evaluator.zip .

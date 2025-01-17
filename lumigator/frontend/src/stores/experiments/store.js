@@ -228,7 +228,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
       if (jobResponse) {
         // Start polling to monitor the job status
-        await updateExperimentStatus(jobResponse.id); // Ensure initial update
+        await updateJobStatus(jobResponse.id); // Ensure initial update
         startPollingForJob(jobResponse.id); // Add polling for groundtruth job
         return jobResponse;
       }
@@ -242,7 +242,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   function startPollingForJob(jobId) {
     isPolling.value = true;
     experimentInterval = setInterval(() => {
-      updateExperimentStatus(jobId).then(() => {
+      updateJobStatus(jobId).then(() => {
         const job = experiments.value.find((experiment) => experiment.id === jobId);
         if (completedStatus.includes(job?.status)) {
           stopPolling(); // Stop polling when the job is complete

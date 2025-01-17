@@ -65,7 +65,6 @@ class JobEvalCreate(BaseModel):
     system_prompt: str | None = None
     config_template: str | None = None
     skip_inference: bool = False
-    store_to_dataset: bool = False
 
 
 # TODO: this has to be renamed to JobEvalCreate and the code above
@@ -77,7 +76,6 @@ class JobEvalLiteCreate(BaseModel):
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     config_template: str | None = None
-    store_to_dataset: bool = False
 
 
 class JobInferenceCreate(BaseModel):
@@ -109,6 +107,7 @@ class JobAnnotateCreate(BaseModel):
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     task: str | None = "summarization"
+    store_to_dataset: bool = False
 
 
 class JobResponse(BaseModel, from_attributes=True):

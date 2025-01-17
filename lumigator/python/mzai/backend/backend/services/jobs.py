@@ -66,12 +66,12 @@ class JobService:
         job_repo: JobRepository,
         result_repo: JobResultRepository,
         ray_client: JobSubmissionClient,
-        data_service: DatasetService,
+        dataset_service: DatasetService,
     ):
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
-        self._dataset_service = data_service
+        self._dataset_service = dataset_service
 
     def _raise_not_found(self, job_id: UUID):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
@@ -358,7 +358,7 @@ class JobService:
 
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
-        if request.store_to_dataset:
+        if job_type == JobType.INFERENCE and request.store_to_dataset:
             background_tasks.add_task(
                 self.on_job_complete,
                 record.id,

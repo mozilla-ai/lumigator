@@ -63,6 +63,7 @@ def create_annotation_job(
         model="hf://facebook/bart-large-cnn",
         output_field="ground_truth",
     )
+    inference_job_create_request.store_to_dataset = True
     job_response = service.create_job(inference_job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)

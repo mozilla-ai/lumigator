@@ -18,7 +18,7 @@ running instance. To get a list of suggested models, you can use the following c
 ```console
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/summarization | jq
 {
-  "total": 9,
+  "total": 7,
   "items": [
     {
       "name": "facebook/bart-large-cnn",
@@ -83,8 +83,6 @@ launched it.
 | Model Type | Model                                    | HuggingFace | API | llamafile |
 |------------|------------------------------------------|-------------|-----|-----------|
 | seq2seq    | facebook/bart-large-cnn                  |      X      |     |           |
-| seq2seq    | longformer-qmsum-meeting-summarization   |      X      |     |           |
-| seq2seq    | mrm8488/t5-base-finetuned-summarize-news |      X      |     |           |
 | seq2seq    | Falconsai/text_summarization             |      X      |     |           |
 | causal     | gpt-4o-mini, gpt-4o                      |             |  X  |           |
 | causal     | open-mistral-7b                          |             |  X  |           |
@@ -105,39 +103,6 @@ evaluation are:
 |------------------------|--------------------------------------------------------|-------|
 | `max_length`           | Maximum length of the summary                          | 142   |
 | `min_length`           | Minimum length of the summary                          | 56    |
-| `length_penalty`       | Length penalty to apply during beam search             | 2.0   |
-| `early_stopping`       | Controls the stopping condition for beam-based methods | true  |
-| `no_repeat_ngram_size` | All n-grams of that size can only occur once           | 3     |
-| `num_beams`            | Number of beams for beam search                        | 4     |
-
-## Longformer QMSum Meeting Summarization
-
-The [`longformer-qmsum-meeting-summarization`](https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization)
-model is a fine-tuned version of [alenai/led-base-16384](https://huggingface.co/allenai/led-base-16384)
-for summarization.
-
-As described in [Longformer: The Long-Document Transformer](https://arxiv.org/pdf/2004.05150.pdf) by
-Iz Beltagy, Matthew E. Peters, Arman Cohan, `led-base-16384` was initialized from `bart-base` since
-both models share the exact same architecture, but modified for long-range summarization and
-question answering.
-
-The model has 162M parameters (FP32), and the model size is 648MB. There are no
-summarization-specific parameters for this model.
-
-## T5 Base Finetuned Summarize News
-
-The [`mrm8488/t5-base-finetuned-summarize-news`](https://huggingface.co/mrm8488/t5-base-finetuned-summarize-news)
-model is a [Google's T5](https://ai.googleblog.com/2020/02/exploring-transfer-learning-with-t5.html)
-base fine-tuned on [News Summary](https://www.kaggle.com/sunnysai12345/news-summary) dataset for
-summarization downstream task.
-
-The model has 223M parameters (FP32), and the model size is 892MB. The default parameters used for
-evaluation are:
-
-| Parameter Name         | Description                                            | Value |
-|------------------------|--------------------------------------------------------|-------|
-| `max_length`           | Maximum length of the summary                          | 200   |
-| `min_length`           | Minimum length of the summary                          | 30    |
 | `length_penalty`       | Length penalty to apply during beam search             | 2.0   |
 | `early_stopping`       | Controls the stopping condition for beam-based methods | true  |
 | `no_repeat_ngram_size` | All n-grams of that size can only occur once           | 3     |

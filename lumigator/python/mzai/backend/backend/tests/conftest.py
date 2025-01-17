@@ -145,8 +145,6 @@ def fake_s3fs() -> S3FileSystem:
 def fake_s3_client(fake_s3fs) -> S3Client:
     """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
     os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    # Please check https://github.com/localstack/localstack/issues/5894
-    # for info about the test region used
     os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = "http://example.com:9000"
@@ -157,8 +155,6 @@ def fake_s3_client(fake_s3fs) -> S3Client:
 def boto_s3_client() -> S3Client:
     """Provide a real S3 client."""
     os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    # Please check https://github.com/localstack/localstack/issues/5894
-    # for info about the test region used
     os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = "http://localhost:9000"

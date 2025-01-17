@@ -171,13 +171,13 @@ function retrieveStatus(experimentId) {
     experiment.status = [...uniqueStatuses][0];
     return [...uniqueStatuses][0];
   }
+    if (uniqueStatuses.has('RUNNING')) {
+    experiment.status = 'RUNNING'
+    return 'RUNNING';
+  }
   if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
     experiment.status = 'INCOMPLETE'
     return 'INCOMPLETE';
-  }
-  if (jobStatuses.includes('RUNNING')) {
-    experiment.status = 'RUNNING'
-    return 'RUNNING';
   }
 }
 

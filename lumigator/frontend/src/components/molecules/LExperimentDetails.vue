@@ -89,7 +89,7 @@
             <li
               v-for="job in selectedExperiment.jobs"
               :key="job.id"
-            >· {{job.model }}</li>
+            >· {{job.model.path }}</li>
           </ul>
         </div>
       </div>
@@ -98,7 +98,7 @@
         class="l-experiment-details__content-item"
       >
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ selectedJob.model }}</div>
+        <div class="l-experiment-details__content-field">{{ selectedJob.mode.pathl }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>

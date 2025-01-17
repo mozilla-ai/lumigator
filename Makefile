@@ -11,6 +11,10 @@ KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f
 ARCH := $(shell uname -m)
 RAY_ARCH_SUFFIX :=
 COMPUTE_TYPE := -cpu
+RAY_WORKER_GPUS ?= 0
+RAY_WORKER_GPUS_FRACTION ?= 0.0
+
+$(info RAY_WORKER_GPUS = $(RAY_WORKER_GPUS))
 
 ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64

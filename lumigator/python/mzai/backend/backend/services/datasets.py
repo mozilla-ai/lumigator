@@ -80,8 +80,8 @@ def dataset_has_gt(filename: str) -> bool:
     if GT_FIELD not in dataset.column_names:
         return False
 
-    # We'll accept that there's at least one value in the ground_truth column
-    return any(dataset[GT_FIELD])
+    # True only if every value in dataset[GT_FIELD] is not None or empty.
+    return all(value for value in dataset[GT_FIELD])
 
 
 class DatasetService:

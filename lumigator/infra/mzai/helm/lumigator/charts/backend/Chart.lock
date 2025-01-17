@@ -2,5 +2,11 @@ dependencies:
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 15.5.20
-digest: sha256:fa28791d6a669ccb1c04be8dd4dce32693ae1699ba318338f5ee8abadf40e0f2
-generated: "2024-09-09T19:21:41.060403-04:00"
+- name: kuberay-operator
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+- name: kuberay-apiserver
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+digest: sha256:51dec0ae8d1294b98e9ab1db61b096fd29565ff7c9a0218befd6b54cd06128f3
+generated: "2025-01-17T14:33:34.114247+01:00"

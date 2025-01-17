@@ -271,6 +271,12 @@ different aspects:
 - [BERTScore](https://openreview.net/pdf?id=SkeHuCVFDr) - Generates embeddings of ground truth input
   and model output and compares their cosine similarity
 
+## Terminate Session
+In order to shut down Lumigator, you can stop the containers that were [started](../get-started/installation.md) using Docker Compose. This can be done by simply running the following command:
+```console
+user@host:~/lumigator$ make stop-lumigator
+```
+
 ## Next Steps
 
 Congratulations! You have successfully uploaded a dataset, created an evaluation job, and retrieved

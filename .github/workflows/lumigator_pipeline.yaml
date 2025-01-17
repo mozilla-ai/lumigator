@@ -42,7 +42,7 @@ jobs:
     if: ${{ needs.lint.result == 'success' }}
     strategy:
       matrix:
-        test: ["sdk", "backend" ]
+        test: ["sdk", "backend", "jobs"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,10 +78,7 @@ jobs:
         run: make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
-        run: make test-${{ matrix.test }}-integration-target
-
-      - name: Run Backend integration tests
-        run: make test-backend-integration-target
+        run: make test-${{ matrix.test }}-integration
 
       - name: Collect Ray logs in case of failure
         if: failure()
@@ -158,7 +155,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        if: steps.filter.outputs.rebuild == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -169,7 +166,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/') }}
+          push: true
           target: "main_image"
           tags: |
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) || '' }}
@@ -197,6 +194,14 @@ jobs:
       - name: Truncate commit SHA
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
+      - name: Set up QEMU
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
@@ -209,6 +214,7 @@ jobs:
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
+          platforms: linux/amd64,linux/arm64
           push: true
           target: "server"
           tags: |

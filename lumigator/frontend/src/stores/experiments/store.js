@@ -190,9 +190,14 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function retrieveLogs() {
-    const logsData = await experimentService.fetchLogs(selectedExperiment.value.id);
+    const logsData = await experimentService.fetchLogs(selectedJob.value.id);
     const logs = splitByEscapeCharacter(logsData.logs);
-    logs.forEach(log => experimentLogs.value.push(log));
+    logs.forEach(log => {
+      const lastEntry = experimentLogs.value[experimentLogs.value.length - 1];
+      if (experimentLogs.value.length === 0 || lastEntry !== log) {
+      experimentLogs.value.push(log);
+      }
+    });
   }
 
   function splitByEscapeCharacter(input) {
@@ -228,10 +233,15 @@ export const useExperimentStore = defineStore('experiment', () => {
   }, { deep: true });
 
   watch(selectedJob, (newValue) => {
-    const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-    selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+    experimentLogs.value = [];
+    // switch to the experiment the job belongs
+    if (newValue) {
+      const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
+      selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+      retrieveLogs();
+    }
     if (newValue?.status === 'RUNNING') {
-      // startPolling()
+      startPolling()
       return;
     } else if (isPolling.value) {
       stopPolling();

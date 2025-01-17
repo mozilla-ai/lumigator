@@ -57,7 +57,7 @@
         :results="selectedJobRslts"
       />
       <l-experiment-logs
-        v-if="selectedExperimentRslts.length === 0"
+        v-if="showLogs && selectedJobRslts.length === 0"
       />
 
     </l-experiments-drawer>
@@ -89,7 +89,6 @@ const {
   experiments,
   selectedExperiment,
   selectedJob,
-  selectedExperimentRslts,
   selectedJobRslts
 } = storeToRefs(experimentStore);
 
@@ -145,7 +144,7 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedExperimentRslts.value = [];
+  selectedJobRslts.value = [];
   showLogs.value = false;
   showDrawer.value = false;
 }

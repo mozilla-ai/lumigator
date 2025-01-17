@@ -295,7 +295,7 @@ class JobService:
         """Sets model URL based on protocol address"""
         if request.model_url.startswith("oai://"):
             model_url = settings.OAI_API_URL
-        elif request.model_url.startswith("mistral://"):
+        elif request.model.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
         else:
             model_url = request.model_url

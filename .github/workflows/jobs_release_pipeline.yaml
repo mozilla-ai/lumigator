@@ -21,7 +21,19 @@ jobs:
         with:
           version: v2.0.0
 
+      - name: Truncate commit SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
       - name: Zip Evaluator
         run: |
           cd lumigator/python/mzai/jobs/
-          zip -r evaluator.zip evaluator
+          zip -r ${{ format('evaluator_{0}.zip', env.GITHUB_SHA_SHORT) }} evaluator
+          ls
+
+      # Set Region and endpoint
+      #- name: Sync files
+      #  env:
+      #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #  run: |
+      #    s5cmd sync 'static/*' 's3://bucket/prefix/'

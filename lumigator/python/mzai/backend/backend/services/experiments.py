@@ -151,7 +151,7 @@ class ExperimentService:
         return ExperimentResponse.model_validate(record)
 =======
     def _get_experiment_jobs(self, experiment_id: UUID):
-        records = self._job_service.job_repo.get_jobs_by_experiment_id(experiment_id)
+        records = self._experiment_repo.get_jobs_by_experiment_id(experiment_id)
         return records
 
     def get_experiment_result_download(

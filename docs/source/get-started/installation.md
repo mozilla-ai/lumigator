@@ -30,7 +30,7 @@ uses SQLite for this purpose.
 
 ```{note}
 If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
-environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the `.env.example` file in
+environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the `.env.template` file in
 the repository for more details.
 ```
 

@@ -247,6 +247,13 @@ class DatasetService:
 
         When supplied, only URLs for files that match the specified extension are returned.
         """
+        # Sanitize the input for a file extension.
+        if extension is not None:
+            extension = extension.strip().lower()
+            # If there's nothing left, set it as None.
+            if extension == "":
+                extension = None
+
         record = self._get_dataset_record(dataset_id)
         dataset_key = self._get_s3_key(dataset_id, record.filename)
 
@@ -264,7 +271,7 @@ class DatasetService:
             download_urls = []
             for s3_object in s3_response["Contents"]:
                 # Ignore files that don't end with the extension if it was specified
-                if extension and not s3_object["Key"].lower().endswith(extension.lower()):
+                if extension and not s3_object["Key"].lower().endswith(extension):
                     continue
 
                 download_url = self.s3_client.generate_presigned_url(

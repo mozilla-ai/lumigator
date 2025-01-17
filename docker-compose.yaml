@@ -48,7 +48,8 @@ services:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block" # pragma: allowlist secret
+    # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
     deploy:
       resources:
@@ -56,14 +57,6 @@ services:
           cpus: '2'
           memory: '5g'
     environment:
-      - HOST=localhost
-      - RAY_IMAGE=raytest
-      - REDISPORT=6379
-      - DASHBOARDPORT=8265
-      - HEADNODEPORT=10001
-      - REDISPASSWORD=yourpassword
-      - NUM_WORKERS=4
-      - NUM_CPU_WORKER=1
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY

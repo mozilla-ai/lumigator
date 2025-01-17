@@ -180,7 +180,6 @@ class DatasetService:
 
             # convert the dataset to HF format and save it to S3
             self._save_dataset_to_s3(temp.name, record)
-
         finally:
             # Cleanup temp file
             Path(temp.name).unlink()

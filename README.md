@@ -22,7 +22,7 @@ To learn more about Lumigator's features and capabilities, see the
 As more organizations turn to AI for solutions, they face the challenge of selecting the best model
 from an ever-growing list of options. The AI landscape is evolving rapidly, with [twice as many new
 models released in 2023 compared to the previous year](https://hai.stanford.edu/research/ai-index-report).
-However, one may find it challenging to compare models for their specific domain and usecase.
+However, in spite of existing [benchmarks and leaderboards](https://crfm.stanford.edu/helm/classic/latest/#/leaderboard) for some scenarios, one may find it challenging to compare models for their specific domain and use case.
 
 [The 2024 AI Index Report](https://arxiv.org/pdf/2405.19522)
 highlighted that AI evaluation tools aren’t (yet) keeping up with the pace of development, making it

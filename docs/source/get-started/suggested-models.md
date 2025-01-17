@@ -18,7 +18,7 @@ running instance. To get a list of suggested models, you can use the following c
 ```console
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/summarization | jq
 {
-  "total": 9,
+  "total": 7,
   "items": [
     {
       "name": "facebook/bart-large-cnn",

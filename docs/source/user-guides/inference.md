@@ -41,7 +41,7 @@ Refer to the `.env.example` file in the repository for more details.
     BUCKET = "lumigator-storage"
     HOST = "localhost"
     LUMIGATOR_PORT = 8000
-    RAY_PORT = 4566
+    RAY_PORT = 8265
 
 
     # Instantiate the Lumigator client

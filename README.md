@@ -48,12 +48,13 @@ need to have the following prerequisites installed on your machine:
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The system Python; no version manager, such as uv, should be active.
 
-You can run and develop Lumigator locally using Docker Compose. This creates three container
+You can run and develop Lumigator locally using Docker Compose. This creates four container
 services networked together to make up all the components of the Lumigator application:
 
-- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
+- `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: A Ray cluster for submitting several types of jobs.
+- `frontend`: Lumigator's Web UI
 
 > [!NOTE]
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
@@ -93,7 +94,7 @@ To verify that Lumigator is running, open a web browser and navigate to
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
-provider’s S3-compatible service, instead of localstack. Similarly, one could provide a different
+provider’s S3-compatible service, instead of minio. Similarly, one could provide a different
 `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See
 [here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml)
 for an example of how to do this, and see the

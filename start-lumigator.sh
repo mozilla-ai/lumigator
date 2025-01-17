@@ -2,7 +2,6 @@
 
 # This script supports the initial setup of Lumigator for developing and using all functionalities locally.
 # It requires Docker and Docker Compose to run. If they are not present on your machine, the script will install and activate them for you.
-# If the local option (`-l`) is selected, Lumigator code is expected to be located in the current folder or in the provided folder.
 
 # Help
 show_help() {
@@ -133,13 +132,6 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -d|--directory)
             ROOT_DIR="$2"
-            shift ;;
-        -m|--method)
-            if [[ "$2" != "git" && "$2" != "zip" ]]; then
-                echo "Invalid method. Use 'git' or 'zip'."
-                exit 1
-            fi
-            download_method="$2";
             shift ;;
         -o|--overwrite) OVERWRITE=true ;;
         -l|--local) local_option=true ;;

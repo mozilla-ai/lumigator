@@ -90,7 +90,7 @@ launched it.
 | causal     | open-mistral-7b                          |             |  X  |           |
 | causal     | Mistral-7B-Instruct                      |             |     |     X     |
 
-## Bart Large CNN
+## BART Large CNN
 
 The [`facebook/bart-large-cnn`](https://huggingface.co/facebook/bart-large-cnn) model is pre-trained
 on English language, and fine-tuned on [CNN Daily Mail](https://huggingface.co/datasets/cnn_dailymail).
@@ -201,7 +201,7 @@ Before you jump into evaluating datasets, you should consider the following impo
 
 Ground-truth would be the actual, expected output or correct answer in for a given task (such as summarization), serving as a reference to compare the model's predictions. Typically, a human with enough expertise in the task will annotate or label a dataset with those references for each sample (for example, an acceptable summary of the input text).
 
-To evaluate a model as reliably as possible, we encourage using human-provided ground-truth to compare against. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) to get you started.
+To evaluate a model as reliably as possible, we encourage using human-provided ground-truth to compare against. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) ([BART](https://mozilla-ai.github.io/lumigator/get-started/suggested-models.html#bart-large-cnn) for summarization task).
 
 You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
 

@@ -104,10 +104,12 @@ clean-docker-buildcache:
 	docker builder prune --all -f
 
 clean-docker-containers:
-	docker rm -vf $$(docker container ls -aq)
+	docker container prune
 
+# remove all dangling images + all mzdotai/* ones
 clean-docker-images:
-	docker rmi -f $$(docker image ls -aq)
+	docker images "mzdotai/*" -q | xargs -n1 docker rmi -f; \
+	docker image prune
 
 clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-images
 

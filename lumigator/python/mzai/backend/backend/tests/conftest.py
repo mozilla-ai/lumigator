@@ -94,8 +94,15 @@ def dialog_dataset():
 
 
 @pytest.fixture(scope="function")
-def dialog_no_gt_dataset():
+def dialog_empty_gt_dataset():
     filename = common_resources_dir() / "sample_data" / "dialogsum_mini_empty_gt.csv"
+    with Path(filename).open("rb") as f:
+        yield f
+
+
+@pytest.fixture(scope="function")
+def dialog_no_gt_dataset():
+    filename = common_resources_dir() / "sample_data" / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 

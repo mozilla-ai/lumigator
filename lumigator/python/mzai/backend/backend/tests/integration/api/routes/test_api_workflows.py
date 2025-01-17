@@ -135,17 +135,20 @@ def test_upload_data_launch_job(
     logger.info(f"#{logs_infer_job_response_model.logs}#")
 
 
+@pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
+    request: pytest.FixtureRequest,
     local_client: TestClient,
-    dialog_no_gt_dataset,
+    unnanotated_dataset,
     simple_eval_template,
     simple_infer_template,
     dependency_overrides_services,
 ):
+    dataset = request.getfixturevalue(unnanotated_dataset)
     create_response = local_client.post(
         "/datasets/",
         data={},
-        files={"dataset": dialog_no_gt_dataset, "format": (None, DatasetFormat.JOB.value)},
+        files={"dataset": dataset, "format": (None, DatasetFormat.JOB.value)},
     )
 
     assert create_response.status_code == 201

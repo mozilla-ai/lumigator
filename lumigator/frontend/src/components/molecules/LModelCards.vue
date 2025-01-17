@@ -5,16 +5,18 @@
         v-for="model in models"
         :key="model.name"
         class="l-models-list__options-container--option"
-        @click="selectModel(model)"
+        @click="toggleModel(model)"
       >
-        <RadioButton
-          v-model="selectedModel"
-          :inputId="model.uri"
-          name="dynamic"
+        <Checkbox
+          v-model="selectedModels"
           :value="model"
+          :inputId="model.id"
+          name="model"
           @click.stop
         />
-        <label :for="model.uri">{{ model.name }}</label>
+        <label :for="model.id">{{ model.name }}</label>
+
+        <!-- Keep @click.stop on external link so it doesn't toggle selection -->
         <Button
           as="a"
           icon="pi pi-external-link"
@@ -31,27 +33,36 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useModelStore } from '@/stores/models/store';
-import RadioButton from 'primevue/radiobutton';
 import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 
 const modelStore = useModelStore();
 const { models } = storeToRefs(modelStore);
-const selectedModel = ref('');
+const selectedModels = ref([]);
 
 defineProps({
   modelLink: String
 })
 
 defineExpose({
-  selectedModel
+  selectedModels
 })
 
-function selectModel(model) {
-  selectedModel.value = model;
+function toggleModel(model) {
+  const index = selectedModels.value.findIndex(
+    (selected) => selected.name === model.name
+  );
+
+  if (index === -1) {
+    selectedModels.value.push(model);
+  } else {
+    selectedModels.value.splice(index, 1);
+  }
 }
 </script>
 

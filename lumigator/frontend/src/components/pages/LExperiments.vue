@@ -114,12 +114,6 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
-// const onShowResults = (experiment) => {
-//   console.log(experiment);
-//   experimentStore.loadResults(experiment.id);
-//   showDrawer.value = true;
-// }
-
 const onShowJobResults = (job) => {
   experimentStore.loadJobResults(job.id);
   showDrawer.value = true;

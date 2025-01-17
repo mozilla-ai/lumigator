@@ -289,7 +289,6 @@ function getStatus() {
     li {
       color: $white;
       font-weight: $l-font-weight-semibold;
-      // margin-bottom: $l-spacing-1 / 2;
     }
   }
 

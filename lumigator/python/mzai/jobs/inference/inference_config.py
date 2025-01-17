@@ -127,7 +127,7 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     torch_dtype: TorchDtype = "auto"
     accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int | None = None
+    max_length: int | None = None
 
     @computed_field
     @property

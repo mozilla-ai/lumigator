@@ -99,7 +99,7 @@ default_infer_template = """{{
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
         "torch_dtype": "{torch_dtype}",
-        "max_new_tokens": 500
+        "max_length": 500
     }},
      "job": {{
         "max_samples": {max_samples},

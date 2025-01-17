@@ -65,32 +65,57 @@
       </div>
       <div class="l-dataset-details__actions">
         <Button
+          v-if="selectedDataset.ground_truth"
           rounded
           severity="secondary"
           size="small"
           icon="pi pi-microchip"
-          label="Use in Experiment"
+          label="Use in Experiments"
           class="l-dataset-empty__action-btn"
           :disabled="!selectedDataset.ground_truth"
           @click="emit('l-experiment', selectedDataset)"
         />
+        <Button
+          v-else
+          rounded
+          severity="secondary"
+          size="small"
+          label="Generate Groundtruth"
+          class="l-dataset-empty__action-btn"
+          @click="showGenerateGroundtruthPopup"
+        />
       </div>
     </div>
+
+    <LGenerateGroundtruthPopup
+      :visible="isGenerateGroundtruthPopupVisible"
+      :dataset="selectedDataset"
+      @close="isGenerateGroundtruthPopupVisible = false"
+      @accept="handleGenerateGroundtruth"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useDatasetStore } from '@/stores/datasets/store';
+import { useToast } from 'primevue/usetoast';
 import { useSlidePanel } from '@/composables/SlidingPanel';
-import { formatDate } from '@/helpers/index'
+import { formatDate } from '@/helpers/index';
 import Button from 'primevue/button';
+import LGenerateGroundtruthPopup from '@/components/molecules/LGenerateGroundtruthPopup.vue';
+import { useExperimentStore } from '@/stores/experiments/store';
+
 
 const datasetStore = useDatasetStore();
+
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 const isCopied = ref(false);
+const isGenerateGroundtruthPopupVisible = ref(false);
+const toast = useToast();
+const experimentStore = useExperimentStore();
 
 const emit = defineEmits([
   'l-delete-dataset',
@@ -109,6 +134,32 @@ const copyToClipboard = async (longString) => {
 function onCloseDetails() {
   showSlidingPanel.value = false;
   emit('l-details-closed')
+}
+
+function showGenerateGroundtruthPopup() {
+  isGenerateGroundtruthPopupVisible.value = true;
+}
+
+
+async function handleGenerateGroundtruth() {
+  const groundTruthPayload = {
+    name: `Groundtruth for ${selectedDataset.value.filename}`,
+    description: `Groundtruth generation for dataset ${selectedDataset.value.id}`,
+    dataset: selectedDataset.value.id,
+    max_samples: -1,
+    task: "summarization",
+  };
+  console.log(groundTruthPayload)
+  try {
+    const result = await experimentStore.startGroundtruthGeneration(groundTruthPayload);
+
+  } catch (error) {
+    console.log("Error generating groundtruth", groundTruthPayload,error)
+  }
+  isGenerateGroundtruthPopupVisible.value = false;
+}
+async function refreshDatasetStatus() {
+  await datasetStore.fetchDatasetDetails(selectedDataset.value.id); // Replace with your dataset refresh logic
 }
 
 </script>
@@ -152,7 +203,7 @@ function onCloseDetails() {
     }
   }
 
-  &__content, &__content-item {
+  &__content,&__content-item {
     display: flex;
     flex-direction: column;
     font-size: $l-menu-font-size;
@@ -167,19 +218,14 @@ function onCloseDetails() {
 
     &-field {
       display: flex;
-      justify-content: space-between;
-    }
-
-  }
-   &__content-item {
+      justify-content: space-between;    }
+  }  &__content-item {
     padding: $l-spacing-1/2 0;
-   }
-
-   &__actions {
+  }
+  &__actions {
     padding: $l-spacing-1 0;
     display: flex;
     justify-content: center;
-   }
-
+  }
 }
 </style>

@@ -132,13 +132,14 @@
         @click="showResulsts"
       />
       <Button
+        v-if="isJobFocused"
         rounded
         severity="secondary"
         size="small"
         icon="pi pi-download"
         label="Download Results"
         :disabled="getStatus() !== 'SUCCEEDED'"
-        @click="emit('l-dnld-results', selectedExperiment)"
+        @click="emit('l-dnld-results', selectedJob)"
       />
     </div>
   </div>

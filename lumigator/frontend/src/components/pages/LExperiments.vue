@@ -126,8 +126,8 @@ const onShowJobResults = (job) => {
   showDrawer.value = true;
 }
 
-const onDnldResults = (experiment) => {
-  experimentStore.loadResultsFile(experiment.id);
+const onDnldResults = (job) => {
+  experimentStore.loadResultsFile(job.id);
 }
 
 const onShowLogs = () => {

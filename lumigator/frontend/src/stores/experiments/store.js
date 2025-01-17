@@ -129,9 +129,9 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedJob.value = parseJobDetails(jobData);
   }
 
-  async function loadResultsFile(experiment_id) {
-    const blob = await experimentService.downloadResults(experiment_id);
-    downloadContent(blob, `${selectedExperiment.value.name}_results`)
+  async function loadResultsFile(jobId) {
+    const blob = await experimentService.downloadResults(jobId);
+    downloadContent(blob, `${selectedJob.value.name}_results`)
   }
 
   async function loadResults(experiment_id) {

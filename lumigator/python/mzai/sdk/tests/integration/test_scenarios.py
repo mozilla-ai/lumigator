@@ -4,6 +4,7 @@ be started prior to running these tests using
 """
 
 from time import sleep
+from uuid import UUID
 
 import requests
 from loguru import logger
@@ -32,20 +33,45 @@ def test_get_datasets_remote_ok(lumi_client_int):
     assert datasets is not None
 
 
+def test_get_datasets_download(lumi_client_int, dialog_data):
+    """Test the download datasets endpoint."""
+    dataset_response = lumi_client_int.datasets.create_dataset(
+        dataset=dialog_data, format=DatasetFormat.JOB
+    )
+
+    assert dataset_response is not None
+    assert isinstance(dataset_response.id, UUID)
+
+    ds_id = dataset_response.id
+    download_response = lumi_client_int.datasets.get_dataset_link(ds_id)
+    assert download_response is not None
+    assert download_response.id == ds_id
+    assert len(download_response.download_urls) == 4
+
+
 def test_dataset_lifecycle_remote_ok(lumi_client_int, dialog_data):
     """Test a complete dataset lifecycle test: add a new dataset,
     list datasets, remove the dataset
     """
     datasets = lumi_client_int.datasets.get_datasets()
     n_initial_datasets = datasets.total
+
+    # Create a dataset
     lumi_client_int.datasets.create_dataset(dataset=dialog_data, format=DatasetFormat.JOB)
     datasets = lumi_client_int.datasets.get_datasets()
     n_current_datasets = datasets.total
-    created_dataset = lumi_client_int.datasets.get_dataset(datasets.items[0].id)
-    assert created_dataset is not None
-    lumi_client_int.datasets.delete_dataset(datasets.items[0].id)
-    datasets = lumi_client_int.datasets.get_datasets()
     assert n_current_datasets - n_initial_datasets == 1
+
+    # Delete one dataset (check it first)
+    dataset_id = datasets.items[0].id
+    created_dataset = lumi_client_int.datasets.get_dataset(dataset_id)
+    assert created_dataset is not None
+    lumi_client_int.datasets.delete_dataset(dataset_id)
+
+    # Re-check the total number of datasets
+    datasets = lumi_client_int.datasets.get_datasets()
+    n_current_datasets = datasets.total
+    assert n_current_datasets - n_initial_datasets == 0
 
 
 def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_template):

@@ -45,7 +45,7 @@ def upload_dataset(
     An uploaded dataset is parsed into HuggingFace format files and stored alongside a
     recreated version of the input dataset.
 
-    NOTE: The recreated version of the CSV file may not have identical delimeters as it will follow
+    NOTE: The recreated version of the CSV file may not have identical delimiters as it will follow
     the format that HuggingFace uses when it generates the CSV.
     """
     ds_response = service.upload_dataset(

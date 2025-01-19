@@ -1,13 +1,11 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all check-dot-env
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
-KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"')
-
-KEEP_CONTAINERS_UP ?= "FALSE"
+KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"' || echo "FALSE")
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -71,11 +69,11 @@ endef
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-.env:
-	@if [ ! -f .env ]; then cp .env.example .env; echo ".env created from .env.example"; fi
+check-dot-env:
+	@if [ ! -f .env ]; then cp .env.template .env; echo ".env created from .env.template"; fi
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
-local-up: .env
+local-up: check-dot-env
 	uv run pre-commit install
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
@@ -86,15 +84,15 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
-start-lumigator: .env
+start-lumigator: check-dot-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build: .env
+start-lumigator-build: check-dot-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
-start-lumigator-external-services: .env
+start-lumigator-external-services: check-dot-env
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator:
@@ -146,12 +144,26 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # start them if they are not present or use the currently running ones.
 test-backend-unit:
 	cd lumigator/python/mzai/backend/; \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
 
 test-backend-integration:
 	cd lumigator/python/mzai/backend/; \
 	docker container list --all; \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db RAY_WORKER_GPUS="0.0" RAY_WORKER_GPUS_FRACTION="0.0" INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt INFERENCE_WORK_DIR=../jobs/inference EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt EVALUATOR_WORK_DIR=../jobs/evaluator uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	RAY_WORKER_GPUS="0.0" \
+	RAY_WORKER_GPUS_FRACTION="0.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)

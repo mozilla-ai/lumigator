@@ -46,12 +46,13 @@ need to have the following prerequisites installed on your machine:
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The system Python (version managers such as uv should be deactivated)
 
-You can run and develop Lumigator locally using Docker Compose. This creates three container
+You can run and develop Lumigator locally using Docker Compose. This creates four container
 services networked together to make up all the components of the Lumigator application:
 
-- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
+- `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: A Ray cluster for submitting several types of jobs.
+- `frontend`: Lumigator's Web UI
 
 > [!NOTE]
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
@@ -59,7 +60,7 @@ services networked together to make up all the components of the Lumigator appli
 
 > [!NOTE]
 > If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
-> environment variable [set locally](https://github.com/mozilla-ai/lumigator/blob/main/.env.example) for Lumigator pick it up at runtime, or, alternately, inject
+> environment variable [set locally](https://github.com/mozilla-ai/lumigator/blob/main/.env.template) for Lumigator pick it up at runtime, or, alternately, inject
 > into the running `backend` docker container.
 
 To start Lumigator locally, follow these steps:
@@ -91,7 +92,7 @@ To verify that Lumigator is running, open a web browser and navigate to
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
-provider’s S3-compatible service, instead of localstack. Similarly, one could provide a different
+provider’s S3-compatible service, instead of minio. Similarly, one could provide a different
 `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See the
 [operational guides](https://mozilla-ai.github.io/lumigator/operations-guide/kubernetes.html) in the
 documentation for more deployment options.

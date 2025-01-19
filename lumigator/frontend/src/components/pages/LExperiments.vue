@@ -168,6 +168,7 @@ onMounted(async () => {
 watch(showSlidingPanel, (newValue) => {
   if (!newValue) {
     selectedExperiment.value = null;
+    selectedJob.value = null;
   }
 });
 </script>

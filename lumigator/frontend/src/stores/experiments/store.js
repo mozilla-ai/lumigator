@@ -143,7 +143,8 @@ export const useExperimentStore = defineStore('experiment', () => {
           meteor: results.resultsData.meteor,
           bertscore: results.resultsData.bertscore,
           rouge: results.resultsData.rouge,
-          runTime: getJobRuntime(results.id)
+          runTime: getJobRuntime(results.id),
+          jobResults: transformResultsArray(results.resultsData)
         }
         selectedExperimentRslts.value.push(modelRow);
       }

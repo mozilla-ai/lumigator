@@ -173,12 +173,10 @@
       </Column>
       <template #expansion="slotProps">
         <div>
-          <!-- <l-jobs-table
-            :column-styles="columnStyles"
-            :table-data="slotProps.data.jobs"
-            @l-job-selected="onJobSelected($event,slotProps.data)"
-          /> -->
-          <pre>{{ slotProps }}</pre>
+          <l-job-results
+            :results="slotProps.data.jobResults"
+            :no-radius="true"
+          />
         </div>
       </template>
     </DataTable>
@@ -190,6 +188,7 @@ import { computed, ref, onUnmounted } from 'vue';
 import { useExperimentStore } from "@/stores/experiments/store.js";
 import { useModelStore } from "@/stores/models/store.js";
 import { storeToRefs } from 'pinia';
+import LJobResults from '@/components/molecules/LJobResults.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 

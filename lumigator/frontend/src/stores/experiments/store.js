@@ -143,7 +143,7 @@ export const useExperimentStore = defineStore('experiment', () => {
           meteor: results.resultsData.meteor,
           bertscore: results.resultsData.bertscore,
           rouge: results.resultsData.rouge,
-          runTime: selectedExperiment.value.runTime
+          runTime: getJobRuntime(results.id)
         }
         selectedExperimentRslts.value.push(modelRow);
       }
@@ -228,6 +228,11 @@ export const useExperimentStore = defineStore('experiment', () => {
       clearInterval(experimentInterval);
       experimentInterval = null;
     }
+  }
+
+  function getJobRuntime(jobId) {
+    const job = jobs.value.find(job => job.id === jobId);
+    return job ? job.runTime : null;
   }
 
   watch(selectedExperiment, (newValue) => {

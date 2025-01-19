@@ -212,7 +212,7 @@ const focusedItemRunTime = computed(() => {
 
   if (currentItemStatus.value !== 'RUNNING'
     && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value.jobs.map(job => job.end_time);
+    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time);
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current
     });

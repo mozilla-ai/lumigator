@@ -121,6 +121,7 @@ const onSelectExperiment = (experiment) => {
 }
 
 const onShowExperimentResults = (experiment) => {
+  experimentStore.loadExperimentResults(experiment);
   showExpResults.value = true;
   showDrawer.value = true;
 }

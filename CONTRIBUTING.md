@@ -46,10 +46,6 @@ To contribute to Lumigator, first identify a need for a new feature or bug fix. 
 6. **Code review and feedback.** The maintainers team will review the pull request, providing feedback and suggestions for improvement. We expect the “User” to address the feedback, making the necessary revisions to your code based. Once the code is reviewed and approved, the pull request will be merged into the main branch.
 7. **Release.** Once merge, your code will be generally available in our repository as part of Lumigator.
 
-Currently, we are able to accept:
-
-* PRs for [**bugfixes**](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D+) and **documentation** only. Please include as much information as possible;
-* [Suggestions](https://github.com/mozilla-ai/lumigator/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=) on making Lumigator easier to understand and contribute to.
 
 ## Where to go
 

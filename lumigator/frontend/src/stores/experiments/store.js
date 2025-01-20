@@ -223,6 +223,34 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  async function startGroundtruthGeneration(groundTruthPayload) {
+    try {
+      const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
+      if (jobResponse) {
+        // Start polling to monitor the job status
+        await updateJobStatus(jobResponse.id); // Ensure initial update
+        startPollingForJob(jobResponse.id); // Add polling for groundtruth job
+        return jobResponse;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to start groundtruth generation:', error);
+      return null;
+    }
+  }
+
+  function startPollingForJob(jobId) {
+    isPolling.value = true;
+    experimentInterval = setInterval(() => {
+      updateJobStatus(jobId).then(() => {
+        const job = experiments.value.find((experiment) => experiment.id === jobId);
+        if (completedStatus.includes(job?.status)) {
+          stopPolling(); // Stop polling when the job is complete
+        }
+      });
+    }, 3000); // Poll every 3 seconds
+  }
+
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
       // startPolling()
@@ -262,6 +290,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experimentLogs,
     selectedExperimentRslts,
     selectedJobRslts,
+    startGroundtruthGeneration,
     runExperiment
   }
 })

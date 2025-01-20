@@ -5,6 +5,7 @@ import {
   PATH_JOB_DETAILS,
   PATH_EXPERIMENT_RESULTS,
   PATH_EXPERIMENT_LOGS,
+  PATHS_EXPERIMENTS_ANNOTATE,
 } from './api';
 
 /**
@@ -56,6 +57,21 @@ async function triggerExperiment(experimentPayload) {
     return error.message;
   }
 }
+
+async function triggerAnnotationJob(groundTruthPayload) {
+  try {
+    const response = await http.post(PATHS_EXPERIMENTS_ANNOTATE(), groundTruthPayload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error while creating groundtruth job', error);
+    return null;
+  }
+}
+export { triggerAnnotationJob };
 
 async function fetchResults(job_id) {
   try {
@@ -112,5 +128,6 @@ export default {
   downloadResults,
   fetchExperimentDetails,
   triggerExperiment,
+  triggerAnnotationJob,
   fetchLogs
 };

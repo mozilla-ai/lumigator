@@ -9,7 +9,7 @@ import boto3
 import fsspec
 import pytest
 import requests_mock
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
@@ -31,6 +31,7 @@ from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGeneration"
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
 
@@ -64,6 +65,18 @@ def valid_experiment_dataset_without_gt() -> str:
         ["Hello World"],
     ]
     return format_dataset(data)
+
+
+@pytest.fixture
+def valid_upload_file(valid_experiment_dataset) -> UploadFile:
+    """Minimal valid upload file (with ground truth)."""
+    fake_filename = "dataset.csv"
+    fake_file = io.BytesIO(valid_experiment_dataset.encode("utf-8"))
+    fake_upload_file = UploadFile(
+        filename=fake_filename,
+        file=fake_file,
+    )
+    return fake_upload_file
 
 
 @pytest.fixture(scope="session")
@@ -343,7 +356,6 @@ def simple_eval_template():
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],
-            "use_pipeline": false,
             "max_samples": {max_samples},
             "return_input_data": true,
             "return_predictions": true,
@@ -365,7 +377,7 @@ def simple_infer_template():
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
             "torch_dtype": "{torch_dtype}",
-            "max_length": 200
+            "max_length": 500
         }},
         "job": {{
             "max_samples": {max_samples},

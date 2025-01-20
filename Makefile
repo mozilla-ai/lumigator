@@ -163,6 +163,8 @@ test-backend-integration:
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
+	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
 	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:

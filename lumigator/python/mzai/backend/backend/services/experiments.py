@@ -1,14 +1,9 @@
 import asyncio
-import csv
-import json
 from collections.abc import Callable
-from io import BytesIO, StringIO
-from pathlib import Path
 from uuid import UUID
 
 import loguru
-from fastapi import BackgroundTasks, UploadFile
-from lumigator_schemas.datasets import DatasetFormat
+from fastapi import BackgroundTasks
 from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -16,80 +11,40 @@ from lumigator_schemas.jobs import (
     JobInferenceCreate,
     JobStatus,
 )
-from s3fs import S3FileSystem
 
+from backend.records.experiments import ExperimentRecord
+from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
+from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
-from backend.settings import settings
 
 
 class ExperimentService:
     def __init__(
         self,
         experiment_repo: ExperimentRepository,
+        job_repo: JobRepository,
         job_service: JobService,
         dataset_service: DatasetService,
     ):
         self._experiment_repo = experiment_repo
+        self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
 
-    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
-        """Given a JSON string containing inference results and the fields
-        we want to read from it, generate a binary file (as a BytesIO
-        object) to be passed to the fastapi UploadFile method.
-        """
-        dataset = {k: v for k, v in results.items() if k in fields}
+    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
+        record = self._experiment_repo.get(experiment_id)
+        if record is None:
+            self._raise_not_found(experiment_id)
+        return record
 
-        # Create a CSV in memory
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(dataset.keys())
-        csv_writer.writerows(zip(*dataset.values()))
+    def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
+        return self._job_repo.get_by_experiment_id(experiment_id)
 
-        # Create a binary file from the CSV, since the upload function expects a binary file
-        bin_data = BytesIO(csv_buffer.getvalue().encode("utf-8"))
-
-        return bin_data
-
-    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate):
-        loguru.logger.info("Adding a new dataset entry to the database...")
-        s3 = S3FileSystem()
-
-        # Get the dataset from the S3 bucket
-        result_key = self._job_service._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            results = json.loads(f.read())
-
-        # define the fields we want to keep from the results JSON
-        # and build a CSV file from it as a BytesIO object
-        fields = ["examples", "ground_truth", request.output_field]
-        bin_data = self._results_to_binary_file(results, fields)
-        bin_data_size = len(bin_data.getvalue())
-
-        # Figure out the dataset filename
-        dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-annotated.csv"
-
-        upload_file = UploadFile(
-            file=bin_data,
-            size=bin_data_size,
-            filename=dataset_filename,
-            headers={"content-type": "text/csv"},
-        )
-        dataset_record = self._dataset_service.upload_dataset(
-            upload_file,
-            format=DatasetFormat.JOB,
-            run_id=job_id,
-            generated=True,
-            generated_by=results["model"],
-        )
-
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
+    def get_all_owned_jobs(self, experiment_id: UUID) -> ListingResponse[UUID]:
+        jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
+        return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -101,6 +56,7 @@ class ExperimentService:
         """
         job_status = self._job_service.ray_client.get_job_status(job_id)
 
+        # TODO rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
         valid_status = [
             JobStatus.CREATED.value.lower(),
             JobStatus.PENDING.value.lower(),
@@ -122,7 +78,11 @@ class ExperimentService:
                 task(*args)
 
     def _run_eval(
-        self, inference_job_id: UUID, request: ExperimentCreate, experiment_id: UUID = None
+        self,
+        inference_job_id: UUID,
+        request: ExperimentCreate,
+        background_tasks: BackgroundTasks,
+        experiment_id: UUID = None,
     ):
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
@@ -138,7 +98,9 @@ class ExperimentService:
 
         # submit the job
         self._job_service.create_job(
-            JobEvalLiteCreate.model_validate(job_eval_dict), experiment_id=experiment_id
+            JobEvalLiteCreate.model_validate(job_eval_dict),
+            background_tasks,
+            experiment_id=experiment_id,
         )
 
     def create_experiment(
@@ -165,22 +127,14 @@ class ExperimentService:
             "model_url": request.model_url,
             "output_field": request.inference_output_field,
             "system_prompt": request.system_prompt,
+            "store_to_dataset": True,
         }
 
         # submit inference job first
         job_response = self._job_service.create_job(
             JobInferenceCreate.model_validate(job_inference_dict),
+            background_tasks,
             experiment_id=experiment_record.id,
-        )
-
-        # Inference jobs produce a new dataset
-        # Add the dataset to the (local) database
-        background_tasks.add_task(
-            self.on_job_complete,
-            job_response.id,
-            self._add_dataset_to_db,
-            job_response.id,
-            JobInferenceCreate.model_validate(job_inference_dict),
         )
 
         # run evaluation job afterwards
@@ -191,10 +145,28 @@ class ExperimentService:
             self._run_eval,
             job_response.id,
             request,
+            background_tasks,
             experiment_record.id,
         )
 
         return ExperimentResponse.model_validate(experiment_record)
+
+    # TODO Move this into a "composite job" impl
+    def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
+        record = self._get_experiment_record(experiment_id)
+        loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
+
+        all_succeeded = True
+        for job in self._get_all_owned_jobs(experiment_id):
+            loguru.logger.info(f"Checking sub job: {job}")
+            if self._job_service.get_job(job.id).status != JobStatus.SUCCEEDED:
+                all_succeeded = False
+                break
+
+        if all_succeeded:
+            record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
+
+        return ExperimentResponse.model_validate(record)
 
     def list_experiments(
         self, skip: int = 0, limit: int = 100

@@ -31,6 +31,7 @@ from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGeneration"
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
 
@@ -343,7 +344,6 @@ def simple_eval_template():
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],
-            "use_pipeline": false,
             "max_samples": {max_samples},
             "return_input_data": true,
             "return_predictions": true,
@@ -365,7 +365,7 @@ def simple_infer_template():
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
             "torch_dtype": "{torch_dtype}",
-            "max_length": 200
+            "max_length": 500
         }},
         "job": {{
             "max_samples": {max_samples},

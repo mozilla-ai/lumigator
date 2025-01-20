@@ -9,8 +9,8 @@ class DatasetConfig(BaseModel):
 class JobConfig(BaseModel):
     max_samples: int
     storage_path: str
-    output_field: str
-    enable_tqdm: bool | None
+    output_field: str | None = None
+    enable_tqdm: bool | None = None
     model_config = ConfigDict(extra="forbid")
 
 
@@ -39,13 +39,14 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     accelerator: str
     model_config = ConfigDict(extra="forbid")
     max_length: int
+    task: str | None = None
 
 
 class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    inference_server: InferenceServerConfig | None
-    params: SamplingParameters | None
+    inference_server: InferenceServerConfig | None = None
+    params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

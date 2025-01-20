@@ -1,0 +1,21 @@
+name: lumigator
+
+services:
+  ray:
+    image: rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX}
+    # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: $GPU_COUNT
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=$NVIDIA_VISIBLE_DEVICES
+
+  backend:
+    environment:
+      - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
+      - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION

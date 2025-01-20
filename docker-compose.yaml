@@ -51,19 +51,12 @@ services:
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
     command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
-    runtime: nvidia
     deploy:
       resources:
         limits:
           cpus: '2'
           memory: '5g'
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY

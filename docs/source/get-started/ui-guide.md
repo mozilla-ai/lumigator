@@ -44,3 +44,6 @@ The **Experiments** page gets populated with the experiment details and the stat
 ![Experiments Completed](../../assets/ui_guide_steps/experiments_completed.png)
 
 ## View Results
+For each experiment, you can view the sidebar which contains a **View Results** button.
+
+TBA

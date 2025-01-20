@@ -105,7 +105,7 @@ class Datasets:
         """
         self.client.get_response(f"{self.DATASETS_ROUTE}/{id}", method=HTTPMethod.DELETE)
 
-    def get_dataset_link(self, id: UUID) -> DatasetDownloadResponse:
+    def get_dataset_link(self, id: UUID, extension: str | None = None) -> DatasetDownloadResponse:
         """Return the download link for a specific dataset.
 
         .. admonition:: Example
@@ -121,11 +121,20 @@ class Datasets:
             id (UUID): the ID of the dataset whose download link we want to
                 obtain.
 
+            extension (str): when specified, will be used to return only URLs for files which have
+                a matching file extension. Wildcards are not accepted. By default, all files are
+                returned. e.g. csv.
+
         Returns:
             DatasetDownloadResponse: the download link for the requested
                 dataset.
         """
-        endpoint = f"{self.DATASETS_ROUTE}/{id}/download"
+        extension = extension.strip().lower() if extension and extension.strip() else None
+
+        endpoint = (
+            f"{self.DATASETS_ROUTE}/{id}/download"
+            f"{f'?extension={extension}' if extension is not None else ''}"
+        )
         response = self.client.get_response(endpoint)
 
         return DatasetDownloadResponse(**(response.json()))

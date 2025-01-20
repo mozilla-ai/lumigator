@@ -64,8 +64,9 @@ JobServiceDep = Annotated[JobService, Depends(get_job_service)]
 def get_experiment_service(
     session: DBSessionDep, job_service: JobServiceDep, dataset_service: DatasetServiceDep
 ) -> ExperimentService:
+    job_repo = JobRepository(session)
     experiment_repo = ExperimentRepository(session)
-    return ExperimentService(experiment_repo, job_service, dataset_service)
+    return ExperimentService(experiment_repo, job_repo, job_service, dataset_service)
 
 
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]

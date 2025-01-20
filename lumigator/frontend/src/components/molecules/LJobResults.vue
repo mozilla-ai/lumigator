@@ -6,6 +6,7 @@
       scrollable
       scrollHeight="90vh"
       tableStyle="min-width: 50rem;min-width:70vw"
+      :class="{'no-radius': noRadius}"
     >
       <Column
         style="vertical-align: middle; text-align: left;padding-right:0"
@@ -158,6 +159,11 @@ const props = defineProps({
   results: {
     type: Object,
     required: true,
+  },
+  noRadius: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 
@@ -244,7 +250,16 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-.p-datatable-column-title {
-  cursor: pointer;
+.l-results-table {
+  .p-datatable-column-title {
+    cursor: pointer;
+  }
+
+  .no-radius {
+    .p-datatable-table-container {
+      border-radius: 0!important;
+    }
+  }
 }
+
 </style>

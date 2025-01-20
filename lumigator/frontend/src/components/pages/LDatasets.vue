@@ -43,6 +43,7 @@
         @l-experiment="onExperimentDataset($event)"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
+        @l-download-dataset="downloadDataset($event)"
       />
     </Teleport>
   </div>
@@ -61,6 +62,8 @@ import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import datasetsService from "@/services/datasets/datasetsService.js";
+import {downloadContent} from "@/helpers/index.js";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
@@ -107,6 +110,10 @@ function deleteConfirmation(dataset) {
   });
 }
 
+async function downloadDataset(dataset) {
+  const blob = await datasetsService.downloadDataset(dataset.id);
+  downloadContent(blob, dataset.filename)
+}
 
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 

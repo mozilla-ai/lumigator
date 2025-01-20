@@ -1,8 +1,38 @@
 <template>
   <div class="l-models-list">
     <div class="l-models-list__options-container">
+      HUGGING FACE
       <div
-        v-for="model in models"
+        v-for="model in noAPIKeyModels"
+        :key="model.name"
+        class="l-models-list__options-container--option"
+        @click="toggleModel(model)"
+      >
+        <Checkbox
+          v-model="selectedModels"
+          :value="model"
+          :inputId="model.id"
+          name="model"
+          @click.stop
+        />
+        <label :for="model.id">{{ model.name }}</label>
+
+        <!-- Keep @click.stop on external link so it doesn't toggle selection -->
+        <Button
+          as="a"
+          icon="pi pi-external-link"
+          severity="secondary"
+          variant="text"
+          rounded
+          class="l-models__external-link"
+          :href="model.website_url"
+          target="_blank"
+          @click.stop
+        />
+      </div>
+      API
+      <div
+        v-for="model in apiKeyModels"
         :key="model.name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
@@ -35,7 +65,7 @@
 
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useModelStore } from '@/stores/models/store';
 import Button from 'primevue/button';
@@ -51,6 +81,14 @@ defineProps({
 
 defineExpose({
   selectedModels
+})
+
+const apiKeyModels = computed(() => {
+  return models.value.filter((x) => x.requires_api_key)
+})
+
+const noAPIKeyModels = computed(() => {
+  return models.value.filter((x) => !x.requires_api_key)
 })
 
 function toggleModel(model) {

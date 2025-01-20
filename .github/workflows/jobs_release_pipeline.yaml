@@ -30,10 +30,12 @@ jobs:
           zip -r ${{ format('evaluator_{0}.zip', env.GITHUB_SHA_SHORT) }} evaluator
           ls
 
-      # Set Region and endpoint
-      #- name: Sync files
-      #  env:
-      #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #  run: |
-      #    s5cmd sync 'static/*' 's3://bucket/prefix/'
+        # Set Region and endpoint
+      - name: Sync files
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: lga1
+        run: |
+          cd lumigator/python/mzai/jobs/
+          s5cmd --endpoint-url=https://object.lga1.coreweave.com sync '${{ format('evaluator_{0}.zip', env.GITHUB_SHA_SHORT) }}' 's3://policy-test/'

@@ -68,6 +68,8 @@ def run_eval(config: EvalJobConfig) -> Path:
         max_samples = len(dataset)
     dataset = dataset.select(range(max_samples))
 
+    logger.info(dataset)
+
     # run evaluation and append to results dict
     predictions = dataset["predictions"]
     ground_truth = dataset["ground_truth"]

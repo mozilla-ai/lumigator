@@ -19,6 +19,7 @@ def request_mock() -> requests_mock.Mocker:
     with requests_mock.Mocker() as cm:
         yield cm
 
+
 @pytest.fixture(scope="session")
 def mock_vendor_data() -> str:
     return '["openai", "mistral"]'
@@ -34,7 +35,7 @@ def lumi_client(request_mock, mock_vendor_data) -> LumigatorClient:
     request_mock.get(
         url=f"http://{LUMI_HOST}/api/v1/{Health.HEALTH_ROUTE}",
         status_code=HTTPStatus.OK,
-        json={'status': 'OK', 'dpeloymentType': 'local'},
+        json={"status": "OK", "deploymentType": "local"},
     )
     return LumigatorClient(LUMI_HOST)
 
@@ -180,4 +181,3 @@ def simple_eval_template():
             "storage_path": "{storage_path}"
         }}
     }}"""
-

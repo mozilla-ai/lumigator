@@ -35,7 +35,7 @@ export const useExperimentStore = defineStore('experiment', () => {
           jobs: [],
           useCase: job.useCase,
           runTime: '',
-          samples: job.evaluation.max_samples,
+          samples: job.max_samples,
           models: [],
           status: 'SUCCEEDED'
         };
@@ -134,12 +134,20 @@ export const useExperimentStore = defineStore('experiment', () => {
     downloadContent(blob, `${selectedJob.value.name}_results`)
   }
 
-  async function loadResults(experiment_id) {
-    const results = await experimentService.fetchResults(experiment_id);
-    if (results?.id) {
-      selectedExperiment.value = experiments.value
-        .find((experiment) => experiment.id === results.id);
-      selectedExperimentRslts.value = transformResultsArray(results.resultsData);
+  async function loadExperimentResults(experiment) {
+    for (const job of experiment.jobs) {
+      const results = await experimentService.fetchResults(job.id);
+      if (results?.id) {
+        const modelRow = {
+          model: results.resultsData.model,
+          meteor: results.resultsData.meteor,
+          bertscore: results.resultsData.bertscore,
+          rouge: results.resultsData.rouge,
+          runTime: getJobRuntime(results.id),
+          jobResults: transformResultsArray(results.resultsData)
+        }
+        selectedExperimentRslts.value.push(modelRow);
+      }
     }
   }
 
@@ -251,6 +259,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     }, 3000); // Poll every 3 seconds
   }
 
+  function getJobRuntime(jobId) {
+    const job = jobs.value.find(job => job.id === jobId);
+    return job ? job.runTime : null;
+  }
+
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
       // startPolling()
@@ -282,7 +295,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     updateStatusForIncompleteJobs,
     loadExperimentDetails,
     loadJobDetails,
-    loadResults,
+    loadExperimentResults,
     loadJobResults,
     loadResultsFile,
     selectedExperiment,

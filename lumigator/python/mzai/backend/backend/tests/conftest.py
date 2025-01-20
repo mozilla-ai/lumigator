@@ -9,7 +9,7 @@ import boto3
 import fsspec
 import pytest
 import requests_mock
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
@@ -31,6 +31,7 @@ from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGeneration"
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
 
@@ -64,6 +65,18 @@ def valid_experiment_dataset_without_gt() -> str:
         ["Hello World"],
     ]
     return format_dataset(data)
+
+
+@pytest.fixture
+def valid_upload_file(valid_experiment_dataset) -> UploadFile:
+    """Minimal valid upload file (with ground truth)."""
+    fake_filename = "dataset.csv"
+    fake_file = io.BytesIO(valid_experiment_dataset.encode("utf-8"))
+    fake_upload_file = UploadFile(
+        filename=fake_filename,
+        file=fake_file,
+    )
+    return fake_upload_file
 
 
 @pytest.fixture(scope="session")
@@ -145,8 +158,6 @@ def fake_s3fs() -> S3FileSystem:
 def fake_s3_client(fake_s3fs) -> S3Client:
     """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
     os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    # Please check https://github.com/localstack/localstack/issues/5894
-    # for info about the test region used
     os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = "http://example.com:9000"
@@ -157,8 +168,6 @@ def fake_s3_client(fake_s3fs) -> S3Client:
 def boto_s3_client() -> S3Client:
     """Provide a real S3 client."""
     os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    # Please check https://github.com/localstack/localstack/issues/5894
-    # for info about the test region used
     os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
     os.environ["AWS_ENDPOINT_URL"] = "http://localhost:9000"
@@ -347,7 +356,6 @@ def simple_eval_template():
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],
-            "use_pipeline": false,
             "max_samples": {max_samples},
             "return_input_data": true,
             "return_predictions": true,
@@ -369,7 +377,7 @@ def simple_infer_template():
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
             "torch_dtype": "{torch_dtype}",
-            "max_length": 200
+            "max_length": 500
         }},
         "job": {{
             "max_samples": {max_samples},

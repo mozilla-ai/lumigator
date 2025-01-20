@@ -10,7 +10,9 @@ from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, D
 from backend.api.http_headers import HttpHeaders
 
 
-def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
+def test_upload_delete(
+    app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes
+):
     upload_filename = "dataset.csv"
 
     # Create
@@ -53,7 +55,9 @@ def test_dataset_delete_error(app_client: TestClient, dependency_overrides_fakes
         assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
 
 
-def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
+def test_presigned_download(
+    app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes
+):
     upload_filename = "dataset.csv"
 
     # Create
@@ -88,10 +92,7 @@ def test_presigned_download(app_client: TestClient, valid_experiment_dataset: st
     ],
 )
 def test_experiment_format_validation(
-    app_client: TestClient,
-    dataset: str,
-    expected_status: int,
-    dependency_overrides_fakes
+    app_client: TestClient, dataset: str, expected_status: int, dependency_overrides_fakes
 ):
     response = app_client.post(
         url="/datasets",
@@ -105,7 +106,7 @@ def test_experiment_ground_truth(
     app_client: TestClient,
     valid_experiment_dataset: str,
     valid_experiment_dataset_without_gt: str,
-    dependency_overrides_fakes
+    dependency_overrides_fakes,
 ):
     ground_truth_response = app_client.post(
         url="/datasets",

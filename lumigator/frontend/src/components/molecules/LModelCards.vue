@@ -114,6 +114,17 @@ function toggleModel(model) {
     padding-top: $l-spacing-1;
     gap: $l-spacing-1;
 
+    &-section {
+      color: $l-grey-100;
+      font-size: $l-font-size-sm;
+      p {
+        margin-bottom: 5px;
+      }
+      span {
+        display: block;
+        line-height: 1.2;
+      }
+    }
     &--option {
       display: grid;
       grid-template-columns: 30px 80% 1fr;

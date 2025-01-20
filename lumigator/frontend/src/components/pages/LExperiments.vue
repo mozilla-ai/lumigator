@@ -93,6 +93,7 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const {
   experiments,
   selectedExperiment,
+  selectedJob,
   selectedJobRslts
 } = storeToRefs(experimentStore);
 

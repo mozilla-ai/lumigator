@@ -176,8 +176,8 @@ class ExperimentService:
         loguru.logger.error(results)
 
         # Generate presigned download URL for the object
-        result_key = self._get_results_s3_key(experiment_id)
-        download_url = self.data_service.s3_client.generate_presigned_url(
+        result_key = self._job_service._get_results_s3_key(experiment_id)
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,

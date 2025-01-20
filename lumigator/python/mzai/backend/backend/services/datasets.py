@@ -247,11 +247,7 @@ class DatasetService:
         When supplied, only URLs for files that match the specified extension are returned.
         """
         # Sanitize the input for a file extension.
-        if extension is not None:
-            extension = extension.strip().lower()
-            # If there's nothing left, set it as None.
-            if extension == "":
-                extension = None
+        extension = extension.strip().lower() if extension and extension.strip() else None
 
         record = self._get_dataset_record(dataset_id)
         dataset_key = self._get_s3_key(dataset_id, record.filename)

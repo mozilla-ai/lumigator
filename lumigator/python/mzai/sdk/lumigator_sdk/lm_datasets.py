@@ -129,10 +129,7 @@ class Datasets:
             DatasetDownloadResponse: the download link for the requested
                 dataset.
         """
-        if extension is not None:
-            extension = extension.strip().lower()
-            if extension == "":
-                extension = None
+        extension = extension.strip().lower() if extension and extension.strip() else None
 
         endpoint = (
             f"{self.DATASETS_ROUTE}/{id}/download"

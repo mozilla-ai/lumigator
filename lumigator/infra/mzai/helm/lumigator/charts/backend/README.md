@@ -4,7 +4,7 @@
 
 This Helm chart is the official way to deploy the Lumigator Backend in cloud environments with Kubernetes
 
-This Helm chart deploys the Lumigator core REST API and it's dependencies. By default this chart will also deploy a minimal version of Ray and Postgres in the Kubernetes cluster. If you don't want to deploy those, you have to regenerate the dependencies of the chart.
+This Helm chart deploys the Lumigator core REST API and some dependencies. By default this chart will also deploy a minimal version of Ray and Postgres in the Kubernetes cluster. If you don't want to deploy those, you have to regenerate the dependencies of the chart.
 
 > [!WARNING]
 > We don't provide support for Ray, S3-compatible storage, or Postgres which are required for the full application to run.

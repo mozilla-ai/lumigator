@@ -9,7 +9,7 @@ import boto3
 import fsspec
 import pytest
 import requests_mock
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
@@ -65,6 +65,18 @@ def valid_experiment_dataset_without_gt() -> str:
         ["Hello World"],
     ]
     return format_dataset(data)
+
+
+@pytest.fixture
+def valid_upload_file(valid_experiment_dataset) -> UploadFile:
+    """Minimal valid upload file (with ground truth)."""
+    fake_filename = "dataset.csv"
+    fake_file = io.BytesIO(valid_experiment_dataset.encode("utf-8"))
+    fake_upload_file = UploadFile(
+        filename=fake_filename,
+        file=fake_file,
+    )
+    return fake_upload_file
 
 
 @pytest.fixture(scope="session")

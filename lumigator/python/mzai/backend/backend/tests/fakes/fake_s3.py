@@ -29,12 +29,16 @@ class FakeS3Client:
     def list_objects_v2(self, **kwargs):
         bucket = kwargs["Bucket"]
         prefix = kwargs["Prefix"]
+        key = f"s3://{bucket}/{prefix}"
+
         return {
             "IsTruncated": False,
             "Name": bucket,
             "KeyCount": len(self.storage),
             "Prefix": prefix,
-            "Contents": [self.__map_entry_to_content(key) for key in self.storage.keys()],
+            "Contents": [
+                self.__map_entry_to_content(k) for k in self.storage.keys() if k.startswith(key)
+            ],
         }
 
     def generate_presigned_url(self, method, **kwargs):

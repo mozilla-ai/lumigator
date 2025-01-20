@@ -1,7 +1,12 @@
 <template>
   <div class="l-models-list">
     <div class="l-models-list__options-container">
-      HUGGING FACE
+      <div class="l-models-list__options-container-section">
+        <p>VIA HUGGING FACE</p>
+        <span>Ensure you have sufficient compute resources
+          available before running models in your environment.
+        </span>
+      </div>
       <div
         v-for="model in noAPIKeyModels"
         :key="model.name"

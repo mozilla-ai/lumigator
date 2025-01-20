@@ -44,6 +44,12 @@ The **Experiments** page gets populated with the experiment details and the stat
 ![Experiments Completed](../../assets/ui_guide_steps/experiments_completed.png)
 
 ## View Results
-For each experiment, you can view the sidebar which contains a **View Results** button.
+For each experiment, you can view the sidebar which contains a **View Results** button. On clicking this button, we would be able to see a table with evaluation metrics comparing the previously selected models.
 
-TBA
+![Results Overall Comparison](../../assets/ui_guide_steps/results_overall_comparison.png)
+
+You can further view the row by row predictions for each individual model by expanding under a given model. This gives you a detailed view of how the model predictions compare to the ground truth for each instance in the dataset.
+
+![Results Row by Row Comparison](../../assets/ui_guide_steps/results_row_by_row.png)
+
+Congratulation! With that, you have successfully run your first experiment using the Lumigator UI! You can continue to run more experiments by uploading your custom datasets and selecting from among the different models available.

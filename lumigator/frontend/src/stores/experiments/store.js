@@ -35,7 +35,7 @@ export const useExperimentStore = defineStore('experiment', () => {
           jobs: [],
           useCase: job.useCase,
           runTime: '',
-          samples: job.evaluation?.max_samples,
+          samples: job.max_samples,
           models: [],
           status: 'SUCCEEDED'
         };

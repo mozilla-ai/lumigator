@@ -98,7 +98,8 @@ default_infer_template = """{{
         "revision": "{revision}",
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
-        "torch_dtype": "{torch_dtype}"
+        "torch_dtype": "{torch_dtype}",
+        "max_length": 500
     }},
      "job": {{
         "max_samples": {max_samples},
@@ -161,8 +162,6 @@ templates = {
     JobType.EVALUATION: {
         "default": causal_eval_template,
         "hf://facebook/bart-large-cnn": bart_eval_template,
-        "hf://mikeadimech/longformer-qmsum-meeting-summarization": seq2seq_eval_template,
-        "hf://mrm8488/t5-base-finetuned-summarize-news": seq2seq_eval_template,
         "hf://Falconsai/text_summarization": seq2seq_eval_template,
         "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
         "oai://gpt-4o-mini": oai_eval_template,

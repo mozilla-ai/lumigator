@@ -83,7 +83,6 @@ class JobEvalLiteCreate(BaseModel):
     name: str
     description: str = ""
     model: str
-    model_url: str | None = None
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     config_template: str | None = None

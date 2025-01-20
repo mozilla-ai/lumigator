@@ -55,32 +55,34 @@ class JobSubmissionResponse(BaseModel):
     driver_exit_code: int | None = None
 
 
-class JobEvalCreate(BaseModel):
+class JobCreate(BaseModel):
+    job_type: JobType
     name: str
     description: str = ""
+    config_template: str | None = None
+
+
+class JobEvalCreate(JobCreate):
+    job_type: JobType = JobType.EVALUATION
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
-    config_template: str | None = None
     skip_inference: bool = False
 
 
 # TODO: this has to be renamed to JobEvalCreate and the code above
 #       has to be removed when we deprecate evaluator
-class JobEvalLiteCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobEvalLiteCreate(JobCreate):
+    job_type: JobType = JobType.EVALUATION_LITE
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    config_template: str | None = None
 
 
-class JobInferenceCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobInferenceCreate(JobCreate):
+    job_type: JobType = JobType.INFERENCE
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
@@ -97,7 +99,6 @@ class JobInferenceCreate(BaseModel):
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
-    config_template: str | None = None
     store_to_dataset: bool = False
 
 

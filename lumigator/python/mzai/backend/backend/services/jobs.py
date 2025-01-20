@@ -215,13 +215,13 @@ class JobService:
 
         return model_url
 
-    def _validate_config(self, job_type: str, config_template: str, config_params: dict):
+    def _validate_config(self, job_type: JobType, config_template: str, config_params: dict):
         if job_type == JobType.INFERENCE:
             InferenceJobConfig.model_validate_json(config_template.format(**config_params))
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
 
-    def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
+    def _get_job_params(self, job_type: JobType, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 

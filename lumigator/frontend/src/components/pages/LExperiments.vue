@@ -31,14 +31,14 @@
     <Teleport to=".sliding-panel">
       <transition name="transition-fade">
         <l-experiment-form
-          v-if="showSlidingPanel && selectedExperiment === null"
+          v-if="isFormVisible"
           @l-close-form="onDismissForm"
         />
       </transition>
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment !== null"
-          @l-results="onShowResults($event)"
+          @l-results="onShowJobResults($event)"
           @l-dnld-results="onDnldResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
@@ -53,11 +53,11 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="selectedExperimentRslts.length"
-        :results="selectedExperimentRslts"
+        v-if="selectedJobRslts.length"
+        :results="selectedJobRslts"
       />
       <l-experiment-logs
-        v-if="selectedExperimentRslts.length === 0"
+        v-if="showLogs && selectedJobRslts.length === 0"
       />
 
     </l-experiments-drawer>
@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -88,7 +88,8 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const {
   experiments,
   selectedExperiment,
-  selectedExperimentRslts
+  selectedJob,
+  selectedJobRslts
 } = storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
@@ -97,8 +98,10 @@ const showLogs = ref(null);
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
+const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
+
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
+  return showLogs.value ? 'Logs' : selectedJob.value.name;
 };
 
 const onCreateExperiment = () => {
@@ -107,17 +110,17 @@ const onCreateExperiment = () => {
 }
 
 const onSelectExperiment = (experiment) => {
-  experimentStore.loadDetails(experiment.id);
+  experimentStore.loadExperimentDetails(experiment.id);
   showSlidingPanel.value = true;
 }
 
-const onShowResults = (experiment) => {
-  experimentStore.loadResults(experiment.id);
+const onShowJobResults = (job) => {
+  experimentStore.loadJobResults(job.id);
   showDrawer.value = true;
 }
 
-const onDnldResults = (experiment) => {
-  experimentStore.loadResultsFile(experiment.id);
+const onDnldResults = (job) => {
+  experimentStore.loadResultsFile(job.id);
 }
 
 const onShowLogs = () => {
@@ -135,7 +138,7 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedExperimentRslts.value = [];
+  selectedJobRslts.value = [];
   showLogs.value = false;
   showDrawer.value = false;
 }
@@ -147,8 +150,11 @@ onMounted(async () => {
   }
 })
 
-watch(showSlidingPanel, () => {
-  selectedExperiment.value = null;
+watch(showSlidingPanel, (newValue) => {
+  if (!newValue) {
+    selectedExperiment.value = null;
+    selectedJob.value = null;
+  }
 });
 </script>
 

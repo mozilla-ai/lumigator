@@ -81,7 +81,7 @@ def dataset_has_gt(filename: str) -> bool:
         return False
 
     # True only if every value in dataset[GT_FIELD] is not None or empty.
-    return all(value for value in dataset[GT_FIELD])
+    return all(value is not None and value.strip() != "" for value in dataset[GT_FIELD])
 
 
 class DatasetService:

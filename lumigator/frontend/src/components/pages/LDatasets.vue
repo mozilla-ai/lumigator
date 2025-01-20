@@ -71,6 +71,10 @@ const confirm = useConfirm();
 const router = useRouter();
 const route = useRoute();
 
+onMounted(async () => {
+  await datasetStore.loadDatasets();
+});
+
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
 It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 

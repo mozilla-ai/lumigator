@@ -136,7 +136,7 @@ test-sdk-unit:
 
 test-sdk-integration:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="integration/test_*.py integration/*/test_*.py"
+	uv run pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)

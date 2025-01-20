@@ -1,15 +1,13 @@
-# Mozilla.ai Lumigator Helm chart
+# Mozilla.ai Lumigator Backend Helm chart
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
-This Helm chart is the official way to deploy the Lumigator application in cloud environments with Kubernetes
+This Helm chart is the official way to deploy the Lumigator Backend in cloud environments with Kubernetes
 
-At this moment this Helm chart only deploys the Lumigator core REST API. We don't provide support for Ray, S3-compatible storage, or Postgres which are required for the full application to run.
+This Helm chart deploys the Lumigator core REST API and it's dependencies. By default this chart will also deploy a minimal version of Ray and Postgres in the Kubernetes cluster. If you don't want to deploy those, you have to regenerate the dependencies of the chart.
 
 > [!WARNING]
-> Lumigator needs an existent: S3 bucket, a relational database and a Ray cluster in order to work as expected.
-
-In the near future, a new version of this chart will be released, which will be able to deploy a minimal version of all the required tools.
+> We don't provide support for Ray, S3-compatible storage, or Postgres which are required for the full application to run.
 
 ## Mistral/OpenAI API key management
 

@@ -4,4 +4,12 @@
 
 This Helm chart is the official way to deploy Lumigator in cloud environments with Kubernetes.
 
-This Helm chart deploys Lumigator backend and frontend and its dependencies.
+This Helm chart is composed by two sub-charts:
+
+## `backend` 
+
+Deploys Lumigator core REST API, a Postgres instance and a minimal version of a Ray cluster.
+
+## `frontend` 
+
+ Deploys Lumigator frontend.

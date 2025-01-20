@@ -43,7 +43,7 @@
         @l-experiment="onExperimentDataset($event)"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
-        @l-download-dataset="downloadDataset($event)"
+        @l-download-dataset="onDownloadDataset()"
       />
     </Teleport>
   </div>
@@ -110,9 +110,8 @@ function deleteConfirmation(dataset) {
   });
 }
 
-async function downloadDataset(dataset) {
-  const blob = await datasetsService.downloadDataset(dataset.id);
-  downloadContent(blob, dataset.filename)
+function onDownloadDataset() {
+  datasetStore.loadDatasetFile();
 }
 
 const onDatasetAdded = () => { datasetInput.value.input.click() }

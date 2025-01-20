@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia'
 import datasetsService from "@/services/datasets/datasetsService";
+import {downloadContent} from "@/helpers/index.js";
 
 export const useDatasetStore = defineStore('dataset', () => {
   const datasets = ref([]);
@@ -41,6 +42,11 @@ export const useDatasetStore = defineStore('dataset', () => {
     await loadDatasets();
   }
 
+  async function loadDatasetFile() {
+    const blob = await datasetsService.downloadDataset(selectedDataset.value.id);
+    downloadContent(blob, selectedDataset.value.filename)
+  }
+
   return {
     datasets,
     loadDatasets,
@@ -48,6 +54,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     loadDatasetInfo,
     resetSelection,
     uploadDataset,
-    deleteDataset
+    deleteDataset,
+    loadDatasetFile
   }
 })

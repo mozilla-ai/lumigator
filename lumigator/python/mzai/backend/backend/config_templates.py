@@ -134,8 +134,7 @@ oai_infer_template = """{{
     "job": {{
         "max_samples": {max_samples},
         "storage_path": "{storage_path}",
-        "output_field": "{output_field}",
-        "enable_tqdm": true
+        "output_field": "{output_field}"
     }},
     "inference_server": {{
         "base_url": "{model_url}",

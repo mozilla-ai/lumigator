@@ -12,8 +12,7 @@ from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
-    JobEvalCreate,
-    JobEvalLiteCreate,
+    JobCreate,
     JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
@@ -21,6 +20,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.jobs.inference import InferenceJobConfig
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -215,6 +215,12 @@ class JobService:
 
         return model_url
 
+    def _validate_config(self, job_type: str, config_template: str, config_params: dict):
+        if job_type == JobType.INFERENCE:
+            InferenceJobConfig.model_validate_json(config_template.format(**config_params))
+        else:
+            loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
+
     def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
@@ -237,6 +243,7 @@ class JobService:
                 "system_prompt": request.system_prompt,
                 "skip_inference": request.skip_inference,
             }
+
         elif job_type == JobType.EVALUATION_LITE:
             job_params = {
                 "job_id": record.id,
@@ -246,7 +253,7 @@ class JobService:
                 "max_samples": request.max_samples,
                 "storage_path": self.storage_path,
             }
-        else:
+        elif job_type == JobType.INFERENCE:
             job_params = {
                 "job_id": record.id,
                 "job_name": request.name,
@@ -262,38 +269,31 @@ class JobService:
                 "storage_path": self.storage_path,
                 "model_url": self._set_model_type(request),
                 "system_prompt": request.system_prompt,
-                "output_field": request.output_field,
+                "output_field": request.output_field or "predictions",
                 "max_tokens": request.max_tokens,
                 "frequency_penalty": request.frequency_penalty,
                 "temperature": request.temperature,
                 "top_p": request.top_p,
             }
+        else:
+            raise ValueError(f"Job type {job_type} not recognized.")
 
         return job_params
 
     def create_job(
         self,
-        request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate,
+        request: JobCreate,
         background_tasks: BackgroundTasks,
         experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
-        if isinstance(request, JobEvalCreate):
-            job_type = JobType.EVALUATION
-        elif isinstance(request, JobEvalLiteCreate):
-            job_type = JobType.EVALUATION_LITE
-        elif isinstance(request, JobInferenceCreate):
-            job_type = JobType.INFERENCE
-        else:
-            raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
-
+        if request.job_type not in JobType:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Job type not implemented.")
+        job_type = request.job_type
         # Create a db record for the job
         record = self.job_repo.create(
             name=request.name, description=request.description, experiment_id=experiment_id
         )
-
-        if isinstance(request, JobInferenceCreate) and not request.output_field:
-            request.output_field = "predictions"
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -308,6 +308,8 @@ class JobService:
             config_template = self._get_config_template(job_type, request.model)
 
         loguru.logger.info(f"template...{config_template, job_type, request.model}")
+
+        self._validate_config(job_type, config_template, config_params)
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.

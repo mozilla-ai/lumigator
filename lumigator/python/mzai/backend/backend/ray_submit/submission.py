@@ -1,3 +1,4 @@
+import os
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any
@@ -37,6 +38,11 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
     loguru.logger.info(
         f"Submitting {entrypoint.get_command_with_params}...{entrypoint.runtime_env}"
     )
+    # copy the lumigator_schema to the working directory so that it's uploaded with the source code
+    # This way, the jobs can use and adhere to the Lumigator schemas when running in ray.
+    working_dir = entrypoint.runtime_env["working_dir"]
+    os.system(f"cp -r ../schemas/lumigator_schemas/ {working_dir}")
+
     return client.submit_job(
         entrypoint=entrypoint.get_command_with_params,
         metadata=entrypoint.metadata,

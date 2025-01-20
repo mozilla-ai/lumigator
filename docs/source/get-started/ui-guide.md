@@ -18,6 +18,29 @@ Once the dataset is uploaded, it can be viewed as a row in the table in the **Da
 ![Datasets Table](../../assets/ui_guide_steps/datasets_table.png)
 
 ## Create and Run an Experiment
+Next we move on to the **Experiments** section. Start by clicking on the **Create Experiment** button.
 
+![Experiments Page](../../assets/ui_guide_steps/experiments_page.png)
+
+This will open a sidebar where you would specify which use case and dataset, and further experiment details. The maximum samples field defines the number of rows from the dataset to be used for the experiment, on which Lumigator would run inference and evaluation to generate results.
+
+Below that, you have the option to select the models to be used for the experiment. Multiple models can be simultaneously selected.
+
+| ![Experiment Fields](../../assets/ui_guide_steps/experiment_fields.png) | ![Model Selection](../../assets/ui_guide_steps/model_select.png) |
+| --- | --- |
+
+```{note}
+In order to be able to use API based models, you need to provide the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator.
+```console
+user@host:~/lumigator$ export MISTRAL_API_KEY=<your_mistral_api_key>
+```
+
+Finally click the **Run Experiment** button.
+
+![Experiments Running](../../assets/ui_guide_steps/experiments_running.png)
+
+The **Experiments** page gets populated with the experiment details and the status of the experiment, which would initially be `RUNNING` and changes to `SUCCEEDED` once the experiment is complete or `FAILED` if the experiment fails.
+
+![Experiments Completed](../../assets/ui_guide_steps/experiments_completed.png)
 
 ## View Results

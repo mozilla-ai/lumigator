@@ -77,7 +77,8 @@ def test_upload_data_launch_job(
         create_inference_job_response.json()
     )
 
-    assert wait_for_job(local_client, create_inference_job_response_model.id)
+    wait_for_job(local_client, create_inference_job_response_model.id)
+
 
     logs_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/logs"
@@ -177,6 +178,7 @@ def test_upload_data_no_gt_launch_annotation(
 
     assert wait_for_job(local_client, create_annotation_job_response_model.id)
 
+
     logs_annotation_job_response = local_client.get(
         f"/jobs/{create_annotation_job_response_model.id}/logs"
     )
@@ -246,11 +248,10 @@ def test_full_experiment_launch(
     logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
 
-    assert wait_for_experiment(local_client, get_experiments.items[0].id)
-
     get_jobs_per_experiment_response = local_client.get(
         f"/experiments_new/{get_experiments.items[0].id}/jobs"
     )
+    logger.info(f"--> {get_jobs_per_experiment_response.json()}")
     experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")

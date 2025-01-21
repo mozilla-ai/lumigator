@@ -15,6 +15,8 @@ from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
+
+from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.jobs import (
     JobConfig,
     JobResponse,
@@ -95,7 +97,7 @@ def wait_for_experiment(client, experiment_id: UUID) -> bool:
     for _ in range(1, MAX_POLLS):
         get_experiment_response = client.get(f"/experiments_new/{experiment_id}")
         assert get_experiment_response.status_code == 200
-        get_experiment_response_model = JobResponse.model_validate(get_experiment_response.json())
+        get_experiment_response_model = ExperimentResponse.model_validate(get_experiment_response.json())
         if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             timed_out = False

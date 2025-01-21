@@ -1,13 +1,10 @@
-from io import BytesIO
 from uuid import UUID
 
 import pytest
-from fastapi import UploadFile
 from lumigator_schemas.datasets import DatasetFormat
-from s3fs import S3FileSystem
 
 from backend.repositories.datasets import DatasetRepository
-from backend.services.datasets import DatasetService
+from backend.services.datasets import DatasetService, dataset_has_gt
 
 
 def test_delete_dataset_file_not_found(db_session, fake_s3_client, fake_s3fs):
@@ -65,3 +62,21 @@ def test_dataset_download_with_extensions(
         sum(1 for x in download_response.download_urls if x.endswith(extension.strip().lower()))
         == total
     )
+
+
+@pytest.mark.parametrize(
+    "dataset_filename, expected_ground_truth",
+    [
+        ("dialogsum_exc.csv", True),
+        ("dialogsum_mini_empty_gt.csv", False),
+        ("dialogsum_mini_no_gt.csv", False),
+        ("dialogsum_mini_some_missing_some_whitespace_gt.csv", False),
+        ("dialogsum_mini_all_gt_is_whitespace.csv", False),
+    ],
+)
+def test_dataset_has_ground_truth(
+    common_resources_sample_data_dir, dataset_filename, expected_ground_truth
+):
+    filename = str(common_resources_sample_data_dir / dataset_filename)
+    has_gt = dataset_has_gt(filename)
+    assert has_gt == expected_ground_truth

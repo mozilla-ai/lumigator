@@ -54,7 +54,7 @@
           <template #body="slotProps">
             <span class="capitalize">
               {{ slotProps.data.generated ? 'True : AI Generated' : slotProps.data.ground_truth }}
-          </span>
+            </span>
           </template>
         </Column>
         <Column header="options">

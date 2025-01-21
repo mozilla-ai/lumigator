@@ -37,7 +37,6 @@ def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) ->
     loguru.logger.info(
         f"Submitting {entrypoint.get_command_with_params}...{entrypoint.runtime_env}"
     )
-
     return client.submit_job(
         entrypoint=entrypoint.get_command_with_params,
         metadata=entrypoint.metadata,

@@ -183,11 +183,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	cd lumigator/python/mzai/jobs/evaluator_lite; \
-	PYTHONPATH=../../schemas uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:
 	cd lumigator/python/mzai/jobs/inference; \
-	PYTHONPATH=../../schemas uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 

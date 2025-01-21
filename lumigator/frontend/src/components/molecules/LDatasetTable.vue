@@ -53,7 +53,7 @@
         >
           <template #body="slotProps">
             <span class="capitalize">
-              {{ slotProps.data.generated ? 'True : AI Generated' : slotProps.data.ground_truth }}
+              {{ slotProps.data.generated ? 'True (AI Generated)' : slotProps.data.ground_truth }}
             </span>
           </template>
         </Column>

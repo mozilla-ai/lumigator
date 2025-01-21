@@ -165,7 +165,7 @@ async function handleGenerateGroundTruth() {
     router.push('experiments');
     await experimentStore.loadExperiments();
   } catch (error) {
-    console.log("Error generating groundtruth", groundTruthPayload,error)
+    console.log("Error generating ground truth", groundTruthPayload,error)
   }
   isGenerateGroundTruthPopupVisible.value = false;
 }

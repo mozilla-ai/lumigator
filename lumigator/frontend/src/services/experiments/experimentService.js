@@ -67,7 +67,7 @@ async function triggerAnnotationJob(groundTruthPayload) {
     });
     return response.data;
   } catch (error) {
-    console.error('Error while creating groundtruth job', error);
+    console.error('Error while creating ground truth job', error);
     return null;
   }
 }

@@ -134,13 +134,13 @@ class Jobs:
 
         Args:
             type(JobType): The kind of job to create. It can be either
-                EVALUATION or INFERENCE.
+                EVALUATION_LITE, ANNOTATION or INFERENCE.
             request(JobEvalCreate): The job's configuration.
 
         Returns:
             JobResponse: The information for the newly created job.
         """
-        if type == JobType.EVALUATION:
+        if type == JobType.EVALUATION or type == JobType.EVALUATION_LITE:
             JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
         elif type == JobType.INFERENCE:
             JobInferenceCreateStrict.model_validate(JobInferenceCreate.model_dump(request))

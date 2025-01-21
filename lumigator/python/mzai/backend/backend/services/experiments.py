@@ -177,10 +177,12 @@ class ExperimentService:
 
         if all_succeeded:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
-        if any_failed:
+        elif any_failed:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.FAILED)
-        if any_running:
+        elif any_running:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.RUNNING)
+        else:
+            record = self._experiment_repo.update(experiment_id, status=JobStatus.PENDING)
 
         return ExperimentResponse.model_validate(record)
 

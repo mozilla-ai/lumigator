@@ -128,8 +128,8 @@ jobs:
   build-backend-image:
     name: Build Backend Docker image
     runs-on: ubuntu-latest
-    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
-    if: ${{ needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -161,23 +161,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and export
         if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          push: true
           target: "main_image"
-          tags: |
-            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) || '' }}
-            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator:{0}', github.ref_name) || '' }}
+          outputs: type=docker,dest=${{ runner.temp }}/backend_${{ env.GITHUB_SHA_SHORT }}.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend
+          path: ${{ runner.temp }}/backend_${{ env.GITHUB_SHA_SHORT }}.tar
+          retention-days: 1
 
   build-frontend-image:
     name: Build Frontend Docker image
     runs-on: ubuntu-latest
-    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
-    if: ${{ needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -209,18 +212,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and export
         uses: docker/build-push-action@v6
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
           platforms: linux/amd64,linux/arm64
-          push: true
           target: "server"
-          tags: |
-            ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator-frontend:frontend_{0}', env.GITHUB_SHA_SHORT) || '' }}
-            ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator-frontend:latest' || '' }}
-            ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator-frontend:{0}', github.ref_name) || '' }}
+          outputs: type=docker,dest=${{ runner.temp }}/frontend_${{ env.GITHUB_SHA_SHORT }}.tar.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend
+          path: ${{ runner.temp }}/frontend_${{ env.GITHUB_SHA_SHORT }}.tar
+          retention-days: 1
 
   sdk-packaging:
     name: Package SDK

@@ -17,7 +17,11 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.main import app
-from backend.tests.conftest import TEST_CAUSAL_MODEL
+from backend.tests.conftest import (
+    TEST_CAUSAL_MODEL,
+    wait_for_experiment,
+    wait_for_job,
+)
 
 
 @app.on_event("startup")
@@ -73,25 +77,7 @@ def test_upload_data_launch_job(
         create_inference_job_response.json()
     )
 
-    succeeded = False
-    for _ in range(1, 200):
-        get_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        logs_infer_job_response = local_client.get(
-            f"/jobs/{create_inference_job_response_model.id}/logs"
-        )
-        logs_infer_job_response_model = JobLogsResponse.model_validate(
-            logs_infer_job_response.json()
-        )
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            break
-        time.sleep(10)
-    assert succeeded
+    assert wait_for_job(local_client, create_inference_job_response_model.id)
 
     logs_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/logs"
@@ -131,19 +117,7 @@ def test_upload_data_launch_job(
         create_evaluation_job_response.json()
     )
 
-    succeeded = False
-    for _ in range(1, 200):
-        get_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            break
-        time.sleep(10)
-    assert succeeded
+    assert wait_for_job(local_client, create_evaluation_job_response_model.id)
 
     logs_evaluation_job_response = local_client.get(
         f"/jobs/{create_evaluation_job_response_model.id}/logs"
@@ -201,19 +175,7 @@ def test_upload_data_no_gt_launch_annotation(
         create_annotation_job_response.json()
     )
 
-    succeeded = False
-    for _ in range(1, 200):
-        get_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            break
-        time.sleep(10)
-    assert succeeded
+    assert wait_for_job(local_client, create_annotation_job_response_model.id)
 
     logs_annotation_job_response = local_client.get(
         f"/jobs/{create_annotation_job_response_model.id}/logs"
@@ -284,22 +246,8 @@ def test_full_experiment_launch(
     logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
 
-    succeeded = False
-    for _ in range(1, 200):
-        get_experiment_response = local_client.get(
-            f"/experiments_new/{get_experiments.items[0].id}"
-        )
-        assert get_experiment_response.status_code == 200
-        get_experiment_response_model = ExperimentResponse.model_validate(
-            get_experiment_response.json()
-        )
-        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            break
-        if get_experiment_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            break
-        time.sleep(10)
+    assert wait_for_experiment(local_client, get_experiments.items[0].id)
+
     get_jobs_per_experiment_response = local_client.get(
         f"/experiments_new/{get_experiments.items[0].id}/jobs"
     )
@@ -310,8 +258,6 @@ def test_full_experiment_launch(
         logger.info(f"Logs for job {job}: ------")
         logger.info(f"{logs_job_response_model}")
         logger.info("------")
-
-    assert succeeded
 
     get_ds_after_response = local_client.get("/datasets/")
     assert get_ds_after_response.status_code == 200

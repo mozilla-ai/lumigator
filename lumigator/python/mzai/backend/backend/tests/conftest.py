@@ -1,9 +1,11 @@
 import csv
 import io
 import os
+import time
 import uuid
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import boto3
 import fsspec
@@ -13,7 +15,12 @@ from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
-from lumigator_schemas.jobs import JobConfig, JobType
+from lumigator_schemas.jobs import (
+    JobConfig,
+    JobResponse,
+    JobStatus,
+    JobType,
+)
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
@@ -34,6 +41,14 @@ TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
 TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGeneration"
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
+# Maximum amount of polls done to check if a job has finished
+# (status FAILED or SUCCEEDED) in fucntion tests.
+# An Exception will be raised if the number of polls is exceeded.
+MAX_POLLS = 18
+
+# Time between job status polls.
+POLL_WAIT_TIME = 10
+
 
 @pytest.fixture
 def common_resources_dir() -> Path:
@@ -51,6 +66,48 @@ def format_dataset(data: list[list[str]]) -> str:
     csv.writer(buffer).writerows(data)
     buffer.seek(0)
     return buffer.read()
+
+
+def wait_for_job(client, job_id: UUID) -> bool:
+    succeeded = False
+    timed_out = True
+    for _ in range(1, MAX_POLLS):
+        get_job_response = client.get(f"/jobs/{job_id}")
+        assert get_job_response.status_code == 200
+        get_job_response_model = JobResponse.model_validate(get_job_response.json())
+        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        time.sleep(POLL_WAIT_TIME)
+    if timed_out:
+        raise Exception("Job poll timed out")
+    return succeeded
+
+
+def wait_for_experiment(client, experiment_id: UUID) -> bool:
+    succeeded = False
+    timed_out = True
+    for _ in range(1, MAX_POLLS):
+        get_experiment_response = client.get(f"/experiments_new/{experiment_id}")
+        assert get_experiment_response.status_code == 200
+        get_experiment_response_model = JobResponse.model_validate(get_experiment_response.json())
+        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            timed_out = False
+            break
+        if get_experiment_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        time.sleep(POLL_WAIT_TIME)
+    if timed_out:
+        raise Exception("Experiment poll timed out")
+    return succeeded
 
 
 @pytest.fixture

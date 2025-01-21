@@ -35,7 +35,10 @@
           @click.stop
         />
       </div>
-       <div class="l-models-list__options-container-section">
+       <div
+        v-if="apiKeyModels.length"
+        class="l-models-list__options-container-section"
+      >
         <p>VIA APIs</p>
         <span>Ensure your API keys are
           added to your environment variables (.env)

@@ -1,3 +1,8 @@
+"""Schema file that is loaded by the backend to validate the input/output data.
+This file must only depend on pydantic and not on any other external library.
+This is because the backend and this job will be running in different environments.
+"""
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -50,3 +55,10 @@ class InferenceJobConfig(BaseModel):
     params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")
+
+
+class InferenceJobOutput(BaseModel):
+    predictions: list
+    examples: list
+    ground_truth: list
+    model: str

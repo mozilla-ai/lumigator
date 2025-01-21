@@ -38,12 +38,8 @@ def get_experiment(service: ExperimentServiceDep, experiment_id: UUID) -> Experi
 
 
 @router.get("/{experiment_id}/jobs")
-def get_experiment_jobs(
-    service: ExperimentServiceDep, experiment_id: UUID
-) -> ListingResponse[UUID]:
-    return service.get_all_owned_jobs(experiment_id)
-    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
-
+def get_experiment_jobs(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse:
+    return ExperimentResponse.model_validate(service._get_experiment_jobs(experiment_id))
 
 
 @router.get("/")

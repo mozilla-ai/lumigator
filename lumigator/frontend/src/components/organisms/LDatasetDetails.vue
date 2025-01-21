@@ -90,7 +90,7 @@
           rounded
           severity="secondary"
           size="small"
-          label="Generate ground truth"
+          label="Generate Ground Truth"
           class="l-dataset-empty__action-btn"
           @click="showGenerateGroundTruthPopup"
         />

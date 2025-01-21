@@ -77,10 +77,11 @@ To start Lumigator locally, follow these steps:
     cd lumigator
     ```
 
-1. If your system has an NVidia GPU, open a terminal and run:
+1. If your system has an NVIDIA GPU, you have an additional pre-requirement: [install the NVIDIA Container Toolkit following their instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). After that, open a terminal and run:
     ```bash
     export RAY_WORKERS_GPU=1
     export RAY_WORKERS_GPU_FRACTION=1.0
+    export GPU_COUNT=1
     ```
     **Important: Continue the next steps in this same terminal.***
 

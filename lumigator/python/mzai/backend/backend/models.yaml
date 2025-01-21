@@ -47,6 +47,8 @@
   uri: oai://gpt-4o-mini
   website_url: https://platform.openai.com/docs/models#gpt-4o-mini
   description: OpenAI's GPT-4o-mini model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -54,6 +56,8 @@
   uri: oai://gpt-4o
   website_url: https://platform.openai.com/docs/models#gpt-4o
   description: OpenAI's GPT-4o model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -61,6 +65,8 @@
   uri: mistral://open-mistral-7b
   website_url: https://mistral.ai/technology/#models
   description: Mistral's 7B model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -72,5 +78,7 @@
     parameter_count: 7.24B
     tensor_type: BF16
     model_size: 14.5GB
+  requirements:
+    - llamafile
   tasks:
     - summarization:

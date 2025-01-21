@@ -231,7 +231,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
-  async function startGroundtruthGeneration(groundTruthPayload) {
+  async function startGroundTruthGeneration(groundTruthPayload) {
     try {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
       if (jobResponse) {
@@ -303,7 +303,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experimentLogs,
     selectedExperimentRslts,
     selectedJobRslts,
-    startGroundtruthGeneration,
+    startGroundTruthGeneration: startGroundTruthGeneration,
     runExperiment
   }
 })

@@ -90,18 +90,18 @@
           rounded
           severity="secondary"
           size="small"
-          label="Generate Groundtruth"
+          label="Generate Ground truth"
           class="l-dataset-empty__action-btn"
-          @click="showGenerateGroundtruthPopup"
+          @click="showGenerateGroundTruthPopup"
         />
       </div>
     </div>
 
-    <LGenerateGroundtruthPopup
-      :visible="isGenerateGroundtruthPopupVisible"
+    <LGenerateGroundTruthPopup
+      :visible="isGenerateGroundTruthPopupVisible"
       :dataset="selectedDataset"
-      @close="isGenerateGroundtruthPopupVisible = false"
-      @accept="handleGenerateGroundtruth"
+      @close="isGenerateGroundTruthPopupVisible = false"
+      @accept="handleGenerateGroundTruth"
     />
   </div>
 </template>
@@ -114,7 +114,7 @@ import { useDatasetStore } from '@/stores/datasets/store';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { formatDate } from '@/helpers/index';
 import Button from 'primevue/button';
-import LGenerateGroundtruthPopup from '@/components/molecules/LGenerateGroundtruthPopup.vue';
+import LGenerateGroundTruthPopup from '@/components/molecules/LGenerateGroundTruthPopup.vue';
 import { useExperimentStore } from '@/stores/experiments/store';
 
 
@@ -123,7 +123,7 @@ const datasetStore = useDatasetStore();
 const { selectedDataset } = storeToRefs(datasetStore);
 const { showSlidingPanel } = useSlidePanel();
 const isCopied = ref(false);
-const isGenerateGroundtruthPopupVisible = ref(false);
+const isGenerateGroundTruthPopupVisible = ref(false);
 const experimentStore = useExperimentStore();
 const router = useRouter();
 
@@ -147,27 +147,27 @@ function onCloseDetails() {
   emit('l-details-closed')
 }
 
-function showGenerateGroundtruthPopup() {
-  isGenerateGroundtruthPopupVisible.value = true;
+function showGenerateGroundTruthPopup() {
+  isGenerateGroundTruthPopupVisible.value = true;
 }
 
 
-async function handleGenerateGroundtruth() {
+async function handleGenerateGroundTruth() {
   const groundTruthPayload = {
-    name: `Groundtruth for ${selectedDataset.value.filename}`,
-    description: `Groundtruth generation for dataset ${selectedDataset.value.id}`,
+    name: `Ground truth for ${selectedDataset.value.filename}`,
+    description: `Ground truth generation for dataset ${selectedDataset.value.id}`,
     dataset: selectedDataset.value.id,
     max_samples: -1,
     task: "summarization",
   };
   try {
-    const result = await experimentStore.startGroundtruthGeneration(groundTruthPayload);
+    const result = await experimentStore.startGroundTruthGeneration(groundTruthPayload);
     router.push('experiments');
     await experimentStore.loadExperiments();
   } catch (error) {
     console.log("Error generating groundtruth", groundTruthPayload,error)
   }
-  isGenerateGroundtruthPopupVisible.value = false;
+  isGenerateGroundTruthPopupVisible.value = false;
 }
 async function refreshDatasetStatus() {
   await datasetStore.fetchDatasetDetails(selectedDataset.value.id); // Replace with your dataset refresh logic

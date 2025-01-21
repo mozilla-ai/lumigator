@@ -2,13 +2,13 @@
     <div v-if="visible" class="popup-backdrop">
       <div class="popup">
         <div class="popup-header">
-          <h3>Generate Groundtruth</h3>
+          <h3>Generate Ground truth</h3>
         </div>
         <div class="popup-body">
           <p>
-            Groundtruth will be generated using <strong>BART</strong>, Lumigator's reference model for this task.
+            Ground truth will be generated using <strong>BART</strong>, Lumigator's reference model for this task.
             Since result quality can vary substantially depending on your dataset, we recommend reviewing the output
-            before using it as Groundtruth for your experiments.
+            before using it as Ground truth for your experiments.
           </p>
           <p>
             <small>Processing time depends on your compute power.</small>

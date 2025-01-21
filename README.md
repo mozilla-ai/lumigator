@@ -77,18 +77,37 @@ To start Lumigator locally, follow these steps:
     cd lumigator
     ```
 
-1. Start Lumigator using Docker Compose:
+1. If your system has an NVidia GPU, open a terminal and run:
+    ```bash
+    export RAY_WORKERS_GPU=1
+    export RAY_WORKERS_GPU_FRACTION=1.0
+    ```
+    **Important: Continue the next steps in this same terminal.***
+
+
+1. If you intend to use Mistral API or OpenAI API, use that same terminal and run:
+    ```bash
+    export MISTRAL_API_KEY=your_mistral_api_key
+    export OPENAI_API_KEY=your_openai_api_key
+    rm .env
+    ```
+    **Important: Continue the next steps in this same terminal.***
+
+    Note: Deleting the existing `.env` is a precaution to ensure you have the most up to date environemnt variables required at any point. Notice while we are in early stages of development, these may change.
+
+    The start script on the next step will recreate the necessary `.env` for you.
+
+1. From that same terminal, start Lumigator with:
 
     ```bash
     make start-lumigator
     ```
 
-To verify that Lumigator is running, open a web browser and navigate to
-[`http://localhost:8000`](http://localhost:8000). You should get the following response:
+    This will create an appropriate `.env` and use Docker Compose to launch all necessary containers for you.
 
-```json
-{"Hello": "Lumigator!🐊"}
-```
+To verify that Lumigator is running, open a web browser and navigate to
+[`http://localhost`](http://localhost). You should see Lumigator's UI.
+
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any

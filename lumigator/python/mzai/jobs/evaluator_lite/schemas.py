@@ -60,8 +60,8 @@ class Rouge(BaseModel):
 
 
 class EvalJobOutput(BaseModel):
-    bertscore: BertScore | None
-    meteor: Meteor | None
-    rouge: Rouge | None
+    bertscore: BertScore | None = None
+    meteor: Meteor | None = None
+    rouge: Rouge | None = None
     predictions: list[str]
     ground_truth: list[str]

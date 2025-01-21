@@ -8,13 +8,19 @@
       </div>
       <div class="popup-body">
         <p>
-          Ground truth will be generated using <strong>BART</strong>, Lumigator's reference model
-          for this task.
+          Ground truth will be generated using
+          <strong>
+            <a href="https://huggingface.co/facebook/bart-large-cnn"
+               target="_blank"
+            >BART</a>
+          </strong>, Lumigator's reference model for this task.
+        </p>
+        <p>
           Since result quality can vary substantially depending on your dataset, we recommend
           reviewing the output before using it as ground truth for your experiments.
         </p>
         <p>
-          <small>Processing time depends on your compute power.</small>
+          Processing time depends on your compute power.
         </p>
       </div>
       <div class="popup-footer">

@@ -75,6 +75,9 @@ def validate_experiment_dataset(filename: str):
 
 
 def dataset_has_gt(filename: str) -> bool:
+    """Returns true if the dataset located at the supplied path (filename) has a ground truth
+    column with all of its rows correctly populated, otherwise false.
+    """
     dataset = load_dataset("csv", data_files=filename, split="train")
 
     if GT_FIELD not in dataset.column_names:

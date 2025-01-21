@@ -43,7 +43,7 @@ services:
       - local
 
   ray:
-    image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
+    image: rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX}
     ports:
       - "6379:6379"
       - "8265:8265"
@@ -120,8 +120,8 @@ services:
       - RAY_HEAD_NODE_HOST
       - MISTRAL_API_KEY=$MISTRAL_API_KEY
       - OPENAI_API_KEY=$OPENAI_API_KEY
-      - RAY_WORKER_GPUS=0
-      - RAY_WORKER_GPUS_FRACTION=0
+      - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
+      - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
       - LUMI_API_CORS_ALLOWED_ORIGINS
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.

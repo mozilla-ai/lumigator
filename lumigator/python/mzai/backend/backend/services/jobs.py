@@ -8,6 +8,7 @@ from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from inference.schemas import InferenceJobConfig
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -21,7 +22,6 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
-from lumigator_schemas.jobs.inference import InferenceJobConfig
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -36,7 +36,7 @@ from backend.settings import settings
 
 class JobService:
     # set storage path
-    storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
+    storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
     job_settings = {
         JobType.INFERENCE: {

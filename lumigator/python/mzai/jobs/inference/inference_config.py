@@ -4,13 +4,13 @@ from typing import Annotated
 import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
-from lumigator_schemas.jobs.inference import DatasetConfig
-from lumigator_schemas.jobs.inference import HfPipelineConfig as BaseHfPipelineConfig
-from lumigator_schemas.jobs.inference import InferenceJobConfig as BaseInferenceJobConfig
-from lumigator_schemas.jobs.inference import InferenceServerConfig as BaseInferenceServerConfig
-from lumigator_schemas.jobs.inference import JobConfig as BaseJobConfig
-from lumigator_schemas.jobs.inference import SamplingParameters as BaseSamplingParameters
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from schemas import DatasetConfig
+from schemas import HfPipelineConfig as BaseHfPipelineConfig
+from schemas import InferenceJobConfig as BaseInferenceJobConfig
+from schemas import InferenceServerConfig as BaseInferenceServerConfig
+from schemas import JobConfig as BaseJobConfig
+from schemas import SamplingParameters as BaseSamplingParameters
 from transformers.pipelines import check_task, get_supported_tasks
 from utils import resolve_model_repo
 

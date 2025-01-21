@@ -299,7 +299,7 @@ jobs:
           context: ${{ runner.temp }}
           push: true
           load: false
-          outputs: type=oci
+          tags: | 
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
             ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator:{0}', github.ref_name) || '' }}

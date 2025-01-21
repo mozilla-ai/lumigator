@@ -8,7 +8,7 @@
         </span>
       </div>
       <div
-        v-for="model in noAPIKeyModels"
+        v-for="model in modelsRequiringNoAPIKey"
         :key="model.name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
@@ -36,7 +36,7 @@
         />
       </div>
        <div
-        v-if="apiKeyModels.length"
+        v-if="modelsRequiringAPIKey.length"
         class="l-models-list__options-container-section"
       >
         <p>VIA APIs</p>
@@ -46,7 +46,7 @@
         </span>
       </div>
       <div
-        v-for="model in apiKeyModels"
+        v-for="model in modelsRequiringAPIKey"
         :key="model.name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
@@ -97,11 +97,11 @@ defineExpose({
   selectedModels
 })
 
-const apiKeyModels = computed(() => {
+const modelsRequiringAPIKey = computed(() => {
   return models.value.filter((x) => x.requires_api_key)
 })
 
-const noAPIKeyModels = computed(() => {
+const modelsRequiringNoAPIKey = computed(() => {
   return models.value.filter((x) => !x.requires_api_key)
 })
 

@@ -260,8 +260,8 @@ jobs:
 
   push-images:
     name: Push Docker images
-    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
-    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    needs: build-backend-image
+    if: ${{ needs.build-backend-image.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -98,11 +98,15 @@ defineExpose({
 })
 
 const modelsRequiringAPIKey = computed(() => {
-  return models.value.filter((x) => x.requires_api_key)
+  return models.value.filter((x) => x?.metadata?.requirements !== undefined &&
+    Array.isArray(x.metadata.requirements) &&
+    x.metadata.requirements.includes("api_key"))
 })
 
 const modelsRequiringNoAPIKey = computed(() => {
-  return models.value.filter((x) => !x.requires_api_key)
+  return models.value.filter((x) => x?.metadata?.requirements === undefined ||
+    !Array.isArray(x.metadata.requirements) ||
+    !x.metadata.requirements.includes("api_key"))
 })
 
 function toggleModel(model) {

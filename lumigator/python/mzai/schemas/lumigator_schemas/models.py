@@ -1,5 +1,3 @@
-from typing import Any
-
 from pydantic import BaseModel, Field
 
 
@@ -14,6 +12,6 @@ class ModelsResponse(BaseModel):
     uri: str
     website_url: str
     description: str
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    requirements: list[str] = Field(default_factory=list)
     info: ModelInfo | None = None
     tasks: list[dict[str, dict | None]]

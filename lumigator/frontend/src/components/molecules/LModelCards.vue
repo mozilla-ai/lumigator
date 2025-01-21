@@ -99,14 +99,14 @@ defineExpose({
 
 const modelsByRequirement = (requirementKey, isRequired) => {
   return models.value.filter((x) => {
-    const isKeyPresent = x?.metadata?.requirements?.includes(requirementKey);
+    const isKeyPresent = x?.requirements?.includes(requirementKey);
     return isRequired ? isKeyPresent : !isKeyPresent;
   });
 }
 
-const modelsRequiringAPIKey = computed(() => modelsByRequirement("api_key"), true);
+const modelsRequiringAPIKey = computed(() => modelsByRequirement("api_key", true));
 
-const modelsRequiringNoAPIKey = computed(() => modelsByRequirement("api_key"), false);
+const modelsRequiringNoAPIKey = computed(() => modelsByRequirement("api_key", false));
 
 function toggleModel(model) {
   const index = selectedModels.value.findIndex(

@@ -1,5 +1,5 @@
 import http from '@/services/http';
-import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET } from './api';
+import {PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD} from './api';
 
 async function fetchDatasets() {
   try {
@@ -48,9 +48,38 @@ async function deleteDataset(id) {
   }
 }
 
+async function downloadDataset(id) {
+  try {
+    const url = `${PATH_SINGLE_DATASET_DOWNLOAD(id)}?extension=csv`;
+    const response = await http.get(url);
+    if (response.status !== 200) {
+      console.error("Error getting dataset download URLs: ", response.status);
+      return;
+    }
+
+    const { download_urls } = response.data;
+    if (!download_urls) {
+      console.error("No download URLs found in the response: ", response.data);
+      return;
+    } else if (download_urls.length > 1) {
+      console.error("Expected a single dataset CSV URL: ", download_urls);
+      return;
+    }
+
+    const fileResponse = await http.get(download_urls[0], {
+      responseType: 'blob', // Important: Receive the file as a binary blob
+    });
+    return fileResponse.data;
+
+  } catch (error) {
+    console.error("Error downloading dataset: ", error.message || error);
+  }
+}
+
 export default {
   fetchDatasets,
   fetchDatasetInfo,
   postDataset,
-  deleteDataset
+  deleteDataset,
+  downloadDataset
 }

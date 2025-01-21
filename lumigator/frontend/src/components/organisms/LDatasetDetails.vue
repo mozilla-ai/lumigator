@@ -16,6 +16,7 @@
           severity="secondary"
           variant="text"
           rounded
+          @click="emit('l-download-dataset')"
         />
         <Button
           severity="secondary"
@@ -128,6 +129,7 @@ const router = useRouter();
 
 const emit = defineEmits([
   'l-delete-dataset',
+  'l-download-dataset',
   'l-details-closed',
   'l-experiment'
 ])

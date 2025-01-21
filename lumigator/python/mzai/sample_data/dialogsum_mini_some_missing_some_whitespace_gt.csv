@@ -1,0 +1,19 @@
+examples,ground_truth
+"#Person1#: Hello, how are you doing today?
+#Person2#: I ' Ve been having trouble breathing lately.,     
+#Person1#: Have you had any type of cold lately?
+#Person2#: No, I haven ' t had a cold. I just have a heavy feeling in my chest when I try to breathe.
+#Person1#: Do you have any allergies that you know of?,
+#Person2#: No, I don ' t have any allergies that I know of.
+#Person1#: Does this happen all the time or mostly when you are active?
+#Person2#: It happens a lot when I work out.,    
+#Person1#: I am going to send you to a pulmonary specialist who can run tests on you for asthma.
+#Person2#: Thank you for your help, doctor.",#Person2# has trouble breathing. The doctor asks #Person2# about it and will send #Person2# to a pulmonary specialist.
+"#Person1#: Hey Jimmy. Let's go workout later today.
+#Person2#: Sure. What time do you want to go?
+#Person1#: How about at 3:30?
+#Person2#: That sounds good. Today we work on Legs and forearm.
+#Person1#: Hey. I just played basketball earlier, so my legs are a little sore. Let's work out on arms and stomach today.
+#Person2#: I'm on a weekly schedule. You're messing everything up.
+#Person1#: C'mon. We're only switching two days. You can do legs on Friday.
+#Person2#: Aright. I'll meet you at the gym at 3:30 then.",       

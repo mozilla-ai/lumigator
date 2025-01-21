@@ -279,6 +279,12 @@ jobs:
       - name: Truncate commit SHA
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend
+          path: ${{ runner.temp }}
+
       - name: Login to DockerHub
         if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
@@ -286,27 +292,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend
-          path: ${{ runner.temp }}
-
-      - name: Debug
-        run: |
-          ls -la ${{ runner.temp }}
-
-      - name: Load image
-        run: |
-          docker load --input ${{ runner.temp }}/backend.tar
-
-      - name: Push image to DockerHub
+      - name: Push OCI image to DockerHub
         if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
         with:
-          load: true
+          context: ${{ runner.temp }}
           push: true
-          tags: |
+          load: false
+          outputs: type=oci
             ${{ contains(github.ref, 'refs/tags/') == false && format('mzdotai/lumigator:backend_dev_{0}', env.GITHUB_SHA_SHORT) || '' }}
             ${{ github.ref == 'refs/heads/main' && 'mzdotai/lumigator:latest' || '' }}
             ${{ contains(github.ref, 'refs/tags/') && format('mzdotai/lumigator:{0}', github.ref_name) || '' }}

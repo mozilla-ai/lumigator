@@ -7,9 +7,12 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 import sys
-import subprocess
+import os
 from pathlib import Path
 
+# Get the commit hash from the environment variable
+commit_id = os.environ.get("GIT_COMMIT", "main")
+print(f"Git Commit ID: {commit_id}")
 # patch the Sphinx run so that it can operate directly on the sources
 # see: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#ensuring-the-code-can-be-imported
 module_paths = [
@@ -29,8 +32,6 @@ project = "Lumigator 🐊"
 copyright = "2024, Mozilla AI"
 author = "Mozilla AI Engineering"
 release = "0.0.1"
-
-commit_id = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('ascii')
 
 # Add the commit_id to rst_epilog for substitution in reStructuredText files
 rst_epilog = f"""

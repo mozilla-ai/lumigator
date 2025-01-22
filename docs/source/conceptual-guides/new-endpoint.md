@@ -48,7 +48,7 @@ Being this the code for a new route, you will save it in `backend/api/routes/tas
 ### 1.2. Add the route to `router.py` with the appropriate tags
 
 The following step is adding the new route to
-[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/api/router.py).
+[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/|commit_id|/lumigator/lumigator/backend/backend/api/router.py).
 The code below shows the updated file with comments next to the two lines marked below as **NEW**:
 
 ```python
@@ -75,7 +75,7 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=[Tags.TASKS])  # N
 ```
 
 Also note that we are specifying some `Tags.TASKS` which have not been defined yet! Open
-[`backend/api/tags.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/api/tags.py)
+[`backend/api/tags.py`](https://github.com/mozilla-ai/lumigator/blob/|commit_id|/lumigator/lumigator/backend/backend/api/tags.py)
 and add the sections marked below as **NEW**:
 
 ```python
@@ -184,7 +184,7 @@ class TaskRepository(BaseRepository[TaskRecord]):
 ```
 
 This does not usually change much as long as you are fine with the base methods provided by the
-[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/repositories/base.py)
+[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/|commit_id|/lumigator/lumigator/backend/backend/repositories/base.py)
 class.
 
 The `TaskRepository` is a repository that allows to run the set of methods defined in the
@@ -204,7 +204,7 @@ class TaskRecord(BaseRecord, NameDescriptionMixin, CreatedAtMixin):
 ```
 
 Similarly to what you saw before for `DatasetRecord`, `TaskRecord` inherits from
-[`BaseRecord`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/records/base.py)
+[`BaseRecord`](https://github.com/mozilla-ai/lumigator/blob/|commit_id|/lumigator/lumigator/backend/backend/records/base.py)
 the property of having an `id` primary key. In addition to that, it inherits `name` and
 `description` from `NameDescriptionMixin` and `created_at` from `CreatedAtMixin`. The only field
 that we need to specify manually is `models`, a non-null column holding a list of strings.
@@ -301,7 +301,7 @@ endpoints (e.g. those which involve running ray jobs), but we'll discuss that in
 
 As `TaskService` depends on the existence of a database, we should inject a dependency on a DB session.
 To do this, add the following code to
-[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/api/deps.py):
+[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/|commit_id|/lumigator/lumigator/backend/backend/api/deps.py):
 
 ```python
 def get_task_service(session: DBSessionDep) -> TaskService:

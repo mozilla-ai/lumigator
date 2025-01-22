@@ -6,11 +6,8 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import os
-
-# Get the commit hash from the environment variable
-commit_hash = os.environ["commit_hash"]
 import sys
+import subprocess
 from pathlib import Path
 
 # patch the Sphinx run so that it can operate directly on the sources
@@ -33,6 +30,11 @@ copyright = "2024, Mozilla AI"
 author = "Mozilla AI Engineering"
 release = "0.0.1"
 
+commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('ascii')
+# Add the commit_id to rst_epilog for substitution
+rst_epilog = f"""
+.. |commit_id| replace:: {commit_hash}
+"""
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

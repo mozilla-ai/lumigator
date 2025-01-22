@@ -9,7 +9,9 @@ user@host:~/lumigator$ make start-lumigator
 The UI can then be accessed by visiting [localhost](http://localhost) on a web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
 
 ## Upload a Dataset
-The first step is to upload a dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
+The main purpose of Lumigator is to help you select a model that works well for your particular data. It does this by evaluating multiple models on a sample of your data: your dataset.
+
+The first step is to upload that dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
 
 ![Datasets Page](../../assets/ui_guide_steps/datasets_page.png)
 

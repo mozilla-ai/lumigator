@@ -58,7 +58,7 @@ class InferenceJobConfig(BaseModel):
 
 
 class InferenceJobOutput(BaseModel):
-    predictions: list
+    predictions: list | None = None
     examples: list
-    ground_truth: list
+    ground_truth: list | None = None
     model: str

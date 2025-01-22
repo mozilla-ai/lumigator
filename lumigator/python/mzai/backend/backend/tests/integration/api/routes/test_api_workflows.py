@@ -1,11 +1,10 @@
 import time
-from time import sleep
-from unittest.mock import patch
 from uuid import UUID
 
 import pytest
 import requests
 from fastapi.testclient import TestClient
+from inference.schemas import InferenceJobOutput
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
@@ -18,7 +17,7 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.main import app
-from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_INFER_MODEL, TEST_SUMMARY_MODEL
+from backend.tests.conftest import TEST_CAUSAL_MODEL
 
 
 @app.on_event("startup")
@@ -234,10 +233,12 @@ def test_upload_data_no_gt_launch_annotation(
     )
     logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
     logs_annotation_job_results_url = requests.get(logs_annotation_job_results_model.download_url)
-    logs_annotation_job_results_json = logs_annotation_job_results_url.json()
-    assert "predictions" not in logs_annotation_job_results_json.keys()
-    assert "ground_truth" in logs_annotation_job_results_json.keys()
-    logger.info(f"Created results: {logs_annotation_job_results_json}")
+    logs_annotation_job_output = InferenceJobOutput.model_validate(
+        logs_annotation_job_results_url.json()
+    )
+    assert logs_annotation_job_output.predictions is None
+    assert logs_annotation_job_output.ground_truth is not None
+    logger.info(f"Created results: {logs_annotation_job_output}")
 
 
 def test_full_experiment_launch(

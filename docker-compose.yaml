@@ -107,7 +107,6 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
       - S3_BUCKET
-      - PYTHONPATH=/mzai/lumigator/python/mzai/backend:/mzai/lumigator/python/mzai/jobs
       - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
       # TODO: the following two rows should be renamed to EVALUATOR_*

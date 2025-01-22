@@ -9,15 +9,15 @@
 import os
 
 # Get the commit hash from the environment variable
-commit_hash = os.environ.get("commit_hash", "main")
+commit_hash = os.environ["commit_hash"]
 import sys
 from pathlib import Path
 
 # patch the Sphinx run so that it can operate directly on the sources
 # see: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#ensuring-the-code-can-be-imported
 module_paths = [
-    Path("..", "..", "lumigator", "python", "mzai", "sdk").resolve(),
-    Path("..", "..", "lumigator", "python", "mzai", "schemas").resolve(),
+    Path("..", "..", "lumigator", "sdk").resolve(),
+    Path("..", "..", "lumigator", "schemas").resolve(),
 ]
 
 for path in module_paths:

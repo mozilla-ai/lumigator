@@ -134,7 +134,7 @@ class Jobs:
 
         Args:
             type(JobType): The kind of job to create. It can be either
-                EVALUATION_LITE, ANNOTATION or INFERENCE.
+                ANNOTATION, EVALUATION, EVALUATION_LITE, or INFERENCE.
             request(JobEvalCreate): The job's configuration.
 
         Returns:

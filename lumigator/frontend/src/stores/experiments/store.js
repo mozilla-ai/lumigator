@@ -6,6 +6,7 @@ import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helper
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const jobs = ref([]);
+  const inferenceJobs = ref([]);
   const selectedExperiment = ref(null);
   const selectedJob = ref(null);
   const selectedJobRslts = ref([]);
@@ -17,8 +18,9 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadExperiments() {
     let allJobs = await experimentService.fetchJobs();
-    allJobs = allJobs.filter(job => job.metadata.job_type === "evaluate");
-    jobs.value = allJobs.map(job => parseJobDetails(job));
+    inferenceJobs.value = allJobs.filter((job) => job.metadata.job_type === "inference")
+    allJobs = allJobs.filter((job) => job.metadata.job_type === "evaluate");
+    jobs.value = allJobs.map((job) => parseJobDetails(job));
     experiments.value = getJobsPerExperiement();
   }
 
@@ -292,6 +294,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   return {
     experiments,
     jobs,
+    inferenceJobs,
     loadExperiments,
     updateStatusForIncompleteJobs,
     loadExperimentDetails,

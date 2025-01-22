@@ -23,12 +23,27 @@
       v-if="datasets.length > 0"
       class="l-datasets__table-container"
     >
-      <l-dataset-table
-        :table-data="datasets"
-        @l-dataset-selected="onDatasetSelected($event)"
-        @l-experiment="onExperimentDataset($event)"
-        @l-delete-dataset="deleteConfirmation($event)"
-      />
+
+      <Tabs value="0">
+        <TabList>
+          <Tab value="0">All Datasets</Tab>
+          <Tab value="1">Groundtruth Jobs</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="0">
+            <l-dataset-table
+              :table-data="datasets"
+              @l-dataset-selected="onDatasetSelected($event)"
+              @l-experiment="onExperimentDataset($event)"
+              @l-delete-dataset="deleteConfirmation($event)"
+            />
+          </TabPanel>
+          <TabPanel value="1">
+            <p class="m-0">
+
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </div>
     <l-file-upload
       ref="datasetInput"
@@ -60,6 +75,13 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
+
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 
@@ -173,5 +195,24 @@ onMounted(async () => {
 .is-empty {
   display: grid;
   place-content: center;
+}
+</style>
+
+<style lang="scss">
+.l-datasets .p-tabs{
+  $root: &;
+
+  & .p-tablist {
+    margin-bottom: $l-spacing-1;
+  }
+
+  & .p-tablist-tab-list {
+    background: $l-card-bg!important;
+
+    & .p-tab {
+      padding-left: $l-spacing-1;
+      padding-right: $l-spacing-1;
+    }
+  }
 }
 </style>

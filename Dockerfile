@@ -5,6 +5,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 ADD . /mzai
 
 WORKDIR /mzai/lumigator/python/mzai/backend
+ENV PYTHONPATH=/mzai/lumigator/python/mzai/backend:/mzai/lumigator/python/mzai/jobs
 
 FROM base AS main_image
 

@@ -60,6 +60,7 @@ napoleon_use_admonition_for_examples = True
 
 myst_enable_extensions = [
     "colon_fence",
+    "substitution",
 ]
 myst_heading_anchors = 3
 

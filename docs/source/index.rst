@@ -37,6 +37,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
    get-started/installation
    get-started/quickstart
+   get-started/ui-guide
    get-started/suggested-models
 
 .. toctree::

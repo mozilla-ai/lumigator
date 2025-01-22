@@ -7,7 +7,7 @@ Follow the [installation guide](../get-started/installation.md) to get Lumigator
 ## Upload a Dataset
 The main purpose of Lumigator is to help you select a model that works well for your particular data. It does this by evaluating multiple models on a sample of your data: your dataset.
 
-The first step is to upload that dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
+The first step is to upload your dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
 
 ![Datasets Page](../../assets/ui_guide_steps/datasets_page.png)
 
@@ -28,10 +28,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-Reminder: in order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [installation guide](installation.md).
-```console
-user@host:~/lumigator$ export MISTRAL_API_KEY=<your_mistral_api_key>
-```
+Reminder: In order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [installation guide](installation.md).
 
 Finally click the **Run Experiment** button.
 

@@ -7,6 +7,9 @@ from pathlib import Path
 from uuid import UUID
 
 import loguru
+
+# TODO: the evaluator_lite import will need to be renamed to evaluator
+#   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
 from inference.schemas import InferenceJobConfig, InferenceJobOutput
@@ -132,8 +135,8 @@ class JobService:
         # Get the dataset from the S3 bucket
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            # Validate that the output file adheres to the expected inference output schema
             results = InferenceJobOutput.model_validate(json.loads(f.read()))
-        # Validate that the output file adheres to
 
         # define the fields we want to keep from the results JSON
         # and build a CSV file from it as a BytesIO object
@@ -164,15 +167,25 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _handle_evaluation_result(self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem):
+    def _validate_evaluation_results(
+        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
+    ):
+        """Handles the evaluation result for a given job.
+
+        Args:
+            job_id (UUID): The unique identifier of the job.
+            request (JobEvalLiteCreate): The request object containing job evaluation details.
+            s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
+
+        Note:
+            Currently, this function only validates the evaluation result. Future implementations
+            may include storing the results in a database (e.g., mlflow).
+        """
         loguru.logger.info("Handling evaluation result")
 
-        # Get the dataset from the S3 bucket
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             EvalJobOutput.model_validate(json.loads(f.read()))
-        # Currently all we do is load the output to validate.
-        # Eventually we will want to store the results in the DB (aka mlflow).
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -394,7 +407,7 @@ class JobService:
             background_tasks.add_task(
                 self.on_job_complete,
                 record.id,
-                self._handle_evaluation_result,
+                self._validate_evaluation_results,
                 record.id,
                 JobEvalLiteCreate.model_validate(request),
                 self._dataset_service.s3_filesystem,

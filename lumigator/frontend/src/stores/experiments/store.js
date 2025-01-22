@@ -16,7 +16,8 @@ export const useExperimentStore = defineStore('experiment', () => {
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
   async function loadExperiments() {
-    const allJobs = await experimentService.fetchJobs();
+    let allJobs = await experimentService.fetchJobs();
+    allJobs = allJobs.filter(job => job.metadata.job_type === "evaluate");
     jobs.value = allJobs.map(job => parseJobDetails(job));
     experiments.value = getJobsPerExperiement();
   }

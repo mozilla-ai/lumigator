@@ -104,7 +104,7 @@ Different models can be chosen for summarization. The information about those mo
 * `website_url`: a link to a web page with more information about the model
 * `description`: a short description about the model
 * `info`: a map containing information about the model like parameter count or model size
-* `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values.
+* `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values
 
 ## Verify
 

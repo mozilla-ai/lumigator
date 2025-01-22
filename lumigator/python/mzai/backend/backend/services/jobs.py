@@ -7,7 +7,12 @@ from pathlib import Path
 from uuid import UUID
 
 import loguru
+
+# TODO: the evaluator_lite import will need to be renamed to evaluator
+#   once the new experiments API is merged
+from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from inference.schemas import InferenceJobConfig, InferenceJobOutput
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -35,7 +40,7 @@ from backend.settings import settings
 
 class JobService:
     # set storage path
-    storage_path = f"s3://{ Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX }/"
+    storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
     job_settings = {
         JobType.INFERENCE: {
@@ -130,12 +135,13 @@ class JobService:
         # Get the dataset from the S3 bucket
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            results = json.loads(f.read())
+            # Validate that the output file adheres to the expected inference output schema
+            results = InferenceJobOutput.model_validate(json.loads(f.read()))
 
         # define the fields we want to keep from the results JSON
         # and build a CSV file from it as a BytesIO object
         fields = ["examples", "ground_truth", request.output_field]
-        bin_data = self._results_to_binary_file(results, fields)
+        bin_data = self._results_to_binary_file(results.model_dump(), fields)
         bin_data_size = len(bin_data.getvalue())
 
         # Figure out the dataset filename
@@ -154,12 +160,32 @@ class JobService:
             format=DatasetFormat.JOB,
             run_id=job_id,
             generated=True,
-            generated_by=results["model"],
+            generated_by=results.model,
         )
 
         loguru.logger.info(
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
+
+    def _validate_evaluation_results(
+        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
+    ):
+        """Handles the evaluation result for a given job.
+
+        Args:
+            job_id (UUID): The unique identifier of the job.
+            request (JobEvalLiteCreate): The request object containing job evaluation details.
+            s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
+
+        Note:
+            Currently, this function only validates the evaluation result. Future implementations
+            may include storing the results in a database (e.g., mlflow).
+        """
+        loguru.logger.info("Handling evaluation result")
+
+        result_key = self._get_results_s3_key(job_id)
+        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            EvalJobOutput.model_validate(json.loads(f.read()))
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -214,6 +240,14 @@ class JobService:
             model_url = request.model_url
 
         return model_url
+
+    def _validate_config(self, job_type: str, config_template: str, config_params: dict):
+        if job_type == JobType.INFERENCE:
+            InferenceJobConfig.model_validate_json(config_template.format(**config_params))
+        elif job_type == JobType.EVALUATION_LITE:
+            EvalJobConfig.model_validate_json(config_template.format(**config_params))
+        else:
+            loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
 
     def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
@@ -309,6 +343,8 @@ class JobService:
 
         loguru.logger.info(f"template...{config_template, job_type, request.model}")
 
+        self._validate_config(job_type, config_template, config_params)
+
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
@@ -365,6 +401,15 @@ class JobService:
                 self._add_dataset_to_db,
                 record.id,
                 JobInferenceCreate.model_validate(request),
+                self._dataset_service.s3_filesystem,
+            )
+        elif job_type == JobType.EVALUATION_LITE:
+            background_tasks.add_task(
+                self.on_job_complete,
+                record.id,
+                self._validate_evaluation_results,
+                record.id,
+                JobEvalLiteCreate.model_validate(request),
                 self._dataset_service.s3_filesystem,
             )
         # FIXME The ray status is now _not enough_ to set the job status,

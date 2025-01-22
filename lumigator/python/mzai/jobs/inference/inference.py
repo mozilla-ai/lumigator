@@ -16,6 +16,7 @@ from model_clients import (
     OpenAIModelClient,
 )
 from paths import PathPrefix
+from schemas import InferenceJobOutput
 from tqdm import tqdm
 
 
@@ -28,11 +29,11 @@ def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     return predictions
 
 
-def save_to_disk(local_path: Path, data_dict: dict):
+def save_to_disk(local_path: Path, results: InferenceJobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data_dict, f)
+        json.dump(results.dict(), f)
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
@@ -43,7 +44,7 @@ def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: InferenceJobConfig, inference_results: dict) -> Path:
+def save_outputs(config: InferenceJobConfig, inference_results: InferenceJobOutput) -> Path:
     storage_path = config.job.storage_path
 
     # generate local temp file ANYWAY:
@@ -123,7 +124,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
     output["model"] = output_model_name
     logger.info(output)
 
-    output_path = save_outputs(config, output)
+    output_path = save_outputs(config, InferenceJobOutput.model_validate(output))
     return output_path
 
 

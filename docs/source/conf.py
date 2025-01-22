@@ -39,7 +39,7 @@ rst_epilog = f"""
 
 # Add the commit_id to myst_substitutions for substitution in Markdown files
 myst_substitutions = {
-    "commit_id": commit_hash
+    "|commit_id|": commit_hash
 }
 
 # -- General configuration ---------------------------------------------------

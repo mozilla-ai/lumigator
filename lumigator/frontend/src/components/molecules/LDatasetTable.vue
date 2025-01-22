@@ -52,9 +52,9 @@
           header="Ground Truth"
         >
           <template #body="slotProps">
-            <span class="capitalize"
-                  v-text="slotProps.data.ground_truth"
-            />
+            <span class="capitalize">
+              {{ slotProps.data.generated ? 'True (AI Generated)' : slotProps.data.ground_truth }}
+            </span>
           </template>
         </Column>
         <Column header="options">

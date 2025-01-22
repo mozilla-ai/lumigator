@@ -107,6 +107,10 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
 
+onMounted(async () => {
+  await experimentStore.loadExperiments();
+});
+
 const getDrawerHeader = () => {
   return showLogs.value ? 'Logs' : selectedExperiment.value.name;
 };

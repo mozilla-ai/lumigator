@@ -30,16 +30,16 @@ copyright = "2024, Mozilla AI"
 author = "Mozilla AI Engineering"
 release = "0.0.1"
 
-commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('ascii')
+commit_id = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('ascii')
 
 # Add the commit_id to rst_epilog for substitution in reStructuredText files
 rst_epilog = f"""
-.. |commit_id| replace:: {commit_hash}
+.. {{ commit_id }} replace:: {commit_id}
 """
 
 # Add the commit_id to myst_substitutions for substitution in Markdown files
 myst_substitutions = {
-    "|commit_id|": commit_hash
+    "commit_id": commit_id
 }
 
 # -- General configuration ---------------------------------------------------

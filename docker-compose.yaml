@@ -69,6 +69,8 @@ services:
       - /bin/bash
       - -c
       - |
+          set -eaux
+          mkdir -p /tmp/ray_pip_cache
           RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           mkdir -p /tmp/ray/session_latest/runtime_resources/pip
           rmdir /tmp/ray/session_latest/runtime_resources/pip/ && ln -s /tmp/ray_pip_cache /tmp/ray/session_latest/runtime_resources/pip
@@ -179,5 +181,8 @@ services:
 volumes:
     minio-data:
     database_volume:
+<<<<<<< HEAD
     redis-data:
     ray-pip-cache:
+=======
+>>>>>>> 658f734e (Setup pip cache during CI)

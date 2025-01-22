@@ -44,7 +44,7 @@ class ModelsResponse(BaseModel):
         "or `{ModelRequirement.API_KEY}` to indicate that an API key is necessary)",
     )
     info: ModelInfo | None = Field(
-        None, title="Model info", description="Detailed model capabities"
+        None, title="Model info", description="Detailed model capabilities"
     )
     tasks: list[dict[str, dict | None]] = Field(
         ..., title="Applicable tasks", description="List of tasks to which the model can be applied"

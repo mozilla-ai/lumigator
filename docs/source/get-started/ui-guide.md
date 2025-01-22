@@ -32,7 +32,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-In order to be able to use API based models, you need to provide the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator.
+Reminder: in order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [installation guide](installation.md).
 ```console
 user@host:~/lumigator$ export MISTRAL_API_KEY=<your_mistral_api_key>
 ```

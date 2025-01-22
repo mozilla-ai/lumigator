@@ -27,7 +27,11 @@
       <Tabs value="0">
         <TabList>
           <Tab value="0">All Datasets</Tab>
-          <Tab value="1">Groundtruth Jobs</Tab>
+          <Tab value="1">
+            <div :class="['is-running', true]">
+              <span>Groundtruth Jobs</span>
+            </div>
+          </Tab>
         </TabList>
         <TabPanels>
           <TabPanel value="0">
@@ -39,8 +43,9 @@
             />
           </TabPanel>
           <TabPanel value="1">
-            <p class="m-0">
-
+            <l-inference-jobs-table
+              :table-data="inferenceJobs"
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -65,9 +70,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref} from 'vue'
+import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { useRouter, useRoute } from 'vue-router';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
@@ -75,7 +81,7 @@ import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
-
+import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -87,6 +93,8 @@ import { useToast } from "primevue/usetoast";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
+const experimentStore = useExperimentStore();
+const { inferenceJobs } = storeToRefs(experimentStore);
 const { showSlidingPanel  } = useSlidePanel();
 const toast = useToast();
 const datasetInput = ref(null);
@@ -176,6 +184,7 @@ onMounted(async () => {
 .l-datasets {
   $root: &;
   max-width: $l-main-width;
+  width: 100%;
   margin: 0 auto;
 
   &__header-container {
@@ -212,6 +221,36 @@ onMounted(async () => {
     & .p-tab {
       padding-left: $l-spacing-1;
       padding-right: $l-spacing-1;
+    }
+  }
+
+  .is-running::after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: $l-primary-color;
+    margin-left: 8px;
+    margin-bottom: 2px;
+    animation: pulse-dot 1.5s infinite ease-in-out;
+  }
+@keyframes pulse-dot {
+  0% {
+    transform: scale(1);
+    /* Start with no glow */
+   color: rgba(255, 255, 0, 0.7);
+  }
+  50% {
+    /* Dot grows in size slightly */
+    transform: scale(1.2);
+    /* Box-shadow expands outward for the glow effect */
+    color: rgba(255, 255, 0, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    /* Return to no glow */
+    color: rgba(255, 255, 0, 0.7);
     }
   }
 }

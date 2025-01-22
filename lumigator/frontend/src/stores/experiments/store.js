@@ -17,10 +17,13 @@ export const useExperimentStore = defineStore('experiment', () => {
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
   async function loadExperiments() {
-    let allJobs = await experimentService.fetchJobs();
-    inferenceJobs.value = allJobs.filter((job) => job.metadata.job_type === "inference")
-    allJobs = allJobs.filter((job) => job.metadata.job_type === "evaluate");
-    jobs.value = allJobs.map((job) => parseJobDetails(job));
+    const allJobs = await experimentService.fetchJobs();
+    inferenceJobs.value = allJobs
+      .filter((job) => job.metadata.job_type === "inference")
+      .map((job) => parseJobDetails(job));
+    jobs.value = allJobs
+      .filter((job) => job.metadata.job_type === "evaluate")
+      .map((job) => parseJobDetails(job));
     experiments.value = getJobsPerExperiement();
   }
 

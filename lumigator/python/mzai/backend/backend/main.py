@@ -50,7 +50,9 @@ def _configure_logger():
     )
 
 
-def create_handler(status_code: HTTPStatus):
+def create_error_handler(status_code: HTTPStatus):
+    """Creates an error handler function for the given status code"""
+
     def handler(_: Request, exc: ServiceError) -> Response:
         return JSONResponse(
             status_code=status_code,
@@ -86,7 +88,7 @@ def create_app() -> FastAPI:
 
     for mapping in exception_mappings:
         for key, value in mapping.items():
-            app.add_exception_handler(key, create_handler(value))
+            app.add_exception_handler(key, create_error_handler(value))
 
     @app.get("/")
     def get_root():

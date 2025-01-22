@@ -2,7 +2,7 @@
 Lumigator comes with a web-based UI that allows you to interact with the Lumigator API. It is designed to be easy to use and to provide a quick way to get started with Lumigator.
 
 ## Getting Started
-Following the [installation guide](../get-started/installation.md), get Lumigator up and running from the command line:
+Follow the [installation guide](../get-started/installation.md) to get Lumigator up and running.
 ```console
 user@host:~/lumigator$ make start-lumigator
 ```

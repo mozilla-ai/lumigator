@@ -144,3 +144,10 @@ To fix linting issues automatically:
 ```console
 user@host:~/lumigator/lumigator/frontend$ npm run lint:fix
 ```
+
+
+### Debugging with VSCode and DebugPy
+
+The backend and unit tests can be debugged with VsCode using Debugpy. If you're not familiar with how debugging python in vscode works, we recommend you read VSCode's documentation [here](https://code.visualstudio.com/docs/python/debugging). When running the command `make local-up`, the backend automatically creates the debugpy listener, which you can attach to using the `Attach to Backend` Debug configuration present in the `.vscode/launch.json` file of this repo.
+
+Similarly, the unit tests can be debugged by setting the environment variable TESTS_USE_DEBUGPY=true and attaching using the `Attach to Tests` Debug configuration. Note that with this enabled, the unit tests wait for you to attach the debugger before running any tests.

@@ -31,10 +31,17 @@ author = "Mozilla AI Engineering"
 release = "0.0.1"
 
 commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('ascii')
-# Add the commit_id to rst_epilog for substitution
+
+# Add the commit_id to rst_epilog for substitution in reStructuredText files
 rst_epilog = f"""
 .. |commit_id| replace:: {commit_hash}
 """
+
+# Add the commit_id to myst_substitutions for substitution in Markdown files
+myst_substitutions = {
+    "commit_id": commit_hash
+}
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 

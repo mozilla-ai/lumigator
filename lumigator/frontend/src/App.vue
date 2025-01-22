@@ -221,6 +221,13 @@ onMounted(async () => {
     p {
       font-size: $l-menu-font-size;
     }
+
+    &.error {
+      color: $l-grey-100;
+      h4 {
+        font-weight: $l-font-weight-semibold;
+      }
+    }
   }
 
   .mode-icon {

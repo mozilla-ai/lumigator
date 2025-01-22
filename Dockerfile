@@ -4,8 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 # Copy the project into the image
 ADD . /mzai
 
-WORKDIR /mzai/lumigator/python/mzai/backend
-ENV PYTHONPATH=/mzai/lumigator/python/mzai/backend:/mzai/lumigator/python/mzai/jobs
+WORKDIR /mzai/lumigator/lumigator/backend
+ENV PYTHONPATH=/mzai/lumigator/lumigator/backend:/mzai/lumigator/lumigator/jobs
 
 FROM base AS main_image
 

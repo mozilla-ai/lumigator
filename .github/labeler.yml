@@ -1,9 +1,9 @@
 api:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/backend/backend/api/**'
+  - any-glob-to-any-file: 'lumigator/lumigator/backend/backend/api/**'
 backend:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/backend/**'
+  - any-glob-to-any-file: 'lumigator/lumigator/backend/**'
 dependencies:
 - changed-files:
   - any-glob-to-any-file: 'pyproject.toml'
@@ -12,13 +12,13 @@ documentation:
   - any-glob-to-any-file: 'docs/**'
 frontend:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/frontend/**'
+  - any-glob-to-any-file: 'frontend/**'
 gha:
 - changed-files:
   - any-glob-to-any-file: '.github/workflows/**'
 schemas:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/schemas/**'
+  - any-glob-to-any-file: 'lumigator/lumigator/schemas/**'
 sdk:
 - changed-files:
-  - any-glob-to-any-file: 'lumigator/python/mzai/sdk/**'
+  - any-glob-to-any-file: 'lumigator/lumigator/sdk/**'

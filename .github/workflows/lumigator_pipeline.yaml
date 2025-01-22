@@ -189,7 +189,7 @@ jobs:
           filters: |
             rebuild_fe:
               - '.github/workflows/**'
-              - 'lumigator/frontend/**'
+              - 'frontend/**'
 
       - name: Truncate commit SHA
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
@@ -213,7 +213,7 @@ jobs:
         uses: docker/build-push-action@v6
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
-          file: "lumigator/frontend/Dockerfile"
+          file: "frontend/Dockerfile"
           platforms: linux/amd64,linux/arm64
           push: true
           target: "server"
@@ -242,32 +242,32 @@ jobs:
 
       - name: Check tag consistency (SDK)
         run: check_version.sh
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/lumigator/sdk
 
       - name: Check tag consistency (schemas)
         run: check_version.sh
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/lumigator/schemas
 
       - name: Install python (SDK)
         run: uv python install
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/lumigator/sdk
 
       - name: Install python (schemas)
         run: uv python install
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/lumigator/schemas
 
       - name: Package SDK
         run: uv build
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/lumigator/sdk
 
       - name: Package schemas
         run: uv build
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/lumigator/schemas
 
       - name: Upload SDK packages to PyPI
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/lumigator/sdk
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
 
       - name: Upload schemas packages to PyPI
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/lumigator/schemas
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose

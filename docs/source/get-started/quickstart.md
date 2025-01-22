@@ -63,7 +63,7 @@ response = lm_client.datasets.create_dataset(
 ```{note}
 The dataset file should be in CSV format and contain a header row with the following columns:
 `examples`, `ground_truth`. The `ground_truth` column is optional since you can generate it using
-Lumigator. See [here](https://github.com/mozilla-ai/lumigator/blob/0bef1965c5180f39832e2932b59ef797b0853ff4/lumigator/python/mzai/sample_data/dialogsum_exc.csv#L4)
+Lumigator. See [here](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/sample_data/dialogsum_exc.csv#L4)
 for an example.
 ```
 

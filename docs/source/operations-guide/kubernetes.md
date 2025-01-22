@@ -43,7 +43,7 @@ To install Lumigator on a Kubernetes cluster, follow these steps:
 1. Install the Lumigator Helm chart:
 
     ```console
-    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator
+    user@host:~/lumigator$ helm install lumigator ./infra/helm/lumigator
     ```
 
 ## Configuration

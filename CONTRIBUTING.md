@@ -5,7 +5,7 @@ large variance between even PATCH versions in terms of feature development.
 
 We want to encourage both suggestions and contributions from the community in the near future. Before submitting a PR, please open a discussion in a related issue.
 
-The lumigator project contains several packages: the `lumigator/python/mzai/backend` package that powers the lumigator server functionality, the `lumigator/python/mzai/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/python/mzai/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
+The lumigator project contains several packages: the `lumigator/lumigator/backend` package that powers the lumigator server functionality, the `lumigator/lumigator/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/lumigator/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
 
 Currently, we are able to accept:
 
@@ -26,7 +26,7 @@ The process to prepare a release should be:
 
 * Ensure that the right version is selected.
   * This is kept as a manual step, since versions can be skipped for a number of reasons.
-* Fill in this same version in the `lumigator/python/mzai/schemas/pyproject.toml` and `lumigator/python/mzai/sdk/pyproject.toml` files.
+* Fill in this same version in the `lumigator/lumigator/schemas/pyproject.toml` and `lumigator/lumigator/sdk/pyproject.toml` files.
 * Make a local commit.
 * Tag the local commit: `git tag vX.Y.Z`
 * Push the local commit: `git push`

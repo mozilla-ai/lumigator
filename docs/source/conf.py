@@ -6,6 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
 import sys
 from pathlib import Path
 
@@ -23,6 +24,9 @@ for path in module_paths:
 # import the modules that we want to document here to aboid the autodoc error
 # see: https://github.com/pydantic/pydantic/discussions/7763#discussioncomment-8417097
 from lumigator_sdk import jobs, lm_datasets, models  # noqa: F401, E402
+
+# Get the commit hash from the environment variable
+commit_hash = os.environ.get("commit_hash", "main")
 
 project = "Lumigator 🐊"
 copyright = "2024, Mozilla AI"

@@ -107,14 +107,14 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
       - S3_BUCKET
-      - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
-      - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
+      - EVALUATOR_PIP_REQS=/mzai/lumigator/lumigator/jobs/evaluator/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/lumigator/jobs/evaluator
       # TODO: the following two rows should be renamed to EVALUATOR_*
       #       and the two above should be removed when we depreate evaluator
-      - EVALUATOR_LITE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator_lite/requirements.txt
-      - EVALUATOR_LITE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator_lite
-      - INFERENCE_PIP_REQS=/mzai/lumigator/python/mzai/jobs/inference/requirements.txt
-      - INFERENCE_WORK_DIR=/mzai/lumigator/python/mzai/jobs/inference
+      - EVALUATOR_LITE_PIP_REQS=/mzai/lumigator/lumigator/jobs/evaluator_lite/requirements.txt
+      - EVALUATOR_LITE_WORK_DIR=/mzai/lumigator/lumigator/jobs/evaluator_lite
+      - INFERENCE_PIP_REQS=/mzai/lumigator/lumigator/jobs/inference/requirements.txt
+      - INFERENCE_WORK_DIR=/mzai/lumigator/lumigator/jobs/inference
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
       - MISTRAL_API_KEY=$MISTRAL_API_KEY
@@ -134,7 +134,7 @@ services:
     image: mzdotai/lumigator-frontend:latest
     build:
       context: .
-      dockerfile: "./lumigator/frontend/Dockerfile"
+      dockerfile: "./frontend/Dockerfile"
       target: "server"
       args:
        VUE_APP_BASE_URL: http://localhost/api/v1/
@@ -142,7 +142,7 @@ services:
       LUMIGATOR_API_PORT: 8000
       LUMIGATOR_API_HOST: backend
     volumes:
-      - ./lumigator/frontend/nginx/:/etc/nginx/templates/
+      - ./frontend/nginx/:/etc/nginx/templates/
     depends_on:
       backend:
         condition: "service_started"

@@ -1,7 +1,7 @@
 # Installation
 
 You can deploy Lumigator either locally or into a distributed environment using Kubernetes
-[HELM Charts](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/lumigator/infra/mzai/helm/lumigator/README.md).
+[HELM Charts](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/infra/helm/lumigator/README.md).
 In this guide, we'll show you how to get started with a local deployment.
 
 ## Prerequisites

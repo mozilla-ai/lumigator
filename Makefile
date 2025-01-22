@@ -131,11 +131,11 @@ clean-all: clean-docker-buildcache clean-docker-containers
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
-	cd lumigator/python/mzai/sdk/tests; \
+	cd lumigator/lumigator/sdk/tests; \
 	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
-	cd lumigator/python/mzai/sdk/tests; \
+	cd lumigator/lumigator/sdk/tests; \
 	uv run pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
@@ -154,7 +154,7 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-backend-unit:
-	cd lumigator/python/mzai/backend/; \
+	cd lumigator/lumigator/backend/; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
@@ -163,7 +163,7 @@ test-backend-unit:
 	uv run pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration:
-	cd lumigator/python/mzai/backend/; \
+	cd lumigator/lumigator/backend/; \
 	docker container list --all; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
@@ -195,11 +195,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/python/mzai/jobs/evaluator_lite; \
+	cd lumigator/lumigator/jobs/evaluator_lite; \
 	uv run --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:
-	cd lumigator/python/mzai/jobs/inference; \
+	cd lumigator/lumigator/jobs/inference; \
 	uv run --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit

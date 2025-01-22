@@ -1,12 +1,14 @@
 # Contributing
 
-Lumigator is still in early stages of development and as such will have large variance between even PATCH versions in terms of feature development. To stay updated on the latest announcements, join our Discord channel: [Discord Channel](https://discord.com/channels/1089876418936180786/1281660143251095634).
+Lumigator is still in early stages of development and as such will have large variance between even PATCH versions in terms of feature development. Check the release notes to see what changed in between releases.
+
+To stay updated on the latest announcements, also join our Discord channel: [Discord Channel](https://discord.com/channels/1089876418936180786/1281660143251095634).
 
 We want to encourage both suggestions and contributions from the community in the near future. Before submitting a [pull request](https://github.com/mozilla-ai/lumigator/pulls), please open a discussion in a [related issue](https://github.com/mozilla-ai/lumigator/issues).
 
 **Before you contribute**
 
-* Check out the roadmap: This will give you an overview of the project's direction and help you identify areas where your contributions can have the greatest impact.
+* Check out the [roadmap](https://github.com/orgs/mozilla-ai/projects/17): This will give you an overview of the project's direction and help you identify areas where your contributions can have the greatest impact.
 * Take a look into the existing issues: Check if your issue or challenge has already been discussed or reported. This helps avoid duplication of effort.
 * Learn about the code: The Lumigator project consists of several packages, each with its own pyproject.toml file. Understanding the project structure will make it easier to contribute effectively: the `lumigator/python/mzai/backend` package that powers the lumigator server functionality, the `lumigator/python/mzai/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/python/mzai/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
 
@@ -26,15 +28,15 @@ If you find an error while running Lumigator, we would appreciate you opening an
 
 If you have ideas for improvements or new features, feel free to open a new discussion or issue to share them. We appreciate well documented ideas or  suggestions. Clearly explain the problem you're trying to solve, the proposed solution, and any relevant diagrams or examples. You can also have at look to our ROADMAP to check if your proposal is aligned with the defined direction of the Lumigator.
 
-We initiate a [discussion](https://github.com/mozilla-ai/lumigator/discussions) on GitHub to refine the implementation details. Once clarified, the feature can be implemented by either us or the reporter." make an upgrade of our contributing file combining the best from all the inputs I gave you and propose me things that can be useful to add.
+We initiate a [discussion](https://github.com/mozilla-ai/lumigator/discussions) on GitHub to refine the implementation details. Once clarified, the feature can be implemented by either us or the reporter.
 
 **Writing Code**
 
-If you don’t know where to start, there is a special [Good First Issue](https://github.com/mozilla-ai/lumigator/contribute). It will give you a list of open issues that are beginner friendly and help you start contributing to our project. 
+If you don’t know where to start, there is a special [Good First Issue](https://github.com/mozilla-ai/lumigator/contribute) page. It will give you a list of open issues that are beginner friendly and help you start contributing to our project. 
 
 To contribute to Lumigator, first identify a need for a new feature or bug fix. Search existing issues and the roadmap to see if it's already been addressed. If not, we will follow the next process.
 
-1. **Proposal**. The Github user ("User") open a github [issue](https://github.com/mozilla-ai/lumigator/issues), referencing the roadmap, and provides a clear description, including the problem, desired outcome, quick diagram and any relevant information.
+1. **Proposal**. The Github user ("User") open a github [issue](https://github.com/mozilla-ai/lumigator/issues), referencing the [roadmap](https://github.com/orgs/mozilla-ai/projects/17), and provides a clear description, including the problem, desired outcome, quick diagram and any relevant information.
 2. **Issue triage**. Any Lumigator maintainer triages it, reviewing that the issue comes with enough details, and assigns labels (e.g., "bug", "enhancement", "help wanted") for better organization. If the issue has been correctly provided, the maintainer will asks other 2-3 folks for feedback and to assess the feasibility and priority of the issue.
 3. **Discussion and refinement**. User is invited to open a [discussion](https://github.com/mozilla-ai/lumigator/discussions) to flesh out their idea with team.
 4. **Contribute to the implementation**. Once the the issue is refined, the “User” is asked if they want to take it, otherwise it will enter into our internal prioritization process and we will keep you posted. The issue is updated with next steps (e.g. dropped / user or someone else implements independently / Lumigator team adds it into our backlog).

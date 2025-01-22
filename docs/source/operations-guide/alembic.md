@@ -28,7 +28,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic --version
 When code changes are made to the data models, or when new models are added, a manual step is
 required in order to ensure that the models are visible to Alembic.
 
-First, the imports at the top of [`env.py`](https://github.com/mozilla-ai/lumigator/blob/main/lumigator/lumigator/backend/backend/alembic/env.py)
+First, the imports at the top of [`env.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/alembic/env.py)
 **MUST** import your package:
 
 `from backend.records.{package} import * # noqa: F403`

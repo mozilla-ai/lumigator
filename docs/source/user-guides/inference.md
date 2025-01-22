@@ -93,7 +93,7 @@ Refer to the `.env.template` file in the repository for more details.
 
 ## Model Specification
 
-Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization`endpoint. It contains the following information for each model:
+Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
 
 * `name`: an identification name for the model
 * `uri`: a URI specifying how to use the model. The following protocols are supported:

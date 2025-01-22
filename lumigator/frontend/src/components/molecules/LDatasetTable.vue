@@ -21,7 +21,7 @@
       >
         <Column
           field="filename"
-          header="Filename"
+          header="File Name"
         />
         <Column
           field="id"
@@ -100,7 +100,7 @@ const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
   return showSlidingPanel.value ?
     'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
-})
+});
 
 const focusedItem = ref(null);
 const tableVisible = ref(true)
@@ -170,6 +170,10 @@ watch(showSlidingPanel, (newValue) => {
 	width: 100%;
 	display: flex;
 	place-content: center;
+
+  & .p-datatable {
+    width: 100%;
+  }
 
 	&__options-trigger {
 		padding: 0;

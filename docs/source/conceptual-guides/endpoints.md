@@ -59,7 +59,7 @@ def get_health() -> HealthResponse:
 Note that the returned type is a `HealthResponse`: this is a
 [pydantic model](https://docs.pydantic.dev/latest/api/base_model/) defining the schema of the
 returned data. The general rule is that all return values in our routes should match a predefined
-schema. Schemas are defined under the `schemas` directory (see: [health response in our source code](https://github.com/mozilla-ai/lumigator/blob/d87dc33b4578d1fe89277ba2412ab53857c9cad8/lumigator/lumigator/schemas/lumigator_schemas/extras.py#L16)),
+schema. Schemas are defined under the `schemas` directory (see: [health response in our source code](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/schemas/lumigator_schemas/extras.py#L16)),
 typically in files with the same name of the route, service, etc.
 
 All the code for `get_health()` appears in the route file. A `HealthResponse`, composed of a

@@ -90,7 +90,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic stamp head
 ## My database is in a different state (from a prior release)
 
 This scenario requires manual review of the existing revisions stored in the
-[versions folder](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/lumigator/backend/backend/alembic/versions),
+[versions folder](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/alembic/versions),
 to determine which revision ID represents the current state of the database containing the data.
 
 Revisions are stored in a format resembling a linked-list, with each revision containing a
@@ -176,7 +176,7 @@ To create an empty revision that you populate manually:
 user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic revision -m "{Explanatory commit-like message}"
 ```
 
-This will create a new Python file under `[versions/](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/lumigator/backend/backend/alembic/versions)`.
+This will create a new Python file under `[versions/](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/lumigator/lumigator/backend/backend/alembic/versions)`.
 
 For example:
 

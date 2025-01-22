@@ -37,7 +37,7 @@ the repository for more details.
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider's S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See [here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml) for an example of how to do
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See [here](https://github.com/mozilla-ai/lumigator/blob/{{commit_hash}}/docker-compose.external.yaml) for an example of how to do
 this.
 
 To deploy Lumigator locally:
@@ -71,7 +71,7 @@ should receive the following JSON response:
 
 ```{note}
 If you need to change the port that the Lumigator service listens on, you can do it in the
-[`docker-compose.yaml`](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.yaml)
+[`docker-compose.yaml`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_hash }}/docker-compose.yaml)
 file.
 ```
 

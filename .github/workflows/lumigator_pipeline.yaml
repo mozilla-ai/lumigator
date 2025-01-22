@@ -74,6 +74,11 @@ jobs:
       - name: Install python
         run: uv python install
 
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
       - name: Spinning up containers for the tests
         run: make start-lumigator-build
 
@@ -116,6 +121,11 @@ jobs:
       - name: Install kernel
         run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
         working-directory: notebooks
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
 
       - name: Setup containers
         run: make start-lumigator-build

@@ -62,8 +62,6 @@ import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-import datasetsService from "@/services/datasets/datasetsService.js";
-import {downloadContent} from "@/helpers/index.js";
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);

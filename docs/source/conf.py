@@ -53,6 +53,7 @@ extensions = [
     "myst_parser",
     "sphinx_design",
     "sphinx_copybutton",
+    "sphinx.ext.linkcheck"
 ]
 
 # napoleon settings

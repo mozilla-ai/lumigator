@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
@@ -10,9 +11,27 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
 from backend.api.http_headers import HttpHeaders
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.dataset_exceptions import (
+    DatasetInvalidError,
+    DatasetMissingFieldsError,
+    DatasetNotFoundError,
+    DatasetSizeError,
+    DatasetUpstreamError,
+)
 from backend.settings import settings
 
 router = APIRouter()
+
+
+def dataset_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        DatasetNotFoundError: status.HTTP_404_NOT_FOUND,
+        DatasetMissingFieldsError: status.HTTP_403_FORBIDDEN,
+        DatasetUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        DatasetSizeError: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        DatasetInvalidError: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    }
 
 
 @router.post(

@@ -1,5 +1,6 @@
 import os
 import sys
+from http import HTTPStatus
 from pathlib import Path
 
 from alembic import command
@@ -7,9 +8,13 @@ from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 
 from backend.api.router import api_router
+from backend.api.routes.datasets import dataset_exception_mappings
 from backend.api.tags import TAGS_METADATA
+from backend.services.exceptions.base_exceptions import ServiceError
 from backend.settings import settings
 
 LUMIGATOR_APP_TAGS = {
@@ -45,6 +50,16 @@ def _configure_logger():
     )
 
 
+def create_handler(status_code: HTTPStatus):
+    def handler(_: Request, exc: ServiceError) -> Response:
+        return JSONResponse(
+            status_code=status_code,
+            content={"detail": exc.message},
+        )
+
+    return handler
+
+
 def create_app() -> FastAPI:
     _configure_logger()
 
@@ -66,6 +81,12 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router)
+
+    exception_mappings = [dataset_exception_mappings()]
+
+    for mapping in exception_mappings:
+        for key, value in mapping.items():
+            app.add_exception_handler(key, create_handler(value))
 
     @app.get("/")
     def get_root():

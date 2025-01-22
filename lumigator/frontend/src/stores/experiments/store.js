@@ -35,7 +35,7 @@ export const useExperimentStore = defineStore('experiment', () => {
           jobs: [],
           useCase: job.useCase,
           runTime: '',
-          samples: job.evaluation.max_samples,
+          samples: job.max_samples,
           models: [],
           status: 'SUCCEEDED'
         };
@@ -134,12 +134,20 @@ export const useExperimentStore = defineStore('experiment', () => {
     downloadContent(blob, `${selectedJob.value.name}_results`)
   }
 
-  async function loadResults(experiment_id) {
-    const results = await experimentService.fetchResults(experiment_id);
-    if (results?.id) {
-      selectedExperiment.value = experiments.value
-        .find((experiment) => experiment.id === results.id);
-      selectedExperimentRslts.value = transformResultsArray(results.resultsData);
+  async function loadExperimentResults(experiment) {
+    for (const job of experiment.jobs) {
+      const results = await experimentService.fetchResults(job.id);
+      if (results?.id) {
+        const modelRow = {
+          model: results.resultsData.model,
+          meteor: results.resultsData.meteor,
+          bertscore: results.resultsData.bertscore,
+          rouge: results.resultsData.rouge,
+          runTime: getJobRuntime(results.id),
+          jobResults: transformResultsArray(results.resultsData)
+        }
+        selectedExperimentRslts.value.push(modelRow);
+      }
     }
   }
 
@@ -157,31 +165,31 @@ export const useExperimentStore = defineStore('experiment', () => {
       return {
         example,
         bertscore: {
-          f1: objectData.bertscore.f1[index],
-          f1_mean: objectData.bertscore.f1_mean,
-          hashcode: objectData.bertscore.hashcode,
-          precision: objectData.bertscore.precision[index],
-          precision_mean: objectData.bertscore.precision_mean,
-          recall: objectData.bertscore.recall[index],
-          recall_mean: objectData.bertscore.recall_mean,
+          f1: objectData.bertscore?.f1?.[index] ?? 0,
+          f1_mean: objectData.bertscore?.f1_mean ?? 0,
+          hashcode: objectData.bertscore?.hashcode ?? 0,
+          precision: objectData.bertscore?.precision?.[index] ?? 0,
+          precision_mean: objectData.bertscore?.precision_mean ?? 0,
+          recall: objectData.bertscore?.recall?.[index] ?? 0,
+          recall_mean: objectData.bertscore?.recall_mean ?? 0,
         },
-        evaluation_time: objectData.evaluation_time,
-        ground_truth: objectData.ground_truth[index],
+        evaluation_time: objectData.evaluation_time ?? 0,
+        ground_truth: objectData.ground_truth?.[index],
         meteor: {
-          meteor: objectData.meteor.meteor[index],
-          meteor_mean: objectData.meteor.meteor_mean,
+          meteor: objectData.meteor?.meteor?.[index] ?? 0,
+          meteor_mean: objectData.meteor?.meteor_mean ?? 0,
         },
         model: objectData.model,
-        predictions: objectData.predictions[index],
+        predictions: objectData.predictions?.[index],
         rouge: {
-          rouge1: objectData.rouge.rouge1[index],
-          rouge1_mean: objectData.rouge.rouge1_mean,
-          rouge2: objectData.rouge.rouge2[index],
-          rouge2_mean: objectData.rouge.rouge2_mean,
-          rougeL: objectData.rouge.rougeL[index],
-          rougeL_mean: objectData.rouge.rougeL_mean,
-          rougeLsum: objectData.rouge.rougeLsum[index],
-          rougeLsum_mean: objectData.rouge.rougeLsum_mean,
+          rouge1: objectData.rouge?.rouge1?.[index] ?? 0,
+          rouge1_mean: objectData.rouge?.rouge1_mean ?? 0,
+          rouge2: objectData.rouge?.rouge2?.[index] ?? 0,
+          rouge2_mean: objectData.rouge?.rouge2_mean ?? 0,
+          rougeL: objectData.rouge?.rougeL?.[index] ?? 0,
+          rougeL_mean: objectData.rouge?.rougeL_mean ?? 0,
+          rougeLsum: objectData.rouge?.rougeLsum?.[index] ?? 0,
+          rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
       }
@@ -223,18 +231,18 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
-  async function startGroundtruthGeneration(groundTruthPayload) {
+  async function startGroundTruthGeneration(groundTruthPayload) {
     try {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
       if (jobResponse) {
         // Start polling to monitor the job status
         await updateJobStatus(jobResponse.id); // Ensure initial update
-        startPollingForJob(jobResponse.id); // Add polling for groundtruth job
+        startPollingForJob(jobResponse.id); // Add polling for ground truth job
         return jobResponse;
       }
       return null;
     } catch (error) {
-      console.error('Failed to start groundtruth generation:', error);
+      console.error('Failed to start ground truth generation:', error);
       return null;
     }
   }
@@ -249,6 +257,11 @@ export const useExperimentStore = defineStore('experiment', () => {
         }
       });
     }, 3000); // Poll every 3 seconds
+  }
+
+  function getJobRuntime(jobId) {
+    const job = jobs.value.find(job => job.id === jobId);
+    return job ? job.runTime : null;
   }
 
   watch(selectedExperiment, (newValue) => {
@@ -282,7 +295,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     updateStatusForIncompleteJobs,
     loadExperimentDetails,
     loadJobDetails,
-    loadResults,
+    loadExperimentResults,
     loadJobResults,
     loadResultsFile,
     selectedExperiment,
@@ -290,7 +303,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experimentLogs,
     selectedExperimentRslts,
     selectedJobRslts,
-    startGroundtruthGeneration,
+    startGroundTruthGeneration: startGroundTruthGeneration,
     runExperiment
   }
 })

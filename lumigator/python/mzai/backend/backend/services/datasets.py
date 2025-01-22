@@ -75,12 +75,16 @@ def validate_experiment_dataset(filename: str):
 
 
 def dataset_has_gt(filename: str) -> bool:
-    with Path(filename).open() as f:
-        reader = csv.DictReader(f)
-        fields = set(reader.fieldnames or [])
-        has_gt = GT_FIELD in fields
+    """Returns true if the dataset located at the supplied path (filename) has a ground truth
+    column with all of its rows correctly populated, otherwise false.
+    """
+    dataset = load_dataset("csv", data_files=filename, split="train")
 
-    return has_gt
+    if GT_FIELD not in dataset.column_names:
+        return False
+
+    # True only if every value in dataset[GT_FIELD] is not None or empty.
+    return all(value is not None and value.strip() != "" for value in dataset[GT_FIELD])
 
 
 class DatasetService:
@@ -105,7 +109,7 @@ class DatasetService:
         return self.dataset_repo.get_by_job_id(job_id)
 
     def _get_s3_path(self, dataset_key: str) -> str:
-        return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        return f"s3://{Path(settings.S3_BUCKET) / dataset_key}"
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
@@ -116,7 +120,12 @@ class DatasetService:
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
     def _save_dataset_to_s3(self, temp_fname, record):
-        """Loads a dataset, converts it to HF dataset format, and saves it on S3."""
+        """Converts the specified file to a set of HuggingFace dataset formatted files,
+        along with a newly recreated CSV file. The files are stored in an S3 bucket.
+        """
+        # Temp file to be used to contain the recreated CSV file.
+        temp = NamedTemporaryFile(delete=False)
+
         try:
             # Load the CSV file as HF dataset
             dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
@@ -126,12 +135,19 @@ class DatasetService:
             dataset_path = self._get_s3_path(dataset_key)
             # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
+
+            # Use the converted HF format files to rebuild the CSV and store it as 'dataset.csv'.
+            dataset_hf.to_csv(temp.name, index=False)
+            self.s3_filesystem.put_file(temp.name, f"{dataset_path}/dataset.csv")
         except Exception as e:
             # if a record was already created, delete it from the DB
             if record:
                 self.dataset_repo.delete(record.id)
 
             self._raise_unhandled_exception(e)
+        finally:
+            # Clean up temp file
+            Path(temp.name).unlink()
 
     def upload_dataset(
         self,
@@ -168,7 +184,6 @@ class DatasetService:
 
             # convert the dataset to HF format and save it to S3
             self._save_dataset_to_s3(temp.name, record)
-
         finally:
             # Cleanup temp file
             Path(temp.name).unlink()
@@ -228,8 +243,16 @@ class DatasetService:
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)
 
-    def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
-        """Generate presigned download URLs for dataset files."""
+    def get_dataset_download(
+        self, dataset_id: UUID, extension: str | None = None
+    ) -> DatasetDownloadResponse:
+        """Generate pre-signed download URLs for dataset files.
+
+        When supplied, only URLs for files that match the specified extension are returned.
+        """
+        # Sanitize the input for a file extension.
+        extension = extension.strip().lower() if extension and extension.strip() else None
+
         record = self._get_dataset_record(dataset_id)
         dataset_key = self._get_s3_key(dataset_id, record.filename)
 
@@ -246,6 +269,10 @@ class DatasetService:
 
             download_urls = []
             for s3_object in s3_response["Contents"]:
+                # Ignore files that don't end with the extension if it was specified
+                if extension and not s3_object["Key"].lower().endswith(extension):
+                    continue
+
                 download_url = self.s3_client.generate_presigned_url(
                     "get_object",
                     Params={

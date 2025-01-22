@@ -1,39 +1,48 @@
 <template>
-    <div v-if="visible" class="popup-backdrop">
-      <div class="popup">
-        <div class="popup-header">
-          <h3>Generate Groundtruth</h3>
-        </div>
-        <div class="popup-body">
-          <p>
-            Groundtruth will be generated using <strong>BART</strong>, Lumigator's reference model for this task.
-            Since result quality can vary substantially depending on your dataset, we recommend reviewing the output
-            before using it as Groundtruth for your experiments.
-          </p>
-          <p>
-            <small>Processing time depends on your compute power.</small>
-          </p>
-        </div>
-        <div class="popup-footer">
-          <Button
-            label="Cancel"
-            class="popup-button cancel"
-            severity="secondary"
-            outlined
-            rounded
-            @click="close"
-          />
-          <Button
-            label="Start Generating"
-            class="popup-button generate"
-            severity="warning"
-            rounded
-            @click="accept"
-          />
-        </div>
+  <div v-if="visible"
+       class="popup-backdrop"
+  >
+    <div class="popup">
+      <div class="popup-header">
+        <h3>Generate Ground Truth</h3>
+      </div>
+      <div class="popup-body">
+        <p>
+          Ground truth will be generated using
+          <strong>
+            <a href="https://huggingface.co/facebook/bart-large-cnn"
+               target="_blank"
+            >BART</a>
+          </strong>, Lumigator's reference model for this task.
+        </p>
+        <p>
+          Since result quality can vary substantially depending on your dataset, we recommend
+          reviewing the output before using it as ground truth for your experiments.
+        </p>
+        <p>
+          Processing time depends on your compute power.
+        </p>
+      </div>
+      <div class="popup-footer">
+        <Button
+          label="Cancel"
+          class="popup-button cancel"
+          severity="secondary"
+          outlined
+          rounded
+          @click="close"
+        />
+        <Button
+          label="Start Generating"
+          class="popup-button generate"
+          severity="warning"
+          rounded
+          @click="accept"
+        />
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
   <script setup>
   import { defineProps, defineEmits } from 'vue'

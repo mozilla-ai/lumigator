@@ -3,13 +3,13 @@ import io
 import os
 import uuid
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import boto3
 import fsspec
 import pytest
 import requests_mock
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
@@ -35,8 +35,14 @@ TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGener
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
 
+@pytest.fixture
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
+
+
+@pytest.fixture
+def common_resources_sample_data_dir(common_resources_dir) -> Path:
+    return common_resources_dir / "sample_data"
 
 
 def format_dataset(data: list[list[str]]) -> str:
@@ -67,6 +73,28 @@ def valid_experiment_dataset_without_gt() -> str:
     return format_dataset(data)
 
 
+@pytest.fixture
+def valid_upload_file(valid_experiment_dataset) -> UploadFile:
+    """Minimal valid upload file (with ground truth)."""
+    fake_filename = "dataset.csv"
+    fake_file = io.BytesIO(valid_experiment_dataset.encode("utf-8"))
+    fake_upload_file = UploadFile(
+        filename=fake_filename,
+        file=fake_file,
+    )
+    return fake_upload_file
+
+
+@pytest.fixture(scope="session")
+def valid_experiment_dataset_with_empty_gt() -> str:
+    """Minimal valid dataset without groundtruth."""
+    data = [
+        ["examples", "ground_truth"],
+        ["Hello World"],
+    ]
+    return format_dataset(data)
+
+
 @pytest.fixture(scope="session")
 def missing_examples_dataset() -> str:
     """Minimal invalid dataset without examples."""
@@ -88,22 +116,22 @@ def extra_column_dataset() -> str:
 
 
 @pytest.fixture(scope="function")
-def dialog_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_exc.csv"
+def dialog_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_empty_gt_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_mini_empty_gt.csv"
+def dialog_empty_gt_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_mini_empty_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_no_gt_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_mini_no_gt.csv"
+def dialog_no_gt_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 

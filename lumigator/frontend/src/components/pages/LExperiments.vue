@@ -38,7 +38,8 @@
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment !== null"
-          @l-results="onShowJobResults($event)"
+          @l-experiment-results="onShowExperimentResults($event)"
+          @l-job-results="onShowJobResults($event)"
           @l-dnld-results="onDnldResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
@@ -53,7 +54,10 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="selectedJobRslts.length"
+        v-if="showExpResults"
+      />
+      <l-job-results
+        v-if="showJobResults && selectedJobRslts.length"
         :results="selectedJobRslts"
       />
       <l-experiment-logs
@@ -76,7 +80,8 @@ import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
-import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
+import LExperimentResults from '@/components/organisms/LExperimentResults.vue';
+import LJobResults from '@/components/molecules/LJobResults.vue';
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 
@@ -95,13 +100,19 @@ const {
 const showDrawer = ref(false);
 const experimentsDrawer = ref(null);
 const showLogs = ref(null);
+const showExpResults = ref(null);
+const showJobResults = ref(null);
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
 
+onMounted(async () => {
+  await experimentStore.loadExperiments();
+});
+
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Logs' : selectedJob.value.name;
+  return showLogs.value ? 'Logs' : selectedExperiment.value.name;
 };
 
 const onCreateExperiment = () => {
@@ -114,9 +125,16 @@ const onSelectExperiment = (experiment) => {
   showSlidingPanel.value = true;
 }
 
+const onShowExperimentResults = (experiment) => {
+  experimentStore.loadExperimentResults(experiment);
+  showExpResults.value = true;
+  showDrawer.value = true;
+}
+
 const onShowJobResults = (job) => {
   experimentStore.loadJobResults(job.id);
   showDrawer.value = true;
+  showJobResults.value = true;
 }
 
 const onDnldResults = (job) => {
@@ -139,6 +157,8 @@ const onCloseDetails = () => {
 
 const resetDrawerContent = () => {
   selectedJobRslts.value = [];
+  showExpResults.value = false;
+  showJobResults.value = false;
   showLogs.value = false;
   showDrawer.value = false;
 }

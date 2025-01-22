@@ -43,7 +43,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
-            :disabled="getStatus() === 'PENDING'"
+            :disabled="currentItemStatus === 'PENDING'"
             style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
@@ -108,7 +108,7 @@
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">run time</div>
-        <div class="l-experiment-details__content-field">{{ getRunTime() }}</div>
+        <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
@@ -128,8 +128,8 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="getStatus() !== 'SUCCEEDED'"
-        @click="showResulsts"
+        :disabled="currentItemStatus !== 'SUCCEEDED'"
+        @click="showResults"
       />
       <Button
         v-if="isJobFocused"
@@ -138,7 +138,7 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="getStatus() !== 'SUCCEEDED'"
+        :disabled="currentItemStatus !== 'SUCCEEDED'"
         @click="emit('l-dnld-results', selectedJob)"
       />
     </div>
@@ -146,14 +146,20 @@
 </template>
 
 <script setup>
-import { computed, ref} from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { formatDate, calculateDuration } from '@/helpers/index'
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 
-const emit = defineEmits(['l-close-details', 'l-results', 'l-show-logs', 'l-dnld-results']);
+const emit = defineEmits([
+  'l-close-details',
+  'l-experiment-results',
+  'l-job-results',
+  'l-show-logs',
+  'l-dnld-results'
+]);
 
 const experimentStore = useExperimentStore();
 const {
@@ -186,7 +192,7 @@ const currentItemStatus = computed(() => {
 });
 
 const tagSeverity = computed(() => {
-   const status = currentItemStatus.value;
+  const status = currentItemStatus.value;
   switch (status) {
     case 'SUCCEEDED':
       return 'success';
@@ -199,30 +205,32 @@ const tagSeverity = computed(() => {
   }
 })
 
-const showResulsts = () => {
-  emit('l-results', isJobFocused.value ? selectedJob.value : selectedExperiment.value.jobs)
-}
-
-function getRunTime() {
+const focusedItemRunTime = computed(() => {
   if (isJobFocused.value) {
     return selectedJob.value.runTime ? selectedJob.value.runTime : '-' ;
   }
+
   if (currentItemStatus.value !== 'RUNNING'
     && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value.jobs.map(job => job.end_time);
+    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time);
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current
     });
-    if(lastEndTime) {
+    if (lastEndTime) {
       return calculateDuration(selectedExperiment.value.created, lastEndTime);
     }
   }
-  return '-';
+  return '-'
+})
+
+const showResults = () => {
+  if (isJobFocused.value) {
+    emit('l-job-results', selectedJob.value);
+    return
+  }
+  emit('l-experiment-results', selectedExperiment.value);
 }
 
-function getStatus() {
-  return isJobFocused.value ? selectedJob.value.status : selectedExperiment.value.status
-}
 </script>
 
 <style lang="scss">

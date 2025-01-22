@@ -75,6 +75,10 @@ spec:
                   name: {{ include "lumigator.openai-secret-ref" . }}
                   key: {{ .Consts.openaiSecretKey }}
             {{- end }}
+            - name: EVALUATOR_PIP_REQS
+              value: {{ .Values.evaluatorPipReqs }}
+            - name: EVALUATOR_WORK_DIR
+              value: {{ .Values.evaluatorWorkDir }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -10,14 +10,15 @@ import sys
 import os
 from pathlib import Path
 
-# Get the commit hash from the environment variable
-commit_id = os.environ.get("GIT_COMMIT", "main")
+# Get the commit hash from git
+import subprocess
+commit_id = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
 print(f"Git Commit ID: {commit_id}")
 # patch the Sphinx run so that it can operate directly on the sources
 # see: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#ensuring-the-code-can-be-imported
 module_paths = [
-    Path("..", "..", "lumigator", "sdk").resolve(),
-    Path("..", "..", "lumigator", "schemas").resolve(),
+    Path("..", "..", "lumigator", "lumigator", "sdk").resolve(),
+    Path("..", "..", "lumigator", "lumigator", "schemas").resolve(),
 ]
 
 for path in module_paths:
@@ -53,7 +54,7 @@ extensions = [
     "myst_parser",
     "sphinx_design",
     "sphinx_copybutton",
-    "sphinx.ext.linkcheck"
+    "sphinx.builders.linkcheck"
 ]
 
 # napoleon settings

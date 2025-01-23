@@ -84,8 +84,15 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
 
-    exception_mappings = [dataset_exception_mappings()]
+    # Group mappings of service error types to HTTP status code, for routes.
+    exception_mappings = [
+        # TODO: Add completions
+        dataset_exception_mappings()  # Datasets
+        # TODO: Add experiments
+        # TODO: Add jobs
+    ]
 
+    # Add a handler for each error -> status mapping.
     for mapping in exception_mappings:
         for key, value in mapping.items():
             app.add_exception_handler(key, create_error_handler(value))

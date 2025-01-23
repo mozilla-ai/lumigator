@@ -30,6 +30,11 @@ When the system is started for the first time, a `.env` file is created from the
 `.env.template`. This file contains different parameters passed to the system as environment
 variables and you can customize it to suit your specific use case.
 
+> [!NOTE]
+> We are mindful about your personal settings so we will never overwrite them. For this reason,
+> if you are pulling a new version of lumigator from the repo please make sure that your `.env`
+> file is consistent with the latest `.env.template`, minus your parameters.
+
 ## Test instructions
 
 The backend includes both unit tests (requiring no additional containers) and integration

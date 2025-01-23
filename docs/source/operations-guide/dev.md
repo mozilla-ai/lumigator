@@ -31,8 +31,10 @@ persisted between runs.
 To use the API-based vendor ground truth generation and evaluation, you'll need to pass the
 following environment variables for credentials, into the docker container:
 
-- `MISTRAL_API_KEY`: You Mistal API key.
-- `OPENAI_API_KEY`: Your OpenAI API key.
+- `MISTRAL_API_KEY`: your Mistral API key.
+- `OPENAI_API_KEY`: your OpenAI API key.
+
+Refer to the [troubleshooting section](troubleshooting.md) for more details.
 
 ## Testing the backend services
 

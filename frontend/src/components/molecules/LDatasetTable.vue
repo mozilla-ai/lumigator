@@ -94,45 +94,48 @@ defineProps({
 	}
 })
 
-const emit = defineEmits(['l-delete-dataset', 'l-dataset-selected', 'l-experiment'])
+const emit = defineEmits([
+  'l-delete-dataset',
+  'l-dataset-selected',
+  'l-experiment',
+  'l-download-dataset']);
 
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
   return showSlidingPanel.value ?
     'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
-})
+});
 
 const focusedItem = ref(null);
-const tableVisible = ref(true)
+const tableVisible = ref(true);
 const optionsMenu = ref();
 const options = ref([
-	{
-		label: 'Use in Experiment',
+  {
+    label: 'Use in Experiment',
     icon: 'pi pi-experiments',
     disabled: false,
-     command: () => {
+    command: () => {
       emit('l-experiment', focusedItem.value)
     }
-	},
-	{
-		separator: true,
-	},
-	{
-		label: 'View',
-		icon: 'pi pi-external-link'
-	},
-	{
-		label: 'Download',
-		icon: 'pi pi-download'
-	},
-	{
-		label: 'Delete',
+  },
+  {
+    separator: true,
+  },
+  {
+    label: 'Download',
+    icon: 'pi pi-download',
+    command: () => {
+      emit('l-download-dataset', focusedItem.value)
+    }
+  },
+  {
+    label: 'Delete',
     icon: 'pi pi-trash',
     command: () => {
       emit('l-delete-dataset', focusedItem.value)
     }
-	},
-])
+  },
+]);
 
 const ptConfigOptionsMenu = ref({
   list: 'l-dataset-table__options-menu',

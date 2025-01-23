@@ -4,10 +4,10 @@ from backend.api.routes import (
     completions,
     datasets,
     experiments,
-    experiments_new,
     health,
     jobs,
     models,
+    runs,
 )
 from backend.api.tags import Tags
 
@@ -20,6 +20,4 @@ api_router.include_router(jobs.router, prefix="/jobs", tags=[Tags.JOBS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
 api_router.include_router(models.router, prefix="/models", tags=[Tags.MODELS])
-api_router.include_router(
-    experiments_new.router, prefix="/experiments_new", tags=[Tags.EXPERIMENTS_NEW]
-)
+api_router.include_router(runs.router, prefix="/runs", tags=[Tags.runs])

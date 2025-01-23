@@ -93,7 +93,7 @@ def wait_for_experiment(client, experiment_id: UUID) -> bool:
     succeeded = False
     timed_out = True
     for _ in range(1, MAX_POLLS):
-        get_experiment_response = client.get(f"/experiments_new/{experiment_id}")
+        get_experiment_response = client.get(f"/runs/{experiment_id}")
         assert get_experiment_response.status_code == 200
         get_experiment_response_model = JobResponse.model_validate(get_experiment_response.json())
         if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:

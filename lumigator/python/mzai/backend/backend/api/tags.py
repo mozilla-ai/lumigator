@@ -7,7 +7,7 @@ class Tags(str, Enum):
     JOBS = "jobs"
     COMPLETIONS = "completions"
     EXPERIMENTS = "experiments"
-    EXPERIMENTS_NEW = "experiments_new"
+    runs = "runs"
     MODELS = "models"
 
 
@@ -25,7 +25,7 @@ TAGS_METADATA = [
         "description": "Create and manage experiments.",
     },
     {
-        "name": Tags.EXPERIMENTS_NEW,
+        "name": Tags.runs,
         "description": "Create and manage experiments (new).",
     },
     {

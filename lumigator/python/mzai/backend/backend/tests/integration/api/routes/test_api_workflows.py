@@ -231,26 +231,22 @@ def test_full_experiment_launch(
     assert get_ds_response.status_code == 200
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
-    create_experiments_response = local_client.post(
-        "/experiments_new/", headers=headers, json=payload
-    )
+    create_experiments_response = local_client.post("/runs/", headers=headers, json=payload)
     assert create_experiments_response.status_code == 201
 
-    get_experiments_response = local_client.get("/experiments_new/")
+    get_experiments_response = local_client.get("/runs/")
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
     assert get_experiments.total > 0
 
-    get_experiment_response = local_client.get(f"/experiments_new/{get_experiments.items[0].id}")
+    get_experiment_response = local_client.get(f"/runs/{get_experiments.items[0].id}")
     logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
 
     assert wait_for_experiment(local_client, get_experiments.items[0].id)
 
-    get_jobs_per_experiment_response = local_client.get(
-        f"/experiments_new/{get_experiments.items[0].id}/jobs"
-    )
+    get_jobs_per_experiment_response = local_client.get(f"/runs/{get_experiments.items[0].id}/jobs")
     experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")

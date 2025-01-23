@@ -6,48 +6,61 @@ def _append_message(existing: str, message: str | None) -> str:
 class ServiceError(Exception):
     """Base exception for service-related errors."""
 
-    def __init__(self, message: str):
+    def __init__(self, message: str, exc: Exception | None = None):
+        """Creates a ServiceError.
+
+        :param message: error message
+        :param exc: optional exception
+        """
         self.message = message
-        pass
+        self.exc = exc
 
 
 class NotFoundError(ServiceError):
-    """Base exception for errors caused by a resource that cannot be found.
+    """Base exception for errors caused by a resource that cannot be found."""
 
-    :param resource: the resource that was not found
-    :param resource_id: the ID of the resource that was not found
-    :param message: an optional error message
-    """
+    def __init__(
+        self,
+        resource: str,
+        resource_id: str,
+        message: str | None = None,
+        exc: Exception | None = None,
+    ):
+        """Creates a NotFoundError.
 
-    def __init__(self, resource: str, resource_id: str, message: str | None = None):
+        :param resource: the resource that was not found
+        :param resource_id: the ID of the resource that was not found
+        :param message: an optional error message
+        :param exc: optional exception
+        """
         msg = f"{resource} with ID {resource_id} not found"
-        super().__init__(_append_message(msg, message))
+        super().__init__(_append_message(msg, message), exc)
         self.resource = resource
         self.resource_id = resource_id
 
 
 class ValidationError(ServiceError):
-    """Base exception for validation-related errors.
+    """Base exception for validation-related errors."""
 
-    :param message: an optional error message
-    """
+    def __init__(self, message: str | None = None, exc: Exception | None = None):
+        """Creates a ValidationError
 
-    def __init__(self, message: str | None = None):
-        super().__init__(message)
+        :param message: optional error message
+        :param exc: optional exception
+        """
+        super().__init__(message, exc)
 
 
 class UpstreamError(ServiceError):
-    """Base exception for upstream-related errors.
+    """Base exception for upstream-related errors."""
 
-    :param service_name: the name of the service which threw the error
-    :param original_exception: the original exception which was raised
-    :param message: an optional error message
-    """
+    def __init__(self, service_name: str, message: str | None = None, exc: Exception | None = None):
+        """Creates a UpstreamError.
 
-    def __init__(
-        self, service_name: str, original_exception: Exception, message: str | None = None
-    ):
+        :param service_name: the name of the service which threw the error
+        :param message: an optional error message
+        :param exc: optional exception
+        """
         msg = _append_message(f"Upstream error with {service_name}", message)
-        super().__init__(msg)
+        super().__init__(msg, exc)
         self.service_name = service_name
-        self.original_exception = original_exception

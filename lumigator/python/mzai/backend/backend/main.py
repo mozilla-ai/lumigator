@@ -55,6 +55,8 @@ def create_error_handler(status_code: HTTPStatus) -> Callable[[Request, ServiceE
     """Creates an error handler function for service errors, using the given status code"""
 
     def handler(_: Request, exc: ServiceError) -> Response:
+        logger.opt(exception=exc).error("Service error")
+
         return JSONResponse(
             status_code=status_code,
             content={"detail": exc.message},

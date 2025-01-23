@@ -154,7 +154,7 @@ class DatasetService:
             if record:
                 self.dataset_repo.delete(record.id)
 
-            raise DatasetUpstreamError("s3", e, "error attempting to save dataset to S3") from e
+            raise DatasetUpstreamError("s3", "error attempting to save dataset to S3", e) from e
         finally:
             # Clean up temp file
             Path(temp.name).unlink()
@@ -303,7 +303,7 @@ class DatasetService:
 
         except Exception as e:
             msg = f"Error generating pre-signed download URLs for dataset {dataset_id}"
-            raise DatasetUpstreamError("s3", e, msg) from e
+            raise DatasetUpstreamError("s3", msg, e) from e
 
         return DatasetDownloadResponse(id=dataset_id, download_urls=download_urls)
 

@@ -10,6 +10,7 @@ class JobType(str, Enum):
     INFERENCE = "inference"
     EVALUATION = "evaluate"
     EVALUATION_LITE = "eval_lite"
+    ANNOTATION = "annotate"
 
 
 class JobStatus(str, Enum):
@@ -98,6 +99,7 @@ class JobInferenceCreate(BaseModel):
     temperature: float = 1.0
     top_p: float = 1.0
     config_template: str | None = None
+    store_to_dataset: bool = False
 
 
 class JobAnnotateCreate(BaseModel):
@@ -106,6 +108,7 @@ class JobAnnotateCreate(BaseModel):
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     task: str | None = "summarization"
+    store_to_dataset: bool = False
 
 
 class JobResponse(BaseModel, from_attributes=True):

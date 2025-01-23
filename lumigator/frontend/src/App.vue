@@ -5,6 +5,7 @@
         <div class="l-menu__top">
           <div class="l-mode">
             <Button
+              v-show="false"
               v-tooltip.right="tooltipConfig"
               icon="pi pi-check"
               severity="secondary"
@@ -219,6 +220,13 @@ onMounted(async () => {
 
     p {
       font-size: $l-menu-font-size;
+    }
+
+    &.error {
+      color: $l-grey-100;
+      h4 {
+        font-weight: $l-font-weight-semibold;
+      }
     }
   }
 

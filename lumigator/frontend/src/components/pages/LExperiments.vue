@@ -31,14 +31,15 @@
     <Teleport to=".sliding-panel">
       <transition name="transition-fade">
         <l-experiment-form
-          v-if="showSlidingPanel && selectedExperiment === null"
+          v-if="isFormVisible"
           @l-close-form="onDismissForm"
         />
       </transition>
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment !== null"
-          @l-results="onShowResults($event)"
+          @l-experiment-results="onShowExperimentResults($event)"
+          @l-job-results="onShowJobResults($event)"
           @l-dnld-results="onDnldResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
@@ -53,11 +54,14 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="selectedExperimentRslts.length"
-        :results="selectedExperimentRslts"
+        v-if="showExpResults"
+      />
+      <l-job-results
+        v-if="showJobResults && selectedJobRslts.length"
+        :results="selectedJobRslts"
       />
       <l-experiment-logs
-        v-if="selectedExperimentRslts.length === 0"
+        v-if="showLogs && selectedJobRslts.length === 0"
       />
 
     </l-experiments-drawer>
@@ -65,7 +69,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -76,7 +80,8 @@ import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
 import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
 import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
 import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
-import LExperimentResults from '@/components/molecules/LExperimentResults.vue';
+import LExperimentResults from '@/components/organisms/LExperimentResults.vue';
+import LJobResults from '@/components/molecules/LJobResults.vue';
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
 
@@ -88,17 +93,22 @@ const { selectedDataset } = storeToRefs(datasetStore);
 const {
   experiments,
   selectedExperiment,
-  selectedExperimentRslts
+  selectedJob,
+  selectedJobRslts
 } = storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
 const experimentsDrawer = ref(null);
 const showLogs = ref(null);
+const showExpResults = ref(null);
+const showJobResults = ref(null);
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
+const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null);
+
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Experiment Logs' : selectedExperiment.value.name;
+  return showLogs.value ? 'Logs' : selectedExperiment.value.name;
 };
 
 const onCreateExperiment = () => {
@@ -107,17 +117,24 @@ const onCreateExperiment = () => {
 }
 
 const onSelectExperiment = (experiment) => {
-  experimentStore.loadDetails(experiment.id);
+  experimentStore.loadExperimentDetails(experiment.id);
   showSlidingPanel.value = true;
 }
 
-const onShowResults = (experiment) => {
-  experimentStore.loadResults(experiment.id);
+const onShowExperimentResults = (experiment) => {
+  experimentStore.loadExperimentResults(experiment);
+  showExpResults.value = true;
   showDrawer.value = true;
 }
 
-const onDnldResults = (experiment) => {
-  experimentStore.loadResultsFile(experiment.id);
+const onShowJobResults = (job) => {
+  experimentStore.loadJobResults(job.id);
+  showDrawer.value = true;
+  showJobResults.value = true;
+}
+
+const onDnldResults = (job) => {
+  experimentStore.loadResultsFile(job.id);
 }
 
 const onShowLogs = () => {
@@ -135,7 +152,9 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedExperimentRslts.value = [];
+  selectedJobRslts.value = [];
+  showExpResults.value = false;
+  showJobResults.value = false;
   showLogs.value = false;
   showDrawer.value = false;
 }
@@ -147,8 +166,11 @@ onMounted(async () => {
   }
 })
 
-watch(showSlidingPanel, () => {
-  selectedExperiment.value = null;
+watch(showSlidingPanel, (newValue) => {
+  if (!newValue) {
+    selectedExperiment.value = null;
+    selectedJob.value = null;
+  }
 });
 </script>
 

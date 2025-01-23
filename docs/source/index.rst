@@ -24,10 +24,11 @@ Lumigator is a Python-based FastAPI web app that features REST API endpoints, pr
 services for serving and evaluating large language models. These models can be hosted on both
 Hugging Face and local stores or accessed through APIs. It consists of:
 
+   - A Web UI
    - A FastAPI-based web app that provides various endpoints for serving and evaluating language
      models.
    - A Ray cluster to run offline inference or evaluation jobs.
-   - Artifact management (S3 in the cloud, localstack locally).
+   - Artifact management (S3 in the cloud, minio locally).
    - A database to track platform-level lifecycle, job, and dataset metadata.
 
 .. toctree::
@@ -36,7 +37,9 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
    get-started/installation
    get-started/quickstart
+   get-started/ui-guide
    get-started/suggested-models
+   get-started/troubleshooting
 
 .. toctree::
    :maxdepth: 2

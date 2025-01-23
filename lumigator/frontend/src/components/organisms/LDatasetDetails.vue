@@ -16,6 +16,7 @@
           severity="secondary"
           variant="text"
           rounded
+          @click="emit('l-download-dataset', selectedDataset)"
         />
         <Button
           severity="secondary"
@@ -94,6 +95,7 @@ const isCopied = ref(false);
 
 const emit = defineEmits([
   'l-delete-dataset',
+  'l-download-dataset',
   'l-details-closed',
   'l-experiment'
 ])

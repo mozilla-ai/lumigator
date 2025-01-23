@@ -3,6 +3,10 @@
 // this file overrides some of the default styles from primevue
 // so the use of !important may be necessary
 
+  :root {
+    --l-tag-info-background: #874B0A!important;
+  }
+
 // Menu Styling
 .p-menu {
   background-color: $l-menu-bg!important;
@@ -74,6 +78,21 @@
 
    .p-datatable-column-sorted {
       background: inherit;
+    }
+
+    .p-datatable-row-expansion {
+      background: $l-main-bg!important;
+      &:hover {
+        background: $l-main-bg!important;
+      }
+
+      &:hover td {
+        background: $l-main-bg!important;
+      }
+
+      & > td:first-child {
+        padding: 0;
+      }
     }
 
 }

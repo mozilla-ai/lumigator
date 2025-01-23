@@ -20,11 +20,19 @@ source .venv/bin/activate
 
 ## Make usage
 
-The available Makefile will copy a `.env` file from the existing `.env.template` file. There are some targets to start the docker composition (`local-up`, `start-lumigator`, `start-lumigator-build`), to stop it (`local-down`) and to run tests (`test-backend`, `test-sdk`, `test-all`).
+The available Makefile contains targets to:
+
+- start the system using docker compose (e.g. `local-up`, `start-lumigator`, `start-lumigator-build`)
+- stop the system (e.g. `local-down`, `stop-lumigator`)
+- run tests (e.g `test-backend`, `test-sdk`, `test-all`)
+
+When the system is started for the first time, a `.env` file is created from the existing `.env.template`. This file contains different parameters passed to the
+system as environment variables and you can customize it to suit your specific
+use case.
 
 ## Test instructions
 
-The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray instance in the same network where the application and tests are running, and test LocalStack containers also in the same configuration).
+The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray instance in the same network where the application and tests are running).
 
 The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
 

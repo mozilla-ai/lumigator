@@ -43,12 +43,13 @@ services:
       - local
 
   ray:
-    image: rayproject/ray:2.30.0-py311-cpu${RAY_ARCH_SUFFIX}
+    image: rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX}
     ports:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --redis-password=yourpassword --block" # pragma: allowlist secret
+    # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
     deploy:
       resources:
@@ -56,14 +57,6 @@ services:
           cpus: '2'
           memory: '5g'
     environment:
-      - HOST=localhost
-      - RAY_IMAGE=raytest
-      - REDISPORT=6379
-      - DASHBOARDPORT=8265
-      - HEADNODEPORT=10001
-      - REDISPASSWORD=yourpassword
-      - NUM_WORKERS=4
-      - NUM_CPU_WORKER=1
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY
@@ -76,7 +69,7 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
 
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
     #       issues down the line. This should be used only for local, development
@@ -92,7 +85,6 @@ services:
       context: .
       dockerfile: "Dockerfile"
       target: "main_image"
-    platform: linux/amd64
     depends_on:
       minio-admin:
         condition: service_completed_successfully
@@ -115,7 +107,6 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
       - S3_BUCKET
-      - PYTHONPATH=/mzai/lumigator/python/mzai/backend
       - EVALUATOR_PIP_REQS=/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt
       - EVALUATOR_WORK_DIR=/mzai/lumigator/python/mzai/jobs/evaluator
       # TODO: the following two rows should be renamed to EVALUATOR_*
@@ -128,10 +119,10 @@ services:
       - RAY_HEAD_NODE_HOST
       - MISTRAL_API_KEY=$MISTRAL_API_KEY
       - OPENAI_API_KEY=$OPENAI_API_KEY
-      - RAY_WORKER_GPUS=0
-      - RAY_WORKER_GPUS_FRACTION=0
+      - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
+      - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
       - LUMI_API_CORS_ALLOWED_ORIGINS
-    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:4566 both on the host system
+    # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
     #       issues down the line. This should be used only for local, development

@@ -16,6 +16,7 @@ from model_clients import (
     OpenAIModelClient,
 )
 from paths import PathPrefix
+from schemas import InferenceJobOutput
 from tqdm import tqdm
 
 
@@ -28,11 +29,11 @@ def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     return predictions
 
 
-def save_to_disk(local_path: Path, data_dict: dict):
+def save_to_disk(local_path: Path, results: InferenceJobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data_dict, f)
+        json.dump(results.dict(), f)
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
@@ -43,7 +44,7 @@ def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: InferenceJobConfig, inference_results: dict) -> Path:
+def save_outputs(config: InferenceJobConfig, inference_results: InferenceJobOutput) -> Path:
     storage_path = config.job.storage_path
 
     # generate local temp file ANYWAY:
@@ -101,7 +102,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
             model_client = OpenAIModelClient(base_url, config)
     elif config.hf_pipeline:
         if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
-            logger.info("Using HuggingFace client.")
+            logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")
             model_client = HuggingFaceModelClient(config)
             output_model_name = config.hf_pipeline.model
         else:
@@ -109,13 +110,21 @@ def run_inference(config: InferenceJobConfig) -> Path:
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 
-    # run inference
-    output[config.job.output_field] = predict(dataset_iterable, model_client)
-    output["examples"] = dataset["examples"]
-    output["ground_truth"] = dataset["ground_truth"]
-    output["model"] = output_model_name
+    # We keep any columns that were already there (not just the original input
+    # samples, but also past predictions under another column name)
+    output.update(dataset.to_dict())
 
-    output_path = save_outputs(config, output)
+    # We are trusting the user: if the dataset already had a column with the output_field
+    # they selected, we overwrite it with the values from our inference.
+
+    if config.job.output_field in dataset.column_names:
+        logger.warning(f"Overwriting {config.job.output_field}")
+
+    output[config.job.output_field] = predict(dataset_iterable, model_client)
+    output["model"] = output_model_name
+    logger.info(output)
+
+    output_path = save_outputs(config, InferenceJobOutput.model_validate(output))
     return output_path
 
 

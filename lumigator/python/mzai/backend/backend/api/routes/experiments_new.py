@@ -22,8 +22,15 @@ async def create_experiment(
 
 
 @router.get("/{experiment_id}")
-def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
-    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
+def get_experiment(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
+    return ExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+
+
+@router.get("/{experiment_id}/jobs")
+def get_experiment_jobs(
+    service: ExperimentServiceDep, experiment_id: UUID
+) -> ListingResponse[UUID]:
+    return service.get_all_owned_jobs(experiment_id)
 
 
 @router.get("/")

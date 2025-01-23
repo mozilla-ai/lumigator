@@ -18,6 +18,11 @@ services:
           action: sync
           ignore:
             - .venv/
+        - path: lumigator/python/mzai/jobs/
+          target: /mzai/lumigator/python/mzai/jobs
+          action: sync
+          ignore:
+            - .venv/
         - path: lumigator/python/mzai/schemas/
           target: /mzai/lumigator/python/mzai/schemas
           action: sync

@@ -14,12 +14,13 @@ command:
 user@host:~/lumigator$ make local-up
 ```
 
-This creates three container services networked together to make up all the components of the
+This creates four container services networked together to make up all the components of the
 Lumigator application:
 
-- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
+- `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
-- `ray`: a Ray cluster for submitting lm-buddy jobs and serving Ray Serve.
+- `ray`: A Ray cluster for submitting several types of jobs.
+- `frontend`: Lumigator's Web UI
 
 The `local-up` make target will also set a watch on the backend codebase, so that any changes you
 make to the codebase will be automatically reflected in the running backend service (see
@@ -30,8 +31,10 @@ persisted between runs.
 To use the API-based vendor ground truth generation and evaluation, you'll need to pass the
 following environment variables for credentials, into the docker container:
 
-- `MISTRAL_API_KEY`: You Mistal API key.
-- `OPENAI_API_KEY`: Your OpenAI API key.
+- `MISTRAL_API_KEY`: your Mistral API key.
+- `OPENAI_API_KEY`: your OpenAI API key.
+
+Refer to the [troubleshooting section](troubleshooting.md) for more details.
 
 ## Testing the backend services
 
@@ -39,25 +42,19 @@ You can test your local setup as follows:
 
 - `SQLite`: Connect to your database with any SQL client that supports SQLite
   (e.g., [DBeaver](https://dbeaver.io/)).
- - `localstack`: Test your localstack setup as follows:
-   - Install `s5smd`, a very fast S3 and local filesystem execution tool, by running:
-     ```bash
-     brew install peak/tap/s5cmd
-     ```
-   - Export the folowing environment variables:
-     ```bash
-     export AWS_ACCESS_KEY_ID=test
-     export AWS_SECRET_ACCESS_KEY=test
-     export AWS_DEFAULT_REGION=us-east-2
-     export AWS_ENDPOINT_URL=http://localhost:4566
-     ```
-    - Set the following alias for convenience:
+- `minio`: Test your minio setup as follows:
+    - connect to http://localhost:9001
+    - log in with `username=lumigator` and `password=lumigator` (you can customize them in your `.env` file)
+    - check out the `lumigator-storage` bucket
+- `minio` via command line:
+    - install the aws cli: `brew install awscli`
+    - export the following environment variables:
       ```bash
-      alias s5='s5cmd --endpoint-url $AWS_ENDPOINT_URL'
+      export AWS_ENDPOINT_URL=http://localhost:9000
+      export AWS_ACCESS_KEY_ID=lumigator
+      export AWS_SECRET_ACCESS_KEY=lumigator
       ```
-    - Check out the storage: `s5 ls`
-    - Check out the lumigator bucket: `s5 ls s3://lumigator-storage`.
-    - Check out the localstack image documentation [here](https://docs.localstack.cloud/references/configuration/).
+    - Check out the lumigator bucket: `aws s3 ls s3://lumigator-storage`.
  - `backend`: Connect to Lumigator's [OpenAPI spec at localhost](http://localhost/docs#), see the
    available endpoints, and interactively run commands.
  - `ray`: Connect to Ray's dashboard [via HTTP to this address](http://localhost:8265/), see the
@@ -124,7 +121,7 @@ Or using yarn:
 user@host:~/lumigator/lumigator/frontend$ yarn dev
 ```
 
-Visit `http://localhost:3000` in your browser. The application runs at this address by default.
+Visit `http://localhost` in your browser. The application runs at this address by default.
 
 ### Build for Production
 
@@ -149,13 +146,3 @@ To fix linting issues automatically:
 ```console
 user@host:~/lumigator/lumigator/frontend$ npm run lint:fix
 ```
-
-### Environment Variables
-
-To configure environment variables, create an `.env` file in the root of the `frontend` directory with the following structure:
-
-```bash
-VUE_APP_BASE_URL=http://localhost:8000/api/v1/  # Backend API URL
-```
-
-You can add other environment-specific variables as needed.

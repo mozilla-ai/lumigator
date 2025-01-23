@@ -39,9 +39,9 @@ export function retrieveEntrypoint(job) {
     // See: lumigator/python/mzai/backend/backend/config_templates.py
 
     // Normalize the max_samples
-    if (jsonObject?.job?.max_samples) {
+    if (jsonObject?.job?.max_samples !== undefined) {
       jsonObject.max_samples = jsonObject.job.max_samples;
-    } else if (jsonObject?.evaluation?.max_samples) {
+    } else if (jsonObject?.evaluation?.max_samples !== undefined) {
       jsonObject.max_samples = jsonObject.evaluation.max_samples;
     } else {
       throw new Error("Unable to parse max_samples from entrypoint config: " + configString);
@@ -49,13 +49,13 @@ export function retrieveEntrypoint(job) {
 
     // Normalize the model path
     let modelPath = '';
-    if (jsonObject?.model?.path) {
+    if (jsonObject?.model?.path !== undefined) {
       modelPath = jsonObject.model.path;
-    } else if (jsonObject?.model?.inference?.engine) {
+    } else if (jsonObject?.model?.inference?.engine !== undefined) {
       modelPath = jsonObject.model.inference.engine;
-    } else if (jsonObject?.hf_pipeline?.model_uri) {
+    } else if (jsonObject?.hf_pipeline?.model_uri !== undefined) {
       modelPath = jsonObject.hf_pipeline.model_uri;
-    } else if (jsonObject?.inference_server?.engine) {
+    } else if (jsonObject?.inference_server?.engine !== undefined) {
       modelPath = jsonObject.inference_server.engine;
     } else {
       throw new Error("Unable to parse model path from entrypoint config: " + configString);
@@ -84,10 +84,10 @@ export function calculateDuration(start, finish) {
   const seconds = totalSeconds % 60;
 
   // Format the result as hh:mm:ss
-  const duration = `${String(hours).padStart(2, '0')}:
+  const formatedDuration = `${String(hours).padStart(2, '0')}:
   ${String(minutes).padStart(2, '0')}:
   ${String(seconds).padStart(2, '0')}`;
-  return duration;
+  return formatedDuration;
 }
 
 export function downloadContent(blob, filename) {

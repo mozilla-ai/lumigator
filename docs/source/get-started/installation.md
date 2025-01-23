@@ -15,12 +15,13 @@ Before you start, make sure you have the following:
 
 ## Local Deployment
 
-You can run and develop Lumigator locally using `docker-compose.` This creates three container
+You can run and develop Lumigator locally using `docker-compose.` This creates four container
 services networked together to make up all the components of the Lumigator application:
 
-- `localstack`: Local storage for datasets that mimics S3-API compatible functionality.
+- `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: A Ray cluster for submitting several types of jobs.
+- `frontend`: Lumigator's Web UI
 
 ```{note}
 Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
@@ -28,17 +29,14 @@ uses SQLite for this purpose.
 ```
 
 ```{note}
-If you'd like to evaluate against LLM APIs like OpenAI and Mistral, you'll need to have your
-environment variable set locally for Lumigator pick it up at runtime, or, alternately, inject
-into the running `backend` docker container.
-
-export OPENAI_API_KEY=yourkey
-export MISTRAL_API_KEY=yourkey
+If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
+environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
+[troubleshooting section](troubleshooting.md) for more details.
 ```
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
-provider's S3-compatible service, instead of localstack. Similarly, one could provide a different
+provider's S3-compatible service, instead of minio. Similarly, one could provide a different
 `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See [here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml) for an example of how to do
 this.
 

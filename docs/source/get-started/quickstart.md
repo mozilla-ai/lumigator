@@ -215,10 +215,11 @@ user@host:~/lumigator$ curl -s "http://localhost:8000/api/v1/health/jobs/$SUBMIS
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
+from pprint import pprint
 job_id = responses[0].id
 
 job = lm_client.jobs.wait_for_job(job_id)  # Create the coroutine object
-result = await job  # Await the coroutine to get the result
+pprint(job)
 ```
 :::
 
@@ -240,7 +241,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/$SUBMISSION_ID/
   -H 'accept: application/json' | jq
 {
   "id": "5195c9a5-938d-475e-b0fc-cf866492909d",
-  "download_url": "http://localhost:4566/lumigator-storage/jobs/results/lumigator_enthusiasts/5195c9a5-938d-475e-b0fc-cf866492909d/results.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=test%2F20241031%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20241031T104126Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0309fe4825bc2358180c607a4a4ad4e8d36946133574d8b9416df228ce62944e"
+  "download_url": "http://localhost:9000/lumigator-storage/jobs/results/lumigator_enthusiasts/5195c9a5-938d-475e-b0fc-cf866492909d/results.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=test%2F20241031%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20241031T104126Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0309fe4825bc2358180c607a4a4ad4e8d36946133574d8b9416df228ce62944e"
 }
 ```
 
@@ -270,6 +271,12 @@ different aspects:
   recall.
 - [BERTScore](https://openreview.net/pdf?id=SkeHuCVFDr) - Generates embeddings of ground truth input
   and model output and compares their cosine similarity
+
+## Terminate Session
+In order to shut down Lumigator, you can stop the containers that were [started](../get-started/installation.md) using Docker Compose. This can be done by simply running the following command:
+```console
+user@host:~/lumigator$ make stop-lumigator
+```
 
 ## Next Steps
 

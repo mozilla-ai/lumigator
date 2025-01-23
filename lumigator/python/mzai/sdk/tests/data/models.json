@@ -1,11 +1,12 @@
 {
-    "total": 9,
+    "total": 6,
     "items": [
       {
         "name": "facebook/bart-large-cnn",
         "uri": "hf://facebook/bart-large-cnn",
         "website_url": "https://huggingface.co/facebook/bart-large-cnn",
         "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
+        "requirements": [],
         "info": {
           "parameter_count": "406M",
           "tensor_type": "F32",
@@ -25,49 +26,11 @@
         ]
       },
       {
-        "name": "mikeadimech/longformer-qmsum-meeting-summarization",
-        "uri": "hf://mikeadimech/longformer-qmsum-meeting-summarization",
-        "website_url": "https://huggingface.co/mikeadimech/longformer-qmsum-meeting-summarization/discussions",
-        "description": "Longformer is a transformer model that is capable of processing long sequences.",
-        "info": {
-          "parameter_count": "162M",
-          "tensor_type": "F32",
-          "model_size": "648MB"
-        },
-        "tasks": [
-          {
-            "summarization": null
-          }
-        ]
-      },
-      {
-        "name": "mrm8488/t5-base-finetuned-summarize-news",
-        "uri": "hf://mrm8488/t5-base-finetuned-summarize-news",
-        "website_url": "https://huggingface.co/mrm8488/t5-base-finetuned-summarize-news",
-        "description": "Google's T5 base fine-tuned on News Summary dataset for summarization downstream task.",
-        "info": {
-          "parameter_count": "223M",
-          "tensor_type": "F32",
-          "model_size": "892MB"
-        },
-        "tasks": [
-          {
-            "summarization": {
-              "max_length": 200,
-              "min_length": 30,
-              "length_penalty": 2,
-              "early_stopping": true,
-              "no_repeat_ngram_size": 3,
-              "num_beams": 4
-            }
-          }
-        ]
-      },
-      {
         "name": "Falconsai/text_summarization",
         "uri": "hf://Falconsai/text_summarization",
         "website_url": "https://huggingface.co/Falconsai/text_summarization",
         "description": "A fine-tuned variant of the T5 transformer model, designed for the task of text summarization.",
+        "requirements": [],
         "info": {
           "parameter_count": "60.5M",
           "tensor_type": "F32",
@@ -87,26 +50,11 @@
         ]
       },
       {
-        "name": "mistralai/Mistral-7B-Instruct-v0.3",
-        "uri": "hf://mistralai/Mistral-7B-Instruct-v0.3",
-        "website_url": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3",
-        "description": "Mistral-7B-Instruct-v0.3 is an instruct fine-tuned version of the Mistral-7B-v0.3.",
-        "info": {
-          "parameter_count": "7.25B",
-          "tensor_type": "BF16",
-          "model_size": "14.5GB"
-        },
-        "tasks": [
-          {
-            "summarization": null
-          }
-        ]
-      },
-      {
         "name": "gpt-4o-mini",
         "uri": "oai://gpt-4o-mini",
         "website_url": "https://platform.openai.com/docs/models#gpt-4o-mini",
         "description": "OpenAI's GPT-4o-mini model.",
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -119,6 +67,7 @@
         "uri": "oai://gpt-4o",
         "website_url": "https://platform.openai.com/docs/models#gpt-4o",
         "description": "OpenAI's GPT-4o model.",
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -131,6 +80,7 @@
         "uri": "mistral://open-mistral-7b",
         "website_url": " https://mistral.ai/technology/#models",
         "description": "Mistral's 7B model.",
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -143,6 +93,7 @@
         "uri": "llamafile://mistralai/Mistral-7B-Instruct-v0.2",
         "website_url": " https://mistral.ai/technology/#models",
         "description": "A llamafile package of Mistral's 7B Instruct model.",
+        "requirements": [ "llamafile" ],
         "info": {
           "parameter_count": "7.24B",
           "tensor_type": "BF16",

@@ -60,7 +60,7 @@ To fix any of these, you should:
 
 1. Get the respective key/token (instructions for
 [Mistral API](https://docs.mistral.ai/getting-started/quickstart/),
-OpenAI API (https://platform.openai.com/docs/quickstart),
+OpenAI API (see `https://platform.openai.com/docs/quickstart`),
 [HF gated models](https://huggingface.co/docs/hub/models-gated) and
 [tokens](https://huggingface.co/docs/hub/en/security-tokens#how-to-manage-user-access-tokens)
 )

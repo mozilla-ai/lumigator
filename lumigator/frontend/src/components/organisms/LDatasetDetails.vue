@@ -108,7 +108,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useDatasetStore } from '@/stores/datasets/store';
 import { useSlidePanel } from '@/composables/SlidingPanel';
@@ -125,10 +124,10 @@ const { showSlidingPanel } = useSlidePanel();
 const isCopied = ref(false);
 const isGenerateGroundTruthPopupVisible = ref(false);
 const experimentStore = useExperimentStore();
-const router = useRouter();
 
 const emit = defineEmits([
   'l-delete-dataset',
+  'l-generate-gt',
   'l-download-dataset',
   'l-details-closed',
   'l-experiment'

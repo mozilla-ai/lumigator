@@ -1,0 +1,2477 @@
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    #   -r /ray/ci/../python/requirements/docker/ray-docker-requirements.txt
+    #   -r /ray/ci/../python/requirements/docker/ray-docker-requirements.txt
+    #   -r /ray/ci/../python/requirements/docker/ray-docker-requirements.txt
+    #   -r /ray/ci/../python/requirements/lint-requirements.txt
+    #   -r /ray/ci/../python/requirements/lint-requirements.txt
+    #   -r /ray/ci/../python/requirements/lint-requirements.txt
+    #   -r /ray/ci/../python/requirements/lint-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/train-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/train-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    #   -r /ray/ci/../python/requirements/security-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   -r /ray/ci/../python/requirements/test-requirements.txt
+    #   accelerate
+    #   accelerate
+    #   accelerate
+    #   accelerate
+    #   accelerate
+    #   accelerate
+    #   accelerate
+    #   adagio
+    #   adal
+    #   adal
+    #   adal
+    #   adal
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aim
+    #   aioboto3
+    #   aiobotocore
+    #   aiobotocore
+    #   aiobotocore
+    #   aiobotocore
+    #   aiohttp
+    #   aiohttp
+    #   aiohttp
+    #   aiohttp
+    #   aiohttp
+    #   aiohttp-cors
+    #   aiosignal
+    #   ale-py
+    #   alembic
+    #   alembic
+    #   altair
+    #   altair
+    #   altair
+    #   altair
+    #   altair
+    #   altair
+    #   anyio
+    #   anyio
+    #   argon2-cffi-bindings
+    #   array-record
+    #   array-record
+    #   arrow
+    #   asttokens
+    #   astunparse
+    #   astunparse
+    #   aws-sam-translator
+    #   aws-sam-translator
+    #   aws-sam-translator
+    #   aws-sam-translator
+    #   aws-xray-sdk
+    #   aws-xray-sdk
+    #   ax-platform
+    #   ax-platform
+    #   ax-platform
+    #   ax-platform
+    #   ax-platform
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-core
+    #   azure-cli-telemetry
+    #   azure-core
+    #   azure-core
+    #   azure-core
+    #   azure-identity
+    #   azure-identity
+    #   azure-identity
+    #   azure-identity
+    #   azure-identity
+    #   azure-mgmt-compute
+    #   azure-mgmt-compute
+    #   azure-mgmt-compute
+    #   azure-mgmt-core
+    #   azure-mgmt-network
+    #   azure-mgmt-network
+    #   azure-mgmt-network
+    #   azure-mgmt-resource
+    #   azure-mgmt-resource
+    #   azure-mgmt-resource
+    #   bayesian-optimization
+    #   bayesian-optimization
+    #   bayesian-optimization
+    #   bayesian-optimization
+    #   black
+    #   black
+    #   black
+    #   bleach
+    #   bleach
+    #   bokeh
+    #   bokeh
+    #   bokeh
+    #   bokeh
+    #   bokeh
+    #   bokeh
+    #   bokeh
+    #   boto3
+    #   boto3
+    #   botocore
+    #   botocore
+    #   botocore
+    #   botorch
+    #   botorch
+    #   botorch
+    #   cfn-lint
+    #   cfn-lint
+    #   cfn-lint
+    #   cfn-lint
+    #   cfn-lint
+    #   cfn-lint
+    #   click-option-group
+    #   clickhouse-connect
+    #   clickhouse-connect
+    #   clickhouse-connect
+    #   clickhouse-connect
+    #   cma
+    #   cmdstanpy
+    #   cmdstanpy
+    #   cmdstanpy
+    #   coloredlogs
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comet-ml
+    #   comm
+    #   configobj
+    #   configspace
+    #   configspace
+    #   configspace
+    #   configspace
+    #   contourpy
+    #   cryptography
+    #   cupy-cuda12x
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   dask
+    #   databricks-cli
+    #   databricks-cli
+    #   databricks-cli
+    #   databricks-cli
+    #   databricks-cli
+    #   databricks-cli
+    #   databricks-cli
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   datasets
+    #   decord
+    #   deepspeed
+    #   deepspeed
+    #   deepspeed
+    #   deepspeed
+    #   deepspeed
+    #   deepspeed
+    #   delta-sharing
+    #   delta-sharing
+    #   delta-sharing
+    #   delta-sharing
+    #   delta-sharing
+    #   delta-sharing
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   distributed
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-control
+    #   dm-env
+    #   dm-env
+    #   dm-env
+    #   docker
+    #   docker
+    #   docker
+    #   docker
+    #   docker-pycreds
+    #   dulwich
+    #   ecdsa
+    #   etils
+    #   etils
+    #   etils
+    #   etils
+    #   etils
+    #   etils
+    #   etils
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   evaluate
+    #   face
+    #   fairscale
+    #   fastapi
+    #   fastapi
+    #   fastapi
+    #   feather-format
+    #   flask
+    #   flask
+    #   flask
+    #   flask-cors
+    #   freezegun
+    #   fs
+    #   fsspec
+    #   fsspec
+    #   fugue
+    #   fugue
+    #   fugue
+    #   fugue-sql-antlr
+    #   fugue-sql-antlr
+    #   fugue-sql-antlr
+    #   fugue-sql-antlr
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   gcs-oauth2-boto-plugin
+    #   glom
+    #   glom
+    #   google-api-core
+    #   google-api-core
+    #   google-api-core
+    #   google-api-core
+    #   google-api-core
+    #   google-api-python-client
+    #   google-api-python-client
+    #   google-api-python-client
+    #   google-apitools
+    #   google-apitools
+    #   google-apitools
+    #   google-apitools
+    #   google-auth
+    #   google-auth
+    #   google-auth
+    #   google-auth
+    #   google-auth
+    #   google-auth-httplib2
+    #   google-auth-httplib2
+    #   google-auth-oauthlib
+    #   google-auth-oauthlib
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery
+    #   google-cloud-bigquery-storage
+    #   google-cloud-bigquery-storage
+    #   google-cloud-bigquery-storage
+    #   google-cloud-core
+    #   google-cloud-core
+    #   google-cloud-storage
+    #   google-cloud-storage
+    #   google-cloud-storage
+    #   google-cloud-storage
+    #   google-cloud-storage
+    #   google-cloud-storage
+    #   google-pasta
+    #   google-resumable-media
+    #   googleapis-common-protos
+    #   gpy
+    #   gpy
+    #   gpy
+    #   gpy
+    #   gpytorch
+    #   gpytorch
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio
+    #   gradio-client
+    #   gradio-client
+    #   gradio-client
+    #   gradio-client
+    #   gradio-client
+    #   gradio-client
+    #   gradio-client
+    #   grpcio-status
+    #   grpcio-status
+    #   grpcio-status
+    #   grpcio-tools
+    #   grpcio-tools
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gsutil
+    #   gymnasium
+    #   gymnasium
+    #   gymnasium
+    #   h5py
+    #   holidays
+    #   hpbandster
+    #   hpbandster
+    #   hpbandster
+    #   hpbandster
+    #   hpbandster
+    #   hpbandster
+    #   httpcore
+    #   httpcore
+    #   httpcore
+    #   httpcore
+    #   httplib2
+    #   httpx
+    #   httpx
+    #   httpx
+    #   httpx
+    #   hudi
+    #   hudi
+    #   huggingface-hub
+    #   huggingface-hub
+    #   huggingface-hub
+    #   huggingface-hub
+    #   huggingface-hub
+    #   huggingface-hub
+    #   huggingface-hub
+    #   hyperopt
+    #   hyperopt
+    #   hyperopt
+    #   hyperopt
+    #   hyperopt
+    #   imageio
+    #   imageio
+    #   importlib-metadata
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipykernel
+    #   ipython
+    #   ipython
+    #   ipython
+    #   ipython
+    #   ipython
+    #   ipywidgets
+    #   ipywidgets
+    #   ipywidgets
+    #   isodate
+    #   jinja2
+    #   jschema-to-python
+    #   jschema-to-python
+    #   jsonpatch
+    #   jsonschema
+    #   jsonschema
+    #   jsonschema
+    #   jsonschema
+    #   jsonschema
+    #   jsonschema-spec
+    #   jsonschema-spec
+    #   jsonschema-spec
+    #   junit-xml
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-cache
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-client
+    #   jupyter-core
+    #   jupyter-core
+    #   jupyter-events
+    #   jupyter-events
+    #   jupyter-events
+    #   jupyter-events
+    #   jupyter-events
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server
+    #   jupyter-server-fileid
+    #   jupyter-server-ydoc
+    #   jupyter-ydoc
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab
+    #   jupyterlab-server
+    #   jupyterlab-server
+    #   jupyterlab-server
+    #   jupyterlab-server
+    #   jupyterlab-server
+    #   jupyterlab-server
+    #   jupytext
+    #   jupytext
+    #   jupytext
+    #   jupytext
+    #   jupytext
+    #   knack
+    #   knack
+    #   knack
+    #   knack
+    #   knack
+    #   knack
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   kubernetes
+    #   labmaze
+    #   labmaze
+    #   lazy-loader
+    #   lightgbm
+    #   lightgbm
+    #   lightgbm
+    #   lightgbm
+    #   lightning-utilities
+    #   lightning-utilities
+    #   linear-operator
+    #   linear-operator
+    #   mako
+    #   matplotlib
+    #   matplotlib
+    #   matplotlib
+    #   matplotlib
+    #   matplotlib
+    #   matplotlib-inline
+    #   mdit-py-plugins
+    #   medpy
+    #   medpy
+    #   memray
+    #   memray
+    #   minigrid
+    #   minigrid
+    #   minigrid
+    #   ml-collections
+    #   ml-collections
+    #   ml-collections
+    #   ml-collections
+    #   ml-dtypes
+    #   mlagents-envs
+    #   mlagents-envs
+    #   mlagents-envs
+    #   mlagents-envs
+    #   mlagents-envs
+    #   mlagents-envs
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   mlflow
+    #   modin
+    #   modin
+    #   modin
+    #   modin
+    #   modin
+    #   monai
+    #   monai
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   mosaicml
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moto
+    #   moviepy
+    #   moviepy
+    #   moviepy
+    #   moviepy
+    #   msal
+    #   msal
+    #   msal
+    #   msal-extensions
+    #   msal-extensions
+    #   msgpack-numpy
+    #   msgpack-numpy
+    #   msrest
+    #   msrest
+    #   msrest
+    #   msrest
+    #   msrest
+    #   msrestazure
+    #   mujoco
+    #   mujoco
+    #   mujoco
+    #   mujoco
+    #   mujoco
+    #   multiprocess
+    #   mypy
+    #   mypy
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-nb
+    #   myst-parser
+    #   myst-parser
+    #   myst-parser
+    #   myst-parser
+    #   myst-parser
+    #   myst-parser
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclassic
+    #   nbclient
+    #   nbclient
+    #   nbclient
+    #   nbclient
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbconvert
+    #   nbformat
+    #   nbformat
+    #   nbformat
+    #   nevergrad
+    #   nevergrad
+    #   nevergrad
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook
+    #   notebook-shim
+    #   nsx-policy-python-sdk
+    #   nsx-policy-python-sdk
+    #   nsx-python-sdk
+    #   nsx-python-sdk
+    #   nsx-vmc-aws-integration-python-sdk
+    #   nsx-vmc-aws-integration-python-sdk
+    #   nsx-vmc-policy-python-sdk
+    #   nsx-vmc-policy-python-sdk
+    #   numba
+    #   numba
+    #   numexpr
+    #   oauth2client
+    #   oauth2client
+    #   oauth2client
+    #   oauth2client
+    #   oauth2client
+    #   onnx
+    #   onnx
+    #   onnxruntime
+    #   onnxruntime
+    #   onnxruntime
+    #   onnxruntime
+    #   onnxruntime
+    #   open-spiel
+    #   open-spiel
+    #   open-spiel
+    #   open-spiel
+    #   openapi-schema-validator
+    #   openapi-schema-validator
+    #   openapi-spec-validator
+    #   opencensus
+    #   opencensus-proto
+    #   opencv-python-headless
+    #   opentelemetry-exporter-opencensus
+    #   opentelemetry-exporter-opencensus
+    #   opentelemetry-exporter-opencensus
+    #   opentelemetry-exporter-opencensus
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-proto
+    #   opentelemetry-sdk
+    #   opt-einsum
+    #   optuna
+    #   optuna
+    #   optuna
+    #   optuna
+    #   optuna
+    #   optuna
+    #   pandas
+    #   pandas
+    #   pandas
+    #   paramiko
+    #   paramiko
+    #   paramz
+    #   paramz
+    #   paramz
+    #   paramz
+    #   partd
+    #   partd
+    #   patsy
+    #   patsy
+    #   pettingzoo
+    #   pettingzoo
+    #   pexpect
+    #   plotly
+    #   plotly
+    #   pre-commit
+    #   pre-commit
+    #   promise
+    #   prophet
+    #   prophet
+    #   prophet
+    #   prophet
+    #   prophet
+    #   prophet
+    #   proto-plus
+    #   pyarrow
+    #   pyasn1-modules
+    #   pydantic
+    #   pydantic-core
+    #   pydot
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyiceberg
+    #   pyjwt
+    #   pylance
+    #   pylance
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymars
+    #   pymunk
+    #   pynacl
+    #   pyopenssl
+    #   pyro-ppl
+    #   pyro-ppl
+    #   pyro-ppl
+    #   pyro-ppl
+    #   pyro4
+    #   pytest
+    #   pytest-aiohttp
+    #   pytest-aiohttp
+    #   pytest-asyncio
+    #   pytest-docker-tools
+    #   pytest-docker-tools
+    #   pytest-fixture-config
+    #   pytest-forked
+    #   pytest-httpserver
+    #   pytest-lazy-fixture
+    #   pytest-mock
+    #   pytest-remotedata
+    #   pytest-remotedata
+    #   pytest-repeat
+    #   pytest-rerunfailures
+    #   pytest-rerunfailures
+    #   pytest-shutil
+    #   pytest-shutil
+    #   pytest-shutil
+    #   pytest-shutil
+    #   pytest-sphinx
+    #   pytest-sugar
+    #   pytest-sugar
+    #   pytest-sugar
+    #   pytest-timeout
+    #   pytest-virtualenv
+    #   pytest-virtualenv
+    #   python-dateutil
+    #   python-jose
+    #   python-jose
+    #   python-jose
+    #   python-jose
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-lightning
+    #   pytorch-ranger
+    #   pyu2f
+    #   pyvmomi
+    #   qpd
+    #   qpd
+    #   qpd
+    #   qpd
+    #   querystring-parser
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   ray
+    #   raydp
+    #   raydp
+    #   raydp
+    #   raydp
+    #   raydp
+    #   raydp
+    #   raydp
+    #   requests
+    #   requests
+    #   requests
+    #   requests
+    #   requests-oauthlib
+    #   requests-oauthlib
+    #   requests-toolbelt
+    #   responses
+    #   responses
+    #   responses
+    #   rfc3339-validator
+    #   rich
+    #   rich
+    #   rsa
+    #   s3fs
+    #   s3fs
+    #   s3fs
+    #   s3transfer
+    #   sarif-om
+    #   sarif-om
+    #   scikit-image
+    #   scikit-image
+    #   scikit-image
+    #   scikit-image
+    #   scikit-image
+    #   scikit-image
+    #   scikit-learn
+    #   scikit-learn
+    #   scikit-learn
+    #   scikit-learn
+    #   scipy
+    #   segment-analytics-python
+    #   segment-analytics-python
+    #   segment-analytics-python
+    #   segment-analytics-python
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   semgrep
+    #   sentry-sdk
+    #   sentry-sdk
+    #   shimmy
+    #   shimmy
+    #   smart-open
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   snowflake-connector-python
+    #   soundfile
+    #   sphinx
+    #   sphinx
+    #   sphinx
+    #   sphinx
+    #   sphinx
+    #   sphinx
+    #   sqlalchemy
+    #   sshpubkeys
+    #   sshpubkeys
+    #   stanio
+    #   starlette
+    #   statsforecast
+    #   statsforecast
+    #   statsforecast
+    #   statsforecast
+    #   statsforecast
+    #   statsforecast
+    #   statsforecast
+    #   statsmodels
+    #   statsmodels
+    #   statsmodels
+    #   statsmodels
+    #   strictyaml
+    #   supersuit
+    #   supersuit
+    #   supersuit
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboard
+    #   tensorboardx
+    #   tensorboardx
+    #   tensorboardx
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-datasets
+    #   tensorflow-metadata
+    #   tensorflow-metadata
+    #   tensorflow-metadata
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   tensorflow-probability
+    #   terminado
+    #   terminado
+    #   tf2onnx
+    #   tf2onnx
+    #   tf2onnx
+    #   tf2onnx
+    #   tf2onnx
+    #   tf2onnx
+    #   tifffile
+    #   timm
+    #   timm
+    #   timm
+    #   timm
+    #   timm
+    #   tinycss2
+    #   tinyscaler
+    #   tokenizers
+    #   torch
+    #   torch
+    #   torch
+    #   torch
+    #   torch
+    #   torch
+    #   torch-cluster
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-geometric
+    #   torch-optimizer
+    #   torch-sparse
+    #   torchmetrics
+    #   torchmetrics
+    #   torchmetrics
+    #   torchtext
+    #   torchtext
+    #   torchtext
+    #   torchtext
+    #   torchvision
+    #   torchvision
+    #   torchvision
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   transformers
+    #   triad
+    #   triad
+    #   triad
+    #   triad
+    #   triad
+    #   trustme
+    #   trustme
+    #   typer
+    #   typer
+    #   typer
+    #   utilsforecast
+    #   utilsforecast
+    #   utilsforecast
+    #   uvicorn
+    #   uvicorn
+    #   vapi-common-client
+    #   vapi-runtime
+    #   vapi-runtime
+    #   vapi-runtime
+    #   vcenter-bindings
+    #   virtualenv
+    #   virtualenv
+    #   vmc-client-bindings
+    #   vmc-client-bindings
+    #   vmc-draas-client-bindings
+    #   vmc-draas-client-bindings
+    #   vsphere-automation-sdk
+    #   vsphere-automation-sdk
+    #   vsphere-automation-sdk
+    #   wandb
+    #   wandb
+    #   wandb
+    #   wandb
+    #   wandb
+    #   wandb
+    #   wandb
+    #   wandb
+    #   watchfiles
+    #   webdataset
+    #   webdataset
+    #   werkzeug
+    #   xgboost
+    #   xgboost
+    #   yahp
+    #   yahp
+    #   yarl
+    #   yarl
+    #   ypy-websocket
+    #   ypy-websocket
+    #   yq
+    #   yq
+    #   yq
+    #   yq
+    #   zoopt
+    #   zoopt
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements.txt
+    # via -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    # via -r /ray/ci/../python/requirements/anyscale-requirements.txt
+    # via -r /ray/ci/../python/requirements/docker/ray-docker-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/lint-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/core-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/data-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/dl-cpu-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/rllib-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/train-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/train-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/train-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/train-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/ml/tune-test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via -r /ray/ci/../python/requirements/test-requirements.txt
+    # via aim
+    # via aim
+    # via aim
+    # via aim
+    # via aimrecords
+    # via aiobotocore
+    # via alembic
+    # via argon2-cffi
+    # via arrow
+    # via ax-platform
+    # via ax-platform
+    # via ax-platform
+    # via azure-cli-core
+    # via azure-cli-core
+    # via azure-cli-core
+    # via azure-cli-core
+    # via azure-cli-core
+    # via azure-cli-telemetry
+    # via beautifulsoup4
+    # via black
+    # via boto3
+    # via botorch
+    # via botorch
+    # via botorch
+    # via cffi
+    # via cfn-lint
+    # via cfn-lint
+    # via cfn-lint
+    # via cfn-lint
+    # via clickhouse-connect
+    # via cmdstanpy
+    # via comet-ml
+    # via comet-ml
+    # via comet-ml
+    # via comet-ml
+    # via comet-ml
+    # via comet-ml
+    # via configspace
+    # via cupy-cuda12x
+    # via dask
+    # via dask
+    # via deepspeed
+    # via deepspeed
+    # via deepspeed
+    # via deepspeed
+    # via distributed
+    # via dm-control
+    # via dm-control
+    # via everett
+    # via flask
+    # via fs
+    # via fugue
+    # via fugue
+    # via fugue
+    # via gcs-oauth2-boto-plugin
+    # via gitdb
+    # via gitpython
+    # via glom
+    # via google-api-core
+    # via google-api-python-client
+    # via google-api-python-client
+    # via google-reauth
+    # via gpy
+    # via gradio
+    # via gradio
+    # via gradio
+    # via gradio
+    # via gradio
+    # via gradio
+    # via gsutil
+    # via gsutil
+    # via gsutil
+    # via gymnasium
+    # via hpbandster
+    # via ipykernel
+    # via ipython
+    # via ipython
+    # via ipython
+    # via ipython
+    # via ipython
+    # via ipywidgets
+    # via ipywidgets
+    # via isoduration
+    # via jedi
+    # via jschema-to-python
+    # via jsonschema
+    # via jsonschema
+    # via jsonschema
+    # via jsonschema
+    # via jsonschema
+    # via jsonschema-spec
+    # via jupyter-events
+    # via jupyter-server-fileid
+    # via jupyter-server-ydoc
+    # via jupyter-server-ydoc
+    # via jupyterlab
+    # via jupyterlab
+    # via jupyterlab
+    # via jupyterlab-server
+    # via markdown-it-py
+    # via matplotlib
+    # via matplotlib
+    # via matplotlib
+    # via matplotlib
+    # via medpy
+    # via mlflow
+    # via mlflow
+    # via mlflow
+    # via mlflow
+    # via mosaicml
+    # via mosaicml
+    # via mosaicml
+    # via mosaicml
+    # via mosaicml
+    # via moto
+    # via moto
+    # via moto
+    # via moto
+    # via moto
+    # via moto
+    # via moto
+    # via moto
+    # via msrestazure
+    # via msrestazure
+    # via myst-nb
+    # via nbclassic
+    # via nbconvert
+    # via nbconvert
+    # via nbconvert
+    # via nbconvert
+    # via nbconvert
+    # via nbformat
+    # via nevergrad
+    # via onnxruntime
+    # via open-spiel
+    # via openapi-spec-validator
+    # via openapi-spec-validator
+    # via openapi-spec-validator
+    # via opencensus
+    # via openpyxl
+    # via opentelemetry-exporter-opencensus
+    # via opentelemetry-exporter-otlp
+    # via opentelemetry-exporter-otlp-proto-grpc
+    # via opentelemetry-sdk
+    # via optuna
+    # via paramiko
+    # via paramiko
+    # via path-py
+    # via pre-commit
+    # via pre-commit
+    # via pre-commit
+    # via prompt-toolkit
+    # via prophet
+    # via pydantic
+    # via pydantic
+    # via pyiceberg
+    # via pyiceberg
+    # via pymars
+    # via pymongo
+    # via pyro-ppl
+    # via pyspark
+    # via pytest
+    # via pytest
+    # via pytest-forked
+    # via pytest-shutil
+    # via pytest-shutil
+    # via pytest-shutil
+    # via pytest-virtualenv
+    # via pytest-virtualenv
+    # via python-lsp-jsonrpc
+    # via python-snappy
+    # via pytorch-lightning
+    # via raydp
+    # via redis
+    # via requests
+    # via ruamel-yaml
+    # via scikit-image
+    # via scikit-image
+    # via semgrep
+    # via semgrep
+    # via semgrep
+    # via semgrep
+    # via semgrep
+    # via semgrep
+    # via snowflake-connector-python
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sphinx
+    # via sqlalchemy
+    # via stack-data
+    # via stack-data
+    # via stack-data
+    # via statsforecast
+    # via statsforecast
+    # via statsmodels
+    # via sympy
+    # via tensorboard
+    # via tensorflow
+    # via tensorflow
+    # via tensorflow
+    # via tensorflow
+    # via tensorflow
+    # via tensorflow-datasets
+    # via tensorflow-datasets
+    # via tensorflow-datasets
+    # via torch-optimizer
+    # via transformers
+    # via triad
+    # via typer
+    # via types-requests
+    # via virtualenv
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via vsphere-automation-sdk
+    # via wandb
+    # via wandb
+    # via wcmatch
+    # via webdataset
+    # via xgboost
+    # via yahp
+    # via ypy-websocket
+--extra-index-url https://download.pytorch.org/whl/cpu
+--find-links https://data.pyg.org/whl/torch-2.3.0+cpu.html
+
+absl-py==1.4.0
+accelerate==0.28.0
+adagio==0.2.4
+adal==1.2.7
+aim==3.23.0 ; python_version < "3.12"
+aim-ui==3.23.0
+aimrecords==0.0.7
+aimrocks==0.5.2
+aioboto3==11.2.0
+aiobotocore==2.5.0
+aiofiles==22.1.0
+aiohttp==3.9.5
+aiohttp-cors==0.7.0
+aioitertools==0.11.0
+aiorwlock==1.3.0
+aiosignal==1.3.1
+aiosqlite==0.19.0
+alabaster==0.7.13
+ale-py==0.10.1
+alembic==1.12.1
+altair==5.1.2
+annotated-types==0.6.0
+antlr4-python3-runtime==4.11.1
+anyio==3.7.1
+appdirs==1.4.4
+applicationinsights==0.11.10
+argcomplete==3.3.0
+argon2-cffi==23.1.0
+argon2-cffi-bindings==21.2.0
+argparse==1.4.0
+array-record==0.5.1 ; python_version < "3.12" and sys_platform != "darwin" and platform_system != "Windows"
+arrow==1.3.0
+asn1crypto==1.5.1
+asttokens==2.4.1
+astunparse==1.6.3
+async-exit-stack==1.0.1
+async-generator==1.10
+async-timeout==4.0.3
+attrs==21.4.0
+aws-sam-translator==1.81.0
+aws-xray-sdk==2.12.1
+ax-platform==0.3.2
+azure-cli-core==2.62.0
+azure-cli-telemetry==1.1.0
+azure-common==1.1.28
+azure-core==1.29.5
+azure-identity==1.17.1
+azure-mgmt-compute==31.0.0
+azure-mgmt-core==1.4.0
+azure-mgmt-network==25.4.0
+azure-mgmt-resource==23.1.1
+babel==2.13.1
+backcall==0.2.0
+backoff==1.10.0
+base58==2.0.1
+bayesian-optimization==1.4.3
+bcrypt==4.0.1
+beautifulsoup4==4.11.1
+black==22.10.0
+bleach==6.1.0
+bokeh==2.4.3
+boltons==21.0.0
+boto==2.49.0
+boto3==1.26.76
+botocore==1.29.76
+botorch==0.8.5
+braceexpand==0.1.7
+bracex==2.4
+cachetools==5.3.2
+certifi==2023.11.17
+cffi==1.16.0
+cfgv==3.4.0
+cfn-lint==0.83.3
+charset-normalizer==3.3.2
+clang-format==12.0.1
+click==8.1.7
+click-option-group==0.5.6
+clickhouse-connect==0.8.10
+cloudpickle==2.2.0
+cma==3.2.2
+cmdstanpy==1.2.0
+colorama==0.4.6
+coloredlogs==15.0.1
+colorful==0.5.5
+colorlog==6.7.0
+comet-ml==3.44.1
+comm==0.2.0
+configobj==5.0.8
+configspace==0.7.1 ; python_version < "3.12"
+contextlib2==21.6.0
+contourpy==1.1.1
+cramjam==2.8.3
+crc32c==2.3
+crcmod==1.7
+cryptography==42.0.5
+cupy-cuda12x==13.1.0 ; sys_platform != "darwin"
+cycler==0.12.1
+cython==0.29.37
+dask==2022.10.2 ; python_version < "3.12"
+databricks-cli==0.18.0
+datasets==2.19.1
+debugpy==1.8.0
+decorator==5.1.1
+decord==0.6.0
+deepspeed==0.12.3
+defusedxml==0.7.1
+delta-sharing==1.0.5
+dill==0.3.7
+distlib==0.3.7
+distributed==2022.10.2 ; python_version < "3.12"
+distro==1.9.0
+dm-control==1.0.12 ; python_version < "3.12"
+dm-env==1.6
+dm-tree==0.1.8
+dnspython==2.4.2
+docker==6.1.3
+docker-pycreds==0.4.0
+docstring-parser==0.15
+docutils==0.19
+dulwich==0.21.6
+ecdsa==0.18.0
+entrypoints==0.4
+et-xmlfile==1.1.0
+etils==1.5.2 ; python_version < "3.12"
+evaluate==0.4.3
+everett==3.1.0
+execnet==2.1.1
+executing==2.0.1
+face==22.0.0
+fairscale==0.4.6
+farama-notifications==0.0.4
+fastapi==0.109.2
+fastavro==1.9.4
+fasteners==0.19
+fastjsonschema==2.19.0
+fastrlock==0.8.2
+feather-format==0.4.1
+ffmpy==0.3.1
+filelock==3.13.1
+flask==2.1.3
+flask-cors==4.0.0
+flatbuffers==23.5.26
+fonttools==4.45.1
+fqdn==1.5.1
+freezegun==1.1.0
+frozenlist==1.4.1
+fs==2.4.16
+fsspec==2023.5.0
+fugue==0.8.7
+fugue-sql-antlr==0.2.0
+future==1.0.0
+gast==0.4.0
+gcs-oauth2-boto-plugin==3.0
+gitdb==4.0.11
+gitpython==3.1.40
+glfw==2.6.3
+glom==22.1.0
+google-api-core==1.34.0
+google-api-python-client==2.111.0
+google-apitools==0.5.32
+google-auth==2.23.4
+google-auth-httplib2==0.1.1
+google-auth-oauthlib==1.0.0
+google-cloud-bigquery==3.13.0
+google-cloud-bigquery-storage==2.24.0
+google-cloud-core==2.4.1
+google-cloud-storage==2.14.0
+google-crc32c==1.5.0
+google-pasta==0.2.0
+google-reauth==0.1.1
+google-resumable-media==2.6.0
+googleapis-common-protos==1.61.0
+gpy==1.13.1
+gpytorch==1.10
+gradio==3.50.2 ; platform_system != "Windows"
+gradio-client==0.6.1
+graphql-core==3.2.3
+graphviz==0.20.3
+greenlet==3.0.1
+grpcio==1.66.2 ; sys_platform != "darwin"
+grpcio-status==1.48.2
+grpcio-tools==1.48.2
+gsutil==5.27
+gunicorn==20.1.0
+gymnasium==1.0.0
+h11==0.12.0
+h5py==3.10.0
+hjson==3.1.0
+holidays==0.39
+hpbandster==0.7.4 ; python_version < "3.12"
+httpcore==0.15.0
+httplib2==0.20.4
+httpx==0.24.1
+hudi==0.2.0
+huggingface-hub==0.27.0
+humanfriendly==10.0
+hyperopt @ git+https://github.com/hyperopt/hyperopt.git@2504ee61419737e814e2dec2961b15d12775529c
+identify==2.6.1
+idna==3.7
+imageio==2.34.2
+imageio-ffmpeg==0.4.5
+imagesize==1.4.1
+importlib-metadata==6.11.0
+importlib-resources==5.13.0
+iniconfig==2.0.0
+ipykernel==6.27.1
+ipython==8.12.3
+ipython-genutils==0.2.0
+ipywidgets==8.1.3
+isodate==0.6.1
+isoduration==20.11.0
+itsdangerous==2.1.2
+jedi==0.19.1
+jinja2==3.1.2
+jmespath==1.0.1
+joblib==1.2.0
+jschema-to-python==1.2.3
+json5==0.9.14
+jsondiff==2.0.0
+jsonpatch==1.32
+jsonpickle==3.0.2
+jsonpointer==2.4
+jsonschema==4.17.3
+jsonschema-spec==0.1.6
+junit-xml==1.9
+jupyter-cache==0.6.1
+jupyter-client==7.3.4
+jupyter-core==5.5.0
+jupyter-events==0.6.3
+jupyter-server==1.24.0
+jupyter-server-fileid==0.9.0
+jupyter-server-ydoc==0.6.1
+jupyter-ydoc==0.2.5
+jupyterlab==3.6.1
+jupyterlab-pygments==0.3.0
+jupyterlab-server==2.24.0
+jupyterlab-widgets==3.0.11
+jupytext==1.16.3
+keras==2.15.0
+kiwisolver==1.4.5
+knack==0.11.0
+kubernetes==24.2.0
+labmaze==1.0.6
+lazy-loader==0.4
+lazy-object-proxy==1.9.0
+libclang==16.0.6
+lightgbm==3.3.5
+lightning-utilities==0.11.2
+linear-operator==0.4.0
+llvmlite==0.42.0
+locket==1.0.0
+lxml==4.9.4
+lz4==4.3.3
+mako==1.3.0
+markdown==3.5.1
+markdown-it-py==2.2.0
+markupsafe==2.1.3
+matplotlib==3.7.4
+matplotlib-inline==0.1.6
+mdit-py-plugins==0.3.5
+mdurl==0.1.2
+medpy==0.4.0
+memray==1.10.0 ; platform_system != "Windows" and sys_platform != "darwin" and platform_machine != "aarch64"
+minigrid==2.3.1
+mistune==0.8.4
+ml-collections==0.1.1
+ml-dtypes==0.3.2
+mlagents-envs==0.28.0
+mlflow==2.9.2
+mmh3==4.1.0
+mock==5.1.0
+modin==0.22.2 ; python_version < "3.12"
+monai==1.3.2
+monotonic==1.6
+more-itertools==10.1.0
+mosaicml==0.2.4 ; python_version < "3.12"
+moto==4.2.12
+moviepy==0.2.3.1
+mpmath==1.3.0
+msal==1.28.1
+msal-extensions==1.2.0b1
+msgpack==1.0.7
+msgpack-numpy==0.4.8
+msrest==0.7.1
+msrestazure==0.6.4
+mujoco==3.2.4
+multidict==6.0.5
+multipledispatch==1.0.0
+multiprocess==0.70.15
+mypy==1.7.0
+mypy-extensions==1.0.0
+myst-nb==1.1.0
+myst-parser==1.0.0
+nbclassic==1.0.0
+nbclient==0.5.13
+nbconvert==6.5.4
+nbformat==5.9.2
+nest-asyncio==1.5.8
+netifaces==0.11.0
+networkx==3.2.1
+nevergrad==0.4.3.post7
+ninja==1.11.1.1
+nodeenv==1.9.1
+notebook==6.5.7
+notebook-shim==0.2.3
+numba==0.59.1
+numexpr==2.8.4
+numpy==1.26.4
+nvidia-nccl-cu12==2.20.5
+oauth2client==4.1.3
+oauthlib==3.2.2
+onnx==1.15.0 ; sys_platform != "darwin" or platform_machine != "arm64"
+onnxruntime==1.18.0 ; sys_platform != "darwin" or platform_machine != "arm64"
+open-spiel==1.4
+openapi-schema-validator==0.4.4
+openapi-spec-validator==0.5.7
+opencensus==0.11.3
+opencensus-context==0.1.3
+opencensus-proto==0.1.0
+opencv-python-headless==4.8.1.78
+openpyxl==3.0.10
+opentelemetry-api==1.1.0
+opentelemetry-exporter-opencensus==0.20b0
+opentelemetry-exporter-otlp==1.1.0
+opentelemetry-exporter-otlp-proto-grpc==1.1.0
+opentelemetry-proto==1.1.0
+opentelemetry-sdk==1.1.0
+opentelemetry-semantic-conventions==0.20b0
+opt-einsum==3.3.0
+optuna==4.1.0
+orjson==3.9.10
+ormsgpack==1.7.0
+packaging==23.0
+pandas==1.5.3 ; python_version < "3.12"
+pandocfilters==1.5.0
+paramiko==2.12.0
+paramz==0.9.6
+parso==0.8.3
+partd==1.4.1
+path==16.14.0
+path-py==12.5.0
+pathable==0.4.3
+pathspec==0.11.2
+patsy==0.5.3
+pbr==6.0.0
+peewee==3.17.0
+pettingzoo==1.24.3
+pexpect==4.8.0
+pickleshare==0.7.5
+pillow==10.3.0 ; platform_system != "Windows"
+pkginfo==1.9.6
+platformdirs==3.11.0
+plotly==5.23.0
+pluggy==1.3.0
+polars==0.14.21
+portalocker==2.8.2
+pre-commit==3.5.0
+prometheus-client==0.19.0
+promise==2.3
+prompt-toolkit==3.0.41
+prophet==1.1.5
+proto-plus==1.22.3
+protobuf==3.20.3
+proxy-py==2.4.3
+psutil==5.9.6
+ptyprocess==0.7.0
+pure-eval==0.2.2
+py==1.11.0
+py-cpuinfo==9.0.0
+py-partiql-parser==0.5.0
+py-spy==0.4.0 ; python_version < "3.12"
+py4j==0.10.9.7
+pyarrow==14.0.2
+pyarrow-hotfix==0.6
+pyasn1==0.5.1
+pyasn1-modules==0.3.0
+pycparser==2.21
+pycurl==7.45.3
+pydantic==2.5.0
+pydantic-core==2.14.1
+pydot==1.4.2
+pydub==0.25.1
+pygame==2.5.2
+pyglet==1.5.15
+pygments==2.18.0
+pyiceberg==0.7.0
+pyjwt==2.8.0
+pylance==0.10.18
+pymars==0.10.0 ; python_version < "3.12"
+pymongo==4.3.2
+pymunk==6.2.1
+pynacl==1.5.0
+pynvml==11.5.0
+pyopengl==3.1.7
+pyopenssl==24.2.1
+pyparsing==3.1.1
+pyro-api==0.1.2
+pyro-ppl==1.9.1
+pyro4==4.82
+pyrsistent==0.20.0
+pysocks==1.7.1
+pyspark==3.4.1
+pytest==7.4.4
+pytest-aiohttp==0.3.0
+pytest-asyncio==0.17.0
+pytest-docker-tools==3.1.3
+pytest-fixture-config==1.7.0
+pytest-forked==1.4.0
+pytest-httpserver==1.0.6
+pytest-lazy-fixture==0.6.3
+pytest-mock==3.14.0
+pytest-remotedata==0.3.2
+pytest-repeat==0.9.3
+pytest-rerunfailures==11.1.2
+pytest-shutil==1.7.0
+pytest-sphinx @ git+https://github.com/ray-project/pytest-sphinx
+pytest-sugar==0.9.5
+pytest-timeout==2.1.0
+pytest-virtualenv==1.7.0 ; python_version < "3.12"
+python-box==6.1.0
+python-dateutil==2.8.2
+python-jose==3.3.0
+python-json-logger==2.0.7
+python-lsp-jsonrpc==1.0.0
+python-multipart==0.0.6
+python-snappy==0.7.2
+pytorch-lightning==1.8.6
+pytorch-ranger==0.1.1
+pytz==2022.7.1
+pyu2f==0.1.5
+pyvmomi==8.0.3.0.1
+pyyaml==6.0.1
+pyzmq==26.0.3
+qpd==0.4.4
+querystring-parser==1.2.4
+raydp==1.7.0b20231020.dev0
+redis==4.4.2
+regex==2024.5.15
+requests==2.31.0
+requests-oauthlib==2.0.0
+requests-toolbelt==1.0.0
+responses==0.13.4
+restrictedpython==7.1
+retry-decorator==1.1.1
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+rich==13.3.2
+rsa==4.7.2
+ruamel-yaml==0.17.40
+ruamel-yaml-clib==0.2.8
+s3fs==2023.5.0
+s3transfer==0.6.2
+safetensors==0.4.3
+sarif-om==1.0.4
+scikit-image==0.24.0
+scikit-learn==1.3.2
+scipy==1.11.4
+segment-analytics-python==2.2.0
+semantic-version==2.10.0
+semgrep==1.32.0
+send2trash==1.8.3
+sentencepiece==0.1.96
+sentry-sdk==2.10.0
+serpent==1.41
+setproctitle==1.3.3
+shellcheck-py==0.7.1.1
+shellingham==1.5.4
+shimmy==2.0.0
+shortuuid==1.0.1
+simpleitk==2.3.1
+simplejson==3.19.2
+six==1.16.0
+smart-open==6.2.0
+smmap==5.0.1
+sniffio==1.3.1
+snowballstemmer==2.2.0
+snowflake-connector-python==3.11.0
+sortedcontainers==2.4.0
+soundfile==0.12.1
+soupsieve==2.5
+sphinx==6.2.1
+sphinxcontrib-applehelp==1.0.8
+sphinxcontrib-devhelp==1.0.6
+sphinxcontrib-htmlhelp==2.0.6
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.8
+sphinxcontrib-serializinghtml==1.1.10
+sqlalchemy==2.0.32
+sqlglot==25.6.1
+sqlparse==0.5.1
+sshpubkeys==3.3.1
+stack-data==0.6.3
+stanio==0.3.0
+starlette==0.36.3
+statsforecast==1.7.0
+statsmodels==0.14.0
+strictyaml==1.7.3
+supersuit==3.9.3
+sympy==1.13.1
+tabulate==0.9.0
+tblib==3.0.0
+tenacity==8.5.0
+tensorboard==2.15.2
+tensorboard-data-server==0.7.2
+tensorboardx==2.6.2.2
+tensorflow==2.15.1 ; python_version < "3.12" and (sys_platform != "darwin" or platform_machine != "arm64")
+tensorflow-datasets==4.9.3 ; python_version < "3.12"
+tensorflow-estimator==2.15.0
+tensorflow-io-gcs-filesystem==0.31.0 ; python_version < "3.12"
+tensorflow-metadata==1.14.0
+tensorflow-probability==0.23.0 ; python_version < "3.12"
+termcolor==2.4.0
+terminado==0.18.1
+testfixtures==7.0.0
+tf2onnx==1.15.1 ; sys_platform != "darwin" or platform_machine != "arm64"
+threadpoolctl==3.1.0
+tifffile==2024.7.21
+timm==0.9.2
+tinycss2==1.3.0
+tinyscaler==1.2.8
+tokenizers==0.15.2
+toml==0.10.2
+tomli==2.0.1
+tomlkit==0.13.0
+toolz==0.12.1
+torch==2.3.0
+torch-cluster==1.6.3
+torch-geometric==2.5.3
+torch-optimizer==0.3.0
+torch-scatter==2.1.2
+torch-sparse==0.6.18
+torch-spline-conv==1.2.2
+torchmetrics==0.10.3
+torchtext==0.18.0
+torchvision==0.18.0
+tornado==6.1
+tqdm==4.64.1
+traitlets==5.14.3
+transformers==4.36.2
+triad==0.9.8
+trustme==0.9.0
+typeguard==2.13.3
+typer==0.12.3
+types-pycurl==7.45.3.20240421
+types-python-dateutil==2.9.0.20240316
+types-pyyaml==6.0.12.2
+types-requests==2.31.0.6
+types-urllib3==1.26.25.14
+typing-extensions==4.8.0
+ujson==5.10.0
+uri-template==1.3.0
+uritemplate==4.1.1
+urllib3==1.26.19
+utilsforecast==0.2.0
+uvicorn==0.22.0
+uvloop==0.19.0
+virtualenv==20.25.3
+vsphere-automation-sdk @ git+https://github.com/vmware/vsphere-automation-sdk-python.git@v8.0.1.0
+wandb==0.17.0
+watchfiles==0.19.0
+wcmatch==8.5.2
+wcwidth==0.2.13
+webcolors==24.6.0
+webdataset==0.2.86
+webencodings==0.5.1
+websocket-client==1.8.0
+websockets==11.0.3
+werkzeug==2.3.8
+wheel==0.43.0
+widgetsnbextension==4.0.11
+wrapt==1.14.1
+wurlitzer==3.1.1
+xgboost==2.1.0
+xlrd==2.0.1
+xmltodict==0.13.0
+xxhash==3.4.1
+y-py==0.6.2
+yahp==0.1.1
+yarl==1.9.4
+ypy-websocket==0.8.4
+yq==3.2.2
+zict==3.0.0
+zipp==3.19.2
+zoopt==0.4.1
+zstandard==0.23.0
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip
+# setuptools

@@ -167,6 +167,14 @@ class DatasetService:
         generated: bool = False,
         generated_by: str | None = None,
     ) -> DatasetResponse:
+        """Attempts to upload and convert the specified dataset (CSV) to HF format which is then
+        stored in S3.
+
+        :raises DatasetSizeError: if the dataset is too large
+        :raises DatasetInvalidError: if the dataset is invalid
+        :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
+        :raises DatasetUpstreamError: if there is an exception interacting with S3
+        """
         temp = NamedTemporaryFile(delete=False)
         try:
             # Write to tempfile and validate size
@@ -201,9 +209,14 @@ class DatasetService:
         return DatasetResponse.model_validate(record)
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
+        """Gets the dataset record by its ID.
+
+        :param dataset_id: dataset ID
+        :raises DatasetNotFoundError: if there is no dataset record with that ID
+        """
         record = self._get_dataset_record(dataset_id)
         if record is None:
-            return None
+            raise DatasetNotFoundError(dataset_id) from None
 
         return DatasetResponse.model_validate(record)
 
@@ -231,11 +244,15 @@ class DatasetService:
 
         This operation is idempotent, calling it with a record that never existed, or that has
         already been deleted, will not raise an error.
+
+        :param dataset_id: dataset ID to delete
+        :raises DatasetNotFoundError: if there is no dataset record with that ID
+        :raises DatasetUpstreamError: if there is an exception deleting the dataset from S3
         """
         record = self._get_dataset_record(dataset_id)
         # Early return if the record does not exist (for idempotency).
         if record is None:
-            return None
+            raise DatasetNotFoundError(dataset_id) from None
 
         try:
             # S3 delete is called first, if this fails for any other reason that the file not being
@@ -249,6 +266,10 @@ class DatasetService:
                 f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
                 f"Cleaning up DB by removing ID. {e}"
             )
+        except Exception as e:
+            raise DatasetUpstreamError(
+                "s3", f"error attempting to delete dataset {dataset_id} from S3", e
+            ) from e
 
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)

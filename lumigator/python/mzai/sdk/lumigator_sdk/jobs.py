@@ -10,6 +10,7 @@ from uuid import UUID
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
+    JobAnnotateCreate,
     JobEvalCreate,
     JobInferenceCreate,
     JobResponse,
@@ -19,6 +20,7 @@ from lumigator_schemas.jobs import (
 )
 
 from lumigator_sdk.client import ApiClient
+from lumigator_sdk.strict_schemas import JobAnnotateCreate as JobAnnotateCreateStrict
 from lumigator_sdk.strict_schemas import JobEvalCreate as JobEvalCreateStrict
 from lumigator_sdk.strict_schemas import JobInferenceCreate as JobInferenceCreateStrict
 
@@ -115,7 +117,9 @@ class Jobs:
             "time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
-    def create_job(self, type: JobType, request: JobEvalCreate | JobInferenceCreate) -> JobResponse:
+    def create_job(
+        self, type: JobType, request: JobEvalCreate | JobInferenceCreate | JobAnnotateCreate
+    ) -> JobResponse:
         """Create a new job.
 
         .. admonition:: Example
@@ -130,16 +134,18 @@ class Jobs:
 
         Args:
             type(JobType): The kind of job to create. It can be either
-                EVALUATION or INFERENCE.
+                ANNOTATION, EVALUATION, EVALUATION_LITE, or INFERENCE.
             request(JobEvalCreate): The job's configuration.
 
         Returns:
             JobResponse: The information for the newly created job.
         """
-        if type == JobType.EVALUATION:
+        if type == JobType.EVALUATION or type == JobType.EVALUATION_LITE:
             JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
         elif type == JobType.INFERENCE:
             JobInferenceCreateStrict.model_validate(JobInferenceCreate.model_dump(request))
+        elif type == JobType.ANNOTATION:
+            JobAnnotateCreateStrict.model_validate(JobAnnotateCreate.model_dump(request))
         else:
             raise ValueError(f"Invalid job type: {type}")
 

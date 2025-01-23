@@ -27,6 +27,7 @@
         :table-data="datasets"
         @l-dataset-selected="onDatasetSelected($event)"
         @l-experiment="onExperimentDataset($event)"
+        @l-download-dataset="onDownloadDataset($event)"
         @l-delete-dataset="deleteConfirmation($event)"
       />
     </div>
@@ -43,7 +44,7 @@
         @l-experiment="onExperimentDataset($event)"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
-        @l-download-dataset="onDownloadDataset()"
+        @l-download-dataset="onDownloadDataset($event)"
       />
     </Teleport>
   </div>
@@ -108,7 +109,8 @@ function deleteConfirmation(dataset) {
   });
 }
 
-function onDownloadDataset() {
+function onDownloadDataset(dataset) {
+  selectedDataset.value = dataset;
   datasetStore.loadDatasetFile();
 }
 

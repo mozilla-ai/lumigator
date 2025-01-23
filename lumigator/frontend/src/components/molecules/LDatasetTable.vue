@@ -15,6 +15,7 @@
         sortField="created_at"
         :sortOrder="-1"
         scrollable
+        scrollHeight="75vh"
         :pt="{table:'table-root'}"
         @row-click="emit('l-dataset-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
@@ -155,11 +156,7 @@ const togglePopover = (event, dataset) => {
 }
 
 watch(showSlidingPanel, (newValue) => {
-  tableVisible.value = false;
   focusedItem.value = newValue ? focusedItem.value : null;
-  setTimeout(() => {
-    tableVisible.value = true;
-  }, 100);
 });
 
 </script>

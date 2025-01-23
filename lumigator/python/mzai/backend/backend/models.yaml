@@ -32,21 +32,12 @@
         no_repeat_ngram_size: 3
         num_beams: 4
 
-- name: mistralai/Mistral-7B-Instruct-v0.3
-  uri: hf://mistralai/Mistral-7B-Instruct-v0.3
-  website_url: https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3
-  description: Mistral-7B-Instruct-v0.3 is an instruct fine-tuned version of the Mistral-7B-v0.3.
-  info:
-    parameter_count: 7.25B
-    tensor_type: BF16
-    model_size: 14.5GB
-  tasks:
-    - summarization:
-
 - name: gpt-4o-mini
   uri: oai://gpt-4o-mini
   website_url: https://platform.openai.com/docs/models#gpt-4o-mini
   description: OpenAI's GPT-4o-mini model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -54,6 +45,8 @@
   uri: oai://gpt-4o
   website_url: https://platform.openai.com/docs/models#gpt-4o
   description: OpenAI's GPT-4o model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -61,6 +54,8 @@
   uri: mistral://open-mistral-7b
   website_url: https://mistral.ai/technology/#models
   description: Mistral's 7B model.
+  requirements:
+    - api_key
   tasks:
     - summarization:
 
@@ -72,5 +67,7 @@
     parameter_count: 7.24B
     tensor_type: BF16
     model_size: 14.5GB
+  requirements:
+    - llamafile
   tasks:
     - summarization:

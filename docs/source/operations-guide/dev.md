@@ -34,7 +34,7 @@ following environment variables for credentials, into the docker container:
 - `MISTRAL_API_KEY`: your Mistral API key.
 - `OPENAI_API_KEY`: your OpenAI API key.
 
-Refer to the [troubleshooting section](troubleshooting.md) for more details.
+Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
 
 ## Testing the backend services
 

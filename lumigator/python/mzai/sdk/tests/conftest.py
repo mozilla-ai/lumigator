@@ -166,6 +166,12 @@ def dialog_data(common_resources_dir):
         yield file
 
 
+@pytest.fixture(scope="function")
+def dialog_data_unannotated(common_resources_dir):
+    with Path.open(common_resources_dir / "dialogsum_mini_no_gt.csv") as file:
+        yield file
+
+
 @pytest.fixture(scope="session")
 def simple_eval_template():
     return """{{

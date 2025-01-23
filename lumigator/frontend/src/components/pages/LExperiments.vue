@@ -38,6 +38,7 @@
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment !== null"
+          title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
           @l-dnld-results="onDnldResults($event)"

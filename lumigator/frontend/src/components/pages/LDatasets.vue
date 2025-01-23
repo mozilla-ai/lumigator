@@ -23,12 +23,14 @@
       v-if="datasets.length > 0"
       class="l-datasets__table-container"
     >
-
-      <Tabs value="0">
+      <Tabs
+        v-model:value="currentTab"
+        @update:value="showSlidingPanel = false"
+      >
         <TabList>
           <Tab value="0">All Datasets</Tab>
           <Tab value="1">
-            <div :class="['is-running', true]">
+            <div :class="{ 'is-running': hasRunningInferenceJob }">
               <span>Groundtruth Jobs</span>
             </div>
           </Tab>
@@ -45,6 +47,7 @@
           <TabPanel value="1">
             <l-inference-jobs-table
               :table-data="inferenceJobs"
+              @l-inference-selected="onJobInferenceSelected($event)"
             />
           </TabPanel>
         </TabPanels>
@@ -116,13 +119,14 @@ import { useToast } from "primevue/usetoast";
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
 const experimentStore = useExperimentStore();
-const { inferenceJobs } = storeToRefs(experimentStore);
+const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore);
 const { showSlidingPanel  } = useSlidePanel();
 const toast = useToast();
 const datasetInput = ref(null);
 const confirm = useConfirm();
 const router = useRouter();
-const route = useRoute();
+const currentTab = ref('0');
+const showLogs = ref(false);
 
 onMounted(async () => {
   await datasetStore.loadDatasets();
@@ -164,10 +168,6 @@ function deleteConfirmation(dataset) {
   });
 }
 
-function onDownloadDataset() {
-  datasetStore.loadDatasetFile();
-}
-
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {
@@ -179,6 +179,7 @@ const onDeleteDataset = (datasetID) => {
 }
 
 const onDatasetSelected = (dataset) => {
+  selectedJob.value = null;
   datasetStore.loadDatasetInfo(dataset.id);
   showSlidingPanel.value = true;
 }
@@ -216,7 +217,7 @@ const onGenerateGT = () => {
 function onDownloadDataset() {
   datasetStore.loadDatasetFile();
 }
-})
+
 
 </script>
 
@@ -257,10 +258,16 @@ function onDownloadDataset() {
 
   & .p-tablist-tab-list {
     background: $l-card-bg!important;
+    border-color: $l-main-bg;
 
     & .p-tab {
       padding-left: $l-spacing-1;
       padding-right: $l-spacing-1;
+      border-color: $l-main-bg;
+
+      &:hover {
+       border-color: $l-main-bg;
+      }
     }
   }
 

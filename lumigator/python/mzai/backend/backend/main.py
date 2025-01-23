@@ -1,5 +1,6 @@
 import os
 import sys
+from collections.abc import Callable
 from http import HTTPStatus
 from pathlib import Path
 
@@ -50,8 +51,8 @@ def _configure_logger():
     )
 
 
-def create_error_handler(status_code: HTTPStatus):
-    """Creates an error handler function for the given status code"""
+def create_error_handler(status_code: HTTPStatus) -> Callable[[Request, ServiceError], Response]:
+    """Creates an error handler function for service errors, using the given status code"""
 
     def handler(_: Request, exc: ServiceError) -> Response:
         return JSONResponse(

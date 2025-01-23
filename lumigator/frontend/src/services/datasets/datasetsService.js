@@ -30,7 +30,7 @@ async function postDataset(formData) {
     });
     return response.data
   } catch (error) {
-    return error
+    return error.response
   }
 }
 

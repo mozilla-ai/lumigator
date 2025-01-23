@@ -91,6 +91,21 @@ Refer to the `.env.template` file in the repository for more details.
     user@host:~/lumigator$ uv run python inference.py
     ```
 
+## Model Specification
+
+Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
+
+* `name`: an identification name for the model
+* `uri`: a URI specifying how to use the model. The following protocols are supported:
+  * `hf://`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
+  * `llamafile://`: model set up with [`llamafile`](https://github.com/Mozilla-Ocho/llamafile) on its default host and port
+  * `oai://`: OpenAI or compatible external API; needs a value for the environment variable OPENAI_API_KEY with a valid key
+  * `mistral://`: Mistral or compatible external API; needs a value for the environment variable MISTRAL_API_KEY with a valid key
+* `website_url`: a link to a web page with more information about the model
+* `description`: a short description about the model
+* `info`: a map containing information about the model like parameter count or model size
+* `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values
+
 ## Verify
 
 Review the contents of the `results.json` file to ensure that the inference job ran

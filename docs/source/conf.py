@@ -48,6 +48,7 @@ napoleon_use_admonition_for_examples = True
 myst_enable_extensions = [
     "colon_fence",
 ]
+myst_heading_anchors = 3
 
 templates_path = ["_templates"]
 source_suffix = [".rst", ".md"]

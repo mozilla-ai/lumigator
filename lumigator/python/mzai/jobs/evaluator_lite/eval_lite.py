@@ -4,9 +4,9 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
-from eval_config import EvalJobConfig
 from eval_metrics import EvaluationMetrics
 from loguru import logger
+from schemas import EvalJobConfig
 
 
 def save_to_disk(local_path: Path, data_dict: dict):

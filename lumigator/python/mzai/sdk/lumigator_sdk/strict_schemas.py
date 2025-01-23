@@ -9,6 +9,7 @@ from lumigator_schemas.experiments import (
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
     Job,
+    JobAnnotateCreate,
     JobConfig,
     JobEvalCreate,
     JobEvent,
@@ -83,6 +84,10 @@ class JobEvalCreate(JobEvalCreate):
 
 
 class JobInferenceCreate(JobInferenceCreate):
+    model_config = ConfigDict(extra="forbid")
+
+
+class JobAnnotateCreate(JobAnnotateCreate):
     model_config = ConfigDict(extra="forbid")
 
 

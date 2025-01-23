@@ -160,7 +160,7 @@ computer. There's nothing to install or configure.
 There are no summarization-specific parameters for this model.
 
 
-# Reference models
+# Reference Models
 
 Before you jump into evaluating datasets, you should consider the following importance of quality ground-truth and annotations.
 

@@ -35,7 +35,7 @@
           @click.stop
         />
       </div>
-       <div
+      <div
         v-if="modelsRequiringAPIKey.length"
         class="l-models-list__options-container-section"
       >

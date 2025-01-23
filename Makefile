@@ -136,7 +136,7 @@ test-sdk-unit:
 
 test-sdk-integration:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="integration/test_*.py integration/*/test_*.py"
+	uv run pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -159,7 +159,8 @@ test-backend-unit:
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
-	uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration:
 	cd lumigator/python/mzai/backend/; \
@@ -176,6 +177,7 @@ test-backend-integration:
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
 	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:

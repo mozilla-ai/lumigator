@@ -10,6 +10,7 @@ class JobType(str, Enum):
     INFERENCE = "inference"
     EVALUATION = "evaluate"
     EVALUATION_LITE = "eval_lite"
+    ANNOTATION = "annotate"
 
 
 class JobStatus(str, Enum):

@@ -10,7 +10,7 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
-from lumigator_sdk.strict_schemas import DatasetDownloadResponse, JobEvalCreate
+from lumigator_sdk.strict_schemas import DatasetDownloadResponse, JobAnnotateCreate, JobEvalCreate
 
 
 def test_sdk_healthcheck_ok(lumi_client_int):
@@ -129,3 +129,39 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
     download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
     requests.get(download_info.download_url, allow_redirects=True)
+
+
+def test_annotate_dataset(lumi_client_int, dialog_data_unannotated):
+    datasets = lumi_client_int.datasets.get_datasets()
+    if datasets.total > 0:
+        for removed_dataset in datasets.items:
+            lumi_client_int.datasets.delete_dataset(removed_dataset.id)
+    datasets = lumi_client_int.datasets.get_datasets()
+    n_initial_datasets = datasets.total
+    dataset = lumi_client_int.datasets.create_dataset(
+        dataset=dialog_data_unannotated, format=DatasetFormat.JOB
+    )
+    datasets = lumi_client_int.datasets.get_datasets()
+    n_current_datasets = datasets.total
+    assert n_current_datasets - n_initial_datasets == 1
+
+    job = JobAnnotateCreate(
+        name="test_annotate",
+        description="Test run for Huggingface model",
+        dataset=str(dataset.id),
+        max_samples=2,
+        task="summarization",
+    )
+    logger.info(job)
+    job_creation_result = lumi_client_int.jobs.create_job(JobType.ANNOTATION, job)
+    assert job_creation_result is not None
+    assert lumi_client_int.jobs.get_jobs() is not None
+
+    job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
+    logger.info(job_status)
+
+    download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
+    logger.info(f"getting result from {download_info.download_url}")
+    results = requests.get(download_info.download_url, allow_redirects=True)
+    logger.info(f"Annotated set has keys: {results.json().keys()}")
+    assert "ground_truth" in results.json().keys()

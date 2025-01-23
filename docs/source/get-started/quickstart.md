@@ -215,10 +215,11 @@ user@host:~/lumigator$ curl -s "http://localhost:8000/api/v1/health/jobs/$SUBMIS
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
+from pprint import pprint
 job_id = responses[0].id
 
 job = lm_client.jobs.wait_for_job(job_id)  # Create the coroutine object
-result = await job  # Await the coroutine to get the result
+pprint(job)
 ```
 :::
 

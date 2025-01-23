@@ -1,5 +1,5 @@
 {
-    "total": 7,
+    "total": 6,
     "items": [
       {
         "name": "facebook/bart-large-cnn",
@@ -46,23 +46,6 @@
               "no_repeat_ngram_size": 3,
               "num_beams": 4
             }
-          }
-        ]
-      },
-      {
-        "name": "mistralai/Mistral-7B-Instruct-v0.3",
-        "uri": "hf://mistralai/Mistral-7B-Instruct-v0.3",
-        "website_url": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3",
-        "description": "Mistral-7B-Instruct-v0.3 is an instruct fine-tuned version of the Mistral-7B-v0.3.",
-        "requirements": [],
-        "info": {
-          "parameter_count": "7.25B",
-          "tensor_type": "BF16",
-          "model_size": "14.5GB"
-        },
-        "tasks": [
-          {
-            "summarization": null
           }
         ]
       },

@@ -13,16 +13,16 @@ cluster, SQL database, and S3-compatible Storage) are the different services Lum
 The components inside the backend, shown in the image below, are the different abstraction layers
 the backend itself relies on:
 
-* The **API** makes backend functionalities available to the UI through different **routes** (see: [schema code](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/routes)).
-  [**Schemas**](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/schemas/schemas)
+* The **API** makes backend functionalities available to the UI through different **routes** (see: {{ '[schema code](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/routes)'.format(commit_id) }} ).
+{{ '[**Schemas**](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/schemas)'.format(commit_id) }}
   are used in the API which allows one to exactly know which kind of data has to be passed to it.
 
 * **Services** implement the actual functionalities and are called by the different methods exposed
-  in the API (see: [backend services](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/services)).
+  in the API (see: {{ '[backend services](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/services)'.format(commit_id) }} ).
 
 * **Repositories** implement the [repository pattern](https://www.cosmicpython.com/book/chapter_02_repository.html)
-  as an abstraction over the SQL database (see: [code for repositories](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/repositories)).
-  They make use of [record classes](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/records) to refer to actual records in the database.
+  as an abstraction over the SQL database (see: {{ '[code for repositories](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/repositories)'.format(commit_id) }} ).
+  They make use of {{ '[record classes](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/records)'.format(commit_id) }} to refer to actual records in the database.
 
 ![Lumigator Backend](../../assets/lumigator-backend.svg)
 
@@ -36,17 +36,17 @@ trailing slash) will map to the absolute path from the root of the repo
 ## Lumigator endpoints
 
 All the endpoints you can access in Lumigator's API are defined in
-[`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/routes)
+{{ '[`backend/api/routes/`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/routes)'.format(commit_id) }}
 and explicitly listed in
-[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/router.py),
-together with a [metadata tag](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/tags.py)
+{{ '[`backend/api/router.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/router.py)'.format(commit_id) }},
+together with a {{ '[metadata tag](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/tags.py)'.format(commit_id) }}
 which is used to provide a short description of the route.
 
 Let us now walk through a few examples to understand how Lumigator's endpoints work.
 
 ### The simplest endpoint: `/health`
 
-The [`/health`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/routes/health.py)
+The {{ '[`/health`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/routes/health.py)'.format(commit_id) }}
 route provides perhaps the simplest example as it allows you to get the current backend status which
 is a constant:
 
@@ -59,12 +59,12 @@ def get_health() -> HealthResponse:
 Note that the returned type is a `HealthResponse`: this is a
 [pydantic model](https://docs.pydantic.dev/latest/api/base_model/) defining the schema of the
 returned data. The general rule is that all return values in our routes should match a predefined
-schema. Schemas are defined under the `schemas` directory (see: [health response in our source code](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/schemas/lumigator_schemas/extras.py#L16)),
+schema. Schemas are defined under the `schemas` directory (see: {{ '[health response in our source code](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/schemas/lumigator_schemas/extras.py#L16)'.format(commit_id) }}),
 typically in files with the same name of the route, service, etc.
 
 All the code for `get_health()` appears in the route file. A `HealthResponse`, composed of a
 deployment type which is loaded from
-[`backend/settings.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/settings.py#L12)
+{{ '[`backend/settings.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/settings.py#L12)'.format(commit_id) }}
 and the status (currently always ok), is returned.
 
 ### One step further: `/datasets`
@@ -80,7 +80,7 @@ def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse
 ```
 
 * The core functionalities are provided by a *service* (in this case a `DatasetService`) defined in
-  [`backend/services/datasets.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/services/datasets.py).
+  {{ '[`backend/services/datasets.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/services/datasets.py)'.format(commit_id) }}.
 
 * Instead of directly passing a `DatasetService` to the `get_dataset` method, DatasetServiceDep is
   defined to perform a *dependency injection* (see:
@@ -96,7 +96,7 @@ So, let us suppose you have already uploaded a dataset to Lumigator. What happen
 
 First thing, `DatasetServiceDep` will make sure that all the dependencies to run your
 `DatasetService` are met. If you look at
-[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/api/deps.py)
+{{ '[`backend/api/deps.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/api/deps.py)'.format(commit_id) }}
 you will see that a `DatasetServiceDep` is nothing more than a `DatasetService` that depends on a
 `DBSessionDep` and `S3ClientDep`:
 
@@ -116,7 +116,7 @@ database session and on an S3 client.
 
 While the S3 dependency is a "simple" one (i.e., it just instantiates a boto3 client in place), the
 database one is a bit more advanced (i.e., it relies on a
-[`DatabaseSessionManager`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/db.py)
+{{ '[`DatabaseSessionManager`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/db.py)'.format(commit_id) }}
 to return a session).
 
 Second, `DatasetService` provides a `get_dataset` method which gets the actual data from the
@@ -137,10 +137,10 @@ def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord:
 
 We access the database using the `repository` abstraction `DatasetRepository` class. All
 repositories are defined in `backend/repositories` and inherit from
-[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/repositories/base.py)
+{{ '[`BaseRepository`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/repositories/base.py)'.format(commit_id) }}
 which is a general class providing ORM access to SQL statements. In particular, the
 `DatasetRepository` is a `BaseRepository` working with items of type
-[`DatasetRecord`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/records/datasets.py).
+{{ '[`DatasetRecord`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/records/datasets.py)'.format(commit_id) }}.
 
 Fields in records are defined as a mix of explicit type definitions and declarative mappings (see the picture below to
 see how the fields in the datasets table are defined).

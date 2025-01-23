@@ -28,7 +28,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic --version
 When code changes are made to the data models, or when new models are added, a manual step is
 required in order to ensure that the models are visible to Alembic.
 
-First, the imports at the top of [`env.py`](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/alembic/env.py)
+First, the imports at the top of {{ '[`env.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/env.py)'.format(commit_id) }}
 **MUST** import your package:
 
 `from backend.records.{package} import * # noqa: F403`
@@ -60,7 +60,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ SQLALCHEMY_DATABASE_URL=sqlit
 
 The rest of the document assumes `SQLALCHEMY_DATABASE_URL` is exported. If `SQLALCHEMY_DATABASE_URL`
 is not present then a default of `sqlite:///local.db` will be used (see:
-[here](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/alembic.ini#L65)).
+{{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/alembic.ini#L65)'.format(commit_id) }}).
 
 If you've followed the `README` for `backend`, you should have sourced the virtual environment. This
 means you can run the `alembic` command directly in the terminal. Alternatively, you can also run it
@@ -90,7 +90,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic stamp head
 ## My database is in a different state (from a prior release)
 
 This scenario requires manual review of the existing revisions stored in the
-[versions folder](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/alembic/versions),
+{{ '[versions folder](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/versions)'.format(commit_id) }},
 to determine which revision ID represents the current state of the database containing the data.
 
 Revisions are stored in a format resembling a linked-list, with each revision containing a
@@ -176,7 +176,7 @@ To create an empty revision that you populate manually:
 user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic revision -m "{Explanatory commit-like message}"
 ```
 
-This will create a new Python file under `[versions/](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/backend/backend/alembic/versions)`.
+This will create a new Python file under {{ '[versions/](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/versions)'.format(commit_id) }}.
 
 For example:
 

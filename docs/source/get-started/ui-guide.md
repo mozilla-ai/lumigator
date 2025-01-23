@@ -9,7 +9,7 @@ The main purpose of Lumigator is to help you select a model that works well for 
 
 The first step is to upload your dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
 
-You can get started by uploading the [sample dataset](https://github.com/mozilla-ai/lumigator/blob/{{ commit_id }}/lumigator/lumigator/sample_data/dialogsum_exc.csv) provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
+You can get started by uploading the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
 
 ![Datasets Page](../../assets/ui_guide_steps/datasets_page.png)
 

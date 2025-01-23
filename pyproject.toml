@@ -18,3 +18,11 @@ docs = [
     "pydantic>=2.8.0",
     "loguru==0.7.2",
 ]
+
+[dependency-groups]
+dev = [
+    "alembic>=1.14.1",
+    "debugpy>=1.8.12",
+    "fastapi>=0.115.6",
+    "loguru>=0.7.2",
+]

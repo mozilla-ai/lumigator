@@ -24,6 +24,17 @@ def create_experiment(
     return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
 
 
+@router.post("/create", status_code=status.HTTP_201_CREATED)
+def create_experiment_id(
+    service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
+) -> ExperimentResponse:
+    """An experiment is a container of runs.
+    This endpoint creates an experiment and returns its ID.
+    The user can then trigger `n` runs using this ID.
+    """
+    pass
+
+
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
     return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())

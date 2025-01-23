@@ -27,9 +27,7 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 async def create_experiment(
     service: ExperimentServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
 ) -> ExperimentResponse:
-    return ExperimentResponse.model_validate(
-        service.create_experiment(request, background_tasks).model_dump()
-    )
+    return ExperimentResponse.model_validate(service.create_experiment(request, background_tasks))
 
 
 @router.get("/{experiment_id}")
@@ -38,8 +36,12 @@ def get_experiment(service: ExperimentServiceDep, experiment_id: UUID) -> Experi
 
 
 @router.get("/{experiment_id}/jobs")
-def get_experiment_jobs(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse:
-    return ExperimentResponse.model_validate(service._get_experiment_jobs(experiment_id))
+def get_experiment_jobs(
+    service: ExperimentServiceDep, experiment_id: UUID
+) -> ListingResponse[UUID]:
+    return ListingResponse[ExperimentResponse].model_validate(
+        service._get_experiment_jobs(experiment_id).model_dump()
+    )
 
 
 @router.get("/")

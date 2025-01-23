@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia'
 import experimentService from "@/services/experiments/experimentService";
 import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
@@ -15,6 +15,10 @@ export const useExperimentStore = defineStore('experiment', () => {
   let experimentInterval = null;
   const experimentLogs = ref([]);
   const completedStatus = ["SUCCEEDED", "FAILED"];
+
+  const hasRunningInferenceJob = computed(() => {
+    return inferenceJobs.value.some(job => job.status === "RUNNING");
+  });
 
   async function loadExperiments() {
     const allJobs = await experimentService.fetchJobs();
@@ -88,9 +92,14 @@ export const useExperimentStore = defineStore('experiment', () => {
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
+  // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
   async function updateJobStatus(id) {
     try {
       const status = await experimentService.fetchJobStatus(id);
+      const inferenceJob = inferenceJobs.value.find((job) => job.id === id);
+      if (inferenceJob) {
+        inferenceJob.status = status;
+      }
       const job = jobs.value.find((job) => job.id === id);
       if (job) {
         job.status = status;
@@ -281,10 +290,13 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   watch(selectedJob, (newValue) => {
     experimentLogs.value = [];
-    // switch to the experiment the job belongs
     if (newValue) {
-      const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-      selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+      const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id);
+      if (isEvaluationJob) {
+        // switch to the experiment the job belongs
+        const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
+        selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+      }
       retrieveLogs();
     }
     if (newValue?.status === 'RUNNING') {
@@ -294,10 +306,21 @@ export const useExperimentStore = defineStore('experiment', () => {
       stopPolling();
     }
   }, { deep: true });
+
   return {
+    // state
     experiments,
     jobs,
     inferenceJobs,
+    selectedExperiment,
+    selectedJob,
+    experimentLogs,
+    selectedExperimentRslts,
+    selectedJobRslts,
+    isPolling,
+    // computed
+    hasRunningInferenceJob,
+    // actions
     loadExperiments,
     updateStatusForIncompleteJobs,
     loadExperimentDetails,
@@ -305,12 +328,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadExperimentResults,
     loadJobResults,
     loadResultsFile,
-    selectedExperiment,
-    selectedJob,
-    experimentLogs,
-    selectedExperimentRslts,
-    selectedJobRslts,
-    startGroundTruthGeneration: startGroundTruthGeneration,
+    startGroundTruthGeneration,
     runExperiment
   }
 })

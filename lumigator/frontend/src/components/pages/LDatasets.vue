@@ -61,11 +61,30 @@
       <l-dataset-details
         v-if="selectedDataset"
         @l-experiment="onExperimentDataset($event)"
+        @l-generate-gt="onGenerateGT()"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
         @l-download-dataset="onDownloadDataset()"
       />
+      <l-experiment-details
+        v-if="showSlidingPanel && selectedJob"
+        title="Job Details"
+        @l-close-details="onCloseJobDetails"
+        @l-show-logs="onShowLogs"
+      />
     </Teleport>
+    <l-experiments-drawer
+      v-if="showLogs"
+      ref="experimentsDrawer"
+      header="Logs"
+      :position="'bottom'"
+      @l-drawer-closed="showLogs = false"
+    >
+      <l-experiment-logs
+        v-if="showLogs"
+      />
+
+    </l-experiments-drawer>
   </div>
 </template>
 
@@ -75,13 +94,16 @@ import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
 import { useSlidePanel } from '@/composables/SlidingPanel';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import LPageHeader from '@/components/molecules/LPageHeader.vue';
 import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
 import LFileUpload from '@/components/molecules/LFileUpload.vue';
 import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
 import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
 import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue';
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -171,11 +193,29 @@ const onExperimentDataset = (dataset) => {
   datasetStore.loadDatasetInfo(dataset.id);
 }
 
-onMounted(async () => {
-  if (route.query.dataset) {
-    const selection = datasets.value.filter((dataset) => dataset.id === route.query.dataset)[0];
-    onDatasetSelected(selection);
-  }
+const onJobInferenceSelected = (job) => {
+  selectedDataset.value = null;
+  experimentStore.loadJobDetails(job.id)
+  showSlidingPanel.value = true;
+}
+
+const onCloseJobDetails = () => {
+  showSlidingPanel.value = false;
+  selectedJob.value = null;
+}
+
+const onShowLogs = () => {
+  showLogs.value = true;
+}
+
+const onGenerateGT = () => {
+  showSlidingPanel.value = false;
+  currentTab.value = '1';
+}
+
+function onDownloadDataset() {
+  datasetStore.loadDatasetFile();
+}
 })
 
 </script>

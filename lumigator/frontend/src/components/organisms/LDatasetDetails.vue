@@ -160,17 +160,12 @@ async function handleGenerateGroundTruth() {
     max_samples: -1,
     task: "summarization",
   };
-  try {
-    const result = await experimentStore.startGroundTruthGeneration(groundTruthPayload);
-    router.push('experiments');
-    await experimentStore.loadExperiments();
-  } catch (error) {
-    console.log("Error generating ground truth", groundTruthPayload,error)
+  const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload);
+  if (inferenceStarted) {
+    experimentStore.loadExperiments();
+    isGenerateGroundTruthPopupVisible.value = false;
+    emit('l-generate-gt');
   }
-  isGenerateGroundTruthPopupVisible.value = false;
-}
-async function refreshDatasetStatus() {
-  await datasetStore.fetchDatasetDetails(selectedDataset.value.id); // Replace with your dataset refresh logic
 }
 
 </script>

@@ -1,5 +1,6 @@
 <template>
   <DataTable
+    v-model:selection="focusedItem"
     :value="tableData"
     selectionMode="single"
     dataKey="id"
@@ -7,6 +8,7 @@
     sortField="created"
     :sortOrder="-1"
     scrollable
+    scrollHeight="75vh"
     :pt="{root:'l-job-table', tableContainer:'width-100'}"
     @row-click="handleRowClick"
   >
@@ -73,7 +75,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import {ref, computed, onMounted, onUnmounted } from 'vue';
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';
 import Column from 'primevue/column';
@@ -98,6 +100,8 @@ defineProps({
 
 const emit = defineEmits(['l-inference-selected'])
 const { showSlidingPanel  } = useSlidePanel();
+const isThrottled = ref(false);
+const focusedItem = ref(null);
 
 const tableStyle = computed(() => {
   return showSlidingPanel.value ?
@@ -109,10 +113,36 @@ function handleRowClick(event) {
   emit('l-inference-selected', event.data)
 }
 
-function retrieveStatus(jobID) {
-  const job = inferenceJobs.value.find(job => job.id === jobID);
-  return job ? job.status : null;
+function retrieveStatus(jobId) {
+  const jobStatus = inferenceJobs.value.find((job) => job.id === jobId)
+  return jobStatus ? jobStatus.status : null
 }
+
+// Throttle ensures the function is invoked at most once every defined period.
+async function throttledUpdateAllJobs() {
+  if (isThrottled.value) { return }; // Skip if throttle is active
+
+  isThrottled.value = true;
+  await experimentStore.updateStatusForIncompleteJobs();
+  setTimeout(() => {
+    isThrottled.value = false; // Release throttle after delay
+  }, 5000); // 5 seconds throttle
+}
+
+
+// This is a temporary solution until 'experiments/' endpoint
+// updates the status of each experiment
+let pollingId;
+onMounted(async () => {
+  await experimentStore.updateStatusForIncompleteJobs();
+  pollingId = setInterval(async () => {
+    await throttledUpdateAllJobs();
+  }, 1000)}
+);
+
+onUnmounted(() => {
+  clearInterval(pollingId);
+});
 
 </script>
 
@@ -136,15 +166,5 @@ function retrieveStatus(jobID) {
     font-weight: $l-font-weight-normal;
     text-transform: uppercase;
   }
-}
-</style>
-
-<style lang="scss">
-.l-job-table {
-	$root: &;
-  	width: 100%;
-    max-width: 1300px;
-    display: flex;
-    place-content: center;
 }
 </style>

@@ -146,8 +146,12 @@ class ExperimentService:
 
         return ExperimentResponse.model_validate(record)
 
-    def _get_experiment_jobs(self, experiment_id: UUID):
+    def _get_experiment_jobs(self, experiment_id: UUID) -> ListingResponse[ExperimentResponse]:
         records = self._job_repo.get_by_experiment_id(experiment_id)
+        return ListingResponse(
+            total=len(records),
+            items=[ExperimentResponse.model_validate(x) for x in records],
+        )
         return records
 
     def get_experiment_result_download(

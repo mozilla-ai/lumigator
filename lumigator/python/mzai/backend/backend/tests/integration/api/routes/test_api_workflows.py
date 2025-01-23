@@ -17,11 +17,15 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.main import app
+<<<<<<< HEAD
 from backend.tests.conftest import (
     TEST_CAUSAL_MODEL,
     wait_for_experiment,
     wait_for_job,
 )
+=======
+from backend.tests.conftest import TEST_CAUSAL_MODEL
+>>>>>>> a2ed12b (testing)
 
 
 @app.on_event("startup")
@@ -239,6 +243,7 @@ def test_full_experiment_launch(
     assert create_experiments_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments_new/")
+
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
@@ -252,7 +257,10 @@ def test_full_experiment_launch(
         f"/experiments_new/{get_experiments.items[0].id}/jobs"
     )
     logger.info(f"--> {get_jobs_per_experiment_response.json()}")
-    experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
+    experiment_jobs = ListingResponse[ExperimentResponse].model_validate(
+        get_jobs_per_experiment_response.json()
+    )
+
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")
         logs_job_response_model = JobLogsResponse.model_validate(logs_job_response.json())

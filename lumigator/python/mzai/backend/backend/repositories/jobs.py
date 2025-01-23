@@ -10,7 +10,7 @@ class JobRepository(BaseRepository[JobRecord]):
     def __init__(self, session: Session):
         super().__init__(JobRecord, session)
 
-    def get_by_experiment_id(self, experiment_id: UUID) -> list[JobRecord]:
+    def get_by_experiment_id(self, experiment_id: UUID) -> list[JobRecord] | None:
         return self.session.query(JobRecord).where(JobRecord.experiment_id == experiment_id).all()
 
 

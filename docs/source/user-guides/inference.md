@@ -5,9 +5,9 @@ a model downloaded from the Hugging Face Hub. The model will generate summaries 
 text data.
 
 ```{note}
-You can also use the OpenAI GPT family of models or the Mistal API to run an inference job. To do
+You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
-Refer to the `.env.template` file in the repository for more details.
+Refer to the [troubleshooting section](troubleshooting.md) for more details.
 ```
 
 ## What You'll Need

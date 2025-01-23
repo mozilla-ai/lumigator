@@ -1,8 +1,8 @@
+from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Form, HTTPException, Query, UploadFile, status
-from loguru import logger
+from fastapi import APIRouter, Form, Query, UploadFile, status
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from starlette.requests import Request
@@ -10,9 +10,27 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep
 from backend.api.http_headers import HttpHeaders
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.dataset_exceptions import (
+    DatasetInvalidError,
+    DatasetMissingFieldsError,
+    DatasetNotFoundError,
+    DatasetSizeError,
+    DatasetUpstreamError,
+)
 from backend.settings import settings
 
 router = APIRouter()
+
+
+def dataset_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        DatasetNotFoundError: status.HTTP_404_NOT_FOUND,
+        DatasetMissingFieldsError: status.HTTP_403_FORBIDDEN,
+        DatasetUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        DatasetSizeError: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        DatasetInvalidError: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    }
 
 
 @router.post(
@@ -60,26 +78,12 @@ def upload_dataset(
 
 @router.get("/{dataset_id}")
 def get_dataset(service: DatasetServiceDep, dataset_id: UUID) -> DatasetResponse:
-    dataset = service.get_dataset(dataset_id)
-    if not dataset:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Dataset '{dataset_id}' not found.",
-        )
-
-    return dataset
+    return service.get_dataset(dataset_id)
 
 
 @router.delete("/{dataset_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_dataset(service: DatasetServiceDep, dataset_id: UUID) -> None:
-    try:
-        service.delete_dataset(dataset_id)
-    except Exception as e:
-        logger.error(f"Unexpected error deleting dataset ID from DB and S3: {dataset_id}. {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error deleting dataset for ID: {dataset_id}",
-        ) from e
+    service.delete_dataset(dataset_id)
 
 
 @router.get("/")

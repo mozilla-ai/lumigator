@@ -67,7 +67,7 @@
         @l-generate-gt="onGenerateGT()"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
-        @l-download-dataset="onDownloadDataset()"
+        @l-download-dataset="onDownloadDataset($event)"
       />
       <l-experiment-details
         v-if="showSlidingPanel && selectedJob"
@@ -168,6 +168,11 @@ function deleteConfirmation(dataset) {
   });
 }
 
+function onDownloadDataset(dataset) {
+  selectedDataset.value = dataset;
+  datasetStore.loadDatasetFile();
+}
+
 const onDatasetAdded = () => { datasetInput.value.input.click() }
 
 const onDatasetUpload = (datasetFile) => {
@@ -213,11 +218,6 @@ const onGenerateGT = () => {
   showSlidingPanel.value = false;
   currentTab.value = '1';
 }
-
-function onDownloadDataset() {
-  datasetStore.loadDatasetFile();
-}
-
 
 </script>
 

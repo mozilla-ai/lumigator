@@ -117,12 +117,12 @@ class BackendSettings(BaseSettings):
     @computed_field
     @property
     def RAY_WORKER_GPUS(self) -> float:  # noqa: N802
-        return float(os.environ.get(self.RAY_WORKER_GPUS_ENV_VAR, 1.0))
+        return float(os.environ.get(self.RAY_WORKER_GPUS_ENV_VAR) or 1.0)
 
     @computed_field
     @property
     def RAY_WORKER_GPUS_FRACTION(self) -> float:  # noqa: N802
-        return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR, 1.0))
+        return float(os.environ.get(self.RAY_WORKER_GPUS_FRACTION_ENV_VAR) or 1.0)
 
     # URL for the Ray Dashboard
     @computed_field

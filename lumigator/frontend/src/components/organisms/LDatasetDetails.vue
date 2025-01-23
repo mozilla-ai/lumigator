@@ -16,7 +16,7 @@
           severity="secondary"
           variant="text"
           rounded
-          @click="emit('l-download-dataset')"
+          @click="emit('l-download-dataset', selectedDataset)"
         />
         <Button
           severity="secondary"

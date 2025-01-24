@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
+    ExperimentIdCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
@@ -12,7 +13,7 @@ from lumigator_schemas.jobs import (
     JobEvalCreate,
 )
 
-from backend.api.deps import JobServiceDep
+from backend.api.deps import ExperimentServiceDep, JobServiceDep
 
 router = APIRouter()
 
@@ -22,17 +23,6 @@ def create_experiment(
     service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
 ) -> ExperimentResponse:
     return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
-
-
-@router.post("/create", status_code=status.HTTP_201_CREATED)
-def create_experiment_id(
-    service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
-) -> ExperimentResponse:
-    """An experiment is a container of runs.
-    This endpoint creates an experiment and returns its ID.
-    The user can then trigger `n` runs using this ID.
-    """
-    pass
 
 
 @router.get("/{experiment_id}")
@@ -71,3 +61,10 @@ def get_experiment_result_download(
     return ExperimentResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
     )
+
+
+@router.post("/id", status_code=status.HTTP_201_CREATED)
+def create_experiment_id(
+    service: ExperimentServiceDep, request: ExperimentIdCreate
+) -> ExperimentResponse:
+    return service.create_experiment(request)

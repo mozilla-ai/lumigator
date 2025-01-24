@@ -26,7 +26,7 @@ TAGS_METADATA = [
     },
     {
         "name": Tags.RUNS,
-        "description": "Create and manage experiments (new).",
+        "description": "Create and manage runs (NOT YET AVAILABLE).",
     },
     {
         "name": Tags.JOBS,

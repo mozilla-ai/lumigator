@@ -5,47 +5,45 @@ A run is a single execution of an experiment, which can be a single job or a bat
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
-from lumigator_schemas.experiments import (
-    ExperimentCreate,
-    ExperimentResponse,
-    ExperimentResultDownloadResponse,
-    ExperimentResultResponse,
-)
 from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.runs import (
+    RunCreate,
+    RunResponse,
+    RunResultDownloadResponse,
+    RunResultResponse,
+)
 
-from backend.api.deps import ExperimentServiceDep, JobServiceDep
+from backend.api.deps import RunServiceDep
 
 router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_run(
-    service: ExperimentServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
-) -> ExperimentResponse:
-    return ExperimentResponse.model_validate(service.create_experiment(request, background_tasks))
+    service: RunServiceDep, request: RunCreate, background_tasks: BackgroundTasks
+) -> RunResponse:
+    """A run is a single execution of an experiment, which can be a single job or a batch of jobs.
+    It must be associated with an experiment id
+    (which means you must already have created an experiment and have that ID in the request).
+    """
+    return RunResponse.model_validate(service.create_run(request, background_tasks))
+
+
+@router.get("/{run_id}")
+def get_run(service: RunServiceDep, run_id: UUID) -> RunResponse:
+    return RunResponse.model_validate(service.get_run(run_id).model_dump())
 
 
 @router.get("/{run_id}/jobs")
-def get_run_jobs(service: ExperimentServiceDep, run_id: UUID) -> ListingResponse[UUID]:
-    return service.get_all_owned_jobs(run_id)
-
-
-@router.get("/")
-def list_runs(
-    service: ExperimentServiceDep,
-    skip: int = 0,
-    limit: int = 100,
-) -> ListingResponse[ExperimentResponse]:
-    return ListingResponse[ExperimentResponse].model_validate(
-        service.list_runs(skip, limit).model_dump()
-    )
+def get_run_jobs(service: RunServiceDep, experiment_id: UUID) -> ListingResponse[UUID]:
+    return service.get_jobs(experiment_id)
 
 
 @router.get("/{run_id}/result")
 def get_run_result(
-    service: JobServiceDep,
+    service: RunServiceDep,
     run_id: UUID,
-) -> ExperimentResultResponse:
+) -> RunResultResponse:
     """Return the results metadata for a run if available in the DB."""
     # not yet implemented
     pass
@@ -53,9 +51,9 @@ def get_run_result(
 
 @router.get("/{run_id}/result/download")
 def get_run_result_download(
-    service: JobServiceDep,
+    service: RunServiceDep,
     run_id: UUID,
-) -> ExperimentResultDownloadResponse:
+) -> RunResultDownloadResponse:
     """Return run results file URL for downloading."""
     # not yet implemented
     pass

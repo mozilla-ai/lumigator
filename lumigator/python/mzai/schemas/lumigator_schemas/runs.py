@@ -6,9 +6,10 @@ from pydantic import BaseModel
 from lumigator_schemas.jobs import JobStatus
 
 
-class ExperimentCreate(BaseModel):
+class RunCreate(BaseModel):
     name: str
     description: str = ""
+    experiment_id: UUID
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
@@ -18,12 +19,7 @@ class ExperimentCreate(BaseModel):
     config_template: str | None = None
 
 
-class ExperimentIdCreate(BaseModel):
-    name: str
-    description: str = ""
-
-
-class ExperimentResponse(BaseModel, from_attributes=True):
+class RunResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str
     description: str
@@ -32,11 +28,11 @@ class ExperimentResponse(BaseModel, from_attributes=True):
     updated_at: datetime.datetime | None = None
 
 
-class ExperimentResultResponse(BaseModel, from_attributes=True):
+class RunResultResponse(BaseModel, from_attributes=True):
     id: UUID
-    experiment_id: UUID
+    run_id: UUID
 
 
-class ExperimentResultDownloadResponse(BaseModel):
+class RunResultDownloadResponse(BaseModel):
     id: UUID
     download_url: str

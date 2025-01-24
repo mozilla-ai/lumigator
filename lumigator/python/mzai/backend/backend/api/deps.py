@@ -73,7 +73,7 @@ def get_experiment_service(
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
-def get_run_service(
+def get_workflow_service(
     session: DBSessionDep, job_service: JobServiceDep, dataset_service: DatasetServiceDep
 ) -> WorkflowService:
     job_repo = JobRepository(session)
@@ -81,7 +81,7 @@ def get_run_service(
     return WorkflowService(experiment_repo, job_repo, job_service, dataset_service)
 
 
-WorkflowServiceDep = Annotated[WorkflowService, Depends(get_run_service)]
+WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
 
 
 def get_mistral_completion_service() -> MistralCompletionService:

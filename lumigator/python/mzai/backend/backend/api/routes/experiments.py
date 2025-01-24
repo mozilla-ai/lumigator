@@ -63,8 +63,20 @@ def get_experiment_result_download(
     )
 
 
-@router.post("/id", status_code=status.HTTP_201_CREATED)
+# TODO: Eventually this route will become the / route,
+# but right now it is a placeholder while we build up the Workflows routes
+# It's not included in the OpenAPI schema for now so it's not visible in the docs
+@router.post("/id", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
 ) -> ExperimentResponse:
     return service.create_experiment(request)
+
+
+@router.get("/{experiment_id}/workflows")
+def get_workflows(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse[UUID]:
+    """TODO: this endpoint should handle passing in an experiment id and the returning a list
+    of all the workflows associated with that experiment. Until workflows are stored and associated
+    with experiments, this is not yet implemented.
+    """
+    raise NotImplementedError

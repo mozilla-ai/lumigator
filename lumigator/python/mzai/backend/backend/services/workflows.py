@@ -5,8 +5,7 @@ from collections.abc import Callable
 from uuid import UUID
 
 import loguru
-from fastapi import BackgroundTasks, HTTPException, status
-from lumigator_schemas.extras import ListingResponse
+from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
@@ -14,8 +13,6 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.workflows import WorkflowCreate, WorkflowResponse
 
-from backend.records.experiments import ExperimentRecord
-from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
@@ -34,23 +31,6 @@ class WorkflowService:
         self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
-
-    def _raise_not_found(self, job_id: UUID):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
-
-    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
-        record = self._experiment_repo.get(experiment_id)
-        if record is None:
-            self._raise_not_found(experiment_id)
-        return record
-
-    def _get_jobs(self, experiment_id: UUID) -> list[JobRecord]:
-        return self._job_repo.get_by_experiment_id(experiment_id)
-
-    def get_jobs(self, experiment_id: UUID) -> ListingResponse[UUID]:
-        """Return the list of job IDs created for a given experiment."""
-        jobs = [job.id for job in self._get_jobs(experiment_id)]
-        return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
@@ -109,33 +89,21 @@ class WorkflowService:
             experiment_id=experiment_id,
         )
 
-    def create_run(
+    def create_workflow(
         self, request: WorkflowCreate, background_tasks: BackgroundTasks
     ) -> WorkflowResponse:
-        """Creates a new run and submits inference and evaluation jobs.
+        """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
-            request (WorkflowCreate): The request object containing the run configuration.
+            request (WorkflowCreate): The request object containing the workflow configuration.
             background_tasks (BackgroundTasks): The background tasks manager for scheduling tasks.
 
         Returns:
-            WorkflowResponse: The response object containing the details of the created run.
+            WorkflowResponse: The response object containing the details of the created workflow.
         """
         loguru.logger.info(
-            f"Creating run '{request.name}' for experiment ID '{request.experiment_id}'."
+            f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'."
         )
-
-        # TODO create a new run object which will be stored in by the tracking service (aka mlflow)
-        # right now just generate a random uuid
-        created_at = datetime.datetime.now()
-
-        run_record = {
-            "id": uuid.uuid4(),
-            "name": request.name,
-            "description": request.description,
-            "created_at": created_at,
-            "updated_at": created_at,
-        }
 
         # input is WorkflowCreate, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
@@ -169,26 +137,26 @@ class WorkflowService:
             request.experiment_id,
         )
 
-        # TODO: This part will need to be refactored more: once everything is done, the last
-        # step is to created two nested runs inside the run_record
+        # TODO create a new workflow object which will be stored in
+        # by the tracking service (aka mlflow)
+        created_at = datetime.datetime.now()
+        # TODO right now this workflow_record is not related to the experiment,
+        # but the 2 jobs created by the workflow are both associated with the experiment,
+        # which is how we'll retrieve them until we
+        # have implemented the association of workflows with experiments
+        workflow_record = {
+            "id": uuid.uuid4(),
+            "name": request.name,
+            "description": request.description,
+            "created_at": created_at,
+            "updated_at": created_at,
+        }
+
+        # TODO: This part will need to be refactored more:
+        # once all the jobs are done, the last
+        # step is to created two jobs inside the workflow_record
         # which store the inference and evaluation job output info
         # on_job_complete_store_in_tracking_service()....
-        run_record["status"] = JobStatus.CREATED
+        workflow_record["status"] = JobStatus.CREATED
 
-        return WorkflowResponse.model_validate(run_record)
-
-    def get_run(self, run_id: UUID) -> WorkflowResponse:
-        record = self._get_experiment_record(run_id)
-        loguru.logger.info(f"Obtaining info for experiment {run_id}: {record}")
-
-        all_succeeded = True
-        for job in self._get_jobs(run_id):
-            loguru.logger.info(f"Checking sub job: {job}")
-            if self._job_service.get_job(job.id).status != JobStatus.SUCCEEDED:
-                all_succeeded = False
-                break
-
-        if all_succeeded:
-            record = self._experiment_repo.update(run_id, status=JobStatus.SUCCEEDED)
-
-        return WorkflowResponse.model_validate(record)
+        return WorkflowResponse.model_validate(workflow_record)

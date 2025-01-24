@@ -28,11 +28,19 @@ class WorkflowResponse(BaseModel, from_attributes=True):
     updated_at: datetime.datetime | None = None
 
 
-class WorkflowResultResponse(BaseModel, from_attributes=True):
-    id: UUID
-    run_id: UUID
+class WorkflowSummaryResponse(BaseModel, from_attributes=True):
+    workflow_id: UUID
+    experiment_id: UUID
+    run_ids: list[UUID]
+    metrics: dict
+    artifacts: dict
+    parameters: dict
 
 
-class WorkflowResultDownloadResponse(BaseModel):
-    id: UUID
-    download_url: str
+class WorkflowDetailsResponse(BaseModel):
+    workflow_id: UUID
+    experiment_id: UUID
+    run_ids: list[UUID]
+    metrics: list[dict]
+    artifacts: list[dict]
+    parameters: list[dict]

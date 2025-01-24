@@ -1,4 +1,4 @@
-# Creating a new endpoint
+# Creating a New Endpoint
 
 The examples in the [Understanding Lumigator Endpoints](https://mozilla-ai.github.io/lumigator/conceptual-guides/endpoints.html)
 guide show the main pieces of code involved in writing a new endpoint. Let us take a toy example,

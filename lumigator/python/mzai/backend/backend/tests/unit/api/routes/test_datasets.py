@@ -106,6 +106,7 @@ def test_experiment_ground_truth(
     app_client: TestClient,
     valid_experiment_dataset: str,
     valid_experiment_dataset_without_gt: str,
+    valid_experiment_dataset_with_empty_gt: str,
     dependency_overrides_fakes,
 ):
     ground_truth_response = app_client.post(
@@ -129,5 +130,17 @@ def test_experiment_ground_truth(
     created_dataset = DatasetResponse.model_validate(no_ground_truth_response.json())
     assert created_dataset.ground_truth is False
     location = no_ground_truth_response.headers.get(HttpHeaders.LOCATION)
+    assert location != ""
+    assert location == f"{app_client.base_url}datasets/{created_dataset.id}"
+
+    empty_ground_truth_response = app_client.post(
+        url="/datasets",
+        data={"format": DatasetFormat.JOB.value},
+        files={"dataset": ("dataset.csv", valid_experiment_dataset_with_empty_gt)},
+    )
+    assert empty_ground_truth_response.status_code == status.HTTP_201_CREATED
+    created_dataset = DatasetResponse.model_validate(empty_ground_truth_response.json())
+    assert created_dataset.ground_truth is False
+    location = empty_ground_truth_response.headers.get(HttpHeaders.LOCATION)
     assert location != ""
     assert location == f"{app_client.base_url}datasets/{created_dataset.id}"

@@ -1,10 +1,13 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia'
 import datasetsService from "@/services/datasets/datasetsService";
+import {downloadContent} from "@/helpers/index.js";
+import { useToast } from "primevue/usetoast";
 
 export const useDatasetStore = defineStore('dataset', () => {
   const datasets = ref([]);
   const selectedDataset = ref(null);
+  const toast = useToast();
 
 
   async function loadDatasets() {
@@ -27,7 +30,12 @@ export const useDatasetStore = defineStore('dataset', () => {
     formData.append('format', 'job'); // Specification @localhost:8000/docs
     const uploadConfirm = await datasetsService.postDataset(formData)
     if (uploadConfirm.status) {
-      console.log('⚠️ Error', uploadConfirm.message);
+      toast.add({
+        severity: 'error',
+        summary: `${uploadConfirm.data.detail}`,
+        messageicon: 'pi pi-exclamation-triangle',
+        group: 'br',
+      })
     }
     await loadDatasets();
   }
@@ -41,6 +49,11 @@ export const useDatasetStore = defineStore('dataset', () => {
     await loadDatasets();
   }
 
+  async function loadDatasetFile() {
+    const blob = await datasetsService.downloadDataset(selectedDataset.value.id);
+    downloadContent(blob, selectedDataset.value.filename)
+  }
+
   return {
     datasets,
     loadDatasets,
@@ -48,6 +61,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     loadDatasetInfo,
     resetSelection,
     uploadDataset,
-    deleteDataset
+    deleteDataset,
+    loadDatasetFile
   }
 })

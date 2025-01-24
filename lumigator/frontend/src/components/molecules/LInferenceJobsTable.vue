@@ -14,7 +14,7 @@
   >
     <Column
       field="name"
-      header="File Name"
+      header="Filename"
     >
       <template #body="slotProps">
         {{ slotProps.data.dataset.name }}

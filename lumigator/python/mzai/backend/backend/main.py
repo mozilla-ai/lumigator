@@ -1,5 +1,7 @@
 import os
 import sys
+from collections.abc import Callable
+from http import HTTPStatus
 from pathlib import Path
 
 from alembic import command
@@ -7,9 +9,13 @@ from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 
 from backend.api.router import api_router
+from backend.api.routes.datasets import dataset_exception_mappings
 from backend.api.tags import TAGS_METADATA
+from backend.services.exceptions.base_exceptions import ServiceError
 from backend.settings import settings
 
 LUMIGATOR_APP_TAGS = {
@@ -45,6 +51,21 @@ def _configure_logger():
     )
 
 
+def create_error_handler(status_code: HTTPStatus) -> Callable[[Request, ServiceError], Response]:
+    """Creates an error handler function for service errors, using the given status code"""
+
+    def handler(_: Request, exc: ServiceError) -> Response:
+        # Log any inner exceptions as part of handling the service error.
+        logger.opt(exception=exc).error("Service error")
+
+        return JSONResponse(
+            status_code=status_code,
+            content={"detail": exc.message},
+        )
+
+    return handler
+
+
 def create_app() -> FastAPI:
     _configure_logger()
 
@@ -66,6 +87,19 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router)
+
+    # Group mappings of service error types to HTTP status code, for routes.
+    exception_mappings = [
+        # TODO: Add completions
+        dataset_exception_mappings()  # Datasets
+        # TODO: Add experiments
+        # TODO: Add jobs
+    ]
+
+    # Add a handler for each error -> status mapping.
+    for mapping in exception_mappings:
+        for key, value in mapping.items():
+            app.add_exception_handler(key, create_error_handler(value))
 
     @app.get("/")
     def get_root():

@@ -4,8 +4,11 @@ This guide will walk you through the process of installing Lumigator on a Kubern
 The official way to deploy the Lumigator application in cloud environments with Kubernetes is to use
 the Helm package manager.
 
-At this moment this Helm chart only deploys the Lumigator core REST API. We don't provide support
-for Ray, S3-compatible storage, or the database which are required for the full application to run. In
+At this moment this Helm chart deploys the Lumigator core REST API (backend) and the Lumigator frontend. Additionally, by default, it also deploys a Ray cluster with a postgres instance as a dependency of the backend.
+
+If you want to use your existent relational database instance or Ray cluster, you will have to reconfigure the dependencies of the backend chart.
+
+We don't provide support for Ray, S3-compatible storage, or the database which are required for the full application to run. In
 the near future, a new version of this chart will be released, which will be able to deploy a
 minimal version of all the required tools.
 

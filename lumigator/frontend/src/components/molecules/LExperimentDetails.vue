@@ -211,7 +211,7 @@ const isInference = computed(() => {
 
 const focusedItem = computed(() => {
   if (selectedJob.value) {
-    return selectedJob.value
+    return selectedJob.value;
   }
   const selected = experiments.value;
     .filter((experiment) => experiment.id === selectedExperiment.value.id)[0];

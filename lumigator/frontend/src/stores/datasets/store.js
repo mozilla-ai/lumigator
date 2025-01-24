@@ -11,7 +11,6 @@ export const useDatasetStore = defineStore('dataset', () => {
 
 
   async function loadDatasets() {
-    datasets.value = [];
     datasets.value = await datasetsService.fetchDatasets();
   }
 

@@ -221,10 +221,6 @@ const onGenerateGT = () => {
   currentTab.value = '1';
 }
 
-watch(hasRunningInferenceJob, (newValue) => {
-  datasetStore.loadDatasets();
-});
-
 </script>
 
 <style scoped lang="scss">

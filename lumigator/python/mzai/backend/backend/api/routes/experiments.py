@@ -79,7 +79,7 @@ def create_experiment_id(
     return service.create_experiment(request)
 
 
-@router.get("/new", include_in_schema=False)
+@router.get("/new/all", include_in_schema=False)
 def list_experiments_new(
     service: ExperimentServiceDep,
     skip: int = 0,

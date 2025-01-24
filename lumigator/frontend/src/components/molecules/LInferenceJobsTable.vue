@@ -114,8 +114,8 @@ function handleRowClick(event) {
 }
 
 function retrieveStatus(jobId) {
-  const jobStatus = inferenceJobs.value.find((job) => job.id === jobId)
-  return jobStatus ? jobStatus.status : null
+  const jobStatus = inferenceJobs.value.find((job) => job.id === jobId);
+  return jobStatus ? jobStatus.status : null;
 }
 
 // Throttle ensures the function is invoked at most once every defined period.

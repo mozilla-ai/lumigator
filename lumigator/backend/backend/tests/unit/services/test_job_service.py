@@ -2,7 +2,9 @@ from unittest.mock import patch
 
 import pytest
 from lumigator_schemas.jobs import (
-    JobInferenceCreate,
+    JobCreate,
+    JobInferenceConfig,
+    JobType,
 )
 
 from backend.services.jobs import JobService
@@ -10,10 +12,12 @@ from backend.settings import settings
 
 
 def test_set_null_inference_job_params(job_record, job_service):
-    request = JobInferenceCreate(
+    request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        model="hf://facebook/bart-large-cnn",
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model="hf://facebook/bart-large-cnn"
+        ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -27,11 +31,13 @@ def test_set_null_inference_job_params(job_record, job_service):
 
 
 def test_set_explicit_inference_job_params(job_record, job_service):
-    request = JobInferenceCreate(
+    request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
         max_samples=10,
-        model="hf://facebook/bart-large-cnn",
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model="hf://facebook/bart-large-cnn"
+        ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -68,11 +74,14 @@ def test_set_explicit_inference_job_params(job_record, job_service):
     ],
 )
 def test_set_model(job_service, model, input_model_url, returned_model_url):
-    request = JobInferenceCreate(
+    request = JobCreate(
         name="test_run",
         description="Test run to verify how model URL is set",
-        model=model,
-        model_url=input_model_url,
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE,
+            model=model,
+            model_url=input_model_url,
+        ),
         dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
     )
     model_url = job_service._set_model_type(request)

@@ -1,6 +1,6 @@
 import datetime as dt
 from enum import Enum
-from typing import Any
+from typing import Any, Literal, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -68,12 +68,9 @@ class JobSubmissionResponse(BaseModel):
     driver_exit_code: int | None = None
 
 
-class JobEvalCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobEvalConfig(BaseModel):
+    job_type: Literal[JobType.EVALUATION]
     model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
     system_prompt: str | None = None
     config_template: str | None = None
@@ -82,21 +79,15 @@ class JobEvalCreate(BaseModel):
 
 # TODO: this has to be renamed to JobEvalCreate and the code above
 #       has to be removed when we deprecate evaluator
-class JobEvalLiteCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobEvalLiteConfig(BaseModel):
+    job_type: Literal[JobType.EVALUATION_LITE]
     model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
     config_template: str | None = None
 
 
-class JobInferenceCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobInferenceConfig(BaseModel):
+    job_type: Literal[JobType.INFERENCE]
     model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
     task: str | None = "summarization"
     accelerator: str | None = "auto"
     revision: str | None = "main"
@@ -115,13 +106,30 @@ class JobInferenceCreate(BaseModel):
     max_new_tokens: int = 500
 
 
-class JobAnnotateCreate(BaseModel):
+class JobAnnotateConfig(BaseModel):
+    job_type: Literal[JobType.ANNOTATION]
+    task: str | None = "summarization"
+    store_to_dataset: bool = False
+
+
+JobSpecificConfig = JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig | JobAnnotateConfig
+"""
+Job configuration dealing exclusively with the Ray jobs
+"""
+# JobSpecificConfigVar = TypeVar('JobSpecificConfig', bound=JobSpecificConfig)
+JobSpecificConfigVar = TypeVar(
+    "JobSpecificConfig", JobEvalConfig, JobEvalLiteConfig, JobInferenceConfig, JobAnnotateConfig
+)
+
+
+class JobCreate(BaseModel):
+    """Job configuration dealing exclusively with backend job handling"""
+
     name: str
     description: str = ""
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    task: str | None = "summarization"
-    store_to_dataset: bool = False
+    job_config: JobSpecificConfig = Field(discriminator="job_type")
 
 
 class JobResponse(BaseModel, from_attributes=True):

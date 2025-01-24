@@ -31,8 +31,10 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(service: JobServiceDep, request: ExperimentCreate) -> JobResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
+def create_experiment(
+    service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
+) -> ExperimentResponse:
+    return service.create_job(JobCreate.model_validate(request.model_dump()), background_tasks)
 
 
 @router.get("/{experiment_id}")

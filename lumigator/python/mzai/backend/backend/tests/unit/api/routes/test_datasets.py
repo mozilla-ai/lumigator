@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 from backend.api.http_headers import HttpHeaders
+from backend.services.exceptions.dataset_exceptions import DatasetUpstreamError
 
 
 def test_upload_delete(
@@ -45,14 +46,15 @@ def test_upload_delete(
 
 def test_dataset_delete_error(app_client: TestClient, dependency_overrides_fakes):
     dataset_id = uuid.uuid4()
+    msg = f"error attempting to delete dataset {dataset_id} from S3"
     with patch(
         "backend.services.datasets.DatasetService.delete_dataset",
-        side_effect=Exception("argh I am exceptional"),
+        side_effect=DatasetUpstreamError("s3", msg),
     ):
         resp = app_client.delete(f"/datasets/{dataset_id}")
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         data = resp.json()
-        assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
+        assert data["detail"] == f"Upstream error with s3: {msg}"
 
 
 def test_presigned_download(

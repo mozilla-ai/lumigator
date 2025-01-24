@@ -174,3 +174,7 @@ cython_debug/
 .ijwb
 *.db
 *.db-journal
+
+# env diff files
+.env.diff
+.env.diff.new

@@ -110,10 +110,13 @@
         <div class="l-experiment-details__content-label">run time</div>
         <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <div
+        v-if="selectedExperiment"
+        class="l-experiment-details__content-item"
+      >
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
-          <!-- {{ selectedExperiment.samples }} -->
+          {{ selectedExperiment }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

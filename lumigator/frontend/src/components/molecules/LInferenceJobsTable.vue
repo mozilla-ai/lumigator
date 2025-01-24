@@ -112,7 +112,7 @@ const tableStyle = computed(() => {
 
 
 function handleRowClick(event) {
-  emit('l-inference-selected', event.data)
+  emit('l-inference-selected', event.data);
 }
 
 function retrieveStatus(jobId) {

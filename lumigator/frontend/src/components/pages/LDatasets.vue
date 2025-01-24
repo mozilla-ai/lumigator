@@ -43,7 +43,6 @@
               @l-dataset-selected="onDatasetSelected($event)"
               @l-experiment="onExperimentDataset($event)"
               @l-download-dataset="onDownloadDataset($event)"
-              @l-download-dataset="onDownloadDataset($event)"
               @l-delete-dataset="deleteConfirmation($event)"
             />
           </TabPanel>

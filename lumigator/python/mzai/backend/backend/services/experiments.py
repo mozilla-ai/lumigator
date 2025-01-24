@@ -5,8 +5,7 @@ from fastapi import BackgroundTasks
 from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
-    JobInferenceCreate,
+    JobCreate,
     JobStatus,
 )
 
@@ -59,7 +58,7 @@ class ExperimentService:
 
         # submit the job
         self._job_service.create_job(
-            JobEvalLiteCreate.model_validate(job_eval_dict),
+            JobCreate.model_validate(job_eval_dict),
             background_tasks,
             experiment_id=experiment_id,
         )
@@ -93,7 +92,7 @@ class ExperimentService:
 
         # submit inference job first
         job_response = self._job_service.create_job(
-            JobInferenceCreate.model_validate(job_inference_dict),
+            JobCreate.model_validate(job_inference_dict),
             background_tasks,
             experiment_id=experiment_record.id,
         )

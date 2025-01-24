@@ -9,7 +9,7 @@ from lumigator_schemas.experiments import (
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalCreate,
+    JobCreate,
 )
 
 from backend.api.deps import JobServiceDep
@@ -21,7 +21,7 @@ router = APIRouter()
 def create_experiment(
     service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
 ) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
+    return service.create_job(JobCreate.model_validate(request.model_dump()), background_tasks)
 
 
 @router.get("/{experiment_id}")

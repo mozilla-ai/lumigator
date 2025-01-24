@@ -10,10 +10,8 @@ from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateCreate,
-    JobEvalCreate,
-    JobEvalLiteCreate,
-    JobInferenceCreate,
+    JobAnnotateConfig,
+    JobCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -47,7 +45,7 @@ def job_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
-    job_create_request: JobInferenceCreate,
+    job_create_request: JobCreate,
     request: Request,
     response: Response,
     background_tasks: BackgroundTasks,
@@ -63,7 +61,7 @@ def create_inference_job(
 @router.post("/annotate/", status_code=status.HTTP_201_CREATED)
 def create_annotation_job(
     service: JobServiceDep,
-    job_create_request: JobAnnotateCreate,
+    job_create_request: JobCreate,
     request: Request,
     response: Response,
     background_tasks: BackgroundTasks,
@@ -72,12 +70,16 @@ def create_annotation_job(
     reference model should be used to generate annotations.
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """
-    inference_job_create_request = JobInferenceCreate(
-        **job_create_request.dict(),
+    inference_job_create_config = JobAnnotateConfig(
+        **job_create_request.job_config.dict(),
         model="hf://facebook/bart-large-cnn",
         output_field="ground_truth",
     )
-    inference_job_create_request.store_to_dataset = True
+    inference_job_create_config.store_to_dataset = True
+    inference_job_create_request_dict = job_create_request.model_dump()
+    inference_job_create_request_dict.job_config = inference_job_create_config
+
+    inference_job_create_request = JobCreate(**inference_job_create_request_dict)
     job_response = service.create_job(inference_job_create_request, background_tasks)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
@@ -89,7 +91,7 @@ def create_annotation_job(
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
-    job_create_request: JobEvalCreate,
+    job_create_request: JobCreate,
     request: Request,
     response: Response,
     background_tasks: BackgroundTasks,
@@ -107,7 +109,7 @@ def create_evaluation_job(
 @router.post("/eval_lite/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_lite_job(
     service: JobServiceDep,
-    job_create_request: JobEvalLiteCreate,
+    job_create_request: JobCreate,
     request: Request,
     response: Response,
     background_tasks: BackgroundTasks,

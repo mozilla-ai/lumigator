@@ -17,16 +17,16 @@ from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
-    JobEvalCreate,
-    JobEvalLiteCreate,
-    JobInferenceCreate,
+    JobCreate,
+    JobEvalConfig,
+    JobEvalLiteConfig,
+    JobInferenceConfig,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
     JobStatus,
     JobType,
 )
-from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
@@ -45,6 +45,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
+JobSpecificRestrictedConfig = type[JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig]
 
 
 class JobService:
@@ -220,9 +221,7 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _validate_evaluation_results(
-        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
-    ):
+    def _validate_evaluation_results(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
         """Handles the evaluation result for a given job.
 
         Args:
@@ -316,14 +315,14 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request: BaseModel) -> str:
+    def _set_model_type(self, request: JobCreate) -> str:
         """Sets model URL based on protocol address"""
-        if request.model.startswith("oai://"):
+        if request.job_config.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
+        elif request.job_config.model.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
         else:
-            model_url = request.model_url
+            model_url = request.job_config.model_url
 
         return model_url
 
@@ -335,7 +334,7 @@ class JobService:
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
 
-    def _get_job_params(self, job_type: JobType, record, request: BaseModel) -> dict:
+    def _get_job_params(self, job_type: str, record, request: JobCreate) -> dict:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
@@ -359,54 +358,60 @@ class JobService:
 
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
-            job_params = job_params | {
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_uri": request.job_config.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
                 "model_url": self._set_model_type(request),
-                "skip_inference": request.skip_inference,
-                "system_prompt": request.system_prompt,
+                "system_prompt": request.job_config.system_prompt,
+                "skip_inference": request.job_config.skip_inference,
             }
-        elif job_type == JobType.INFERENCE:
-            job_params = job_params | {
-                "accelerator": request.accelerator,
-                "frequency_penalty": request.frequency_penalty,
-                "max_tokens": request.max_tokens,
+        elif job_type == JobType.EVALUATION_LITE:
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_uri": request.job_config.model,
+                "dataset_path": dataset_s3_path,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
+            }
+        else:
+            job_params = {
+                "job_id": record.id,
+                "job_name": request.name,
+                "model_uri": request.job_config.model,
+                "dataset_path": dataset_s3_path,
+                "task": request.job_config.task,
+                "accelerator": request.job_config.accelerator,
+                "revision": request.job_config.revision,
+                "use_fast": request.job_config.use_fast,
+                "trust_remote_code": request.job_config.trust_remote_code,
+                "torch_dtype": request.job_config.torch_dtype,
+                "max_samples": request.max_samples,
+                "storage_path": self.storage_path,
                 "model_url": self._set_model_type(request),
-                "output_field": request.output_field,
-                "revision": request.revision,
-                "system_prompt": request.system_prompt,
-                "task": request.task,
-                "temperature": request.temperature,
-                "top_p": request.top_p,
-                "torch_dtype": request.torch_dtype,
-                "trust_remote_code": request.trust_remote_code,
-                "use_fast": request.use_fast,
-                "max_new_tokens": request.max_new_tokens,
+                "system_prompt": request.job_config.system_prompt,
+                "output_field": request.job_config.output_field,
+                "max_tokens": request.job_config.max_tokens,
+                "frequency_penalty": request.job_config.frequency_penalty,
+                "temperature": request.job_config.temperature,
+                "top_p": request.job_config.top_p,
             }
 
         return job_params
 
     def create_job(
-        self, request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate
+        self,
+        request: JobCreate,
+        background_tasks: BackgroundTasks,
+        experiment_id: UUID = None,
     ) -> JobResponse:
-        """Creates a new workload to run on Ray based on the type of request.
-
-        :param request: contains information on the requested job, including type,
-                        (e.g. inference or evaluation)
-        :param background_tasks: dependency used to initiate tasks in the background
-        :param experiment_id: experiment ID (optional) links this job to a parent experiment.
-        :return: information on the created job
-        :rtype: JobResponse
-        :raises JobTypeUnsupportedError: if the requested job type is not supported
-        """
-        if isinstance(request, JobEvalCreate):
-            job_type = JobType.EVALUATION
-        elif isinstance(request, JobEvalLiteCreate):
-            job_type = JobType.EVALUATION_LITE
-        elif isinstance(request, JobInferenceCreate):
-            job_type = JobType.INFERENCE
-            if not request.output_field:
-                request.output_field = "predictions"
-        else:
-            raise JobTypeUnsupportedError(request) from None
+        """Creates a new evaluation workload to run on Ray and returns the response status."""
+        # Typing won't allow other job_type's
+        job_type = request.job_config.job_type
 
         # Create a db record for the job
         record = self.job_repo.create(
@@ -414,6 +419,10 @@ class JobService:
             description=request.description,
             job_type=job_type,
         )
+
+        # TODO defer to specific job
+        if job_type == JobType.INFERENCE and not request.output_field:
+            request.output_field = "predictions"
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -429,12 +438,15 @@ class JobService:
 
         loguru.logger.info(f"template...{config_template, job_type, request.model}")
 
+        # The idea would be to remove this step...
         self._validate_config(job_type, config_template, config_params)
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
         # appear on the command line and the values are the respective params.
+
+        # ...and use directly Job*Config(request.job.config.model_dump_json())
         job_config_args = {
             "--config": config_template.format(**config_params),
         }

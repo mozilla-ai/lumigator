@@ -16,7 +16,7 @@ from backend.services.completions import MistralCompletionService, OpenAIComplet
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
-from backend.services.runs import RunService
+from backend.services.workflows import WorkflowService
 from backend.settings import settings
 
 
@@ -75,13 +75,13 @@ ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_servi
 
 def get_run_service(
     session: DBSessionDep, job_service: JobServiceDep, dataset_service: DatasetServiceDep
-) -> RunService:
+) -> WorkflowService:
     job_repo = JobRepository(session)
     experiment_repo = ExperimentRepository(session)
-    return RunService(experiment_repo, job_repo, job_service, dataset_service)
+    return WorkflowService(experiment_repo, job_repo, job_service, dataset_service)
 
 
-RunServiceDep = Annotated[RunService, Depends(get_run_service)]
+WorkflowServiceDep = Annotated[WorkflowService, Depends(get_run_service)]
 
 
 def get_mistral_completion_service() -> MistralCompletionService:

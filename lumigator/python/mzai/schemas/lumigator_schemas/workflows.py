@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from lumigator_schemas.jobs import JobStatus
 
 
-class RunCreate(BaseModel):
+class WorkflowCreate(BaseModel):
     name: str
     description: str = ""
     experiment_id: UUID
@@ -19,7 +19,7 @@ class RunCreate(BaseModel):
     config_template: str | None = None
 
 
-class RunResponse(BaseModel, from_attributes=True):
+class WorkflowResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str
     description: str
@@ -28,11 +28,11 @@ class RunResponse(BaseModel, from_attributes=True):
     updated_at: datetime.datetime | None = None
 
 
-class RunResultResponse(BaseModel, from_attributes=True):
+class WorkflowResultResponse(BaseModel, from_attributes=True):
     id: UUID
     run_id: UUID
 
 
-class RunResultDownloadResponse(BaseModel):
+class WorkflowResultDownloadResponse(BaseModel):
     id: UUID
     download_url: str

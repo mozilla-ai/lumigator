@@ -12,7 +12,7 @@ from lumigator_schemas.jobs import (
     JobInferenceCreate,
     JobStatus,
 )
-from lumigator_schemas.runs import RunCreate, RunResponse
+from lumigator_schemas.workflows import WorkflowCreate, WorkflowResponse
 
 from backend.records.experiments import ExperimentRecord
 from backend.records.jobs import JobRecord
@@ -22,7 +22,7 @@ from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 
 
-class RunService:
+class WorkflowService:
     def __init__(
         self,
         experiment_repo: ExperimentRepository,
@@ -86,7 +86,7 @@ class RunService:
     def _run_eval(
         self,
         inference_job_id: UUID,
-        request: RunCreate,
+        request: WorkflowCreate,
         background_tasks: BackgroundTasks,
         experiment_id: UUID = None,
     ):
@@ -109,15 +109,17 @@ class RunService:
             experiment_id=experiment_id,
         )
 
-    def create_run(self, request: RunCreate, background_tasks: BackgroundTasks) -> RunResponse:
+    def create_run(
+        self, request: WorkflowCreate, background_tasks: BackgroundTasks
+    ) -> WorkflowResponse:
         """Creates a new run and submits inference and evaluation jobs.
 
         Args:
-            request (RunCreate): The request object containing the run configuration.
+            request (WorkflowCreate): The request object containing the run configuration.
             background_tasks (BackgroundTasks): The background tasks manager for scheduling tasks.
 
         Returns:
-            RunResponse: The response object containing the details of the created run.
+            WorkflowResponse: The response object containing the details of the created run.
         """
         loguru.logger.info(
             f"Creating run '{request.name}' for experiment ID '{request.experiment_id}'."
@@ -135,7 +137,7 @@ class RunService:
             "updated_at": created_at,
         }
 
-        # input is RunCreate, we need to split the configs and generate one
+        # input is WorkflowCreate, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
         job_inference_dict = {
             "name": f"{request.name}-inference",
@@ -173,9 +175,9 @@ class RunService:
         # on_job_complete_store_in_tracking_service()....
         run_record["status"] = JobStatus.CREATED
 
-        return RunResponse.model_validate(run_record)
+        return WorkflowResponse.model_validate(run_record)
 
-    def get_run(self, run_id: UUID) -> RunResponse:
+    def get_run(self, run_id: UUID) -> WorkflowResponse:
         record = self._get_experiment_record(run_id)
         loguru.logger.info(f"Obtaining info for experiment {run_id}: {record}")
 
@@ -189,4 +191,4 @@ class RunService:
         if all_succeeded:
             record = self._experiment_repo.update(run_id, status=JobStatus.SUCCEEDED)
 
-        return RunResponse.model_validate(record)
+        return WorkflowResponse.model_validate(record)

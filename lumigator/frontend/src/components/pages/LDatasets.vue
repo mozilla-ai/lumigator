@@ -39,6 +39,7 @@
           <TabPanel value="0">
             <l-dataset-table
               v-if="datasets.length"
+              ref="refDatasetTable"
               :table-data="datasets"
               @l-dataset-selected="onDatasetSelected($event)"
               @l-experiment="onExperimentDataset($event)"
@@ -50,6 +51,7 @@
             <l-inference-jobs-table
               :table-data="inferenceJobs"
               @l-inference-selected="onJobInferenceSelected($event)"
+              @l-inference-finished="reloadDatasetTable"
             />
           </TabPanel>
         </TabPanels>
@@ -94,7 +96,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
@@ -129,6 +131,7 @@ const confirm = useConfirm();
 const router = useRouter();
 const currentTab = ref('0');
 const showLogs = ref(false);
+const refDatasetTable = ref(null)
 
 onMounted(async () => {
   await datasetStore.loadDatasets();
@@ -176,6 +179,15 @@ function onDownloadDataset(dataset) {
 }
 
 const onDatasetAdded = () => { datasetInput.value.input.click() }
+
+const reloadDatasetTable = () => {
+  datasetStore.loadDatasets();
+  refDatasetTable.value.loading = true;
+  setTimeout(async () => {
+    await datasetStore.loadDatasets();
+    refDatasetTable.value.loading = false;
+  }, 1500);
+}
 
 const onDatasetUpload = (datasetFile) => {
   datasetStore.uploadDataset(datasetFile);

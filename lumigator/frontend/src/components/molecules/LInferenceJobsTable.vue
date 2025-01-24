@@ -75,18 +75,20 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted, onUnmounted } from 'vue';
+import {ref, computed, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';
 import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from "@/stores/experiments/store.js";
+import { useDatasetStore } from "@/stores/datasets/store.js";
 import { useSlidePanel } from '@/composables/SlidingPanel';
 
 
 const experimentStore = useExperimentStore();
-const { inferenceJobs } = storeToRefs(experimentStore);
+const datasetStore = useDatasetStore();
+const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(experimentStore);
 defineProps({
   tableData: {
     type: Array,
@@ -98,7 +100,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['l-inference-selected']);
+const emit = defineEmits(['l-inference-selected', 'l-inference-finished']);
 const { showSlidingPanel  } = useSlidePanel();
 const isThrottled = ref(false);
 const focusedItem = ref(null);
@@ -130,20 +132,21 @@ async function throttledUpdateAllJobs() {
 }
 
 
-// This is a temporary solution until 'experiments/' endpoint
-// updates the status of each experiment
+// This is a temporary solution until 'jobs/' endpoint
+// updates the status of each job
 let pollingId;
-onMounted(async () => {
+watch(hasRunningInferenceJob, async (newValue) => {
+  if (newValue) {
   await experimentStore.updateStatusForIncompleteJobs();
   pollingId = setInterval(async () => {
     await throttledUpdateAllJobs();
-  }, 1000)}
-);
-
-onUnmounted(() => {
-  clearInterval(pollingId);
+  }, 1000)
+  } else {
+    clearInterval(pollingId);
+    emit('l-inference-finished')
+    datasetStore.loadDatasets();
+  }
 });
-
 </script>
 
 <style scoped lang="scss">

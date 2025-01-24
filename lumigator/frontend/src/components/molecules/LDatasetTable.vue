@@ -178,7 +178,7 @@ watch(props.tableData, (newValue) => {
   }
 });
 
-  defineExpose({loading})
+defineExpose({loading});
 </script>
 
 <style scoped lang="scss">

@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia'
 import experimentService from "@/services/experiments/experimentService";
 import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
@@ -6,6 +6,7 @@ import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helper
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const jobs = ref([]);
+  const inferenceJobs = ref([]);
   const selectedExperiment = ref(null);
   const selectedJob = ref(null);
   const selectedJobRslts = ref([]);
@@ -15,9 +16,18 @@ export const useExperimentStore = defineStore('experiment', () => {
   const experimentLogs = ref([]);
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
+  const hasRunningInferenceJob = computed(() => {
+    return inferenceJobs.value.some(job => job.status === "RUNNING");
+  });
+
   async function loadExperiments() {
     const allJobs = await experimentService.fetchJobs();
-    jobs.value = allJobs.map(job => parseJobDetails(job));
+    inferenceJobs.value = allJobs
+      .filter((job) => job.metadata.job_type === "inference")
+      .map((job) => parseJobDetails(job));
+    jobs.value = allJobs
+      .filter((job) => job.metadata.job_type === "evaluate")
+      .map((job) => parseJobDetails(job));
     experiments.value = getJobsPerExperiement();
   }
 
@@ -82,9 +92,14 @@ export const useExperimentStore = defineStore('experiment', () => {
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
+  // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
   async function updateJobStatus(id) {
     try {
       const status = await experimentService.fetchJobStatus(id);
+      const inferenceJob = inferenceJobs.value.find((job) => job.id === id);
+      if (inferenceJob) {
+        inferenceJob.status = status;
+      }
       const job = jobs.value.find((job) => job.id === id);
       if (job) {
         job.status = status;
@@ -165,31 +180,31 @@ export const useExperimentStore = defineStore('experiment', () => {
       return {
         example,
         bertscore: {
-          f1: objectData.bertscore.f1[index],
-          f1_mean: objectData.bertscore.f1_mean,
-          hashcode: objectData.bertscore.hashcode,
-          precision: objectData.bertscore.precision[index],
-          precision_mean: objectData.bertscore.precision_mean,
-          recall: objectData.bertscore.recall[index],
-          recall_mean: objectData.bertscore.recall_mean,
+          f1: objectData.bertscore?.f1?.[index] ?? 0,
+          f1_mean: objectData.bertscore?.f1_mean ?? 0,
+          hashcode: objectData.bertscore?.hashcode ?? 0,
+          precision: objectData.bertscore?.precision?.[index] ?? 0,
+          precision_mean: objectData.bertscore?.precision_mean ?? 0,
+          recall: objectData.bertscore?.recall?.[index] ?? 0,
+          recall_mean: objectData.bertscore?.recall_mean ?? 0,
         },
-        evaluation_time: objectData.evaluation_time,
-        ground_truth: objectData.ground_truth[index],
+        evaluation_time: objectData.evaluation_time ?? 0,
+        ground_truth: objectData.ground_truth?.[index],
         meteor: {
-          meteor: objectData.meteor.meteor[index],
-          meteor_mean: objectData.meteor.meteor_mean,
+          meteor: objectData.meteor?.meteor?.[index] ?? 0,
+          meteor_mean: objectData.meteor?.meteor_mean ?? 0,
         },
         model: objectData.model,
-        predictions: objectData.predictions[index],
+        predictions: objectData.predictions?.[index],
         rouge: {
-          rouge1: objectData.rouge.rouge1[index],
-          rouge1_mean: objectData.rouge.rouge1_mean,
-          rouge2: objectData.rouge.rouge2[index],
-          rouge2_mean: objectData.rouge.rouge2_mean,
-          rougeL: objectData.rouge.rougeL[index],
-          rougeL_mean: objectData.rouge.rougeL_mean,
-          rougeLsum: objectData.rouge.rougeLsum[index],
-          rougeLsum_mean: objectData.rouge.rougeLsum_mean,
+          rouge1: objectData.rouge?.rouge1?.[index] ?? 0,
+          rouge1_mean: objectData.rouge?.rouge1_mean ?? 0,
+          rouge2: objectData.rouge?.rouge2?.[index] ?? 0,
+          rouge2_mean: objectData.rouge?.rouge2_mean ?? 0,
+          rougeL: objectData.rouge?.rougeL?.[index] ?? 0,
+          rougeL_mean: objectData.rouge?.rougeL_mean ?? 0,
+          rougeLsum: objectData.rouge?.rougeLsum?.[index] ?? 0,
+          rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
       }
@@ -231,6 +246,34 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  async function startGroundTruthGeneration(groundTruthPayload) {
+    try {
+      const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
+      if (jobResponse) {
+        // Start polling to monitor the job status
+        await updateJobStatus(jobResponse.id); // Ensure initial update
+        startPollingForJob(jobResponse.id); // Add polling for ground truth job
+        return jobResponse;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to start ground truth generation:', error);
+      return null;
+    }
+  }
+
+  function startPollingForJob(jobId) {
+    isPolling.value = true;
+    experimentInterval = setInterval(() => {
+      updateJobStatus(jobId).then(() => {
+        const job = experiments.value.find((experiment) => experiment.id === jobId);
+        if (completedStatus.includes(job?.status)) {
+          stopPolling(); // Stop polling when the job is complete
+        }
+      });
+    }, 3000); // Poll every 3 seconds
+  }
+
   function getJobRuntime(jobId) {
     const job = jobs.value.find(job => job.id === jobId);
     return job ? job.runTime : null;
@@ -247,10 +290,13 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   watch(selectedJob, (newValue) => {
     experimentLogs.value = [];
-    // switch to the experiment the job belongs
     if (newValue) {
-      const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-      selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+      const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id);
+      if (isEvaluationJob) {
+        // switch to the experiment the job belongs
+        const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
+        selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId);
+      }
       retrieveLogs();
     }
     if (newValue?.status === 'RUNNING') {
@@ -260,9 +306,21 @@ export const useExperimentStore = defineStore('experiment', () => {
       stopPolling();
     }
   }, { deep: true });
+
   return {
+    // state
     experiments,
     jobs,
+    inferenceJobs,
+    selectedExperiment,
+    selectedJob,
+    experimentLogs,
+    selectedExperimentRslts,
+    selectedJobRslts,
+    isPolling,
+    // computed
+    hasRunningInferenceJob,
+    // actions
     loadExperiments,
     updateStatusForIncompleteJobs,
     loadExperimentDetails,
@@ -270,11 +328,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadExperimentResults,
     loadJobResults,
     loadResultsFile,
-    selectedExperiment,
-    selectedJob,
-    experimentLogs,
-    selectedExperimentRslts,
-    selectedJobRslts,
+    startGroundTruthGeneration,
     runExperiment
   }
 })

@@ -86,7 +86,24 @@ LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 check-dot-env:
-	@if [ ! -f .env ]; then cp .env.template .env; echo ".env created from .env.template"; fi
+#    Create .env from template if it doesn't exist
+	@if [ ! -f .env ]; then \
+	cp .env.template .env; \
+	echo ".env created from .env.template"; \
+	fi
+
+	# Generate new diff between template and current .env
+	@diff .env.template .env > .env.diff.new 2>/dev/null || true
+
+	# Check if files are out of sync and show warning
+	@if [ -f .env ] && [ -f .env.template ] && ! cmp -s .env.diff .env.diff.new; then \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	echo -e "\033[1;31mWARNING: .env and .env.template are out of sync. Please review changes\033[0m"; \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	fi
+
+	# Update diff file for next comparison
+	@mv .env.diff.new .env.diff 2>/dev/null || true
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: check-dot-env

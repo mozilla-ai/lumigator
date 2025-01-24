@@ -81,7 +81,7 @@ LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 check-dot-env:
-   # Create .env from template if it doesn't exist
+#    Create .env from template if it doesn't exist
 	@if [ ! -f .env ]; then \
 	cp .env.template .env; \
 	echo ".env created from .env.template"; \

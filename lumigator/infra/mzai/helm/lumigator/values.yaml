@@ -45,6 +45,8 @@ backend:
     security: {}
 
   ray-cluster:
+    image:
+      tag: 2.30.0
     head:
       resources:
         limits:

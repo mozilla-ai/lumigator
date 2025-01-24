@@ -34,6 +34,7 @@ variables and you can customize it to suit your specific use case.
 > We are mindful about your personal settings so we will never overwrite them. For this reason,
 > if you are pulling a new version of lumigator from the repo please make sure that your `.env`
 > file is consistent with the latest `.env.template`, minus your parameters.
+Alternatively, if it does not contain any hardcoded settings of your own, delete the .env and Lumigator will create a new one.
 
 ## Test instructions
 

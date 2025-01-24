@@ -295,7 +295,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       if (isEvaluationJob) {
         // switch to the experiment the job belongs
         const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-        selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId)
+        selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId);
       }
       retrieveLogs();
     }

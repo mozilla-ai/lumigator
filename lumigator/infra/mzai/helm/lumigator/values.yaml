@@ -3,11 +3,6 @@
 # Declare variables to be passed into your templates.
 
 backend:
-  s3Bucket: ""
-  AWSAccessKey: ""
-  AWSSecretKey: ""
-  s3EndpointURL: ""
-  AWSEndpointURL: ""
 
   # Name of the Ray head service
   rayAddress: lumigator-kuberay-head-svc
@@ -49,10 +44,6 @@ backend:
       tag: 2.30.0-py311-gpu
     head:
       resources:
-        limits:
-          cpu: "8"
-          memory: "20G" # 2GB is too low for object storage limits
-          nvidia.com/gpu: "1"
         requests:
           # For production use-cases, we recommend specifying integer CPU requests and limits.
           # We also recommend setting requests equal to limits for both CPU and memory.
@@ -60,7 +51,10 @@ backend:
           # Kubernetes testing environments such as KinD and minikube.
           cpu: "8"
           memory: "20G"
+          nvidia.com/gpu: "1"
       env:
+        # Set the following environment variables with the desired values to connect to your object storage
+        # env vars required by s3fs
         - name: FSSPEC_S3_KEY
           value: ""
         - name: FSSPEC_S3_SECRET

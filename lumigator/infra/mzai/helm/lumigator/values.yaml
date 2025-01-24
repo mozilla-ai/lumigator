@@ -41,12 +41,12 @@ backend:
   kuberay-apiserver:
     image:
       repository: quay.io/kuberay/apiserver
-      tag: nightly
+      tag: 2.30.0
     security: {}
 
   ray-cluster:
     image:
-      tag: 2.30.0
+      tag: 2.30.0-py311-gpu
     head:
       resources:
         limits:
@@ -67,3 +67,5 @@ backend:
           value: ""
         - name: FSSPEC_S3_ENDPOINT_URL
           value: ""
+    worker:
+      disabled: true

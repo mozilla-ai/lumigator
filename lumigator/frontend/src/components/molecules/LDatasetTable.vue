@@ -22,7 +22,7 @@
       >
         <Column
           field="filename"
-          header="File Name"
+          header="Filename"
         />
         <Column
           field="id"

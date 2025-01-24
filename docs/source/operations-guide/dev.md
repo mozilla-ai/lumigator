@@ -31,8 +31,10 @@ persisted between runs.
 To use the API-based vendor ground truth generation and evaluation, you'll need to pass the
 following environment variables for credentials, into the docker container:
 
-- `MISTRAL_API_KEY`: You Mistal API key.
-- `OPENAI_API_KEY`: Your OpenAI API key.
+- `MISTRAL_API_KEY`: your Mistral API key.
+- `OPENAI_API_KEY`: your OpenAI API key.
+
+Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
 
 ## Testing the backend services
 
@@ -144,3 +146,10 @@ To fix linting issues automatically:
 ```console
 user@host:~/lumigator/lumigator/frontend$ npm run lint:fix
 ```
+
+
+### Debugging with VSCode and DebugPy
+
+The backend and unit tests can be debugged with VsCode using Debugpy. If you're not familiar with how debugging python in vscode works, we recommend you read VSCode's documentation [here](https://code.visualstudio.com/docs/python/debugging). When running the command `make local-up`, the backend automatically creates the debugpy listener, which you can attach to using the `Attach to Backend` Debug configuration present in the `.vscode/launch.json` file of this repo.
+
+Similarly, the unit tests can be debugged by adding the parameter `DEBUGPY=true` when running a make test command. For example, `make test-sdk-unit DEBUGPY=true` will run the test with the debugger and you can attach using the `Attach to Tests` Debug configuration. Note that with this enabled, the unit tests wait for you to attach the debugger before running any tests.

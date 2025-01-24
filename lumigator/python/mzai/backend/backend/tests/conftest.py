@@ -1,19 +1,26 @@
 import csv
 import io
 import os
+import time
 import uuid
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import boto3
 import fsspec
 import pytest
 import requests_mock
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
-from lumigator_schemas.jobs import JobConfig, JobType
+from lumigator_schemas.jobs import (
+    JobConfig,
+    JobResponse,
+    JobStatus,
+    JobType,
+)
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
@@ -31,11 +38,26 @@ from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SUMMARY_MODEL = "hf://hf-internal-testing/tiny-random-T5ForConditionalGeneration"
 TEST_INFER_MODEL = "hf://hf-internal-testing/tiny-random-t5"
 
+# Maximum amount of polls done to check if a job has finished
+# (status FAILED or SUCCEEDED) in fucntion tests.
+# An Exception will be raised if the number of polls is exceeded.
+MAX_POLLS = 18
 
+# Time between job status polls.
+POLL_WAIT_TIME = 10
+
+
+@pytest.fixture
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
+
+
+@pytest.fixture
+def common_resources_sample_data_dir(common_resources_dir) -> Path:
+    return common_resources_dir / "sample_data"
 
 
 def format_dataset(data: list[list[str]]) -> str:
@@ -44,6 +66,48 @@ def format_dataset(data: list[list[str]]) -> str:
     csv.writer(buffer).writerows(data)
     buffer.seek(0)
     return buffer.read()
+
+
+def wait_for_job(client, job_id: UUID) -> bool:
+    succeeded = False
+    timed_out = True
+    for _ in range(1, MAX_POLLS):
+        get_job_response = client.get(f"/jobs/{job_id}")
+        assert get_job_response.status_code == 200
+        get_job_response_model = JobResponse.model_validate(get_job_response.json())
+        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        time.sleep(POLL_WAIT_TIME)
+    if timed_out:
+        raise Exception("Job poll timed out")
+    return succeeded
+
+
+def wait_for_experiment(client, experiment_id: UUID) -> bool:
+    succeeded = False
+    timed_out = True
+    for _ in range(1, MAX_POLLS):
+        get_experiment_response = client.get(f"/experiments_new/{experiment_id}")
+        assert get_experiment_response.status_code == 200
+        get_experiment_response_model = JobResponse.model_validate(get_experiment_response.json())
+        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
+            succeeded = True
+            timed_out = False
+            break
+        if get_experiment_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        time.sleep(POLL_WAIT_TIME)
+    if timed_out:
+        raise Exception("Experiment poll timed out")
+    return succeeded
 
 
 @pytest.fixture
@@ -61,6 +125,28 @@ def valid_experiment_dataset_without_gt() -> str:
     """Minimal valid dataset without groundtruth."""
     data = [
         ["examples"],
+        ["Hello World"],
+    ]
+    return format_dataset(data)
+
+
+@pytest.fixture
+def valid_upload_file(valid_experiment_dataset) -> UploadFile:
+    """Minimal valid upload file (with ground truth)."""
+    fake_filename = "dataset.csv"
+    fake_file = io.BytesIO(valid_experiment_dataset.encode("utf-8"))
+    fake_upload_file = UploadFile(
+        filename=fake_filename,
+        file=fake_file,
+    )
+    return fake_upload_file
+
+
+@pytest.fixture(scope="session")
+def valid_experiment_dataset_with_empty_gt() -> str:
+    """Minimal valid dataset without groundtruth."""
+    data = [
+        ["examples", "ground_truth"],
         ["Hello World"],
     ]
     return format_dataset(data)
@@ -87,22 +173,22 @@ def extra_column_dataset() -> str:
 
 
 @pytest.fixture(scope="function")
-def dialog_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_exc.csv"
+def dialog_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_empty_gt_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_mini_empty_gt.csv"
+def dialog_empty_gt_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_mini_empty_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_no_gt_dataset():
-    filename = common_resources_dir() / "sample_data" / "dialogsum_mini_no_gt.csv"
+def dialog_no_gt_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
@@ -343,7 +429,6 @@ def simple_eval_template():
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],
-            "use_pipeline": false,
             "max_samples": {max_samples},
             "return_input_data": true,
             "return_predictions": true,
@@ -365,7 +450,7 @@ def simple_infer_template():
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
             "torch_dtype": "{torch_dtype}",
-            "max_length": 200
+            "max_length": 500
         }},
         "job": {{
             "max_samples": {max_samples},

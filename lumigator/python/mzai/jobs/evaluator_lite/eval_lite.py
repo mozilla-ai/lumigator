@@ -4,9 +4,9 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
-from eval_config import EvalJobConfig
 from eval_metrics import EvaluationMetrics
 from loguru import logger
+from schemas import EvalJobConfig
 
 
 def save_to_disk(local_path: Path, data_dict: dict):
@@ -67,6 +67,8 @@ def run_eval(config: EvalJobConfig) -> Path:
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
         max_samples = len(dataset)
     dataset = dataset.select(range(max_samples))
+
+    logger.info(dataset)
 
     # run evaluation and append to results dict
     predictions = dataset["predictions"]

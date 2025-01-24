@@ -1,12 +1,11 @@
 import csv
-import traceback
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import BinaryIO
 from uuid import UUID
 
 from datasets import load_dataset
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 from loguru import logger
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
@@ -16,6 +15,13 @@ from s3fs import S3FileSystem
 
 from backend.records.datasets import DatasetRecord
 from backend.repositories.datasets import DatasetRepository
+from backend.services.exceptions.dataset_exceptions import (
+    DatasetInvalidError,
+    DatasetMissingFieldsError,
+    DatasetNotFoundError,
+    DatasetSizeError,
+    DatasetUpstreamError,
+)
 from backend.settings import settings
 
 GT_FIELD: str = "ground_truth"
@@ -32,19 +38,28 @@ def validate_file_size(input: BinaryIO, output: BinaryIO, max_size: ByteSize) ->
     We can then process the file as a whole once its been written to a buffer on the server.
 
     Reference: https://github.com/tiangolo/fastapi/issues/362#issuecomment-584104025
+
+    :param input: the input buffer
+    :param output: the output buffer (which is updated to contain the parsed dataset)
+    :param max_size: the maximum allowed size of the output buffer
+    :raises DatasetSizeError: if the size of the output buffer (file) is too large
     """
     actual_size = 0
     for chunk in input:
         actual_size += output.write(chunk)
         if actual_size > max_size:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File upload exceeds the {max_size.human_readable(decimal=True)} limit.",
-            )
+            raise DatasetSizeError(max_size.human_readable(decimal=True)) from None
     return actual_size
 
 
 def validate_dataset_format(filename: str, format: DatasetFormat):
+    """Validates the dataset identified by the filename, based on the format.
+
+    :param filename: the filename of the dataset to validate
+    :param format: the dataset format (e.g. 'job')
+    :raises DatasetInvalidError: if there is a problem with the dataset file format
+    :raises DatasetMissingFieldsError: if the dataset is missing any required fields
+    """
     try:
         match format:
             case DatasetFormat.JOB:
@@ -54,33 +69,35 @@ def validate_dataset_format(filename: str, format: DatasetFormat):
                 raise ValueError(f"Unknown dataset format: {format}")
     except UnicodeError as e:
         logger.opt(exception=e).info("Error processing dataset upload.")
-        http_exception = HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Dataset is not a valid CSV file.",
-        )
-        raise http_exception from e
+        raise DatasetInvalidError("not a CSV file") from e
 
 
 def validate_experiment_dataset(filename: str):
+    """Validates the dataset (CSV) file to ensure all required fields are present.
+
+    :param filename: the filename of the dataset to validate
+    :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
+    """
     with Path(filename).open() as f:
         reader = csv.DictReader(f)
         fields = set(reader.fieldnames or [])
 
         missing_fields = REQUIRED_EXPERIMENT_FIELDS.difference(fields)
         if missing_fields:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Experiment dataset is missing the required fields: {missing_fields}.",
-            )
+            raise DatasetMissingFieldsError(missing_fields) from None
 
 
 def dataset_has_gt(filename: str) -> bool:
-    with Path(filename).open() as f:
-        reader = csv.DictReader(f)
-        fields = set(reader.fieldnames or [])
-        has_gt = GT_FIELD in fields
+    """Returns true if the dataset located at the supplied path (filename) has a ground truth
+    column with all of its rows correctly populated, otherwise false.
+    """
+    dataset = load_dataset("csv", data_files=filename, split="train")
 
-    return has_gt
+    if GT_FIELD not in dataset.column_names:
+        return False
+
+    # True only if every value in dataset[GT_FIELD] is not None or empty.
+    return all(value is not None and value.strip() != "" for value in dataset[GT_FIELD])
 
 
 class DatasetService:
@@ -91,13 +108,6 @@ class DatasetService:
         self.s3_client = s3_client
         self.s3_filesystem = s3_filesystem
 
-    def _raise_not_found(self, dataset_id: UUID) -> None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Dataset '{dataset_id}' not found.")
-
-    def _raise_unhandled_exception(self, e: Exception) -> None:
-        traceback.print_exc()
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(e)) from e
-
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
         return self.dataset_repo.get(dataset_id)
 
@@ -105,7 +115,7 @@ class DatasetService:
         return self.dataset_repo.get_by_job_id(job_id)
 
     def _get_s3_path(self, dataset_key: str) -> str:
-        return f"s3://{ Path(settings.S3_BUCKET) / dataset_key }"
+        return f"s3://{Path(settings.S3_BUCKET) / dataset_key}"
 
     def _get_s3_key(self, dataset_id: UUID, filename: str) -> str:
         """Generate the S3 key for the dataset contents.
@@ -116,7 +126,16 @@ class DatasetService:
         return f"{settings.S3_DATASETS_PREFIX}/{dataset_id}/{filename}"
 
     def _save_dataset_to_s3(self, temp_fname, record):
-        """Loads a dataset, converts it to HF dataset format, and saves it on S3."""
+        """Converts the specified file to a set of HuggingFace dataset formatted files,
+        along with a newly recreated CSV file. The files are stored in an S3 bucket.
+
+        :param temp_fname: temporary file name to read the dataset from
+        :param record: the dataset record (DatasetRecord)
+        :raises DatasetUpstreamError: if there is an exception interacting with S3
+        """
+        # Temp file to be used to contain the recreated CSV file.
+        temp = NamedTemporaryFile(delete=False)
+
         try:
             # Load the CSV file as HF dataset
             dataset_hf = load_dataset("csv", data_files=temp_fname, split="train")
@@ -126,12 +145,19 @@ class DatasetService:
             dataset_path = self._get_s3_path(dataset_key)
             # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, fs=self.s3_filesystem)
+
+            # Use the converted HF format files to rebuild the CSV and store it as 'dataset.csv'.
+            dataset_hf.to_csv(temp.name, index=False)
+            self.s3_filesystem.put_file(temp.name, f"{dataset_path}/dataset.csv")
         except Exception as e:
             # if a record was already created, delete it from the DB
             if record:
                 self.dataset_repo.delete(record.id)
 
-            self._raise_unhandled_exception(e)
+            raise DatasetUpstreamError("s3", "error attempting to save dataset to S3", e) from e
+        finally:
+            # Clean up temp file
+            Path(temp.name).unlink()
 
     def upload_dataset(
         self,
@@ -141,6 +167,14 @@ class DatasetService:
         generated: bool = False,
         generated_by: str | None = None,
     ) -> DatasetResponse:
+        """Attempts to upload and convert the specified dataset (CSV) to HF format which is then
+        stored in S3.
+
+        :raises DatasetSizeError: if the dataset is too large
+        :raises DatasetInvalidError: if the dataset is invalid
+        :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
+        :raises DatasetUpstreamError: if there is an exception interacting with S3
+        """
         temp = NamedTemporaryFile(delete=False)
         try:
             # Write to tempfile and validate size
@@ -168,7 +202,6 @@ class DatasetService:
 
             # convert the dataset to HF format and save it to S3
             self._save_dataset_to_s3(temp.name, record)
-
         finally:
             # Cleanup temp file
             Path(temp.name).unlink()
@@ -176,9 +209,14 @@ class DatasetService:
         return DatasetResponse.model_validate(record)
 
     def get_dataset(self, dataset_id: UUID) -> DatasetResponse | None:
+        """Gets the dataset record by its ID.
+
+        :param dataset_id: dataset ID
+        :raises DatasetNotFoundError: if there is no dataset record with that ID
+        """
         record = self._get_dataset_record(dataset_id)
         if record is None:
-            return None
+            raise DatasetNotFoundError(dataset_id) from None
 
         return DatasetResponse.model_validate(record)
 
@@ -206,11 +244,15 @@ class DatasetService:
 
         This operation is idempotent, calling it with a record that never existed, or that has
         already been deleted, will not raise an error.
+
+        :param dataset_id: dataset ID to delete
+        :raises DatasetNotFoundError: if there is no dataset record with that ID
+        :raises DatasetUpstreamError: if there is an exception deleting the dataset from S3
         """
         record = self._get_dataset_record(dataset_id)
         # Early return if the record does not exist (for idempotency).
         if record is None:
-            return None
+            raise DatasetNotFoundError(dataset_id) from None
 
         try:
             # S3 delete is called first, if this fails for any other reason that the file not being
@@ -224,13 +266,33 @@ class DatasetService:
                 f"Dataset ID: {dataset_id} was present in the DB but not found on S3... "
                 f"Cleaning up DB by removing ID. {e}"
             )
+        except Exception as e:
+            raise DatasetUpstreamError(
+                "s3", f"error attempting to delete dataset {dataset_id} from S3", e
+            ) from e
 
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)
 
-    def get_dataset_download(self, dataset_id: UUID) -> DatasetDownloadResponse:
-        """Generate presigned download URLs for dataset files."""
+    def get_dataset_download(
+        self, dataset_id: UUID, extension: str | None = None
+    ) -> DatasetDownloadResponse:
+        """Generate pre-signed download URLs for dataset files.
+
+        When supplied, only URLs for files that match the specified extension are returned.
+
+        :param dataset_id: ID of the dataset to generate pre-signed download URLs for
+        :param extension: File extension used to determine which files to generate URLs for
+        :raises DatasetNotFoundError: if the dataset cannot be found in S3
+        :raises DatasetUpstreamError: if there is an exception interacting with S3
+        """
+        # Sanitize the input for a file extension.
+        extension = extension.strip().lower() if extension and extension.strip() else None
+
         record = self._get_dataset_record(dataset_id)
+        if record is None:
+            raise DatasetNotFoundError(dataset_id, "error getting dataset download") from None
+
         dataset_key = self._get_s3_key(dataset_id, record.filename)
 
         try:
@@ -240,12 +302,16 @@ class DatasetService:
             )
 
             if s3_response.get("KeyCount") == 0:
-                raise HTTPException(
-                    status.HTTP_404_NOT_FOUND, f"No files found with prefix '{dataset_key}'."
-                )
+                raise DatasetNotFoundError(
+                    dataset_id, f"No S3 files found with prefix '{dataset_key}'"
+                ) from None
 
             download_urls = []
             for s3_object in s3_response["Contents"]:
+                # Ignore files that don't end with the extension if it was specified
+                if extension and not s3_object["Key"].lower().endswith(extension):
+                    continue
+
                 download_url = self.s3_client.generate_presigned_url(
                     "get_object",
                     Params={
@@ -257,7 +323,8 @@ class DatasetService:
                 download_urls.append(download_url)
 
         except Exception as e:
-            self._raise_unhandled_exception(e)
+            msg = f"Error generating pre-signed download URLs for dataset {dataset_id}"
+            raise DatasetUpstreamError("s3", msg, e) from e
 
         return DatasetDownloadResponse(id=dataset_id, download_urls=download_urls)
 

@@ -10,9 +10,25 @@ KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
 RAY_ARCH_SUFFIX :=
+COMPUTE_TYPE := -cpu
+RAY_WORKER_GPUS ?= 0
+RAY_WORKER_GPUS_FRACTION ?= 0.0
+GPU_COMPOSE :=
+
+DEBUGPY_ARGS :=
+ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
+    DEBUGPY_ARGS := -m debugpy --listen 5679 --wait-for-client
+endif
+
+$(info RAY_WORKER_GPUS = $(RAY_WORKER_GPUS))
 
 ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
+endif
+
+ifeq ($(shell test $(RAY_WORKER_GPUS) -ge 1; echo $$?) , 0)
+	COMPUTE_TYPE := -gpu
+	GPU_COMPOSE := -f docker-compose.gpu.override.yaml
 endif
 
 # lumigator runs on a set of containers (backend, ray, minio, etc).
@@ -70,12 +86,29 @@ LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 check-dot-env:
-	@if [ ! -f .env ]; then cp .env.template .env; echo ".env created from .env.template"; fi
+#    Create .env from template if it doesn't exist
+	@if [ ! -f .env ]; then \
+	cp .env.template .env; \
+	echo ".env created from .env.template"; \
+	fi
+
+	# Generate new diff between template and current .env
+	@diff .env.template .env > .env.diff.new 2>/dev/null || true
+
+	# Check if files are out of sync and show warning
+	@if [ -f .env ] && [ -f .env.template ] && ! cmp -s .env.diff .env.diff.new; then \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	echo -e "\033[1;31mWARNING: .env and .env.template are out of sync. Please review changes\033[0m"; \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	fi
+
+	# Update diff file for next comparison
+	@mv .env.diff.new .env.diff 2>/dev/null || true
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: check-dot-env
 	uv run pre-commit install
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
 local-down:
 	docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
@@ -85,18 +118,18 @@ local-logs:
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
 start-lumigator: check-dot-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: check-dot-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: check-dot-env
-	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	docker compose $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator:
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 clean-docker-buildcache:
 	docker builder prune --all -f
@@ -121,11 +154,11 @@ clean-all: clean-docker-buildcache clean-docker-containers
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="integration/test_*.py integration/*/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -148,7 +181,8 @@ test-backend-unit:
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
-	uv run pytest -o python_files="backend/tests/unit/*/test_*.py"
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration:
 	cd lumigator/python/mzai/backend/; \
@@ -163,7 +197,10 @@ test-backend-integration:
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
-	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
+	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -181,11 +218,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	cd lumigator/python/mzai/jobs/evaluator_lite; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:
 	cd lumigator/python/mzai/jobs/inference; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 

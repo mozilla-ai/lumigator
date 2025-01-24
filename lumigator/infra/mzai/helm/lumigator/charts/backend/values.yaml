@@ -1,8 +1,6 @@
-# Default values for lumigator.
+# Default values for the lumigator backend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
-replicaCount: 1
 
 s3Bucket: ""
 AWSAccessKey: ""
@@ -19,6 +17,9 @@ serviceAccountName: ""
 existingMistralAPISecret: ""
 mistralAPIKey: ""
 
+evaluatorPipReqs: "/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt"
+evaluatorWorkDir: "/mzai/lumigator/python/mzai/jobs/evaluator"
+
 image:
   repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
@@ -28,8 +29,6 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-podAnnotations: {}
 
 podSecurityContext:
   {}
@@ -47,7 +46,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8000
-  https: false
+  annotations: {}
 
 resources:
   {}
@@ -61,12 +60,6 @@ resources:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
 
 # Note: Need to manually delete PVC after helm delete
 postgresql:

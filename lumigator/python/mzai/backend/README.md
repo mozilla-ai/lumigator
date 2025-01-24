@@ -20,44 +20,56 @@ source .venv/bin/activate
 
 ## Make usage
 
-The available Makefile will copy a `.env` file from the existing `.env.template` file. There are some targets to start the docker composition (`local-up`, `start-lumigator`, `start-lumigator-build`), to stop it (`local-down`) and to run tests (`test-backend`, `test-sdk`, `test-all`).
+The available Makefile contains targets to:
+
+- start the system using docker compose (e.g. `local-up`, `start-lumigator`, `start-lumigator-build`)
+- stop the system (e.g. `local-down`, `stop-lumigator`)
+- run tests (e.g `test-backend`, `test-sdk`, `test-all`)
+
+When the system is started for the first time, a `.env` file is created from the existing
+`.env.template`. This file contains different parameters passed to the system as environment
+variables and you can customize it to suit your specific use case.
+
+> [!NOTE]
+> We are mindful about your personal settings so we will never overwrite them. For this reason,
+> if you are pulling a new version of lumigator from the repo please make sure that your `.env`
+> file is consistent with the latest `.env.template`, minus your parameters.
+Alternatively, if it does not contain any hardcoded settings of your own, delete the .env and Lumigator will create a new one.
 
 ## Test instructions
 
-The backend includes both unit tests (requiring no additional containers) and integration tests (currently requiring a live Ray instance in the same network where the application and tests are running).
+The backend includes both unit tests (requiring no additional containers) and integration
+tests (currently requiring a live Ray instance in the same network where the application
+and tests are running). Fake or mock services are used in unit tests, usually via the
+[`requests-mock`](https://pypi.org/project/requests-mock/) package in the case of HTTP APIs.
+Specifically, the S3 file system driver is replaced with an [in-memory implementation](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.implementations.memory.MemoryFileSystem)
+of the `AbstractFileSystem` interface via [registry modification](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.registry.register_implementation).
 
-The backend needs to retrieve the location of the database used in tests via the `SQLALCHEMY_DATABASE_URL` enviroment variable. For simplicity, SQLite is used inside the test container. To run the tests, please use:
+The following make targets are available for tests:
 
-```bash
-SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-```
+- `test-sdk-unit`, `test-sdk-integration` run, respectively, unit and integration tests on the sdk.
+`test-sdk` runs both, first making sure that containers are available to run the integration tests
+and starting them if not
 
-Note that this will create an SQLite database file named `local.db` in the `backend` directory. Remove it before running another batch of tests. Also note that the tests as invoked in the Makefile will remove and recreate a file called `local.db` in the `lumigator/python/mzai/backend` directory.
+- `test-backend-unit`, `test-backend-integration` run, respectively, unit and integration tests on the backend.
+`test-backend` runs both, first making sure that containers are available to run the integration tests
+and starting them if not
 
-The tests include a unit test suite and an integration test suite. There are make targets available at the root folder, as follows:
+- `test-jobs-unit` runs unit tests on individual jobs. Currently we have two sub-targets for this,
+`test-jobs-inference-unit` and `test-jobs-evaluation-unit`.
 
-* `backend-test`: runs `backend-unit-test` and `backend-int-test`
-  * `backend-unit-test`: runs tests in `backend/tests/unit/*/test_*.py` (any depth of subfolders)
-  * `backend-int-test`: runs tests in `backend/tests/int/*/test_*.py` (any depth of subfolders)
+- `test-all` runs all the tests together
 
-The SQLite configuration making use of a local file is used in both unit and integration tests. Test containers are needed for integration tests. Fake or mock services are used in unit tests, usually via the [`requests-mock`](https://pypi.org/project/requests-mock/) package in the case of HTTP APIs. Specifically, the S3 file system driver is replaced with an [in-memory implementation](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.implementations.memory.MemoryFileSystem) of the `AbstractFileSystem` interface via [registry modification](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.registry.register_implementation).
+## Data models and database upgrades
 
-## Data models
-
-As an engineer/contributor, when you change a data model or add a new model which needs to be
-persisted to the database, you **MUST** ensure you've consulted and followed the
-[Alembic operational guide](https://mozilla-ai.github.io/lumigator).
-
-## Database Upgrade
-
-There may be times when changes are required to the database used for persistence. To minimize
-issues for developers/contributors of Lumigator, we rely on
+There may be times when changes are required to the database we use to persist dataset and
+experiment metadata. To minimize issues for developers/contributors of Lumigator, we rely on
 [alembic](https://alembic.sqlalchemy.org/en/latest/) as a 'dev dependency'.
 
 Breaking changes should be noted in release changelogs, but if you're working on `main` there may be
 times when you encounter a database issue that wasn't expected because the schema changed and your
 local database does not have a matching one.
 
-For further information on using Alembic to maintain the correct database schema with the `backend`
-project, please see the specific
-[Alembic operational guide](https://mozilla-ai.github.io/lumigator).
+As an engineer/contributor, when you change a data model or add a new model which needs to be
+persisted to the database, you **MUST** ensure you've consulted and followed the
+[Alembic operational guide](https://mozilla-ai.github.io/lumigator/operations-guide/alembic.html).

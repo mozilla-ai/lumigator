@@ -19,6 +19,16 @@
                     "remoteRoot": "/mzai"
                 }
             ]
+        },
+        {
+            "name": "Attach to Tests",
+            "type": "debugpy",
+            "request": "attach",
+            "justMyCode":  false,
+            "connect": {
+                "host": "localhost",
+                "port": 5679
+            }
         }
     ]
 }

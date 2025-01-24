@@ -15,6 +15,11 @@ RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
 
+DEBUGPY_ARGS :=
+ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
+    DEBUGPY_ARGS := -m debugpy --listen 5679 --wait-for-client
+endif
+
 $(info RAY_WORKER_GPUS = $(RAY_WORKER_GPUS))
 
 ifeq ($(ARCH), arm64)
@@ -132,11 +137,11 @@ clean-all: clean-docker-buildcache clean-docker-containers
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
 	cd lumigator/python/mzai/sdk/tests; \
-	uv run pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -160,7 +165,7 @@ test-backend-unit:
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration:
 	cd lumigator/python/mzai/backend/; \
@@ -178,7 +183,7 @@ test-backend-integration:
 	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
 	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -196,11 +201,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	cd lumigator/python/mzai/jobs/evaluator_lite; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:
 	cd lumigator/python/mzai/jobs/inference; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 

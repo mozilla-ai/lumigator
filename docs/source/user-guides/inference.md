@@ -7,7 +7,7 @@ text data.
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
-Refer to the [troubleshooting section](troubleshooting.md) for more details.
+Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
 ```
 
 ## What You'll Need

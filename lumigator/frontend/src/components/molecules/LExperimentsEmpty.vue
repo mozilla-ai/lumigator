@@ -11,7 +11,7 @@
       rounded
       size="small"
       icon="pi pi-plus"
-      label="Create experiment"
+      label="Create Experiment"
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
     />

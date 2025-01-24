@@ -98,7 +98,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['l-inference-selected'])
+const emit = defineEmits(['l-inference-selected']);
 const { showSlidingPanel  } = useSlidePanel();
 const isThrottled = ref(false);
 const focusedItem = ref(null);

@@ -9,6 +9,7 @@ from lumigator_schemas.experiments import (
     ExperimentResultResponse,
 )
 from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import JobResponse
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
@@ -38,8 +39,8 @@ def get_experiment(service: ExperimentServiceDep, experiment_id: UUID) -> Experi
 @router.get("/{experiment_id}/jobs")
 def get_experiment_jobs(
     service: ExperimentServiceDep, experiment_id: UUID
-) -> ListingResponse[UUID]:
-    return ListingResponse[ExperimentResponse].model_validate(
+) -> ListingResponse[JobResponse]:
+    return ListingResponse[JobResponse].model_validate(
         service._get_experiment_jobs(experiment_id).model_dump()
     )
 

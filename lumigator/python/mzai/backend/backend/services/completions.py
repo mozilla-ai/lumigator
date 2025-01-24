@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
+from http import HTTPStatus
 
 from lumigator_schemas.completions import CompletionRequest, CompletionResponse
 from mistralai.client import MistralClient
-from mistralai.exceptions import MistralException
+from mistralai.exceptions import MistralAPIException, MistralException
 from mistralai.models.chat_completion import ChatMessage
-from openai import OpenAI
+from openai import APIError, OpenAI, OpenAIError
 
 from backend.services.exceptions.completion_exceptions import CompletionUpstreamError
 from backend.settings import settings
@@ -33,6 +34,7 @@ class MistralCompletionService(CompletionService):
         :param request: the request (text) to be completed
         :raises CompletionUpstreamError: if there is an exception interacting with Mistral
         """
+        service_name = "Mistral"
         try:
             response = self.client.chat(
                 model=self.model,
@@ -46,9 +48,11 @@ class MistralCompletionService(CompletionService):
             )
             response = response.choices[0].message.content
             return CompletionResponse(text=response)
+        except MistralAPIException as e:
+            raise CompletionUpstreamError(service_name, HTTPStatus(e.http_status).phrase, e) from e
         except MistralException as e:
             raise CompletionUpstreamError(
-                "mistral", "unexpected error getting completions response", e
+                service_name, "unexpected error getting completions response", e
             ) from e
 
 
@@ -69,6 +73,7 @@ class OpenAICompletionService(CompletionService):
         :param request: the request (text) to be completed
         :raises CompletionUpstreamError: if there is an exception interacting with OpenAI
         """
+        service_name = "OpenAI"
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -82,7 +87,9 @@ class OpenAICompletionService(CompletionService):
             )
             response = response.choices[0].message.content
             return CompletionResponse(text=response)
-        except Exception as e:
+        except APIError as e:
+            raise CompletionUpstreamError(service_name, e.message, e) from e
+        except OpenAIError as e:
             raise CompletionUpstreamError(
-                "openai", "unexpected error getting completions response", e
+                service_name, "unexpected error getting completions response", e
             ) from e

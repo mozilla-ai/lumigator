@@ -5,7 +5,7 @@
       mode="out-in"
     >
       <DataTable
-        v-if="tableVisible"
+        v-if="tableData.length"
         v-model:selection="focusedItem"
         selectionMode="single"
         dataKey="id"
@@ -108,7 +108,6 @@ const style = computed(() => {
 });
 
 const focusedItem = ref(null);
-const tableVisible = ref(true);
 const optionsMenu = ref();
 const options = ref([
   {

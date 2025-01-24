@@ -38,9 +38,11 @@
         <TabPanels>
           <TabPanel value="0">
             <l-dataset-table
+              v-if="datasets.length"
               :table-data="datasets"
               @l-dataset-selected="onDatasetSelected($event)"
               @l-experiment="onExperimentDataset($event)"
+              @l-download-dataset="onDownloadDataset($event)"
               @l-delete-dataset="deleteConfirmation($event)"
             />
           </TabPanel>
@@ -92,7 +94,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
@@ -218,6 +220,10 @@ const onGenerateGT = () => {
   showSlidingPanel.value = false;
   currentTab.value = '1';
 }
+
+watch(hasRunningInferenceJob, (newValue) => {
+  datasetStore.loadDatasets();
+});
 
 </script>
 

@@ -17,6 +17,19 @@ To install Lumigator on a Kubernetes cluster, you need to have the following pre
 - A S3-compatible storage bucket.
 - A Ray cluster.
 
+## Helm Values
+Example helm values are provided below
+
+```
+backend:
+  s3Bucket: "lumigator-ktest"
+  AWSAccessKey: "your-aws-acces-key"
+  AWSSecretKey: "your-aws-secret-key"
+
+  rayAddress: address-of-your-ray-cluster
+  rayWorkerGPUs: "1.0" # The number of GPUs you'd like to use in requests to your ray cluster
+```
+
 ## Installation
 
 To install Lumigator on a Kubernetes cluster, follow these steps:
@@ -37,6 +50,7 @@ To install Lumigator on a Kubernetes cluster, follow these steps:
 
     ```console
     user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator
+    helm install lumigator lumigator --set backend.image.tag=backend_dev_c107c4c,frontend.image.tag=frontend_09799ee -f cw-values.yaml
     ```
 
 ## Configuration
@@ -50,6 +64,8 @@ it to Lumigator:
 - Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
   which will be added in a new Secret.
 
+## Uninstallation
+Note: When uninstalling lumigator, you must manually remove the postgres pvc
 
 ## Next Steps
 

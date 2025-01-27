@@ -14,6 +14,7 @@ from lumigator_schemas.jobs import (
     JobResultDownloadResponse,
     JobResultObject,
     JobStatus,
+    JobType
 )
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
 
@@ -69,12 +70,15 @@ def test_upload_data_launch_job(
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
         "dataset": str(created_dataset.id),
         "max_samples": 10,
-        "config_template": simple_infer_template,
-        "output_field": "predictions",
-        "store_to_dataset": True,
+        "job_config": {
+            "job_type": JobType.INFERENCE,
+            "model": TEST_CAUSAL_MODEL,
+            "config_template": simple_infer_template,
+            "output_field": "predictions",
+            "store_to_dataset": True,
+        },
     }
     create_inference_job_response = local_client.post(
         "/jobs/inference/", headers=POST_HEADER, json=infer_payload
@@ -85,7 +89,7 @@ def test_upload_data_launch_job(
         create_inference_job_response.json()
     )
 
-    wait_for_job(local_client, create_inference_job_response_model.id)
+    assert wait_for_job(local_client, create_inference_job_response_model.id)
 
     logs_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/logs"
@@ -109,10 +113,13 @@ def test_upload_data_launch_job(
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
         "dataset": str(output_infer_job_response_model.id),
-        "config_template": simple_eval_template,
         "max_samples": 10,
+        "job_config": {
+            "job_type": JobType.EVALUATION_LITE,
+            "metrics": ["rouge", "meteor"],
+            "model": TEST_CAUSAL_MODEL,
+        },
     }
 
     create_evaluation_job_response = local_client.post(
@@ -175,7 +182,10 @@ def test_upload_data_no_gt_launch_annotation(
         "description": "Test run for Huggingface model",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
-        "task": "summarization",
+        "job_config": {
+            "job_type": JobType.ANNOTATION,
+            "task": "summarization",
+        },
     }
     create_annotation_job_response = local_client.post(
         "/jobs/annotate/", headers=POST_HEADER, json=annotation_payload

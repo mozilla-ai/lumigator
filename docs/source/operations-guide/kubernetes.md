@@ -8,15 +8,6 @@ At this moment this Helm chart deploys the Lumigator core REST API (backend) and
 
 If you want to use your existent relational database instance or Ray cluster, you will have to reconfigure the dependencies of the backend chart.
 
-We don't provide support for Ray, S3-compatible storage, or the database which are required for the full application to run. In
-the near future, a new version of this chart will be released, which will be able to deploy a
-minimal version of all the required tools.
-
-```{warning}
-Lumigator needs an existing: S3 bucket, relational database and a Ray cluster in order to work as
-expected.
-```
-
 ## Prerequisites
 
 To install Lumigator on a Kubernetes cluster, you need to have the following prerequisites:
@@ -74,10 +65,7 @@ Backend:
 s3Bucket: "example-bucket-name"  # Name of the S3 bucket you want to use.
 AWSAccessKey: "EXAMPLE_AWS_ACCESS_KEY"  # AWS access key.
 AWSSecretKey: "EXAMPLE_AWS_SECRET_KEY"  # AWS secret key.
-s3EndpointURL: "https://example-s3-endpoint.com"  # URL of the S3 endpoint. Change this if using a different provider.
-AWSEndpointURL: "https://example-aws-endpoint.com"  # URL of the AWS endpoint. Typically matches the S3EndpointURL.
 rayAddress: "example-ray-cluster-head-address"  # Address of the Ray cluster head service. If you use the Ray cluster deployed with the backend chart, the value is the first word of your helm release name + -lumigator-kuberay-head-svc
-rayPort: "8265"  # Port to connect to the Ray service. Usually 8265.
 
 ray-cluster:
   head:

@@ -13,6 +13,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from backend.api.router import api_router
+from backend.api.routes.completions import completion_exception_mappings
 from backend.api.routes.datasets import dataset_exception_mappings
 from backend.api.tags import TAGS_METADATA
 from backend.services.exceptions.base_exceptions import ServiceError
@@ -90,8 +91,8 @@ def create_app() -> FastAPI:
 
     # Group mappings of service error types to HTTP status code, for routes.
     exception_mappings = [
-        # TODO: Add completions
-        dataset_exception_mappings()  # Datasets
+        completion_exception_mappings(),  # Completions
+        dataset_exception_mappings(),  # Datasets
         # TODO: Add experiments
         # TODO: Add jobs
     ]

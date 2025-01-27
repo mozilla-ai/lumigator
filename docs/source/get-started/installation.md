@@ -29,9 +29,10 @@ uses SQLite for this purpose.
 ```
 
 ```{note}
-The Ray container will use the shared host folder `${HOME}/.cache/huggingface/` to store
-artifacts downloaded from HuggingFace. Make sure this directory exists and has read and write
-permissions for all users before starting Lumigator.
+The Ray container will use the shared host folder indicated by environment variable `${HF_HOME}`
+(with default value `${HOME}/.cache/huggingface/`) to store artifacts downloaded from HuggingFace.
+Make sure this directory exists and has read and write permissions for all users before starting
+Lumigator.
 ```
 
 ```{note}

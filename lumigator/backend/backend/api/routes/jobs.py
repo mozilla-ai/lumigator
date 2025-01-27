@@ -11,12 +11,12 @@ from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateConfig,
     JobCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
+    JobType,
 )
 from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
@@ -75,14 +75,14 @@ def create_annotation_job(
     reference model should be used to generate annotations.
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """
-    inference_job_create_config = JobAnnotateConfig(
-        **job_create_request.job_config.dict(),
-        model="hf://facebook/bart-large-cnn",
-        output_field="ground_truth",
-    )
-    inference_job_create_config.store_to_dataset = True
+    inference_job_create_config_dict = job_create_request.job_config.dict()
+    inference_job_create_config_dict["model"] = "hf://facebook/bart-large-cnn"
+    inference_job_create_config_dict["output_field"] = "ground_truth"
+    inference_job_create_config_dict["store_to_dataset"] = True
+    inference_job_create_config_dict["job_type"] = JobType.INFERENCE
+
     inference_job_create_request_dict = job_create_request.model_dump()
-    inference_job_create_request_dict.job_config = inference_job_create_config
+    inference_job_create_request_dict["job_config"] = inference_job_create_config_dict
 
     inference_job_create_request = JobCreate(**inference_job_create_request_dict)
     job_response = service.create_job(inference_job_create_request, background_tasks)

@@ -73,16 +73,13 @@ class JobEvalConfig(BaseModel):
     model: str
     model_url: str | None = None
     system_prompt: str | None = None
-    config_template: str | None = None
     skip_inference: bool = False
 
 
-# TODO: this has to be renamed to JobEvalCreate and the code above
-#       has to be removed when we deprecate evaluator
 class JobEvalLiteConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION_LITE]
+    metrics: list[str] = ["meteor", "rouge", "bertscore"]
     model: str
-    config_template: str | None = None
 
 
 class JobInferenceConfig(BaseModel):
@@ -101,7 +98,6 @@ class JobInferenceConfig(BaseModel):
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
-    config_template: str | None = None
     store_to_dataset: bool = False
     max_new_tokens: int = 500
 

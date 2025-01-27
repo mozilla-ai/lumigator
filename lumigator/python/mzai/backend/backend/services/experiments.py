@@ -9,7 +9,7 @@ from lumigator_schemas.experiments import (
     ExperimentResultDownloadResponse,
 )
 from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import Job, JobEvalLiteCreate, JobInferenceCreate, JobStatus
+from lumigator_schemas.jobs import JobEvalLiteCreate, JobInferenceCreate, JobResponse, JobStatus
 from s3fs import S3FileSystem
 
 from backend.records.jobs import JobRecord
@@ -142,13 +142,12 @@ class ExperimentService:
 
         return ExperimentResponse.model_validate(record)
 
-    def _get_experiment_jobs(self, experiment_id: UUID) -> ListingResponse[Job]:
+    def _get_experiment_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
         records = self._job_repo.get_by_experiment_id(experiment_id)
         return ListingResponse(
             total=len(records),
-            items=[Job.model_validate(x) for x in records],
+            items=[JobResponse.model_validate(x) for x in records],
         )
-        return records
 
     def get_experiment_result_download(
         self, experiment_id: UUID

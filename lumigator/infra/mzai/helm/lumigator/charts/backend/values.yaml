@@ -87,7 +87,7 @@ ray-cluster:
         cpu: "8"
         memory: "20G"
         nvidia.com/gpu: "1"
-    env:
+    containerEnv:
       # Set the following environment variables with the desired values to connect to your object storage
       # env vars required by s3fs
       - name: FSSPEC_S3_KEY

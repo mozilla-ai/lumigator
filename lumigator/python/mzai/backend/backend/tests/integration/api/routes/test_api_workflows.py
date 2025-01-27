@@ -9,12 +9,7 @@ from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import (
-    JobLogsResponse,
-    JobResponse,
-    JobResultDownloadResponse,
-    JobStatus,
-)
+from lumigator_schemas.jobs import JobLogsResponse, JobResponse, JobResultDownloadResponse, JobType
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -61,12 +56,15 @@ def test_upload_data_launch_job(
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
         "dataset": str(created_dataset.id),
         "max_samples": 10,
-        "config_template": simple_infer_template,
-        "output_field": "predictions",
-        "store_to_dataset": True,
+        "job_config": {
+            "job_type": JobType.INFERENCE,
+            "model": TEST_CAUSAL_MODEL,
+            "config_template": simple_infer_template,
+            "output_field": "predictions",
+            "store_to_dataset": True,
+        },
     }
     create_inference_job_response = local_client.post(
         "/jobs/inference/", headers=headers, json=infer_payload
@@ -102,10 +100,13 @@ def test_upload_data_launch_job(
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
         "dataset": str(output_infer_job_response_model.id),
-        "config_template": simple_eval_template,
         "max_samples": 10,
+        "job_config": {
+            "job_type": JobType.EVALUATION_LITE,
+            "metrics": ["rouge", "meteor"],
+            "model": TEST_CAUSAL_MODEL,
+        },
     }
 
     create_evaluation_job_response = local_client.post(
@@ -164,7 +165,10 @@ def test_upload_data_no_gt_launch_annotation(
         "description": "Test run for Huggingface model",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
-        "task": "summarization",
+        "job_config": {
+            "job_type": JobType.ANNOTATION,
+            "task": "summarization",
+        },
     }
     create_annotation_job_response = local_client.post(
         "/jobs/annotate/", headers=headers, json=annotation_payload
@@ -219,12 +223,13 @@ def test_full_experiment_launch(
         "accept": "application/json",
         "Content-Type": "application/json",
     }
+
     payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
         "dataset": str(created_dataset.id),
         "max_samples": 2,
+        "model": TEST_CAUSAL_MODEL,
     }
 
     get_ds_response = local_client.get("/datasets/")
@@ -234,6 +239,7 @@ def test_full_experiment_launch(
     create_experiments_response = local_client.post(
         "/experiments_new/", headers=headers, json=payload
     )
+    logger.info(f"Msg: {create_experiments_response.text}")
     assert create_experiments_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments_new/")

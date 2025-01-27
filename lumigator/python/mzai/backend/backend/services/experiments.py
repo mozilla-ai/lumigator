@@ -6,7 +6,10 @@ from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobCreate,
+    JobEvalLiteConfig,
+    JobInferenceConfig,
     JobStatus,
+    JobType,
 )
 
 from backend.records.jobs import JobRecord
@@ -48,17 +51,18 @@ class ExperimentService:
         dataset_record = self._dataset_service.get_dataset_by_job_id(inference_job_id)
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
-        job_eval_dict = {
-            "name": f"{request.name}-evaluation",
-            "model": request.model,
-            "dataset": dataset_record.id,
-            "max_samples": request.max_samples,
-            "skip_inference": True,
-        }
+
+        eval_job_config = JobEvalLiteConfig(job_type=JobType.EVALUATION_LITE, model=request.model)
+        eval_job_create = JobCreate(
+            name=f"{request.name}-evaluation",
+            dataset=dataset_record.id,
+            max_samples=request.max_samples,
+            job_config=eval_job_config,
+        )
 
         # submit the job
         self._job_service.create_job(
-            JobCreate.model_validate(job_eval_dict),
+            eval_job_create,
             background_tasks,
             experiment_id=experiment_id,
         )
@@ -79,20 +83,24 @@ class ExperimentService:
 
         # input is ExperimentCreate, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
-        job_inference_dict = {
-            "name": f"{request.name}-inference",
-            "model": request.model,
-            "dataset": request.dataset,
-            "max_samples": request.max_samples,
-            "model_url": request.model_url,
-            "output_field": request.inference_output_field,
-            "system_prompt": request.system_prompt,
-            "store_to_dataset": True,
-        }
+        infer_job_config = JobInferenceConfig(
+            job_type=JobType.INFERENCE,
+            model=request.model,
+            model_url=request.model_url,
+            output_field=request.inference_output_field,
+            system_prompt=request.system_prompt,
+            store_to_dataset=True,
+        )
+        infer_job_create = JobCreate(
+            name=f"{request.name}-inference",
+            dataset=request.dataset,
+            max_samples=request.max_samples,
+            job_config=infer_job_config,
+        )
 
         # submit inference job first
         job_response = self._job_service.create_job(
-            JobCreate.model_validate(job_inference_dict),
+            infer_job_create,
             background_tasks,
             experiment_id=experiment_record.id,
         )

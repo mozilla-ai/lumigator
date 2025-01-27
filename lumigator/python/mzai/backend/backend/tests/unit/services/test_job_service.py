@@ -18,8 +18,8 @@ def test_set_null_inference_job_params(job_record, job_service):
         ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
-    params = job_service._get_job_params("INFERENCE", job_record, request)
-    assert params["max_samples"] == -1
+    params = job_service.generateInferenceJobConfig(request, job_record, "", "")
+    assert params.job.max_samples == -1
 
 
 def test_set_explicit_inference_job_params(job_record, job_service):
@@ -32,8 +32,8 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
-    params = job_service._get_job_params("INFERENCE", job_record, request)
-    assert params["max_samples"] == 10
+    params = job_service.generateInferenceJobConfig(request, job_record, "", "")
+    assert params.job.max_samples == 10
 
 
 @pytest.mark.parametrize(

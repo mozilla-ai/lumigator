@@ -913,7 +913,7 @@ wheels = [
 
 [[package]]
 name = "lumigator-schemas"
-version = "0.0.2"
+version = "v0.1.0-alpha"
 source = { editable = "../schemas" }
 dependencies = [
     { name = "pydantic" },

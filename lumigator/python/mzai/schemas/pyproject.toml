@@ -1,6 +1,6 @@
 [project]
 name = "lumigator-schemas"
-version = "0.0.2"
+version = "v0.1.0-alpha"
 description = "Schemas used for REST API communication"
 readme = "README.md"
 requires-python = ">=3.11"

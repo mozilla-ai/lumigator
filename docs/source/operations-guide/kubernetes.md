@@ -33,6 +33,20 @@ with a minimal configuration ready to work with Lumigator.
 > - Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
 >   which will be added in a new Secret.
 
+In order to be able to use Mistral and/or the OpenAI API, you also have to add this configuration to your values file:
+
+```console
+ray-cluster:
+  head:
+    containerEnv:
+      - name: MISTRAL_API_KEY
+            valueFrom: "name-of-the-mistral-secret"
+              secretKeyRef: "name-of-the-mistral-secret-key"
+      - name: OPENAI_API_KEY
+            valueFrom: "name-of-the-openai-secret"
+              secretKeyRef: "name-of-the-openai-secret-key"
+```
+
 ## Example values configurations
 
 This is just a minimal example of the values that you have to set in the values files of the backend chart in order
@@ -56,6 +70,8 @@ ray-cluster:
         value: "https://example-s3-endpoint.com"  # S3 endpoint URL used by containers.
 ```
 
+Save this example as a `values.yaml` file, customize it with your own values, and you can proceed to install Lumigator following the steps describe in the next section.
+
 ## Installation
 
 To install Lumigator on a Kubernetes cluster, follow these steps:
@@ -75,7 +91,7 @@ To install Lumigator on a Kubernetes cluster, follow these steps:
 1. Install the Lumigator Helm chart:
 
     ```console
-    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator -f lumigator/infra/mzai/helm/lumigator/values.yaml
+    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator -f values.yaml
     ```
 
 ## Next Steps

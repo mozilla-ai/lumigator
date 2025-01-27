@@ -94,6 +94,9 @@ services:
       ray:
         condition: "service_started"
         required: false
+      mlflow:
+        condition: "service_started"
+        required: false
     ports:
       - 8000:8000
     environment:
@@ -121,6 +124,7 @@ services:
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
+      - MLFLOW_TRACKING_URI
       - LUMI_API_CORS_ALLOWED_ORIGINS
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
@@ -150,6 +154,25 @@ services:
     ports:
       - 80:80
 
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.0.1
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - BACKEND_STORE_URI=sqlite:///mlflow.db
+      - ARTIFACT_ROOT=s3://mlflow/x`
+    ports:
+      - "8001:5000"
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: mlflow server --backend-store-uri ${BACKEND_STORE_URI} --default-artifact-root ${ARTIFACT_ROOT} --host 0.0.0.0
+    extra_hosts:
+      - "localhost:host-gateway"
+    profiles:
+      - local
 volumes:
 
     minio-data:

@@ -43,7 +43,6 @@ class BackendSettings(BaseSettings):
         MLFLOW = "mlflow"
 
     TRACKING_BACKEND: TrackingBackendType = TrackingBackendType.MLFLOW
-    TRACKING_BACKEND: TrackingBackendType = TrackingBackendType.MLFLOW
 
     @computed_field
     @property

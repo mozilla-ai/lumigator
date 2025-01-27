@@ -16,28 +16,6 @@ To install Lumigator on a Kubernetes cluster, you need to have the following pre
 - A S3-compatible storage bucket.
 - Helm installed.
 
-## Installation
-
-To install Lumigator on a Kubernetes cluster, follow these steps:
-
-1. Clone the Lumigator repository:
-
-    ```console
-    user@host:~$ git clone git@github.com:mozilla-ai/lumigator.git
-    ```
-
-1. Change to the Lumigator directory:
-
-    ```console
-    user@host:~$ cd lumigator
-    ```
-
-1. Install the Lumigator Helm chart:
-
-    ```console
-    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator
-    ```
-
 ## Configuration
 
 The Lumigator chart is composed of two sub-charts, backend and frontend. The main Lumigator one is
@@ -77,6 +55,28 @@ ray-cluster:
       - name: FSSPEC_S3_ENDPOINT_URL
         value: "https://example-s3-endpoint.com"  # S3 endpoint URL used by containers.
 ```
+
+## Installation
+
+To install Lumigator on a Kubernetes cluster, follow these steps:
+
+1. Clone the Lumigator repository:
+
+    ```console
+    user@host:~$ git clone git@github.com:mozilla-ai/lumigator.git
+    ```
+
+1. Change to the Lumigator directory:
+
+    ```console
+    user@host:~$ cd lumigator
+    ```
+
+1. Install the Lumigator Helm chart:
+
+    ```console
+    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator -f lumigator/infra/mzai/helm/lumigator/values.yaml
+    ```
 
 ## Next Steps
 

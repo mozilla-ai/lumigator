@@ -145,7 +145,7 @@ There are no summarization-specific parameters for these models.
 
 The [Open Mistral 7B](https://mistral.ai/news/announcing-mistral-7b/) model is a causal language
 model developed by [Mistral AI](https://mistral.ai/). It is the smaller version of the
-Mistal AI family of models.
+Mistral AI family of models.
 
 There are no summarization-specific parameters for this model.
 
@@ -160,7 +160,7 @@ computer. There's nothing to install or configure.
 There are no summarization-specific parameters for this model.
 
 
-# Reference models
+# Reference Models
 
 Before you jump into evaluating datasets, you should consider the following importance of quality ground-truth and annotations.
 

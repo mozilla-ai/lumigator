@@ -5,6 +5,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 ADD . /mzai
 
 WORKDIR /mzai/lumigator/python/mzai/backend
+ENV PYTHONPATH=/mzai/lumigator/python/mzai/backend:/mzai/lumigator/python/mzai/jobs
 
 FROM base AS main_image
 
@@ -18,4 +19,12 @@ FROM base AS dev_image
 # Sync the project into a new environment, using the frozen lockfile and all dependencies
 RUN uv sync --frozen
 
-CMD ["uv","run", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "backend.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+
+CMD [\
+    "uv","run", "-m", "debugpy", "--listen", "0.0.0.0:5678", \
+    "-m", "uvicorn", "backend.main:app", "--reload", \
+    "--reload-dir", "/mzai/lumigator/python/mzai/jobs", \
+    "--reload-dir", "/mzai/lumigator/python/mzai/schemas", \
+    "--host", "0.0.0.0", \
+    "--port", "8000" \
+]

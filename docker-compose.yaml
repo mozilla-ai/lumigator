@@ -53,7 +53,6 @@ services:
     shm_size: 2g
     volumes:
       - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
-    # - ray-huggingface-cache:/home/ray/.cache/huggingface
     deploy:
       resources:
         limits:
@@ -157,4 +156,3 @@ services:
 volumes:
     minio-data:
     database_volume:
-    ray-huggingface-cache:

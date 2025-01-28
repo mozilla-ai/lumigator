@@ -1,0 +1,24 @@
+{
+  "name": "test-job-001",
+  "description": "This is a test inference job",
+  "dataset": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
+  "max_samples": 5,
+  "job_config": {
+    "job_type": "inference",
+    "model": "some_model",
+    "model_url": "https://huggingface.co/facebook/bart-large-cnn",
+    "system_prompt": "some prompt",
+    "task": "summarization",
+    "accelerator": "auto",
+    "revision": "main",
+    "use_fast": true,
+    "trust_remote_code": false,
+    "torch_dtype": "auto",
+    "output_field": "predictions",
+    "max_tokens": 1024,
+    "frequency_penalty": 0.0,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "store_to_dataset": false
+  }
+}

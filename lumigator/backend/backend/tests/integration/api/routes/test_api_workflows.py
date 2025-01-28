@@ -39,8 +39,6 @@ def test_health_ok(local_client: TestClient):
 def test_upload_data_launch_job(
     local_client: TestClient,
     dialog_dataset,
-    simple_eval_template,
-    simple_infer_template,
     dependency_overrides_services,
 ):
     response = local_client.get("/health")
@@ -75,7 +73,6 @@ def test_upload_data_launch_job(
         "job_config": {
             "job_type": JobType.INFERENCE,
             "model": TEST_CAUSAL_MODEL,
-            "config_template": simple_infer_template,
             "output_field": "predictions",
             "store_to_dataset": True,
         },
@@ -162,8 +159,6 @@ def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
     local_client: TestClient,
     unnanotated_dataset,
-    simple_eval_template,
-    simple_infer_template,
     dependency_overrides_services,
 ):
     dataset = request.getfixturevalue(unnanotated_dataset)

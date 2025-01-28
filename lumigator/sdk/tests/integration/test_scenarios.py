@@ -15,11 +15,15 @@ from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import (
     DatasetDownloadResponse,
+    JobAnnotateConfig,
     ExperimentIdCreate,
-    JobAnnotateCreate,
-    JobEvalCreate,
+    JobCreate,
+    JobEvalLiteConfig,
+    JobInferenceConfig,
     WorkflowCreateRequest,
 )
+
+TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
 
 
 def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
@@ -121,36 +125,79 @@ def test_job_lifecycle_remote_ok(
     assert jobs is not None
     logger.info(lumi_client_int.datasets.get_dataset(dataset.id))
 
+    datasets = lumi_client_int.datasets.get_datasets()
+    n_before_jobs_datasets = datasets.total
+
     infer_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
     assert infer_jobs_before is not None
 
-    job = JobEvalCreate(
-        name="test-job-int-001",
-        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
-        dataset=dataset.id,
-        config_template=simple_eval_template,
+    infer_job_config = JobInferenceConfig(
+        # FIXME make a const
+        model=TEST_CAUSAL_MODEL,
+        output_field="predictions",
+        store_to_dataset=True,
     )
-    logger.info(job)
-    job.description = "This is a test job"
-    job.max_samples = 2
-    job_creation_result = lumi_client_int.jobs.create_job(JobType.EVALUATION, job)
-    all_jobs = lumi_client_int.jobs.get_jobs()
-    assert job_creation_result is not None
-    assert all_jobs is not None
-    assert all_jobs.items
+    infer_job = JobCreate(
+        name="test-job-int-001",
+        description="This is a test job",
+        dataset=dataset.id,
+        max_samples=2,
+        job_config=infer_job_config,
+    )
+    logger.info(infer_job)
+
+    job_infer_creation_result = lumi_client_int.jobs.create_job(infer_job)
+    assert job_infer_creation_result is not None
+    assert lumi_client_int.jobs.get_jobs() is not None
+
     eval_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
     assert eval_jobs is not None
     assert eval_jobs.items
-    infer_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
-    assert infer_jobs is not None
-    assert infer_jobs_before.total == infer_jobs.total
 
-    job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
-    logger.info(job_status)
+    infer_job_status = lumi_client_int.jobs.wait_for_job(
+        job_infer_creation_result.id, retries=11, poll_wait=30
+    )
+    logger.info(infer_job_status)
 
-    download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
+    download_info = lumi_client_int.jobs.get_job_download(job_infer_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
     requests.get(download_info.download_url, allow_redirects=True, timeout=10)
+
+    infer_dataset = lumi_client_int.jobs.get_job_dataset(job_infer_creation_result.id)
+
+    assert infer_dataset is not None
+
+    eval_job_config = JobEvalLiteConfig(
+        metrics=["rouge", "meteor"],
+        model=TEST_CAUSAL_MODEL,
+    )
+    eval_job = JobCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        dataset=str(infer_dataset.id),
+        max_samples=10,
+        job_config=eval_job_config,
+    )
+    logger.info(eval_job)
+
+    job_eval_creation_result = lumi_client_int.jobs.create_job(eval_job)
+    assert job_eval_creation_result is not None
+    assert lumi_client_int.jobs.get_jobs() is not None
+
+    eval_job_status = lumi_client_int.jobs.wait_for_job(
+        job_eval_creation_result.id, retries=11, poll_wait=30
+    )
+    logger.info(eval_job_status)
+
+    datasets = lumi_client_int.datasets.get_datasets()
+    n_after_jobs_datasets = datasets.total
+    assert n_after_jobs_datasets - n_before_jobs_datasets == 1
+
+    infer_jobs_after = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
+    assert infer_jobs_after is not None
+    assert infer_jobs_after.total - infer_jobs_before.total == 1
+
+
 
 
 @pytest.mark.parametrize(
@@ -183,24 +230,26 @@ def test_annotate_datasets(
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    # Create annotation job
-    job = JobAnnotateCreate(
-        name=f"test_annotate_{dataset_name}",
-        description=f"Test run for {dataset_name} dataset annotation with default BART",
-        dataset=str(created_dataset.id),
+    annotate_job_config = JobAnnotateConfig(task="summarization")
+    annotate_job = JobCreate(
+        name="test_annotate",
+        description="Test run for Huggingface model",
+        dataset=str(dataset.id),
         max_samples=2,
-        task="summarization",
+        job_config=annotate_job_config,
     )
-    logger.info(job)
-    job_creation_result = lumi_client_int.jobs.create_job(JobType.ANNOTATION, job)
-    assert job_creation_result is not None
+
+    logger.info(annotate_job)
+    annotate_job_creation_result = lumi_client_int.jobs.create_job(annotate_job)
+    assert annotate_job_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
+    job_status = lumi_client_int.jobs.wait_for_job(
+        annotate_job_creation_result.id, retries=11, poll_wait=30
+    )
     logger.info(job_status)
 
-    # Download and verify results
-    download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
+    download_info = lumi_client_int.jobs.get_job_download(annotate_job_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
     results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
     logger.info(f"Annotated set has keys: {results.json().keys()}")

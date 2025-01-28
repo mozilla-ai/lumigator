@@ -1,3 +1,5 @@
+from typing import Literal
+
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
     ExperimentIdCreate,
@@ -6,16 +8,17 @@ from lumigator_schemas.experiments import (
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateCreate,
-    JobConfig,
-    JobEvalCreate,
+    JobAnnotateConfig,
+    JobCreate,
+    JobEvalLiteConfig,
     JobEvent,
-    JobInferenceCreate,
+    JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
     JobSubmissionResponse,
+    JobType,
 )
 from lumigator_schemas.workflows import WorkflowCreateRequest
 from pydantic import ConfigDict
@@ -49,10 +52,6 @@ class Job(Job):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobConfig(JobConfig):
-    model_config = ConfigDict(extra="forbid")
-
-
 class JobEvent(JobEvent):
     model_config = ConfigDict(extra="forbid")
 
@@ -65,15 +64,22 @@ class JobSubmissionResponse(JobSubmissionResponse):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobEvalCreate(JobEvalCreate):
+class JobCreate(JobCreate):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobInferenceCreate(JobInferenceCreate):
+class JobInferenceConfig(JobInferenceConfig):
+    job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model_config = ConfigDict(extra="forbid")
 
 
-class JobAnnotateCreate(JobAnnotateCreate):
+class JobEvalLiteConfig(JobEvalLiteConfig):
+    job_type: Literal[JobType.EVALUATION_LITE] = JobType.EVALUATION_LITE
+    model_config = ConfigDict(extra="forbid")
+
+
+class JobAnnotateConfig(JobAnnotateConfig):
+    job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     model_config = ConfigDict(extra="forbid")
 
 

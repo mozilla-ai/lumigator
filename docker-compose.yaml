@@ -80,7 +80,7 @@ services:
       - local
 
   backend:
-    image: mzdotai/lumigator:latest
+    image: mzdotai/lumigator:v0.1.0-alpha
     build:
       context: .
       dockerfile: "Dockerfile"
@@ -131,7 +131,7 @@ services:
       - "localhost:host-gateway"
 
   frontend:
-    image: mzdotai/lumigator-frontend:latest
+    image: mzdotai/lumigator-frontend:v0.1.0-alpha
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"

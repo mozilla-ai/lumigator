@@ -69,7 +69,7 @@ class JobSubmissionResponse(BaseModel):
 
 
 class JobEvalConfig(BaseModel):
-    job_type: Literal[JobType.EVALUATION]
+    job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
     model: str
     model_url: str | None = None
     system_prompt: str | None = None
@@ -77,13 +77,13 @@ class JobEvalConfig(BaseModel):
 
 
 class JobEvalLiteConfig(BaseModel):
-    job_type: Literal[JobType.EVALUATION_LITE]
+    job_type: Literal[JobType.EVALUATION_LITE] = JobType.EVALUATION_LITE
     metrics: list[str] = ["meteor", "rouge", "bertscore"]
     model: str
 
 
 class JobInferenceConfig(BaseModel):
-    job_type: Literal[JobType.INFERENCE]
+    job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     task: str | None = "summarization"
     accelerator: str | None = "auto"

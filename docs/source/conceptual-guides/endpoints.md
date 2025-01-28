@@ -18,11 +18,11 @@ the backend itself relies on:
   are used in the API which allows one to exactly know which kind of data has to be passed to it.
 
 * **Services** implement the actual functionalities and are called by the different methods exposed
-  in the API (see: [backend services](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/services)).
+  in the API (see: [backend services](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/services)).
 
 * **Repositories** implement the [repository pattern](https://www.cosmicpython.com/book/chapter_02_repository.html)
-  as an abstraction over the SQL database (see: [code for repositories](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/repositories)).
-  They make use of [record classes](https://github.com/mozilla-ai/lumigator/tree/31d4cd3ecdafba6292a71e125b31f23498ddf9da/lumigator/python/mzai/backend/backend/records) to refer to actual records in the database.
+  as an abstraction over the SQL database (see: [code for repositories](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/repositories)).
+  They make use of [record classes](https://github.com/mozilla-ai/lumigator/tree/main/lumigator/python/mzai/backend/backend/records) to refer to actual records in the database.
 
 ![Lumigator Backend](../../assets/lumigator-backend.svg)
 

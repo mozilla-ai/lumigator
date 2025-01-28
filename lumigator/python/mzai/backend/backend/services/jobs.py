@@ -77,7 +77,7 @@ class JobService:
         JobStatus.PENDING.value,
         JobStatus.RUNNING.value,
     ]
-    """list: A list of valid job statuses."""
+    """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
     TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]

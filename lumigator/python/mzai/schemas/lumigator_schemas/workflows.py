@@ -9,7 +9,7 @@ from lumigator_schemas.jobs import JobStatus
 class WorkflowCreate(BaseModel):
     name: str
     description: str = ""
-    experiment_id: UUID
+    experiment_id: str
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
@@ -20,7 +20,7 @@ class WorkflowCreate(BaseModel):
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):
-    id: UUID
+    id: str
     name: str
     description: str
     status: JobStatus
@@ -29,8 +29,8 @@ class WorkflowResponse(BaseModel, from_attributes=True):
 
 
 class WorkflowSummaryResponse(BaseModel, from_attributes=True):
-    workflow_id: UUID
-    experiment_id: UUID
+    workflow_id: str
+    experiment_id: str
     run_ids: list[UUID]
     metrics: dict
     artifacts: dict
@@ -38,8 +38,8 @@ class WorkflowSummaryResponse(BaseModel, from_attributes=True):
 
 
 class WorkflowDetailsResponse(BaseModel):
-    workflow_id: UUID
-    experiment_id: UUID
+    workflow_id: str
+    experiment_id: str
     run_ids: list[UUID]
     metrics: list[dict]
     artifacts: list[dict]

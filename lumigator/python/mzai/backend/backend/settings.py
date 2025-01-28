@@ -1,5 +1,6 @@
 import os
 from collections.abc import Mapping
+from enum import Enum
 from typing import Final
 
 from lumigator_schemas.extras import DeploymentType
@@ -34,6 +35,24 @@ class BackendSettings(BaseSettings):
     RAY_WORKER_ENV_VARS: list[str] = []
     RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
     RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
+
+    # Tracking
+    class TrackingBackendType(str, Enum):
+        """Enum for tracking backend types."""
+
+        MLFLOW = "mlflow"
+
+    TRACKING_BACKEND: TrackingBackendType = TrackingBackendType.MLFLOW
+
+    @computed_field
+    @property
+    # Default is specified in .env file
+    def TRACKING_BACKEND_URI(self) -> str:  # noqa: N802
+        if self.TRACKING_BACKEND == self.TrackingBackendType.MLFLOW:
+            # the tracking uri env var must be set, return that
+            assert os.environ.get("MLFLOW_TRACKING_URI", None) is not None
+            return os.environ["MLFLOW_TRACKING_URI"]
+        raise ValueError(f"Unsupported tracking backend: {self.TRACKING_BACKEND}")
 
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"

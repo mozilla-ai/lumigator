@@ -67,6 +67,8 @@ services:
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
     command: bash -c "RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
+    volumes:
+      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
     deploy:
       resources:
         limits:

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
@@ -10,8 +11,16 @@ from lumigator_schemas.experiments import (
 from lumigator_schemas.extras import ListingResponse
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 
 router = APIRouter()
+
+
+def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        ExperimentNotFoundError: status.HTTP_404_NOT_FOUND,
+    }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

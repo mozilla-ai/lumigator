@@ -25,9 +25,23 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep, JobServiceDep
 from backend.api.http_headers import HttpHeaders
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.job_exceptions import (
+    JobNotFoundError,
+    JobTypeUnsupportedError,
+    JobUpstreamError,
+)
 from backend.settings import settings
 
 router = APIRouter()
+
+
+def job_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        JobNotFoundError: status.HTTP_404_NOT_FOUND,
+        JobTypeUnsupportedError: status.HTTP_501_NOT_IMPLEMENTED,
+        JobUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+    }
 
 
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)

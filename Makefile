@@ -15,6 +15,11 @@ RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
 
+DEBUGPY_ARGS :=
+ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
+    DEBUGPY_ARGS := -m debugpy --listen 5679 --wait-for-client
+endif
+
 $(info RAY_WORKER_GPUS = $(RAY_WORKER_GPUS))
 
 ifeq ($(ARCH), arm64)
@@ -81,7 +86,24 @@ LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
 check-dot-env:
-	@if [ ! -f .env ]; then cp .env.template .env; echo ".env created from .env.template"; fi
+#    Create .env from template if it doesn't exist
+	@if [ ! -f .env ]; then \
+	cp .env.template .env; \
+	echo ".env created from .env.template"; \
+	fi
+
+	# Generate new diff between template and current .env
+	@diff .env.template .env > .env.diff.new 2>/dev/null || true
+
+	# Check if files are out of sync and show warning
+	@if [ -f .env ] && [ -f .env.template ] && ! cmp -s .env.diff .env.diff.new; then \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	echo -e "\033[1;31mWARNING: .env and .env.template are out of sync. Please review changes\033[0m"; \
+	echo -e "\033[1;31m====================================================================\033[0m"; \
+	fi
+
+	# Update diff file for next comparison
+	@mv .env.diff.new .env.diff 2>/dev/null || true
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: check-dot-env
@@ -131,12 +153,12 @@ clean-all: clean-docker-buildcache clean-docker-containers
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
-	cd lumigator/lumigator/sdk/tests; \
-	uv run pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
-	cd lumigator/lumigator/sdk/tests; \
-	uv run pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+	cd lumigator/python/mzai/sdk/tests; \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -160,7 +182,7 @@ test-backend-unit:
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration:
 	cd lumigator/lumigator/backend/; \
@@ -178,7 +200,7 @@ test-backend-integration:
 	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
 	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -195,12 +217,12 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/lumigator/jobs/evaluator_lite; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	cd lumigator/python/mzai/jobs/evaluator_lite; \
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:
-	cd lumigator/lumigator/jobs/inference; \
-	uv run --with pytest --with-requirements requirements.txt --isolated pytest
+	cd lumigator/python/mzai/jobs/inference; \
+	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 

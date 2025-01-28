@@ -2,11 +2,12 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+
 from backend.records.base import BaseRecord
 from backend.records.datasets import *  # noqa: F403
 from backend.records.experiments import *  # noqa: F403
 from backend.records.jobs import *  # noqa: F403
-from sqlalchemy import engine_from_config, pool
 
 """
 NOTE: Do NOT remove imports for the data models: backend.records.{package}

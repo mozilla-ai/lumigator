@@ -5,14 +5,15 @@ import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from transformers.pipelines import check_task, get_supported_tasks
+from utils import resolve_model_repo
+
 from schemas import DatasetConfig
 from schemas import HfPipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig
 from schemas import SamplingParameters as BaseSamplingParameters
-from transformers.pipelines import check_task, get_supported_tasks
-from utils import resolve_model_repo
 
 
 def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:

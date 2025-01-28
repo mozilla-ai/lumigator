@@ -16,8 +16,9 @@ from model_clients import (
     OpenAIModelClient,
 )
 from paths import PathPrefix
-from schemas import InferenceJobOutput
 from tqdm import tqdm
+
+from schemas import InferenceJobOutput
 
 
 def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:

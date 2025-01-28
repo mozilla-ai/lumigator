@@ -2,12 +2,12 @@ import os
 import re
 from abc import abstractmethod
 
-from inference_config import InferenceJobConfig
+from inference_config import AutoTokenizerConfig, InferenceJobConfig
 from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion
-from transformers import pipeline
+from transformers import AutoTokenizer, pipeline
 
 
 def strip_path_prefix(path: str) -> str:
@@ -150,7 +150,16 @@ class MistralModelClient(APIModelClient):
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
-        self._pipeline = pipeline(**config.hf_pipeline.model_dump())
+        pipeline_kwargs = config.hf_pipeline.model_dump()
+        if hasattr(config.hf_pipeline, "tokenizer") and config.hf_pipeline.tokenizer:
+            # If a tokenizer config is provided and is not None, load the tokenizer separately
+            pipeline_kwargs["tokenizer"] = self._load_tokenizer(config.hf_pipeline.tokenizer)
+
+        self._pipeline = pipeline(**pipeline_kwargs)
+
+    def _load_tokenizer(self, tokenizer_config: AutoTokenizerConfig):
+        logger.info(f"Loading Tokenizer with config: {tokenizer_config}")
+        return AutoTokenizer.from_pretrained(**tokenizer_config.model_dump())
 
     def predict(self, prompt):
         prediction = self._pipeline(prompt)[0]

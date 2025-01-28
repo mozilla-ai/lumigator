@@ -5,6 +5,7 @@ import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from schemas import AutoTokenizerConfig as BaseAutoTokenizerConfig
 from schemas import DatasetConfig
 from schemas import HfPipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
@@ -115,8 +116,24 @@ class SamplingParameters(BaseSamplingParameters):
     model_config = ConfigDict(extra="forbid")
 
 
+class AutoTokenizerConfig(BaseAutoTokenizerConfig, arbitrary_types_allowed=True):
+    """Settings passed to a HuggingFace AutoTokenizer instantiation."""
+
+    model_uri: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
+    model_max_length: int
+    use_fast: bool = True
+    trust_remote_code: bool = False
+
+    @computed_field
+    @property
+    def pretrained_model_name_or_path(self) -> str:
+        """Returns the model name stripping out the prefix, e.g. `hf://`."""
+        return resolve_model_repo(self.model_uri)
+
+
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     model_uri: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
+    tokenizer: AutoTokenizerConfig | None = None
     task: SupportedTask
     revision: str = "main"  # Model version: branch, tag, or commit ID
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible

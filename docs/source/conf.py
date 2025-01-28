@@ -6,19 +6,19 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import sys
-import os
-from pathlib import Path
 
 # Get the commit hash from git
 import subprocess
+import sys
+from pathlib import Path
+
 commit_id = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
 print(f"Git Commit ID: {commit_id}")
 # patch the Sphinx run so that it can operate directly on the sources
 # see: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#ensuring-the-code-can-be-imported
 module_paths = [
-    Path("..", "..", "lumigator", "lumigator", "sdk").resolve(),
-    Path("..", "..", "lumigator", "lumigator", "schemas").resolve(),
+    Path("..", "..", "lumigator", "sdk").resolve(),
+    Path("..", "..", "lumigator", "schemas").resolve(),
 ]
 
 for path in module_paths:
@@ -40,9 +40,7 @@ rst_epilog = f"""
 """
 
 # Add the commit_id to myst_substitutions for substitution in Markdown files
-myst_substitutions = {
-    "commit_id": commit_id
-}
+myst_substitutions = {"commit_id": commit_id}
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -54,7 +52,7 @@ extensions = [
     "myst_parser",
     "sphinx_design",
     "sphinx_copybutton",
-    "sphinx.builders.linkcheck"
+    "sphinx.builders.linkcheck",
 ]
 
 # napoleon settings

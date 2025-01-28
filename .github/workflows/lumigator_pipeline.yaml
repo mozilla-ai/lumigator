@@ -213,7 +213,7 @@ jobs:
         uses: docker/build-push-action@v6
         if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
-          file: "frontend/Dockerfile"
+          file: "lumigator/frontend/Dockerfile"
           platforms: linux/amd64,linux/arm64
           push: true
           target: "server"

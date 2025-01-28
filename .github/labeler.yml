@@ -12,7 +12,7 @@ documentation:
   - any-glob-to-any-file: 'docs/**'
 frontend:
 - changed-files:
-  - any-glob-to-any-file: 'frontend/**'
+  - any-glob-to-any-file: 'lumigator/frontend/**'
 gha:
 - changed-files:
   - any-glob-to-any-file: '.github/workflows/**'

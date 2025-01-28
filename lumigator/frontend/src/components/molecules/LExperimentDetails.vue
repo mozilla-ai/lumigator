@@ -116,7 +116,7 @@
       >
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedExperiment }}
+          {{ selectedExperiment.samples }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

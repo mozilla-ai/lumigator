@@ -28,7 +28,8 @@ jobs:
       uses: lycheeverse/lychee-action@v2
       with:
         # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
-        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost'
+        # Excluding the docs folder because these links will be checked by the sphinx linkcheck builder later
+        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost' --exclude-path 'docs'
 
     - name: Check for modified paths
       uses: dorny/paths-filter@v3

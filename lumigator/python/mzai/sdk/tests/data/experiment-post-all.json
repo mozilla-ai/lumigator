@@ -1,8 +1,0 @@
-{
-    "name": "experiment",
-    "description": "test experiment",
-    "model": "hf://facebook/bart-large-cnn",
-    "dataset": "daab39ac-be9f-4de9-87c0-c4c94b297a97",
-    "max_samples": 1000,
-    "system_prompt": "This is a test template. Just generate something interesting."
-}

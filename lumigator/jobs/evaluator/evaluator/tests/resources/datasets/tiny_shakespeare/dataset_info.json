@@ -1,0 +1,48 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "tiny-shakespeare",
+  "dataset_size": 1343458,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/Trelis/tiny-shakespeare@2225a5674b252d623cfb151ef099d179629c2f49/train.csv": {
+      "num_bytes": 1224246,
+      "checksum": null
+    },
+    "hf://datasets/Trelis/tiny-shakespeare@2225a5674b252d623cfb151ef099d179629c2f49/test.csv": {
+      "num_bytes": 119222,
+      "checksum": null
+    }
+  },
+  "download_size": 1343468,
+  "features": {
+    "text": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 2686926,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 1224242,
+      "num_examples": 472,
+      "dataset_name": "tiny-shakespeare"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 119216,
+      "num_examples": 49,
+      "dataset_name": "tiny-shakespeare"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

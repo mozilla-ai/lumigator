@@ -1,0 +1,38 @@
+{
+    "total": 3,
+    "items": [
+        {
+            "id": "daab39ac-be9f-4de9-87c0-c4c94b297a97",
+            "filename": "ds1.hf",
+            "format": "job",
+            "run_id": "d34dbeef-1000-0000-0000-000000000000",
+            "generated": true,
+            "generated_by": "test-generator",
+            "size": 16,
+            "ground_truth": true,
+            "created_at": "2024-09-26T11:52:05"
+        },
+        {
+            "id": "e3be6e4b-dd1e-43b7-a97b-0d47dcc49a4f",
+            "filename": "ds2.hf",
+            "format": "job",
+            "run_id": "d34dbeef-1001-0000-0000-000000000000",
+            "generated": false,
+            "generated_by": "test-generator",
+            "size": 16,
+            "ground_truth": false,
+            "created_at": "2024-09-26T11:52:05"
+        },
+        {
+            "id": "1e23ed9f-b193-444e-8427-e2119a08b0d8",
+            "filename": "ds3.hf",
+            "format": "job",
+            "run_id": "d34dbeef-1002-0000-0000-000000000000",
+            "generated": true,
+            "generated_by": "test-generator",
+            "size": 16,
+            "ground_truth": true,
+            "created_at": "2024-09-26T11:52:05"
+        }
+    ]
+}

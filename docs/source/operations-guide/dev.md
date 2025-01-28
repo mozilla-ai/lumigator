@@ -90,7 +90,7 @@ Ensure you have the following installed on your system:
 1. Navigate to the `lumigator/frontend` directory:
 
    ```console
-   user@host:~$ cd lumigator/lumigator/frontend
+   user@host:~$ cd lumigator/frontend
    ```
 
 1. **Install dependencies**:
@@ -98,13 +98,13 @@ Ensure you have the following installed on your system:
    Using npm:
 
    ```console
-   user@host:~/lumigator/lumigator/frontend$ npm install
+   user@host:~/lumigator/frontend$ npm install
    ```
 
    Or using yarn:
 
    ```console
-   user@host:~/lumigator/lumigator/frontend$ yarn install
+   user@host:~/lumigator/frontend$ yarn install
    ```
 
 ### Development
@@ -112,13 +112,13 @@ Ensure you have the following installed on your system:
 To run the frontend locally for development purposes, use the following command to start the Vite development server. This will also enable hot-reloading, so changes you make in the code will be reflected instantly in the browser.
 
 ```console
-user@host:~/lumigator/lumigator/frontend$ npm run dev
+user@host:~/lumigator/frontend$ npm run dev
 ```
 
 Or using yarn:
 
 ```console
-user@host:~/lumigator/lumigator/frontend$ yarn dev
+user@host:~/lumigator/frontend$ yarn dev
 ```
 
 Visit `http://localhost` in your browser. The application runs at this address by default.
@@ -128,7 +128,7 @@ Visit `http://localhost` in your browser. The application runs at this address b
 To build the frontend for production, run:
 
 ```console
-user@host:~/lumigator/lumigator/frontend$ npm run build
+user@host:~/lumigator/frontend$ npm run build
 ```
 
 This command will bundle the frontend code into a production-ready, optimized set of static assets located in the `dist` directory. By default `dist` is placed in project's root directory ( `./lumigator/frontend` in this case).

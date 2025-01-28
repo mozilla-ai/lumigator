@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+GIT_COMMIT    ?= $(shell git rev-parse HEAD)
 
 # Put it first so that "make" without argument is like "make help".
 help:

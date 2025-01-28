@@ -1,0 +1,47 @@
+{
+    "type": "SUBMISSION",
+    "job_id": "daab39ac-be9f-4de9-87c0-c4c94b297a97",
+    "submission_id": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
+    "driver_info": null,
+    "status": "FAILED",
+    "entrypoint": "python -m lumigator.lumigator.evaluator evaluate huggingface --config '{\"name\": \"test_run_hugging_face/6f6487ac-7170-4a11-af7a-0f6db1ec9a74\", \"model\": {\"path\": \"hf://facebook/bart-large-cnn\"}, \"tokenizer\": {\"path\": \"hf://facebook/bart-large-cnn\", \"mod_max_length\": 1024}, \"dataset\": {\"path\": \"s3://lumigator-storage/datasets/131ce97c-f89e-4fab-a2cf-9593adadce10/thunderbird_gt_bart.csv\"}, \"evaluation\": {\"metrics\": [\"rouge\", \"meteor\", \"bertscore\"], \"use_pipeline\": true, \"max_samples\": 10, \"return_input_data\": true, \"return_predictions\": true, \"storage_path\": \"s3://lumigator-storage/experiments/results/\"}}'",
+    "message": "I am another message",
+    "error_type": null,
+    "start_time": "2024-10-01T19:01:45.080000Z",
+    "end_time": "2024-10-01T19:04:34.727000Z",
+    "metadata": {},
+    "runtime_env": {
+        "working_dir": "gcs://_ray_pkg_dfbbe97e195354a0.zip",
+        "pip": {
+            "packages": [
+            "click>=8.1.7",
+            "scipy==1.13.1",
+            "numpy<2.0.0",
+            "wandb==0.16.3",
+            "protobuf>=3.20.2",
+            "urllib3>=1.26.18,<2",
+            "pydantic>=2.6.4",
+            "pydantic-yaml>=1.2.0",
+            "ray[default]==2.30.0",
+            "s3fs==2024.5.0",
+            "ruff==0.5.5",
+            "datasets==2.20.0",
+            "transformers==4.43.4",
+            "accelerate==0.33.0",
+            "bitsandbytes==0.42.0",
+            "bert_score==0.3.13",
+            "lm-eval==0.4.3",
+            "einops==0.8.0",
+            "openai==1.38.0",
+            "sentencepiece==0.2.0",
+            "evaluate==0.4.2",
+            "mistralai==0.4.2",
+            "nltk==3.8.1"
+            ],
+            "pip_check": false
+        }
+    },
+    "driver_agent_http_address": "http://172.18.0.3:52365",
+    "driver_node_id": "bb961a432bd4ad649fa987d739945e38c23406747ce30dd1102c22e1",
+    "driver_exit_code": 1
+}

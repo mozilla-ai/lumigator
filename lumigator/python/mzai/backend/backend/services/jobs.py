@@ -72,6 +72,17 @@ class JobService:
         },
     }
 
+    NON_TERMINAL_STATUS = [
+        JobStatus.CREATED.value,
+        JobStatus.PENDING.value,
+        JobStatus.RUNNING.value,
+    ]
+    """list: A list of non-terminal job statuses."""
+
+    # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
+    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+    """list: A list of terminal job statuses."""
+
     def __init__(
         self,
         job_repo: JobRepository,
@@ -220,6 +231,23 @@ class JobService:
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             EvalJobOutput.model_validate(json.loads(f.read()))
 
+    def get_upstream_job_status(self, job_id: UUID) -> str:
+        """Returns the (lowercase) status of the upstream job.
+
+        Example: PENDING, RUNNING, STOPPED, SUCCEEDED, FAILED.
+
+        :param job_id: The ID of the job to retrieve the status for.
+        :return: The status of the upstream job.
+        :rtype: str
+        :raises JobUpstreamError: If there is an error with the upstream service returning the
+                                  job status
+        """
+        try:
+            status_response = self.ray_client.get_job_status(str(job_id))
+            return str(status_response.value.lower())
+        except RuntimeError as e:
+            raise JobUpstreamError("ray", "error getting Ray job status", e) from e
+
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
 
@@ -228,27 +256,12 @@ class JobService:
         - task: the function to be called after the job completes successfully
         - args: the arguments to be passed to the function `task()`
         """
-
-        def latest_job_status(job_id: UUID) -> str:
-            try:
-                status_response = self.ray_client.get_job_status(str(job_id))
-                return str(status_response.value.lower())
-            except RuntimeError as e:
-                raise JobUpstreamError("ray", "error getting Ray job status", e) from e
-
-        job_status = latest_job_status(job_id)
-
-        valid_status = [
-            JobStatus.CREATED.value,
-            JobStatus.PENDING.value,
-            JobStatus.RUNNING.value,
-        ]
-        stop_status = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+        job_status = self.get_upstream_job_status(job_id)
 
         loguru.logger.info(f"Watching {job_id}")
-        while job_status not in stop_status and job_status in valid_status:
+        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
             await asyncio.sleep(5)
-            job_status = latest_job_status(job_id)
+            job_status = self.get_upstream_job_status(job_id)
 
         match job_status:
             case JobStatus.FAILED.value:

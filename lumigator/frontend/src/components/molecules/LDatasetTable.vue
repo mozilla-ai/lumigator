@@ -5,7 +5,7 @@
       mode="out-in"
     >
       <DataTable
-        v-if="tableVisible"
+        v-if="tableData.length"
         v-model:selection="focusedItem"
         selectionMode="single"
         dataKey="id"
@@ -15,7 +15,9 @@
         sortField="created_at"
         :sortOrder="-1"
         scrollable
+        scrollHeight="75vh"
         :pt="{table:'table-root'}"
+        :loading
         @row-click="emit('l-dataset-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
       >
@@ -52,9 +54,9 @@
           header="Ground Truth"
         >
           <template #body="slotProps">
-            <span class="capitalize"
-                  v-text="slotProps.data.ground_truth"
-            />
+            <span class="capitalize">
+              {{ slotProps.data.generated ? 'True (AI Generated)' : slotProps.data.ground_truth }}
+            </span>
           </template>
         </Column>
         <Column header="options">
@@ -80,14 +82,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { formatDate } from '@/helpers/index'
 
-defineProps({
+const props = defineProps({
 	tableData: {
 		type: Array,
 		required: true,
@@ -100,14 +102,15 @@ const emit = defineEmits([
   'l-experiment',
   'l-download-dataset']);
 
+
 const { showSlidingPanel  } = useSlidePanel();
 const style = computed(() => {
   return showSlidingPanel.value ?
     'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 });
 
+const loading = ref(true);
 const focusedItem = ref(null);
-const tableVisible = ref(true);
 const optionsMenu = ref();
 const options = ref([
   {
@@ -137,6 +140,11 @@ const options = ref([
   },
 ]);
 
+onMounted(() => {
+  setTimeout(() => {
+    loading.value = false;
+  }, 1000);
+})
 const ptConfigOptionsMenu = ref({
   list: 'l-dataset-table__options-menu',
   itemLink: 'l-dataset-table__menu-option',
@@ -158,13 +166,19 @@ const togglePopover = (event, dataset) => {
 }
 
 watch(showSlidingPanel, (newValue) => {
-  tableVisible.value = false;
   focusedItem.value = newValue ? focusedItem.value : null;
-  setTimeout(() => {
-    tableVisible.value = true;
-  }, 100);
 });
 
+watch(props.tableData, (newValue) => {
+  if (!newValue.length) {
+    loading.value = true;
+    setTimeout(() => {
+    loading.value = false;
+  }, 500);
+  }
+});
+
+defineExpose({loading});
 </script>
 
 <style scoped lang="scss">
@@ -173,6 +187,10 @@ watch(showSlidingPanel, (newValue) => {
 	width: 100%;
 	display: flex;
 	place-content: center;
+
+  & .p-datatable {
+    width: 100%;
+  }
 
 	&__options-trigger {
 		padding: 0;

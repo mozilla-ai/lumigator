@@ -18,7 +18,7 @@ async def create_workflow(
     service: WorkflowServiceDep, request: WorkflowCreate, background_tasks: BackgroundTasks
 ) -> WorkflowResponse:
     """A workflow is a single execution for an experiment.
-    A workflow can be a single job or a collection of jobs.
+    A workflow is a collection of 1 or more jobs.
     It must be associated with an experiment id,
     which means you must already have created an experiment and have that ID in the request.
     """
@@ -52,7 +52,7 @@ def get_workflow_summary(
     raise NotImplementedError
 
 
-@router.get("/{workflow_id}/result/download")
+@router.get("/{workflow_id}/details")
 def get_workflow_details(
     service: WorkflowServiceDep,
     workflow_id: UUID,

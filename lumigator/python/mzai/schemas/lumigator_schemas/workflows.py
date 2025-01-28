@@ -31,16 +31,16 @@ class WorkflowResponse(BaseModel, from_attributes=True):
 class WorkflowSummaryResponse(BaseModel, from_attributes=True):
     workflow_id: UUID
     experiment_id: UUID
-    run_ids: list[UUID]
+    job_ids: list[UUID]
     metrics: dict
     artifacts: dict
     parameters: dict
 
 
+# TODO: This schema will need to be refined when the WorkflowDetails route is implemented
 class WorkflowDetailsResponse(BaseModel):
     workflow_id: UUID
     experiment_id: UUID
-    run_ids: list[UUID]
-    metrics: list[dict]
-    artifacts: list[dict]
-    parameters: list[dict]
+    job_ids: list[UUID]
+    metrics_urls: list[str]  # same length as run_ids
+    artifacts_urls: list[str]  # same length as run_ids

@@ -13,8 +13,6 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.workflows import WorkflowCreate, WorkflowResponse
 
-from backend.repositories.experiments import ExperimentRepository
-from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 
@@ -22,13 +20,9 @@ from backend.services.jobs import JobService
 class WorkflowService:
     def __init__(
         self,
-        experiment_repo: ExperimentRepository,
-        job_repo: JobRepository,
         job_service: JobService,
         dataset_service: DatasetService,
     ):
-        self._experiment_repo = experiment_repo
-        self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
 

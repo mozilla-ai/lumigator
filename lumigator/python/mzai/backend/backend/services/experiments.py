@@ -1,11 +1,9 @@
 from uuid import UUID
 
 import loguru
-from fastapi import BackgroundTasks
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentIdCreate, ExperimentResponse
+from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
     JobStatus,
 )
 
@@ -37,33 +35,12 @@ class ExperimentService:
         jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
         return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
-    def _run_eval(
-        self,
-        inference_job_id: UUID,
-        request: ExperimentCreate,
-        background_tasks: BackgroundTasks,
-        experiment_id: UUID = None,
-    ):
-        # use the inference job id to recover the dataset record
-        dataset_record = self._dataset_service.get_dataset_by_job_id(inference_job_id)
-
-        # prepare the inputs for the evaluation job and pass the id of the new dataset
-        job_eval_dict = {
-            "name": f"{request.name}-evaluation",
-            "model": request.model,
-            "dataset": dataset_record.id,
-            "max_samples": request.max_samples,
-            "skip_inference": True,
-        }
-
-        # submit the job
-        self._job_service.create_job(
-            JobEvalLiteCreate.model_validate(job_eval_dict),
-            background_tasks,
-            experiment_id=experiment_id,
-        )
-
-    def create_experiment(self, request: ExperimentIdCreate) -> ExperimentResponse:
+    def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
+        # The FastAPI BackgroundTasks object is used to run a function in the background.
+        # It is a wrapper around Starlette's BackgroundTasks object.
+        # A background task should be attached to a response,
+        # and will run only once the response has been sent.
+        # See here: https://www.starlette.io/background/
         experiment_record = self._experiment_repo.create(
             name=request.name, description=request.description
         )

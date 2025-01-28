@@ -4,6 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
+    ExperimentIdResponse,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
@@ -74,7 +75,7 @@ def get_experiment_result_download(
 @router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
-) -> ExperimentResponse:
+) -> ExperimentIdResponse:
     """Create an experiment ID."""
     return service.create_experiment(request)
 

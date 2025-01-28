@@ -23,6 +23,11 @@ class ExperimentIdCreate(BaseModel):
     description: str = ""
 
 
+class ExperimentIdResponse(BaseModel):
+    id: str
+    created_at: datetime.datetime
+
+
 class ExperimentResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str

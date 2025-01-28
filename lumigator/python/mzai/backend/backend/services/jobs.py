@@ -10,7 +10,7 @@ import loguru
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
+from evaluator_lite.schemas import EvalJobConfig
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
 from inference.schemas import InferenceJobConfig, InferenceJobOutput
 from lumigator_schemas.datasets import DatasetFormat
@@ -167,26 +167,6 @@ class JobService:
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _validate_evaluation_results(
-        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
-    ):
-        """Handles the evaluation result for a given job.
-
-        Args:
-            job_id (UUID): The unique identifier of the job.
-            request (JobEvalLiteCreate): The request object containing job evaluation details.
-            s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
-
-        Note:
-            Currently, this function only validates the evaluation result. Future implementations
-            may include storing the results in a database (e.g., mlflow).
-        """
-        loguru.logger.info("Handling evaluation result")
-
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            EvalJobOutput.model_validate(json.loads(f.read()))
-
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
 
@@ -322,9 +302,7 @@ class JobService:
             raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
 
         # Create a db record for the job
-        record = self.job_repo.create(
-            name=request.name, description=request.description, experiment_id=experiment_id
-        )
+        record = self.job_repo.create(name=request.name, description=request.description)
 
         if isinstance(request, JobInferenceCreate) and not request.output_field:
             request.output_field = "predictions"
@@ -401,15 +379,6 @@ class JobService:
                 self._add_dataset_to_db,
                 record.id,
                 JobInferenceCreate.model_validate(request),
-                self._dataset_service.s3_filesystem,
-            )
-        elif job_type == JobType.EVALUATION_LITE:
-            background_tasks.add_task(
-                self.on_job_complete,
-                record.id,
-                self._validate_evaluation_results,
-                record.id,
-                JobEvalLiteCreate.model_validate(request),
                 self._dataset_service.s3_filesystem,
             )
         # FIXME The ray status is now _not enough_ to set the job status,

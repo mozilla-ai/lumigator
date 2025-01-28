@@ -93,10 +93,10 @@ def create_app() -> FastAPI:
 
     # Group mappings of service error types to HTTP status code, for routes.
     exception_mappings = [
-        completion_exception_mappings(),  # Completions
-        dataset_exception_mappings(),  # Datasets
+        completion_exception_mappings(),
+        dataset_exception_mappings(),
         experiment_exception_mappings(),
-        job_exception_mappings(),  # Jobs
+        job_exception_mappings(),
     ]
 
     # Add a handler for each error -> status mapping.

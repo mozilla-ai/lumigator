@@ -5,9 +5,9 @@ a model downloaded from the Hugging Face Hub. The model will generate summaries 
 text data.
 
 ```{note}
-You can also use the OpenAI GPT family of models or the Mistal API to run an inference job. To do
+You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
-Refer to the `.env.template` file in the repository for more details.
+Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
 ```
 
 ## What You'll Need
@@ -90,6 +90,21 @@ Refer to the `.env.template` file in the repository for more details.
     ```console
     user@host:~/lumigator$ uv run python inference.py
     ```
+
+## Model Specification
+
+Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
+
+* `name`: an identification name for the model
+* `uri`: a URI specifying how to use the model. The following protocols are supported:
+  * `hf://`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
+  * `llamafile://`: model set up with [`llamafile`](https://github.com/Mozilla-Ocho/llamafile) on its default host and port
+  * `oai://`: OpenAI or compatible external API; needs a value for the environment variable OPENAI_API_KEY with a valid key
+  * `mistral://`: Mistral or compatible external API; needs a value for the environment variable MISTRAL_API_KEY with a valid key
+* `website_url`: a link to a web page with more information about the model
+* `description`: a short description about the model
+* `info`: a map containing information about the model like parameter count or model size
+* `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values
 
 ## Verify
 

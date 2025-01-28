@@ -35,7 +35,7 @@
           @click.stop
         />
       </div>
-       <div
+      <div
         v-if="modelsRequiringAPIKey.length"
         class="l-models-list__options-container-section"
       >
@@ -97,13 +97,16 @@ defineExpose({
   selectedModels
 })
 
-const modelsRequiringAPIKey = computed(() => {
-  return models.value.filter((x) => x.requires_api_key)
-})
+const modelsByRequirement = (requirementKey, isRequired) => {
+  return models.value.filter((x) => {
+    const isKeyPresent = x?.requirements?.includes(requirementKey);
+    return isRequired ? isKeyPresent : !isKeyPresent;
+  });
+}
 
-const modelsRequiringNoAPIKey = computed(() => {
-  return models.value.filter((x) => !x.requires_api_key)
-})
+const modelsRequiringAPIKey = computed(() => modelsByRequirement("api_key", true));
+
+const modelsRequiringNoAPIKey = computed(() => modelsByRequirement("api_key", false));
 
 function toggleModel(model) {
   const index = selectedModels.value.findIndex(

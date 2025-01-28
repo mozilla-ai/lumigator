@@ -1,11 +1,11 @@
 {
-    "total": 7,
+    "total": 6,
     "items": [
       {
         "name": "facebook/bart-large-cnn",
         "uri": "hf://facebook/bart-large-cnn",
         "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
-        "requires_api_key": false,
+        "requirements": [],
         "info": {
           "parameter_count": "406M",
           "tensor_type": "F32",
@@ -28,7 +28,7 @@
         "name": "Falconsai/text_summarization",
         "uri": "hf://Falconsai/text_summarization",
         "description": "A fine-tuned variant of the T5 transformer model, designed for the task of text summarization.",
-        "requires_api_key": false,
+        "requirements": [],
         "info": {
           "parameter_count": "60.5M",
           "tensor_type": "F32",
@@ -48,26 +48,10 @@
         ]
       },
       {
-        "name": "mistralai/Mistral-7B-Instruct-v0.3",
-        "uri": "hf://mistralai/Mistral-7B-Instruct-v0.3",
-        "description": "Mistral-7B-Instruct-v0.3 is an instruct fine-tuned version of the Mistral-7B-v0.3.",
-        "requires_api_key": false,
-        "info": {
-          "parameter_count": "7.25B",
-          "tensor_type": "BF16",
-          "model_size": "14.5GB"
-        },
-        "tasks": [
-          {
-            "summarization": null
-          }
-        ]
-      },
-      {
         "name": "gpt-4o-mini",
         "uri": "oai://gpt-4o-mini",
         "description": "OpenAI's GPT-4o-mini model.",
-        "requires_api_key": true,
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -79,7 +63,7 @@
         "name": "gpt-4o",
         "uri": "oai://gpt-4o",
         "description": "OpenAI's GPT-4o model.",
-        "requires_api_key": true,
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -91,7 +75,7 @@
         "name": "open-mistral-7b",
         "uri": "mistral://open-mistral-7b",
         "description": "Mistral's 7B model.",
-        "requires_api_key": true,
+        "requirements": [ "api_key" ],
         "info": null,
         "tasks": [
           {
@@ -103,7 +87,7 @@
         "name": "mistralai/Mistral-7B-Instruct-v0.2",
         "uri": "llamafile://mistralai/Mistral-7B-Instruct-v0.2",
         "description": "A llamafile package of Mistral's 7B Instruct model.",
-        "requires_api_key": false,
+        "requirements": [ "llamafile" ],
         "info": {
           "parameter_count": "7.24B",
           "tensor_type": "BF16",

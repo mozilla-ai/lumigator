@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 
 from backend.api.http_headers import HttpHeaders
+from backend.services.exceptions.dataset_exceptions import DatasetUpstreamError
 
 
 def test_upload_delete(
@@ -45,14 +46,15 @@ def test_upload_delete(
 
 def test_dataset_delete_error(app_client: TestClient, dependency_overrides_fakes):
     dataset_id = uuid.uuid4()
+    msg = f"error attempting to delete dataset {dataset_id} from S3"
     with patch(
         "backend.services.datasets.DatasetService.delete_dataset",
-        side_effect=Exception("argh I am exceptional"),
+        side_effect=DatasetUpstreamError("s3", msg),
     ):
         resp = app_client.delete(f"/datasets/{dataset_id}")
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         data = resp.json()
-        assert data["detail"] == f"Unexpected error deleting dataset for ID: {dataset_id}"
+        assert data["detail"] == f"Upstream error with s3: {msg}"
 
 
 def test_presigned_download(
@@ -106,6 +108,7 @@ def test_experiment_ground_truth(
     app_client: TestClient,
     valid_experiment_dataset: str,
     valid_experiment_dataset_without_gt: str,
+    valid_experiment_dataset_with_empty_gt: str,
     dependency_overrides_fakes,
 ):
     ground_truth_response = app_client.post(
@@ -129,5 +132,17 @@ def test_experiment_ground_truth(
     created_dataset = DatasetResponse.model_validate(no_ground_truth_response.json())
     assert created_dataset.ground_truth is False
     location = no_ground_truth_response.headers.get(HttpHeaders.LOCATION)
+    assert location != ""
+    assert location == f"{app_client.base_url}datasets/{created_dataset.id}"
+
+    empty_ground_truth_response = app_client.post(
+        url="/datasets",
+        data={"format": DatasetFormat.JOB.value},
+        files={"dataset": ("dataset.csv", valid_experiment_dataset_with_empty_gt)},
+    )
+    assert empty_ground_truth_response.status_code == status.HTTP_201_CREATED
+    created_dataset = DatasetResponse.model_validate(empty_ground_truth_response.json())
+    assert created_dataset.ground_truth is False
+    location = empty_ground_truth_response.headers.get(HttpHeaders.LOCATION)
     assert location != ""
     assert location == f"{app_client.base_url}datasets/{created_dataset.id}"

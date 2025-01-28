@@ -4,7 +4,13 @@ from typing import Annotated
 import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
-from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, computed_field
+from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from schemas import DatasetConfig
+from schemas import HfPipelineConfig as BaseHfPipelineConfig
+from schemas import InferenceJobConfig as BaseInferenceJobConfig
+from schemas import InferenceServerConfig as BaseInferenceServerConfig
+from schemas import JobConfig as BaseJobConfig
+from schemas import SamplingParameters as BaseSamplingParameters
 from transformers.pipelines import check_task, get_supported_tasks
 from utils import resolve_model_repo
 
@@ -89,12 +95,7 @@ class Accelerator(str, Enum):
     MPS = "mps"
 
 
-class DatasetConfig(BaseModel):
-    path: str
-    model_config = ConfigDict(extra="forbid")
-
-
-class JobConfig(BaseModel):
+class JobConfig(BaseJobConfig):
     max_samples: int = -1  # set to all samples by default
     storage_path: str
     output_field: str = "predictions"
@@ -102,15 +103,11 @@ class JobConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class InferenceServerConfig(BaseModel):
-    base_url: str
-    engine: str
-    system_prompt: str | None
+class InferenceServerConfig(BaseInferenceServerConfig):
     max_retries: int = 3
-    model_config = ConfigDict(extra="forbid")
 
 
-class SamplingParameters(BaseModel):
+class SamplingParameters(BaseSamplingParameters):
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
@@ -118,7 +115,7 @@ class SamplingParameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
+class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     model_uri: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
     task: SupportedTask
     revision: str = "main"  # Model version: branch, tag, or commit ID
@@ -163,7 +160,7 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
         return self.accelerator
 
 
-class InferenceJobConfig(BaseModel):
+class InferenceJobConfig(BaseInferenceJobConfig):
     name: str
     dataset: DatasetConfig
     job: JobConfig

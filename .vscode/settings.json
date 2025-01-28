@@ -10,6 +10,7 @@
     },
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
-        "./lumigator/python/mzai/schemas"
+        "./lumigator/python/mzai/schemas",
+        "./lumigator/python/mzai/jobs"
     ]
 }

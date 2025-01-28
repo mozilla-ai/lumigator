@@ -1,17 +1,15 @@
-# Default values for lumigator.
+# Default values for the lumigator backend.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
-replicaCount: 1
 
 s3Bucket: ""
 AWSAccessKey: ""
 AWSSecretKey: ""
-s3EndpointURL: ""
-AWSEndpointURL: ""
+s3EndpointURL: "" # URL of the S3 endpoint. Change this if using a different provider.
+AWSEndpointURL: "" # URL of the AWS endpoint. Typically matches the S3EndpointURL.
 
 rayAddress: ""
-rayPort: "5432"
+rayPort: "" # Port to connect to the Ray service. Usually 8265.
 rayWorkerGPUs: ""
 
 serviceAccountName: ""
@@ -19,17 +17,18 @@ serviceAccountName: ""
 existingMistralAPISecret: ""
 mistralAPIKey: ""
 
+evaluatorPipReqs: "/mzai/lumigator/python/mzai/jobs/evaluator/requirements.txt"
+evaluatorWorkDir: "/mzai/lumigator/python/mzai/jobs/evaluator"
+
 image:
   repository: "mzdotai/lumigator"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "v0.1.0-alpha"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-podAnnotations: {}
 
 podSecurityContext:
   {}
@@ -47,7 +46,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8000
-  https: false
+  annotations: {}
 
 resources:
   {}
@@ -62,15 +61,41 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 # Note: Need to manually delete PVC after helm delete
 postgresql:
   enabled: true
   #  auth:
   #    username: lumigator
   #    database: lumigator
+
+kuberay-apiserver:
+  image:
+    repository: quay.io/kuberay/apiserver
+    tag: 2.30.0
+  security: {}
+
+ray-cluster:
+  image:
+    tag: 2.30.0-py311-gpu
+  head:
+    resources:
+      {}
+      # requests:
+      #   # For production use-cases, we recommend specifying integer CPU requests and limits.
+      #   # We also recommend setting requests equal to limits for both CPU and memory.
+      #   # For this example, we use a 500m CPU request to accomodate resource-constrained local
+      #   # Kubernetes testing environments such as KinD and minikube.
+      #   cpu: "8"
+      #   memory: "20G"
+      #   nvidia.com/gpu: "1"
+    env:
+      # Set the following environment variables with the desired values to connect to your object storage
+      # env vars required by s3fs
+      - name: FSSPEC_S3_KEY
+        value: ""
+      - name: FSSPEC_S3_SECRET
+        value: ""
+      - name: FSSPEC_S3_ENDPOINT_URL
+        value: ""
+  worker:
+    disabled: true

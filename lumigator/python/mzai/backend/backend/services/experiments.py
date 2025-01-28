@@ -2,11 +2,10 @@ from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
+from lumigator_schemas.experiments import ExperimentCreate, ExperimentIdCreate, ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
-    JobInferenceCreate,
     JobStatus,
 )
 
@@ -64,51 +63,11 @@ class ExperimentService:
             experiment_id=experiment_id,
         )
 
-    def create_experiment(
-        self, request: ExperimentCreate, background_tasks: BackgroundTasks
-    ) -> ExperimentResponse:
-        # The FastAPI BackgroundTasks object is used to run a function in the background.
-        # It is a wrapper around Starlette's BackgroundTasks object.
-        # A background task should be attached to a response,
-        # and will run only once the response has been sent.
-        # See here: https://www.starlette.io/background/
-
+    def create_experiment(self, request: ExperimentIdCreate) -> ExperimentResponse:
         experiment_record = self._experiment_repo.create(
             name=request.name, description=request.description
         )
         loguru.logger.info(f"Created experiment '{request.name}' with ID '{experiment_record.id}'.")
-
-        # input is ExperimentCreate, we need to split the configs and generate one
-        # JobInferenceCreate and one JobEvalCreate
-        job_inference_dict = {
-            "name": f"{request.name}-inference",
-            "model": request.model,
-            "dataset": request.dataset,
-            "max_samples": request.max_samples,
-            "model_url": request.model_url,
-            "output_field": request.inference_output_field,
-            "system_prompt": request.system_prompt,
-            "store_to_dataset": True,
-        }
-
-        # submit inference job first
-        job_response = self._job_service.create_job(
-            JobInferenceCreate.model_validate(job_inference_dict),
-            background_tasks,
-            experiment_id=experiment_record.id,
-        )
-
-        # run evaluation job afterwards
-        # (NOTE: tasks in starlette are executed sequentially: https://www.starlette.io/background/)
-        background_tasks.add_task(
-            self._job_service.on_job_complete,
-            job_response.id,
-            self._run_eval,
-            job_response.id,
-            request,
-            background_tasks,
-            experiment_record.id,
-        )
 
         return ExperimentResponse.model_validate(experiment_record)
 

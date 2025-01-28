@@ -18,6 +18,11 @@ class ExperimentCreate(BaseModel):
     config_template: str | None = None
 
 
+class ExperimentIdCreate(BaseModel):
+    name: str
+    description: str = ""
+
+
 class ExperimentResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str

@@ -1,7 +1,5 @@
-import asyncio
 import csv
 import json
-from collections.abc import Callable
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
@@ -71,17 +69,6 @@ class JobService:
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
     }
-
-    NON_TERMINAL_STATUS = [
-        JobStatus.CREATED.value,
-        JobStatus.PENDING.value,
-        JobStatus.RUNNING.value,
-    ]
-    """list: A list of non-terminal job statuses."""
-
-    # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
-    """list: A list of terminal job statuses."""
 
     def __init__(
         self,
@@ -247,36 +234,6 @@ class JobService:
             return str(status_response.value.lower())
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
-
-    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
-        """Watches a submitted job and, when it terminates successfully, runs a given task.
-
-        Inputs:
-        - job_id: the UUID of the job to watch
-        - task: the function to be called after the job completes successfully
-        - args: the arguments to be passed to the function `task()`
-        """
-        job_status = self.get_upstream_job_status(job_id)
-
-        loguru.logger.info(f"Watching {job_id}")
-        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
-            await asyncio.sleep(5)
-            job_status = self.get_upstream_job_status(job_id)
-
-        match job_status:
-            case JobStatus.FAILED.value:
-                loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-            case JobStatus.SUCCEEDED.value:
-                loguru.logger.info(f"Job {job_id} finished successfully.")
-                if task is not None:
-                    task(*args)
-            case _:
-                # NOTE: Consider raising an exception here as we *really* don't expect
-                # anything other than FAILED or SUCCEEDED.
-                loguru.logger.error(
-                    f"Job {job_id} has an unexpected status "
-                    f"({job_status}) that is not completed."
-                )
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]

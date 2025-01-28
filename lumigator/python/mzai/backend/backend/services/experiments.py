@@ -1,24 +1,20 @@
+import json
 from uuid import UUID
 
 import loguru
-<<<<<<< HEAD
 from fastapi import BackgroundTasks
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
-=======
-from fastapi import BackgroundTasks, UploadFile
-from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
 )
->>>>>>> 4fe14cd (add experiment methods)
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
     JobStatus,
 )
+from s3fs import S3FileSystem
 
 from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
@@ -26,6 +22,7 @@ from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
+from backend.settings import settings
 
 
 class ExperimentService:
@@ -122,7 +119,6 @@ class ExperimentService:
 
         return ExperimentResponse.model_validate(experiment_record)
 
-<<<<<<< HEAD
     # TODO Move this into a "composite job" impl
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
         """Gets an experiment by ID.
@@ -149,7 +145,7 @@ class ExperimentService:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
 
         return ExperimentResponse.model_validate(record)
-=======
+
     def _get_experiment_jobs(self, experiment_id: UUID):
         records = self._experiment_repo.get_jobs_by_experiment_id(experiment_id)
         return records
@@ -191,7 +187,6 @@ class ExperimentService:
         )
 
         return ExperimentResultDownloadResponse(id=experiment_id, download_url=download_url)
->>>>>>> 4fe14cd (add experiment methods)
 
     def list_experiments(
         self, skip: int = 0, limit: int = 100

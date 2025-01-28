@@ -47,7 +47,6 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
-    JobTypeUnsupportedError,
     JobUpstreamError,
 )
 from backend.settings import settings

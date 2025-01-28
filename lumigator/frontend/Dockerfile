@@ -3,7 +3,7 @@ ARG NODE_VERSION=18.20.0
 FROM node:${NODE_VERSION}-alpine AS base
 
 # Copy the project into the image
-COPY ../frontend /mzai/frontend
+COPY . /mzai/frontend
 
 WORKDIR /mzai/
 

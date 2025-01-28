@@ -6,13 +6,13 @@ either locally or remotely.
 You can install the lumigator SDK  via `pip` directly or via `uv` from the cloned repository:
 
 ```bash
-pip install -e lumigator/lumigator/sdk
+pip install -e lumigator/sdk
 ```
 
 or
 
 ```bash
-uv pip install -e lumigator/lumigator/sdk
+uv pip install -e lumigator/sdk
 ```
 
 Now that you have the SDK installed, you can use it to communicate with Lumigator. You can run the

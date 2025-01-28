@@ -16,11 +16,11 @@ matching revision ID.
 
 ## Running commands
 
-Please run `alembic` commands in this document within the backend (`lumigator/lumigator/backend`) folder, using `uv`. For example, where the Lumigator repository is cloned to your `$HOME` directory:
+Please run `alembic` commands in this document within the backend (`lumigator/backend`) folder, using `uv`. For example, where the Lumigator repository is cloned to your `$HOME` directory:
 
 ```console
-user@host:~/$ cd lumigator/lumigator/lumigator/backend
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic --version
+user@host:~/$ cd lumigator/lumigator/backend
+user@host:~/lumigator/lumigator/backend$ uv run alembic --version
 ```
 
 ## Data model changes
@@ -28,7 +28,7 @@ user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic --version
 When code changes are made to the data models, or when new models are added, a manual step is
 required in order to ensure that the models are visible to Alembic.
 
-First, the imports at the top of {{ '[`env.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/env.py)'.format(commit_id) }}
+First, the imports at the top of {{ '[`env.py`](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/backend/alembic/env.py)'.format(commit_id) }}
 **MUST** import your package:
 
 `from backend.records.{package} import * # noqa: F403`
@@ -49,25 +49,25 @@ In order to connect to a "real" database to compare its state against the codifi
 variable in your shell, or provide it on each invocation of `alembic`:
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ export SQLALCHEMY_DATABASE_URL=sqlite:///local.db
+user@host:~/lumigator/lumigator/backend$ export SQLALCHEMY_DATABASE_URL=sqlite:///local.db
 ```
 
 or
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run alembic history
+user@host:~/lumigator/lumigator/backend$ SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run alembic history
 ```
 
 The rest of the document assumes `SQLALCHEMY_DATABASE_URL` is exported. If `SQLALCHEMY_DATABASE_URL`
 is not present then a default of `sqlite:///local.db` will be used (see:
-{{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/alembic.ini#L65)'.format(commit_id) }}).
+{{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/alembic.ini#L65)'.format(commit_id) }}).
 
 If you've followed the `README` for `backend`, you should have sourced the virtual environment. This
 means you can run the `alembic` command directly in the terminal. Alternatively, you can also run it
 using `uv`:
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic --version
+user@host:~/lumigator/lumigator/backend$ uv run alembic --version
 ```
 
 ## Pre-existing databases (not currently managed by Alembic)
@@ -84,13 +84,13 @@ manage going forward.
 If you believe your database already matches the most up-to-date models:
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic stamp head
+user@host:~/lumigator/lumigator/backend$ uv run alembic stamp head
 ```
 
 ## My database is in a different state (from a prior release)
 
 This scenario requires manual review of the existing revisions stored in the
-{{ '[versions folder](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/versions)'.format(commit_id) }},
+{{ '[versions folder](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/backend/alembic/versions)'.format(commit_id) }},
 to determine which revision ID represents the current state of the database containing the data.
 
 Revisions are stored in a format resembling a linked-list, with each revision containing a
@@ -103,7 +103,7 @@ To align your database with a specific revision (migration ID `e75fa022c781` ali
 state of our database):
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic stamp e75fa022c781
+user@host:~/lumigator/lumigator/backend$ uv run alembic stamp e75fa022c781
 ```
 
 ## Other Alembic commands
@@ -115,13 +115,13 @@ downgrading the database.
 - Viewing migration history
 
     ```console
-    user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic history
+    user@host:~/lumigator/lumigator/backend$ uv run alembic history
     ```
 
 - Show your current revision
 
     ```console
-    user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic current
+    user@host:~/lumigator/lumigator/backend$ uv run alembic current
     ```
 
 - Upgrading
@@ -129,19 +129,19 @@ downgrading the database.
     - Manually upgrade your database to match the latest models:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic upgrade head
+        user@host:~/lumigator/lumigator/backend$ uv run alembic upgrade head
         ```
 
     - You can also upgrade 'relative' to your current state, so to move forwards 1 revision:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic upgrade +1
+        user@host:~/lumigator/lumigator/backend$ uv run alembic upgrade +1
         ```
 
     - If you know the version you want to migrate to, you can specify it:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic upgrade cb3cf47d9259
+        user@host:~/lumigator/lumigator/backend$ uv run alembic upgrade cb3cf47d9259
         ```
 
 - Downgrading
@@ -149,19 +149,19 @@ downgrading the database.
     - To downgrade to the original state (not recommended) use:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic downgrade base
+        user@host:~/lumigator/lumigator/backend$ uv run alembic downgrade base
         ```
 
     - You can also downgrade 'relative' to your current state, so to move backwards 1 revision:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic downgrade -1
+        user@host:~/lumigator/lumigator/backend$ uv run alembic downgrade -1
         ```
 
     - If you know the version you want to migrate to, you can specify it:
 
         ```console
-        user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic upgrade cb3cf47d9259
+        user@host:~/lumigator/lumigator/backend$ uv run alembic upgrade cb3cf47d9259
         ````
 
 ## Creating revisions
@@ -173,15 +173,15 @@ when moving between migrations).
 To create an empty revision that you populate manually:
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic revision -m "{Explanatory commit-like message}"
+user@host:~/lumigator/lumigator/backend$ uv run alembic revision -m "{Explanatory commit-like message}"
 ```
 
-This will create a new Python file under {{ '[versions/](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/lumigator/backend/backend/alembic/versions)'.format(commit_id) }}.
+This will create a new Python file under {{ '[versions/](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/backend/alembic/versions)'.format(commit_id) }}.
 
 For example:
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic revision -m "added desc field to job"
+user@host:~/lumigator/lumigator/backend$ uv run alembic revision -m "added desc field to job"
 ```
 
 should see a new Python file created with a commit/ID prepended to your message:
@@ -193,7 +193,7 @@ create a revision using the `--autogenerate` flag when creating a revision. This
 way to create revisions in Lumigator.
 
 ```console
-user@host:~/lumigator/lumigator/lumigator/backend$ uv run alembic revision --autogenerate -m {Explanatory commit-like message}
+user@host:~/lumigator/lumigator/backend$ uv run alembic revision --autogenerate -m {Explanatory commit-like message}
 ```
 
 Please note that "automatic" doesn't mean this can be completely automated, as manual steps are

@@ -13,20 +13,20 @@ services:
       - "5678:5678"
     develop:
       watch:
-        - path: lumigator/lumigator/backend/
-          target: /mzai/lumigator/lumigator/backend
+        - path: lumigator/backend/
+          target: /mzai/lumigator/backend
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/lumigator/jobs/
-          target: /mzai/lumigator/lumigator/jobs
+        - path: lumigator/jobs/
+          target: /mzai/lumigator/jobs
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/lumigator/schemas/
-          target: /mzai/lumigator/lumigator/schemas
+        - path: lumigator/schemas/
+          target: /mzai/lumigator/schemas
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/lumigator/backend/pyproject.toml
+        - path: lumigator/backend/pyproject.toml
           action: rebuild

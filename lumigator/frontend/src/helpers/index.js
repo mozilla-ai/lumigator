@@ -36,7 +36,7 @@ export function retrieveEntrypoint(job) {
 
     // NOTE: Normalization is required because the config templates used per-model sometimes vary,
     // meaning that the location of the data we are trying to parse isn't always the same.
-    // See: lumigator/lumigator/backend/backend/config_templates.py
+    // See: lumigator/backend/backend/config_templates.py
 
     // Normalize the max_samples
     if (jsonObject?.job?.max_samples !== undefined) {

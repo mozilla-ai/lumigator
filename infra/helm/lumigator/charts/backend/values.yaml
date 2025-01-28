@@ -17,8 +17,8 @@ serviceAccountName: ""
 existingMistralAPISecret: ""
 mistralAPIKey: ""
 
-evaluatorPipReqs: "/mzai/lumigator/lumigator/jobs/evaluator/requirements.txt"
-evaluatorWorkDir: "/mzai/lumigator/lumigator/jobs/evaluator"
+evaluatorPipReqs: "/mzai/lumigator/jobs/evaluator/requirements.txt"
+evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 
 image:
   repository: "mzdotai/lumigator"

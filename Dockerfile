@@ -4,8 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 # Copy the project into the image
 ADD . /mzai
 
-WORKDIR /mzai/lumigator/lumigator/backend
-ENV PYTHONPATH=/mzai/lumigator/lumigator/backend:/mzai/lumigator/lumigator/jobs
+WORKDIR /mzai/lumigator/backend
+ENV PYTHONPATH=/mzai/lumigator/backend:/mzai/lumigator/jobs
 
 FROM base AS main_image
 
@@ -23,8 +23,8 @@ RUN uv sync --frozen
 CMD [\
     "uv","run", "-m", "debugpy", "--listen", "0.0.0.0:5678", \
     "-m", "uvicorn", "backend.main:app", "--reload", \
-    "--reload-dir", "/mzai/lumigator/python/mzai/jobs", \
-    "--reload-dir", "/mzai/lumigator/python/mzai/schemas", \
+    "--reload-dir", "/mzai/lumigator/jobs", \
+    "--reload-dir", "/mzai/lumigator/schemas", \
     "--host", "0.0.0.0", \
     "--port", "8000" \
 ]

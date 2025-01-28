@@ -10,7 +10,7 @@ We want to encourage both suggestions and contributions from the community in th
 
 * Check out the [roadmap](https://github.com/orgs/mozilla-ai/projects/17): This will give you an overview of the project's direction and help you identify areas where your contributions can have the greatest impact.
 * Take a look into the existing issues: Check if your issue or challenge has already been discussed or reported. This helps avoid duplication of effort.
-* Learn about the code: The Lumigator project consists of several packages, each with its own pyproject.toml file. Understanding the project structure will make it easier to contribute effectively: the `lumigator/python/mzai/backend` package that powers the lumigator server functionality, the `lumigator/python/mzai/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/python/mzai/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
+* Learn about the code: The Lumigator project consists of several packages, each with its own pyproject.toml file. Understanding the project structure will make it easier to contribute effectively: the `lumigator/backend` package that powers the lumigator server functionality, the `lumigator/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
 
 ### **Disclaimer**
 

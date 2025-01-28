@@ -10,7 +10,7 @@
     },
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
-        "./lumigator/lumigator/schemas",
-        "./lumigator/lumigator/jobs"
+        "./lumigator/schemas",
+        "./lumigator/jobs"
     ]
 }

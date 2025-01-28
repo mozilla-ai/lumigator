@@ -107,14 +107,14 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
       - S3_BUCKET
-      - EVALUATOR_PIP_REQS=/mzai/lumigator/lumigator/jobs/evaluator/requirements.txt
-      - EVALUATOR_WORK_DIR=/mzai/lumigator/lumigator/jobs/evaluator
+      - EVALUATOR_PIP_REQS=/mzai/lumigator/jobs/evaluator/requirements.txt
+      - EVALUATOR_WORK_DIR=/mzai/lumigator/jobs/evaluator
       # TODO: the following two rows should be renamed to EVALUATOR_*
       #       and the two above should be removed when we depreate evaluator
-      - EVALUATOR_LITE_PIP_REQS=/mzai/lumigator/lumigator/jobs/evaluator_lite/requirements.txt
-      - EVALUATOR_LITE_WORK_DIR=/mzai/lumigator/lumigator/jobs/evaluator_lite
-      - INFERENCE_PIP_REQS=/mzai/lumigator/lumigator/jobs/inference/requirements.txt
-      - INFERENCE_WORK_DIR=/mzai/lumigator/lumigator/jobs/inference
+      - EVALUATOR_LITE_PIP_REQS=/mzai/lumigator/jobs/evaluator_lite/requirements.txt
+      - EVALUATOR_LITE_WORK_DIR=/mzai/lumigator/jobs/evaluator_lite
+      - INFERENCE_PIP_REQS=/mzai/lumigator/jobs/inference/requirements.txt
+      - INFERENCE_WORK_DIR=/mzai/lumigator/jobs/inference
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
       - MISTRAL_API_KEY=$MISTRAL_API_KEY

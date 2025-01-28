@@ -49,7 +49,14 @@ services:
       - "8265:8265"
       - "10001:10001"
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
-    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+          ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
+          mkdir -p /tmp/ray/session_latest/runtime_resources/pip
+          rmdir /tmp/ray/session_latest/runtime_resources/pip/ && ln -s /tmp/ray_pip_cache /tmp/ray/session_latest/runtime_resources/pip
+          sleep infinity
     shm_size: 2g
     deploy:
       resources:
@@ -78,6 +85,8 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+    volumes:
+      - ray-pip-cache:/tmp/ray_pip_cache
 
   backend:
     image: mzdotai/lumigator:latest
@@ -151,6 +160,6 @@ services:
       - 80:80
 
 volumes:
-
     minio-data:
     database_volume:
+    ray-pip-cache:

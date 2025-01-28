@@ -36,6 +36,7 @@ class ExperimentService:
     def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
         record = self._experiment_repo.get(experiment_id)
         if record is None:
+            # TODO: Use not found exception as this method doesn't exist.
             self._raise_not_found(experiment_id)
         return record
 
@@ -85,7 +86,7 @@ class ExperimentService:
         experiment_id: UUID = None,
     ):
         # use the inference job id to recover the dataset record
-        dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
+        dataset_record = self._dataset_service.get_dataset_by_job_id(inference_job_id)
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_dict = {

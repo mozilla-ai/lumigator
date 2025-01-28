@@ -72,7 +72,7 @@ class JobService:
         },
     }
 
-    VALID_STATUS = [
+    NON_TERMINAL_STATUS = [
         JobStatus.CREATED.value,
         JobStatus.PENDING.value,
         JobStatus.RUNNING.value,
@@ -80,7 +80,7 @@ class JobService:
     """list: A list of valid job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    STOP_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
     """list: A list of terminal job statuses."""
 
     def __init__(
@@ -259,7 +259,7 @@ class JobService:
         job_status = self.get_upstream_job_status(job_id)
 
         loguru.logger.info(f"Watching {job_id}")
-        while job_status not in self.STOP_STATUS and job_status in self.VALID_STATUS:
+        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
             await asyncio.sleep(5)
             job_status = self.get_upstream_job_status(job_id)
 

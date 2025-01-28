@@ -14,7 +14,7 @@ from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
 #   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput, EvaluationConfig
 from evaluator_lite.schemas import ModelConfig as ELModelConfig
-from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
     HfPipelineConfig,
@@ -47,7 +47,6 @@ from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
-    JobTypeUnsupportedError,
     JobUpstreamError,
 )
 from backend.settings import settings
@@ -173,7 +172,7 @@ class JobService:
 
         return bin_data
 
-    def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate, s3: S3FileSystem):
+    def _add_dataset_to_db(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
         """Attempts to add the result of a job (generated dataset) as a new dataset in Lumigator.
 
         :param job_id: The ID of the job, used to identify the S3 path

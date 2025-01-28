@@ -15,6 +15,7 @@ from starlette.responses import JSONResponse, Response
 from backend.api.router import api_router
 from backend.api.routes.completions import completion_exception_mappings
 from backend.api.routes.datasets import dataset_exception_mappings
+from backend.api.routes.jobs import job_exception_mappings
 from backend.api.tags import TAGS_METADATA
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.settings import settings
@@ -94,7 +95,7 @@ def create_app() -> FastAPI:
         completion_exception_mappings(),  # Completions
         dataset_exception_mappings(),  # Datasets
         # TODO: Add experiments
-        # TODO: Add jobs
+        job_exception_mappings(),  # Jobs
     ]
 
     # Add a handler for each error -> status mapping.

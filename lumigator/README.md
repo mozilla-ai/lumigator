@@ -20,4 +20,8 @@ The `python` directory contains the source code for the core functionality of Lu
 including:
 
 - **SDK**: A Python SDK for interacting with Lumigator services.
-- **Backend API**: The backend API that mkes the platform's features available.
+- **Backend API**: The backend API that makes the platform's features available.
+
+## `frontend` Directory
+
+The `frontend` directory contains the source code for Lumigator frontend.

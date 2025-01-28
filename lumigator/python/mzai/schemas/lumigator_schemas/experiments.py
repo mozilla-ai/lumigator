@@ -3,8 +3,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from lumigator_schemas.jobs import JobStatus
-
 
 class ExperimentCreate(BaseModel):
     name: str
@@ -22,7 +20,6 @@ class ExperimentResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str
     description: str
-    status: JobStatus
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None
 

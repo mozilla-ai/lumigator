@@ -1,14 +1,16 @@
+import json
 from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
-from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
-    JobInferenceCreate,
-    JobStatus,
+from lumigator_schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
 )
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import JobEvalLiteCreate, JobInferenceCreate, JobResponse, JobStatus
+from s3fs import S3FileSystem
 
 from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
@@ -16,6 +18,7 @@ from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
+from backend.settings import settings
 
 
 class ExperimentService:
@@ -138,6 +141,51 @@ class ExperimentService:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
 
         return ExperimentResponse.model_validate(record)
+
+    def _get_experiment_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
+        records = self._job_repo.get_by_experiment_id(experiment_id)
+        return ListingResponse(
+            total=len(records),
+            items=[JobResponse.model_validate(x) for x in records],
+        )
+
+    def get_experiment_result_download(
+        self, experiment_id: UUID
+    ) -> ExperimentResultDownloadResponse:
+        """Return experiment results file URL for downloading."""
+        s3 = S3FileSystem()
+        # get jobs matching this experiment
+        # have a query returning a list of (two) jobs, one inference and one eval,
+        # matching the current experiment id. Note that each job has its own type baked in
+        # (per https://github.com/mozilla-ai/lumigator/pull/576)
+        jobs = self._get_experiment_jobs(experiment_id)
+
+        # iterate on jobs and depending on which job this is, import selected fields
+        results = {}
+
+        for job in jobs:
+            # Get the dataset from the S3 bucket
+            result_key = self._job_service._get_results_s3_key(job.id)
+            with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+                job_results = json.loads(f.read())
+
+            # we just merge the two dictionaries for now
+            results.update(job_results)
+
+        loguru.logger.error(results)
+
+        # Generate presigned download URL for the object
+        result_key = self._job_service._get_results_s3_key(experiment_id)
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.S3_BUCKET,
+                "Key": result_key,
+            },
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+        return ExperimentResultDownloadResponse(id=experiment_id, download_url=download_url)
 
     def list_experiments(
         self, skip: int = 0, limit: int = 100

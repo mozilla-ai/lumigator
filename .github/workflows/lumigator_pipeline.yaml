@@ -139,23 +139,24 @@ jobs:
         id: filter
         with:
           filters: |
-            rebuild:
+            build:
               - '.github/**'
               - 'lumigator/**'
 
       - name: Truncate commit SHA
-        if: steps.filter.outputs.rebuild == 'true'
-        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
+        if: steps.filter.outputs.build == 'true'
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
-        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker buildx
-        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -163,7 +164,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push backend image
-        if: steps.filter.outputs.rebuild == 'true'
+        if: steps.filter.outputs.build == 'true'
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
@@ -186,23 +187,24 @@ jobs:
         id: filter
         with:
           filters: |
-            rebuild_fe:
+            build_fe:
               - '.github/workflows/**'
               - 'lumigator/frontend/**'
 
       - name: Truncate commit SHA
-        if: steps.filter.outputs.rebuild_fe == 'true'
-        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_ENV
+        if: steps.filter.outputs.build_fe == 'true'
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
-        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker buildx
-        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -211,7 +213,7 @@ jobs:
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v6
-        if: steps.filter.outputs.rebuild_fe == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
         with:
           file: "lumigator/frontend/Dockerfile"
           platforms: linux/amd64,linux/arm64
@@ -234,7 +236,7 @@ jobs:
         id: filter
         with:
           filters: |
-            rebuild:
+            push_be:
               - '.github/**'
               - 'lumigator/**'
 
@@ -253,7 +255,7 @@ jobs:
           docker pull ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
-        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -273,7 +275,7 @@ jobs:
         id: filter
         with:
           filters: |
-            rebuild:
+            push_fe:
               - '.github/**'
               - 'lumigator/**'
 
@@ -293,7 +295,7 @@ jobs:
           docker pull ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
-        if: steps.filter.outputs.rebuild == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

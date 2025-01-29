@@ -291,7 +291,7 @@ class JobService:
 
         return job_status
 
-    async def handle_inference_job(self, job_id: UUID, request: JobInferenceCreate):
+    async def handle_inference_job(self, job_id: UUID, request: JobCreate):
         """Long term we maybe want to move logic about how to handle a specific job
         to be separate from the job service. However, for now, we will keep it here.
         This function can be attached to the jobs that run inference so that the results will

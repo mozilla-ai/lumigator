@@ -225,36 +225,45 @@ def test_full_experiment_launch(
         "Content-Type": "application/json",
     }
     payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
-        "model": TEST_CAUSAL_MODEL,
-        "dataset": str(created_dataset.id),
-        "max_samples": 2,
+        "name": "test_experiment",
+        "description": "Test experiment for Huggingface models",
     }
 
     get_ds_response = local_client.get("/datasets/")
     assert get_ds_response.status_code == 200
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
-    create_experiments_response = local_client.post(
-        "/experiments_new/", headers=headers, json=payload
+    create_experiments_id_response = local_client.post(
+        "/experiments/new/", headers=headers, json=payload
     )
-    assert create_experiments_response.status_code == 201
+    assert create_experiments_id_response.status_code == 201
+    experiment_id = create_experiments_id_response.json()["id"]
 
-    get_experiments_response = local_client.get("/experiments_new/")
+    # run a workflow for that experiment
+    payload = {
+        "name": "test_run_hugging_face",
+        "description": "Test workflow for Huggingface model",
+        "model": TEST_CAUSAL_MODEL,
+        "dataset": str(created_dataset.id),
+        "experiment_id": experiment_id,
+        "max_samples": 2,
+    }
+    create_workflow_response = local_client.post("/workflows/", headers=headers, json=payload)
+    assert create_workflow_response.status_code == 201
 
+    get_experiments_response = local_client.get("/experiments/new/all")
+    assert get_experiments_response.status_code == 200
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
-    assert get_experiments.total > 0
+    assert experiment_id in [str(exp.id) for exp in get_experiments.items]
+    experiment_id = get_experiments.items[0].id
 
-    get_experiment_response = local_client.get(f"/experiments_new/{get_experiments.items[0].id}")
+    get_experiment_response = local_client.get(f"/experiments/new/{experiment_id}")
+    logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
-
     # response
-    get_jobs_per_experiment_response = local_client.get(
-        f"/experiments_new/{get_experiments.items[0].id}/jobs"
-    )
+    get_jobs_per_experiment_response = local_client.get(f"/workflows/{experiment_id}/jobs")
 
     experiment_jobs = ListingResponse[JobResponse].model_validate(
         get_jobs_per_experiment_response.json()

@@ -39,11 +39,6 @@ class ExperimentService:
         return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
     def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
-        # The FastAPI BackgroundTasks object is used to run a function in the background.
-        # It is a wrapper around Starlette's BackgroundTasks object.
-        # A background task should be attached to a response,
-        # and will run only once the response has been sent.
-        # See here: https://www.starlette.io/background/
         experiment_record = self._experiment_repo.create(
             name=request.name, description=request.description
         )

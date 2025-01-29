@@ -31,7 +31,8 @@ python_files="backend/tests/integration/*/test_*.py" \
 -k 'test_full_experiment_launch'
 ```
 
-As an example, editing this runs only the `test_full_experiment_launch` method in `test-backend-integration`
+As an example, editing this runs only the `test_full_experiment_launch` method in `test-backend-integration`:
+
 ```sh
 test-backend-integration:
 	cd lumigator/python/mzai/backend/; \
@@ -56,9 +57,9 @@ test-backend-integration:
 
 Additionally, you can run this directly on the commandline so as to not change the Makefile.
 
-The external services that the application depends on are the database, Ray cluster, and S3-compatible storage.
-
 ## Test Dependencies
+
+The external services that the application depends on are the database, Ray cluster, and S3-compatible storage.
 
 The backend tests offer two sets of service dependencies as fixtures:
 

@@ -82,12 +82,6 @@ To install Lumigator on a Kubernetes cluster, follow these steps:
     user@host:~$ git clone git@github.com:mozilla-ai/lumigator.git
     ```
 
-1. Change to the Lumigator directory:
-
-    ```console
-    user@host:~$ cd lumigator
-    ```
-
 1. Install the Lumigator Helm chart:
 
     ```console

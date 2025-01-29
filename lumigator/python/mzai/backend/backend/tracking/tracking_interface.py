@@ -70,26 +70,26 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def create_run(self, experiment_id: str, workflow_id: str, data: dict):
-        """Log the run output."""
+    def create_job(self, experiment_id: str, workflow_id: str, data: dict):
+        """Log the job output."""
         pass
 
     @abstractmethod
-    def get_run(self, run_id: str) -> dict:
-        """Get a run."""
+    def get_job(self, job_id: str) -> dict:
+        """Get a job."""
         pass
 
     @abstractmethod
-    def update_run(self, run_id: str, new_data: dict) -> None:
-        """Update a run."""
+    def update_job(self, job_id: str, new_data: dict) -> None:
+        """Update a job."""
         pass
 
     @abstractmethod
-    def delete_run(self, run_id: str) -> None:
-        """Delete a run."""
+    def delete_job(self, job_id: str) -> None:
+        """Delete a job."""
         pass
 
     @abstractmethod
-    def list_runs(self, experiment_id: str, workflow_id: str) -> list:
-        """List all runs for an workflow."""
+    def list_jobs(self, experiment_id: str, workflow_id: str) -> list:
+        """List all jobs for an workflow."""
         pass

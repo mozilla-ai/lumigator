@@ -20,7 +20,7 @@ docs = [
 ]
 
 [dependency-groups]
-# Added these as dev dependencies to make IDE pylint extenions happy
+# Added these as dev dependencies to make IDE pylint extension happy
 dev = [
     "alembic>=1.14.1",
     "debugpy>=1.8.12",

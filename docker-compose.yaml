@@ -181,8 +181,5 @@ services:
 volumes:
     minio-data:
     database_volume:
-<<<<<<< HEAD
     redis-data:
     ray-pip-cache:
-=======
->>>>>>> 658f734e (Setup pip cache during CI)

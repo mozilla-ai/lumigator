@@ -5,14 +5,13 @@ down into two distinct categories:
 
 - `unit` tests: Involve isolated functions/classes.
 - `integration` tests: Depend on some external service to run.
+-
+We currently test unit and integration tests via the `Makefile`:
+- `test-sdk`
+- `test-backend`
+- `test-jobs-unit`
 
-The external services that the application depends on are the database, Ray cluster, and S3 storage.
-Currently, we are using the [`TestContainers`](https://testcontainers-python.readthedocs.io/en/latest/)
-library to provide some of these dependencies for testing.
-
-`TestContainers` provides a simple interface for spinning up a Docker container running some service
-as part of the testing lifecycle. This is configured in the `conftest.py` file that contains
-fixtures for the entire test suite.
+The external services that the application depends on are the database, Ray cluster, and S3-compatible storage.
 
 ## Test Dependencies
 
@@ -25,10 +24,12 @@ By default, an embedded SQLite database is used in both cases.
 
 ## Running Tests
 
-To run the tests, you can use the following command:
+To run the backend tests, you can use the configured commands in the Makefile:
 
 ```
-SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
+- make test-backend-integration
+- make test-backend-unit
+- test-backend
 ```
 
 ## Test Settings

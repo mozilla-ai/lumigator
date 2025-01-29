@@ -199,7 +199,7 @@ jobs:
           filters: |
             rebuild_fe:
               - '.github/workflows/**'
-              - 'frontend/**'
+              - 'lumigator/frontend/**'
 
       - name: Truncate commit SHA
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV

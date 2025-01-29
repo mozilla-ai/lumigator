@@ -5,6 +5,7 @@ from lumigator_schemas.workflows import (
     WorkflowCreate,
     WorkflowDetailsResponse,
     WorkflowResponse,
+    WorkflowResultDownloadResponse,
     WorkflowSummaryResponse,
 )
 
@@ -53,15 +54,11 @@ def get_workflow_summary(
 
 
 @router.get("/{workflow_id}/details")
-def get_workflow_details(
+def get_experiment_result_download(
     service: WorkflowServiceDep,
     workflow_id: UUID,
-) -> WorkflowDetailsResponse:
-    """TODO: Retrieve the detailed results for a specific workflow.
-    This endpoint fetches the detailed results of the jobs that
-    were run as part of the specified workflow. Unlike the get_workflow_summary endpoint,
-    this endpoint returns the raw results of the jobs (stats for each example in the dataset).
-    It compiles the results into a downloadable format,
-    which can be used for further analysis or record-keeping.
-    """
-    raise NotImplementedError
+) -> WorkflowResultDownloadResponse:
+    """Return experiment results file URL for downloading."""
+    return WorkflowResultDownloadResponse.model_validate(
+        service.get_workflow_result_download(workflow_id).model_dump()
+    )

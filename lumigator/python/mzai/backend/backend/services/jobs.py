@@ -290,7 +290,7 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request: BaseModel) -> str:
+    def _set_model_type(self, request) -> str:
         """Sets model URL based on protocol address"""
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL

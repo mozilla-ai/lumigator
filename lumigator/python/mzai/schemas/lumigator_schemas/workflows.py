@@ -44,3 +44,8 @@ class WorkflowDetailsResponse(BaseModel):
     job_ids: list[UUID]
     metrics_urls: list[str]  # same length as run_ids
     artifacts_urls: list[str]  # same length as run_ids
+
+
+class WorkflowResultDownloadResponse(BaseModel):
+    id: UUID
+    download_url: str

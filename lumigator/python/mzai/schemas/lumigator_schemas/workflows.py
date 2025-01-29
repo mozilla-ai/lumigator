@@ -29,20 +29,14 @@ class WorkflowResponse(BaseModel, from_attributes=True):
     updated_at: datetime.datetime | None = None
 
 
-class WorkflowSummaryResponse(BaseModel, from_attributes=True):
-    workflow_id: UUID
-    experiment_id: UUID
-    job_ids: list[UUID]
-    metrics: dict
-    artifacts: dict
-    parameters: dict
-
-
-# TODO: This schema will need to be refined when the WorkflowDetails route is implemented
-class WorkflowDetailsResponse(BaseModel):
+# TODO: This schema will need to be refined when the get_workflow route is implemented
+class WorkflowDetailsResponse(BaseModel, from_attributes=True):
     workflow_id: UUID
     experiment_id: UUID
     jobs: list[JobResults]
+    metrics: dict
+    artifacts: dict
+    parameters: dict
 
 
 class WorkflowResultDownloadResponse(BaseModel):

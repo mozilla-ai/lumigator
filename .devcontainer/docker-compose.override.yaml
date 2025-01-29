@@ -8,9 +8,13 @@ services:
       dockerfile: "Dockerfile"
       target: "dev_image"
     volumes:
-      -  database_volume:/mzai/backend/local.db
+      - type: bind
+        source: ~/.lumigator/db/
+        target: /lumigator_db/
     ports:
       - "5678:5678"
+    environment:
+      - SQLALCHEMY_DATABASE_URL=sqlite:////lumigator_db/local.db
     develop:
       watch:
         - path: lumigator/python/mzai/backend/

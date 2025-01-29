@@ -169,7 +169,6 @@ def test_job_lifecycle_remote_ok(
 
     eval_job_config = JobEvalLiteConfig(
         metrics=["rouge", "meteor"],
-        model=TEST_CAUSAL_MODEL,
     )
     eval_job = JobCreate(
         name="test_run_hugging_face",

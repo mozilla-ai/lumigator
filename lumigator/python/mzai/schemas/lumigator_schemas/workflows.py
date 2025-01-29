@@ -21,6 +21,7 @@ class WorkflowCreate(BaseModel):
 
 class WorkflowResponse(BaseModel, from_attributes=True):
     id: UUID
+    experiment_id: UUID
     name: str
     description: str
     status: JobStatus

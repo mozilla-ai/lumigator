@@ -161,6 +161,7 @@ class WorkflowService:
         # have implemented the association of workflows with experiments
         workflow_record = {
             "id": uuid.uuid4(),
+            "experiment_id": request.experiment_id,
             "name": request.name,
             "description": request.description,
             "created_at": created_at,

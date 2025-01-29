@@ -346,7 +346,6 @@ def test_create_exp_workflow_check_results(
         workflow_status = workflow_1_details.status
         logger.info(f"Workflow status: {workflow_status}")
 
-    # now get the results of the experiment
     experiment_results = GetExperimentResponse.model_validate(
         local_client.get(f"/experiments/new/{experiment_id}").json()
     )
@@ -354,6 +353,41 @@ def test_create_exp_workflow_check_results(
     assert workflow_1_details.experiment_id == experiment_results.id
     assert len(experiment_results.workflows) == 1
     assert workflow_1_details == experiment_results.workflows[0]
+
+    # add another workflow to the experiment
+    workflow_2 = WorkflowResponse.model_validate(
+        local_client.post(
+            "/workflows/",
+            headers=POST_HEADER,
+            json={
+                "name": "Workflow_2",
+                "description": "Test workflow for inf and eval",
+                "model": TEST_CAUSAL_MODEL,
+                "dataset": str(dataset.id),
+                "experiment_id": experiment_id,
+                "max_samples": 1,
+            },
+        ).json()
+    )
+
+    # Wait till the workflow is done
+    workflow_status = workflow_2.status
+    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        time.sleep(1)
+        workflow_2_details = WorkflowDetailsResponse.model_validate(
+            local_client.get(f"/workflows/{workflow_2.id}").json()
+        )
+        workflow_status = workflow_2_details.status
+        logger.info(f"Workflow status: {workflow_status}")
+
+    # now get the results of the experiment
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+    # make sure it has the info for both workflows
+    assert len(experiment_results.workflows) == 2
+    assert workflow_1_details in experiment_results.workflows
+    assert workflow_2_details in experiment_results.workflows
 
     # TODO: delete the experiment
     # local_client.delete(f"/experiments/{experiment_id}")

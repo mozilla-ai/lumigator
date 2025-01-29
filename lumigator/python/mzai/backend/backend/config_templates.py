@@ -125,12 +125,7 @@ bart_infer_template = """{{
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
         "torch_dtype": "{torch_dtype}",
-        "max_length": 142,
-        "tokenizer": {{ "model_uri": "{model_uri}",
-                        "model_max_length": 1024,
-                        "use_fast": "{use_fast}",
-                        "trust_remote_code": "{trust_remote_code}"
-        }}
+        "max_length": 142
     }},
      "job": {{
         "max_samples": {max_samples},

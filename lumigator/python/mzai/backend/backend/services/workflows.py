@@ -176,7 +176,8 @@ class WorkflowService:
 
         return WorkflowResponse.model_validate(workflow_record)
 
-    # TODO: until we have implemented the association of workflows with experiments, everything continues to be indexed by experiment_id
+    # TODO: until we have implemented the association of workflows with experiments,
+    #  everything continues to be indexed by experiment_id
     def _get_workflow_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
         records = self._job_repo.get_by_experiment_id(experiment_id)
         return ListingResponse(

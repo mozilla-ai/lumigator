@@ -256,17 +256,17 @@ def test_full_experiment_launch(
         get_experiments_response.json()
     )
     assert experiment_id in [str(exp.id) for exp in get_experiments.items]
+    experiment_id = get_experiments.items[0].id
 
     get_experiment_response = local_client.get(f"/experiments/new/{experiment_id}")
     logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
-    assert wait_for_experiment(local_client, get_experiments.items[0].id)
     # response
-    get_jobs_per_experiment_response = local_client.get(
-        f"/experiments/new/{get_experiments.items[0].id}/jobs"
-    )
+    get_jobs_per_experiment_response = local_client.get(f"/workflows/{experiment_id}/jobs")
 
-    experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
+    experiment_jobs = ListingResponse[JobResponse].model_validate(
+        get_jobs_per_experiment_response.json()
+    )
 
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")

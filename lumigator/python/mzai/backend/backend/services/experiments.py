@@ -1,4 +1,3 @@
-import json
 from uuid import UUID
 
 import loguru
@@ -8,9 +7,6 @@ from lumigator_schemas.experiments import (
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
-    JobInferenceCreate,
-    JobResponse,
     JobStatus,
 )
 

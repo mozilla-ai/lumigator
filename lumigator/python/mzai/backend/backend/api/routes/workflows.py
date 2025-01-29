@@ -1,9 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import JobResponse
 from lumigator_schemas.workflows import (
     WorkflowCreate,
-    WorkflowDetailsResponse,
     WorkflowResponse,
     WorkflowResultDownloadResponse,
     WorkflowSummaryResponse,
@@ -34,6 +35,20 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: UUID) -> WorkflowResp
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
     raise NotImplementedError
+
+
+# TODO: currently experiment_id=workflow_id, but this will change
+@router.get("/{experiment_id}/jobs", include_in_schema=False)
+def get_workflow_jobs(
+    service: WorkflowServiceDep, experiment_id: UUID
+) -> ListingResponse[JobResponse]:
+    """Get all jobs for a workflow.
+    TODO: this will likely eventually be merged with the get_workflow endpoint, once implemented
+    """
+    # TODO right now this command expects that the workflow_id is the same as the experiment_id
+    return ListingResponse[JobResponse].model_validate(
+        service.get_workflow_jobs(experiment_id).model_dump()
+    )
 
 
 @router.get("/{workflow_id}/summary")

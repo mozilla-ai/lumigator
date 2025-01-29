@@ -178,7 +178,7 @@ class WorkflowService:
 
     # TODO: until we have implemented the association of workflows with experiments,
     #  everything continues to be indexed by experiment_id
-    def _get_workflow_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
+    def get_workflow_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
         records = self._job_repo.get_by_experiment_id(experiment_id)
         return ListingResponse(
             total=len(records),
@@ -192,7 +192,7 @@ class WorkflowService:
         # have a query returning a list of (two) jobs, one inference and one eval,
         # matching the current experiment id. Note that each job has its own type baked in
         # (per https://github.com/mozilla-ai/lumigator/pull/576)
-        jobs = self._get_workflow_jobs(experiment_id)
+        jobs = self.get_workflow_jobs(experiment_id)
 
         # iterate on jobs and depending on which job this is, import selected fields
         results = {}

@@ -12,7 +12,6 @@ from lumigator_schemas.experiments import (
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
-    JobResponse,
 )
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
@@ -86,7 +85,7 @@ def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
 ) -> ExperimentResponse:
     """Create an experiment ID."""
-    return service.create_experiment(request)
+    return ExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 
 
 @router.get("/new/all", include_in_schema=False)
@@ -105,15 +104,6 @@ def list_experiments_new(
 def get_experiment_new(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
     """Get an experiment by ID."""
     return ExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
-
-
-@router.get("/new/{experiment_id}/jobs", include_in_schema=False)
-def get_experiment_jobs(
-    service: ExperimentServiceDep, experiment_id: UUID
-) -> ListingResponse[JobResponse]:
-    return ListingResponse[JobResponse].model_validate(
-        service._get_experiment_jobs(experiment_id).model_dump()
-    )
 
 
 @router.get("/new/{experiment_id}/workflows", include_in_schema=False)

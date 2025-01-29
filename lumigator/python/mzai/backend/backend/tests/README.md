@@ -6,15 +6,60 @@ down into two distinct categories:
 - `unit` tests: Involve isolated functions/classes.
 - `integration` tests: Depend on some external service to run.
 
-The external services that the application depends on are the database, Ray cluster, and S3 storage.
-Currently, we are using the [`TestContainers`](https://testcontainers-python.readthedocs.io/en/latest/)
-library to provide some of these dependencies for testing.
 
-`TestContainers` provides a simple interface for spinning up a Docker container running some service
-as part of the testing lifecycle. This is configured in the `conftest.py` file that contains
-fixtures for the entire test suite.
+## Running Tests
+
+We currently test unit and integration tests via the `Makefile`:
+- `test-sdk`
+- `test-backend`
+- `test-jobs-unit`
+
+To run the backend tests, for example, you can use the configured commands in the `Makefile`:
+
+```
+- make test-backend-integration
+- make test-backend-unit
+- make test-backend # runs both
+```
+
+### Running Individual Tests
+To run individual tests, you can change the pytest path by specifying the `-k` flag in pytest, which runs tests [based on string expression](https://docs.pytest.org/en/6.2.x/usage.html#specifying-tests-selecting-tests)
+
+```sh
+uv run $(DEBUGPY_ARGS) -m pytest -s -o \
+python_files="backend/tests/integration/*/test_*.py" \
+-k 'test_full_experiment_launch'
+```
+
+As an example, editing this runs only the `test_full_experiment_launch` method in `test-backend-integration`:
+
+```sh
+test-backend-integration:
+	cd lumigator/python/mzai/backend/; \
+	docker container list --all; \
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	RAY_WORKER_GPUS="0.0" \
+	RAY_WORKER_GPUS_FRACTION="0.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
+	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o \
+	python_files="backend/tests/integration/*/test_*.py" \
+	-k 'test_full_experiment_launch'
+```
+
+Additionally, you can run this directly on the commandline so as to not change the Makefile.
 
 ## Test Dependencies
+
+The external services that the application depends on are the database, Ray cluster, and S3-compatible storage.
 
 The backend tests offer two sets of service dependencies as fixtures:
 
@@ -23,13 +68,6 @@ The backend tests offer two sets of service dependencies as fixtures:
 
 By default, an embedded SQLite database is used in both cases.
 
-## Running Tests
-
-To run the tests, you can use the following command:
-
-```
-SQLALCHEMY_DATABASE_URL=sqlite:///local.db uv run pytest
-```
 
 ## Test Settings
 

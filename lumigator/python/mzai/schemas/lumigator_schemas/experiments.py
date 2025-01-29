@@ -32,3 +32,8 @@ class ExperimentResponse(BaseModel, from_attributes=True):
 class ExperimentResultResponse(BaseModel, from_attributes=True):
     id: UUID
     experiment_id: UUID
+
+
+class ExperimentResultDownloadResponse(BaseModel):
+    id: UUID
+    download_url: str

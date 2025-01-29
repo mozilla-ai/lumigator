@@ -21,6 +21,6 @@ class DatasetResponse(BaseModel, from_attributes=True):
     size: int
     ground_truth: bool
     run_id: UUID | None
-    generated: bool
+    generated: bool | None
     generated_by: str | None
     created_at: datetime.datetime

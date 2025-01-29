@@ -41,6 +41,7 @@ class WorkflowDetailsResponse(WorkflowResponse):
     jobs: list[JobResults] | None = None
     metrics: dict | None = None
     parameters: dict | None = None
+    artifacts_download_url: str | None = None
 
 
 class WorkflowResultDownloadResponse(BaseModel):

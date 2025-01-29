@@ -352,7 +352,10 @@ def test_create_exp_workflow_check_results(
 
     assert workflow_1_details.experiment_id == experiment_results.id
     assert len(experiment_results.workflows) == 1
-    assert workflow_1_details == experiment_results.workflows[0]
+    # the presigned url can be different but everything else should be the same
+    assert workflow_1_details.model_dump(
+        exclude={"artifacts_download_url"}
+    ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
 
     # add another workflow to the experiment
     workflow_2 = WorkflowResponse.model_validate(
@@ -386,8 +389,13 @@ def test_create_exp_workflow_check_results(
     )
     # make sure it has the info for both workflows
     assert len(experiment_results.workflows) == 2
-    assert workflow_1_details in experiment_results.workflows
-    assert workflow_2_details in experiment_results.workflows
+    # make sure both workflows are in the experiment, excluding that presigned url again
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
 
     # TODO: delete the experiment
     # local_client.delete(f"/experiments/{experiment_id}")

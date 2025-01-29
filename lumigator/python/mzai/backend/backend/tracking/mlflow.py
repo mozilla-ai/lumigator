@@ -1,14 +1,19 @@
 import contextlib
+import json
 from collections.abc import Generator
 from datetime import datetime
 
+import boto3
+import loguru
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
+from s3fs import S3FileSystem
 
+from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient, TrackingClientManager
 
@@ -150,7 +155,7 @@ class MLflowTrackingClient(TrackingClient):
         )
         all_job_ids = [run.info.run_id for run in all_jobs]
 
-        return WorkflowDetailsResponse(
+        workflow_details = WorkflowDetailsResponse(
             id=workflow_id,
             experiment_id=workflow.info.experiment_id,
             description=workflow.data.tags.get("description"),
@@ -161,6 +166,45 @@ class MLflowTrackingClient(TrackingClient):
             metrics=self._compile_metrics(all_job_ids),
             parameters=self._compile_parameters(all_job_ids),
         )
+        # Currently, only compile the result json artifact if the workflow has succeeded
+        if workflow_details.status != WorkflowStatus.SUCCEEDED:
+            return workflow_details
+        # now we need to combine all of the files that were output into a single json.
+        # look through every job associated with this workflow and get the results
+        # combine them into a single json file, put that back into s3, and then generate
+        # a presigned URL for that file
+        compiled_results = {}
+        s3 = S3FileSystem()
+        for job in workflow_details.jobs:
+            # look for all parameter keys that end in "_s3_path" and download the file
+            for param in job.parameters:
+                if param["name"].endswith("_s3_path"):
+                    # download the file
+                    # get the file from the S3 bucket
+                    with s3.open(f"{param['value']}") as f:
+                        job_results = json.loads(f.read())
+                    # if any keys are the same, log a warning and then overwrite the key
+                    for key in job_results.keys():
+                        if key in compiled_results:
+                            loguru.logger.warning(
+                                f"Key '{key}' already exists in the compiled results. Overwriting."
+                            )
+                    # merge the results into the compiled results
+                    compiled_results.update(job_results)
+        with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
+            f.write(json.dumps(compiled_results))
+        # Generate presigned download URL for the object
+        s3_client = boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
+        download_url = s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.S3_BUCKET,
+                "Key": f"{workflow_id}/compiled.json",
+            },
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+        workflow_details.artifacts_download_url = download_url
+        return workflow_details
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         self._client.set_tag(workflow_id, "status", status)
@@ -179,6 +223,8 @@ class MLflowTrackingClient(TrackingClient):
         )
         for metric, value in data.metrics.items():
             self._client.log_metric(run.info.run_id, metric, value)
+        for parameter, value in data.parameters.items():
+            self._client.log_param(run.info.run_id, parameter, value)
 
     def update_job(self, job_id: str, new_data: dict):
         raise NotImplementedError

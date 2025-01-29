@@ -1,13 +1,8 @@
-from uuid import UUID
-
 from fastapi import APIRouter, BackgroundTasks, status
-from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import JobResponse
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
     WorkflowResponse,
-    WorkflowResultDownloadResponse,
 )
 
 from backend.api.deps import WorkflowServiceDep
@@ -35,45 +30,3 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetai
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
     return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
-
-
-# TODO: currently experiment_id=workflow_id, but this will change
-@router.get("/{experiment_id}/jobs", include_in_schema=False)
-def get_workflow_jobs(
-    service: WorkflowServiceDep, experiment_id: UUID
-) -> ListingResponse[JobResponse]:
-    """Get all jobs for a workflow.
-    TODO: this will likely eventually be merged with the get_workflow endpoint, once implemented
-    """
-    # TODO right now this command expects that the workflow_id is the same as the experiment_id
-    return ListingResponse[JobResponse].model_validate(
-        service.get_workflow_jobs(experiment_id).model_dump()
-    )
-
-
-@router.get("/{workflow_id}/details")
-def get_workflow_details(
-    service: WorkflowServiceDep,
-    workflow_id: UUID,
-) -> WorkflowDetailsResponse:
-    """TODO:Return the results metadata for a run if available in the DB.
-    This should retrieve the metadata for the job or jobs that were run in the workflow and compile
-    them into a single response that can be used to populate the UI.
-    Currently this looks like taking the average results for the
-    inference job (tok/s, gen length, etc) and the
-    average results for the evaluation job (ROUGE, BLEU, etc) and
-    returning them in a single response.
-    For detailed results you would want to use the get_workflow_details endpoint.
-    """
-    raise NotImplementedError
-
-
-@router.get("/{workflow_id}/details")
-def get_experiment_result_download(
-    service: WorkflowServiceDep,
-    workflow_id: UUID,
-) -> WorkflowResultDownloadResponse:
-    """Return experiment results file URL for downloading."""
-    return WorkflowResultDownloadResponse.model_validate(
-        service.get_workflow_result_download(workflow_id).model_dump()
-    )

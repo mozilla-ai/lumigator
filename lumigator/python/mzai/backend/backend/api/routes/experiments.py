@@ -108,12 +108,3 @@ def list_experiments_new(
 def get_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
     return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
-
-
-@router.get("/new/{experiment_id}/workflows", include_in_schema=False)
-def get_workflows(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse[UUID]:
-    """TODO: this endpoint should handle passing in an experiment id and the returning a list
-    of all the workflows associated with that experiment. Until workflows are stored and associated
-    with experiments, this is not yet implemented.
-    """
-    raise NotImplementedError

@@ -4,7 +4,6 @@ from pathlib import Path
 import loguru
 from evaluator_lite.schemas import EvalJobOutput
 from fastapi import BackgroundTasks
-from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
@@ -15,10 +14,8 @@ from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
     WorkflowResponse,
-    WorkflowResultDownloadResponse,
     WorkflowStatus,
 )
-from s3fs import S3FileSystem
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
@@ -88,15 +85,23 @@ class WorkflowService:
 
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
-        if job_inference_create.store_to_dataset:
-            self._job_service._add_dataset_to_db(
-                inference_job.id,
-                job_inference_create,
-                self._dataset_service.s3_filesystem,
-            )
+        self._job_service._add_dataset_to_db(
+            inference_job.id,
+            job_inference_create,
+            self._dataset_service.s3_filesystem,
+        )
+        # log the job to the tracking client
+        inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
+        inference_job_output = RunOutputs(
+            parameters={
+                "inference_output_s3_path": inf_path,
+            }
+        )
+        self._tracking_client.create_job(
+            request.experiment_id, workflow.id, "inference", inference_job_output
+        )
 
         # FIXME The ray status is now _not enough_ to set the job status,
-        # since the dataset may still be under creation
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
@@ -138,6 +143,9 @@ class WorkflowService:
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later
+            # Get the dataset from the S3 bucket
+            result_key = self._job_service._get_results_s3_key(evaluation_job.id)
+
             outputs = RunOutputs(
                 metrics={
                     "rouge1_mean": round(eval_output.rouge.rouge1_mean, 3),
@@ -148,7 +156,10 @@ class WorkflowService:
                     "bertscore_precision_mean": round(eval_output.bertscore.precision_mean, 3),
                     "bertscore_recall_mean": round(eval_output.bertscore.recall_mean, 3),
                     "meteor_mean": round(eval_output.meteor.meteor_mean, 3),
-                }
+                },
+                # eventually this could be an artifact and be stored by the tracking client,
+                #  but we'll keep it as being stored the way it is for right now.
+                parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
             )
             self._tracking_client.create_job(
                 request.experiment_id, workflow.id, "evaluation", outputs
@@ -160,7 +171,8 @@ class WorkflowService:
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
-        return self._tracking_client.get_workflow(workflow_id)
+        tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        return tracking_server_workflow
 
     def create_workflow(
         self, request: WorkflowCreateRequest, background_tasks: BackgroundTasks
@@ -186,48 +198,3 @@ class WorkflowService:
         background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
 
         return workflow
-
-    # TODO: until we have implemented the association of workflows with experiments,
-    #  everything continues to be indexed by experiment_id
-    def get_workflow_jobs(self, experiment_id: str) -> ListingResponse[JobResponse]:
-        records = self._job_repo.get_by_experiment_id(experiment_id)
-        return ListingResponse(
-            total=len(records),
-            items=[JobResponse.model_validate(x) for x in records],
-        )
-
-    def get_workflow_result_download(self, experiment_id: str) -> WorkflowResultDownloadResponse:
-        """Return experiment results file URL for downloading."""
-        s3 = S3FileSystem()
-        # get jobs matching this experiment
-        # have a query returning a list of (two) jobs, one inference and one eval,
-        # matching the current experiment id. Note that each job has its own type baked in
-        # (per https://github.com/mozilla-ai/lumigator/pull/576)
-        jobs = self.get_workflow_jobs(experiment_id)
-
-        # iterate on jobs and depending on which job this is, import selected fields
-        results = {}
-
-        for job in jobs:
-            # Get the dataset from the S3 bucket
-            result_key = self._job_service._get_results_s3_key(job.id)
-            with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-                job_results = json.loads(f.read())
-
-            # we just merge the two dictionaries for now
-            results.update(job_results)
-
-        loguru.logger.error(results)
-
-        # Generate presigned download URL for the object
-        result_key = self._job_service._get_results_s3_key(experiment_id)
-        download_url = self._dataset_service.s3_client.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": settings.S3_BUCKET,
-                "Key": result_key,
-            },
-            ExpiresIn=settings.S3_URL_EXPIRATION,
-        )
-
-        return WorkflowResultDownloadResponse(id=experiment_id, download_url=download_url)

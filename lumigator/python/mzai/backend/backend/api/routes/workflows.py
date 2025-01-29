@@ -5,9 +5,9 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import JobResponse
 from lumigator_schemas.workflows import (
     WorkflowCreate,
+    WorkflowDetailsResponse,
     WorkflowResponse,
     WorkflowResultDownloadResponse,
-    WorkflowSummaryResponse,
 )
 
 from backend.api.deps import WorkflowServiceDep
@@ -51,11 +51,11 @@ def get_workflow_jobs(
     )
 
 
-@router.get("/{workflow_id}/summary")
-def get_workflow_summary(
+@router.get("/{workflow_id}/details")
+def get_workflow_details(
     service: WorkflowServiceDep,
     workflow_id: UUID,
-) -> WorkflowSummaryResponse:
+) -> WorkflowDetailsResponse:
     """TODO:Return the results metadata for a run if available in the DB.
     This should retrieve the metadata for the job or jobs that were run in the workflow and compile
     them into a single response that can be used to populate the UI.

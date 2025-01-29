@@ -88,6 +88,8 @@ def create_experiment_id(
     return ExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 
 
+# TODO: FIXME this should not need the /all suffix.
+# See further discussion https://github.com/mozilla-ai/lumigator/pull/728/files/2c960962c365d72e0714a16333884f0f209d214e#r1932176937
 @router.get("/new/all", include_in_schema=False)
 def list_experiments_new(
     service: ExperimentServiceDep,

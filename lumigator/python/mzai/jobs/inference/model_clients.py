@@ -2,12 +2,13 @@ import os
 import re
 from abc import abstractmethod
 
-from inference_config import AutoTokenizerConfig, InferenceJobConfig
+from inference_config import InferenceJobConfig
 from loguru import logger
 from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion
-from transformers import AutoTokenizer, pipeline
+from transformers import pipeline
+from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
 
 def strip_path_prefix(path: str) -> str:
@@ -150,16 +151,50 @@ class MistralModelClient(APIModelClient):
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
-        pipeline_kwargs = config.hf_pipeline.model_dump()
-        if hasattr(config.hf_pipeline, "tokenizer") and config.hf_pipeline.tokenizer:
-            # If a tokenizer config is provided and is not None, load the tokenizer separately
-            pipeline_kwargs["tokenizer"] = self._load_tokenizer(config.hf_pipeline.tokenizer)
+        self._pipeline = pipeline(**config.hf_pipeline.model_dump())
+        logger.info(f"Initial model_max_length {self._pipeline.tokenizer.model_max_length}")
+        self._set_tokenizer_max_length()
+        logger.info(f"Final model_max_length {self._pipeline.tokenizer.model_max_length}")
 
-        self._pipeline = pipeline(**pipeline_kwargs)
+    def _set_tokenizer_max_length(self):
+        """Set the tokenizer's model_max_length if it's currently the default very large integer.
+        Checks various possible max_length parameters which varies on model architecture.
+        """
+        config = self._pipeline.model.config
 
-    def _load_tokenizer(self, tokenizer_config: AutoTokenizerConfig):
-        logger.info(f"Loading Tokenizer with config: {tokenizer_config}")
-        return AutoTokenizer.from_pretrained(**tokenizer_config.model_dump())
+        # Only override if it's the default value
+        if self._pipeline.tokenizer.model_max_length == VERY_LARGE_INTEGER:
+            # This is the default value from HF for models that don't have a max length
+            # Common parameter names to check in config
+            config_params = [
+                # BERT-based, LLaMA
+                "max_position_embeddings",
+                # GPT-2-based
+                "n_positions",
+                "n_ctx",
+                # ChatGLM-based
+                "max_sequence_length",
+                "seq_length",
+                # Mistral-based
+                "sliding_window",
+            ]
+
+            # Check config parameters
+            for param in config_params:
+                if hasattr(config, param):
+                    value = getattr(config, param)
+                    if (
+                        isinstance(value, int) and value < VERY_LARGE_INTEGER
+                    ):  # Sanity check for reasonable values
+                        self._pipeline.tokenizer.model_max_length = value
+                        logger.info(f"Setting model_max_length to {value} based on config.{param}")
+                        return
+
+            # If no suitable parameter is found, warn the user and continue with the HF default
+            logger.warning(
+                "Could not find a suitable parameter in the model config to set model_max_length. \
+                    Using default value."
+            )
 
     def predict(self, prompt):
         prediction = self._pipeline(prompt)[0]

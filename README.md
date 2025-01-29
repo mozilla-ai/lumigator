@@ -80,8 +80,8 @@ To start Lumigator locally, follow these steps:
 
 1. If your system has an NVIDIA GPU, you have an additional pre-requirement: [install the NVIDIA Container Toolkit following their instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). After that, open a terminal and run:
     ```bash
-    export RAY_WORKERS_GPU=1
-    export RAY_WORKERS_GPU_FRACTION=1.0
+    export RAY_WORKER_GPUS=1
+    export RAY_WORKER_GPUS_FRACTION=1.0
     export GPU_COUNT=1
     ```
     **Important: Continue the next steps in this same terminal.**
@@ -127,6 +127,10 @@ To stop the containers you started using Docker Compose, simply run the followin
 ```bash
 make stop-lumigator
 ```
+
+## Kubernetes Installation
+
+You can also deploy Lumigator on Kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.
 
 ## Documentation
 

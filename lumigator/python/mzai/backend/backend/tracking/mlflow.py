@@ -31,7 +31,7 @@ class MLflowTrackingClient(TrackingClient):
         workflow = self._client.create_run(experiment_id=experiment_id)
         return workflow.info.run_id
 
-    def create_run(self, experiment_id: str, workflow_id: str, data: dict):
+    def create_job(self, experiment_id: str, workflow_id: str, data: dict):
         """Log the run output to MLflow."""
         _ = self._client.create_run(
             experiment_id=experiment_id, tags={MLFLOW_PARENT_RUN_ID: workflow_id}
@@ -64,16 +64,16 @@ class MLflowTrackingClient(TrackingClient):
     def list_workflows(self, experiment_id: str) -> list:
         raise NotImplementedError
 
-    def update_run(self, run_id: str, new_data: dict):
+    def update_job(self, job_id: str, new_data: dict):
         raise NotImplementedError
 
-    def get_run(self, run_id: str):
+    def get_job(self, job_id: str):
         raise NotImplementedError
 
-    def delete_run(self, run_id: str):
+    def delete_job(self, job_id: str):
         raise NotImplementedError
 
-    def list_runs(self, experiment_id: str, workflow_id: str):
+    def list_jobs(self, experiment_id: str, workflow_id: str):
         raise NotImplementedError
 
 

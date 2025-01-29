@@ -2,24 +2,21 @@ from datetime import datetime
 from uuid import UUID
 
 import loguru
-from fastapi import BackgroundTasks, HTTPException, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
-    ExperimentIdCreate,
     ExperimentIdResponse,
     ExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
     JobStatus,
 )
 
-from backend.records.experiments import ExperimentRecord
 from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
 from backend.tracking import TrackingClient
 
@@ -39,15 +36,6 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def _raise_not_found(self, job_id: UUID):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
-
-    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
-        record = self._experiment_repo.get(experiment_id)
-        if record is None:
-            self._raise_not_found(experiment_id)
-        return record
-
     def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
         return self._job_repo.get_by_experiment_id(experiment_id)
 
@@ -55,33 +43,7 @@ class ExperimentService:
         jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
         return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
-    def _run_eval(
-        self,
-        inference_job_id: UUID,
-        request: ExperimentCreate,
-        background_tasks: BackgroundTasks,
-        experiment_id: UUID = None,
-    ):
-        # use the inference job id to recover the dataset record
-        dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
-
-        # prepare the inputs for the evaluation job and pass the id of the new dataset
-        job_eval_dict = {
-            "name": f"{request.name}-evaluation",
-            "model": request.model,
-            "dataset": dataset_record.id,
-            "max_samples": request.max_samples,
-            "skip_inference": True,
-        }
-
-        # submit the job
-        self._job_service.create_job(
-            JobEvalLiteCreate.model_validate(job_eval_dict),
-            background_tasks,
-            experiment_id=experiment_id,
-        )
-
-    def create_experiment(self, request: ExperimentIdCreate) -> ExperimentIdResponse:
+    def create_experiment(self, request: ExperimentCreate) -> ExperimentIdResponse:
         experiment_record = self._experiment_repo.create(
             name=request.name, description=request.description
         )
@@ -101,7 +63,17 @@ class ExperimentService:
 
     # TODO Move this into a "composite job" impl
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
-        record = self._get_experiment_record(experiment_id)
+        """Gets an experiment by ID.
+
+        :param experiment_id: the ID of the experiment to return information for
+        :returns: information on the experiment, such as the ID, name, status etc.
+        :rtype: ExperimentResponse
+        :raises ExperimentNotFoundError: if the experiment does not exist
+        """
+        record = self._experiment_repo.get(experiment_id)
+        if record is None:
+            raise ExperimentNotFoundError(experiment_id) from None
+
         loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
 
         all_succeeded = True

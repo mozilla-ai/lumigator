@@ -8,15 +8,20 @@ from uuid import UUID
 import loguru
 from evaluator_lite.schemas import EvalJobOutput
 from fastapi import BackgroundTasks
+from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
+    JobResponse,
     JobStatus,
 )
-from lumigator_schemas.workflows import WorkflowCreate, WorkflowResponse
+from lumigator_schemas.workflows import (
+    WorkflowCreate,
+    WorkflowResponse,
+    WorkflowResultDownloadResponse,
+)
 from s3fs import S3FileSystem
 
-from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
@@ -27,50 +32,47 @@ from backend.tracking import TrackingClient
 class WorkflowService:
     def __init__(
         self,
-        experiment_repo: ExperimentRepository,
         job_repo: JobRepository,
         job_service: JobService,
         dataset_service: DatasetService,
         tracking_client: TrackingClient,
     ):
-        self._experiment_repo = experiment_repo
         self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
         self._tracking_client = tracking_client
+        self.NON_TERMINAL_STATUS = [
+            JobStatus.CREATED.value,
+            JobStatus.PENDING.value,
+            JobStatus.RUNNING.value,
+        ]
+
+        # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
+        self.TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
 
     async def on_job_complete(
         self, job_id: UUID, experiment_id: UUID, workflow_id: UUID, task: Callable = None, *args
     ):
-        """Watches a submitted job and, when it terminates successfully, runs a given task.
-
-        Inputs:
-        - job_id: the UUID of the job to watch
-        - task: the function to be called after the job completes successfully
-        - args: the arguments to be passed to the function `task()`
-        """
-        job_status = self._job_service.ray_client.get_job_status(job_id)
-
-        # TODO rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-        valid_status = [
-            JobStatus.CREATED.value.lower(),
-            JobStatus.PENDING.value.lower(),
-            JobStatus.RUNNING.value.lower(),
-        ]
-        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
+        job_status = self._job_service.get_upstream_job_status(job_id)
 
         loguru.logger.info(f"Watching {job_id}")
-        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
+        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
             await asyncio.sleep(5)
-            job_status = self._job_service.ray_client.get_job_status(job_id)
+            job_status = self._job_service.get_upstream_job_status(job_id)
 
-        if job_status.lower() == JobStatus.FAILED.value.lower():
-            loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-
-        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
-            loguru.logger.info(f"Job {job_id} finished successfully.")
-            if task is not None:
-                task(*args)
+        match job_status:
+            case JobStatus.FAILED.value:
+                loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
+            case JobStatus.SUCCEEDED.value:
+                loguru.logger.info(f"Job {job_id} finished successfully.")
+                if task is not None:
+                    task(*args)
+            case _:
+                # NOTE: Consider raising an exception here as we *really* don't expect
+                # anything other than FAILED or SUCCEEDED.
+                loguru.logger.error(
+                    f"Job {job_id} has an unexpected status ({job_status}) that is not completed."
+                )
 
     def _validate_evaluation_results(
         self,
@@ -202,6 +204,7 @@ class WorkflowService:
         # have implemented the association of workflows with experiments
         workflow_record = {
             "id": workflow_id,
+            "experiment_id": request.experiment_id,
             "name": request.name,
             "description": request.description,
             "created_at": created_at,
@@ -216,3 +219,48 @@ class WorkflowService:
         workflow_record["status"] = JobStatus.CREATED
 
         return WorkflowResponse.model_validate(workflow_record)
+
+    # TODO: until we have implemented the association of workflows with experiments,
+    #  everything continues to be indexed by experiment_id
+    def get_workflow_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
+        records = self._job_repo.get_by_experiment_id(experiment_id)
+        return ListingResponse(
+            total=len(records),
+            items=[JobResponse.model_validate(x) for x in records],
+        )
+
+    def get_workflow_result_download(self, experiment_id: UUID) -> WorkflowResultDownloadResponse:
+        """Return experiment results file URL for downloading."""
+        s3 = S3FileSystem()
+        # get jobs matching this experiment
+        # have a query returning a list of (two) jobs, one inference and one eval,
+        # matching the current experiment id. Note that each job has its own type baked in
+        # (per https://github.com/mozilla-ai/lumigator/pull/576)
+        jobs = self.get_workflow_jobs(experiment_id)
+
+        # iterate on jobs and depending on which job this is, import selected fields
+        results = {}
+
+        for job in jobs:
+            # Get the dataset from the S3 bucket
+            result_key = self._job_service._get_results_s3_key(job.id)
+            with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+                job_results = json.loads(f.read())
+
+            # we just merge the two dictionaries for now
+            results.update(job_results)
+
+        loguru.logger.error(results)
+
+        # Generate presigned download URL for the object
+        result_key = self._job_service._get_results_s3_key(experiment_id)
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.S3_BUCKET,
+                "Key": result_key,
+            },
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+        return WorkflowResultDownloadResponse(id=experiment_id, download_url=download_url)

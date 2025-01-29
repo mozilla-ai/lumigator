@@ -51,6 +51,8 @@ services:
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
     command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
+    volumes:
+      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
     deploy:
       resources:
         limits:
@@ -80,7 +82,7 @@ services:
       - local
 
   backend:
-    image: mzdotai/lumigator:latest
+    image: mzdotai/lumigator:v0.1.0-alpha
     build:
       context: .
       dockerfile: "Dockerfile"
@@ -92,9 +94,6 @@ services:
         condition: "service_started"
         required: false
       ray:
-        condition: "service_started"
-        required: false
-      mlflow:
         condition: "service_started"
         required: false
     ports:
@@ -124,7 +123,6 @@ services:
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
-      - MLFLOW_TRACKING_URI
       - LUMI_API_CORS_ALLOWED_ORIGINS
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
@@ -135,7 +133,7 @@ services:
       - "localhost:host-gateway"
 
   frontend:
-    image: mzdotai/lumigator-frontend:latest
+    image: mzdotai/lumigator-frontend:v0.1.0-alpha
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"
@@ -154,26 +152,6 @@ services:
     ports:
       - 80:80
 
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.0.1
-    environment:
-      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - BACKEND_STORE_URI=sqlite:///mlflow.db
-      - ARTIFACT_ROOT=s3://mlflow/x`
-    ports:
-      - "8001:5000"
-    depends_on:
-      minio:
-        condition: service_healthy
-    command: mlflow server --backend-store-uri ${BACKEND_STORE_URI} --default-artifact-root ${ARTIFACT_ROOT} --host 0.0.0.0
-    extra_hosts:
-      - "localhost:host-gateway"
-    profiles:
-      - local
 volumes:
-
     minio-data:
     database_volume:

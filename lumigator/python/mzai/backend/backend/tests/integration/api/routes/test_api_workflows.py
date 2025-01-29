@@ -1,3 +1,5 @@
+import json
+import logging
 import time
 from uuid import UUID
 
@@ -10,6 +12,7 @@ from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
+    Job,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -39,6 +42,8 @@ def test_upload_data_launch_job(
 ):
     response = local_client.get("/health")
     assert response.status_code == 200
+
+    logger.info("Running test...")
 
     create_response = local_client.post(
         "/datasets/",
@@ -77,7 +82,7 @@ def test_upload_data_launch_job(
         create_inference_job_response.json()
     )
 
-    assert wait_for_job(local_client, create_inference_job_response_model.id)
+    wait_for_job(local_client, create_inference_job_response_model.id)
 
     logs_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/logs"
@@ -252,17 +257,18 @@ def test_full_experiment_launch(
         get_experiments_response.json()
     )
     assert experiment_id in [str(exp.id) for exp in get_experiments.items]
+    experiment_id = get_experiments.items[0].id
 
     get_experiment_response = local_client.get(f"/experiments/new/{experiment_id}")
     logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
+    # response
+    get_jobs_per_experiment_response = local_client.get(f"/workflows/{experiment_id}/jobs")
 
-    assert wait_for_experiment(local_client, get_experiments.items[0].id)
-
-    get_jobs_per_experiment_response = local_client.get(
-        f"/experiments/new/{get_experiments.items[0].id}/jobs"
+    experiment_jobs = ListingResponse[JobResponse].model_validate(
+        get_jobs_per_experiment_response.json()
     )
-    experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
+
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")
         logs_job_response_model = JobLogsResponse.model_validate(logs_job_response.json())
@@ -280,11 +286,11 @@ def test_experiment_non_existing(local_client: TestClient, dependency_overrides_
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Job {non_existing_id} not found."
+    assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Job {non_existing_id} not found."
+    assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"

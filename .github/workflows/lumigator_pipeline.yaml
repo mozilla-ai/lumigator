@@ -11,7 +11,7 @@ on:
       - main
     tags:
       # Not the right semver regexp, but good enough
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v*.*.*'
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
@@ -74,6 +74,11 @@ jobs:
       - name: Install python
         run: uv python install
 
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
       - name: Spinning up containers for the tests
         run: make start-lumigator-build
 
@@ -116,6 +121,11 @@ jobs:
       - name: Install kernel
         run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
         working-directory: notebooks
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Setup containers
         run: make start-lumigator-build

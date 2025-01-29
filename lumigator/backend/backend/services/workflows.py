@@ -4,11 +4,11 @@ from pathlib import Path
 import loguru
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
-    JobInferenceCreate,
-    JobLogsResponse,
-    JobResponse,
+    JobCreate,
+    JobEvalLiteConfig,
+    JobInferenceConfig,
     JobResultObject,
+    JobLogsResponse,
     JobStatus,
 )
 from lumigator_schemas.workflows import (
@@ -37,6 +37,7 @@ class WorkflowService:
         job_service: JobService,
         dataset_service: DatasetService,
         tracking_client: TrackingClient,
+        background_tasks: BackgroundTasks
     ):
         self._job_repo = job_repo
         self._job_service = job_service
@@ -61,20 +62,25 @@ class WorkflowService:
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
-        job_inference_dict = {
-            "name": f"{workflow.name}-inference",
-            "model": request.model,
-            "dataset": request.dataset,
-            "max_samples": request.max_samples,
-            "model_url": request.model_url,
-            "output_field": request.inference_output_field,
-            "system_prompt": request.system_prompt,
-            "store_to_dataset": True,
-        }
-        job_inference_create = JobInferenceCreate.model_validate(job_inference_dict)
+        job_infer_config = JobInferenceConfig(
+            model=request.model,
+            model_url=request.model_url,
+            output_field=request.inference_output_field,
+            system_prompt=request.system_prompt,
+            store_to_dataset=True,
+        )
+        job_infer_create = JobCreate(
+            name=f"{request.name}-inference",
+            dataset=request.dataset,
+            max_samples=request.max_samples,
+            job_config=job_infer_config,
+        )
+
         # submit inference job first
-        inference_job = JobResponse.model_validate(
-            self._job_service.create_job(job_inference_create)
+        inference_job = self._job_service.create_job(
+            job_infer_create,
+            self.background_tasks,
+            experiment_id=request.experiment_id,
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
@@ -92,7 +98,7 @@ class WorkflowService:
         # Add the dataset to the (local) database
         self._job_service._add_dataset_to_db(
             inference_job.id,
-            job_inference_create,
+            job_infer_create,
             self._dataset_service.s3_filesystem,
         )
         # log the job to the tracking client
@@ -110,17 +116,18 @@ class WorkflowService:
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
-        job_eval_dict = {
-            "name": f"{request.name}-evaluation",
-            "model": request.model,
-            "dataset": dataset_record.id,
-            "max_samples": request.max_samples,
-            "skip_inference": True,
-        }
+        job_eval_create = JobCreate(
+            name=f"{request.name}-evaluation",
+            dataset=dataset_record.id,
+            max_samples=request.max_samples,
+            job_config=JobEvalLiteConfig(),
+        )
 
         # submit the job
-        evaluation_job = JobResponse.model_validate(
-            self._job_service.create_job(JobEvalLiteCreate.model_validate(job_eval_dict))
+        evaluation_job = self._job_service.create_job(
+            job_eval_create,
+            self.background_tasks,
+            experiment_id=request.experiment_id,
         )
 
         # wait for the evaluation job to complete
@@ -132,13 +139,12 @@ class WorkflowService:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
         try:
-            eval_lite_request = JobEvalLiteCreate.model_validate(job_eval_dict)
             loguru.logger.info("Handling evaluation result")
 
             result_key = str(
                 Path(settings.S3_JOB_RESULTS_PREFIX)
                 / settings.S3_JOB_RESULTS_FILENAME.format(
-                    job_name=eval_lite_request.name, job_id=evaluation_job.id
+                    job_name=job_eval_create.name, job_id=evaluation_job.id
                 )
             )
             with self._dataset_service.s3_filesystem.open(
@@ -187,7 +193,7 @@ class WorkflowService:
         return tracking_server_workflow
 
     def create_workflow(
-        self, request: WorkflowCreateRequest, background_tasks: BackgroundTasks
+        self, request: WorkflowCreateRequest
     ) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
@@ -204,10 +210,12 @@ class WorkflowService:
 
         workflow = self._tracking_client.create_workflow(
             experiment_id=request.experiment_id, description=request.description, name=request.name
+        # input is WorkflowCreate, we need to split the configs and generate one
+        # JobInferenceCreate and one JobEvalCreate
         )
 
         # Run the inference and evaluation pipeline as a background task
-        background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
+        self.background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
 
         return workflow
 

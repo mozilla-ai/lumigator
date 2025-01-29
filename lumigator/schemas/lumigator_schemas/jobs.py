@@ -79,7 +79,6 @@ class JobEvalConfig(BaseModel):
 class JobEvalLiteConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION_LITE] = JobType.EVALUATION_LITE
     metrics: list[str] = ["meteor", "rouge", "bertscore"]
-    model: str
 
 
 class JobInferenceConfig(BaseModel):
@@ -103,7 +102,7 @@ class JobInferenceConfig(BaseModel):
 
 
 class JobAnnotateConfig(BaseModel):
-    job_type: Literal[JobType.ANNOTATION]
+    job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     task: str | None = "summarization"
     store_to_dataset: bool = False
 

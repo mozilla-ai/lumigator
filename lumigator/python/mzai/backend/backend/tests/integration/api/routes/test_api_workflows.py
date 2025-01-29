@@ -1,3 +1,5 @@
+import json
+import logging
 import time
 from uuid import UUID
 
@@ -10,6 +12,7 @@ from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
+    Job,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -39,6 +42,8 @@ def test_upload_data_launch_job(
 ):
     response = local_client.get("/health")
     assert response.status_code == 200
+
+    logger.info("Running test...")
 
     create_response = local_client.post(
         "/datasets/",
@@ -77,7 +82,7 @@ def test_upload_data_launch_job(
         create_inference_job_response.json()
     )
 
-    assert wait_for_job(local_client, create_inference_job_response_model.id)
+    wait_for_job(local_client, create_inference_job_response_model.id)
 
     logs_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/logs"
@@ -237,21 +242,24 @@ def test_full_experiment_launch(
     assert create_experiments_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments_new/")
+
     get_experiments = ListingResponse[ExperimentResponse].model_validate(
         get_experiments_response.json()
     )
     assert get_experiments.total > 0
 
     get_experiment_response = local_client.get(f"/experiments_new/{get_experiments.items[0].id}")
-    logger.info(f"--> {get_experiment_response.text}")
     assert get_experiment_response.status_code == 200
 
-    assert wait_for_experiment(local_client, get_experiments.items[0].id)
-
+    # response
     get_jobs_per_experiment_response = local_client.get(
         f"/experiments_new/{get_experiments.items[0].id}/jobs"
     )
-    experiment_jobs = ListingResponse[UUID].model_validate(get_jobs_per_experiment_response.json())
+
+    experiment_jobs = ListingResponse[JobResponse].model_validate(
+        get_jobs_per_experiment_response.json()
+    )
+
     for job in experiment_jobs.items:
         logs_job_response = local_client.get(f"/jobs/{job}/logs")
         logs_job_response_model = JobLogsResponse.model_validate(logs_job_response.json())

@@ -1,23 +1,24 @@
-import asyncio
-from collections.abc import Callable
+import json
 from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentResponse
-from lumigator_schemas.extras import ListingResponse
-from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
-    JobInferenceCreate,
-    JobStatus,
+from lumigator_schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+    ExperimentResultDownloadResponse,
 )
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import JobEvalLiteCreate, JobInferenceCreate, JobResponse, JobStatus
+from s3fs import S3FileSystem
 
-from backend.records.experiments import ExperimentRecord
 from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
+from backend.settings import settings
 
 
 class ExperimentService:
@@ -33,50 +34,12 @@ class ExperimentService:
         self._job_service = job_service
         self._dataset_service = dataset_service
 
-    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
-        record = self._experiment_repo.get(experiment_id)
-        if record is None:
-            # TODO: Use not found exception as this method doesn't exist.
-            self._raise_not_found(experiment_id)
-        return record
-
     def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
         return self._job_repo.get_by_experiment_id(experiment_id)
 
     def get_all_owned_jobs(self, experiment_id: UUID) -> ListingResponse[UUID]:
         jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
         return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
-
-    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
-        """Watches a submitted job and, when it terminates successfully, runs a given task.
-
-        Inputs:
-        - job_id: the UUID of the job to watch
-        - task: the function to be called after the job completes successfully
-        - args: the arguments to be passed to the function `task()`
-        """
-        job_status = self._job_service.ray_client.get_job_status(job_id)
-
-        # TODO rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-        valid_status = [
-            JobStatus.CREATED.value.lower(),
-            JobStatus.PENDING.value.lower(),
-            JobStatus.RUNNING.value.lower(),
-        ]
-        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
-
-        loguru.logger.info(f"Watching {job_id}")
-        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            await asyncio.sleep(5)
-            job_status = self._job_service.ray_client.get_job_status(job_id)
-
-        if job_status.lower() == JobStatus.FAILED.value.lower():
-            loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-
-        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
-            loguru.logger.info(f"Job {job_id} finished successfully.")
-            if task is not None:
-                task(*args)
 
     def _run_eval(
         self,
@@ -141,7 +104,7 @@ class ExperimentService:
         # run evaluation job afterwards
         # (NOTE: tasks in starlette are executed sequentially: https://www.starlette.io/background/)
         background_tasks.add_task(
-            self.on_job_complete,
+            self._job_service.on_job_complete,
             job_response.id,
             self._run_eval,
             job_response.id,
@@ -154,7 +117,17 @@ class ExperimentService:
 
     # TODO Move this into a "composite job" impl
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
-        record = self._get_experiment_record(experiment_id)
+        """Gets an experiment by ID.
+
+        :param experiment_id: the ID of the experiment to return information for
+        :returns: information on the experiment, such as the ID, name, status etc.
+        :rtype: ExperimentResponse
+        :raises ExperimentNotFoundError: if the experiment does not exist
+        """
+        record = self._experiment_repo.get(experiment_id)
+        if record is None:
+            raise ExperimentNotFoundError(experiment_id) from None
+
         loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
 
         all_succeeded = True
@@ -168,6 +141,51 @@ class ExperimentService:
             record = self._experiment_repo.update(experiment_id, status=JobStatus.SUCCEEDED)
 
         return ExperimentResponse.model_validate(record)
+
+    def _get_experiment_jobs(self, experiment_id: UUID) -> ListingResponse[JobResponse]:
+        records = self._job_repo.get_by_experiment_id(experiment_id)
+        return ListingResponse(
+            total=len(records),
+            items=[JobResponse.model_validate(x) for x in records],
+        )
+
+    def get_experiment_result_download(
+        self, experiment_id: UUID
+    ) -> ExperimentResultDownloadResponse:
+        """Return experiment results file URL for downloading."""
+        s3 = S3FileSystem()
+        # get jobs matching this experiment
+        # have a query returning a list of (two) jobs, one inference and one eval,
+        # matching the current experiment id. Note that each job has its own type baked in
+        # (per https://github.com/mozilla-ai/lumigator/pull/576)
+        jobs = self._get_experiment_jobs(experiment_id)
+
+        # iterate on jobs and depending on which job this is, import selected fields
+        results = {}
+
+        for job in jobs:
+            # Get the dataset from the S3 bucket
+            result_key = self._job_service._get_results_s3_key(job.id)
+            with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+                job_results = json.loads(f.read())
+
+            # we just merge the two dictionaries for now
+            results.update(job_results)
+
+        loguru.logger.error(results)
+
+        # Generate presigned download URL for the object
+        result_key = self._job_service._get_results_s3_key(experiment_id)
+        download_url = self._dataset_service.s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.S3_BUCKET,
+                "Key": result_key,
+            },
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+        return ExperimentResultDownloadResponse(id=experiment_id, download_url=download_url)
 
     def list_experiments(
         self, skip: int = 0, limit: int = 100

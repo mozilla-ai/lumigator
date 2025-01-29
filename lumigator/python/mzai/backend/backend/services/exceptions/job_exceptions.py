@@ -11,7 +11,7 @@ from backend.services.exceptions.base_exceptions import (
 
 
 class JobNotFoundError(NotFoundError):
-    """Raised when job does not exist."""
+    """Raised when a job does not exist."""
 
     def __init__(self, resource_id: UUID, message: str | None = None, exc: Exception | None = None):
         """Creates a JobNotFoundError.

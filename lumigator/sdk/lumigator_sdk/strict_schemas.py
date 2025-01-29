@@ -1,5 +1,3 @@
-from typing import Literal
-
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
     ExperimentIdCreate,
@@ -18,7 +16,6 @@ from lumigator_schemas.jobs import (
     JobResultDownloadResponse,
     JobResultResponse,
     JobSubmissionResponse,
-    JobType,
 )
 from lumigator_schemas.workflows import WorkflowCreateRequest
 from pydantic import ConfigDict
@@ -69,17 +66,14 @@ class JobCreate(JobCreate):
 
 
 class JobInferenceConfig(JobInferenceConfig):
-    job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model_config = ConfigDict(extra="forbid")
 
 
 class JobEvalLiteConfig(JobEvalLiteConfig):
-    job_type: Literal[JobType.EVALUATION_LITE] = JobType.EVALUATION_LITE
     model_config = ConfigDict(extra="forbid")
 
 
 class JobAnnotateConfig(JobAnnotateConfig):
-    job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     model_config = ConfigDict(extra="forbid")
 
 

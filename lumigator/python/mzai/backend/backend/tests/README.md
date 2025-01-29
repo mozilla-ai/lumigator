@@ -7,17 +7,28 @@ down into two distinct categories:
 - `integration` tests: Depend on some external service to run.
 
 
+## Running Tests
+
 We currently test unit and integration tests via the `Makefile`:
 - `test-sdk`
 - `test-backend`
 - `test-jobs-unit`
 
-## Running Individual Tests
+To run the backend tests, for example, you can use the configured commands in the `Makefile`:
+
+```
+- make test-backend-integration
+- make test-backend-unit
+- test-backend # runs both
+```
+
+### Running Individual Tests
 To run individual tests, you can change the pytest path by specifying the `-k` flag in pytest, which runs tests [based on string expression](https://docs.pytest.org/en/6.2.x/usage.html#specifying-tests-selecting-tests)
 
-```uv run $(DEBUGPY_ARGS) -m pytest -s -o \
-	python_files="backend/tests/integration/*/test_*.py" \
-	-k 'test_full_experiment_launch'
+```sh
+uv run $(DEBUGPY_ARGS) -m pytest -s -o \
+python_files="backend/tests/integration/*/test_*.py" \
+-k 'test_full_experiment_launch'
 ```
 
 As an example, editing this runs only the `test_full_experiment_launch` method in `test-backend-integration`
@@ -56,15 +67,6 @@ The backend tests offer two sets of service dependencies as fixtures:
 
 By default, an embedded SQLite database is used in both cases.
 
-## Running Tests
-
-To run the backend tests, you can use the configured commands in the Makefile:
-
-```
-- make test-backend-integration
-- make test-backend-unit
-- test-backend # runs both
-```
 
 ## Test Settings
 

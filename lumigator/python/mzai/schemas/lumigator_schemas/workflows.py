@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from lumigator_schemas.jobs import JobStatus
+from lumigator_schemas.jobs import JobResults, JobStatus
 
 
 class WorkflowCreate(BaseModel):
@@ -41,9 +41,7 @@ class WorkflowSummaryResponse(BaseModel, from_attributes=True):
 class WorkflowDetailsResponse(BaseModel):
     workflow_id: UUID
     experiment_id: UUID
-    job_ids: list[UUID]
-    metrics_urls: list[str]  # same length as run_ids
-    artifacts_urls: list[str]  # same length as run_ids
+    jobs: list[JobResults]
 
 
 class WorkflowResultDownloadResponse(BaseModel):

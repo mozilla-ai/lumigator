@@ -12,7 +12,6 @@ from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput, EvaluationConfig
-from evaluator_lite.schemas import ModelConfig as ELModelConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
@@ -203,6 +202,8 @@ class JobService:
         # define the fields we want to keep from the results JSON
         # and build a CSV file from it as a BytesIO object
         fields = ["examples", "ground_truth", request.job_config.output_field]
+        loguru.logger.info(f"--> results: {results}")
+        loguru.logger.info(f"--> fields: {fields}")
         bin_data = self._results_to_binary_file(results.model_dump(), fields)
         bin_data_size = len(bin_data.getvalue())
 
@@ -406,7 +407,6 @@ class JobService:
         job_config = EvalJobConfig(
             name=f"{request.name}/{record.id}",
             dataset=ELDatasetConfig(path=dataset_path),
-            model=ELModelConfig(path=request.job_config.model),
             evaluation=EvaluationConfig(
                 metrics=request.job_config.metrics,
                 max_samples=request.max_samples,
@@ -478,7 +478,7 @@ class JobService:
         settings.inherit_ray_env(runtime_env_vars)
 
         # set num_gpus per worker (zero if we are just hitting a service)
-        if not request.job_config.model.startswith("hf://"):
+        if job_type == JobType.INFERENCE and not request.job_config.model.startswith("hf://"):
             worker_gpus = job_settings["ray_worker_gpus_fraction"]
         else:
             worker_gpus = job_settings["ray_worker_gpus"]

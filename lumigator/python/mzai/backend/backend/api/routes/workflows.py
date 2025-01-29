@@ -1,10 +1,12 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.jobs import JobResponse
 from lumigator_schemas.workflows import (
     WorkflowCreate,
-    WorkflowDetailsResponse,
     WorkflowResponse,
+    WorkflowResultDownloadResponse,
     WorkflowSummaryResponse,
 )
 
@@ -18,7 +20,7 @@ async def create_workflow(
     service: WorkflowServiceDep, request: WorkflowCreate, background_tasks: BackgroundTasks
 ) -> WorkflowResponse:
     """A workflow is a single execution for an experiment.
-    A workflow can be a single job or a collection of jobs.
+    A workflow is a collection of 1 or more jobs.
     It must be associated with an experiment id,
     which means you must already have created an experiment and have that ID in the request.
     """
@@ -33,6 +35,20 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: UUID) -> WorkflowResp
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
     raise NotImplementedError
+
+
+# TODO: currently experiment_id=workflow_id, but this will change
+@router.get("/{experiment_id}/jobs", include_in_schema=False)
+def get_workflow_jobs(
+    service: WorkflowServiceDep, experiment_id: UUID
+) -> ListingResponse[JobResponse]:
+    """Get all jobs for a workflow.
+    TODO: this will likely eventually be merged with the get_workflow endpoint, once implemented
+    """
+    # TODO right now this command expects that the workflow_id is the same as the experiment_id
+    return ListingResponse[JobResponse].model_validate(
+        service.get_workflow_jobs(experiment_id).model_dump()
+    )
 
 
 @router.get("/{workflow_id}/summary")
@@ -52,16 +68,12 @@ def get_workflow_summary(
     raise NotImplementedError
 
 
-@router.get("/{workflow_id}/result/download")
-def get_workflow_details(
+@router.get("/{workflow_id}/details")
+def get_experiment_result_download(
     service: WorkflowServiceDep,
     workflow_id: UUID,
-) -> WorkflowDetailsResponse:
-    """TODO: Retrieve the detailed results for a specific workflow.
-    This endpoint fetches the detailed results of the jobs that
-    were run as part of the specified workflow. Unlike the get_workflow_summary endpoint,
-    this endpoint returns the raw results of the jobs (stats for each example in the dataset).
-    It compiles the results into a downloadable format,
-    which can be used for further analysis or record-keeping.
-    """
-    raise NotImplementedError
+) -> WorkflowResultDownloadResponse:
+    """Return experiment results file URL for downloading."""
+    return WorkflowResultDownloadResponse.model_validate(
+        service.get_workflow_result_download(workflow_id).model_dump()
+    )

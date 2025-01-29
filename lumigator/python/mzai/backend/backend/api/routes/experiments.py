@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, status
@@ -14,8 +15,16 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 
 router = APIRouter()
+
+
+def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        ExperimentNotFoundError: status.HTTP_404_NOT_FOUND,
+    }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -76,7 +85,7 @@ def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
 ) -> ExperimentResponse:
     """Create an experiment ID."""
-    return service.create_experiment(request)
+    return ExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 
 
 @router.get("/new/all", include_in_schema=False)
@@ -95,14 +104,6 @@ def list_experiments_new(
 def get_experiment_new(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
     """Get an experiment by ID."""
     return ExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
-
-
-@router.get("/new/{experiment_id}/jobs", include_in_schema=False)
-def get_experiment_jobs(
-    service: ExperimentServiceDep, experiment_id: UUID
-) -> ListingResponse[UUID]:
-    """Get all jobs associated with an experiment."""
-    return service.get_all_owned_jobs(experiment_id)
 
 
 @router.get("/new/{experiment_id}/workflows", include_in_schema=False)

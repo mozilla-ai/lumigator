@@ -1,21 +1,20 @@
-import asyncio
-from collections.abc import Callable
 from uuid import UUID
 
 import loguru
-from fastapi import BackgroundTasks, HTTPException, status
-from lumigator_schemas.experiments import ExperimentCreate, ExperimentIdCreate, ExperimentResponse
+from lumigator_schemas.experiments import (
+    ExperimentCreate,
+    ExperimentResponse,
+)
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalLiteCreate,
     JobStatus,
 )
 
-from backend.records.experiments import ExperimentRecord
 from backend.records.jobs import JobRecord
 from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
 
 
@@ -32,15 +31,6 @@ class ExperimentService:
         self._job_service = job_service
         self._dataset_service = dataset_service
 
-    def _raise_not_found(self, job_id: UUID):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
-
-    def _get_experiment_record(self, experiment_id: UUID) -> ExperimentRecord:
-        record = self._experiment_repo.get(experiment_id)
-        if record is None:
-            self._raise_not_found(experiment_id)
-        return record
-
     def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
         return self._job_repo.get_by_experiment_id(experiment_id)
 
@@ -48,63 +38,7 @@ class ExperimentService:
         jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
         return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
 
-    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
-        """Watches a submitted job and, when it terminates successfully, runs a given task.
-        Inputs:
-        - job_id: the UUID of the job to watch
-        - task: the function to be called after the job completes successfully
-        - args: the arguments to be passed to the function `task()`
-        """
-        job_status = self._job_service.ray_client.get_job_status(job_id)
-
-        # TODO rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-        valid_status = [
-            JobStatus.CREATED.value.lower(),
-            JobStatus.PENDING.value.lower(),
-            JobStatus.RUNNING.value.lower(),
-        ]
-        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
-
-        loguru.logger.info(f"Watching {job_id}")
-        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
-            await asyncio.sleep(5)
-            job_status = self._job_service.ray_client.get_job_status(job_id)
-
-        if job_status.lower() == JobStatus.FAILED.value.lower():
-            loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-
-        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
-            loguru.logger.info(f"Job {job_id} finished successfully.")
-            if task is not None:
-                task(*args)
-
-    def _run_eval(
-        self,
-        inference_job_id: UUID,
-        request: ExperimentCreate,
-        background_tasks: BackgroundTasks,
-        experiment_id: UUID = None,
-    ):
-        # use the inference job id to recover the dataset record
-        dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job_id)
-
-        # prepare the inputs for the evaluation job and pass the id of the new dataset
-        job_eval_dict = {
-            "name": f"{request.name}-evaluation",
-            "model": request.model,
-            "dataset": dataset_record.id,
-            "max_samples": request.max_samples,
-            "skip_inference": True,
-        }
-
-        # submit the job
-        self._job_service.create_job(
-            JobEvalLiteCreate.model_validate(job_eval_dict),
-            background_tasks,
-            experiment_id=experiment_id,
-        )
-
-    def create_experiment(self, request: ExperimentIdCreate) -> ExperimentResponse:
+    def create_experiment(self, request: ExperimentCreate) -> ExperimentResponse:
         experiment_record = self._experiment_repo.create(
             name=request.name, description=request.description
         )
@@ -114,7 +48,17 @@ class ExperimentService:
 
     # TODO Move this into a "composite job" impl
     def get_experiment(self, experiment_id: UUID) -> ExperimentResponse:
-        record = self._get_experiment_record(experiment_id)
+        """Gets an experiment by ID.
+
+        :param experiment_id: the ID of the experiment to return information for
+        :returns: information on the experiment, such as the ID, name, status etc.
+        :rtype: ExperimentResponse
+        :raises ExperimentNotFoundError: if the experiment does not exist
+        """
+        record = self._experiment_repo.get(experiment_id)
+        if record is None:
+            raise ExperimentNotFoundError(experiment_id) from None
+
         loguru.logger.info(f"Obtaining info for experiment {experiment_id}: {record}")
 
         all_succeeded = True

@@ -1,3 +1,24 @@
 # Default values for lumigator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+
+backend:
+
+  # Name of the Ray head service
+  rayAddress: lumigator-kuberay-head-svc
+  rayPort: "8265"
+  rayWorkerGPUs: "1.0"
+
+  ray-cluster:
+    image:
+      tag: 2.30.0-py311-gpu
+    head:
+      containerEnv:
+        # Set the following environment variables with the desired values to connect to your object storage
+        # env vars required by s3fs
+        - name: FSSPEC_S3_KEY
+          value: ""
+        - name: FSSPEC_S3_SECRET
+          value: ""
+        - name: FSSPEC_S3_ENDPOINT_URL
+          value: ""

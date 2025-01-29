@@ -19,7 +19,7 @@ To run the backend tests, for example, you can use the configured commands in th
 ```
 - make test-backend-integration
 - make test-backend-unit
-- test-backend # runs both
+- make test-backend # runs both
 ```
 
 ### Running Individual Tests

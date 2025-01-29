@@ -130,7 +130,7 @@ make stop-lumigator
 
 ## Kubernetes Installation
 
-You can also deploy Lumigator on kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.
+You can also deploy Lumigator on Kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.
 
 ## Documentation
 

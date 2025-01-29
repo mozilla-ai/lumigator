@@ -128,6 +128,10 @@ To stop the containers you started using Docker Compose, simply run the followin
 make stop-lumigator
 ```
 
+## Kubernetes Installation
+
+You can also deploy Lumigator on Kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.
+
 ## Documentation
 
 For the complete Lumigator documentation, visit the

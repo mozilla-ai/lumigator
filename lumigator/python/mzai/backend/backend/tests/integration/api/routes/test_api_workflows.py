@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from inference.schemas import InferenceJobOutput
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
-from lumigator_schemas.experiments import ExperimentResponse
+from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
@@ -18,6 +18,7 @@ from lumigator_schemas.jobs import (
     JobResultDownloadResponse,
     JobStatus,
 )
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -25,6 +26,11 @@ from backend.tests.conftest import (
     wait_for_experiment,
     wait_for_job,
 )
+
+POST_HEADER = {
+    "accept": "application/json",
+    "Content-Type": "application/json",
+}
 
 
 @app.on_event("startup")
@@ -59,10 +65,6 @@ def test_upload_data_launch_job(
     assert get_ds_response.status_code == 200
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-    }
     infer_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
@@ -74,7 +76,7 @@ def test_upload_data_launch_job(
         "store_to_dataset": True,
     }
     create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=headers, json=infer_payload
+        "/jobs/inference/", headers=POST_HEADER, json=infer_payload
     )
     assert create_inference_job_response.status_code == 201
 
@@ -100,10 +102,6 @@ def test_upload_data_launch_job(
     )
     assert output_infer_job_response_model is not None
 
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-    }
     eval_payload = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
@@ -114,7 +112,7 @@ def test_upload_data_launch_job(
     }
 
     create_evaluation_job_response = local_client.post(
-        "/jobs/eval_lite/", headers=headers, json=eval_payload
+        "/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload
     )
     assert create_evaluation_job_response.status_code == 201
 
@@ -159,11 +157,6 @@ def test_upload_data_no_gt_launch_annotation(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-    }
-
     annotation_payload = {
         "name": "test_annotate",
         "description": "Test run for Huggingface model",
@@ -172,7 +165,7 @@ def test_upload_data_no_gt_launch_annotation(
         "task": "summarization",
     }
     create_annotation_job_response = local_client.post(
-        "/jobs/annotate/", headers=headers, json=annotation_payload
+        "/jobs/annotate/", headers=POST_HEADER, json=annotation_payload
     )
     assert create_annotation_job_response.status_code == 201
 
@@ -220,10 +213,6 @@ def test_full_experiment_launch(
     )
     assert create_response.status_code == 201
     created_dataset = DatasetResponse.model_validate(create_response.json())
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-    }
     payload = {
         "name": "test_experiment",
         "description": "Test experiment for Huggingface models",
@@ -234,7 +223,7 @@ def test_full_experiment_launch(
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
     create_experiments_id_response = local_client.post(
-        "/experiments/new/", headers=headers, json=payload
+        "/experiments/new/", headers=POST_HEADER, json=payload
     )
     assert create_experiments_id_response.status_code == 201
     experiment_id = create_experiments_id_response.json()["id"]
@@ -248,7 +237,7 @@ def test_full_experiment_launch(
         "experiment_id": experiment_id,
         "max_samples": 2,
     }
-    create_workflow_response = local_client.post("/workflows/", headers=headers, json=payload)
+    create_workflow_response = local_client.post("/workflows/", headers=POST_HEADER, json=payload)
     assert create_workflow_response.status_code == 201
 
     get_experiments_response = local_client.get("/experiments/new/all")
@@ -294,3 +283,82 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     response = local_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
+
+
+def test_create_exp_workflow_check_results(
+    local_client: TestClient, dialog_dataset, dependency_overrides_services
+):
+    """Here's how it will work
+    * Create a dataset
+    * Create an experiment, get back an ID and validate it
+    * Create a workflow for that experiment
+    * Poll the status of the workflow until it's done
+    * Get the results of the workflow
+    """
+    # Make sure backend is healthy
+    response = local_client.get("/health")
+    assert response.status_code == 200
+
+    # Upload a dataset
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
+    assert create_response.status_code == 201
+
+    dataset = DatasetResponse.model_validate(create_response.json())
+
+    experiment = local_client.post(
+        "/experiments/new/",
+        headers=POST_HEADER,
+        json={
+            "name": "test_create_exp_workflow_check_results",
+            "description": "Test for an experiment with associated workflows",
+        },
+    )
+    assert experiment.status_code == 201
+    experiment_id = experiment.json()["id"]
+
+    # run a workflow for that experiment
+    workflow_1 = WorkflowResponse.model_validate(
+        local_client.post(
+            "/workflows/",
+            headers=POST_HEADER,
+            json={
+                "name": "Workflow_1",
+                "description": "Test workflow for inf and eval",
+                "model": TEST_CAUSAL_MODEL,
+                "dataset": str(dataset.id),
+                "experiment_id": experiment_id,
+                "max_samples": 1,
+            },
+        ).json()
+    )
+
+    # Wait till the workflow is done
+    workflow_status = workflow_1.status
+    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        time.sleep(1)
+        workflow_1_details = WorkflowDetailsResponse.model_validate(
+            local_client.get(f"/workflows/{workflow_1.id}").json()
+        )
+        workflow_status = workflow_1_details.status
+        logger.info(f"Workflow status: {workflow_status}")
+
+    # now get the results of the experiment
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+
+    assert workflow_1_details.experiment_id == experiment_results.id
+    assert len(experiment_results.workflows) == 1
+    assert workflow_1_details == experiment_results.workflows[0]
+
+    # TODO: delete the experiment
+    # local_client.delete(f"/experiments/{experiment_id}")
+    # response = local_client.get(f"/experiments/{experiment_id}")
+    # assert response.status_code == 404
+    # # make sure the workflow results also were deleted
+    # response = local_client.get(f"/workflows/{workflow_1_details.id}")
+    # assert response.status_code == 404

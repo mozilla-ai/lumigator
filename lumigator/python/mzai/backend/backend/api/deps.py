@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
-from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.datasets import DatasetService
@@ -78,10 +77,7 @@ def get_experiment_service(
     dataset_service: DatasetServiceDep,
 ) -> ExperimentService:
     job_repo = JobRepository(session)
-    experiment_repo = ExperimentRepository(session)
-    return ExperimentService(
-        experiment_repo, job_repo, job_service, dataset_service, tracking_client
-    )
+    return ExperimentService(job_repo, job_service, dataset_service, tracking_client)
 
 
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
@@ -94,10 +90,7 @@ def get_workflow_service(
     dataset_service: DatasetServiceDep,
 ) -> WorkflowService:
     job_repo = JobRepository(session)
-    experiment_repo = ExperimentRepository(session)
-    return WorkflowService(
-        experiment_repo, job_repo, job_service, dataset_service, tracking_client=tracking_client
-    )
+    return WorkflowService(job_repo, job_service, dataset_service, tracking_client=tracking_client)
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]

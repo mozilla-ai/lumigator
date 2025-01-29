@@ -3,13 +3,20 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from lumigator_schemas.jobs import JobResults, JobStatus
+from lumigator_schemas.jobs import JobResults, LowercaseEnum
 
 
-class WorkflowCreate(BaseModel):
+class WorkflowStatus(LowercaseEnum):
+    CREATED = "created"
+    RUNNING = "running"
+    FAILED = "failed"
+    SUCCEEDED = "succeeded"
+
+
+class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
-    experiment_id: UUID
+    experiment_id: str
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
@@ -20,25 +27,22 @@ class WorkflowCreate(BaseModel):
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):
-    id: UUID
-    experiment_id: UUID
+    id: str
+    experiment_id: str
     name: str
     description: str
-    status: JobStatus
+    status: WorkflowStatus
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None
 
 
-# TODO: This schema will need to be refined when the get_workflow route is implemented
-class WorkflowDetailsResponse(BaseModel, from_attributes=True):
-    workflow_id: UUID
-    experiment_id: UUID
-    jobs: list[JobResults]
-    metrics: dict
-    artifacts: dict
-    parameters: dict
+# This schema extends workflow response and adds a few more fields
+class WorkflowDetailsResponse(WorkflowResponse):
+    jobs: list[JobResults] | None = None
+    metrics: dict | None = None
+    parameters: dict | None = None
 
 
 class WorkflowResultDownloadResponse(BaseModel):
-    id: UUID
+    id: str
     download_url: str

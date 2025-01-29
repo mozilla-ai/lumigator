@@ -2,6 +2,11 @@ import contextlib
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 
+from lumigator_schemas.experiments import GetExperimentResponse
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+
+from backend.tracking.schemas import RunOutputs
+
 
 class TrackingClientManager(ABC):
     """Abstract base class for tracking client managers."""
@@ -20,12 +25,12 @@ class TrackingClient(ABC):
     """Abstract base class for tracking clients."""
 
     @abstractmethod
-    def create_experiment(self, name: str) -> str:
+    def create_experiment(self, name: str) -> GetExperimentResponse:
         """Create a new experiment."""
         pass
 
     @abstractmethod
-    def get_experiment(self, experiment_id: str) -> dict:
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
         """Get an experiment."""
         pass
 
@@ -40,22 +45,27 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def list_experiments(self) -> list:
+    def list_experiments(self, skip: int, limit: int) -> list:
         """List all experiments."""
         pass
 
     @abstractmethod
-    def create_workflow(self, experiment_id: str) -> str:
+    def experiments_count(self) -> int:
+        """Count all experiments."""
+        pass
+
+    @abstractmethod
+    def create_workflow(self, experiment_id: str, description: str, name: str) -> WorkflowResponse:
         """Create a new workflow."""
         pass
 
     @abstractmethod
-    def get_workflow(self, workflow_id: str) -> dict:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
         pass
 
     @abstractmethod
-    def update_workflow(self, workflow_id: str, new_data: dict) -> None:
+    def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update a workflow."""
         pass
 
@@ -70,7 +80,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def create_job(self, experiment_id: str, workflow_id: str, data: dict):
+    def create_job(self, experiment_id: str, workflow_id: str, name: str, data: RunOutputs):
         """Log the job output."""
         pass
 

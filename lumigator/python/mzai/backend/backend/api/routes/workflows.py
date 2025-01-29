@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import JobResponse
 from lumigator_schemas.workflows import (
-    WorkflowCreate,
+    WorkflowCreateRequest,
     WorkflowDetailsResponse,
     WorkflowResponse,
     WorkflowResultDownloadResponse,
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_workflow(
-    service: WorkflowServiceDep, request: WorkflowCreate, background_tasks: BackgroundTasks
+    service: WorkflowServiceDep, request: WorkflowCreateRequest, background_tasks: BackgroundTasks
 ) -> WorkflowResponse:
     """A workflow is a single execution for an experiment.
     A workflow is a collection of 1 or more jobs.
@@ -28,13 +28,13 @@ async def create_workflow(
 
 
 @router.get("/{workflow_id}")
-def get_workflow(service: WorkflowServiceDep, workflow_id: UUID) -> WorkflowResponse:
+def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
     """TODO: The workflow objects are currently not saved in the database so it can't be retrieved.
     In order to get all the info about a workflow,
     you need to get all the jobs for an experiment and make some decisions about how to use them.
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
-    raise NotImplementedError
+    return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
 
 
 # TODO: currently experiment_id=workflow_id, but this will change

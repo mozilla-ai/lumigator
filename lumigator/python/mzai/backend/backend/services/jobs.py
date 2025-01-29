@@ -1,7 +1,6 @@
 import asyncio
 import csv
 import json
-from collections.abc import Callable
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
@@ -12,7 +11,7 @@ import loguru
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
-from fastapi import BackgroundTasks, UploadFile
+from fastapi import UploadFile
 from inference.schemas import InferenceJobConfig, InferenceJobOutput
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
@@ -248,33 +247,29 @@ class JobService:
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
-    async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
-        """Watches a submitted job and, when it terminates successfully, runs a given task.
-        Inputs:
-        - job_id: the UUID of the job to watch
-        - task: the function to be called after the job completes successfully
-        - args: the arguments to be passed to the function `task()`
+    async def wait_for_job_complete(self, job_id, max_wait_time_sec=300):
+        """Waits for a job to complete, or until a maximum wait time is reached.
+
+        :param job_id: The ID of the job to wait for.
+        :param max_wait_time: The maximum time to wait for the job to complete.
+        :return: The status of the job when it completes.
+        :rtype: str
+        :raises JobUpstreamError: If there is an error with the upstream service returning the
+                                  job status
         """
+        loguru.logger.info(f"Waiting for job {job_id} to complete...")
+
+        # Get the initial job status
         job_status = self.get_upstream_job_status(job_id)
 
-        loguru.logger.info(f"Watching {job_id}")
-        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
+        # Wait for the job to complete
+        elapsed_time = 0
+        while job_status not in self.TERMINAL_STATUS and elapsed_time < max_wait_time_sec:
             await asyncio.sleep(5)
+            elapsed_time += 5
             job_status = self.get_upstream_job_status(job_id)
 
-        match job_status:
-            case JobStatus.FAILED.value:
-                loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-            case JobStatus.SUCCEEDED.value:
-                loguru.logger.info(f"Job {job_id} finished successfully.")
-                if task is not None:
-                    task(*args)
-            case _:
-                # NOTE: Consider raising an exception here as we *really* don't expect
-                # anything other than FAILED or SUCCEEDED.
-                loguru.logger.error(
-                    f"Job {job_id} has an unexpected status ({job_status}) that is not completed."
-                )
+        return job_status
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]
@@ -357,10 +352,7 @@ class JobService:
         return job_params
 
     def create_job(
-        self,
-        request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate,
-        background_tasks: BackgroundTasks,
-        experiment_id: UUID = None,
+        self, request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate
     ) -> JobResponse:
         """Creates a new workload to run on Ray based on the type of request.
 
@@ -448,20 +440,6 @@ class JobService:
         )
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
-
-        # Inference jobs produce a new dataset
-        # Add the dataset to the (local) database
-        if job_type == JobType.INFERENCE and request.store_to_dataset:
-            background_tasks.add_task(
-                self.on_job_complete,
-                record.id,
-                self._add_dataset_to_db,
-                record.id,
-                JobInferenceCreate.model_validate(request),
-                self._dataset_service.s3_filesystem,
-            )
-        # FIXME The ray status is now _not enough_ to set the job status,
-        # since the dataset may still be under creation
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

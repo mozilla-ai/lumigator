@@ -152,21 +152,19 @@ class MistralModelClient(APIModelClient):
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
-        logger.info(f"Initial model_max_length {self._pipeline.tokenizer.model_max_length}")
         self._set_tokenizer_max_length()
-        logger.info(f"Final model_max_length {self._pipeline.tokenizer.model_max_length}")
 
     def _set_tokenizer_max_length(self):
         """Set the tokenizer's model_max_length if it's currently the default very large integer.
         Checks various possible max_length parameters which varies on model architecture.
         """
         config = self._pipeline.model.config
-
+        logger.info(f"Initial model_max_length {self._pipeline.tokenizer.model_max_length}")
         # Only override if it's the default value
         if self._pipeline.tokenizer.model_max_length == VERY_LARGE_INTEGER:
             # This is the default value from HF for models that don't have a max length
             # Common parameter names to check in config
-            config_params = [
+            plausible_max_length_params = [
                 # BERT-based, LLaMA
                 "max_position_embeddings",
                 # GPT-2-based
@@ -180,7 +178,7 @@ class HuggingFaceModelClient(BaseModelClient):
             ]
 
             # Check config parameters
-            for param in config_params:
+            for param in plausible_max_length_params:
                 if hasattr(config, param):
                     value = getattr(config, param)
                     if (
@@ -195,6 +193,9 @@ class HuggingFaceModelClient(BaseModelClient):
                 "Could not find a suitable parameter in the model config to set model_max_length. \
                     Using default value."
             )
+        else:
+            logger.info(f"Using model_max_length = {self._pipeline.tokenizer.model_max_length} \
+                        as per HuggingFace model config")
 
     def predict(self, prompt):
         prediction = self._pipeline(prompt)[0]

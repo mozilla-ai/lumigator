@@ -42,30 +42,30 @@ services:
     profiles:
       - local
 
-  redis:
-    image: redis:8.0-M03-alpine
-    command: redis-server --save 60 1 --loglevel warning
-    profiles:
-      - local
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
+  # redis:
+  #   image: redis:8.0-M03-alpine
+  #   command: redis-server --save 60 1 --loglevel warning
+  #   profiles:
+  #     - local
+  #   volumes:
+  #     - redis-data:/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "redis-cli ping"]
+  #     interval: 1s
+  #     timeout: 3s
+  #     retries: 5
 
   ray:
     image: rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX}
-    depends_on:
-      redis:
-        condition: service_healthy
+    # depends_on:
+      # redis:
+      #   condition: service_healthy
     ports:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
-    command: bash -c "RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
+    command: bash -c "ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
     shm_size: 2g
     volumes:
       - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
@@ -112,6 +112,9 @@ services:
       ray:
         condition: "service_started"
         required: false
+      mlflow:
+        condition: "service_started"
+        required: false
     ports:
       - 8000:8000
     environment:
@@ -140,6 +143,7 @@ services:
       - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
       - LUMI_API_CORS_ALLOWED_ORIGINS
+      - MLFLOW_TRACKING_URI
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
@@ -168,7 +172,27 @@ services:
     ports:
       - 80:80
 
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.0.1
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - BACKEND_STORE_URI=sqlite:///mlflow.db
+      - ARTIFACT_ROOT=s3://mlflow`
+    ports:
+      - "8001:5000"
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: mlflow server --backend-store-uri ${BACKEND_STORE_URI} --default-artifact-root ${ARTIFACT_ROOT} --host 0.0.0.0
+    extra_hosts:
+      - "localhost:host-gateway"
+    profiles:
+      - local
+
 volumes:
     minio-data:
     database_volume:
-    redis-data:
+    # redis-data:

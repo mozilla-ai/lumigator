@@ -27,5 +27,6 @@ jobs:
           repository: "lumigator"
           package: "lumigator/lumigator"
           delete-tags: backend_dev_*,frontend_*
+          keep-n-tagged: 2
           delete-untagged: true
           delete-partial-images: true

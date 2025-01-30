@@ -26,4 +26,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "lumigator"
           package: "lumigator/lumigator"
-          delete-tags: backend_dev_*,frontend_*

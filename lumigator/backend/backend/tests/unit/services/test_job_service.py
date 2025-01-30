@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from lumigator_schemas.jobs import (
     JobInferenceCreate,
@@ -14,8 +16,14 @@ def test_set_null_inference_job_params(job_record, job_service):
         model="hf://facebook/bart-large-cnn",
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
-    params = job_service._get_job_params("INFERENCE", job_record, request)
-    assert params["max_samples"] == -1
+
+    # Patch the response we'd get from the dataset service since we don't actually have a dataset
+    with patch(
+        "backend.services.datasets.DatasetService.get_dataset_s3_path",
+        return_value="s3://bucket/path/to/dataset",
+    ):
+        params = job_service._get_job_params("INFERENCE", job_record, request)
+        assert params["max_samples"] == -1
 
 
 def test_set_explicit_inference_job_params(job_record, job_service):
@@ -26,8 +34,14 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         model="hf://facebook/bart-large-cnn",
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
-    params = job_service._get_job_params("INFERENCE", job_record, request)
-    assert params["max_samples"] == 10
+
+    # Patch the response we'd get from the dataset service since we don't actually have a dataset
+    with patch(
+        "backend.services.datasets.DatasetService.get_dataset_s3_path",
+        return_value="s3://bucket/path/to/dataset",
+    ):
+        params = job_service._get_job_params("INFERENCE", job_record, request)
+        assert params["max_samples"] == 10
 
 
 @pytest.mark.parametrize(

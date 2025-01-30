@@ -98,7 +98,8 @@ default_infer_template = """{{
         "revision": "{revision}",
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
-        "torch_dtype": "{torch_dtype}"
+        "torch_dtype": "{torch_dtype}",
+        "max_new_tokens": 500
     }},
      "job": {{
         "max_samples": {max_samples},
@@ -123,7 +124,8 @@ bart_infer_template = """{{
         "revision": "{revision}",
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
-        "torch_dtype": "{torch_dtype}"
+        "torch_dtype": "{torch_dtype}",
+        "max_new_tokens": 142
     }},
      "job": {{
         "max_samples": {max_samples},

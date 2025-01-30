@@ -144,7 +144,7 @@ jobs:
               - 'lumigator/**'
 
       - name: Truncate commit SHA
-        if: steps.filter.outputs.build == 'true'
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
@@ -164,7 +164,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push backend image
-        if: steps.filter.outputs.build == 'true'
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
@@ -192,7 +192,7 @@ jobs:
               - 'lumigator/frontend/**'
 
       - name: Truncate commit SHA
-        if: steps.filter.outputs.build_fe == 'true'
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Set up QEMU
@@ -224,8 +224,8 @@ jobs:
 
   push-backend-images:
     name: Push backend Docker images
-    needs: [ "build-backend-image", "build-frontend-image" ]
-    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' }}
+    needs: [ "build-backend-image", "build-frontend-image", "integration-tests", "notebook-integration-test" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -241,9 +241,11 @@ jobs:
               - 'lumigator/**'
 
       - name: Truncate commit SHA
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -251,8 +253,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Docker images
-        run: |
-          docker pull ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
+        run: docker pull ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
         if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
@@ -261,10 +263,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Tag and push Docker image (tagged releases)
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/') 
+        run: |
+          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
+          docker push mzdotai/lumigator:${{ github.ref_name }}
+
+      - name: Tag and push Docker image (normal build)
+        if: steps.filter.outputs.push_be == 'true' || "! contains(github.ref, 'refs/tags/')"  
+        run: |
+          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+          docker push mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Tag and push Docker image (latest)
+        if: steps.filter.outputs.push_be == 'true' || github.ref == 'refs/heads/main'
+        run: |
+          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:latest
+          docker push mzdotai/lumigator:latest
+
   push-frontend-images:
     name: Push frontend Docker images
-    needs: [ "build-backend-image", "build-frontend-image" ]
-    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' }}
+    needs: [ "build-backend-image", "build-frontend-image", "integration-tests", "notebook-integration-test" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -280,9 +300,11 @@ jobs:
               - 'lumigator/**'
 
       - name: Truncate commit SHA
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -290,9 +312,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Docker images
-        run: |
-          docker pull ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
-          docker pull ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }}
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
+        run: docker pull ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
@@ -301,20 +322,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tag and push to DockerHub frontend Docker Image
+      - name: Tag and push Docker image (tagged releases)
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/') 
         run: |
-          if [[ contains(github.ref, 'refs/tags/') == false ]]; then
-            docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
-            docker push mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
-          fi
-          if [[  github.ref == 'refs/heads/main' ]]; then
-            docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
-            docker push mzdotai/lumigator-frontend:latest
-          fi
-          if [[ contains(github.ref, 'refs/tags/') ]]; then
-            docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
-            docker push mzdotai/lumigator-frontend:${{ github.ref_name }}
-          fi
+          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
+          docker push mzdotai/lumigator-frontend:${{ github.ref_name }}
+
+      - name: Tag and push Docker image (normal build)
+        if: steps.filter.outputs.push_fe == 'true' || "! contains(github.ref, 'refs/tags/')"  
+        run: |
+          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+          docker push mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Tag and push Docker image (latest)
+        if: steps.filter.outputs.push_fe == 'true' || github.ref == 'refs/heads/main'
+        run: |
+          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
+          docker push mzdotai/lumigator-frontend:latest
 
   sdk-packaging:
     name: Package SDK

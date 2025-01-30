@@ -104,7 +104,14 @@ class JobInferenceCreate(BaseModel):
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
     model_url: str | None = None
-    system_prompt: str | None = None
+    system_prompt: str | None = Field(
+        title="System Prompt",
+        default=None,
+        examples=[
+            "You are an advanced AI trained to summarize documents accurately and concisely. "
+            "Your goal is to extract key information while maintaining clarity and coherence."
+        ],
+    )
     output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0

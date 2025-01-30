@@ -27,7 +27,7 @@ with a minimal configuration ready to work with Lumigator.
 
 > [!NOTE]If the Mistral and/or the OpenAI API is used, there are two ways to provide
 > it to Lumigator:
-> 
+>
 > - Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
 >   and/or `existingOpenaiAPISecret`
 > - Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
@@ -82,16 +82,10 @@ To install Lumigator on a Kubernetes cluster, follow these steps:
     user@host:~$ git clone git@github.com:mozilla-ai/lumigator.git
     ```
 
-1. Change to the Lumigator directory:
-
-    ```console
-    user@host:~$ cd lumigator
-    ```
-
 1. Install the Lumigator Helm chart:
 
     ```console
-    user@host:~/lumigator$ helm install lumigator ./lumigator/infra/mzai/helm/lumigator -f values.yaml
+    user@host:~/lumigator$ helm install lumigator ./infra/helm/lumigator -f values.yaml
     ```
 
 ## Next Steps

@@ -1,0 +1,27 @@
+name: Clean up images
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Run every day at 3AM UTC
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+
+permissions:
+  packages: write
+
+jobs:
+  delete_images:
+    name: Delete images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all images on GHCR
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "lumigator"
+          package: "lumigator"
+          delete-tags: backend_dev_*,frontend_*
+          older-than: 1 day
+          delete-untagged: true
+          delete-partial-images: true

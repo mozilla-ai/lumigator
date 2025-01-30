@@ -26,3 +26,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "lumigator"
           package: "lumigator/lumigator"
+          delete-tags: backend_dev_*,frontend_*
+          delete-untagged: true
+          delete-partial-images: true

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete all images on GHCR
-        uses: jenskeiner/ghcr-container-repository-cleanup-action@v1.3.0
+        uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}

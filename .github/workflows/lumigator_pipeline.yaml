@@ -235,7 +235,7 @@ jobs:
   push-backend-images:
     name: Push backend Docker images
     needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "integration-tests", "notebook-integration-test" ]
-    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result = 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' }}
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

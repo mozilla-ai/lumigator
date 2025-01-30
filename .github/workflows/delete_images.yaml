@@ -25,3 +25,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "lumigator"
+          delete-tags: backend_dev_*,frontend_*

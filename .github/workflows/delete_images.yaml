@@ -24,4 +24,5 @@ jobs:
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "lumigator/lumigator"
           delete-tags: backend_dev_*,frontend_*

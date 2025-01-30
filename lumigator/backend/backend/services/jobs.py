@@ -250,7 +250,6 @@ class JobService:
 
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
-
         Inputs:
         - job_id: the UUID of the job to watch
         - task: the function to be called after the job completes successfully

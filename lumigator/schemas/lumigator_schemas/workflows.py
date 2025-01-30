@@ -3,10 +3,13 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from lumigator_schemas.jobs import JobResults, JobStatus
 
-class ExperimentCreate(BaseModel):
+
+class WorkflowCreate(BaseModel):
     name: str
     description: str = ""
+    experiment_id: UUID
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
@@ -16,24 +19,26 @@ class ExperimentCreate(BaseModel):
     config_template: str | None = None
 
 
-class ExperimentIdCreate(BaseModel):
-    name: str
-    description: str = ""
-
-
-class ExperimentResponse(BaseModel, from_attributes=True):
+class WorkflowResponse(BaseModel, from_attributes=True):
     id: UUID
+    experiment_id: UUID
     name: str
     description: str
+    status: JobStatus
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None
 
 
-class ExperimentResultResponse(BaseModel, from_attributes=True):
-    id: UUID
+# TODO: This schema will need to be refined when the get_workflow route is implemented
+class WorkflowDetailsResponse(BaseModel, from_attributes=True):
+    workflow_id: UUID
     experiment_id: UUID
+    jobs: list[JobResults]
+    metrics: dict
+    artifacts: dict
+    parameters: dict
 
 
-class ExperimentResultDownloadResponse(BaseModel):
+class WorkflowResultDownloadResponse(BaseModel):
     id: UUID
     download_url: str

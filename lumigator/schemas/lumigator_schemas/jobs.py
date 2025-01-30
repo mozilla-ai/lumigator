@@ -140,6 +140,12 @@ class JobResultDownloadResponse(BaseModel):
     download_url: str
 
 
+class JobResults(BaseModel):
+    id: UUID
+    metric_url: str
+    artifact_url: str
+
+
 class Job(JobResponse, JobSubmissionResponse):
     """Job represents the composition of JobResponse and JobSubmissionResponse.
 

@@ -19,6 +19,7 @@ from lumigator_schemas.workflows import (
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.workflow_exceptions import WorkflowNotFoundError
 from backend.services.jobs import JobService
 from backend.settings import settings
 from backend.tracking import TrackingClient
@@ -172,6 +173,8 @@ class WorkflowService:
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
         tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        if tracking_server_workflow is None:
+            raise WorkflowNotFoundError(workflow_id)
         return tracking_server_workflow
 
     def create_workflow(
@@ -198,3 +201,7 @@ class WorkflowService:
         background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
 
         return workflow
+
+    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+        """Delete a workflow by ID."""
+        return self._tracking_client.delete_workflow(workflow_id)

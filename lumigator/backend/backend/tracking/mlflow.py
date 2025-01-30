@@ -47,7 +47,15 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def delete_experiment(self, experiment_id: str) -> None:
-        """Delete an experiment."""
+        """Delete an experiment. Although Mflow has a delete_experiment method,
+        We will use the functions of this class instead, so that we make sure we correctly
+        clean up all the artifacts/runs/etc. associated with the experiment.
+        """
+        workflow_ids = self._find_workflows(experiment_id)
+        # delete all the workflows
+        for workflow_id in workflow_ids:
+            self.delete_workflow(workflow_id)
+        # delete the experiment
         self._client.delete_experiment(experiment_id)
 
     def _compile_metrics(self, job_ids: list) -> dict:
@@ -73,10 +81,8 @@ class MLflowTrackingClient(TrackingClient):
                 parameters[parameter] = run.data.params[parameter]
         return parameters
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
+    def _find_workflows(self, experiment_id: str) -> list:
         # get all the runs for the experiment
-        experiment = self._client.get_experiment(experiment_id)
-        # now get all the workflows associated with that experiment
         all_runs = self._client.search_runs(experiment_ids=[experiment_id])
         # now organize the runs into workflows so that a nested run goes under the parent run
         workflow_ids = []
@@ -85,6 +91,17 @@ class MLflowTrackingClient(TrackingClient):
             # if it has a parent id then it's a run, if not then it's a workflow
             if parent_id is None:
                 workflow_ids.append(run.info.run_id)
+        return workflow_ids
+
+    def get_experiment(self, experiment_id: str):
+        # get all the runs for the experiment
+        experiment = self._client.get_experiment(experiment_id)
+        # If the experiment is in the deleted lifecylce, return None
+        if experiment.lifecycle_stage == "deleted":
+            return None
+
+        # now get all the workflows associated with that experiment
+        workflow_ids = self._find_workflows(experiment_id)
         workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
         return GetExperimentResponse(
             id=experiment_id,
@@ -139,13 +156,15 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=experiment_id,
             name=name,
             description=description,
-            status=workflow.data.tags.get("status"),
+            status=WorkflowStatus.CREATED,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         # get the workflow, and for each job associated with with workflow, get its status
         workflow = self._client.get_run(workflow_id)
+        if workflow.info.lifecycle_stage == "deleted":
+            return None
         # similar to the get_experiment method, but for a single workflow,
         # we need to get all the runs
         # search for all runs that have the tag "mlflow.parentRunId" equal to the workflow_id
@@ -173,27 +192,29 @@ class MLflowTrackingClient(TrackingClient):
         # look through every job associated with this workflow and get the results
         # combine them into a single json file, put that back into s3, and then generate
         # a presigned URL for that file
-        compiled_results = {}
+        # check if the compiled results already exist
         s3 = S3FileSystem()
-        for job in workflow_details.jobs:
-            # look for all parameter keys that end in "_s3_path" and download the file
-            for param in job.parameters:
-                if param["name"].endswith("_s3_path"):
-                    # download the file
-                    # get the file from the S3 bucket
-                    with s3.open(f"{param['value']}") as f:
-                        job_results = json.loads(f.read())
-                    # if any keys are the same, log a warning and then overwrite the key
-                    for key in job_results.keys():
-                        if key in compiled_results:
-                            loguru.logger.warning(
-                                f"Key '{key}' already exists in the compiled results. Overwriting."
-                            )
-                    # merge the results into the compiled results
-                    compiled_results.update(job_results)
-        with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
-            f.write(json.dumps(compiled_results))
-        # Generate presigned download URL for the object
+        if not s3.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
+            compiled_results = {}
+            for job in workflow_details.jobs:
+                # look for all parameter keys that end in "_s3_path" and download the file
+                for param in job.parameters:
+                    if param["name"].endswith("_s3_path"):
+                        # download the file
+                        # get the file from the S3 bucket
+                        with s3.open(f"{param['value']}") as f:
+                            job_results = json.loads(f.read())
+                        # if any keys are the same, log a warning and then overwrite the key
+                        for key in job_results.keys():
+                            if key in compiled_results:
+                                loguru.logger.warning(
+                                    f"Key '{key}' already exists in the results. Overwriting."
+                                )
+                        # merge the results into the compiled results
+                        compiled_results.update(job_results)
+            with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
+                f.write(json.dumps(compiled_results))
+            # Generate presigned download URL for the object
         s3_client = boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
         download_url = s3_client.generate_presigned_url(
             "get_object",
@@ -209,8 +230,30 @@ class MLflowTrackingClient(TrackingClient):
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         self._client.set_tag(workflow_id, "status", status)
 
-    def delete_workflow(self, workflow_id: str) -> None:
-        raise NotImplementedError
+    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+        # delete the workflow and all child jobs from MLflow
+        # first, get the workflow
+        workflow = self._client.get_run(workflow_id)
+        # get all the jobs associated with the workflow
+        all_jobs = self._client.search_runs(
+            experiment_ids=[workflow.info.experiment_id],
+            filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
+        )
+        all_job_ids = [run.info.run_id for run in all_jobs]
+        # delete all the jobs
+        for job_id in all_job_ids:
+            self.delete_job(job_id)
+        # delete the workflow
+        self._client.delete_run(workflow_id)
+        # TODO: delete the compiled results from S3, and any saved artifacts
+        return WorkflowResponse(
+            id=workflow_id,
+            experiment_id=workflow.info.experiment_id,
+            name=workflow.data.tags.get("mlflow.runName"),
+            description=workflow.data.tags.get("description"),
+            status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
+            created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
+        )
 
     def list_workflows(self, experiment_id: str) -> list:
         raise NotImplementedError
@@ -232,6 +275,8 @@ class MLflowTrackingClient(TrackingClient):
     def get_job(self, job_id: str):
         # look up the job and return it as a JobResult
         run = self._client.get_run(job_id)
+        if run.info.lifecycle_stage == "deleted":
+            return None
         return JobResults(
             id=job_id,
             metrics=[
@@ -243,7 +288,7 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def delete_job(self, job_id: str):
-        raise NotImplementedError
+        self._client.delete_run(job_id)
 
     def list_jobs(self, experiment_id: str, workflow_id: str):
         raise NotImplementedError

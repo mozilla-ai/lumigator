@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
@@ -6,8 +8,16 @@ from lumigator_schemas.workflows import (
 )
 
 from backend.api.deps import WorkflowServiceDep
+from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.workflow_exceptions import WorkflowNotFoundError
 
 router = APIRouter()
+
+
+def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+    return {
+        WorkflowNotFoundError: status.HTTP_404_NOT_FOUND,
+    }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -30,3 +40,10 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetai
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
     return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
+
+
+# delete a workflow
+@router.delete("/{workflow_id}")
+def delete_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
+    """Delete a workflow by ID."""
+    return WorkflowDetailsResponse.model_validate(service.delete_workflow(workflow_id).model_dump())

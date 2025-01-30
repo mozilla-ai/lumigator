@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator
 
 from lumigator_schemas.experiments import GetExperimentResponse
+from lumigator_schemas.jobs import JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
 from backend.tracking.schemas import RunOutputs
@@ -30,7 +31,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment."""
         pass
 
@@ -60,7 +61,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow."""
         pass
 
@@ -70,7 +71,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def delete_workflow(self, workflow_id: str) -> None:
+    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         """Delete a workflow."""
         pass
 
@@ -85,7 +86,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def get_job(self, job_id: str) -> dict:
+    def get_job(self, job_id: str) -> JobResults | None:
         """Get a job."""
         pass
 

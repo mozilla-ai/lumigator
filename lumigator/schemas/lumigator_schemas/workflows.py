@@ -42,8 +42,3 @@ class WorkflowDetailsResponse(WorkflowResponse):
     metrics: dict | None = None
     parameters: dict | None = None
     artifacts_download_url: str | None = None
-
-
-class WorkflowResultDownloadResponse(BaseModel):
-    id: str
-    download_url: str

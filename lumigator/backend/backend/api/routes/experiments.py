@@ -108,3 +108,9 @@ def list_experiments_new(
 def get_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
     return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+
+
+@router.delete("/new/{experiment_id}", include_in_schema=False)
+def delete_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> None:
+    """Delete an experiment by ID."""
+    service.delete_experiment(experiment_id)

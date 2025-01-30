@@ -1,5 +1,3 @@
-from uuid import UUID
-
 import loguru
 from lumigator_schemas.experiments import (
     ExperimentCreate,
@@ -9,9 +7,9 @@ from lumigator_schemas.experiments import (
 )
 from lumigator_schemas.extras import ListingResponse
 
-from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.jobs import JobService
 from backend.tracking import TrackingClient
 
@@ -29,13 +27,6 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def _get_all_owned_jobs(self, experiment_id: UUID) -> list[JobRecord]:
-        return self._job_repo.get_by_experiment_id(experiment_id)
-
-    def get_all_owned_jobs(self, experiment_id: UUID) -> ListingResponse[UUID]:
-        jobs = [job.id for job in self._get_all_owned_jobs(experiment_id)]
-        return ListingResponse[UUID].model_validate({"total": len(jobs), "items": jobs})
-
     def create_experiment(self, request: ExperimentCreate) -> ExperimentIdResponse:
         experiment = self._tracking_session.create_experiment(request.name)
         loguru.logger.info(
@@ -43,8 +34,10 @@ class ExperimentService:
         )
         return experiment
 
-    def get_experiment(self, experiment_id: UUID) -> GetExperimentResponse:
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
         record = self._tracking_session.get_experiment(experiment_id)
+        if record is None:
+            raise ExperimentNotFoundError(experiment_id) from None
         return GetExperimentResponse.model_validate(record)
 
     def list_experiments(
@@ -55,3 +48,6 @@ class ExperimentService:
             total=self._tracking_session.experiments_count(),
             items=[ExperimentResponse.model_validate(x) for x in records],
         )
+
+    def delete_experiment(self, experiment_id: str):
+        self._tracking_session.delete_experiment(experiment_id)

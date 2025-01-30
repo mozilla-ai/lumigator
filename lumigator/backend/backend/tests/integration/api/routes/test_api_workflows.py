@@ -285,6 +285,18 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
+def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
+    workflow_status = JobStatus.PENDING
+    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        time.sleep(1)
+        workflow_details = WorkflowDetailsResponse.model_validate(
+            local_client.get(f"/workflows/{workflow_id}").json()
+        )
+        workflow_status = workflow_details.status
+        logger.info(f"Workflow status: {workflow_status}")
+    return workflow_details
+
+
 def test_create_exp_workflow_check_results(
     local_client: TestClient, dialog_dataset, dependency_overrides_services
 ):
@@ -337,14 +349,7 @@ def test_create_exp_workflow_check_results(
     )
 
     # Wait till the workflow is done
-    workflow_status = workflow_1.status
-    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
-        time.sleep(1)
-        workflow_1_details = WorkflowDetailsResponse.model_validate(
-            local_client.get(f"/workflows/{workflow_1.id}").json()
-        )
-        workflow_status = workflow_1_details.status
-        logger.info(f"Workflow status: {workflow_status}")
+    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
 
     experiment_results = GetExperimentResponse.model_validate(
         local_client.get(f"/experiments/new/{experiment_id}").json()
@@ -374,14 +379,7 @@ def test_create_exp_workflow_check_results(
     )
 
     # Wait till the workflow is done
-    workflow_status = workflow_2.status
-    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
-        time.sleep(1)
-        workflow_2_details = WorkflowDetailsResponse.model_validate(
-            local_client.get(f"/workflows/{workflow_2.id}").json()
-        )
-        workflow_status = workflow_2_details.status
-        logger.info(f"Workflow status: {workflow_status}")
+    workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
 
     # now get the results of the experiment
     experiment_results = GetExperimentResponse.model_validate(
@@ -397,10 +395,12 @@ def test_create_exp_workflow_check_results(
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
     ]
 
-    # TODO: delete the experiment
-    # local_client.delete(f"/experiments/{experiment_id}")
-    # response = local_client.get(f"/experiments/{experiment_id}")
-    # assert response.status_code == 404
-    # # make sure the workflow results also were deleted
-    # response = local_client.get(f"/workflows/{workflow_1_details.id}")
-    # assert response.status_code == 404
+    # delete the experiment
+    local_client.delete(f"/experiments/new/{experiment_id}")
+    response = local_client.get(f"/experiments/new/{experiment_id}")
+    assert response.status_code == 404
+    # make sure the workflow results also were deleted
+    response = local_client.get(f"/workflows/{workflow_1_details.id}")
+    assert response.status_code == 404
+    response = local_client.get(f"/workflows/{workflow_2_details.id}")
+    assert response.status_code == 404

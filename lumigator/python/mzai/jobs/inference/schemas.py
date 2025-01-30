@@ -35,16 +35,8 @@ class SamplingParameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class AutoTokenizerConfig(BaseModel, arbitrary_types_allowed=True):
-    model_uri: str
-    model_max_length: int
-    use_fast: bool
-    trust_remote_code: bool
-
-
 class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_uri: str
-    tokenizer: AutoTokenizerConfig | None = None
     revision: str
     use_fast: bool
     trust_remote_code: bool

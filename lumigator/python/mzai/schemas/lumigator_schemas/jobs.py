@@ -6,14 +6,23 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class JobType(str, Enum):
+class LowercaseEnum(str, Enum):
+    """Can be used to ensure that values for enums are returned in lowercase."""
+
+    def __new__(cls, value):
+        obj = super().__new__(cls, value.lower())
+        obj._value_ = value.lower()
+        return obj
+
+
+class JobType(LowercaseEnum):
     INFERENCE = "inference"
     EVALUATION = "evaluate"
     EVALUATION_LITE = "eval_lite"
     ANNOTATION = "annotate"
 
 
-class JobStatus(str, Enum):
+class JobStatus(LowercaseEnum):
     CREATED = "created"
     PENDING = "pending"
     RUNNING = "running"
@@ -129,6 +138,12 @@ class JobResultResponse(BaseModel, from_attributes=True):
 class JobResultDownloadResponse(BaseModel):
     id: UUID
     download_url: str
+
+
+class JobResults(BaseModel):
+    id: UUID
+    metric_url: str
+    artifact_url: str
 
 
 class Job(JobResponse, JobSubmissionResponse):

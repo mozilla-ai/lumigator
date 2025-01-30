@@ -4,6 +4,7 @@ import json
 from collections.abc import Callable
 from io import BytesIO, StringIO
 from pathlib import Path
+from typing import Any
 from uuid import UUID
 
 import loguru
@@ -11,7 +12,7 @@ import loguru
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
-from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import InferenceJobConfig, InferenceJobOutput
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
@@ -35,6 +36,11 @@ from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.job_exceptions import (
+    JobNotFoundError,
+    JobTypeUnsupportedError,
+    JobUpstreamError,
+)
 from backend.settings import settings
 
 
@@ -66,6 +72,17 @@ class JobService:
         },
     }
 
+    NON_TERMINAL_STATUS = [
+        JobStatus.CREATED.value,
+        JobStatus.PENDING.value,
+        JobStatus.RUNNING.value,
+    ]
+    """list: A list of non-terminal job statuses."""
+
+    # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
+    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+    """list: A list of terminal job statuses."""
+
     def __init__(
         self,
         job_repo: JobRepository,
@@ -78,31 +95,47 @@ class JobService:
         self.ray_client = ray_client
         self._dataset_service = dataset_service
 
-    def _raise_not_found(self, job_id: UUID):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Job {job_id} not found.")
-
     def _get_job_record(self, job_id: UUID) -> JobRecord:
+        """Gets a job from the repository (database) by ID.
+
+        :param job_id: the ID of the job to retrieve
+        :return: the job record which includes information on whether a job belongs to an experiment
+        :rtype: JobRecord
+        :raises JobNotFoundError: If the job does not exist
+        """
         record = self.job_repo.get(job_id)
         if record is None:
-            self._raise_not_found(job_id)
+            raise JobNotFoundError(job_id) from None
+
         return record
 
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
+        """Updates an existing job record in the repository (database) by ID.
+
+        :param job_id: The ID of the job to update
+        :param updates: The updates to update the job record
+        :return: The updated job record
+        :rtype: JobRecord
+        :raises JobNotFoundError: If the job does not exist in the database
+        """
         record = self.job_repo.update(job_id, **updates)
         if record is None:
-            self._raise_not_found(job_id)
+            raise JobNotFoundError(job_id) from None
+
         return record
 
     def _get_results_s3_key(self, job_id: UUID) -> str:
-        """Given an job ID, returns the S3 key for the job results.
+        """Given a job ID, returns the S3 key identifying where job results should be stored.
 
-        The S3 key is built from:
+        The S3 key is constructed from:
         - settings.S3_JOB_RESULTS_PREFIX: the path where jobs are stored
-        - settings.S3_JOB_RESULTS_FILENAME: a filename template that is to be
-          formatted with some of the job record's metadata (e.g. exp name/id)
+        - settings.S3_JOB_RESULTS_FILENAME: a filename template that is to be formatted with some of
+         the job record's metadata (e.g. exp name/id)
 
-        The returned string contains the S3 key *excluding the bucket / s3 prefix*,
+        :param job_id: The ID of the job to retrieve the S3 key for
+        :return: The returned string contains the S3 key *excluding the bucket / s3 prefix*,
         as it is to be used by the boto3 client which accepts them separately.
+        :rtype: str
         """
         record = self._get_job_record(job_id)
 
@@ -111,7 +144,7 @@ class JobService:
             / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
         )
 
-    def _results_to_binary_file(self, results: str, fields: list[str]) -> BytesIO:
+    def _results_to_binary_file(self, results: dict[str, Any], fields: list[str]) -> BytesIO:
         """Given a JSON string containing inference results and the fields
         we want to read from it, generate a binary file (as a BytesIO
         object) to be passed to the fastapi UploadFile method.
@@ -130,6 +163,17 @@ class JobService:
         return bin_data
 
     def _add_dataset_to_db(self, job_id: UUID, request: JobInferenceCreate, s3: S3FileSystem):
+        """Attempts to add the result of a job (generated dataset) as a new dataset in Lumigator.
+
+        :param job_id: The ID of the job, used to identify the S3 path
+        :param request: The job request containing the dataset and output fields
+        :param s3: The S3 filesystem dependency for accessing storage
+        :raises DatasetNotFoundError: If the dataset in the request does not exist
+        :raises DatasetSizeError: if the dataset is too large
+        :raises DatasetInvalidError: if the dataset is invalid
+        :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
+        :raises DatasetUpstreamError: if there is an exception interacting with S3
+        """
         loguru.logger.info("Adding a new dataset entry to the database...")
 
         # Get the dataset from the S3 bucket
@@ -187,35 +231,51 @@ class JobService:
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             EvalJobOutput.model_validate(json.loads(f.read()))
 
+    def get_upstream_job_status(self, job_id: UUID) -> str:
+        """Returns the (lowercase) status of the upstream job.
+
+        Example: PENDING, RUNNING, STOPPED, SUCCEEDED, FAILED.
+
+        :param job_id: The ID of the job to retrieve the status for.
+        :return: The status of the upstream job.
+        :rtype: str
+        :raises JobUpstreamError: If there is an error with the upstream service returning the
+                                  job status
+        """
+        try:
+            status_response = self.ray_client.get_job_status(str(job_id))
+            return str(status_response.value.lower())
+        except RuntimeError as e:
+            raise JobUpstreamError("ray", "error getting Ray job status", e) from e
+
     async def on_job_complete(self, job_id: UUID, task: Callable = None, *args):
         """Watches a submitted job and, when it terminates successfully, runs a given task.
-
         Inputs:
         - job_id: the UUID of the job to watch
         - task: the function to be called after the job completes successfully
         - args: the arguments to be passed to the function `task()`
         """
-        job_status = self.ray_client.get_job_status(job_id)
-
-        valid_status = [
-            JobStatus.CREATED.value.lower(),
-            JobStatus.PENDING.value.lower(),
-            JobStatus.RUNNING.value.lower(),
-        ]
-        stop_status = [JobStatus.FAILED.value.lower(), JobStatus.SUCCEEDED.value.lower()]
+        job_status = self.get_upstream_job_status(job_id)
 
         loguru.logger.info(f"Watching {job_id}")
-        while job_status.lower() not in stop_status and job_status.lower() in valid_status:
+        while job_status not in self.TERMINAL_STATUS and job_status in self.NON_TERMINAL_STATUS:
             await asyncio.sleep(5)
-            job_status = self.ray_client.get_job_status(job_id)
+            job_status = self.get_upstream_job_status(job_id)
 
-        if job_status.lower() == JobStatus.FAILED.value.lower():
-            loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
-
-        if job_status.lower() == JobStatus.SUCCEEDED.value.lower():
-            loguru.logger.info(f"Job {job_id} finished successfully.")
-            if task is not None:
-                task(*args)
+        match job_status:
+            case JobStatus.FAILED.value:
+                loguru.logger.error(f"Job {job_id} failed: not running task {str(task)}")
+            case JobStatus.SUCCEEDED.value:
+                loguru.logger.info(f"Job {job_id} finished successfully.")
+                if task is not None:
+                    task(*args)
+            case _:
+                # NOTE: Consider raising an exception here as we *really* don't expect
+                # anything other than FAILED or SUCCEEDED.
+                loguru.logger.error(
+                    f"Job {job_id} has an unexpected status "
+                    f"({job_status}) that is not completed."
+                )
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]
@@ -230,7 +290,7 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request: BaseModel) -> str:
+    def _set_model_type(self, request) -> str:
         """Sets model URL based on protocol address"""
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
@@ -249,58 +309,50 @@ class JobService:
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
 
-    def _get_job_params(self, job_type: str, record, request: BaseModel) -> dict:
+    def _get_job_params(self, job_type: JobType, record, request: BaseModel) -> dict:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
         # provide a reasonable system prompt for services where none was specified
-        if job_type == JobType.EVALUATION or job_type == JobType.INFERENCE:
-            if request.system_prompt is None and not request.model.startswith("hf://"):
-                request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+        if (
+            job_type in [JobType.EVALUATION, JobType.INFERENCE]
+            and request.system_prompt is None
+            and not request.model.startswith("hf://")
+        ):
+            request.system_prompt = settings.DEFAULT_SUMMARIZER_PROMPT
+
+        # Base job parameters (used for eval-lite, evaluation and inference).
+        job_params = {
+            "dataset_path": dataset_s3_path,
+            "job_id": record.id,
+            "job_name": request.name,
+            "max_samples": request.max_samples,
+            "model_uri": request.model,
+            "storage_path": self.storage_path,
+        }
 
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
-            job_params = {
-                "job_id": record.id,
-                "job_name": request.name,
-                "model_uri": request.model,
-                "dataset_path": dataset_s3_path,
-                "max_samples": request.max_samples,
-                "storage_path": self.storage_path,
+            job_params = job_params | {
                 "model_url": self._set_model_type(request),
-                "system_prompt": request.system_prompt,
                 "skip_inference": request.skip_inference,
-            }
-        elif job_type == JobType.EVALUATION_LITE:
-            job_params = {
-                "job_id": record.id,
-                "job_name": request.name,
-                "model_uri": request.model,
-                "dataset_path": dataset_s3_path,
-                "max_samples": request.max_samples,
-                "storage_path": self.storage_path,
-            }
-        else:
-            job_params = {
-                "job_id": record.id,
-                "job_name": request.name,
-                "model_uri": request.model,
-                "dataset_path": dataset_s3_path,
-                "task": request.task,
-                "accelerator": request.accelerator,
-                "revision": request.revision,
-                "use_fast": request.use_fast,
-                "trust_remote_code": request.trust_remote_code,
-                "torch_dtype": request.torch_dtype,
-                "max_samples": request.max_samples,
-                "storage_path": self.storage_path,
-                "model_url": self._set_model_type(request),
                 "system_prompt": request.system_prompt,
-                "output_field": request.output_field,
-                "max_tokens": request.max_tokens,
+            }
+        elif job_type == JobType.INFERENCE:
+            job_params = job_params | {
+                "accelerator": request.accelerator,
                 "frequency_penalty": request.frequency_penalty,
+                "max_tokens": request.max_tokens,
+                "model_url": self._set_model_type(request),
+                "output_field": request.output_field,
+                "revision": request.revision,
+                "system_prompt": request.system_prompt,
+                "task": request.task,
                 "temperature": request.temperature,
                 "top_p": request.top_p,
+                "torch_dtype": request.torch_dtype,
+                "trust_remote_code": request.trust_remote_code,
+                "use_fast": request.use_fast,
             }
 
         return job_params
@@ -311,23 +363,31 @@ class JobService:
         background_tasks: BackgroundTasks,
         experiment_id: UUID = None,
     ) -> JobResponse:
-        """Creates a new evaluation workload to run on Ray and returns the response status."""
+        """Creates a new workload to run on Ray based on the type of request.
+
+        :param request: contains information on the requested job, including type,
+                        (e.g. inference or evaluation)
+        :param background_tasks: dependency used to initiate tasks in the background
+        :param experiment_id: experiment ID (optional) links this job to a parent experiment.
+        :return: information on the created job
+        :rtype: JobResponse
+        :raises JobTypeUnsupportedError: if the requested job type is not supported
+        """
         if isinstance(request, JobEvalCreate):
             job_type = JobType.EVALUATION
         elif isinstance(request, JobEvalLiteCreate):
             job_type = JobType.EVALUATION_LITE
         elif isinstance(request, JobInferenceCreate):
             job_type = JobType.INFERENCE
+            if not request.output_field:
+                request.output_field = "predictions"
         else:
-            raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "Job type not implemented.")
+            raise JobTypeUnsupportedError(request) from None
 
         # Create a db record for the job
         record = self.job_repo.create(
             name=request.name, description=request.description, experiment_id=experiment_id
         )
-
-        if isinstance(request, JobInferenceCreate) and not request.output_field:
-            request.output_field = "predictions"
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -419,6 +479,13 @@ class JobService:
         return JobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> JobResponse:
+        """Gets a job from the repository (database) by ID.
+
+        :param job_id: the ID of the job to retrieve
+        :return: the job record which includes information on whether a job belongs to an experiment
+        :rtype: JobRecord
+        :raises JobNotFoundError: If the job does not exist
+        """
         record = self._get_job_record(job_id)
         loguru.logger.info(f"Obtaining info for job {job_id}: {record.name}")
 
@@ -452,21 +519,29 @@ class JobService:
         job_id: UUID,
         status: JobStatus,
     ) -> JobResponse:
+        """Updates the status of a job.
+
+        :param job_id: the ID of the job to update
+        :param status: the status to update the job with
+        :return: the updated job information
+        :rtype: JobResponse
+        :raises JobNotFoundError: If the job does not exist
+        """
         record = self._update_job_record(job_id, status=status)
         return JobResponse.model_validate(record)
 
     def get_job_result(self, job_id: UUID) -> JobResultResponse:
-        """Return job results metadata if available in the DB."""
-        job_record = self._get_job_record(job_id)
+        """Return job results metadata if available in the DB.
+
+        :param job_id: the ID of the job to retrieve results for
+        :return: the job results metadata
+        :rtype: JobResultResponse
+        :raises JobNotFoundError: if the job does not exist
+        """
         result_record = self.result_repo.get_by_job_id(job_id)
         if result_record is None:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                (
-                    f"No result available for job '{job_record.name}' "
-                    f"(status = '{job_record.status}')."
-                ),
-            )
+            raise JobNotFoundError(job_id) from None
+
         return JobResultResponse.model_validate(result_record)
 
     def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:

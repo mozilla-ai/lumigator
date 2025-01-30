@@ -57,7 +57,7 @@ jobs:
         run: make test-${{ matrix.test }}-unit
 
   integration-tests:
-    name: Integration tests
+    name: Integration tests (SQLite)
     runs-on: ubuntu-latest
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
@@ -89,6 +89,54 @@ jobs:
 
       - name: Run ${{ matrix.test }} integration tests
         run: make test-${{ matrix.test }}-integration
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/
+
+  integration-tests-postgres:
+    name: Integration tests (PostgreSQL)
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Spinning up containers for the tests
+        run: make start-lumigator-build-postgres
+
+      - name: Run ${{ matrix.test }} integration tests
+        # This setting only affects backend integration tests
+        # localhost is used since the postgres DB needs to be
+        # accessed from pytest
+        # The SDK tests already use a separate Lumigator started
+        # with postgres overrides
+        # Allowing secrets for local test postgres
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
         if: failure()
@@ -280,11 +328,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
-        if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')  
+        if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
@@ -329,7 +377,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)

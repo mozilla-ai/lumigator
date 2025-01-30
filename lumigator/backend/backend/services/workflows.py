@@ -94,9 +94,8 @@ class WorkflowService:
         # log the job to the tracking client
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
         inference_job_output = RunOutputs(
-            parameters={
-                "inference_output_s3_path": inf_path,
-            }
+            parameters={"inference_output_s3_path": inf_path},
+            ray_job_id=str(inference_job.id),
         )
         self._tracking_client.create_job(
             request.experiment_id, workflow.id, "inference", inference_job_output
@@ -161,6 +160,7 @@ class WorkflowService:
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
+                ray_job_id=str(evaluation_job.id),
             )
             self._tracking_client.create_job(
                 request.experiment_id, workflow.id, "evaluation", outputs

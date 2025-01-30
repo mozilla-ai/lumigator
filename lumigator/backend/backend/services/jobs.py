@@ -247,7 +247,7 @@ class JobService:
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
-    async def wait_for_job_complete(self, job_id, max_wait_time_sec=300):
+    async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
@@ -258,13 +258,15 @@ class JobService:
                                   job status
         """
         loguru.logger.info(f"Waiting for job {job_id} to complete...")
-
         # Get the initial job status
         job_status = self.get_upstream_job_status(job_id)
 
         # Wait for the job to complete
         elapsed_time = 0
-        while job_status not in self.TERMINAL_STATUS and elapsed_time < max_wait_time_sec:
+        while job_status not in self.TERMINAL_STATUS:
+            if max_wait_time_sec and elapsed_time >= max_wait_time_sec:
+                loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
+                break
             await asyncio.sleep(5)
             elapsed_time += 5
             job_status = self.get_upstream_job_status(job_id)

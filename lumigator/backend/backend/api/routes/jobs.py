@@ -54,6 +54,16 @@ def create_inference_job(
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
 
+    async def background_task(job_response: JobResponse, job_create_request: JobInferenceCreate):
+        await service.wait_for_job_complete(job_response.id)
+        service._add_dataset_to_db(
+            job_response.id,
+            job_create_request,
+            service._dataset_service.s3_filesystem,
+        )
+
+    background_tasks.add_task(background_task, job_response, job_create_request)
+
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
 
@@ -78,7 +88,17 @@ def create_annotation_job(
         output_field="ground_truth",
     )
     inference_job_create_request.store_to_dataset = True
-    job_response = service.create_job(inference_job_create_request, background_tasks)
+    job_response = service.create_job(inference_job_create_request)
+
+    async def background_task(job_response: JobResponse, job_create_request: JobInferenceCreate):
+        await service.wait_for_job_complete(job_response.id)
+        service._add_dataset_to_db(
+            job_response.id,
+            job_create_request,
+            service._dataset_service.s3_filesystem,
+        )
+
+    background_tasks.add_task(background_task, job_response, job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -92,9 +112,8 @@ def create_evaluation_job(
     job_create_request: JobEvalCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -110,9 +129,8 @@ def create_evaluation_lite_job(
     job_create_request: JobEvalLiteCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

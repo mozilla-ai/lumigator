@@ -2,7 +2,7 @@ import contextlib
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 
-from lumigator_schemas.experiments import GetExperimentResponse
+from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
 from lumigator_schemas.jobs import JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
@@ -46,7 +46,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def list_experiments(self, skip: int, limit: int) -> list:
+    def list_experiments(self, skip: int, limit: int) -> list[ExperimentResponse]:
         """List all experiments."""
         pass
 

@@ -240,6 +240,9 @@ def test_full_experiment_launch(
     create_workflow_response = local_client.post("/workflows/", headers=POST_HEADER, json=payload)
     assert create_workflow_response.status_code == 201
 
+    # Wait till the workflow is done
+    wait_for_workflow_complete(local_client, create_workflow_response.json()["id"])
+
     get_experiments_response = local_client.get("/experiments/new/all")
     assert get_experiments_response.status_code == 200
     get_experiments = ListingResponse[ExperimentResponse].model_validate(

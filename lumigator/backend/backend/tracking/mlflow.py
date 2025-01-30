@@ -2,11 +2,15 @@ import contextlib
 import json
 from collections.abc import Generator
 from datetime import datetime
+from http import HTTPStatus
+from urllib.parse import urljoin
 
 import boto3
 import loguru
+import requests
+from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
-from lumigator_schemas.jobs import JobResults
+from lumigator_schemas.jobs import JobLogsResponse, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
@@ -128,10 +132,8 @@ class MLflowTrackingClient(TrackingClient):
             experiments.extend(response)
             if limit is not None and len(experiments) >= limit:
                 break
-            if not response:
+            if response.token is None:
                 break
-            page_token = response[-1].experiment_id
-
         return experiments[:limit] if limit is not None else experiments
 
     def experiments_count(self):
@@ -230,6 +232,49 @@ class MLflowTrackingClient(TrackingClient):
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         self._client.set_tag(workflow_id, "status", status)
 
+    def _get_ray_job_logs(self, ray_job_id: str):
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"))
+
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            loguru.logger.error(
+                f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}"
+            )
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Job logs for ID: {ray_job_id} not found",
+            )
+        elif resp.status_code != HTTPStatus.OK:
+            loguru.logger.error(
+                f"Unexpected status code getting job logs: {resp.status_code}, \
+                    error: {resp.text or ''}"
+            )
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail=f"Unexpected error getting job logs for ID: {ray_job_id}",
+            )
+
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            loguru.logger.error(f"JSON decode error: {e}")
+            loguru.logger.error(f"Response text: {resp.text}")
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
+            ) from e
+
+    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+        # get all the jobs under the workflow
+        all_jobs = self._client.search_runs(
+            experiment_ids=[workflow_id],
+            filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
+        )
+        all_ray_job_ids = [run.data.params.get("ray_job_id") for run in all_jobs]
+        logs = [self._get_ray_job_logs(ray_job_id) for ray_job_id in all_ray_job_ids]
+        # combine the logs into a single string
+        # TODO: This is not a great solution but it matches the current API
+        return JobLogsResponse(logs="\n".join([log.logs for log in logs]))
+
     def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         # delete the workflow and all child jobs from MLflow
         # first, get the workflow
@@ -268,6 +313,9 @@ class MLflowTrackingClient(TrackingClient):
             self._client.log_metric(run.info.run_id, metric, value)
         for parameter, value in data.parameters.items():
             self._client.log_param(run.info.run_id, parameter, value)
+
+        # log the ray_job_id as a param, we'll use this to get the logs later
+        self._client.log_param(run.info.run_id, "ray_job_id", data.ray_job_id)
 
     def update_job(self, job_id: str, new_data: dict):
         raise NotImplementedError

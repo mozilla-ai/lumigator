@@ -40,9 +40,7 @@ class ExperimentService:
             raise ExperimentNotFoundError(experiment_id) from None
         return GetExperimentResponse.model_validate(record)
 
-    def list_experiments(
-        self, skip: int = 0, limit: int = 100
-    ) -> ListingResponse[ExperimentResponse]:
+    def list_experiments(self, skip: int, limit: int) -> ListingResponse[ExperimentResponse]:
         records = self._tracking_session.list_experiments(skip, limit)
         return ListingResponse(
             total=self._tracking_session.experiments_count(),

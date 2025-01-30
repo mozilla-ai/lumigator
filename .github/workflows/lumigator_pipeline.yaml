@@ -68,21 +68,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+
       - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
       - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-integration
 
       - name: Collect Ray logs in case of failure

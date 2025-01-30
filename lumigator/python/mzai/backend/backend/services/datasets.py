@@ -170,6 +170,8 @@ class DatasetService:
         """Attempts to upload and convert the specified dataset (CSV) to HF format which is then
         stored in S3.
 
+        :return: Information on the uploaded dataset
+        :rtype: DatasetResponse
         :raises DatasetSizeError: if the dataset is too large
         :raises DatasetInvalidError: if the dataset is invalid
         :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
@@ -212,6 +214,8 @@ class DatasetService:
         """Gets the dataset record by its ID.
 
         :param dataset_id: dataset ID
+        :return: Information on the dataset
+        :rtype: DatasetResponse
         :raises DatasetNotFoundError: if there is no dataset record with that ID
         """
         record = self._get_dataset_record(dataset_id)
@@ -283,6 +287,8 @@ class DatasetService:
 
         :param dataset_id: ID of the dataset to generate pre-signed download URLs for
         :param extension: File extension used to determine which files to generate URLs for
+        :return: Pre-signed download URLs
+        :rtype: DatasetDownloadResponse
         :raises DatasetNotFoundError: if the dataset cannot be found in S3
         :raises DatasetUpstreamError: if there is an exception interacting with S3
         """

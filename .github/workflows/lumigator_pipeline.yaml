@@ -181,7 +181,7 @@ jobs:
           target: "main_image"
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+            ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
   build-frontend-image:
     name: Build Frontend Docker image
@@ -230,7 +230,7 @@ jobs:
           push: true
           target: "server"
           tags: |
-            ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }}
+            ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }}
 
   push-backend-images:
     name: Push backend Docker images
@@ -264,7 +264,7 @@ jobs:
 
       - name: Download Docker images
         if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
-        run: docker pull ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+        run: docker pull ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
         if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
@@ -276,19 +276,19 @@ jobs:
       - name: Tag and push Docker image (tagged releases)
         if: contains(github.ref, 'refs/tags/') 
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
+          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
           docker push mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
         if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')  
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
           docker push mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
         if: steps.filter.outputs.push_be == 'true' || github.ref == 'refs/heads/main'
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:latest
+          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:latest
           docker push mzdotai/lumigator:latest
 
   push-frontend-images:
@@ -323,7 +323,7 @@ jobs:
 
       - name: Download Docker images
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
-        run: docker pull ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }}
+        run: docker pull ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Login to DockerHub
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
@@ -335,19 +335,19 @@ jobs:
       - name: Tag and push Docker image (tagged releases)
         if: contains(github.ref, 'refs/tags/') 
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
+          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
           docker push mzdotai/lumigator-frontend:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
         if: steps.filter.outputs.push_fe == 'true' && !contains(github.ref, 'refs/tags/')
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
           docker push mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
         if: steps.filter.outputs.push_fe == 'true' || github.ref == 'refs/heads/main'
         run: |
-          docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
+          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
           docker push mzdotai/lumigator-frontend:latest
 
   sdk-packaging:

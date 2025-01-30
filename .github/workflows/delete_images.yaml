@@ -1,11 +1,6 @@
 name: Clean up images
 
 on:
-  pull_request:
-    branches:
-      - "**"
-    # synchronized is when you push new commits
-    types: ["opened", "synchronize"]
   schedule:
     - cron: '0 3 * * *'  # Run every day at 3AM UTC
   # required to enable manual triggers on the GH web ui

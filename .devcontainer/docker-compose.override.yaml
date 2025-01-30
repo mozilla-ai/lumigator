@@ -19,22 +19,22 @@ services:
         required: false
     develop:
       watch:
-        - path: lumigator/python/mzai/backend/
-          target: /mzai/lumigator/python/mzai/backend
+        - path: lumigator/backend/
+          target: /mzai/lumigator/backend
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/python/mzai/jobs/
-          target: /mzai/lumigator/python/mzai/jobs
+        - path: lumigator/jobs/
+          target: /mzai/lumigator/jobs
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/python/mzai/schemas/
-          target: /mzai/lumigator/python/mzai/schemas
+        - path: lumigator/schemas/
+          target: /mzai/lumigator/schemas
           action: sync
           ignore:
             - .venv/
-        - path: lumigator/python/mzai/backend/pyproject.toml
+        - path: lumigator/backend/pyproject.toml
           action: rebuild
 
   mlflow:

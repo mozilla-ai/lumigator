@@ -370,32 +370,32 @@ jobs:
 
       - name: Check tag consistency (SDK)
         run: check_version.sh
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/sdk
 
       - name: Check tag consistency (schemas)
         run: check_version.sh
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/schemas
 
       - name: Install python (SDK)
         run: uv python install
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/sdk
 
       - name: Install python (schemas)
         run: uv python install
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/schemas
 
       - name: Package SDK
         run: uv build
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/sdk
 
       - name: Package schemas
         run: uv build
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/schemas
 
       - name: Upload SDK packages to PyPI
-        working-directory: lumigator/python/mzai/sdk
+        working-directory: lumigator/sdk
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
 
       - name: Upload schemas packages to PyPI
-        working-directory: lumigator/python/mzai/schemas
+        working-directory: lumigator/schemas
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose

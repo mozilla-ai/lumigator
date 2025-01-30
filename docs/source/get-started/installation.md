@@ -1,7 +1,7 @@
 # Installation
 
 You can deploy Lumigator either locally or into a distributed environment using Kubernetes
-[HELM Charts](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/lumigator/infra/mzai/helm/lumigator/README.md).
+{{ '[HELM Charts](https://github.com/mozilla-ai/lumigator/blob/{}/infra/helm/lumigator/README.md)'.format(commit_id) }}.
 In this guide, we'll show you how to get started with a local deployment.
 
 ## Prerequisites
@@ -44,7 +44,7 @@ environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider's S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See [here](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.external.yaml) for an example of how to do
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/docker-compose.external.yaml)'.format(commit_id) }} for an example of how to do
 this.
 
 To deploy Lumigator locally:
@@ -78,7 +78,7 @@ should receive the following JSON response:
 
 ```{note}
 If you need to change the port that the Lumigator service listens on, you can do it in the
-[`docker-compose.yaml`](https://github.com/mozilla-ai/lumigator/blob/7be2518ec8c6bc59ab8463fc7c39aad078bbb386/docker-compose.yaml)
+{{ '[`docker-compose.yaml`](https://github.com/mozilla-ai/lumigator/blob/{}/docker-compose.yaml)'.format(commit_id) }}
 file.
 ```
 

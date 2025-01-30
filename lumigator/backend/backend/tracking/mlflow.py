@@ -81,7 +81,13 @@ class MLflowTrackingClient(TrackingClient):
         for job_id in job_ids:
             run = self._client.get_run(job_id)
             for parameter in run.data.params:
-                assert parameter not in parameters
+                # if the parameter shows up in multiple runs, prepend the run_name to the key
+                # TODO: this is a hacky way to handle this,
+                #  we should come up with a better solution but at least it keeps the info
+                if parameter in parameters:
+                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[
+                        parameter
+                    ]
                 parameters[parameter] = run.data.params[parameter]
         return parameters
 
@@ -175,6 +181,8 @@ class MLflowTrackingClient(TrackingClient):
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
         all_job_ids = [run.info.run_id for run in all_jobs]
+        # sort the jobs by created_at, with the oldest last
+        all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
 
         workflow_details = WorkflowDetailsResponse(
             id=workflow_id,
@@ -265,15 +273,20 @@ class MLflowTrackingClient(TrackingClient):
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         # get all the jobs under the workflow
+        # get the workflow run
+        workflow_run = self._client.get_run(workflow_id)
+        # get the jobs associated with the workflow
         all_jobs = self._client.search_runs(
-            experiment_ids=[workflow_id],
+            experiment_ids=[workflow_run.info.experiment_id],
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
+        # sort the jobs by created_at, with the oldest last
+        all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
         all_ray_job_ids = [run.data.params.get("ray_job_id") for run in all_jobs]
         logs = [self._get_ray_job_logs(ray_job_id) for ray_job_id in all_ray_job_ids]
         # combine the logs into a single string
         # TODO: This is not a great solution but it matches the current API
-        return JobLogsResponse(logs="\n".join([log.logs for log in logs]))
+        return JobLogsResponse(logs="\n================\n".join([log.logs for log in logs]))
 
     def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         # delete the workflow and all child jobs from MLflow

@@ -398,6 +398,19 @@ def test_create_exp_workflow_check_results(
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
     ]
 
+    # get the logs
+    logs_job_response = local_client.get(f"/workflows/{workflow_1_details.id}/logs")
+    logs = JobLogsResponse.model_validate(logs_job_response.json())
+    assert logs.logs is not None
+    # Very naive way to check whether both of the logs we expect are in here
+    # This will need to be updated as we improve the log retrieval structure.
+    assert "Inference results stored at" in logs.logs
+    assert "Storing evaluation results into" in logs.logs
+    # assert that inference comes before eval
+    assert logs.logs.index("Inference results stored at") < logs.logs.index(
+        "Storing evaluation results into"
+    )
+
     # delete the experiment
     local_client.delete(f"/experiments/new/{experiment_id}")
     response = local_client.get(f"/experiments/new/{experiment_id}")

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, BackgroundTasks, status
+from lumigator_schemas.jobs import JobLogsResponse
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -40,6 +41,13 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetai
     This means you can't yet easily compile a list of all workflows for an experiment.
     """
     return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
+
+
+# get the logs
+@router.get("/{workflow_id}/logs")
+def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsResponse:
+    """Get the logs for a workflow."""
+    return JobLogsResponse.model_validate(service.get_workflow_logs(workflow_id).model_dump())
 
 
 # delete a workflow

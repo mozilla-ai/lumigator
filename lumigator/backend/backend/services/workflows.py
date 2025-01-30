@@ -7,6 +7,7 @@ from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
+    JobLogsResponse,
     JobResponse,
     JobStatus,
 )
@@ -205,3 +206,7 @@ class WorkflowService:
     def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         """Delete a workflow by ID."""
         return self._tracking_client.delete_workflow(workflow_id)
+
+    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+        """Get the logs for a workflow."""
+        return self._tracking_client.get_workflow_logs(workflow_id)

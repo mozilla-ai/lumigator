@@ -15,7 +15,6 @@ from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
-
 from lumigator_schemas.experiments import ExperimentResponse
 from lumigator_schemas.jobs import (
     JobConfig,
@@ -97,7 +96,9 @@ def wait_for_experiment(client, experiment_id: UUID) -> bool:
     for _ in range(1, MAX_POLLS):
         get_experiment_response = client.get(f"/experiments/new/{experiment_id}")
         assert get_experiment_response.status_code == 200
-        get_experiment_response_model = ExperimentResponse.model_validate(get_experiment_response.json())
+        get_experiment_response_model = ExperimentResponse.model_validate(
+            get_experiment_response.json()
+        )
         if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             timed_out = False
@@ -451,8 +452,7 @@ def simple_infer_template():
             "revision": "{revision}",
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
-            "torch_dtype": "{torch_dtype}",
-            "max_length": 500
+            "torch_dtype": "{torch_dtype}"
         }},
         "job": {{
             "max_samples": {max_samples},

@@ -51,7 +51,6 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     torch_dtype: str
     accelerator: str
     model_config = ConfigDict(extra="forbid")
-    max_length: int
     truncation: bool = True
     task: str | None = None
 

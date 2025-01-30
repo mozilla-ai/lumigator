@@ -160,42 +160,43 @@ class HuggingFaceModelClient(BaseModelClient):
         """
         config = self._pipeline.model.config
         logger.info(f"Initial model_max_length {self._pipeline.tokenizer.model_max_length}")
-        # Only override if it's the default value
-        if self._pipeline.tokenizer.model_max_length == VERY_LARGE_INTEGER:
-            # This is the default value from HF for models that don't have a max length
-            # Common parameter names to check in config
-            plausible_max_length_params = [
-                # BERT-based, LLaMA
-                "max_position_embeddings",
-                # GPT-2-based
-                "n_positions",
-                "n_ctx",
-                # ChatGLM-based
-                "max_sequence_length",
-                "seq_length",
-                # Mistral-based
-                "sliding_window",
-            ]
-
-            # Check config parameters
-            for param in plausible_max_length_params:
-                if hasattr(config, param):
-                    value = getattr(config, param)
-                    if (
-                        isinstance(value, int) and value < VERY_LARGE_INTEGER
-                    ):  # Sanity check for reasonable values
-                        self._pipeline.tokenizer.model_max_length = value
-                        logger.info(f"Setting model_max_length to {value} based on config.{param}")
-                        return
-
-            # If no suitable parameter is found, warn the user and continue with the HF default
-            logger.warning(
-                "Could not find a suitable parameter in the model config to set model_max_length. \
-                    Using default value."
-            )
-        else:
+        # If suitable model_max_length is already available, don't override it
+        if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
             logger.info(f"Using model_max_length = {self._pipeline.tokenizer.model_max_length} \
                         as per HuggingFace model config")
+            return
+        # Only override if it's the default value:
+        # i.e., VERY_LARGE_INTEGER for models that don't have a model_max_length explicity set
+        # Common parameter names to check in config
+        plausible_max_length_params = [
+            # BERT-based, LLaMA
+            "max_position_embeddings",
+            # GPT-2-based
+            "n_positions",
+            "n_ctx",
+            # ChatGLM-based
+            "max_sequence_length",
+            "seq_length",
+            # Mistral-based
+            "sliding_window",
+        ]
+
+        # Check config parameters
+        for param in plausible_max_length_params:
+            if hasattr(config, param):
+                value = getattr(config, param)
+                if (
+                    isinstance(value, int) and value < VERY_LARGE_INTEGER
+                ):  # Sanity check for reasonable values
+                    self._pipeline.tokenizer.model_max_length = value
+                    logger.info(f"Setting model_max_length to {value} based on config.{param}")
+                    return
+
+        # If no suitable parameter is found, warn the user and continue with the HF default
+        logger.warning(
+            "Could not find a suitable parameter in the model config to set model_max_length. \
+                Using default value."
+        )
 
     def predict(self, prompt):
         prediction = self._pipeline(prompt)[0]

@@ -264,7 +264,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/') 
         run: |
           docker tag ghcr.io/${{ github.repository }}/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
           docker push mzdotai/lumigator:${{ github.ref_name }}
@@ -323,7 +323,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/') 
         run: |
           docker tag ghcr.io/${{ github.repository }}/lumigator:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
           docker push mzdotai/lumigator-frontend:${{ github.ref_name }}

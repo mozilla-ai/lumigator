@@ -31,7 +31,7 @@ def dataset_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
         DatasetUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         DatasetSizeError: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
         DatasetInvalidError: status.HTTP_422_UNPROCESSABLE_ENTITY,
-        DatasetNotAvailableError: status.HTTP_204_NO_CONTENT,
+        DatasetNotAvailableError: status.HTTP_422_UNPROCESSABLE_ENTITY,
     }
 
 

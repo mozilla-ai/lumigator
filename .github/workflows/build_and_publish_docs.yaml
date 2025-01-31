@@ -4,7 +4,6 @@ on:
   push:
     branches:
         - main
-        - brake/docs
   pull_request:
     branches:
       - "**"
@@ -56,8 +55,13 @@ jobs:
       uses: lycheeverse/lychee-action@v2
       with:
         # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
-        # Excluding the docs folder because these links will be checked by the sphinx linkcheck builder later
-        args: --base . --verbose --no-progress './**/*.md'  './**/*.html' './**/*.rst' --exclude 'mailto:|localhost' --exclude-path 'docs/source'
+        # Excluding the docs folder because the links in there are dynamic and are checked after
+        # they're compiled into html
+        args: |
+          --base . --verbose --no-progress
+          './**/*.md' './docs/build/**/*.html' './**/*.rst'
+          --exclude 'mailto:|localhost'
+          --exclude-path 'docs/source'
 
     - name: Set up pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'

@@ -14,7 +14,7 @@ The components inside the backend, shown in the image below, are the different a
 the backend itself relies on:
 
 * The **API** makes backend functionalities available to the UI through different **routes** (see: {{ '[schema code](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/backend/api/routes)'.format(commit_id) }} ).
-{{ '[**Schemas**](https://github.com/moa;asldfjaszilla-ai/lumigator/blob/{}/lumigator/schemas)'.format(commit_id) }}
+{{ '[**Schemas**](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/schemas)'.format(commit_id) }}
   are used in the API which allows one to exactly know which kind of data has to be passed to it.
 
 * **Services** implement the actual functionalities and are called by the different methods exposed

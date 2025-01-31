@@ -198,8 +198,8 @@ jobs:
         with:
           filters: |
             build_fe:
-              - '.github/workflows/**'
-              - 'lumigator/frontend/**'
+              - '.github/**'
+              - 'lumigator/**'
 
       - name: Truncate commit SHA
         if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')

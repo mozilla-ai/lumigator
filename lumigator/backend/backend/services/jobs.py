@@ -273,6 +273,22 @@ class JobService:
 
         return job_status
 
+    async def handle_inference_job(self, job_id: UUID, request: JobInferenceCreate):
+        """Long term we maybe want to move logic about how to handle a specific job
+        to be separate from the job service. However, for now, we will keep it here.
+        This function can be attached to the jobs that run inference so that the results will
+        get added to the dataset db. The job routes that store the results
+        in the db will add this function as a background task after the job is created.
+        """
+        loguru.logger.info("Handling inference job result")
+
+        await self.wait_for_job_complete(job_id)
+        self._add_dataset_to_db(
+            job_id,
+            request,
+            self._dataset_service.s3_filesystem,
+        )
+
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]
 

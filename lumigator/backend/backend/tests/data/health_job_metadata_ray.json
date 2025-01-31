@@ -1,0 +1,52 @@
+{
+  "type": "SUBMISSION",
+  "job_id": null,
+  "submission_id": "e899341d-bada-4f3c-ae32-b87bf730f897",
+  "driver_info": null,
+  "status": "RUNNING",
+  "entrypoint": "if [ `arch` = \"aarch64\" ]; then export LD_PRELOAD=$VIRTUAL_ENV/lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0; fi; python -m evaluator evaluate huggingface --config '{\n    \"name\": \"test_run_hugging_face/e899341d-bada-4f3c-ae32-b87bf730f897\",\n    \"model\": { \"path\": \"hf://facebook/bart-large-cnn\" },\n    \"tokenizer\": { \"path\": \"hf://facebook/bart-large-cnn\", \"mod_max_length\": 1024 },\n    \"dataset\": { \"path\": \"s3://lumigator-storage/datasets/c404aa33-4c4c-4a59-845e-01e10ad22226/thunderbird_gt_bart.csv\" },\n    \"evaluation\": {\n        \"metrics\": [\"rouge\", \"meteor\", \"bertscore\"],\n        \"use_pipeline\": true,\n        \"max_samples\": 10,\n        \"return_input_data\": true,\n        \"return_predictions\": true,\n        \"storage_path\": \"s3://lumigator-storage/jobs/results/\"\n    }\n}'",
+  "message": "Job is currently running.",
+  "error_type": null,
+  "start_time": 1730999068650,
+  "end_time": null,
+  "metadata": {"job_type": "evaluate"},
+  "runtime_env": {
+    "working_dir": "gcs://_ray_pkg_d5f068763637bcac.zip",
+    "pip": {
+      "packages": [
+        "click>=8.1.7",
+        "scipy==1.13.1",
+        "numpy<2.0.0",
+        "wandb==0.16.3",
+        "protobuf>=3.20.2",
+        "urllib3>=1.26.18,<2",
+        "pydantic>=2.6.4",
+        "pydantic-yaml>=1.2.0",
+        "ray[default]==2.30.0",
+        "loguru==0.7.2",
+        "s3fs==2024.5.0",
+        "ruff==0.5.5",
+        "datasets==2.20.0",
+        "transformers==4.43.4",
+        "accelerate==0.33.0",
+        "bitsandbytes==0.42.0",
+        "bert_score==0.3.13",
+        "lm-eval==0.4.3",
+        "einops==0.8.0",
+        "openai==1.38.0",
+        "sentencepiece==0.2.0",
+        "evaluate==0.4.3",
+        "mistralai==0.4.2",
+        "nltk==3.8.1"
+      ],
+      "pip_check": false
+    },
+    "env_vars": {
+      "MZAI_JOB_ID": "e899341d-bada-4f3c-ae32-b87bf730f897"
+    },
+    "_ray_commit": "97c37298df9e997b86ca9efed824e27024f3bd60"
+  },
+  "driver_agent_http_address": "http://172.18.0.3:52365",
+  "driver_node_id": "c213baf5946b4bd960c5f114575c5ec2643343653ea6050003db2819",
+  "driver_exit_code": null
+}

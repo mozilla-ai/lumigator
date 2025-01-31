@@ -10,7 +10,7 @@ We want to encourage both suggestions and contributions from the community in th
 
 * Check out the [roadmap](https://github.com/orgs/mozilla-ai/projects/17): This will give you an overview of the project's direction and help you identify areas where your contributions can have the greatest impact.
 * Take a look into the existing issues: Check if your issue or challenge has already been discussed or reported. This helps avoid duplication of effort.
-* Learn about the code: The Lumigator project consists of several packages, each with its own pyproject.toml file. Understanding the project structure will make it easier to contribute effectively: the `lumigator/python/mzai/backend` package that powers the lumigator server functionality, the `lumigator/python/mzai/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/python/mzai/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
+* Learn about the code: The Lumigator project consists of several packages, each with its own pyproject.toml file. Understanding the project structure will make it easier to contribute effectively: the `lumigator/backend` package that powers the lumigator server functionality, the `lumigator/schemas` package containing the formal schemas for communication with the server through the REST API, and the `lumigator/sdk` package abstracting the REST API for Python applications. Each package holds its own `pyproject.toml` definition.
 
 ### **Disclaimer**
 
@@ -22,7 +22,7 @@ We will carefully consider all submissions and provide feedback whenever possibl
 
 **Reporting Bugs**
 
-If you find an error while running Lumigator, we would appreciate you opening an [issue](https://github.com/mozilla-ai/lumigator/issues) to report it. Follow the corresponding template in Github providing a description of the bug, a detailed description on how to reproduce the reported behavior, a detailed description on what you would expect to happen and your system info. 
+If you find an error while running Lumigator, we would appreciate you opening an [issue](https://github.com/mozilla-ai/lumigator/issues) to report it. Follow the corresponding template in Github providing a description of the bug, a detailed description on how to reproduce the reported behavior, a detailed description on what you would expect to happen and your system info.
 
 **Suggesting features**
 
@@ -54,5 +54,3 @@ To contribute to Lumigator, first identify a need for a new feature or bug fix. 
 * [Lumigator documentation](https://mozilla-ai.github.io/lumigator/): Describes all the components and includes usage guides.
 * [Open issues](https://github.com/mozilla-ai/lumigator/issues): Browse the open issues to check if the topic you want to raise is already being discussed.
 * [Contribute](https://github.com/mozilla-ai/lumigator/contribute): Explore the list of "good first issues" to start contributing.
-
-

@@ -19,7 +19,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 1. Install the Lumigator SDK:
 
     ```console
-    user@host:~/lumigator$ uv pip install -e lumigator/python/mzai/sdk
+    user@host:~/lumigator$ uv pip install -e lumigator/sdk
     ```
 
 1. Create a new Python file:
@@ -48,7 +48,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     lm_client = LumigatorClient(f"{HOST}:{LUMIGATOR_PORT}")
 
     # Upload a dataset
-    dataset_path = "lumigator/python/mzai/sample_data/dialogsum_exc.csv"
+    dataset_path = "lumigator/sample_data/dialogsum_exc.csv"
     dataset = lm_client.datasets.create_dataset(
         dataset=open(dataset_path, 'rb'),
         format=datasets.DatasetFormat.JOB

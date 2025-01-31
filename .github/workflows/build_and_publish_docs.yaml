@@ -23,29 +23,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Check links
-      id: lychee
-      uses: lycheeverse/lychee-action@v2
-      with:
-        # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
-        args: --base . --verbose --no-progress './**/*.md'  './**/*.rst' --exclude 'mailto:|localhost'
-
-    - name: Check for modified paths
-      uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: |
-          docs_changes:
-            - 'docs/**'
-
     - name: Set up Python 3.11
-      if: steps.filter.outputs.docs_changes == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
     - name: Set up environment
-      if: steps.filter.outputs.docs_changes == 'true'
       id: setup
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -54,7 +37,6 @@ jobs:
       continue-on-error: false
 
     - name: Install docs dependencies
-      if: steps.filter.outputs.docs_changes == 'true'
       id: install_build_dependencies
       run: |
         . .venv/bin/activate
@@ -62,24 +44,38 @@ jobs:
       continue-on-error: false
 
     - name: Build documentation
-      if: steps.filter.outputs.docs_changes == 'true'
       run: |
         . .venv/bin/activate
         cd docs
         sphinx-build source build/html
 
+    # Always check the docs
+    - name: Check links
+      id: lychee
+      uses: lycheeverse/lychee-action@v2
+      with:
+        # Documentation: https://github.com/lycheeverse/lychee?tab=readme-ov-file#commandline-parameters
+        # Excluding the docs folder because the links in there are dynamic and are checked after
+        # they're compiled into html
+        args: |
+          --base . --verbose --no-progress
+          './**/*.md' './docs/build/**/*.html' './**/*.rst'
+          --exclude 'mailto:|localhost'
+          --exclude-path 'docs/source'
+          --exclude-path '.venv'
+
     - name: Set up pages
-      if: steps.filter.outputs.docs_changes == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/configure-pages@v4
 
     - name: Upload artifact
-      if: steps.filter.outputs.docs_changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: docs/build/html/
 
     - name: Deploy
-      if: steps.filter.outputs.docs_changes == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/deploy-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

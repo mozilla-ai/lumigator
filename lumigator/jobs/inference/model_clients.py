@@ -159,11 +159,10 @@ class HuggingFaceModelClient(BaseModelClient):
         Checks various possible max_length parameters which varies on model architecture.
         """
         config = self._pipeline.model.config
-        logger.info(f"Initial model_max_length {self._pipeline.tokenizer.model_max_length}")
+        logger.info(f"Selected HF model's tokenizer has maximum number of input tokens: \
+                    {self._pipeline.tokenizer.model_max_length}")
         # If suitable model_max_length is already available, don't override it
         if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
-            logger.info(f"Using model_max_length = {self._pipeline.tokenizer.model_max_length} \
-                        as per HuggingFace model config")
             return
         # Only override if it's the default value:
         # i.e., VERY_LARGE_INTEGER for models that don't have a model_max_length explicity set
@@ -189,13 +188,14 @@ class HuggingFaceModelClient(BaseModelClient):
                     isinstance(value, int) and value < VERY_LARGE_INTEGER
                 ):  # Sanity check for reasonable values
                     self._pipeline.tokenizer.model_max_length = value
-                    logger.info(f"Setting model_max_length to {value} based on config.{param}")
+                    logger.info(f"Setting the maximum length of input tokens to {value} \
+                                based on the config.{param} attribute.")
                     return
 
         # If no suitable parameter is found, warn the user and continue with the HF default
         logger.warning(
-            "Could not find a suitable parameter in the model config to set model_max_length. \
-                Using default value."
+            f"Could not find a suitable parameter in the model config to set model_max_length. \
+                Using default value: {self._pipeline.tokenizer.model_max_length}"
         )
 
     def predict(self, prompt):

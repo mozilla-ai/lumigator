@@ -44,8 +44,7 @@ environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider's S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/docker-compose.external.yaml)'.format(commit_id) }} for an example of how to do
-this.
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/docker-compose.yaml)'.format(commit_id) }} to see where the `RAY_HEAD_NODE_HOST` is defined
 
 To deploy Lumigator locally:
 

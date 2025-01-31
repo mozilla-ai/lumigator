@@ -199,7 +199,6 @@ jobs:
           filters: |
             build_fe:
               - '.github/workflows/**'
-              - 'lumigator/frontend/**'
 
       - name: Truncate commit SHA
         if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
@@ -307,7 +306,6 @@ jobs:
           filters: |
             push_fe:
               - '.github/**'
-              - 'lumigator/**'
 
       - name: Truncate commit SHA
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')

@@ -1,0 +1,94 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: deepseek-v3
+spec:
+  serveConfigV2: |
+    applications:
+    - name: llm
+      route_prefix: /
+      import_path:  lumigator.jobs.vllm.serve:model
+      deployments:
+      - name: VLLMDeployment
+        num_replicas: 4
+        ray_actor_options:
+          num_cpus: 8
+          # NOTE: num_gpus is set automatically based on TENSOR_PARALLELISM
+      runtime_env:
+        working_dir: "https://github.com/mozilla-ai/lumigator/archive/refs/heads/777-evaluate-deepseek.zip"
+        pip: ["vllm==0.7.0"]
+        env_vars:
+          MODEL_ID: "/models/DeepSeek-V3-bf16"
+          TENSOR_PARALLELISM: "8"
+          PIPELINE_PARALLELISM: "4"
+  rayClusterConfig:
+    rayVersion: "2.42.0"
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+      template:
+        spec:
+          containers:
+          - name: ray-head
+            image: rayproject/ray:2.42.0.637116-py312-cu124
+            resources:
+              limits:
+                cpu: "2"
+                memory: "4Gi"
+              requests:
+                cpu: "2"
+                memory: "4Gi"
+            ports:
+            - containerPort: 6379
+              name: gcs-server
+            - containerPort: 8265
+              name: dashboard
+            - containerPort: 10001
+              name: client
+            - containerPort: 8000
+              name: serve
+    workerGroupSpecs:
+    - replicas: 4
+      minReplicas: 4
+      maxReplicas: 4
+      groupName: gpu-group
+      rayStartParams:
+        num-gpus: "8"
+      template:
+        spec:
+          containers:
+          - name: llm
+            image: rayproject/ray:2.42.0.637116-py312-cu124
+            resources:
+              limits:
+                cpu: "16"
+                memory: "32Gi"
+                nvidia.com/gpu: "8"
+              requests:
+                cpu: "16"
+                memory: "32Gi"
+                nvidia.com/gpu: "8"
+            volumeMounts:
+              - mountPath: /models
+                name: models
+          volumes:
+              - name: models
+                persistentVolumeClaim:
+                  claimName: models
+          tolerations:
+            - key: "is_gpu"
+              operator: "Exists"
+              effect: "PreferNoSchedule"
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: gpu.nvidia.com/class
+                    operator: In
+                    values:
+                      - A100_NVLINK_80GB
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - US-EAST-04

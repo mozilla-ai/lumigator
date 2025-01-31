@@ -34,7 +34,7 @@
             "einops==0.8.0",
             "openai==1.38.0",
             "sentencepiece==0.2.0",
-            "evaluate==0.4.2",
+            "evaluate==0.4.3",
             "mistralai==0.4.2",
             "nltk==3.8.1"
             ],

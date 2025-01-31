@@ -1,6 +1,11 @@
 import http from '@/services/http';
 import { PATH_HEALTH_ROOT } from './api';
 
+/**
+ * Fetches the health status from /api/v1/health/
+ * response.data provides also the "deployent_type" property
+ * @returns {Promise<string|Error>}
+ */
 async function fetchHealthStatus() {
   try {
     const response = await http.get(PATH_HEALTH_ROOT());

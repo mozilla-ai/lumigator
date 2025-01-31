@@ -4,7 +4,7 @@ bitsandbytes==0.42.0
 click>=8.1.7
 datasets==2.20.0
 einops==0.8.0
-evaluate==0.4.2
+evaluate==0.4.3
 lm-eval==0.4.3
 loguru==0.7.2
 mistralai==0.4.2

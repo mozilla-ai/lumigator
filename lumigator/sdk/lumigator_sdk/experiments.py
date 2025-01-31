@@ -1,5 +1,4 @@
 from http import HTTPMethod
-from json import dumps
 
 from lumigator_schemas.experiments import (
     ExperimentIdCreate,
@@ -23,11 +22,11 @@ class Experiments:
         """Creates a new experiment."""
         ExperimentIdCreateStrict.model_validate(ExperimentIdCreate.model_dump(experiment))
         response = self.__client.get_response(
-            self.EXPERIMENTS_ROUTE, HTTPMethod.POST, dumps(experiment)
+            self.EXPERIMENTS_ROUTE, HTTPMethod.POST, experiment.model_dump_json()
         )
 
         data = response.json()
-        return ExperimentResponse(**data)
+        return ExperimentIdResponse(**data)
 
     def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Returns information on the experiment for the specified ID."""

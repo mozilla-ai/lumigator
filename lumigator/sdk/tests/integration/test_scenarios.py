@@ -10,8 +10,15 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
-from lumigator_sdk.strict_schemas import DatasetDownloadResponse, JobAnnotateCreate, JobEvalCreate
+from lumigator_sdk.strict_schemas import (
+    DatasetDownloadResponse,
+    ExperimentIdCreate,
+    JobAnnotateCreate,
+    JobEvalCreate,
+    WorkflowCreateRequest,
+)
 
 
 def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
@@ -173,7 +180,7 @@ def test_annotate_dataset(lumi_client_int: LumigatorClient, dialog_data_unannota
 def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):
     """Wait for a workflow to complete."""
     workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
-    while workflow_details.status not in ["completed", "failed"]:
+    while workflow_details.status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
         sleep(5)
         workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
     return workflow_details
@@ -189,15 +196,16 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     dataset_id = dataset_response.id
 
     # Create an experiment
-    experiment_response = lumi_client_int.experiments.create_experiment(
+    request = ExperimentIdCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
     )
+    experiment_response = lumi_client_int.experiments.create_experiment(request)
     assert experiment_response is not None
     experiment_id = experiment_response.id
 
     # Create a workflow for the experiment
-    workflow_1_response = lumi_client_int.workflows.create_workflow(
+    request = WorkflowCreateRequest(
         name="Workflow_1",
         description="Test workflow for inf and eval",
         model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
@@ -205,6 +213,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         experiment_id=str(experiment_id),
         max_samples=1,
     )
+    workflow_1_response = lumi_client_int.workflows.create_workflow(request)
     assert workflow_1_response is not None
     workflow_1_id = workflow_1_response.id
 
@@ -221,7 +230,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
 
     # Add another workflow to the experiment
-    workflow_2_response = lumi_client_int.workflows.create_workflow(
+    request = WorkflowCreateRequest(
         name="Workflow_2",
         description="Test workflow for inf and eval",
         model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
@@ -229,6 +238,8 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         experiment_id=str(experiment_id),
         max_samples=1,
     )
+
+    workflow_2_response = lumi_client_int.workflows.create_workflow(request)
     assert workflow_2_response is not None
     workflow_2_id = workflow_2_response.id
 
@@ -258,9 +269,21 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
 
     # Delete the experiment
     lumi_client_int.experiments.delete_experiment(experiment_id)
-    response = lumi_client_int.experiments.get_experiment(experiment_id)
-    assert response is None
-    response = lumi_client_int.workflows.get_workflow(workflow_1_details.id)
-    assert response is None
-    response = lumi_client_int.workflows.get_workflow(workflow_2_details.id)
-    assert response is None
+    #  shoudl throw exeption: lumi_client_int.experiments.get_experiment(experiment_id)
+    try:
+        lumi_client_int.experiments.get_experiment(experiment_id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass
+
+    try:
+        lumi_client_int.workflows.get_workflow(workflow_1_details.id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass
+
+    try:
+        lumi_client_int.workflows.get_workflow(workflow_2_details.id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass

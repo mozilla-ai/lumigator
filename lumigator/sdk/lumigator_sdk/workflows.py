@@ -1,5 +1,4 @@
 from http import HTTPMethod
-from json import dumps
 
 from lumigator_schemas.jobs import JobLogsResponse
 from lumigator_schemas.workflows import (
@@ -22,7 +21,7 @@ class Workflows:
         """Creates a new experiment."""
         WorkflowCreateRequestStrict.model_validate(WorkflowCreateRequest.model_dump(workflow))
         response = self.__client.get_response(
-            self.WORKFLOWS_ROUTE, HTTPMethod.POST, dumps(workflow)
+            self.WORKFLOWS_ROUTE, HTTPMethod.POST, workflow.model_dump_json()
         )
 
         data = response.json()

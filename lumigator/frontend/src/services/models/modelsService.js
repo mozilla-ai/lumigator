@@ -1,3 +1,7 @@
+/**
+ * This file contains services related to models.
+ */
+
 import http from '@/services/http';
 import { PATH_MODELS_ROOT } from './api';
 

@@ -1,6 +1,14 @@
+/**
+ *  This file contains CRUD operations for datasets through the API
+ *  More information @http://localhost:8000/docs
+ */
+
 import http from '@/services/http';
 import {PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD} from './api';
 
+/**
+ * @returns {Promise<Array>} A promise that resolves to an array of datasets.
+ */
 async function fetchDatasets() {
   try {
     const response = await http.get(PATH_DATASETS_ROOT());
@@ -11,6 +19,10 @@ async function fetchDatasets() {
   }
 }
 
+/**
+ * Fetches information about a specific dataset.
+ * @param {string} id - The ID of the dataset.
+ */
 async function fetchDatasetInfo(id) {
   try {
     const response = await http.get(PATH_SINGLE_DATASET(id));
@@ -21,6 +33,11 @@ async function fetchDatasetInfo(id) {
   }
 }
 
+/**
+ * Upload a new dataset to the BE.
+ * @param {FormData} formData - The form data containing the dataset information.
+ *  Proper schema for FormData can be found @ [POST] /api/v1/datasets/
+ */
 async function postDataset(formData) {
   try {
     const response = await http.post(PATH_DATASETS_ROOT(), formData, {
@@ -34,6 +51,10 @@ async function postDataset(formData) {
   }
 }
 
+/**
+ * Deletes a specific dataset.
+ * @param {string} id - The ID of the dataset to delete.
+ */
 async function deleteDataset(id) {
 
   try {
@@ -48,6 +69,10 @@ async function deleteDataset(id) {
   }
 }
 
+/**
+ * Downloads a specific dataset as a CSV file.
+ * @param {string} id - The ID of the dataset to download.
+ */
 async function downloadDataset(id) {
   try {
     const url = `${PATH_SINGLE_DATASET_DOWNLOAD(id)}?extension=csv`;

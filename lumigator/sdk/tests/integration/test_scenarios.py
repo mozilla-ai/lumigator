@@ -10,10 +10,11 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
+from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import DatasetDownloadResponse, JobAnnotateCreate, JobEvalCreate
 
 
-def test_sdk_healthcheck_ok(lumi_client_int):
+def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
     """Test the healthcheck endpoint."""
     healthy = False
     for i in range(10):
@@ -27,13 +28,13 @@ def test_sdk_healthcheck_ok(lumi_client_int):
     assert healthy
 
 
-def test_get_datasets_remote_ok(lumi_client_int):
+def test_get_datasets_remote_ok(lumi_client_int: LumigatorClient):
     """Test the `get_datasets` endpoint."""
     datasets = lumi_client_int.datasets.get_datasets()
     assert datasets is not None
 
 
-def test_get_datasets_download(lumi_client_int, dialog_data):
+def test_get_datasets_download(lumi_client_int: LumigatorClient, dialog_data):
     """Test the download datasets endpoint."""
     dataset_response = lumi_client_int.datasets.create_dataset(
         dataset=dialog_data, format=DatasetFormat.JOB
@@ -65,7 +66,7 @@ def test_get_datasets_download(lumi_client_int, dialog_data):
     assert sum_ends_with(download_response, ".csv") == 1
 
 
-def test_dataset_lifecycle_remote_ok(lumi_client_int, dialog_data):
+def test_dataset_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data):
     """Test a complete dataset lifecycle test: add a new dataset,
     list datasets, remove the dataset
     """
@@ -90,7 +91,9 @@ def test_dataset_lifecycle_remote_ok(lumi_client_int, dialog_data):
     assert n_current_datasets - n_initial_datasets == 0
 
 
-def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_template):
+def test_job_lifecycle_remote_ok(
+    lumi_client_int: LumigatorClient, dialog_data, simple_eval_template
+):
     """Test a complete job lifecycle test: add a new dataset,
     create a new job, run the job, get the results
     """
@@ -131,7 +134,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
     requests.get(download_info.download_url, allow_redirects=True, timeout=10)
 
 
-def test_annotate_dataset(lumi_client_int, dialog_data_unannotated):
+def test_annotate_dataset(lumi_client_int: LumigatorClient, dialog_data_unannotated):
     datasets = lumi_client_int.datasets.get_datasets()
     if datasets.total > 0:
         for removed_dataset in datasets.items:
@@ -165,3 +168,99 @@ def test_annotate_dataset(lumi_client_int, dialog_data_unannotated):
     results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
     logger.info(f"Annotated set has keys: {results.json().keys()}")
     assert "ground_truth" in results.json().keys()
+
+
+def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):
+    """Wait for a workflow to complete."""
+    workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
+    while workflow_details.status not in ["completed", "failed"]:
+        sleep(5)
+        workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
+    return workflow_details
+
+
+def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dialog_data):
+    """Test creating an experiment with associated workflows and checking results."""
+    # Upload a dataset
+    dataset_response = lumi_client_int.datasets.create_dataset(
+        dataset=dialog_data, format=DatasetFormat.JOB
+    )
+    assert dataset_response is not None
+    dataset_id = dataset_response.id
+
+    # Create an experiment
+    experiment_response = lumi_client_int.experiments.create_experiment(
+        name="test_create_exp_workflow_check_results",
+        description="Test for an experiment with associated workflows",
+    )
+    assert experiment_response is not None
+    experiment_id = experiment_response.id
+
+    # Create a workflow for the experiment
+    workflow_1_response = lumi_client_int.workflows.create_workflow(
+        name="Workflow_1",
+        description="Test workflow for inf and eval",
+        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
+        dataset=str(dataset_id),
+        experiment_id=str(experiment_id),
+        max_samples=1,
+    )
+    assert workflow_1_response is not None
+    workflow_1_id = workflow_1_response.id
+
+    # Wait till the workflow is done
+    workflow_1_details = wait_for_workflow_complete(lumi_client_int, workflow_1_id)
+
+    # Get the results of the experiment
+    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
+    assert experiment_results is not None
+    assert workflow_1_details.experiment_id == experiment_results.id
+    assert len(experiment_results.workflows) == 1
+    assert workflow_1_details.model_dump(
+        exclude={"artifacts_download_url"}
+    ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
+
+    # Add another workflow to the experiment
+    workflow_2_response = lumi_client_int.workflows.create_workflow(
+        name="Workflow_2",
+        description="Test workflow for inf and eval",
+        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
+        dataset=str(dataset_id),
+        experiment_id=str(experiment_id),
+        max_samples=1,
+    )
+    assert workflow_2_response is not None
+    workflow_2_id = workflow_2_response.id
+
+    # Wait till the workflow is done
+    workflow_2_details = wait_for_workflow_complete(lumi_client_int, workflow_2_id)
+
+    # Get the results of the experiment
+    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
+    assert experiment_results is not None
+    assert len(experiment_results.workflows) == 2
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+
+    # Get the logs
+    logs_response = lumi_client_int.workflows.get_workflow_logs(workflow_1_details.id)
+    assert logs_response is not None
+    assert logs_response.logs is not None
+    assert "Inference results stored at" in logs_response.logs
+    assert "Storing evaluation results into" in logs_response.logs
+    assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
+        "Storing evaluation results into"
+    )
+
+    # Delete the experiment
+    lumi_client_int.experiments.delete_experiment(experiment_id)
+    response = lumi_client_int.experiments.get_experiment(experiment_id)
+    assert response is None
+    response = lumi_client_int.workflows.get_workflow(workflow_1_details.id)
+    assert response is None
+    response = lumi_client_int.workflows.get_workflow(workflow_2_details.id)
+    assert response is None

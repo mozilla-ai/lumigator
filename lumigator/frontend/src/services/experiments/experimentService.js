@@ -2,7 +2,7 @@
  * This file contains services related to experiments & jobs
  */
 
-// TODO: Refactor into two stores one for experiments one for jobs, when Backend can provide an experiment ID.
+// TODO: Refactor into two services one for experiments one for jobs, when Backend can provide an experiment ID.
 
 import http from '@/services/http';
 import {

@@ -1,8 +1,19 @@
-import { ref, watch, computed } from 'vue';
-import { defineStore } from 'pinia'
-import experimentService from "@/services/experiments/experimentService";
-import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
+/**
+ * This store manages the state and actions related to experiments and jobs in the application.
+ * During the time of implementation Backend did not provide experiment id yet.
+ * Consequently front end defines an Experiment as a group of evaluation jobs. The criteria for these jobs to be grouped together
+ *  and the experiment.id is the timestamp of their creation and the user given name.
+ */
+// TODO: Refactor into two store files one for experiments & one for jobs, when Backend can provide an experiment ID.
 
+import { ref, watch, computed } from 'vue';
+import { defineStore } from 'pinia';
+import experimentService from "@/services/experiments/experimentService";
+import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index';
+
+/**
+ * Defines the experiment store.
+ */
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
   const jobs = ref([]);
@@ -16,10 +27,18 @@ export const useExperimentStore = defineStore('experiment', () => {
   const experimentLogs = ref([]);
   const completedStatus = ["SUCCEEDED", "FAILED"];
 
+  /**
+   * Checks if there is any running inference job ,
+   * for maintaining the polling process or not.
+   */
   const hasRunningInferenceJob = computed(() => {
     return inferenceJobs.value.some(job => job.status === "RUNNING");
   });
 
+  /**
+   * Loads all experiments and jobs.
+   */
+  // TODO: Rename to loadAllJobs
   async function loadExperiments() {
     const allJobs = await experimentService.fetchJobs();
     inferenceJobs.value = allJobs
@@ -31,6 +50,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments.value = getJobsPerExperiement();
   }
 
+  /**
+   * Groups jobs by experiment.
+   *  Jobs with same name and starting time belong to the same experiment.
+   * @returns {Array} Array of experiments with their associated jobs.
+   */
   function getJobsPerExperiement() {
     const experimentMap = jobs.value.reduce((acc, job) => {
       const key = `${job.name}-${job.experimentStart}`;
@@ -41,7 +65,8 @@ export const useExperimentStore = defineStore('experiment', () => {
           created: job.created,
           dataset: job.dataset,
           description: job.description,
-          name: job.name, experimentStart: job.experimentStart,
+          name: job.name,
+          experimentStart: job.experimentStart,
           jobs: [],
           useCase: job.useCase,
           runTime: '',
@@ -54,15 +79,15 @@ export const useExperimentStore = defineStore('experiment', () => {
       acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model);
       return acc;
 
-    }, {})
+    }, {});
 
     return Object.values(experimentMap);
   }
 
   /**
    *
-   * @param {*} job - the job data to parse
-   * @returns job data parsed for display as an experiment
+   * @param {Object} job - The job data to parse.
+   * @returns {Object} Parsed job data.
    */
   function parseJobDetails(job) {
     return {
@@ -79,8 +104,9 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   /**
+   * The retrieved IDs will determine which experiment is still Running
    *
-   * @returns {string[]} IDs of stored experiments that have not completed
+   * @returns {string[]} IDs of incomplete jobs.
    */
   function getIncompleteJobIds() {
     return jobs.value
@@ -90,7 +116,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   /**
    *
-   * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
+   * @param {string} id - The ID of the job to update.
    */
   // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
   async function updateJobStatus(id) {
@@ -110,7 +136,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   /**
-   * Updates the status for stored experiments that are not completed
+   * Updates the status for stored experiments that are not completed.
    */
   async function updateStatusForIncompleteJobs() {
     await Promise.all(
@@ -118,6 +144,13 @@ export const useExperimentStore = defineStore('experiment', () => {
         .map(id => updateJobStatus(id)));
   }
 
+  /**
+   * Runs an experiment with multiple models.
+   * Each model triggers a respecive evaluation job.
+   *
+   * @param {Object} experimentData - The data for the experiment to run.
+   * @returns {Promise<Array>} The results of the experiment.
+   */
   async function runExperiment(experimentData) {
     const modelArray = experimentData.models;
     const jobRequests = modelArray.map((singleModel) => {
@@ -144,11 +177,21 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedJob.value = parseJobDetails(jobData);
   }
 
+  /**
+   * Downloads the results file for a job.
+   *
+   * @param {string} jobId .
+   */
   async function loadResultsFile(jobId) {
     const blob = await experimentService.downloadResults(jobId);
-    downloadContent(blob, `${selectedJob.value.name}_results`)
+    downloadContent(blob, `${selectedJob.value.name}_results`);
   }
 
+  /**
+   * Loads the results of an experiment.
+   *
+   * @param {Object} experiment - The experiment to load results for.
+   */
   async function loadExperimentResults(experiment) {
     for (const job of experiment.jobs) {
       const results = await experimentService.fetchResults(job.id);
@@ -160,12 +203,17 @@ export const useExperimentStore = defineStore('experiment', () => {
           rouge: results.resultsData.rouge,
           runTime: getJobRuntime(results.id),
           jobResults: transformResultsArray(results.resultsData)
-        }
+        };
         selectedExperimentRslts.value.push(modelRow);
       }
     }
   }
 
+  /**
+   * Loads the results of a job by its ID.
+   *
+   * @param {string} jobId - The ID of the job to load results for.
+   */
   async function loadJobResults(jobId) {
     const results = await experimentService.fetchResults(jobId);
     if (results?.id) {
@@ -175,6 +223,12 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  /**
+   * Transforms results data into a format which accommodates the UI
+   *
+   * @param {Object} objectData .
+   * @returns {Array} Transformed results array.
+   */
   function transformResultsArray(objectData) {
     const transformedArray = objectData.examples.map((example, index) => {
       return {
@@ -207,18 +261,21 @@ export const useExperimentStore = defineStore('experiment', () => {
           rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
-      }
+      };
     });
-    return transformedArray
+    return transformedArray;
   }
 
+  /**
+   * Retrieves logs for the selected job.
+   */
   async function retrieveLogs() {
     const logsData = await experimentService.fetchLogs(selectedJob.value.id);
     const logs = splitByEscapeCharacter(logsData.logs);
     logs.forEach(log => {
       const lastEntry = experimentLogs.value[experimentLogs.value.length - 1];
       if (experimentLogs.value.length === 0 || lastEntry !== log) {
-      experimentLogs.value.push(log);
+        experimentLogs.value.push(log);
       }
     });
   }
@@ -233,7 +290,6 @@ export const useExperimentStore = defineStore('experiment', () => {
     if (!isPolling.value) {
       isPolling.value = true;
       retrieveLogs();
-      // Poll every 3 seconds
       experimentInterval = setInterval(retrieveLogs, 3000);
     }
   }
@@ -246,6 +302,12 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  /**
+   * Starts ground truth generation aka an inference job.
+   *
+   * @param {Object} groundTruthPayload - The payload for ground truth generation.
+   * @returns {Promise<Object|null>} The response from the annotation job or null if it fails.
+   */
   async function startGroundTruthGeneration(groundTruthPayload) {
     try {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload);
@@ -262,18 +324,29 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  /**
+   * Starts polling for a specific job by its ID.
+   *
+   * @param {string} jobId - The ID of the job to poll.
+   */
   function startPollingForJob(jobId) {
     isPolling.value = true;
     experimentInterval = setInterval(() => {
       updateJobStatus(jobId).then(() => {
         const job = experiments.value.find((experiment) => experiment.id === jobId);
         if (completedStatus.includes(job?.status)) {
-          stopPolling(); // Stop polling when the job is complete
+          stopPolling();
         }
       });
-    }, 3000); // Poll every 3 seconds
+    }, 3000);
   }
 
+  /**
+   * Gets the runtime of a job by its ID.
+   *
+   * @param {string} jobId - The ID of the job to get runtime for.
+   * @returns {string|null} The runtime of the job or null if not found.
+   */
   function getJobRuntime(jobId) {
     const job = jobs.value.find(job => job.id === jobId);
     return job ? job.runTime : null;
@@ -281,7 +354,6 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   watch(selectedExperiment, (newValue) => {
     if (newValue?.status === 'RUNNING') {
-      // startPolling()
       return;
     } else if (isPolling.value) {
       stopPolling();
@@ -300,7 +372,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       retrieveLogs();
     }
     if (newValue?.status === 'RUNNING') {
-      startPolling()
+      startPolling();
       return;
     } else if (isPolling.value) {
       stopPolling();
@@ -330,5 +402,5 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadResultsFile,
     startGroundTruthGeneration,
     runExperiment
-  }
-})
+  };
+});

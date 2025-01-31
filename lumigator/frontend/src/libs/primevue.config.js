@@ -1,3 +1,8 @@
+/**
+ * Basic configuration of PrimeVue UI library
+ * https://primevue.org/configuration/
+ */
+
 import { definePreset } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
 

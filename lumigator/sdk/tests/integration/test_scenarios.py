@@ -128,7 +128,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int, dialog_data, simple_eval_templ
 
     download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
-    requests.get(download_info.download_url, allow_redirects=True)
+    requests.get(download_info.download_url, allow_redirects=True, timeout=10)
 
 
 def test_annotate_dataset(lumi_client_int, dialog_data_unannotated):
@@ -162,6 +162,6 @@ def test_annotate_dataset(lumi_client_int, dialog_data_unannotated):
 
     download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
-    results = requests.get(download_info.download_url, allow_redirects=True)
+    results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
     logger.info(f"Annotated set has keys: {results.json().keys()}")
     assert "ground_truth" in results.json().keys()

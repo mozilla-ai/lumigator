@@ -9,7 +9,7 @@ import boto3
 import loguru
 import requests
 from fastapi import HTTPException
-from lumigator_schemas.experiments import GetExperimentResponse
+from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.exceptions import MlflowException
@@ -28,11 +28,12 @@ class MLflowTrackingClient(TrackingClient):
     def __init__(self, tracking_uri: str):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
-    def create_experiment(self, name: str) -> GetExperimentResponse:
+    def create_experiment(self, name: str, description: str) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
         try:
             experiment_id = self._client.create_experiment(name)
+            self._client.set_experiment_tag(experiment_id, "description", description)
         except MlflowException as e:
             # if the experiment name already exists,
             # log a warning and then append a short timestamp to the name
@@ -40,6 +41,7 @@ class MLflowTrackingClient(TrackingClient):
                 print(f"Experiment name '{name}' already exists. Appending timestamp.")
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
+                self._client.set_experiment_tag(experiment_id, "description", description)
             else:
                 raise e
         # get the experiment so you can populate the response
@@ -63,8 +65,9 @@ class MLflowTrackingClient(TrackingClient):
         self._client.delete_experiment(experiment_id)
 
     def _compile_metrics(self, job_ids: list) -> dict:
-        # take the individual metrics from each run and compile them into a single dict
-        # for now, assert that each run has no overlapping metrics
+        """Take the individual metrics from each run and compile them into a single dict
+        for now, assert that each run has no overlapping metrics
+        """
         metrics = {}
         for job_id in job_ids:
             run = self._client.get_run(job_id)
@@ -75,8 +78,9 @@ class MLflowTrackingClient(TrackingClient):
         return metrics
 
     def _compile_parameters(self, job_ids: list) -> dict:
-        # take the individual parameters from each run and compile them into a single dict
-        # for now, assert that each run has no overlapping parameters
+        """Take the individual parameters from each run and compile them into a single dict
+        for now, assert that each run has no overlapping parameters
+        """
         parameters = {}
         for job_id in job_ids:
             run = self._client.get_run(job_id)
@@ -92,7 +96,7 @@ class MLflowTrackingClient(TrackingClient):
         return parameters
 
     def _find_workflows(self, experiment_id: str) -> list:
-        # get all the runs for the experiment
+        """Find all the workflows associated with an experiment."""
         all_runs = self._client.search_runs(experiment_ids=[experiment_id])
         # now organize the runs into workflows so that a nested run goes under the parent run
         workflow_ids = []
@@ -104,7 +108,7 @@ class MLflowTrackingClient(TrackingClient):
         return workflow_ids
 
     def get_experiment(self, experiment_id: str):
-        # get all the runs for the experiment
+        """Get an experiment and all its workflows."""
         experiment = self._client.get_experiment(experiment_id)
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
@@ -121,9 +125,11 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def update_experiment(self, experiment_id: str, new_name: str) -> None:
+        """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list:
+    def list_experiments(self, skip: int, limit: int) -> list[ExperimentResponse]:
+        """List all experiments."""
         page_token = None
         experiments = []
         skipped = 0
@@ -140,9 +146,20 @@ class MLflowTrackingClient(TrackingClient):
                 break
             if response.token is None:
                 break
-        return experiments[:limit] if limit is not None else experiments
+        reduced_experiments = experiments[:limit] if limit is not None else experiments
+        return [
+            ExperimentResponse(
+                id=experiment.experiment_id,
+                name=experiment.name,
+                description=experiment.tags.get("description") or "",
+                created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
+                updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
+            )
+            for experiment in reduced_experiments
+        ]
 
     def experiments_count(self):
+        """Get the number of experiments."""
         return len(self.list_experiments(skip=0, limit=None))
 
     # this corresponds to creating a run in MLflow.
@@ -169,7 +186,7 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
-        # get the workflow, and for each job associated with with workflow, get its status
+        """Get a workflow and all its jobs."""
         workflow = self._client.get_run(workflow_id)
         if workflow.info.lifecycle_stage == "deleted":
             return None
@@ -238,10 +255,14 @@ class MLflowTrackingClient(TrackingClient):
         return workflow_details
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
+        """Update the status of a workflow."""
         self._client.set_tag(workflow_id, "status", status)
 
     def _get_ray_job_logs(self, ray_job_id: str):
-        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"))
+        """Get the logs for a Ray job."""
+        resp = requests.get(
+            urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5
+        )  # 5 sec
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(
@@ -272,8 +293,7 @@ class MLflowTrackingClient(TrackingClient):
             ) from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
-        # get all the jobs under the workflow
-        # get the workflow run
+        """Get the logs for a workflow."""
         workflow_run = self._client.get_run(workflow_id)
         # get the jobs associated with the workflow
         all_jobs = self._client.search_runs(
@@ -289,7 +309,7 @@ class MLflowTrackingClient(TrackingClient):
         return JobLogsResponse(logs="\n================\n".join([log.logs for log in logs]))
 
     def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
-        # delete the workflow and all child jobs from MLflow
+        """Delete a workflow."""
         # first, get the workflow
         workflow = self._client.get_run(workflow_id)
         # get all the jobs associated with the workflow
@@ -314,6 +334,7 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def list_workflows(self, experiment_id: str) -> list:
+        """List all workflows in an experiment."""
         raise NotImplementedError
 
     def create_job(self, experiment_id: str, workflow_id: str, name: str, data: RunOutputs):
@@ -331,10 +352,11 @@ class MLflowTrackingClient(TrackingClient):
         self._client.log_param(run.info.run_id, "ray_job_id", data.ray_job_id)
 
     def update_job(self, job_id: str, new_data: dict):
+        """Update the metrics and parameters of a job."""
         raise NotImplementedError
 
     def get_job(self, job_id: str):
-        # look up the job and return it as a JobResult
+        """Get the results of a job."""
         run = self._client.get_run(job_id)
         if run.info.lifecycle_stage == "deleted":
             return None
@@ -349,9 +371,11 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def delete_job(self, job_id: str):
+        """Delete a job."""
         self._client.delete_run(job_id)
 
     def list_jobs(self, experiment_id: str, workflow_id: str):
+        """List all jobs in a workflow."""
         raise NotImplementedError
 
 

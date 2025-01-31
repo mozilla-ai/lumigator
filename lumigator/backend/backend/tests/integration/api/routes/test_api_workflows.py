@@ -192,9 +192,12 @@ def test_upload_data_no_gt_launch_annotation(
         logs_annotation_job_results.json()
     )
     logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
-    logs_annotation_job_results_url = requests.get(logs_annotation_job_results_model.download_url)
+    annotation_job_results_url = requests.get(
+        logs_annotation_job_results_model.download_url,
+        timeout=5,  # 5 seconds
+    )
     logs_annotation_job_output = InferenceJobOutput.model_validate(
-        logs_annotation_job_results_url.json()
+        annotation_job_results_url.json()
     )
     assert logs_annotation_job_output.predictions is None
     assert logs_annotation_job_output.ground_truth is not None

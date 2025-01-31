@@ -36,7 +36,7 @@ class GetExperimentResponse(BaseModel, from_attributes=True):
 
 
 class ExperimentResponse(BaseModel, from_attributes=True):
-    id: UUID
+    id: str
     name: str
     description: str
     created_at: datetime.datetime
@@ -44,10 +44,10 @@ class ExperimentResponse(BaseModel, from_attributes=True):
 
 
 class ExperimentResultResponse(BaseModel, from_attributes=True):
-    id: UUID
+    id: str
     experiment_id: UUID
 
 
 class ExperimentResultDownloadResponse(BaseModel):
-    id: UUID
+    id: str
     download_url: str

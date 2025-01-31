@@ -202,7 +202,7 @@ def get_job(service: JobServiceDep, job_id: UUID) -> Job:
 
 @router.get("/{job_id}/logs")
 def get_job_logs(job_id: UUID) -> JobLogsResponse:
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"))
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
         loguru.logger.error(
@@ -262,7 +262,7 @@ def get_job_result_download(
 
 def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
     """Returns metadata that exists in the Ray cluster for all jobs."""
-    resp = requests.get(settings.RAY_JOBS_URL)
+    resp = requests.get(settings.RAY_JOBS_URL, timeout=5)  # 5 seconds
     if resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
             f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}"
@@ -285,7 +285,7 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
 
 def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
     """Returns metadata on the specified job if it exists in the Ray cluster."""
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
         loguru.logger.error(

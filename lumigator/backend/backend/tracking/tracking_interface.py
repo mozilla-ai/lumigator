@@ -26,7 +26,7 @@ class TrackingClient(ABC):
     """Abstract base class for tracking clients."""
 
     @abstractmethod
-    def create_experiment(self, name: str) -> GetExperimentResponse:
+    def create_experiment(self, name: str, description: str) -> GetExperimentResponse:
         """Create a new experiment."""
         pass
 

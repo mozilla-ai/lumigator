@@ -20,9 +20,14 @@ docs = [
 ]
 
 [dependency-groups]
+# Added these as dev dependencies to make IDE pylint extension happy
 dev = [
     "alembic>=1.14.1",
     "debugpy>=1.8.12",
     "fastapi>=0.115.6",
     "loguru>=0.7.2",
+    "mlflow>=2.20.0",
+    "mypy-boto3-s3>=1.36.0",
+    "ray>=2.41.0",
+    "s3fs>=2024.12.0",
 ]

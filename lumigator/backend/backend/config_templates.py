@@ -154,14 +154,14 @@ oai_infer_template = """{{
 def lookup_template(job_type, model_name):
     if job_type == JobType.INFERENCE:
         # Locally hosted models using oai client
-        if model_name.startswith("ollama://"):
+        oai_compatible_local_model_prefixes = ("ollama://", "llamafile://")
+        if model_name.startswith(oai_compatible_local_model_prefixes):
             return oai_infer_template
         inference_templates = {
             "default": default_infer_template,
             "oai://gpt-4o-mini": oai_infer_template,
             "oai://gpt-4o": oai_infer_template,
             "mistral://open-mistral-7b": oai_infer_template,
-            "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
         }
         # If no config template is provided, use the default one for the job type
         return inference_templates.get(model_name, default_infer_template)

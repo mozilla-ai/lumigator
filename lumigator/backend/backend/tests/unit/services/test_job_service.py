@@ -26,8 +26,11 @@ def test_set_null_inference_job_params(job_record, job_service):
         "backend.services.datasets.DatasetService.get_dataset_s3_path",
         return_value="s3://bucket/path/to/dataset",
     ):
-        params = job_service._get_job_params("INFERENCE", job_record, request)
-        assert params["max_samples"] == -1
+        dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
+        job_config = job_service.generate_inference_job_config(
+            request, request.dataset, dataset_s3_path, job_service.storage_path
+        )
+        assert job_config.job.max_samples == -1
 
 
 def test_set_explicit_inference_job_params(job_record, job_service):
@@ -46,8 +49,11 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         "backend.services.datasets.DatasetService.get_dataset_s3_path",
         return_value="s3://bucket/path/to/dataset",
     ):
-        params = job_service._get_job_params("INFERENCE", job_record, request)
-        assert params["max_samples"] == 10
+        dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
+        job_config = job_service.generate_inference_job_config(
+            request, request.dataset, dataset_s3_path, job_service.storage_path
+        )
+        assert job_config.job.max_samples == 10
 
 
 @pytest.mark.parametrize(

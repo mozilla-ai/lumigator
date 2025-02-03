@@ -74,7 +74,7 @@
   </DataTable>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {ref, computed, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';

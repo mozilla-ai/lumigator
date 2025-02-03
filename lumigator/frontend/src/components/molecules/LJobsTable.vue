@@ -60,7 +60,7 @@
   </DataTable>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';
 import Column from 'primevue/column';

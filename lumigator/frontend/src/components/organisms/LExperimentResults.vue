@@ -183,7 +183,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref, onUnmounted } from 'vue';
 import { useExperimentStore } from "@/stores/experiments/store";
 import { useModelStore } from "@/stores/models/store";

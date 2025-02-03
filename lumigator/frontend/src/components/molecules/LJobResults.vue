@@ -157,7 +157,7 @@ import Column from 'primevue/column';
 
 const props = defineProps({
   results: {
-    type: Object,
+    type: Array,
     required: true,
   },
   noRadius: {

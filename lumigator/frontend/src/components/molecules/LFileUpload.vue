@@ -54,8 +54,7 @@ function confirmUpload() {
     },
     reject: () => {
       cancelUpload();
-    },
-    close: false
+    }
   })
 }
 

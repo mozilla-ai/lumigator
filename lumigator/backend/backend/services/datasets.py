@@ -18,6 +18,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.services.exceptions.dataset_exceptions import (
     DatasetInvalidError,
     DatasetMissingFieldsError,
+    DatasetNotAvailableError,
     DatasetNotFoundError,
     DatasetSizeError,
     DatasetUpstreamError,
@@ -170,8 +171,6 @@ class DatasetService:
         """Attempts to upload and convert the specified dataset (CSV) to HF format which is then
         stored in S3.
 
-        :return: Information on the uploaded dataset
-        :rtype: DatasetResponse
         :raises DatasetSizeError: if the dataset is too large
         :raises DatasetInvalidError: if the dataset is invalid
         :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
@@ -214,8 +213,6 @@ class DatasetService:
         """Gets the dataset record by its ID.
 
         :param dataset_id: dataset ID
-        :return: Information on the dataset
-        :rtype: DatasetResponse
         :raises DatasetNotFoundError: if there is no dataset record with that ID
         """
         record = self._get_dataset_record(dataset_id)
@@ -224,17 +221,32 @@ class DatasetService:
 
         return DatasetResponse.model_validate(record)
 
-    def get_dataset_by_job_id(self, job_id: UUID) -> DatasetResponse | None:
+    def get_dataset_by_job_id(self, job_id: UUID) -> DatasetResponse:
+        """Gets the dataset associated to a job.
+
+        :param job_id: job ID to find the associated dataset for
+        :return: information on the associated dataset, for example filename, size, if it contains
+                 ground truth data.
+        :rtype: DatasetResponse
+        :raises DatasetNotAvailableError: if there is no dataset associated with the supplied job ID
+        """
         record = self._get_dataset_record_by_job_id(job_id)
         if record is None:
-            return None
+            raise DatasetNotAvailableError(f"not found using job ID: {job_id}") from None
 
         return DatasetResponse.model_validate(record)
 
-    def get_dataset_s3_path(self, dataset_id: UUID) -> str | None:
+    def get_dataset_s3_path(self, dataset_id: UUID) -> str:
+        """Gets the S3 path associated with a dataset.
+
+        :param dataset_id: dataset ID
+        :return: S3 path
+        :rtype: str
+        :raises DatasetNotFoundError: if there is no dataset record with that ID
+        """
         record = self._get_dataset_record(dataset_id)
         if record is None:
-            return None
+            raise DatasetNotFoundError(dataset_id) from None
 
         dataset_key = self._get_s3_key(record.id, record.filename)
         dataset_path = self._get_s3_path(dataset_key)
@@ -287,8 +299,6 @@ class DatasetService:
 
         :param dataset_id: ID of the dataset to generate pre-signed download URLs for
         :param extension: File extension used to determine which files to generate URLs for
-        :return: Pre-signed download URLs
-        :rtype: DatasetDownloadResponse
         :raises DatasetNotFoundError: if the dataset cannot be found in S3
         :raises DatasetUpstreamError: if there is an exception interacting with S3
         """

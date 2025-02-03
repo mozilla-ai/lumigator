@@ -81,8 +81,8 @@ import Tag from 'primevue/tag';
 import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia';
-import { useExperimentStore } from "@/stores/experiments/store.js";
-import { useDatasetStore } from "@/stores/datasets/store.js";
+import { useExperimentStore } from "@/stores/experiments/store";
+import { useDatasetStore } from "@/stores/datasets/store";
 import { useSlidePanel } from '@/composables/SlidingPanel';
 
 

@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia'
 import datasetsService from "@/services/datasets/datasetsService";
-import {downloadContent} from "@/helpers/index.js";
+import {downloadContent} from "@/helpers/index";
 import { useToast } from "primevue/usetoast";
 
 export const useDatasetStore = defineStore('dataset', () => {

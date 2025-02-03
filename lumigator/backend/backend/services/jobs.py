@@ -377,10 +377,10 @@ class JobService:
     # to put this. The jobs should ideally have no dependency towards the backend.
 
     def generate_inference_job_config(
-        self, request: JobCreate, record: JobRecord, dataset_path: str, storage_path: str
+        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
     ):
         job_config = InferenceJobConfig(
-            name=f"{request.name}/{record.id}",
+            name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
             job=InferJobConfig(
                 max_samples=request.max_samples,
@@ -443,10 +443,10 @@ class JobService:
         return job_config
 
     def generate_evaluation_lite_job_config(
-        self, request: JobCreate, record: JobRecord, dataset_path: str, storage_path: str
+        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
     ):
         job_config = EvalJobConfig(
-            name=f"{request.name}/{record.id}",
+            name=f"{request.name}/{record_id}",
             dataset=ELDatasetConfig(path=dataset_path),
             evaluation=EvaluationConfig(
                 metrics=request.job_config.metrics,
@@ -482,11 +482,11 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
             job_config = self.generate_inference_job_config(
-                request, record, dataset_s3_path, self.storage_path
+                request, record.id, dataset_s3_path, self.storage_path
             )
         elif job_type == JobType.EVALUATION_LITE:
             job_config = self.generate_evaluation_lite_job_config(
-                request, record, dataset_s3_path, self.storage_path
+                request, record.id, dataset_s3_path, self.storage_path
             )
         else:
             # This should not happen since the job_type's are type checked

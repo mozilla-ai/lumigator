@@ -135,7 +135,7 @@ def list_jobs(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[Job]:
-    """Attempts to retrieve job data from the Lumigator repository where Ray
+    """Retrieves job data from the Lumigator repository where Ray
     metadata is also available.
 
     Results are a merged representation which form an augmented view of a 'job'.
@@ -150,24 +150,23 @@ def list_jobs(
     for job in jobs.items:
         job = service.get_job(job.id)
 
-    # Get all jobs Ray knows about.
-    ray_jobs = _get_all_ray_jobs()
+    # Get all jobs Ray knows about on a dict
+    ray_jobs = {ray_job.submission_id: ray_job for ray_job in _get_all_ray_jobs()}
 
     results = list[Job]()
 
     # Merge Ray jobs into the repositories jobs
+    job: JobResponse
     for job in jobs.items:
-        found_job = next(
-            (job for job in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
-        )
-        if found_job is None:
-            continue
-
-        # Combine both types of response.
-        ray_info = found_job.dict()
-        lm_info = job.model_dump()
-        merged = {**ray_info, **lm_info}
-        results.append(Job(**merged))
+        job_id = str(job.id)
+        if job_id in ray_jobs:
+            # Combine both types of response.
+            found_job: RayJobDetails
+            found_job = ray_jobs[job_id]
+            ray_job_info = found_job.dict()
+            lm_info = job.model_dump()
+            merged = {**ray_job_info, **lm_info}
+            results.append(Job(**merged))
 
     return ListingResponse[Job](
         total=jobs.total,
@@ -180,14 +179,16 @@ def get_job(
     service: JobServiceDep,
     job_id: UUID,
 ) -> Job:
-    """Attempts to retrieve merged job data from the Lumigator repository and Ray
+    """Retrieves merged job data from the Lumigator repository and Ray
     for a valid UUID.
 
     The result is a merged representation which forms an augmented view of a 'job'.
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
+    job: JobResponse
     job = service.get_job(job_id)
+    ray_job: RayJobDetails
     ray_job = _get_ray_job(job_id)
 
     # Combine both types of response.
@@ -204,7 +205,7 @@ def get_job_per_type(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[Job]:
-    """Attempts to retrieve merged job data from the Lumigator repository and Ray
+    """Retrieves merged job data from the Lumigator repository and Ray
     for a valid job type (currently `inference` or `evaluation`).
 
     Results are a merged representation which form an augmented view of a 'job'.
@@ -221,7 +222,9 @@ def get_job_per_type(
     results = list[Job]()
 
     # Merge Ray jobs into the repositories jobs
+    job: JobResponse
     for job in jobs.items:
+        found_job: RayJobDetails
         found_job = next(
             (job for job in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
         )

@@ -154,7 +154,7 @@ oai_infer_template = """{{
 def lookup_template(job_type, model_name):
     if job_type == JobType.INFERENCE:
         # Locally hosted models using oai client
-        oai_compatible_local_model_prefixes = ("ollama://", "llamafile://")
+        oai_compatible_local_model_prefixes = ("ollama://", "llamafile://", "vllm://")
         if model_name.startswith(oai_compatible_local_model_prefixes):
             return oai_infer_template
         inference_templates = {

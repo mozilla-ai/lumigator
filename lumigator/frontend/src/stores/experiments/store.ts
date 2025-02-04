@@ -17,8 +17,8 @@ export const useExperimentStore = defineStore('experiment', () => {
   const inferenceJobs: Ref<Experiment[]> = ref([]);
   const selectedExperiment: Ref<Experiment | undefined> = ref();
   const selectedJob: Ref<Experiment | undefined> = ref();
-  const selectedJobRslts: Ref<JobResults[]> = ref([]);
-  const selectedExperimentRslts: Ref<ExperimentResults[]> = ref([]);
+  const selectedJobResults: Ref<JobResults[]> = ref([]);
+  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([]);
   const isPolling = ref(false);
   let experimentInterval: number | undefined = undefined;
   const experimentLogs: Ref<unknown[]> = ref([]);
@@ -35,11 +35,11 @@ export const useExperimentStore = defineStore('experiment', () => {
       .map((job) => parseJobDetails(job))
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJobDetails(job))
-    experiments.value = getJobsPerExperiement()
+      .map((job) => parseJobDetails(job));
+    experiments.value = getJobsPerExperiment();
   }
 
-  function getJobsPerExperiement(): Experiment[] {
+  function getJobsPerExperiment(): Experiment[] {
     const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
       const key = `${job.name}-${job.experimentStart}`;
       // initialize a grouping object
@@ -169,7 +169,7 @@ export const useExperimentStore = defineStore('experiment', () => {
           runTime: getJobRuntime(results.id),
           jobResults: transformResultsArray(results.resultsData),
         } as unknown as ExperimentResults;
-        selectedExperimentRslts.value.push(modelRow);
+        selectedExperimentResults.value.push(modelRow);
       }
     }
   }
@@ -181,8 +181,8 @@ export const useExperimentStore = defineStore('experiment', () => {
       download_url: string;
     };
     if (results?.id) {
-      selectedJob.value = jobs.value.find((job) => job.id === results.id)
-      selectedJobRslts.value = transformResultsArray(results.resultsData)
+      selectedJob.value = jobs.value.find((job) => job.id === results.id);
+      selectedJobResults.value = transformResultsArray(results.resultsData);
     }
   }
 
@@ -338,8 +338,8 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedExperiment,
     selectedJob,
     experimentLogs,
-    selectedExperimentRslts,
-    selectedJobRslts,
+    selectedExperimentResults,
+    selectedJobResults,
     isPolling,
     // computed
     hasRunningInferenceJob,

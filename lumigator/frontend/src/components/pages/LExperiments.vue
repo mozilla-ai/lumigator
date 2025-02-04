@@ -26,7 +26,7 @@
           title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
-          @l-dnld-results="onDnldResults($event)"
+          @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
         />
@@ -40,8 +40,11 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results v-if="showExpResults" />
-      <l-job-results v-if="showJobResults && selectedJobRslts.length" :results="selectedJobRslts" />
-      <l-experiment-logs v-if="showLogs && selectedJobRslts.length === 0" />
+      <l-job-results
+        v-if="showJobResults && selectedJobResults.length"
+        :results="selectedJobResults"
+      />
+      <l-experiment-logs v-if="showLogs && selectedJobResults.length === 0" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -64,13 +67,13 @@ import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue';
 import type { Experiment, Job } from '@/types/Experiment';
 
-const { showSlidingPanel } = useSlidePanel()
-const experimentStore = useExperimentStore()
-const datasetStore = useDatasetStore()
-const modelStore = useModelStore()
-const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedJob, selectedJobRslts } =
-  storeToRefs(experimentStore)
+const { showSlidingPanel } = useSlidePanel();
+const experimentStore = useExperimentStore();
+const datasetStore = useDatasetStore();
+const modelStore = useModelStore();
+const { selectedDataset } = storeToRefs(datasetStore);
+const { experiments, selectedExperiment, selectedJob, selectedJobResults } =
+  storeToRefs(experimentStore);
 
 const showDrawer = ref(false);
 const experimentsDrawer = ref();
@@ -112,7 +115,7 @@ const onShowJobResults = (job: Job) => {
   showJobResults.value = true;
 };
 
-const onDnldResults = (job: Job) => {
+const onDownloadResults = (job: Job) => {
   experimentStore.loadResultsFile(job.id);
 };
 
@@ -131,12 +134,12 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedJobRslts.value = []
-  showExpResults.value = false
-  showJobResults.value = false
-  showLogs.value = false
-  showDrawer.value = false
-}
+  selectedJobResults.value = [];
+  showExpResults.value = false;
+  showJobResults.value = false;
+  showLogs.value = false;
+  showDrawer.value = false;
+};
 
 onMounted(async () => {
   await modelStore.loadModels()

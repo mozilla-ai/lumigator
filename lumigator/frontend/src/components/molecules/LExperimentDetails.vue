@@ -130,7 +130,7 @@
         icon="pi pi-download"
         label="Download Results"
         :disabled="currentItemStatus !== 'SUCCEEDED'"
-        @click="emit('l-dnld-results', selectedJob)"
+        @click="emit('l-download-results', selectedJob)"
       />
     </div>
   </div>
@@ -149,8 +149,8 @@ const emit = defineEmits([
   'l-experiment-results',
   'l-job-results',
   'l-show-logs',
-  'l-dnld-results',
-])
+  'l-download-results',
+]);
 
 defineProps({
   title: {

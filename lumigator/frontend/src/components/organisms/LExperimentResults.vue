@@ -123,11 +123,11 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import type { Model } from '@/types/Experiment';
 
-const experimentStore = useExperimentStore()
-const modelStore = useModelStore()
-const { selectedExperimentRslts } = storeToRefs(experimentStore)
-const { models } = storeToRefs(modelStore)
-const expandedRows = ref([])
+const experimentStore = useExperimentStore();
+const modelStore = useModelStore();
+const { selectedExperimentResults } = storeToRefs(experimentStore);
+const { models } = storeToRefs(modelStore);
+const expandedRows = ref([]);
 
 const tooltipColorsConfig = ref({
   root: {
@@ -188,15 +188,15 @@ const tooltips = ref({
 
 const tableData = computed(() => {
   const modelsMap = new Map(models.value.map((model: Model) => [model.uri, model]));
-  return selectedExperimentRslts.value.map((job) => ({
+  return selectedExperimentResults.value.map((job) => ({
     ...job,
     model: modelsMap.get(job.model),
   }))
 })
 
 onUnmounted(() => {
-  selectedExperimentRslts.value = []
-})
+  selectedExperimentResults.value = [];
+});
 </script>
 
 <style scoped lang="scss"></style>

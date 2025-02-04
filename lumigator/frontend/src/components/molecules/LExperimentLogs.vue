@@ -1,11 +1,6 @@
 <template>
-  <div
-    class="l-experiment-logs"
-  >
-    <div
-      ref="logContainer"
-      class="l-experiment-logs__container"
-    >
+  <div class="l-experiment-logs">
+    <div ref="logContainer" class="l-experiment-logs__container">
       <div
         v-for="(log, index) in experimentLogs"
         :key="index"
@@ -20,11 +15,11 @@
 <script lang="ts" setup>
 import { ref, watch, computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store'
+import { useExperimentStore } from '@/stores/experiments/store';
 const experimentStore = useExperimentStore();
 const { experimentLogs } = storeToRefs(experimentStore);
 const logContainer = ref(null);
-const logsLength = computed(() => experimentLogs.value.length)
+const logsLength = computed(() => experimentLogs.value.length);
 
 const scrollToBottom = async () => {
   if (logContainer.value) {
@@ -33,8 +28,7 @@ const scrollToBottom = async () => {
   }
 };
 
-
-watch(logsLength, () => scrollToBottom())
+watch(logsLength, () => scrollToBottom());
 </script>
 
 <style scoped lang="scss">
@@ -59,7 +53,6 @@ watch(logsLength, () => scrollToBottom())
       margin-bottom: $l-spacing-1;
       word-wrap: break-word;
     }
-
   }
 }
 </style>

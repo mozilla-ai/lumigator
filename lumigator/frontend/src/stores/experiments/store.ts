@@ -1,7 +1,7 @@
 import { ref, watch, computed } from 'vue';
-import { defineStore } from 'pinia'
-import experimentService from "@/services/experiments/experimentService";
-import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
+import { defineStore } from 'pinia';
+import experimentService from '@/services/experiments/experimentService';
+import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index';
 
 export const useExperimentStore = defineStore('experiment', () => {
   const experiments = ref([]);
@@ -14,19 +14,19 @@ export const useExperimentStore = defineStore('experiment', () => {
   const isPolling = ref(false);
   let experimentInterval = null;
   const experimentLogs = ref([]);
-  const completedStatus = ["SUCCEEDED", "FAILED"];
+  const completedStatus = ['SUCCEEDED', 'FAILED'];
 
   const hasRunningInferenceJob = computed(() => {
-    return inferenceJobs.value.some(job => job.status === "RUNNING");
+    return inferenceJobs.value.some((job) => job.status === 'RUNNING');
   });
 
   async function loadExperiments() {
     const allJobs = await experimentService.fetchJobs();
     inferenceJobs.value = allJobs
-      .filter((job) => job.metadata.job_type === "inference")
+      .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJobDetails(job));
     jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === "evaluate")
+      .filter((job) => job.metadata.job_type === 'evaluate')
       .map((job) => parseJobDetails(job));
     experiments.value = getJobsPerExperiement();
   }
@@ -41,20 +41,20 @@ export const useExperimentStore = defineStore('experiment', () => {
           created: job.created,
           dataset: job.dataset,
           description: job.description,
-          name: job.name, experimentStart: job.experimentStart,
+          name: job.name,
+          experimentStart: job.experimentStart,
           jobs: [],
           useCase: job.useCase,
           runTime: '',
           samples: job.max_samples,
           models: [],
-          status: 'SUCCEEDED'
+          status: 'SUCCEEDED',
         };
       }
       acc[key].jobs.push(job);
       acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model);
       return acc;
-
-    }, {})
+    }, {});
 
     return Object.values(experimentMap);
   }
@@ -74,7 +74,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       description: job.description,
       experimentStart: job.start_time.slice(0, 16),
       end_time: job.end_time,
-      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null
+      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null,
     };
   }
 
@@ -83,9 +83,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
-    return jobs.value
-      .filter(job => !completedStatus.includes(job.status))
-      .map(job => job.id);
+    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id);
   }
 
   /**
@@ -113,9 +111,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    * Updates the status for stored experiments that are not completed
    */
   async function updateStatusForIncompleteJobs() {
-    await Promise.all(
-      getIncompleteJobIds()
-        .map(id => updateJobStatus(id)));
+    await Promise.all(getIncompleteJobIds().map((id) => updateJobStatus(id)));
   }
 
   async function runExperiment(experimentData) {
@@ -136,7 +132,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   function loadExperimentDetails(id) {
-    selectedExperiment.value = experiments.value.find(experiment => experiment.id === id);
+    selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id);
   }
 
   async function loadJobDetails(id) {
@@ -146,7 +142,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadResultsFile(jobId) {
     const blob = await experimentService.downloadResults(jobId);
-    downloadContent(blob, `${selectedJob.value.name}_results`)
+    downloadContent(blob, `${selectedJob.value.name}_results`);
   }
 
   async function loadExperimentResults(experiment) {
@@ -159,8 +155,8 @@ export const useExperimentStore = defineStore('experiment', () => {
           bertscore: results.resultsData.bertscore,
           rouge: results.resultsData.rouge,
           runTime: getJobRuntime(results.id),
-          jobResults: transformResultsArray(results.resultsData)
-        }
+          jobResults: transformResultsArray(results.resultsData),
+        };
         selectedExperimentRslts.value.push(modelRow);
       }
     }
@@ -169,8 +165,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   async function loadJobResults(jobId) {
     const results = await experimentService.fetchResults(jobId);
     if (results?.id) {
-      selectedJob.value = jobs.value
-        .find((job) => job.id === results.id);
+      selectedJob.value = jobs.value.find((job) => job.id === results.id);
       selectedJobRslts.value = transformResultsArray(results.resultsData);
     }
   }
@@ -207,18 +202,18 @@ export const useExperimentStore = defineStore('experiment', () => {
           rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
-      }
+      };
     });
-    return transformedArray
+    return transformedArray;
   }
 
   async function retrieveLogs() {
     const logsData = await experimentService.fetchLogs(selectedJob.value.id);
     const logs = splitByEscapeCharacter(logsData.logs);
-    logs.forEach(log => {
+    logs.forEach((log) => {
       const lastEntry = experimentLogs.value[experimentLogs.value.length - 1];
       if (experimentLogs.value.length === 0 || lastEntry !== log) {
-      experimentLogs.value.push(log);
+        experimentLogs.value.push(log);
       }
     });
   }
@@ -275,37 +270,47 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   function getJobRuntime(jobId) {
-    const job = jobs.value.find(job => job.id === jobId);
+    const job = jobs.value.find((job) => job.id === jobId);
     return job ? job.runTime : null;
   }
 
-  watch(selectedExperiment, (newValue) => {
-    if (newValue?.status === 'RUNNING') {
-      // startPolling()
-      return;
-    } else if (isPolling.value) {
-      stopPolling();
-    }
-  }, { deep: true });
-
-  watch(selectedJob, (newValue) => {
-    experimentLogs.value = [];
-    if (newValue) {
-      const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id);
-      if (isEvaluationJob) {
-        // switch to the experiment the job belongs
-        const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-        selectedExperiment.value = experiments.value.find((exp) => exp.id === selectedExperimentId);
+  watch(
+    selectedExperiment,
+    (newValue) => {
+      if (newValue?.status === 'RUNNING') {
+        // startPolling()
+        return;
+      } else if (isPolling.value) {
+        stopPolling();
       }
-      retrieveLogs();
-    }
-    if (newValue?.status === 'RUNNING') {
-      startPolling()
-      return;
-    } else if (isPolling.value) {
-      stopPolling();
-    }
-  }, { deep: true });
+    },
+    { deep: true },
+  );
+
+  watch(
+    selectedJob,
+    (newValue) => {
+      experimentLogs.value = [];
+      if (newValue) {
+        const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id);
+        if (isEvaluationJob) {
+          // switch to the experiment the job belongs
+          const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`;
+          selectedExperiment.value = experiments.value.find(
+            (exp) => exp.id === selectedExperimentId,
+          );
+        }
+        retrieveLogs();
+      }
+      if (newValue?.status === 'RUNNING') {
+        startPolling();
+        return;
+      } else if (isPolling.value) {
+        stopPolling();
+      }
+    },
+    { deep: true },
+  );
 
   return {
     // state
@@ -329,6 +334,6 @@ export const useExperimentStore = defineStore('experiment', () => {
     loadJobResults,
     loadResultsFile,
     startGroundTruthGeneration,
-    runExperiment
-  }
-})
+    runExperiment,
+  };
+});

@@ -1,15 +1,14 @@
 import { ref } from 'vue';
-import { defineStore } from 'pinia'
-import datasetsService from "@/services/datasets/datasetsService";
-import {downloadContent} from "@/helpers/index";
-import { useToast } from "primevue/usetoast";
+import { defineStore } from 'pinia';
+import datasetsService from '@/services/datasets/datasetsService';
+import { downloadContent } from '@/helpers/index';
+import { useToast } from 'primevue/usetoast';
 import type { ToastMessageOptions } from 'primevue';
 
 export const useDatasetStore = defineStore('dataset', () => {
   const datasets = ref([]);
   const selectedDataset = ref(null);
   const toast = useToast();
-
 
   async function loadDatasets() {
     datasets.value = await datasetsService.fetchDatasets();
@@ -24,25 +23,29 @@ export const useDatasetStore = defineStore('dataset', () => {
   }
 
   async function uploadDataset(datasetFile) {
-    if (!datasetFile) { return }
+    if (!datasetFile) {
+      return;
+    }
     // Create a new FormData object and append the selected file and the required format
     const formData = new FormData();
     formData.append('dataset', datasetFile); // Attach the file
     formData.append('format', 'job'); // Specification @localhost:8000/docs
-    const uploadConfirm = await datasetsService.postDataset(formData)
+    const uploadConfirm = await datasetsService.postDataset(formData);
     if (uploadConfirm.status) {
       toast.add({
         severity: 'error',
         summary: `${uploadConfirm.data.detail}`,
         messageicon: 'pi pi-exclamation-triangle',
         group: 'br',
-      } as ToastMessageOptions & {messageicon: string})
+      } as ToastMessageOptions & { messageicon: string });
     }
     await loadDatasets();
   }
 
   async function deleteDataset(id) {
-    if (!id) { return };
+    if (!id) {
+      return;
+    }
     if (selectedDataset.value?.id === id) {
       resetSelection();
     }
@@ -52,7 +55,7 @@ export const useDatasetStore = defineStore('dataset', () => {
 
   async function loadDatasetFile() {
     const blob = await datasetsService.downloadDataset(selectedDataset.value.id);
-    downloadContent(blob, selectedDataset.value.filename)
+    downloadContent(blob, selectedDataset.value.filename);
   }
 
   return {
@@ -63,6 +66,6 @@ export const useDatasetStore = defineStore('dataset', () => {
     resetSelection,
     uploadDataset,
     deleteDataset,
-    loadDatasetFile
-  }
-})
+    loadDatasetFile,
+  };
+});

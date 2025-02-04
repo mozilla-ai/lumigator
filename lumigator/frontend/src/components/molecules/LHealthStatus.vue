@@ -14,7 +14,7 @@ const { healthStatus } = storeToRefs(healthStore);
 
 onMounted(async () => {
   await healthStore.loadHealthStatus();
-})
+});
 </script>
 
 <style scoped lang="scss">

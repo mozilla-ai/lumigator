@@ -1,8 +1,5 @@
 <template>
-  <Tabs
-    value="0"
-    class="l-experiment-tabs"
-  >
+  <Tabs value="0" class="l-experiment-tabs">
     <TabList class="l-experiment-tabs__list">
       <Tab value="0">Experiment Details</Tab>
       <Tab value="1">Logs</Tab>
@@ -11,7 +8,7 @@
         severity="secondary"
         rounded
         aria-label="Close"
-        style="margin-left: auto;"
+        style="margin-left: auto"
         class="l-experiment-form__close"
         @click="emit('l-close-details')"
       />
@@ -36,9 +33,6 @@ import TabPanel from 'primevue/tabpanel';
 import Button from 'primevue/button';
 
 const emit = defineEmits(['l-close-details']);
-
-
-
 </script>
 
 <style scoped lang="scss">
@@ -46,7 +40,9 @@ const emit = defineEmits(['l-close-details']);
   $root: &;
 
   &__list {
-    position: sticky; top: 0;z-index:100;
+    position: sticky;
+    top: 0;
+    z-index: 100;
     padding-bottom: $l-spacing-1;
   }
 }

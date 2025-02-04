@@ -3,22 +3,18 @@
     <Menu :model="routes">
       <template #start>
         <div class="l-main-menu__logo">
-          <img
-            src="@/assets/lumigator.svg"
-            alt="lumigator-logo"
-          ></div>
+          <img src="@/assets/lumigator.svg" alt="lumigator-logo" />
+        </div>
       </template>
       <template #item="{ item }">
         <router-link
           :to="item.path"
           class="l-main-menu__link"
           :disabled="item.disabled"
-          @click="showSlidingPanel=false"
+          @click="showSlidingPanel = false"
         >
           <span :class="item.icon" />
-          <span ripple
-                class="l-main-menu__link-label"
-          >{{ item.name }} </span>
+          <span ripple class="l-main-menu__link-label">{{ item.name }} </span>
         </router-link>
       </template>
     </Menu>
@@ -27,10 +23,9 @@
 
 <script lang="ts" setup>
 import Menu from 'primevue/menu';
-import { routes } from '@/router'
+import { routes } from '@/router';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 const { showSlidingPanel } = useSlidePanel();
-
 </script>
 
 <style scoped lang="scss">
@@ -40,7 +35,6 @@ const { showSlidingPanel } = useSlidePanel();
 }
 
 .l-main-menu {
-
   &__logo {
     height: 5rem;
     will-change: filter;
@@ -50,8 +44,8 @@ const { showSlidingPanel } = useSlidePanel();
     text-wrap: nowrap;
     font-weight: 500;
     cursor: default;
-		display: flex;
-		padding: $l-spacing-1/2;
+    display: flex;
+    padding: $l-spacing-1/2;
     padding-top: 0;
     align-items: center;
 
@@ -69,16 +63,17 @@ const { showSlidingPanel } = useSlidePanel();
     gap: $l-spacing-1/2;
     align-items: center;
     color: $l-menu-item-color;
-		text-transform: capitalize;
+    text-transform: capitalize;
 
-    :hover,:focus {
+    :hover,
+    :focus {
       background-color: $l-menu-bg;
     }
 
-		&-label {
-			font-size: $l-menu-font-size;
+    &-label {
+      font-size: $l-menu-font-size;
       font-weight: $l-font-weight-normal;
-		}
+    }
   }
 }
 
@@ -86,5 +81,4 @@ const { showSlidingPanel } = useSlidePanel();
 .l-main-menu__link:hover span {
   color: $white;
 }
-
 </style>

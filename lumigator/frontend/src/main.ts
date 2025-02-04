@@ -11,16 +11,15 @@ import LumiPreset from './libs/primevue.config';
 
 const app = createApp(App);
 
-app.use(router)
-  .use(createPinia())
+app.use(router).use(createPinia());
 app.use(PrimeVue, {
   theme: {
     preset: LumiPreset,
     options: {
       prefix: 'l',
       darkModeSelector: '.l-always-dark',
-      cssLayer: false
-    }
+      cssLayer: false,
+    },
   },
 });
 app.use(ConfirmationService);

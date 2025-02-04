@@ -9,6 +9,6 @@ export function useSlidePanel() {
 
   return {
     showSlidingPanel,
-    togglePanel
+    togglePanel,
   };
 }

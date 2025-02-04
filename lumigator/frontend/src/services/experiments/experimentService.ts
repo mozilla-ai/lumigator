@@ -15,12 +15,12 @@ import {
 async function fetchJobs() {
   try {
     const response = await http.get(PATH_JOBS_ROOT());
-    return response.data.items.map(p => ({
+    return response.data.items.map((p) => ({
       ...p,
       status: p.status.toUpperCase(),
     }));
   } catch (error) {
-    console.error("Error fetching experiments", error.message || error);
+    console.error('Error fetching experiments', error.message || error);
     return [];
   }
 }
@@ -34,7 +34,7 @@ async function fetchExperimentDetails(id) {
     }
     return response.data;
   } catch (error) {
-    console.error("Error fetching experiment details", error.message || error);
+    console.error('Error fetching experiment details', error.message || error);
     return null;
   }
 }
@@ -51,7 +51,7 @@ async function triggerExperiment(experimentPayload) {
         'Content-Type': 'application/json',
       },
     });
-    return response.data
+    return response.data;
   } catch (error) {
     console.error('Error while creating experiment', error);
     return error.message;
@@ -78,17 +78,17 @@ async function fetchResults(job_id) {
     const response = await http.get(PATH_EXPERIMENT_RESULTS(job_id));
     const { download_url, id } = response.data;
     if (!download_url) {
-      console.error("No download_url found in the response.");
+      console.error('No download_url found in the response.');
       return;
     }
-    const jsonData = await http.get(download_url)
+    const jsonData = await http.get(download_url);
     return {
       resultsData: jsonData.data,
       id,
-      download_url
-    }
+      download_url,
+    };
   } catch (error) {
-    console.error("Error fetching experiment results", error.message || error);
+    console.error('Error fetching experiment results', error.message || error);
     return error;
   }
 }
@@ -98,16 +98,16 @@ async function downloadResults(experiment_id) {
     const response = await http.get(PATH_EXPERIMENT_RESULTS(experiment_id));
     const { download_url } = response.data;
     if (!download_url) {
-      console.error("No download_url found in the response.");
+      console.error('No download_url found in the response.');
       return;
     }
     const fileResponse = await http.get(download_url, {
       responseType: 'blob', // Important: Receive the file as a binary blob
-    })
+    });
     const blob = fileResponse.data;
     return blob;
   } catch (error) {
-    console.error("Error downloading experiment results", error.message || error);
+    console.error('Error downloading experiment results', error.message || error);
     return error;
   }
 }
@@ -115,7 +115,7 @@ async function downloadResults(experiment_id) {
 async function fetchLogs(id) {
   try {
     const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id));
-    return logsResponse.data
+    return logsResponse.data;
   } catch (error) {
     console.error('Error fetching logs for job', id, error);
   }
@@ -129,5 +129,5 @@ export default {
   fetchExperimentDetails,
   triggerExperiment,
   triggerAnnotationJob,
-  fetchLogs
+  fetchLogs,
 };

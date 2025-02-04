@@ -3,7 +3,7 @@ import { PATH_MODELS_ROOT } from './api';
 
 async function fetchModels(task_name = 'summarization') {
   try {
-    const response = await http.get(PATH_MODELS_ROOT(task_name))
+    const response = await http.get(PATH_MODELS_ROOT(task_name));
     if (response) {
       return response.data.items;
     }
@@ -14,5 +14,5 @@ async function fetchModels(task_name = 'summarization') {
 }
 
 export default {
-  fetchModels
-}
+  fetchModels,
+};

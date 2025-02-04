@@ -1,12 +1,12 @@
 import http from '@/services/http';
-import {PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD} from './api';
+import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD } from './api';
 
 async function fetchDatasets() {
   try {
     const response = await http.get(PATH_DATASETS_ROOT());
     return response.data.items;
   } catch (error) {
-    console.error("Error fetching datasets:", error.message || error);
+    console.error('Error fetching datasets:', error.message || error);
     return [];
   }
 }
@@ -16,7 +16,7 @@ async function fetchDatasetInfo(id) {
     const response = await http.get(PATH_SINGLE_DATASET(id));
     return response.data;
   } catch (error) {
-    console.error("Error fetching dataset info:", error.message || error);
+    console.error('Error fetching dataset info:', error.message || error);
     return [];
   }
 }
@@ -28,23 +28,22 @@ async function postDataset(formData) {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data
+    return response.data;
   } catch (error) {
-    return error.response
+    return error.response;
   }
 }
 
 async function deleteDataset(id) {
-
   try {
     const response = await http.delete(PATH_SINGLE_DATASET(id));
     if (response.status === 200 || response.status === 204) {
       return response;
     } else {
-      console.error("Unexpected response status: ", response.status);
+      console.error('Unexpected response status: ', response.status);
     }
   } catch (error) {
-    console.error("Error deleting dataset:", error);
+    console.error('Error deleting dataset:', error);
   }
 }
 
@@ -53,16 +52,16 @@ async function downloadDataset(id) {
     const url = `${PATH_SINGLE_DATASET_DOWNLOAD(id)}?extension=csv`;
     const response = await http.get(url);
     if (response.status !== 200) {
-      console.error("Error getting dataset download URLs: ", response.status);
+      console.error('Error getting dataset download URLs: ', response.status);
       return;
     }
 
     const { download_urls } = response.data;
     if (!download_urls) {
-      console.error("No download URLs found in the response: ", response.data);
+      console.error('No download URLs found in the response: ', response.data);
       return;
     } else if (download_urls.length > 1) {
-      console.error("Expected a single dataset CSV URL: ", download_urls);
+      console.error('Expected a single dataset CSV URL: ', download_urls);
       return;
     }
 
@@ -70,9 +69,8 @@ async function downloadDataset(id) {
       responseType: 'blob', // Important: Receive the file as a binary blob
     });
     return fileResponse.data;
-
   } catch (error) {
-    console.error("Error downloading dataset: ", error.message || error);
+    console.error('Error downloading dataset: ', error.message || error);
   }
 }
 
@@ -81,5 +79,5 @@ export default {
   fetchDatasetInfo,
   postDataset,
   deleteDataset,
-  downloadDataset
-}
+  downloadDataset,
+};

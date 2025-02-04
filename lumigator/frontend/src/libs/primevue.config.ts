@@ -12,10 +12,10 @@ const LumiPreset = definePreset(Aura, {
           hoverColor: '#FFF646',
           activeColor: '#E0C414',
           lgFontSize: '14px',
-				},
+        },
       },
     },
   },
 });
 
-export default LumiPreset
+export default LumiPreset;

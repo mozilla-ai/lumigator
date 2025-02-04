@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from backend.services.exceptions.base_exceptions import (
+    NotAvailableError,
     NotFoundError,
     UpstreamError,
     ValidationError,
@@ -81,3 +82,26 @@ class DatasetUpstreamError(UpstreamError):
         :param exc: optional exception
         """
         super().__init__(service_name, message, exc)
+
+
+class DatasetNotAvailableError(NotAvailableError):
+    """Raised when a dataset is not available.
+
+    This error differs from DatasetNotFoundError, the expectation here is that the dataset
+    should have been available based on identifying information for another resource.
+
+    Example: When a job runs to generate a dataset, the job ID may later be used to retrieve
+    the dataset.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        exc: Exception | None = None,
+    ):
+        """Creates a DatasetNotAvailableError.
+
+        :param message: error message
+        :param exc: optional exception
+        """
+        super().__init__("Dataset", message, exc)

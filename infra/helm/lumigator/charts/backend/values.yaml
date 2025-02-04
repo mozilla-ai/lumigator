@@ -68,12 +68,6 @@ postgresql:
   #    username: lumigator
   #    database: lumigator
 
-kuberay-apiserver:
-  image:
-    repository: quay.io/kuberay/apiserver
-    tag: 2.30.0
-  security: {}
-
 ray-cluster:
   image:
     tag: 2.30.0-py311-gpu

@@ -11,7 +11,7 @@ async function fetchDatasets() {
   }
 }
 
-async function fetchDatasetInfo(id) {
+async function fetchDatasetInfo(id: string) {
   try {
     const response = await http.get(PATH_SINGLE_DATASET(id))
     return response.data
@@ -21,7 +21,7 @@ async function fetchDatasetInfo(id) {
   }
 }
 
-async function postDataset(formData) {
+async function postDataset(formData: FormData) {
   try {
     const response = await http.post(PATH_DATASETS_ROOT(), formData, {
       headers: {
@@ -34,7 +34,7 @@ async function postDataset(formData) {
   }
 }
 
-async function deleteDataset(id) {
+async function deleteDataset(id: string) {
   try {
     const response = await http.delete(PATH_SINGLE_DATASET(id))
     if (response.status === 200 || response.status === 204) {
@@ -47,7 +47,7 @@ async function deleteDataset(id) {
   }
 }
 
-async function downloadDataset(id) {
+async function downloadDataset(id: string) {
   try {
     const url = `${PATH_SINGLE_DATASET_DOWNLOAD(id)}?extension=csv`
     const response = await http.get(url)

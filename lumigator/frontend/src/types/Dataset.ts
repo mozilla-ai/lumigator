@@ -8,4 +8,4 @@ export type Dataset = {
   id: string;
   run_id: string | null;
   size: number;
-}
+};

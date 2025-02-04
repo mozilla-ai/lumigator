@@ -34,7 +34,11 @@
           {{ selectedDataset?.filename }}
         </span>
       </div>
-      <div class="l-dataset-details__content-item" @click="copyToClipboard(selectedDataset?.id)">
+      <div
+        class="l-dataset-details__content-item"
+        @click="copyToClipboard(selectedDataset.id)"
+        v-if="selectedDataset"
+      >
         <span class="l-dataset-details__content-label">dataset id</span>
         <span class="l-dataset-details__content-field">
           {{ selectedDataset?.id }}
@@ -47,8 +51,8 @@
       </div>
       <div class="l-dataset-details__content-item">
         <span class="l-dataset-details__content-label">submitted</span>
-        <span class="l-dataset-details__content-field">
-          {{ formatDate(selectedDataset?.created_at) }}
+        <span class="l-dataset-details__content-field" v-if="selectedDataset">
+          {{ formatDate(selectedDataset.created_at) }}
         </span>
       </div>
       <div class="l-dataset-details__content-item">
@@ -127,8 +131,8 @@ const emit = defineEmits([
   'l-experiment',
 ])
 
-const copyToClipboard = async (longString) => {
-  isCopied.value = true
+const copyToClipboard = async (longString: string) => {
+  isCopied.value = true;
   setTimeout(() => {
     isCopied.value = false
   }, 3000)

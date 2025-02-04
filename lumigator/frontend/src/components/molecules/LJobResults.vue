@@ -96,11 +96,11 @@
 import { ref, onMounted, type Ref, type PropType } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import type { ExperimentResults } from '@/types/Experiment';
+import type { JobResults } from '@/types/Experiment';
 
 const props = defineProps({
   results: {
-    type: Array as PropType<ExperimentResults[]>,
+    type: Array as PropType<JobResults[]>,
     required: true,
   },
   noRadius: {
@@ -128,7 +128,7 @@ const tooltipColorsConfig = ref({
   },
 })
 
-const tableData: Ref<ExperimentResults[]> = ref([]);
+const tableData: Ref<JobResults[]> = ref([]);
 const tooltips = ref({
   examples: {
     value: `Text which is passed as an input to the model, together

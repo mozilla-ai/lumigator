@@ -22,7 +22,7 @@
       </transition>
       <transition name="transition-fade">
         <l-experiment-details
-          v-if="selectedExperiment !== null"
+          v-if="selectedExperiment"
           title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
@@ -47,21 +47,22 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch, ref, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/store'
-import { useDatasetStore } from '@/stores/datasets/store'
-import { useModelStore } from '@/stores/models/store'
-import { useSlidePanel } from '@/composables/SlidingPanel'
-import LPageHeader from '@/components/molecules/LPageHeader.vue'
-import LExperimentTable from '@/components/molecules/LExperimentTable.vue'
-import LExperimentForm from '@/components/molecules/LExperimentForm.vue'
-import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue'
-import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue'
-import LExperimentResults from '@/components/organisms/LExperimentResults.vue'
-import LJobResults from '@/components/molecules/LJobResults.vue'
-import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue'
-import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
+import { onMounted, watch, ref, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useExperimentStore } from '@/stores/experiments/store';
+import { useDatasetStore } from '@/stores/datasets/store';
+import { useModelStore } from '@/stores/models/store';
+import { useSlidePanel } from '@/composables/SlidingPanel';
+import LPageHeader from '@/components/molecules/LPageHeader.vue';
+import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
+import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
+import LExperimentResults from '@/components/organisms/LExperimentResults.vue';
+import LJobResults from '@/components/molecules/LJobResults.vue';
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
+import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue';
+import type { Experiment, Job } from '@/types/Experiment';
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -79,7 +80,7 @@ const showJobResults = ref();
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
-const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null)
+const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value);
 
 onMounted(async () => {
   await experimentStore.loadExperiments()
@@ -94,26 +95,26 @@ const onCreateExperiment = () => {
   selectedExperiment.value = undefined;
 };
 
-const onSelectExperiment = (experiment) => {
-  experimentStore.loadExperimentDetails(experiment.id)
-  showSlidingPanel.value = true
-}
+const onSelectExperiment = (experiment: Experiment) => {
+  experimentStore.loadExperimentDetails(experiment.id);
+  showSlidingPanel.value = true;
+};
 
-const onShowExperimentResults = (experiment) => {
-  experimentStore.loadExperimentResults(experiment)
-  showExpResults.value = true
-  showDrawer.value = true
-}
+const onShowExperimentResults = (experiment: Experiment) => {
+  experimentStore.loadExperimentResults(experiment);
+  showExpResults.value = true;
+  showDrawer.value = true;
+};
 
-const onShowJobResults = (job) => {
-  experimentStore.loadJobResults(job.id)
-  showDrawer.value = true
-  showJobResults.value = true
-}
+const onShowJobResults = (job: Job) => {
+  experimentStore.loadJobResults(job.id);
+  showDrawer.value = true;
+  showJobResults.value = true;
+};
 
-const onDnldResults = (job) => {
-  experimentStore.loadResultsFile(job.id)
-}
+const onDnldResults = (job: Job) => {
+  experimentStore.loadResultsFile(job.id);
+};
 
 const onShowLogs = () => {
   showLogs.value = true

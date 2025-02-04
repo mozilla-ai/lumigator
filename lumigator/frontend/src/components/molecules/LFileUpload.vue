@@ -19,8 +19,8 @@ const selectedFile = ref();
 const fileName = ref(''); // State to hold the name of the selected file
 const confirm = useConfirm();
 
-const handleFileChange = (event) => {
-  const file = event.target.files[0]
+const handleFileChange = (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
     fileName.value = file.name
     selectedFile.value = file

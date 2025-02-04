@@ -30,7 +30,8 @@
         Summarization jobs are evaluated with ROUGE, METEOR, and BERT score, each focusing on
         different aspects of prediction-ground truth similarity.
         <a href="https://mozilla-ai.github.io/lumigator/" target="_blank"
-          >Learn more <span class="pi pi-arrow-up-right"></span> </a>
+          >Learn more <span class="pi pi-arrow-up-right"></span>
+        </a>
       </p>
       <FloatLabel variant="in" class="l-experiment-form__field">
         <Select
@@ -158,7 +159,7 @@ function resetForm() {
   experimentDescription.value = '';
   dataset.value = undefined;
   modelSelection.value.selectedModels = [];
-  maxSamples.value = null;
+  maxSamples.value = undefined;
 }
 
 onMounted(async () => {

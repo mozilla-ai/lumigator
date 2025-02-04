@@ -93,9 +93,11 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 
-import { useConfirm } from 'primevue/useconfirm'
-import { useToast } from 'primevue/usetoast'
-import type { ToastMessageOptions } from 'primevue'
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
+import type { ToastMessageOptions } from 'primevue';
+import type { Dataset } from '@/types/Dataset';
+import type { Job } from '@/types/Experiment';
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
@@ -117,7 +119,7 @@ onMounted(async () => {
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
 It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
-function deleteConfirmation(dataset) {
+function deleteConfirmation(dataset: Dataset) {
   confirm.require({
     message: `${dataset.filename}`,
     header: 'Delete  dataset?',
@@ -150,9 +152,9 @@ function deleteConfirmation(dataset) {
   })
 }
 
-function onDownloadDataset(dataset) {
-  selectedDataset.value = dataset
-  datasetStore.loadDatasetFile()
+function onDownloadDataset(dataset: Dataset) {
+  selectedDataset.value = dataset;
+  datasetStore.loadDatasetFile();
 }
 
 const onDatasetAdded = () => {
@@ -168,15 +170,15 @@ const reloadDatasetTable = () => {
   }, 1500)
 }
 
-const onDatasetUpload = (datasetFile) => {
-  datasetStore.uploadDataset(datasetFile)
-}
+const onDatasetUpload = (datasetFile: File) => {
+  datasetStore.uploadDataset(datasetFile);
+};
 
-const onDeleteDataset = (datasetID) => {
-  datasetStore.deleteDataset(datasetID)
-}
+const onDeleteDataset = (datasetID: string) => {
+  datasetStore.deleteDataset(datasetID);
+};
 
-const onDatasetSelected = (dataset) => {
+const onDatasetSelected = (dataset: Dataset) => {
   selectedJob.value = undefined;
   datasetStore.loadDatasetInfo(dataset.id);
   showSlidingPanel.value = true;
@@ -186,13 +188,13 @@ const onClearSelection = () => {
   datasetStore.resetSelection()
 }
 
-const onExperimentDataset = (dataset) => {
-  router.push('experiments')
-  selectedDataset.value = dataset
-  datasetStore.loadDatasetInfo(dataset.id)
-}
+const onExperimentDataset = (dataset: Dataset) => {
+  router.push('experiments');
+  selectedDataset.value = dataset;
+  datasetStore.loadDatasetInfo(dataset.id);
+};
 
-const onJobInferenceSelected = (job) => {
+const onJobInferenceSelected = (job: Job) => {
   selectedDataset.value = undefined;
   experimentStore.loadJobDetails(job.id);
   showSlidingPanel.value = true;

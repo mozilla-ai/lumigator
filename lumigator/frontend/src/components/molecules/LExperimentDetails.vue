@@ -50,9 +50,9 @@
         </div>
       </div>
       <div
-        v-if="isJobFocused"
+        v-if="isJobFocused && selectedJob"
         class="l-experiment-details__content-item"
-        @click="copyToClipboard(selectedJob?.id)"
+        @click="copyToClipboard(selectedJob.id)"
       >
         <div class="l-experiment-details__content-label">job id</div>
         <div
@@ -87,12 +87,14 @@
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ (selectedJob as any)?.model.path }}</div>
+        <div class="l-experiment-details__content-field">
+          {{ (selectedJob as any)?.model.path }}
+        </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
-        <div class="l-experiment-details__content-field">
-          {{ formatDate(focusedItem?.created) }}
+        <div class="l-experiment-details__content-field" v-if="focusedItem">
+          {{ formatDate(focusedItem.created) }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -161,15 +163,15 @@ const { experiments, selectedExperiment, jobs, inferenceJobs, selectedJob } =
   storeToRefs(experimentStore)
 const isCopied = ref(false)
 
-const copyToClipboard = async (longString) => {
-  isCopied.value = true
+const copyToClipboard = async (longString: string) => {
+  isCopied.value = true;
   setTimeout(() => {
     isCopied.value = false
   }, 3000)
   await navigator.clipboard.writeText(longString)
 }
 
-const isJobFocused = computed(() => selectedJob.value !== undefined);
+const isJobFocused = computed(() => Boolean(selectedJob.value));
 const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value]);
 
 // TODO: this needs refactor when the backend provides experiment id
@@ -220,9 +222,9 @@ const focusedItemRunTime = computed(() => {
   if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
     const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || [];
     const lastEndTime = endTimes.reduce((latest, current) => {
-      return new Date(latest) > new Date(current) ? latest : current
-    })
-    if (lastEndTime) {
+      return new Date(latest) > new Date(current) ? latest : current;
+    });
+    if (lastEndTime && selectedExperiment.value) {
       return calculateDuration(selectedExperiment.value?.created, lastEndTime);
     }
   }

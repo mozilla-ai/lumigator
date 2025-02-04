@@ -82,15 +82,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import { formatDate } from '@/helpers/index'
-import { useSlidePanel } from '@/composables/SlidingPanel'
-import Tag from 'primevue/tag'
-import LJobsTable from '@/components/molecules/LJobsTable.vue'
-import { useExperimentStore } from '@/stores/experiments/store'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable';
+import Column from 'primevue/column';
+import { formatDate } from '@/helpers/index';
+import { useSlidePanel } from '@/composables/SlidingPanel';
+import Tag from 'primevue/tag';
+import LJobsTable from '@/components/molecules/LJobsTable.vue';
+import { useExperimentStore } from '@/stores/experiments/store';
+import type { Experiment, Job } from '@/types/Experiment';
 
 const props = defineProps({
   tableData: {
@@ -120,8 +121,10 @@ const columnStyles = computed(() => {
   }
 })
 
-function handleRowClick(event) {
-  if (event.originalEvent.target.closest('svg.p-icon.p-datatable-row-toggle-icon')) {
+function handleRowClick(event: DataTableRowClickEvent) {
+  if (
+    (event.originalEvent.target as HTMLElement)?.closest('svg.p-icon.p-datatable-row-toggle-icon')
+  ) {
     // preventing experiment selection on row expansion
     return
   }
@@ -130,7 +133,7 @@ function handleRowClick(event) {
   emit('l-experiment-selected', event.data);
 }
 
-function onJobSelected(job, experiment) {
+function onJobSelected(job: Job, experiment: Experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   experimentStore.loadJobDetails(job.id)
@@ -138,8 +141,8 @@ function onJobSelected(job, experiment) {
   emit('l-experiment-selected', experiment)
 }
 
-function retrieveStatus(experimentId) {
-  const experiment = experiments.value.find((exp) => exp.id === experimentId)
+function retrieveStatus(experimentId: string) {
+  const experiment = experiments.value.find((exp) => exp.id === experimentId);
   if (!experiment) {
     return undefined;
   }
@@ -175,7 +178,7 @@ async function throttledUpdateAllJobs() {
 
 // This is a temporary solution until 'experiments/' endpoint
 // updates the status of each experiment
-let pollingId
+let pollingId: number | undefined;
 onMounted(async () => {
   await experimentStore.updateStatusForIncompleteJobs()
   pollingId = setInterval(async () => {

@@ -1,13 +1,18 @@
-import http from '@/services/http'
-import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD } from './api'
+import http from '@/services/http';
+import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD } from './api';
+import { AxiosError } from 'axios';
 
 async function fetchDatasets() {
   try {
     const response = await http.get(PATH_DATASETS_ROOT())
     return response.data.items
   } catch (error) {
-    console.error('Error fetching datasets:', error.message || error)
-    return []
+    if (error instanceof Error) {
+      console.error('Error fetching datasets:', error.message || error);
+    } else if (error instanceof AxiosError) {
+      console.error('Error fetching datasets:', error.response?.data || error);
+    }
+    return [];
   }
 }
 
@@ -16,8 +21,12 @@ async function fetchDatasetInfo(id: string) {
     const response = await http.get(PATH_SINGLE_DATASET(id))
     return response.data
   } catch (error) {
-    console.error('Error fetching dataset info:', error.message || error)
-    return []
+    if (error instanceof Error) {
+      console.error('Error fetching dataset info:', error.message || error);
+    } else if (error instanceof AxiosError) {
+      console.error('Error fetching dataset info:', error.response?.data || error);
+    }
+    return [];
   }
 }
 
@@ -30,7 +39,11 @@ async function postDataset(formData: FormData) {
     })
     return response.data
   } catch (error) {
-    return error.response
+    if (error instanceof Error) {
+      return error;
+    } else if (error instanceof AxiosError) {
+      return error.response;
+    }
   }
 }
 
@@ -70,7 +83,11 @@ async function downloadDataset(id: string) {
     })
     return fileResponse.data
   } catch (error) {
-    console.error('Error downloading dataset: ', error.message || error)
+    if (error instanceof Error) {
+      console.error('Error downloading dataset: ', error.message || error);
+    } else if (error instanceof AxiosError) {
+      console.error('Error downloading dataset: ', error.response?.data || error);
+    }
   }
 }
 

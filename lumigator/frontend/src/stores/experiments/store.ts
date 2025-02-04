@@ -155,7 +155,11 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function loadExperimentResults(experiment: Experiment) {
     for (const job of experiment.jobs) {
-      const results = await experimentService.fetchResults(job.id)
+      const results = (await experimentService.fetchResults(job.id)) as {
+        resultsData: ObjectData;
+        id: string;
+        download_url: string;
+      };
       if (results?.id) {
         const modelRow = {
           model: results.resultsData.model,
@@ -171,7 +175,11 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function loadJobResults(jobId: string) {
-    const results = await experimentService.fetchResults(jobId);
+    const results = (await experimentService.fetchResults(jobId)) as {
+      resultsData: ObjectData;
+      id: string;
+      download_url: string;
+    };
     if (results?.id) {
       selectedJob.value = jobs.value.find((job) => job.id === results.id)
       selectedJobRslts.value = transformResultsArray(results.resultsData)

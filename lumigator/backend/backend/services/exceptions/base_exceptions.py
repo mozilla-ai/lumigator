@@ -64,3 +64,23 @@ class UpstreamError(ServiceError):
         msg = _append_message(f"Upstream error with {service_name}", message)
         super().__init__(msg, exc)
         self.service_name = service_name
+
+
+class NotAvailableError(ServiceError):
+    """Base exception for errors caused by a resource not being available."""
+
+    def __init__(
+        self,
+        resource: str,
+        message: str,
+        exc: Exception | None = None,
+    ):
+        """Creates a NotAvailableError.
+
+        :param resource: the resource type that was not available
+        :param message: error message
+        :param exc: optional exception
+        """
+        msg = f"{resource} not available"
+        super().__init__(_append_message(msg, message), exc)
+        self.resource = resource

@@ -98,6 +98,9 @@ def test_upload_data_launch_job(
     output_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/dataset"
     )
+    assert output_infer_job_response is not None
+    assert output_infer_job_response.status_code == 200
+
     output_infer_job_response_model = DatasetResponse.model_validate(
         output_infer_job_response.json()
     )

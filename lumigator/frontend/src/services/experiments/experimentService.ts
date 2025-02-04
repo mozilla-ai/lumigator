@@ -7,7 +7,7 @@ import {
   PATH_EXPERIMENT_LOGS,
   PATHS_EXPERIMENTS_ANNOTATE,
 } from './api';
-import type { ExperimentResults, Job, ObjectData } from '@/types/Experiment';
+import type { Job, ObjectData } from '@/types/Experiment';
 import { AxiosError } from 'axios';
 
 /**

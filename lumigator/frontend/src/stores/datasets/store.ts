@@ -23,7 +23,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     selectedDataset.value = undefined;
   }
 
-  async function uploadDataset(datasetFile: Blob) {
+  async function uploadDataset(datasetFile: File) {
     if (!datasetFile) {
       return
     }

@@ -43,9 +43,9 @@ export function retrieveEntrypoint(job: Job) {
     // See: lumigator/backend/backend/config_templates.py
 
     // Normalize the max_samples
-    if (jsonObject?.job?.max_samples) {
+    if (typeof jsonObject?.job?.max_samples !== 'undefined') {
       jsonObject.max_samples = jsonObject.job.max_samples;
-    } else if (jsonObject?.evaluation?.max_samples) {
+    } else if (typeof jsonObject?.evaluation?.max_samples !== 'undefined') {
       jsonObject.max_samples = jsonObject.evaluation.max_samples;
     } else {
       throw new Error('Unable to parse max_samples from entrypoint config: ' + configString)

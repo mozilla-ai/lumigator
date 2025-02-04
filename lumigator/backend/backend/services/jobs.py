@@ -31,7 +31,7 @@ from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 
-from backend import config_templates
+from backend.config_templates import lookup_template
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
@@ -278,15 +278,7 @@ class JobService:
                 )
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
-        job_templates = config_templates.templates[job_type]
-
-        if model_name in job_templates:
-            # if no config template is provided, get the default one for the model
-            config_template = job_templates[model_name]
-        else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = job_templates["default"]
+        config_template = lookup_template(job_type, model_name)
 
         return config_template
 

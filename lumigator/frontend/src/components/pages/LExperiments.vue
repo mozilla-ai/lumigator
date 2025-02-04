@@ -71,11 +71,11 @@ const { selectedDataset } = storeToRefs(datasetStore)
 const { experiments, selectedExperiment, selectedJob, selectedJobRslts } =
   storeToRefs(experimentStore)
 
-const showDrawer = ref(false)
-const experimentsDrawer = ref(null)
-const showLogs = ref(null)
-const showExpResults = ref(null)
-const showJobResults = ref(null)
+const showDrawer = ref(false);
+const experimentsDrawer = ref();
+const showLogs = ref();
+const showExpResults = ref();
+const showJobResults = ref();
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
@@ -86,13 +86,13 @@ onMounted(async () => {
 })
 
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Logs' : selectedExperiment.value.name
-}
+  return showLogs.value ? 'Logs' : selectedExperiment.value?.name;
+};
 
 const onCreateExperiment = () => {
-  showSlidingPanel.value = true
-  selectedExperiment.value = null
-}
+  showSlidingPanel.value = true;
+  selectedExperiment.value = undefined;
+};
 
 const onSelectExperiment = (experiment) => {
   experimentStore.loadExperimentDetails(experiment.id)
@@ -121,9 +121,9 @@ const onShowLogs = () => {
 }
 
 const onDismissForm = () => {
-  selectedDataset.value = null
-  showSlidingPanel.value = false
-}
+  selectedDataset.value = undefined;
+  showSlidingPanel.value = false;
+};
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false
@@ -146,8 +146,8 @@ onMounted(async () => {
 
 watch(showSlidingPanel, (newValue) => {
   if (!newValue) {
-    selectedExperiment.value = null
-    selectedJob.value = null
+    selectedExperiment.value = undefined;
+    selectedJob.value = undefined;
   }
 })
 </script>

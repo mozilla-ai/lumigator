@@ -9,7 +9,8 @@
         aria-label="Close"
         class="l-experiment-details__close"
         @click="emit('l-close-details')"
-      />
+      >
+      </Button>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item">

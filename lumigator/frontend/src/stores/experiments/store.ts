@@ -1,20 +1,21 @@
-import { ref, watch, computed } from 'vue'
-import { defineStore } from 'pinia'
-import experimentService from '@/services/experiments/experimentService'
-import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
+import { ref, watch, computed, type Ref } from 'vue';
+import { defineStore } from 'pinia';
+import experimentService from '@/services/experiments/experimentService';
+import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index';
+import type { Experiment, ExperimentResults } from '@/types/Experiment';
 
 export const useExperimentStore = defineStore('experiment', () => {
-  const experiments = ref([])
-  const jobs = ref([])
-  const inferenceJobs = ref([])
-  const selectedExperiment = ref(null)
-  const selectedJob = ref(null)
-  const selectedJobRslts = ref([])
-  const selectedExperimentRslts = ref([])
-  const isPolling = ref(false)
-  let experimentInterval = null
-  const experimentLogs = ref([])
-  const completedStatus = ['SUCCEEDED', 'FAILED']
+  const experiments: Ref<Experiment[]> = ref([]);
+  const jobs: Ref<Experiment[]>= ref([]);
+  const inferenceJobs: Ref<Experiment[]> = ref([]);
+  const selectedExperiment: Ref<Experiment | undefined> = ref();
+  const selectedJob: Ref<Experiment | undefined> = ref();
+  const selectedJobRslts = ref([]);
+  const selectedExperimentRslts: Ref<ExperimentResults[]> = ref([]);
+  const isPolling = ref(false);
+  let experimentInterval: number | undefined = undefined;
+  const experimentLogs: Ref<unknown[]> = ref([]);
+  const completedStatus = ['SUCCEEDED', 'FAILED'];
 
   const hasRunningInferenceJob = computed(() => {
     return inferenceJobs.value.some((job) => job.status === 'RUNNING')
@@ -31,7 +32,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments.value = getJobsPerExperiement()
   }
 
-  function getJobsPerExperiement() {
+  function getJobsPerExperiement(): Experiment[] {
     const experimentMap = jobs.value.reduce((acc, job) => {
       const key = `${job.name}-${job.experimentStart}`
       // initialize a grouping object
@@ -141,8 +142,8 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function loadResultsFile(jobId) {
-    const blob = await experimentService.downloadResults(jobId)
-    downloadContent(blob, `${selectedJob.value.name}_results`)
+    const blob = await experimentService.downloadResults(jobId);
+    downloadContent(blob, `${selectedJob.value?.name}_results`);
   }
 
   async function loadExperimentResults(experiment) {
@@ -208,12 +209,12 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function retrieveLogs() {
-    const logsData = await experimentService.fetchLogs(selectedJob.value.id)
-    const logs = splitByEscapeCharacter(logsData.logs)
+    const logsData = await experimentService.fetchLogs(selectedJob.value?.id);
+    const logs = splitByEscapeCharacter(logsData.logs);
     logs.forEach((log) => {
       const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
       if (experimentLogs.value.length === 0 || lastEntry !== log) {
-        experimentLogs.value.push(log)
+        experimentLogs.value.push(log );
       }
     })
   }
@@ -235,9 +236,9 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   function stopPolling() {
     if (isPolling.value) {
-      isPolling.value = false
-      clearInterval(experimentInterval)
-      experimentInterval = null
+      isPolling.value = false;
+      clearInterval(experimentInterval);
+      experimentInterval = undefined;
     }
   }
 
@@ -261,9 +262,9 @@ export const useExperimentStore = defineStore('experiment', () => {
     isPolling.value = true
     experimentInterval = setInterval(() => {
       updateJobStatus(jobId).then(() => {
-        const job = experiments.value.find((experiment) => experiment.id === jobId)
-        if (completedStatus.includes(job?.status)) {
-          stopPolling() // Stop polling when the job is complete
+        const job = experiments.value.find((experiment) => experiment.id === jobId);
+        if (job && completedStatus.includes(job.status)) {
+          stopPolling(); // Stop polling when the job is complete
         }
       })
     }, 3000) // Poll every 3 seconds

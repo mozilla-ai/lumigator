@@ -114,13 +114,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted } from 'vue'
-import { useExperimentStore } from '@/stores/experiments/store'
-import { useModelStore } from '@/stores/models/store'
-import { storeToRefs } from 'pinia'
-import LJobResults from '@/components/molecules/LJobResults.vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
+import { computed, ref, onUnmounted } from 'vue';
+import { useExperimentStore } from '@/stores/experiments/store';
+import { useModelStore } from '@/stores/models/store';
+import { storeToRefs } from 'pinia';
+import LJobResults from '@/components/molecules/LJobResults.vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import type { Model } from '@/types/Experiment';
 
 const experimentStore = useExperimentStore()
 const modelStore = useModelStore()
@@ -186,7 +187,7 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const modelsMap = new Map(models.value.map((model) => [model.uri, model]))
+  const modelsMap = new Map(models.value.map((model: Model) => [model.uri, model]));
   return selectedExperimentRslts.value.map((job) => ({
     ...job,
     model: modelsMap.get(job.model),

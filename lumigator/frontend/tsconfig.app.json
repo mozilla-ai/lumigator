@@ -15,6 +15,11 @@
         "./src/*"
       ]
     },
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false
   }
 }

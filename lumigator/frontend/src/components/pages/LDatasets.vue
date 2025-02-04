@@ -97,18 +97,18 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 
-const datasetStore = useDatasetStore()
-const { datasets, selectedDataset } = storeToRefs(datasetStore)
-const experimentStore = useExperimentStore()
-const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore)
-const { showSlidingPanel } = useSlidePanel()
-const toast = useToast()
-const datasetInput = ref(null)
-const confirm = useConfirm()
-const router = useRouter()
-const currentTab = ref('0')
-const showLogs = ref(false)
-const refDatasetTable = ref(null)
+const datasetStore = useDatasetStore();
+const { datasets, selectedDataset } = storeToRefs(datasetStore);
+const experimentStore = useExperimentStore();
+const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore);
+const { showSlidingPanel } = useSlidePanel();
+const toast = useToast();
+const datasetInput = ref();
+const confirm = useConfirm();
+const router = useRouter();
+const currentTab = ref('0');
+const showLogs = ref(false);
+const refDatasetTable = ref();
 
 onMounted(async () => {
   await datasetStore.loadDatasets()
@@ -177,10 +177,10 @@ const onDeleteDataset = (datasetID) => {
 }
 
 const onDatasetSelected = (dataset) => {
-  selectedJob.value = null
-  datasetStore.loadDatasetInfo(dataset.id)
-  showSlidingPanel.value = true
-}
+  selectedJob.value = undefined;
+  datasetStore.loadDatasetInfo(dataset.id);
+  showSlidingPanel.value = true;
+};
 
 const onClearSelection = () => {
   datasetStore.resetSelection()
@@ -193,15 +193,15 @@ const onExperimentDataset = (dataset) => {
 }
 
 const onJobInferenceSelected = (job) => {
-  selectedDataset.value = null
-  experimentStore.loadJobDetails(job.id)
-  showSlidingPanel.value = true
-}
+  selectedDataset.value = undefined;
+  experimentStore.loadJobDetails(job.id);
+  showSlidingPanel.value = true;
+};
 
 const onCloseJobDetails = () => {
-  showSlidingPanel.value = false
-  selectedJob.value = null
-}
+  showSlidingPanel.value = false;
+  selectedJob.value = undefined;
+};
 
 const onShowLogs = () => {
   showLogs.value = true

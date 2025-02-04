@@ -1,14 +1,15 @@
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
-import datasetsService from '@/services/datasets/datasetsService'
-import { downloadContent } from '@/helpers/index'
-import { useToast } from 'primevue/usetoast'
-import type { ToastMessageOptions } from 'primevue'
+import { ref, type Ref } from 'vue';
+import { defineStore } from 'pinia';
+import datasetsService from '@/services/datasets/datasetsService';
+import { downloadContent } from '@/helpers/index';
+import { useToast } from 'primevue/usetoast';
+import type { ToastMessageOptions } from 'primevue';
+import type { Dataset } from '@/types/Dataset';
 
 export const useDatasetStore = defineStore('dataset', () => {
-  const datasets = ref([])
-  const selectedDataset = ref(null)
-  const toast = useToast()
+  const datasets = ref([]);
+  const selectedDataset: Ref<Dataset | undefined> = ref();
+  const toast = useToast();
 
   async function loadDatasets() {
     datasets.value = await datasetsService.fetchDatasets()
@@ -19,7 +20,7 @@ export const useDatasetStore = defineStore('dataset', () => {
   }
 
   function resetSelection() {
-    selectedDataset.value = null
+    selectedDataset.value = undefined;
   }
 
   async function uploadDataset(datasetFile) {
@@ -53,9 +54,10 @@ export const useDatasetStore = defineStore('dataset', () => {
     await loadDatasets()
   }
 
+  // TODO: this shouldnt depend on refs/state, it can be a util function
   async function loadDatasetFile() {
-    const blob = await datasetsService.downloadDataset(selectedDataset.value.id)
-    downloadContent(blob, selectedDataset.value.filename)
+    const blob = await datasetsService.downloadDataset(selectedDataset.value?.id);
+    downloadContent(blob, selectedDataset.value?.filename);
   }
 
   return {

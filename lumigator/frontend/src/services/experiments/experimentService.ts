@@ -6,13 +6,14 @@ import {
   PATH_EXPERIMENT_RESULTS,
   PATH_EXPERIMENT_LOGS,
   PATHS_EXPERIMENTS_ANNOTATE,
-} from './api'
+} from './api';
+import type { Job } from '@/types/Experiment';
 
 /**
  *
  * @returns {array} of all jobs, regardless the experiment
  */
-async function fetchJobs() {
+async function fetchJobs(): Promise<Job[]> {
   try {
     const response = await http.get(PATH_JOBS_ROOT())
     return response.data.items.map((p) => ({

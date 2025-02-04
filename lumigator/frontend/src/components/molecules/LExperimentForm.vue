@@ -9,7 +9,8 @@
         aria-label="Close"
         class="l-experiment-form__close"
         @click="emit('l-close-form')"
-      />
+      >
+      </Button>
     </div>
     <div class="l-experiment-form__fields">
       <FloatLabel variant="in" size="small" class="l-experiment-form__field">
@@ -20,7 +21,8 @@
           :options="experimentTypeOptions"
           variant="filled"
           disabled
-        />
+        >
+        </Select>
         <label for="use_case">Use case</label>
       </FloatLabel>
 
@@ -28,8 +30,7 @@
         Summarization jobs are evaluated with ROUGE, METEOR, and BERT score, each focusing on
         different aspects of prediction-ground truth similarity.
         <a href="https://mozilla-ai.github.io/lumigator/" target="_blank"
-          >Learn more <span class="pi pi-arrow-up-right"
-        /></a>
+          >Learn more <span class="pi pi-arrow-up-right"></span> </a>
       </p>
       <FloatLabel variant="in" class="l-experiment-form__field">
         <Select
@@ -39,7 +40,7 @@
           :options="filteredDatasets"
           variant="filled"
           size="small"
-        />
+        ></Select>
         <label for="dataset">Select Dataset</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">
@@ -52,7 +53,7 @@
           v-model="experimentDescription"
           rows="2"
           style="resize: none"
-        />
+        ></Textarea>
         <label for="description_input">Experiment description</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">
@@ -74,25 +75,26 @@
         class="l-page-header__action-btn"
         :disabled="isInvalid"
         @click="triggerExperiment"
-      />
+      ></Button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
-import { useExperimentStore } from '@/stores/experiments/store'
-import Button from 'primevue/button'
-import FloatLabel from 'primevue/floatlabel'
-import Select from 'primevue/select'
-import Textarea from 'primevue/textarea'
-import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
-import LModelCards from '@/components/molecules/LModelCards.vue'
-import { useToast } from 'primevue/usetoast'
-import type { ToastMessageOptions } from 'primevue'
+import { ref, computed, onMounted, type Ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useDatasetStore } from '@/stores/datasets/store';
+import { useExperimentStore } from '@/stores/experiments/store';
+import Button from 'primevue/button';
+import FloatLabel from 'primevue/floatlabel';
+import Select from 'primevue/select';
+import Textarea from 'primevue/textarea';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import LModelCards from '@/components/molecules/LModelCards.vue';
+import { useToast } from 'primevue/usetoast';
+import type { ToastMessageOptions } from 'primevue';
+import type { Dataset } from '@/types/Dataset';
 
 const emit = defineEmits(['l-close-form'])
 
@@ -100,14 +102,14 @@ const datasetStore = useDatasetStore()
 const experimentStore = useExperimentStore()
 const { datasets, selectedDataset } = storeToRefs(datasetStore)
 
-const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
-const experimentType = experimentTypeOptions.value[0]
-const dataset = ref(null)
-const experimentTitle = ref('')
-const experimentDescription = ref('')
-const maxSamples = ref()
-const modelSelection = ref(null)
-const toast = useToast()
+const experimentTypeOptions = ref([{ useCase: 'Summarization' }]);
+const experimentType = experimentTypeOptions.value[0];
+const dataset: Ref<Dataset | undefined> = ref();
+const experimentTitle = ref('');
+const experimentDescription = ref('');
+const maxSamples = ref();
+const modelSelection = ref();
+const toast = useToast();
 
 const isInvalid = computed(
   () =>
@@ -126,7 +128,7 @@ async function triggerExperiment() {
     name: experimentTitle.value,
     description: experimentDescription.value,
     models: modelSelection.value.selectedModels,
-    dataset: dataset.value.id,
+    dataset: dataset.value?.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
   const success = await experimentStore.runExperiment(experimentPayload)
@@ -152,11 +154,11 @@ async function triggerExperiment() {
 }
 
 function resetForm() {
-  experimentTitle.value = ''
-  experimentDescription.value = ''
-  dataset.value = null
-  modelSelection.value.selectedModels = []
-  maxSamples.value = null
+  experimentTitle.value = '';
+  experimentDescription.value = '';
+  dataset.value = undefined;
+  modelSelection.value.selectedModels = [];
+  maxSamples.value = null;
 }
 
 onMounted(async () => {

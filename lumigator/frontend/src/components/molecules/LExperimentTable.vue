@@ -126,8 +126,8 @@ function handleRowClick(event) {
     return
   }
   // user selected an experiment, clear selected job
-  selectedJob.value = null
-  emit('l-experiment-selected', event.data)
+  selectedJob.value = undefined;
+  emit('l-experiment-selected', event.data);
 }
 
 function onJobSelected(job, experiment) {
@@ -141,7 +141,7 @@ function onJobSelected(job, experiment) {
 function retrieveStatus(experimentId) {
   const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {
-    return null
+    return undefined;
   }
 
   const jobStatuses = experiment.jobs.map((job) => job.status)
@@ -188,8 +188,8 @@ onUnmounted(() => {
 })
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : null
-})
+  focusedItem.value = newValue ? focusedItem.value : undefined;
+});
 
 watch(
   () => props.tableData.length,

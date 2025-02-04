@@ -10,7 +10,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   const inferenceJobs: Ref<Experiment[]> = ref([]);
   const selectedExperiment: Ref<Experiment | undefined> = ref();
   const selectedJob: Ref<Experiment | undefined> = ref();
-  const selectedJobRslts = ref([]);
+  const selectedJobRslts: Ref<ExperimentResults[]> = ref([]);
   const selectedExperimentRslts: Ref<ExperimentResults[]> = ref([]);
   const isPolling = ref(false);
   let experimentInterval: number | undefined = undefined;

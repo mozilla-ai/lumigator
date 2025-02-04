@@ -14,10 +14,10 @@ const props = defineProps({
 
 const emit = defineEmits(['l-file-upload'])
 
-const input = ref(null)
-const selectedFile = ref()
-const fileName = ref('') // State to hold the name of the selected file
-const confirm = useConfirm()
+const input = ref();
+const selectedFile = ref();
+const fileName = ref(''); // State to hold the name of the selected file
+const confirm = useConfirm();
 
 const handleFileChange = (event) => {
   const file = event.target.files[0]
@@ -53,9 +53,9 @@ function confirmUpload() {
 }
 
 function reset() {
-  input.value.value = null
-  selectedFile.value = null
-  fileName.value = ''
+  input.value.value = undefined;
+  selectedFile.value = undefined;
+  fileName.value = '';
 }
 
 function cancelUpload() {

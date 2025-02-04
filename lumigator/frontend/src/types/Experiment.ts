@@ -18,9 +18,14 @@ export type Job = {
   id: string;
   status: string;
   metadata: Record<string, unknown>;
+  end_time: string;
+  model: Record<string, unknown>;
+  name: string;
+  experimentStart: string;
 }
 
 export type Model = {
+  id: string;
   description: string;
   info?: {
     parameter_count: string;

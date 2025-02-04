@@ -16,13 +16,13 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Title</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.name }}
+          {{ focusedItem?.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">description</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.description }}
+          {{ focusedItem?.description }}
         </div>
       </div>
       <div class="l-experiment-details__content-item row">
@@ -52,14 +52,14 @@
       <div
         v-if="isJobFocused"
         class="l-experiment-details__content-item"
-        @click="copyToClipboard(selectedJob.id)"
+        @click="copyToClipboard(selectedJob?.id)"
       >
         <div class="l-experiment-details__content-label">job id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
         >
-          {{ selectedJob.id }}
+          {{ selectedJob?.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
@@ -70,29 +70,29 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.dataset.name }}
+          {{ (focusedItem?.dataset as any).name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem.useCase }}</div>
+        <div class="l-experiment-details__content-field">{{ focusedItem?.useCase }}</div>
       </div>
       <div v-if="!isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
-            <li v-for="job in selectedExperiment.jobs" :key="job.id">· {{ job.model.path }}</li>
+            <li v-for="job in selectedExperiment?.jobs" :key="job.id">· {{ job.model.path }}</li>
           </ul>
         </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ selectedJob.model.path }}</div>
+        <div class="l-experiment-details__content-field">{{ (selectedJob as any)?.model.path }}</div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
         <div class="l-experiment-details__content-field">
-          {{ formatDate(focusedItem.created) }}
+          {{ formatDate(focusedItem?.created) }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -169,34 +169,34 @@ const copyToClipboard = async (longString) => {
   await navigator.clipboard.writeText(longString)
 }
 
-const isJobFocused = computed(() => selectedJob.value !== null)
-const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
+const isJobFocused = computed(() => selectedJob.value !== undefined);
+const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value]);
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    const selected = allJobs.value.filter((job) => job.id === selectedJob.value.id)[0]
-    return selected ? selected.status : selectedJob.value.status
+    const selected = allJobs.value.filter((job) => job.id === selectedJob.value?.id)[0];
+    return selected ? selected.status : selectedJob.value?.status;
   }
   const selected = experiments.value.filter(
-    (experiment) => experiment.id === selectedExperiment.value.id,
-  )[0]
-  return selected ? selected.status : selectedExperiment.value.status
-})
+    (experiment) => experiment.id === selectedExperiment.value?.id,
+  )[0];
+  return selected ? selected.status : selectedExperiment.value?.status;
+});
 
 const isInference = computed(() => {
-  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value.id)
-})
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id);
+});
 
 const focusedItem = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
   }
   const selected = experiments.value.filter(
-    (experiment) => experiment.id === selectedExperiment.value.id,
-  )[0]
-  return selected ? selected : selectedExperiment.value
-})
+    (experiment) => experiment.id === selectedExperiment.value?.id,
+  )[0];
+  return selected ? selected : selectedExperiment.value;
+});
 
 const tagSeverity = computed(() => {
   const status = currentItemStatus.value
@@ -214,16 +214,16 @@ const tagSeverity = computed(() => {
 
 const focusedItemRunTime = computed(() => {
   if (isJobFocused.value) {
-    return selectedJob.value.runTime ? selectedJob.value.runTime : '-'
+    return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-';
   }
 
   if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time)
+    const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || [];
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current
     })
     if (lastEndTime) {
-      return calculateDuration(selectedExperiment.value.created, lastEndTime)
+      return calculateDuration(selectedExperiment.value?.created, lastEndTime);
     }
   }
   return '-'

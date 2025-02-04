@@ -7,7 +7,7 @@ import type { ToastMessageOptions } from 'primevue';
 import type { Dataset } from '@/types/Dataset';
 
 export const useDatasetStore = defineStore('dataset', () => {
-  const datasets = ref([]);
+  const datasets: Ref<Dataset[]> = ref([]);
   const selectedDataset: Ref<Dataset | undefined> = ref();
   const toast = useToast();
 

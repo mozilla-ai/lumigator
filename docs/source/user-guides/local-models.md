@@ -9,7 +9,7 @@ Before installation and setup, here are some recommended system requirements:
 ## Getting Started
 Assuming that you have already installed Lumigator and have the application [running](../get-started/installation.md#local-deployment), the first step is to upload a dataset. You can do this through the [Lumigator UI](../get-started/ui-guide.md), which can be accessed by visiting [localhost](http://localhost). You can get started by uploading the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
 
-Create a bash script `test_local_llm_eval.sh` and initialize the following variables.
+Create a bash file `common_variables.sh` and initialize the following variables.
 
 ```bash
 #!/bin/bash
@@ -38,19 +38,18 @@ Next, you have a choice between choosing one of the below-mentioned local LLM to
 You should be able to see it running on http://localhost:8080/. Note that this is the endpoint that Lumigator will use to interact with.
 
 ### Run Lumigator Evaluation
-Append the following lines to your initially created `test_local_llm_eval.sh` script:
+Create a new bash script `test_local_llm_eval.sh`:
 ```bash
+#!/bin/bash
+source common_variables.sh
+
 EVAL_NAME="Llamafile mistral-7b-instruct-v0.2"
 EVAL_DESC="Test evaluation with mistral-7b-instruct-v0.2"
 EVAL_MODEL="llamafile://mistral-7b-instruct-v0.2"
 EVAL_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
-```
-Run the evaluation:
-```bash
 
-bash test_local_llm_eval.sh # initializing the variables
-
-curl -s "$BACKEND_URL/api/v1/jobs/evaluate/" \
+# TODO: change to evaluate endpoint after experiments_new migration
+curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -62,9 +61,13 @@ curl -s "$BACKEND_URL/api/v1/jobs/evaluate/" \
     "model_url": "'"$EVAL_MODEL_URL"'",
     "system_prompt": "'"$EVAL_SYSTEM_PROMPT"'"
   }'
+
 ```
 
-
+Finally run the evaluation:
+``````console
+user@host:~/lumigator$ test_local_llm_eval.sh
+```
 
 ## Ollama
 [Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://docs.openwebui.com/).

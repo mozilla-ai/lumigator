@@ -48,6 +48,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    operations-guide/kubernetes
    operations-guide/alembic
    operations-guide/dev
+   operations-guide/configure-S3
 
 .. toctree::
    :maxdepth: 2

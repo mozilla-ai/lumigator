@@ -11,7 +11,7 @@ import loguru
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
 from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
-from fastapi import UploadFile
+from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import InferenceJobConfig, InferenceJobOutput
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
@@ -288,6 +288,10 @@ class JobService:
             request,
             self._dataset_service.s3_filesystem,
         )
+
+    def add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
+        """Adds a background task to the background tasks queue."""
+        background_tasks.add_task(task, *args)
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
         job_templates = config_templates.templates[job_type]

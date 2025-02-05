@@ -95,7 +95,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
@@ -119,6 +119,7 @@ import TabPanel from 'primevue/tabpanel';
 
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import type { ToastMessageOptions } from 'primevue';
 
 const datasetStore = useDatasetStore();
 const { datasets, selectedDataset } = storeToRefs(datasetStore);
@@ -167,7 +168,7 @@ function deleteConfirmation(dataset) {
         detail: `${dataset.filename}`,
         group: 'br',
         life: 3000
-      })
+      } as ToastMessageOptions & {messageicon: string} )
     },
     reject: () => {}
   });

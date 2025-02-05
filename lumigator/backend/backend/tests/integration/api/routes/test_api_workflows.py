@@ -15,7 +15,7 @@ from lumigator_schemas.jobs import (
     JobResultDownloadResponse,
     JobStatus,
 )
-from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -98,6 +98,9 @@ def test_upload_data_launch_job(
     output_infer_job_response = local_client.get(
         f"/jobs/{create_inference_job_response_model.id}/dataset"
     )
+    assert output_infer_job_response is not None
+    assert output_infer_job_response.status_code == 200
+
     output_infer_job_response_model = DatasetResponse.model_validate(
         output_infer_job_response.json()
     )
@@ -200,6 +203,120 @@ def test_upload_data_no_gt_launch_annotation(
     logger.info(f"Created results: {logs_annotation_job_output}")
 
 
+def check_backend_health_status(local_client: TestClient):
+    """Check the backend health status."""
+    response = local_client.get("/health")
+    assert response.status_code == 200
+
+
+def check_initial_dataset_count(local_client: TestClient):
+    """Check the initial dataset count."""
+    get_ds_response = local_client.get("/datasets/")
+    assert get_ds_response.status_code == 200
+    return ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
+
+
+def upload_dataset(local_client: TestClient, dialog_dataset):
+    """Upload a dataset."""
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
+    assert create_response.status_code == 201
+    return DatasetResponse.model_validate(create_response.json())
+
+
+def check_dataset_count_after_upload(local_client: TestClient, initial_count):
+    """Check the dataset count after uploading a dataset."""
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == initial_count.total + 1
+    return get_ds_after
+
+
+def create_experiment(local_client: TestClient):
+    """Create an experiment."""
+    experiment = local_client.post(
+        "/experiments/new/",
+        headers=POST_HEADER,
+        json={
+            "name": "test_create_exp_workflow_check_results",
+            "description": "Test for an experiment with associated workflows",
+        },
+    )
+    assert experiment.status_code == 201
+    return experiment.json()["id"]
+
+
+def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_name):
+    """Run a workflow for the experiment."""
+    workflow = WorkflowResponse.model_validate(
+        local_client.post(
+            "/workflows/",
+            headers=POST_HEADER,
+            json={
+                "name": workflow_name,
+                "description": "Test workflow for inf and eval",
+                "model": TEST_CAUSAL_MODEL,
+                "dataset": str(dataset_id),
+                "experiment_id": experiment_id,
+                "max_samples": 1,
+            },
+        ).json()
+    )
+    return workflow
+
+
+def validate_experiment_results(local_client: TestClient, experiment_id, workflow_details):
+    """Validate experiment results."""
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+    assert workflow_details.experiment_id == experiment_results.id
+    assert len(experiment_results.workflows) == 1
+    assert workflow_details.model_dump(
+        exclude={"artifacts_download_url"}
+    ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
+
+
+def validate_updated_experiment_results(
+    local_client: TestClient, experiment_id, workflow_1_details, workflow_2_details
+):
+    """Validate updated experiment results."""
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+    assert len(experiment_results.workflows) == 2
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+
+
+def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
+    """Retrieve and validate workflow logs."""
+    logs_job_response = local_client.get(f"/workflows/{workflow_id}/logs")
+    logs = JobLogsResponse.model_validate(logs_job_response.json())
+    assert logs.logs is not None
+    assert "Inference results stored at" in logs.logs
+    assert "Storing evaluation results into" in logs.logs
+    assert logs.logs.index("Inference results stored at") < logs.logs.index(
+        "Storing evaluation results into"
+    )
+
+
+def delete_experiment_and_validate(local_client: TestClient, experiment_id):
+    """Delete the experiment and ensure associated workflows are also deleted."""
+    local_client.delete(f"/experiments/new/{experiment_id}")
+    response = local_client.get(f"/experiments/new/{experiment_id}")
+    assert response.status_code == 404
+
+
+@pytest.mark.integration
 def test_full_experiment_launch(
     local_client: TestClient, dialog_dataset, dependency_overrides_services
 ):
@@ -214,29 +331,22 @@ def test_full_experiment_launch(
     * Validating updated experiment results
     * Retrieving and validating workflow logs
     * Deleting the experiment and ensuring associated workflows are also deleted
-    * Ensuring the dataset count is updated correctly after the experiment deletion
     """
-    # Make sure backend is healthy
-    response = local_client.get("/health")
-    assert response.status_code == 200
-    # check how many datasets are in the db before we start
-    get_ds_response = local_client.get("/datasets/")
-    assert get_ds_response.status_code == 200
-    get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
-
-    # Upload a dataset
-    create_response = local_client.post(
-        "/datasets/",
-        data={},
-        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    check_backend_health_status(local_client)
+    initial_count = check_initial_dataset_count(local_client)
+    dataset = upload_dataset(local_client, dialog_dataset)
+    check_dataset_count_after_upload(local_client, initial_count)
+    experiment_id = create_experiment(local_client)
+    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1")
+    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+    validate_experiment_results(local_client, experiment_id, workflow_1_details)
+    workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
+    workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+    validate_updated_experiment_results(
+        local_client, experiment_id, workflow_1_details, workflow_2_details
     )
-    assert create_response.status_code == 201
-    dataset = DatasetResponse.model_validate(create_response.json())
-
-    get_ds_after_response = local_client.get("/datasets/")
-    assert get_ds_after_response.status_code == 200
-    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    assert get_ds_after.total == get_ds.total + 1
+    retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
+    delete_experiment_and_validate(local_client, experiment_id)
 
     experiment = local_client.post(
         "/experiments/new/",

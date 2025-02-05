@@ -26,7 +26,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import Button from 'primevue/button';
 const emit  = defineEmits(['l-add-experiment'])
 </script>

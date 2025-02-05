@@ -183,10 +183,10 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref, onUnmounted } from 'vue';
-import { useExperimentStore } from "@/stores/experiments/store.js";
-import { useModelStore } from "@/stores/models/store.js";
+import { useExperimentStore } from "@/stores/experiments/store";
+import { useModelStore } from "@/stores/models/store";
 import { storeToRefs } from 'pinia';
 import LJobResults from '@/components/molecules/LJobResults.vue';
 import DataTable from 'primevue/datatable';

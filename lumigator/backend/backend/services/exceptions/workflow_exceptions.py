@@ -1,4 +1,4 @@
-from backend.services.exceptions.base_exceptions import NotFoundError
+from backend.services.exceptions.base_exceptions import NotFoundError, ValidationError
 
 
 class WorkflowNotFoundError(NotFoundError):
@@ -11,4 +11,16 @@ class WorkflowNotFoundError(NotFoundError):
         :param message: optional error message
         :param exc: optional exception
         """
-        super().__init__("Job", str(resource_id), message, exc)
+        super().__init__("Workflow", str(resource_id), message, exc)
+
+
+class WorkflowValidationError(ValidationError):
+    """Base exception, raised when validation-related errors occur."""
+
+    def __init__(self, message: str, exc: Exception | None = None):
+        """Creates a WorkflowValidationError.
+
+        :param message: optional error message
+        :param exc: optional exception instance
+        """
+        super().__init__(message, exc)

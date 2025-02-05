@@ -81,13 +81,14 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Menu from 'primevue/menu';
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import { formatDate } from '@/helpers/index'
+import type { MenuItem } from 'primevue/menuitem';
 
 const props = defineProps({
 	tableData: {
@@ -112,7 +113,7 @@ const style = computed(() => {
 const loading = ref(true);
 const focusedItem = ref(null);
 const optionsMenu = ref();
-const options = ref([
+const options = ref<MenuItem[]>([
   {
     label: 'Use in Experiment',
     icon: 'pi pi-experiments',

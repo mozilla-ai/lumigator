@@ -3,7 +3,10 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from lumigator_schemas.jobs import JobResults, LowercaseEnum
+from lumigator_schemas.jobs import (
+    JobResults,
+    LowercaseEnum,
+)
 
 
 class WorkflowStatus(LowercaseEnum):

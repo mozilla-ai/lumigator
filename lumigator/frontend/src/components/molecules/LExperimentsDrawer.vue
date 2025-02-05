@@ -22,9 +22,10 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script lang="ts" setup>
+import { ref, type PropType } from 'vue'
 import Drawer from 'primevue/drawer';
+import type { DrawerProps } from 'primevue';
 
 const emit = defineEmits(['l-drawer-closed'])
 defineProps({
@@ -34,7 +35,7 @@ defineProps({
     default: 'Results'
   },
   position: {
-    type: String,
+    type: String as PropType<DrawerProps["position"]>,
     required: false,
     default: 'full'
   }

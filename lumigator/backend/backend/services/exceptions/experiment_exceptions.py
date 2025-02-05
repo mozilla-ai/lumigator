@@ -11,4 +11,4 @@ class ExperimentNotFoundError(NotFoundError):
         :param message: optional error message
         :param exc: optional exception
         """
-        super().__init__("Job", resource_id, message, exc)
+        super().__init__("Experiment", resource_id, message, exc)

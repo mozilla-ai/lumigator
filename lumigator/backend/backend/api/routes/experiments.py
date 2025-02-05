@@ -5,9 +5,11 @@ from fastapi import APIRouter, BackgroundTasks, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
+    ExperimentIdResponse,
     ExperimentResponse,
     ExperimentResultDownloadResponse,
     ExperimentResultResponse,
+    GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -80,12 +82,12 @@ def get_experiment_result_download(
 # TODO: Eventually this route will become the / route,
 # but right now it is a placeholder while we build up the Workflows routes
 # It's not included in the OpenAPI schema for now so it's not visible in the docs
-@router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=True)
 def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
-) -> ExperimentResponse:
+) -> ExperimentIdResponse:
     """Create an experiment ID."""
-    return ExperimentResponse.model_validate(service.create_experiment(request).model_dump())
+    return ExperimentIdResponse.model_validate(service.create_experiment(request).model_dump())
 
 
 # TODO: FIXME this should not need the /all suffix.
@@ -103,15 +105,12 @@ def list_experiments_new(
 
 
 @router.get("/new/{experiment_id}", include_in_schema=False)
-def get_experiment_new(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
+def get_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
-    return ExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+    return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
 
 
-@router.get("/new/{experiment_id}/workflows", include_in_schema=False)
-def get_workflows(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse[UUID]:
-    """TODO: this endpoint should handle passing in an experiment id and the returning a list
-    of all the workflows associated with that experiment. Until workflows are stored and associated
-    with experiments, this is not yet implemented.
-    """
-    raise NotImplementedError
+@router.delete("/new/{experiment_id}", include_in_schema=False)
+def delete_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> None:
+    """Delete an experiment by ID."""
+    service.delete_experiment(experiment_id)

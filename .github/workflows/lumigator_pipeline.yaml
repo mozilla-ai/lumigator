@@ -262,10 +262,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download Docker images
-        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
-        run: docker pull ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }}
-
       - name: Login to DockerHub
         if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
@@ -275,21 +271,15 @@ jobs:
 
       - name: Tag and push Docker image (tagged releases)
         if: contains(github.ref, 'refs/tags/') 
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
-          docker push mzdotai/lumigator:${{ github.ref_name }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
         if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')  
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
-          docker push mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
         if: steps.filter.outputs.push_be == 'true' && github.ref == 'refs/heads/main'
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:latest
-          docker push mzdotai/lumigator:latest
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:latest
 
   push-frontend-images:
     name: Push frontend Docker images
@@ -321,10 +311,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download Docker images
-        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
-        run: docker pull ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }}
-
       - name: Login to DockerHub
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
@@ -334,21 +320,15 @@ jobs:
 
       - name: Tag and push Docker image (tagged releases)
         if: contains(github.ref, 'refs/tags/') 
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
-          docker push mzdotai/lumigator-frontend:${{ github.ref_name }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
         if: steps.filter.outputs.push_fe == 'true' && !contains(github.ref, 'refs/tags/')
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
-          docker push mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
         if: steps.filter.outputs.push_fe == 'true' && github.ref == 'refs/heads/main'
-        run: |
-          docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
-          docker push mzdotai/lumigator-frontend:latest
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:latest
 
   sdk-packaging:
     name: Package SDK

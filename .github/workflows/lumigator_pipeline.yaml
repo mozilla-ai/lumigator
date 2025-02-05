@@ -286,7 +286,7 @@ jobs:
           docker push mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
-        if: steps.filter.outputs.push_be == 'true' || github.ref == 'refs/heads/main'
+        if: steps.filter.outputs.push_be == 'true' && github.ref == 'refs/heads/main'
         run: |
           docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:latest
           docker push mzdotai/lumigator:latest
@@ -345,7 +345,7 @@ jobs:
           docker push mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
-        if: steps.filter.outputs.push_fe == 'true' || github.ref == 'refs/heads/main'
+        if: steps.filter.outputs.push_fe == 'true' && github.ref == 'refs/heads/main'
         run: |
           docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:latest
           docker push mzdotai/lumigator-frontend:latest

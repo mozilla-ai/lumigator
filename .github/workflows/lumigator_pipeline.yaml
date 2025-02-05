@@ -309,6 +309,9 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
 
+      - name: Install skopeo
+        run: sudo apt-get -y install skopeo
+
       - name: Truncate commit SHA
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV

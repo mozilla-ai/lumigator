@@ -20,7 +20,10 @@ from lumigator_schemas.workflows import (
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
-from backend.services.exceptions.workflow_exceptions import WorkflowNotFoundError
+from backend.services.exceptions.workflow_exceptions import (
+    WorkflowNotFoundError,
+    WorkflowValidationError,
+)
 from backend.services.jobs import JobService
 from backend.settings import settings
 from backend.tracking import TrackingClient
@@ -205,6 +208,10 @@ class WorkflowService:
 
     def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         """Delete a workflow by ID."""
+        # if the workflow is running, we should throw an error
+        workflow = self.get_workflow(workflow_id)
+        if workflow.status == WorkflowStatus.RUNNING:
+            raise WorkflowValidationError("Cannot delete a running workflow")
         return self._tracking_client.delete_workflow(workflow_id)
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:

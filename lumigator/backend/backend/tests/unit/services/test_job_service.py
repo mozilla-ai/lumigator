@@ -5,6 +5,7 @@ from lumigator_schemas.jobs import (
     JobInferenceCreate,
 )
 
+from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.services.jobs import JobService
 from backend.settings import settings
 
@@ -77,3 +78,15 @@ def test_set_model(job_service, model, input_model_url, returned_model_url):
     )
     model_url = job_service._set_model_type(request)
     assert model_url == returned_model_url
+
+
+def test_invalid_text_generation(job_service):
+    request = JobInferenceCreate(
+        name="test_text_generation_run",
+        description="Test run to verify that system prompt is set.",
+        model="hf://microsoft/Phi-3.5-mini-instruct",
+        dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
+        task="text-generation",
+    )
+    with pytest.raises(JobValidationError):
+        job_service.create_job(request=request)

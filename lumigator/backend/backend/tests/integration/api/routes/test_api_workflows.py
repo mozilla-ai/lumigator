@@ -348,6 +348,103 @@ def test_full_experiment_launch(
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)
 
+    experiment = local_client.post(
+        "/experiments/new/",
+        headers=POST_HEADER,
+        json={
+            "name": "test_create_exp_workflow_check_results",
+            "description": "Test for an experiment with associated workflows",
+        },
+    )
+    assert experiment.status_code == 201
+    experiment_id = experiment.json()["id"]
+
+    # run a workflow for that experiment
+    workflow_1 = WorkflowResponse.model_validate(
+        local_client.post(
+            "/workflows/",
+            headers=POST_HEADER,
+            json={
+                "name": "Workflow_1",
+                "description": "Test workflow for inf and eval",
+                "model": TEST_CAUSAL_MODEL,
+                "dataset": str(dataset.id),
+                "experiment_id": experiment_id,
+                "max_samples": 1,
+            },
+        ).json()
+    )
+
+    # Wait till the workflow is done
+    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+
+    assert workflow_1_details.experiment_id == experiment_results.id
+    assert len(experiment_results.workflows) == 1
+    # the presigned url can be different but everything else should be the same
+    assert workflow_1_details.model_dump(
+        exclude={"artifacts_download_url"}
+    ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
+
+    # add another workflow to the experiment
+    workflow_2 = WorkflowResponse.model_validate(
+        local_client.post(
+            "/workflows/",
+            headers=POST_HEADER,
+            json={
+                "name": "Workflow_2",
+                "description": "Test workflow for inf and eval",
+                "model": TEST_CAUSAL_MODEL,
+                "dataset": str(dataset.id),
+                "experiment_id": experiment_id,
+                "max_samples": 1,
+            },
+        ).json()
+    )
+
+    # Wait till the workflow is done
+    workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+
+    # now get the results of the experiment
+    experiment_results = GetExperimentResponse.model_validate(
+        local_client.get(f"/experiments/new/{experiment_id}").json()
+    )
+    # make sure it has the info for both workflows
+    assert len(experiment_results.workflows) == 2
+    # make sure both workflows are in the experiment, excluding that presigned url again
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+
+    # get the logs
+    logs_job_response = local_client.get(f"/workflows/{workflow_1_details.id}/logs")
+    logs = JobLogsResponse.model_validate(logs_job_response.json())
+    assert logs.logs is not None
+    # Very naive way to check whether both of the logs we expect are in here
+    # This will need to be updated as we improve the log retrieval structure.
+    assert "Inference results stored at" in logs.logs
+    assert "Storing evaluation results into" in logs.logs
+    # assert that inference comes before eval
+    assert logs.logs.index("Inference results stored at") < logs.logs.index(
+        "Storing evaluation results into"
+    )
+
+    # delete the experiment
+    local_client.delete(f"/experiments/new/{experiment_id}")
+    response = local_client.get(f"/experiments/new/{experiment_id}")
+    assert response.status_code == 404
+    # make sure the workflow results also were deleted
+    response = local_client.get(f"/workflows/{workflow_1_details.id}")
+    assert response.status_code == 404
+    response = local_client.get(f"/workflows/{workflow_2_details.id}")
+    assert response.status_code == 404
+
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"

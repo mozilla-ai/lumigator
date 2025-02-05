@@ -1,10 +1,8 @@
 from lumigator_schemas.completions import CompletionResponse
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
-    ExperimentCreate,
+    ExperimentIdCreate,
     ExperimentResponse,
-    ExperimentResultDownloadResponse,
-    ExperimentResultResponse,
 )
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
@@ -20,6 +18,7 @@ from lumigator_schemas.jobs import (
     JobResultResponse,
     JobSubmissionResponse,
 )
+from lumigator_schemas.workflows import WorkflowCreateRequest
 from pydantic import ConfigDict
 
 
@@ -35,19 +34,11 @@ class DatasetResponse(DatasetResponse, from_attributes=True):
     model_config = ConfigDict(extra="forbid")
 
 
-class ExperimentCreate(ExperimentCreate):
+class ExperimentIdCreate(ExperimentIdCreate):
     model_config = ConfigDict(extra="forbid")
 
 
 class ExperimentResponse(ExperimentResponse, from_attributes=True):
-    model_config = ConfigDict(extra="forbid")
-
-
-class ExperimentResultResponse(ExperimentResultResponse, from_attributes=True):
-    model_config = ConfigDict(extra="forbid")
-
-
-class ExperimentResultDownloadResponse(ExperimentResultDownloadResponse):
     model_config = ConfigDict(extra="forbid")
 
 
@@ -100,4 +91,8 @@ class JobResultResponse(JobResultResponse, from_attributes=True):
 
 
 class JobResultDownloadResponse(JobResultDownloadResponse):
+    model_config = ConfigDict(extra="forbid")
+
+
+class WorkflowCreateRequest(WorkflowCreateRequest):
     model_config = ConfigDict(extra="forbid")

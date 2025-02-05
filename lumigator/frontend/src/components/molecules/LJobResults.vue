@@ -150,14 +150,14 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
 const props = defineProps({
   results: {
-    type: Object,
+    type: Array,
     required: true,
   },
   noRadius: {

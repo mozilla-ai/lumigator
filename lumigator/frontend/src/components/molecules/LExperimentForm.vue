@@ -107,7 +107,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store';
@@ -120,6 +120,7 @@ import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import LModelCards from '@/components/molecules/LModelCards.vue';
 import { useToast } from "primevue/usetoast";
+import type { ToastMessageOptions } from 'primevue';
 
 const emit = defineEmits([
   'l-close-form',
@@ -167,7 +168,7 @@ async function triggerExperiment() {
       messageicon: 'pi pi-verified',
       group: 'br',
       life: 3000
-    })
+    } as ToastMessageOptions & {messageicon: string})
     return;
   }
     toast.add({
@@ -175,7 +176,7 @@ async function triggerExperiment() {
     summary: `Experiment failed to start`,
     messageicon: 'pi pi-exclamation-triangle',
     group: 'br',
-  })
+  } as ToastMessageOptions & {messageicon: string})
 }
 
 function resetForm() {

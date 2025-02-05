@@ -54,7 +54,9 @@ def create_inference_job(
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
 
-    background_tasks.add_task(service.handle_inference_job, job_response.id, job_create_request)
+    service.add_background_task(
+        background_tasks, service.handle_inference_job, job_response.id, job_create_request
+    )
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -82,8 +84,11 @@ def create_annotation_job(
     inference_job_create_request.store_to_dataset = True
     job_response = service.create_job(inference_job_create_request)
 
-    background_tasks.add_task(
-        service.handle_inference_job, job_response.id, inference_job_create_request
+    service.add_background_task(
+        background_tasks,
+        service.handle_inference_job,
+        job_response.id,
+        inference_job_create_request,
     )
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)

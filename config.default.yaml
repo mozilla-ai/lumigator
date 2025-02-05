@@ -1,0 +1,49 @@
+app:
+    # AWS Variables for S3 Object Storage
+    # Configure these for AWS access, or use defaults for local development with minio.
+    aws_access_key_id: lumigator
+    aws_secret_access_key: lumigator # pragma: allowlist secret
+    aws_default_region: us-east-2
+    # The URL which can be used for S3 operations
+    aws_endpoint_url: http://localhost:9000
+    # The name of the S3 bucket to use for storage
+    s3_bucket: lumigator-storage
+    # Ray Cluster Configuration
+    # These settings are for the local Ray setup.
+    # To use an external Ray cluster, you MUST use an external S3-compatible storage
+    # to ensure the Ray workers can access data from your Lumigator server.
+    ray_head_node_host: ray
+    ray_dashboard_port: 8265
+    ray_worker_gpus: 0
+    ray_worker_gpus_fraction: 0
+    nvidia_visible_devices: all
+    gpu_count: 0
+    # Cache for HuggingFace models and artifacts
+    hf_home: ${HOME}/.cache/huggingface
+    # Access token to use when attempting to access gated models in HuggingFace
+    hf_token: foobar
+    mistral_api_key: lumigator # pragma: allowlist secret
+    openai_api_key: lumigator # pragma: allowlist secret
+    # MLFlow Configuration
+    mlflow_tracking_uri: http://mlflow:5000
+    minio_root_user: minioadmin
+    minio_root_password: minioadmin # pragma: allowlist secret
+    minio_api_cors_allow_origin: "*"
+    deployment_type: local
+    database_url: sqlite:///local.db
+    # LUMI_API_CORS_ALLOWED_ORIGINS:
+    # Array of origins (See: https://developer.mozilla.org/en-US/docs/Glossary/Origin)
+    # that should be allowed to make Cross-Domain (CORS) API requests to the Lumigator backend API.
+    # The expected format of each is: scheme + domain + port (if no port is specified then 80 is assumed).
+    # e.g. "http://localhost:3000,http://lumigator.mydomain.com"
+    # To allow CORS requests from anywhere specify "*" as any, or the only value.
+    # e.g.  - "*"
+    lumi_api_cors_allowed_origins:
+        - http://localhost
+        - http://localhost:3000
+    evaluator_pip_reqs: /mzai/lumigator/jobs/evaluator/requirements.txt
+    evaluator_work_dir: /mzai/lumigator/jobs/evaluator
+    evaluator_lite_pip_reqs: /mzai/lumigator/jobs/evaluator_lite/requirements.txt
+    evaluator_lite_work_dir: /mzai/lumigator/jobs/evaluator_lite
+    inference_pip_reqs: /mzai/lumigator/jobs/inference/requirements.txt
+    inference_work_dir: /mzai/lumigator/jobs/inference

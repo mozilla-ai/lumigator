@@ -178,3 +178,7 @@ cython_debug/
 # env diff files
 .env.diff
 .env.diff.new
+
+# Deployment/config files
+build/
+config.user.yaml

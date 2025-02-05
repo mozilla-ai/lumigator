@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all check-dot-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all check-dot-env config-clean config-generate config-generate-env
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -6,6 +6,12 @@ PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
 KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"' || echo "FALSE")
+
+# Configuration to identify the input and output config files
+CONFIG_BUILD_DIR="build"
+CONFIG_DEFAULT="config.default.yaml"
+CONFIG_USER="config.user.yaml"
+CONFIG_OUTPUT="config.deploy.yaml"
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -85,50 +91,31 @@ endef
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
-check-dot-env:
-#    Create .env from template if it doesn't exist
-	@if [ ! -f .env ]; then \
-	cp .env.template .env; \
-	echo ".env created from .env.template"; \
-	fi
-
-	# Generate new diff between template and current .env
-	@diff .env.template .env > .env.diff.new 2>/dev/null || true
-
-	# Check if files are out of sync and show warning
-	@if [ -f .env ] && [ -f .env.template ] && ! cmp -s .env.diff .env.diff.new; then \
-	echo -e "\033[1;31m====================================================================\033[0m"; \
-	echo -e "\033[1;31mWARNING: .env and .env.template are out of sync. Please review changes\033[0m"; \
-	echo -e "\033[1;31m====================================================================\033[0m"; \
-	fi
-
-	# Update diff file for next comparison
-	@mv .env.diff.new .env.diff 2>/dev/null || true
-
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
-local-up: check-dot-env
+local-up: config-generate-env
 	uv run pre-commit install
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
-local-down:
-	docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+local-down: config-clean
+	docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
-start-lumigator: check-dot-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+start-lumigator: config-generate-env
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build: check-dot-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+start-lumigator-build: config-generate-env
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
-start-lumigator-external-services: check-dot-env
+start-lumigator-external-services: config-generate-env
 	docker compose $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
-stop-lumigator:
+
+stop-lumigator: config-clean
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) down
 
 clean-docker-buildcache:
@@ -229,3 +216,30 @@ test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
 # test everything
 test-all: test-sdk test-backend test-jobs-unit
+
+# config-clean: removes any generated config files from the build directory (including the directory itself).
+config-clean:
+	@echo "Cleaning up generated config files in '$(CONFIG_BUILD_DIR)'..."
+	@rm -rf $(CONFIG_BUILD_DIR)
+	@echo "Cleanup complete."
+
+# config-generate: merges default and user YAML config files to produce a YAML file in the build directory.
+# Any keys missing from the user config will be substituted with the default key/values.
+# Values in the user config take prescedence over the default values.
+config-generate: config-clean
+	@mkdir -p $(CONFIG_BUILD_DIR)
+	@if [ -e $(CONFIG_USER) ]; then \
+		echo "Found user configuration"; \
+		yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(CONFIG_DEFAULT) $(CONFIG_USER) > $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT); \
+	else \
+		echo "No user defined config found, default will be used"; \
+		cp $(CONFIG_DEFAULT) $(CONFIG_USER); \
+		cp $(CONFIG_DEFAULT) $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT); \
+	fi
+	@echo "Config generation complete."
+
+# config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
+config-generate-env: config-generate
+	@echo "Generating .env file for Docker Compose using 'app' config section..."
+	@scripts/config_generate_env.sh $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT) "$(CONFIG_BUILD_DIR)/.env"
+	@echo ".env file generated at $(CONFIG_BUILD_DIR)/.env"

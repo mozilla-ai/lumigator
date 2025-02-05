@@ -5,30 +5,30 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { useConfirm } from 'primevue/useconfirm';
+import { ref } from 'vue'
+import { useConfirm } from 'primevue/useconfirm'
 
 const props = defineProps({
   entity: String,
-});
+})
 
-const emit = defineEmits(['l-file-upload']);
+const emit = defineEmits(['l-file-upload'])
 
-const input = ref(null);
-const selectedFile = ref();
-const fileName = ref(''); // State to hold the name of the selected file
-const confirm = useConfirm();
+const input = ref(null)
+const selectedFile = ref()
+const fileName = ref('') // State to hold the name of the selected file
+const confirm = useConfirm()
 
 const handleFileChange = (event) => {
-  const file = event.target.files[0];
+  const file = event.target.files[0]
   if (file) {
-    fileName.value = file.name;
-    selectedFile.value = file;
-    confirmUpload();
+    fileName.value = file.name
+    selectedFile.value = file
+    confirmUpload()
   } else {
-    fileName.value = '';
+    fileName.value = ''
   }
-};
+}
 
 function confirmUpload() {
   confirm.require({
@@ -44,31 +44,31 @@ function confirmUpload() {
       label: 'Upload',
     },
     accept: () => {
-      uploadConfirmed();
+      uploadConfirmed()
     },
     reject: () => {
-      cancelUpload();
+      cancelUpload()
     },
-  });
+  })
 }
 
 function reset() {
-  input.value.value = null;
-  selectedFile.value = null;
-  fileName.value = '';
+  input.value.value = null
+  selectedFile.value = null
+  fileName.value = ''
 }
 
 function cancelUpload() {
   // Clear the file input and reset state
-  reset();
+  reset()
 }
 
 function uploadConfirmed() {
-  emit('l-file-upload', selectedFile.value);
-  reset();
+  emit('l-file-upload', selectedFile.value)
+  reset()
 }
 
 defineExpose({
   input,
-});
+})
 </script>

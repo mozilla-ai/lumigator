@@ -20,11 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, type PropType } from 'vue';
-import Drawer from 'primevue/drawer';
-import type { DrawerProps } from 'primevue';
+import { ref, type PropType } from 'vue'
+import Drawer from 'primevue/drawer'
+import type { DrawerProps } from 'primevue'
 
-const emit = defineEmits(['l-drawer-closed']);
+const emit = defineEmits(['l-drawer-closed'])
 defineProps({
   header: {
     type: String,
@@ -36,8 +36,8 @@ defineProps({
     required: false,
     default: 'full',
   },
-});
-const drawerVisible = ref(true);
+})
+const drawerVisible = ref(true)
 </script>
 
 <!-- Style here cannot be scoped because Drawer is attached to the DOM

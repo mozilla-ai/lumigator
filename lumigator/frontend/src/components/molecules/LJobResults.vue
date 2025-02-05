@@ -93,9 +93,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { ref, onMounted } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 
 const props = defineProps({
   results: {
@@ -107,7 +107,7 @@ const props = defineProps({
     required: false,
     default: false,
   },
-});
+})
 
 const tooltipColorsConfig = ref({
   root: {
@@ -125,9 +125,9 @@ const tooltipColorsConfig = ref({
       ['border-bottom-color']: `black`,
     },
   },
-});
+})
 
-const tableData = ref([]);
+const tableData = ref([])
 const tooltips = ref({
   examples: {
     value: `Text which is passed as an input to the model, together
@@ -183,11 +183,11 @@ const tooltips = ref({
     class: 'metric-tooltip',
     pt: tooltipColorsConfig.value,
   },
-});
+})
 
 onMounted(() => {
-  tableData.value = props.results;
-});
+  tableData.value = props.results
+})
 </script>
 
 <style lang="scss">

@@ -13,22 +13,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store';
-const experimentStore = useExperimentStore();
-const { experimentLogs } = storeToRefs(experimentStore);
-const logContainer = ref(null);
-const logsLength = computed(() => experimentLogs.value.length);
+import { ref, watch, computed, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/store'
+const experimentStore = useExperimentStore()
+const { experimentLogs } = storeToRefs(experimentStore)
+const logContainer = ref(null)
+const logsLength = computed(() => experimentLogs.value.length)
 
 const scrollToBottom = async () => {
   if (logContainer.value) {
-    await nextTick();
-    logContainer.value.scrollTop = logContainer.value.scrollHeight;
+    await nextTick()
+    logContainer.value.scrollTop = logContainer.value.scrollHeight
   }
-};
+}
 
-watch(logsLength, () => scrollToBottom());
+watch(logsLength, () => scrollToBottom())
 </script>
 
 <style scoped lang="scss">

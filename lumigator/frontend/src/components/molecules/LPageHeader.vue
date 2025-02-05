@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from 'primevue/button';
+import Button from 'primevue/button'
 
 defineProps({
   title: {
@@ -45,13 +45,13 @@ defineProps({
     default: false,
     required: false,
   },
-});
+})
 
-const emit = defineEmits(['l-header-action']);
+const emit = defineEmits(['l-header-action'])
 
 const handleAction = () => {
-  emit('l-header-action');
-};
+  emit('l-header-action')
+}
 </script>
 
 <style scoped lang="scss">

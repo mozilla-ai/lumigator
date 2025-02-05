@@ -50,15 +50,15 @@
 </template>
 
 <script lang="ts" setup>
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
-import Column from 'primevue/column';
-import { formatDate } from '@/helpers/index';
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store';
+import DataTable from 'primevue/datatable'
+import Tag from 'primevue/tag'
+import Column from 'primevue/column'
+import { formatDate } from '@/helpers/index'
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/store'
 
-const experimentStore = useExperimentStore();
-const { jobs } = storeToRefs(experimentStore);
+const experimentStore = useExperimentStore()
+const { jobs } = storeToRefs(experimentStore)
 defineProps({
   tableData: {
     type: Array,
@@ -68,19 +68,19 @@ defineProps({
     type: Object,
     required: true,
   },
-});
+})
 
-const emit = defineEmits(['l-job-selected']);
+const emit = defineEmits(['l-job-selected'])
 
-const shortenedModel = (path) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`);
+const shortenedModel = (path) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`)
 
 function handleRowClick(event) {
-  emit('l-job-selected', event.data);
+  emit('l-job-selected', event.data)
 }
 
 function retrieveStatus(jobID) {
-  const job = jobs.value.find((job) => job.id === jobID);
-  return job ? job.status : null;
+  const job = jobs.value.find((job) => job.id === jobID)
+  return job ? job.status : null
 }
 </script>
 

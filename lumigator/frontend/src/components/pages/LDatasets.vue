@@ -72,50 +72,50 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useExperimentStore } from '@/stores/experiments/store';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import { useRouter } from 'vue-router';
-import LPageHeader from '@/components/molecules/LPageHeader.vue';
-import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
-import LFileUpload from '@/components/molecules/LFileUpload.vue';
-import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
-import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
-import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue';
-import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
-import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
-import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
+import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import { useRouter } from 'vue-router'
+import LPageHeader from '@/components/molecules/LPageHeader.vue'
+import LDatasetTable from '@/components/molecules/LDatasetTable.vue'
+import LFileUpload from '@/components/molecules/LFileUpload.vue'
+import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue'
+import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue'
+import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue'
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue'
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue'
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
-import type { ToastMessageOptions } from 'primevue';
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import type { ToastMessageOptions } from 'primevue'
 
-const datasetStore = useDatasetStore();
-const { datasets, selectedDataset } = storeToRefs(datasetStore);
-const experimentStore = useExperimentStore();
-const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore);
-const { showSlidingPanel } = useSlidePanel();
-const toast = useToast();
-const datasetInput = ref(null);
-const confirm = useConfirm();
-const router = useRouter();
-const currentTab = ref('0');
-const showLogs = ref(false);
-const refDatasetTable = ref(null);
+const datasetStore = useDatasetStore()
+const { datasets, selectedDataset } = storeToRefs(datasetStore)
+const experimentStore = useExperimentStore()
+const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore)
+const { showSlidingPanel } = useSlidePanel()
+const toast = useToast()
+const datasetInput = ref(null)
+const confirm = useConfirm()
+const router = useRouter()
+const currentTab = ref('0')
+const showLogs = ref(false)
+const refDatasetTable = ref(null)
 
 onMounted(async () => {
-  await datasetStore.loadDatasets();
-});
+  await datasetStore.loadDatasets()
+})
 
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
-It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`);
+It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
 function deleteConfirmation(dataset) {
   confirm.require({
@@ -133,9 +133,9 @@ function deleteConfirmation(dataset) {
       severity: 'danger',
     },
     accept: () => {
-      onDeleteDataset(dataset.id);
+      onDeleteDataset(dataset.id)
       if (!selectedDataset.value && showSlidingPanel.value) {
-        showSlidingPanel.value = false;
+        showSlidingPanel.value = false
       }
       toast.add({
         severity: 'secondary',
@@ -144,73 +144,73 @@ function deleteConfirmation(dataset) {
         detail: `${dataset.filename}`,
         group: 'br',
         life: 3000,
-      } as ToastMessageOptions & { messageicon: string });
+      } as ToastMessageOptions & { messageicon: string })
     },
     reject: () => {},
-  });
+  })
 }
 
 function onDownloadDataset(dataset) {
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetFile();
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetFile()
 }
 
 const onDatasetAdded = () => {
-  datasetInput.value.input.click();
-};
+  datasetInput.value.input.click()
+}
 
 const reloadDatasetTable = () => {
-  datasetStore.loadDatasets();
-  refDatasetTable.value.loading = true;
+  datasetStore.loadDatasets()
+  refDatasetTable.value.loading = true
   setTimeout(async () => {
-    await datasetStore.loadDatasets();
-    refDatasetTable.value.loading = false;
-  }, 1500);
-};
+    await datasetStore.loadDatasets()
+    refDatasetTable.value.loading = false
+  }, 1500)
+}
 
 const onDatasetUpload = (datasetFile) => {
-  datasetStore.uploadDataset(datasetFile);
-};
+  datasetStore.uploadDataset(datasetFile)
+}
 
 const onDeleteDataset = (datasetID) => {
-  datasetStore.deleteDataset(datasetID);
-};
+  datasetStore.deleteDataset(datasetID)
+}
 
 const onDatasetSelected = (dataset) => {
-  selectedJob.value = null;
-  datasetStore.loadDatasetInfo(dataset.id);
-  showSlidingPanel.value = true;
-};
+  selectedJob.value = null
+  datasetStore.loadDatasetInfo(dataset.id)
+  showSlidingPanel.value = true
+}
 
 const onClearSelection = () => {
-  datasetStore.resetSelection();
-};
+  datasetStore.resetSelection()
+}
 
 const onExperimentDataset = (dataset) => {
-  router.push('experiments');
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetInfo(dataset.id);
-};
+  router.push('experiments')
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetInfo(dataset.id)
+}
 
 const onJobInferenceSelected = (job) => {
-  selectedDataset.value = null;
-  experimentStore.loadJobDetails(job.id);
-  showSlidingPanel.value = true;
-};
+  selectedDataset.value = null
+  experimentStore.loadJobDetails(job.id)
+  showSlidingPanel.value = true
+}
 
 const onCloseJobDetails = () => {
-  showSlidingPanel.value = false;
-  selectedJob.value = null;
-};
+  showSlidingPanel.value = false
+  selectedJob.value = null
+}
 
 const onShowLogs = () => {
-  showLogs.value = true;
-};
+  showLogs.value = true
+}
 
 const onGenerateGT = () => {
-  showSlidingPanel.value = false;
-  currentTab.value = '1';
-};
+  showSlidingPanel.value = false
+  currentTab.value = '1'
+}
 </script>
 
 <style scoped lang="scss">

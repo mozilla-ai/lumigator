@@ -80,34 +80,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useExperimentStore } from '@/stores/experiments/store';
-import Button from 'primevue/button';
-import FloatLabel from 'primevue/floatlabel';
-import Select from 'primevue/select';
-import Textarea from 'primevue/textarea';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import LModelCards from '@/components/molecules/LModelCards.vue';
-import { useToast } from 'primevue/usetoast';
-import type { ToastMessageOptions } from 'primevue';
+import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
+import Button from 'primevue/button'
+import FloatLabel from 'primevue/floatlabel'
+import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
+import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import LModelCards from '@/components/molecules/LModelCards.vue'
+import { useToast } from 'primevue/usetoast'
+import type { ToastMessageOptions } from 'primevue'
 
-const emit = defineEmits(['l-close-form']);
+const emit = defineEmits(['l-close-form'])
 
-const datasetStore = useDatasetStore();
-const experimentStore = useExperimentStore();
-const { datasets, selectedDataset } = storeToRefs(datasetStore);
+const datasetStore = useDatasetStore()
+const experimentStore = useExperimentStore()
+const { datasets, selectedDataset } = storeToRefs(datasetStore)
 
-const experimentTypeOptions = ref([{ useCase: 'Summarization' }]);
-const experimentType = experimentTypeOptions.value[0];
-const dataset = ref(null);
-const experimentTitle = ref('');
-const experimentDescription = ref('');
-const maxSamples = ref();
-const modelSelection = ref(null);
-const toast = useToast();
+const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
+const experimentType = experimentTypeOptions.value[0]
+const dataset = ref(null)
+const experimentTitle = ref('')
+const experimentDescription = ref('')
+const maxSamples = ref()
+const modelSelection = ref(null)
+const toast = useToast()
 
 const isInvalid = computed(
   () =>
@@ -115,11 +115,11 @@ const isInvalid = computed(
     !experimentDescription.value ||
     !dataset.value ||
     !modelSelection.value?.selectedModels?.length,
-);
+)
 
 const filteredDatasets = computed(() =>
   datasets.value.filter((dataset) => dataset.ground_truth === true),
-);
+)
 
 async function triggerExperiment() {
   const experimentPayload = {
@@ -128,45 +128,45 @@ async function triggerExperiment() {
     models: modelSelection.value.selectedModels,
     dataset: dataset.value.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
-  };
-  const success = await experimentStore.runExperiment(experimentPayload);
+  }
+  const success = await experimentStore.runExperiment(experimentPayload)
   if (success.length) {
-    await experimentStore.loadExperiments();
-    emit('l-close-form');
-    resetForm();
+    await experimentStore.loadExperiments()
+    emit('l-close-form')
+    resetForm()
     toast.add({
       severity: 'secondary',
       summary: `${success[0].name} Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
       life: 3000,
-    } as ToastMessageOptions & { messageicon: string });
-    return;
+    } as ToastMessageOptions & { messageicon: string })
+    return
   }
   toast.add({
     severity: 'error',
     summary: `Experiment failed to start`,
     messageicon: 'pi pi-exclamation-triangle',
     group: 'br',
-  } as ToastMessageOptions & { messageicon: string });
+  } as ToastMessageOptions & { messageicon: string })
 }
 
 function resetForm() {
-  experimentTitle.value = '';
-  experimentDescription.value = '';
-  dataset.value = null;
-  modelSelection.value.selectedModels = [];
-  maxSamples.value = null;
+  experimentTitle.value = ''
+  experimentDescription.value = ''
+  dataset.value = null
+  modelSelection.value.selectedModels = []
+  maxSamples.value = null
 }
 
 onMounted(async () => {
   if (datasets.value?.length === 0) {
-    await datasetStore.loadDatasets();
+    await datasetStore.loadDatasets()
   }
   if (selectedDataset.value) {
-    dataset.value = selectedDataset.value;
+    dataset.value = selectedDataset.value
   }
-});
+})
 </script>
 
 <style scoped lang="scss">

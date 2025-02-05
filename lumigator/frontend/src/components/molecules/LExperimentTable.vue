@@ -82,121 +82,121 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import { formatDate } from '@/helpers/index';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import Tag from 'primevue/tag';
-import LJobsTable from '@/components/molecules/LJobsTable.vue';
-import { useExperimentStore } from '@/stores/experiments/store';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import { formatDate } from '@/helpers/index'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import Tag from 'primevue/tag'
+import LJobsTable from '@/components/molecules/LJobsTable.vue'
+import { useExperimentStore } from '@/stores/experiments/store'
 
 const props = defineProps({
   tableData: {
     type: Array,
     required: true,
   },
-});
-const emit = defineEmits(['l-experiment-selected']);
+})
+const emit = defineEmits(['l-experiment-selected'])
 
-const isThrottled = ref(false);
-const { showSlidingPanel } = useSlidePanel();
-const experimentStore = useExperimentStore();
-const { experiments, selectedJob } = storeToRefs(experimentStore);
-const tableVisible = ref(true);
-const focusedItem = ref();
-const expandedRows = ref([]);
+const isThrottled = ref(false)
+const { showSlidingPanel } = useSlidePanel()
+const experimentStore = useExperimentStore()
+const { experiments, selectedJob } = storeToRefs(experimentStore)
+const tableVisible = ref(true)
+const focusedItem = ref()
+const expandedRows = ref([])
 
 const style = computed(() => {
-  return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px';
-});
+  return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
+})
 
 const columnStyles = computed(() => {
   return {
     expander: 'width: 4rem',
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
-  };
-});
+  }
+})
 
 function handleRowClick(event) {
   if (event.originalEvent.target.closest('svg.p-icon.p-datatable-row-toggle-icon')) {
     // preventing experiment selection on row expansion
-    return;
+    return
   }
   // user selected an experiment, clear selected job
-  selectedJob.value = null;
-  emit('l-experiment-selected', event.data);
+  selectedJob.value = null
+  emit('l-experiment-selected', event.data)
 }
 
 function onJobSelected(job, experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
-  experimentStore.loadJobDetails(job.id);
+  experimentStore.loadJobDetails(job.id)
   // select the experiment that job belongs to
-  emit('l-experiment-selected', experiment);
+  emit('l-experiment-selected', experiment)
 }
 
 function retrieveStatus(experimentId) {
-  const experiment = experiments.value.find((exp) => exp.id === experimentId);
+  const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {
-    return null;
+    return null
   }
 
-  const jobStatuses = experiment.jobs.map((job) => job.status);
-  const uniqueStatuses = new Set(jobStatuses);
+  const jobStatuses = experiment.jobs.map((job) => job.status)
+  const uniqueStatuses = new Set(jobStatuses)
   if (uniqueStatuses.size === 1) {
-    experiment.status = [...uniqueStatuses][0];
-    return [...uniqueStatuses][0];
+    experiment.status = [...uniqueStatuses][0]
+    return [...uniqueStatuses][0]
   }
   if (uniqueStatuses.has('RUNNING')) {
-    experiment.status = 'RUNNING';
-    return 'RUNNING';
+    experiment.status = 'RUNNING'
+    return 'RUNNING'
   }
   if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
-    experiment.status = 'INCOMPLETE';
-    return 'INCOMPLETE';
+    experiment.status = 'INCOMPLETE'
+    return 'INCOMPLETE'
   }
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
 async function throttledUpdateAllJobs() {
   if (isThrottled.value) {
-    return;
+    return
   } // Skip if throttle is active
 
-  isThrottled.value = true;
-  await experimentStore.updateStatusForIncompleteJobs();
+  isThrottled.value = true
+  await experimentStore.updateStatusForIncompleteJobs()
   setTimeout(() => {
-    isThrottled.value = false; // Release throttle after delay
-  }, 5000); // 5 seconds throttle
+    isThrottled.value = false // Release throttle after delay
+  }, 5000) // 5 seconds throttle
 }
 
 // This is a temporary solution until 'experiments/' endpoint
 // updates the status of each experiment
-let pollingId;
+let pollingId
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteJobs();
+  await experimentStore.updateStatusForIncompleteJobs()
   pollingId = setInterval(async () => {
-    await throttledUpdateAllJobs();
-  }, 1000);
-}); // Check every second, throttled to execute every 5 seconds
+    await throttledUpdateAllJobs()
+  }, 1000)
+}) // Check every second, throttled to execute every 5 seconds
 
 onUnmounted(() => {
-  clearInterval(pollingId);
-});
+  clearInterval(pollingId)
+})
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : null;
-});
+  focusedItem.value = newValue ? focusedItem.value : null
+})
 
 watch(
   () => props.tableData.length,
   async () => {
-    await experimentStore.updateStatusForIncompleteJobs();
+    await experimentStore.updateStatusForIncompleteJobs()
   },
-);
+)
 </script>
 
 <style scoped lang="scss">

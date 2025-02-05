@@ -101,22 +101,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import { formatDate } from '@/helpers/index';
-import Button from 'primevue/button';
-import LGenerateGroundTruthPopup from '@/components/molecules/LGenerateGroundTruthPopup.vue';
-import { useExperimentStore } from '@/stores/experiments/store';
+import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import { formatDate } from '@/helpers/index'
+import Button from 'primevue/button'
+import LGenerateGroundTruthPopup from '@/components/molecules/LGenerateGroundTruthPopup.vue'
+import { useExperimentStore } from '@/stores/experiments/store'
 
-const datasetStore = useDatasetStore();
+const datasetStore = useDatasetStore()
 
-const { selectedDataset } = storeToRefs(datasetStore);
-const { showSlidingPanel } = useSlidePanel();
-const isCopied = ref(false);
-const isGenerateGroundTruthPopupVisible = ref(false);
-const experimentStore = useExperimentStore();
+const { selectedDataset } = storeToRefs(datasetStore)
+const { showSlidingPanel } = useSlidePanel()
+const isCopied = ref(false)
+const isGenerateGroundTruthPopupVisible = ref(false)
+const experimentStore = useExperimentStore()
 
 const emit = defineEmits([
   'l-delete-dataset',
@@ -124,23 +124,23 @@ const emit = defineEmits([
   'l-download-dataset',
   'l-details-closed',
   'l-experiment',
-]);
+])
 
 const copyToClipboard = async (longString) => {
-  isCopied.value = true;
+  isCopied.value = true
   setTimeout(() => {
-    isCopied.value = false;
-  }, 3000);
-  await navigator.clipboard.writeText(longString);
-};
+    isCopied.value = false
+  }, 3000)
+  await navigator.clipboard.writeText(longString)
+}
 
 function onCloseDetails() {
-  showSlidingPanel.value = false;
-  emit('l-details-closed');
+  showSlidingPanel.value = false
+  emit('l-details-closed')
 }
 
 function showGenerateGroundTruthPopup() {
-  isGenerateGroundTruthPopupVisible.value = true;
+  isGenerateGroundTruthPopupVisible.value = true
 }
 
 async function handleGenerateGroundTruth() {
@@ -150,12 +150,12 @@ async function handleGenerateGroundTruth() {
     dataset: selectedDataset.value.id,
     max_samples: -1,
     task: 'summarization',
-  };
-  const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload);
+  }
+  const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload)
   if (inferenceStarted) {
-    experimentStore.loadExperiments();
-    isGenerateGroundTruthPopupVisible.value = false;
-    emit('l-generate-gt');
+    experimentStore.loadExperiments()
+    isGenerateGroundTruthPopupVisible.value = false
+    emit('l-generate-gt')
   }
 }
 </script>

@@ -35,8 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import Button from 'primevue/button';
-const emit = defineEmits(['l-add-dataset']);
+import Button from 'primevue/button'
+const emit = defineEmits(['l-add-dataset'])
 </script>
 
 <style scoped lang="scss">

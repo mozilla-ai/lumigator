@@ -76,42 +76,42 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useModelStore } from '@/stores/models/store';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
+import { ref, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useModelStore } from '@/stores/models/store'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 
-const modelStore = useModelStore();
-const { models } = storeToRefs(modelStore);
-const selectedModels = ref([]);
+const modelStore = useModelStore()
+const { models } = storeToRefs(modelStore)
+const selectedModels = ref([])
 
 defineProps({
   modelLink: String,
-});
+})
 
 defineExpose({
   selectedModels,
-});
+})
 
 const modelsByRequirement = (requirementKey, isRequired) => {
   return models.value.filter((x) => {
-    const isKeyPresent = x?.requirements?.includes(requirementKey);
-    return isRequired ? isKeyPresent : !isKeyPresent;
-  });
-};
+    const isKeyPresent = x?.requirements?.includes(requirementKey)
+    return isRequired ? isKeyPresent : !isKeyPresent
+  })
+}
 
-const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true));
+const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
 
-const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false));
+const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
 
 function toggleModel(model) {
-  const index = selectedModels.value.findIndex((selected) => selected.name === model.name);
+  const index = selectedModels.value.findIndex((selected) => selected.name === model.name)
 
   if (index === -1) {
-    selectedModels.value.push(model);
+    selectedModels.value.push(model)
   } else {
-    selectedModels.value.splice(index, 1);
+    selectedModels.value.splice(index, 1)
   }
 }
 </script>

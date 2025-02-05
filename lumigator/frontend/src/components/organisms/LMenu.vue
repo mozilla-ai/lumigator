@@ -22,10 +22,10 @@
 </template>
 
 <script lang="ts" setup>
-import Menu from 'primevue/menu';
-import { routes } from '@/router';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-const { showSlidingPanel } = useSlidePanel();
+import Menu from 'primevue/menu'
+import { routes } from '@/router'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+const { showSlidingPanel } = useSlidePanel()
 </script>
 
 <style scoped lang="scss">

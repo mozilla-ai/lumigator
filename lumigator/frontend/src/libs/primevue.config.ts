@@ -1,5 +1,5 @@
-import { definePreset } from '@primevue/themes';
-import Aura from '@primevue/themes/aura';
+import { definePreset } from '@primevue/themes'
+import Aura from '@primevue/themes/aura'
 
 const LumiPreset = definePreset(Aura, {
   semantic: {
@@ -16,6 +16,6 @@ const LumiPreset = definePreset(Aura, {
       },
     },
   },
-});
+})
 
-export default LumiPreset;
+export default LumiPreset

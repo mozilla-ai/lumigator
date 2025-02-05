@@ -29,8 +29,8 @@
 </template>
 
 <script lang="ts" setup>
-import Button from 'primevue/button';
-const emit = defineEmits(['l-add-experiment']);
+import Button from 'primevue/button'
+const emit = defineEmits(['l-add-experiment'])
 </script>
 
 <style scoped lang="scss">

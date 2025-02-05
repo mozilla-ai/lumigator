@@ -63,43 +63,43 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Menu from 'primevue/menu';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import { formatDate } from '@/helpers/index';
-import type { MenuItem } from 'primevue/menuitem';
+import { ref, computed, onMounted, watch } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Menu from 'primevue/menu'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import { formatDate } from '@/helpers/index'
+import type { MenuItem } from 'primevue/menuitem'
 
 const props = defineProps({
   tableData: {
     type: Array,
     required: true,
   },
-});
+})
 
 const emit = defineEmits([
   'l-delete-dataset',
   'l-dataset-selected',
   'l-experiment',
   'l-download-dataset',
-]);
+])
 
-const { showSlidingPanel } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel()
 const style = computed(() => {
-  return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)';
-});
+  return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
+})
 
-const loading = ref(true);
-const focusedItem = ref(null);
-const optionsMenu = ref();
+const loading = ref(true)
+const focusedItem = ref(null)
+const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
     label: 'Use in Experiment',
     icon: 'pi pi-experiments',
     disabled: false,
     command: () => {
-      emit('l-experiment', focusedItem.value);
+      emit('l-experiment', focusedItem.value)
     },
   },
   {
@@ -109,55 +109,55 @@ const options = ref<MenuItem[]>([
     label: 'Download',
     icon: 'pi pi-download',
     command: () => {
-      emit('l-download-dataset', focusedItem.value);
+      emit('l-download-dataset', focusedItem.value)
     },
   },
   {
     label: 'Delete',
     icon: 'pi pi-trash',
     command: () => {
-      emit('l-delete-dataset', focusedItem.value);
+      emit('l-delete-dataset', focusedItem.value)
     },
   },
-]);
+])
 
 onMounted(() => {
   setTimeout(() => {
-    loading.value = false;
-  }, 1000);
-});
+    loading.value = false
+  }, 1000)
+})
 const ptConfigOptionsMenu = ref({
   list: 'l-dataset-table__options-menu',
   itemLink: 'l-dataset-table__menu-option',
   itemIcon: 'l-dataset-table__menu-option-icon',
   separator: 'separator',
-});
+})
 
-const shortenedID = (id) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`);
+const shortenedID = (id) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`)
 
 const togglePopover = (event, dataset) => {
-  focusedItem.value = dataset;
-  const experimentOption = options.value.find((option) => option.label === 'Use in Experiment');
+  focusedItem.value = dataset
+  const experimentOption = options.value.find((option) => option.label === 'Use in Experiment')
   if (experimentOption) {
-    experimentOption.disabled = !dataset.ground_truth;
+    experimentOption.disabled = !dataset.ground_truth
   }
-  optionsMenu.value.toggle(event);
-};
+  optionsMenu.value.toggle(event)
+}
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : null;
-});
+  focusedItem.value = newValue ? focusedItem.value : null
+})
 
 watch(props.tableData, (newValue) => {
   if (!newValue.length) {
-    loading.value = true;
+    loading.value = true
     setTimeout(() => {
-      loading.value = false;
-    }, 500);
+      loading.value = false
+    }, 500)
   }
-});
+})
 
-defineExpose({ loading });
+defineExpose({ loading })
 </script>
 
 <style scoped lang="scss">

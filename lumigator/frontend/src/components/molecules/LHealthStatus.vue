@@ -5,16 +5,16 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useHealthStore } from '@/stores/health/store';
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useHealthStore } from '@/stores/health/store'
 
-const healthStore = useHealthStore();
-const { healthStatus } = storeToRefs(healthStore);
+const healthStore = useHealthStore()
+const { healthStatus } = storeToRefs(healthStore)
 
 onMounted(async () => {
-  await healthStore.loadHealthStatus();
-});
+  await healthStore.loadHealthStatus()
+})
 </script>
 
 <style scoped lang="scss">

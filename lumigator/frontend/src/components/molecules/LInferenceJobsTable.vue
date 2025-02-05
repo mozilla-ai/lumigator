@@ -62,19 +62,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue';
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
-import Column from 'primevue/column';
-import { formatDate } from '@/helpers/index';
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useSlidePanel } from '@/composables/SlidingPanel';
+import { ref, computed, watch } from 'vue'
+import DataTable from 'primevue/datatable'
+import Tag from 'primevue/tag'
+import Column from 'primevue/column'
+import { formatDate } from '@/helpers/index'
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useSlidePanel } from '@/composables/SlidingPanel'
 
-const experimentStore = useExperimentStore();
-const datasetStore = useDatasetStore();
-const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(experimentStore);
+const experimentStore = useExperimentStore()
+const datasetStore = useDatasetStore()
+const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(experimentStore)
 defineProps({
   tableData: {
     type: Array,
@@ -84,54 +84,54 @@ defineProps({
     type: Object,
     required: false,
   },
-});
+})
 
-const emit = defineEmits(['l-inference-selected', 'l-inference-finished']);
-const { showSlidingPanel } = useSlidePanel();
-const isThrottled = ref(false);
-const focusedItem = ref(null);
+const emit = defineEmits(['l-inference-selected', 'l-inference-finished'])
+const { showSlidingPanel } = useSlidePanel()
+const isThrottled = ref(false)
+const focusedItem = ref(null)
 
 const tableStyle = computed(() => {
-  return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)';
-});
+  return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
+})
 
 function handleRowClick(event) {
-  emit('l-inference-selected', event.data);
+  emit('l-inference-selected', event.data)
 }
 
 function retrieveStatus(jobId) {
-  const jobStatus = inferenceJobs.value.find((job) => job.id === jobId);
-  return jobStatus ? jobStatus.status : null;
+  const jobStatus = inferenceJobs.value.find((job) => job.id === jobId)
+  return jobStatus ? jobStatus.status : null
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
 async function throttledUpdateAllJobs() {
   if (isThrottled.value) {
-    return;
+    return
   } // Skip if throttle is active
 
-  isThrottled.value = true;
-  await experimentStore.updateStatusForIncompleteJobs();
+  isThrottled.value = true
+  await experimentStore.updateStatusForIncompleteJobs()
   setTimeout(() => {
-    isThrottled.value = false; // Release throttle after delay
-  }, 5000); // 5 seconds throttle
+    isThrottled.value = false // Release throttle after delay
+  }, 5000) // 5 seconds throttle
 }
 
 // This is a temporary solution until 'jobs/' endpoint
 // updates the status of each job
-let pollingId;
+let pollingId
 watch(hasRunningInferenceJob, async (newValue) => {
   if (newValue) {
-    await experimentStore.updateStatusForIncompleteJobs();
+    await experimentStore.updateStatusForIncompleteJobs()
     pollingId = setInterval(async () => {
-      await throttledUpdateAllJobs();
-    }, 1000);
+      await throttledUpdateAllJobs()
+    }, 1000)
   } else {
-    clearInterval(pollingId);
-    emit('l-inference-finished');
-    datasetStore.loadDatasets();
+    clearInterval(pollingId)
+    emit('l-inference-finished')
+    datasetStore.loadDatasets()
   }
-});
+})
 </script>
 
 <style scoped lang="scss">

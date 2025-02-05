@@ -41,8 +41,8 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue';
-import Button from 'primevue/button';
+import { defineProps, defineEmits } from 'vue'
+import Button from 'primevue/button'
 
 // Define the props
 const props = defineProps({
@@ -54,18 +54,18 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-});
+})
 
 // Define the emitted events
-const emit = defineEmits(['close', 'accept']);
+const emit = defineEmits(['close', 'accept'])
 
 // Methods
 function close() {
-  emit('close');
+  emit('close')
 }
 
 function accept() {
-  emit('accept', props.dataset);
+  emit('accept', props.dataset)
 }
 </script>
 

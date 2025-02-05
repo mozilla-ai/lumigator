@@ -25,14 +25,14 @@
 </template>
 
 <script lang="ts" setup>
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
-import Button from 'primevue/button';
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import Button from 'primevue/button'
 
-const emit = defineEmits(['l-close-details']);
+const emit = defineEmits(['l-close-details'])
 </script>
 
 <style scoped lang="scss">

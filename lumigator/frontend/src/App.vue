@@ -59,17 +59,17 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import LMenu from '@/components/organisms/LMenu.vue';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useExperimentStore } from '@/stores/experiments/store';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
-import Button from 'primevue/button';
+import { onMounted, ref } from 'vue'
+import LMenu from '@/components/organisms/LMenu.vue'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import ConfirmDialog from 'primevue/confirmdialog'
+import Toast from 'primevue/toast'
+import Button from 'primevue/button'
 
-const datasetStore = useDatasetStore();
-const experimentStore = useExperimentStore();
+const datasetStore = useDatasetStore()
+const experimentStore = useExperimentStore()
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,
@@ -90,13 +90,13 @@ const tooltipConfig = ref({
       },
     },
   },
-});
+})
 
-const { showSlidingPanel } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel()
 onMounted(async () => {
-  await experimentStore.loadExperiments();
-  await datasetStore.loadDatasets();
-});
+  await experimentStore.loadExperiments()
+  await datasetStore.loadDatasets()
+})
 </script>
 
 <style scoped lang="scss">

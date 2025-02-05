@@ -114,19 +114,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted } from 'vue';
-import { useExperimentStore } from '@/stores/experiments/store';
-import { useModelStore } from '@/stores/models/store';
-import { storeToRefs } from 'pinia';
-import LJobResults from '@/components/molecules/LJobResults.vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { computed, ref, onUnmounted } from 'vue'
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useModelStore } from '@/stores/models/store'
+import { storeToRefs } from 'pinia'
+import LJobResults from '@/components/molecules/LJobResults.vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
 
-const experimentStore = useExperimentStore();
-const modelStore = useModelStore();
-const { selectedExperimentRslts } = storeToRefs(experimentStore);
-const { models } = storeToRefs(modelStore);
-const expandedRows = ref([]);
+const experimentStore = useExperimentStore()
+const modelStore = useModelStore()
+const { selectedExperimentRslts } = storeToRefs(experimentStore)
+const { models } = storeToRefs(modelStore)
+const expandedRows = ref([])
 
 const tooltipColorsConfig = ref({
   root: {
@@ -144,7 +144,7 @@ const tooltipColorsConfig = ref({
       ['border-bottom-color']: `black`,
     },
   },
-});
+})
 const tooltips = ref({
   rouge1: {
     value: `Measures the overlap of individual words
@@ -183,19 +183,19 @@ const tooltips = ref({
     class: 'metric-tooltip',
     pt: tooltipColorsConfig.value,
   },
-});
+})
 
 const tableData = computed(() => {
-  const modelsMap = new Map(models.value.map((model) => [model.uri, model]));
+  const modelsMap = new Map(models.value.map((model) => [model.uri, model]))
   return selectedExperimentRslts.value.map((job) => ({
     ...job,
     model: modelsMap.get(job.model),
-  }));
-});
+  }))
+})
 
 onUnmounted(() => {
-  selectedExperimentRslts.value = [];
-});
+  selectedExperimentRslts.value = []
+})
 </script>
 
 <style scoped lang="scss"></style>

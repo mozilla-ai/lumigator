@@ -11,7 +11,7 @@ to check if it has already been discussed or otherwise open a
 This problem usually occurs when the disk space allocated by Docker is completely
 filled up. There are two ways to tackle this:
 
-- increase the amount of disk space avaiable to the docker engine. You can do it
+- increase the amount of disk space available to the docker engine. You can do it
 by opening Settings in Docker Desktop, opening the `Resources` section, and then
 increasing the value specified under `Disk usage limit`
 

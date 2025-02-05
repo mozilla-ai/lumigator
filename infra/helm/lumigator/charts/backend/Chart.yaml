@@ -1,5 +1,5 @@
 apiVersion: v2
-name: lumigator-backend
+name: backend
 description: A Helm chart for Lumigator backend
 
 # A chart can be either an 'application' or a 'library' chart.

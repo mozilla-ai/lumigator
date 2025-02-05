@@ -177,7 +177,7 @@ const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value]);
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    const selected = allJobs.value.filter((job) => job.id === selectedJob.value?.id)[0];
+    const selected = allJobs.value.find((job) => job.id === selectedJob.value?.id);
     return selected ? selected.status : selectedJob.value?.status;
   }
   const selected = experiments.value.filter(

@@ -45,7 +45,7 @@ async function fetchExperimentDetails(id: string) {
     } else {
       console.error('Error fetching experiment details', error);
     }
-    return undefined;
+    return;
   }
 }
 
@@ -82,7 +82,7 @@ async function triggerAnnotationJob(groundTruthPayload: unknown) {
     return response.data
   } catch (error) {
     console.error('Error while creating ground truth job', error);
-    return undefined;
+    return;
   }
 }
 export { triggerAnnotationJob }

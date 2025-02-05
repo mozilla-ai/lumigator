@@ -268,10 +268,10 @@ export const useExperimentStore = defineStore('experiment', () => {
         startPollingForJob(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
-      return undefined;
+      return;
     } catch (error) {
       console.error('Failed to start ground truth generation:', error);
-      return undefined;
+      return;
     }
   }
 

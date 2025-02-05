@@ -17,7 +17,7 @@ export function formatDate(dateString: string) {
 export function retrieveEntrypoint(job: Job) {
   if (!job || !job.entrypoint) {
     console.error('Invalid job data');
-    return undefined;
+    return;
   }
 
   // Extract stringified JSON from entrypoint property
@@ -27,7 +27,7 @@ export function retrieveEntrypoint(job: Job) {
 
   if (!configString) {
     console.error('No config found in job entrypoint');
-    return undefined;
+    return;
   }
 
   try {
@@ -70,7 +70,7 @@ export function retrieveEntrypoint(job: Job) {
     return jsonObject
   } catch (error) {
     console.error('Failed to parse JSON in entrypoint:', error);
-    return undefined;
+    return;
   }
 }
 

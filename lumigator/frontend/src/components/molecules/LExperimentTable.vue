@@ -144,7 +144,7 @@ function onJobSelected(job: Job, experiment: Experiment) {
 function retrieveStatus(experimentId: string) {
   const experiment = experiments.value.find((exp) => exp.id === experimentId);
   if (!experiment) {
-    return undefined;
+    return;
   }
 
   const jobStatuses = experiment.jobs.map((job) => job.status)

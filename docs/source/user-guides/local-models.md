@@ -71,7 +71,7 @@ curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
 
 Finally run the evaluation:
 ```console
-user@host:~/lumigator$ test_local_llm_eval.sh
+user@host:~/lumigator$ bash test_local_llm_eval.sh
 ```
 
 You can view the results on the UI as described [below](./local-models.md#view-evaluation-results).
@@ -116,7 +116,7 @@ curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
 
 Run the evaluation:
 ```console
-user@host:~/lumigator$ test_local_llm_eval.sh
+user@host:~/lumigator$ bash test_local_llm_eval.sh
 ```
 
 Finally, view the results on the UI as described [below](./local-models.md#view-evaluation-results).
@@ -140,6 +140,8 @@ user@host:~/vllm$ docker run -it --rm -p 8090:8000 \
 vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
 --dtype float16
 ```
+If successful, you should see the vLLM server running on http://localhost:8090/docs and your chosen model listed on http://localhost:8090/v1/models.
+
 We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since 8000 is already used by Lumigator).
 
 ### Run Lumigator Evaluation
@@ -170,7 +172,7 @@ curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
 
 Run the evaluation:
 ```console
-user@host:~/lumigator$ test_local_llm_eval.sh
+user@host:~/lumigator$ bash test_local_llm_eval.sh
 ```
 
 ## View Evaluation Results

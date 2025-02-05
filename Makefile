@@ -111,7 +111,7 @@ local-up: check-dot-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
 local-down:
-	docker compose --profile local -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs

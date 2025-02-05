@@ -309,8 +309,7 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
 
-      - name: Install skopeo
-        run: sudo apt-get -y install skopeo
+
 
       - name: Truncate commit SHA
         if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
@@ -334,6 +333,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Install skopeo
+        run: sudo apt-get -y install skopeo
+
+      - name: Copy multi-platform image to DockerHub
+        run: |
+          skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:mario_test
 
       - name: Tag and push Docker image (tagged releases)
         if: contains(github.ref, 'refs/tags/') 

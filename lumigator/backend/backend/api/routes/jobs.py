@@ -2,10 +2,11 @@ import json
 from http import HTTPStatus
 from urllib.parse import urljoin
 from uuid import UUID
+from typing import Annotated
 
 import loguru
 import requests
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Query
 from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -134,6 +135,7 @@ def list_jobs(
     service: JobServiceDep,
     skip: int = 0,
     limit: int = 100,
+    job_types: Annotated[list[str] | None, Query()] = None
 ) -> ListingResponse[Job]:
     """Retrieves job data from the Lumigator repository where Ray
     metadata is also available.
@@ -142,6 +144,13 @@ def list_jobs(
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
+
+    # if job_type not in ["inference", "annotate", "evaluate"]:
+    #     raise ValueError(f"Unknown job type {job_type}") from None
+    # jobs = service.list_jobs_per_type(job_type, skip, limit)
+
+
+
     jobs = service.list_jobs(skip, limit)
     if not jobs or jobs.total == 0 or len(jobs.items) == 0:
         return jobs

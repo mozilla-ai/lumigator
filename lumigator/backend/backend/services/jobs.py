@@ -45,6 +45,7 @@ from backend.settings import settings
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
 
+
 class JobService:
     # set storage path
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
@@ -337,8 +338,6 @@ class JobService:
         # get dataset S3 path from UUID
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
 
-        model_url = self._set_model_type(request)
-
         # provide a reasonable system prompt for services where none was specified
         if (
             job_type in [JobType.EVALUATION, JobType.INFERENCE]
@@ -360,7 +359,7 @@ class JobService:
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
             job_params = job_params | {
-                "model_url": model_url,
+                "model_url": self._set_model_type(request),
                 "skip_inference": request.skip_inference,
                 "system_prompt": request.system_prompt,
             }
@@ -369,7 +368,7 @@ class JobService:
                 "accelerator": request.accelerator,
                 "frequency_penalty": request.frequency_penalty,
                 "max_tokens": request.max_tokens,
-                "model_url": model_url,
+                "model_url": self._set_model_type(request),
                 "output_field": request.output_field,
                 "revision": request.revision,
                 "system_prompt": request.system_prompt,
@@ -410,7 +409,10 @@ class JobService:
 
         # Create a db record for the job
         record = self.job_repo.create(
-            name=request.name, description=request.description, job_type=job_type, experiment_id=experiment_id
+            name=request.name,
+            description=request.description,
+            job_type=job_type,
+            experiment_id=experiment_id,
         )
 
         # prepare configuration parameters, which depend both on the user inputs
@@ -503,27 +505,7 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
-    def get_job_per_type(self, job_type: str) -> ListingResponse[JobResponse]:
-        records = self._get_job_records_per_type(job_type)
-
-        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
-            return JobResponse.model_validate(record)
-
-        # get job status from ray
-        job_status = self.ray_client.get_job_status(job_id)
-
-        # update job status in the DB if it differs from the current status
-        if job_status.lower() != record.status.value.lower():
-            record = self._update_job_record(job_id, status=job_status.lower())
-
-        return JobResponse.model_validate(record)
-
-    def _list_job_records_per_type(
-        self,
-        job_type: str,
-        skip: int,
-        limit: int
-    ) -> list[JobRecord]:
+    def _list_job_records_per_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord]:
         records = self.job_repo.list_by_job_type(job_type, skip, limit)
         if records is None:
             return []

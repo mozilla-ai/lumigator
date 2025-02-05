@@ -147,6 +147,7 @@ def test_upload_data_launch_job(
     get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
+
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,

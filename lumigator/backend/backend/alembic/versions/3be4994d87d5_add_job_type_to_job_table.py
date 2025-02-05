@@ -1,8 +1,8 @@
 """Add job type to job table
 
-Revision ID: ef5ee5662ce3
-Revises: e9679cbc3c36
-Create Date: 2025-01-07 13:24:40.657958
+Revision ID: 3be4994d87d5
+Revises: 4c0345b3d525
+Create Date: 2025-02-03 17:38:54.564918
 
 """
 
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "ef5ee5662ce3"  # pragma: allowlist secret
-down_revision: str | None = "e9679cbc3c36"  # pragma: allowlist secret
+revision: str = "3be4994d87d5"  # pragma: allowlist secret
+down_revision: str | None = "4c0345b3d525"  # pragma: allowlist secret
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

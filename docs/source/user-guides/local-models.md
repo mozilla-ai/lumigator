@@ -42,7 +42,7 @@ Next, you have a choice of choosing one among the below-mentioned local LLM tool
 2. Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`.
 3. Start the application locally with `./mistral-7b-instruct-v0.2.Q4_0.llamafile`.
 
-You should be able to see it running on http://localhost:8080/. Note that this is the endpoint that Lumigator will use to interact with.
+You should be able to see it running on [localhost:8080](http://localhost:8080/). Note that this is the endpoint that Lumigator will use to interact with.
 
 ### Run Lumigator Evaluation
 Create a new bash script `test_local_llm_eval.sh`:
@@ -87,7 +87,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
   ```console
   user@host:~/lumigator$ ollama run llama3.2
   ```
-  This should start the Ollama completions endpoint locally and can be verified by visiting http://localhost:11434/.
+  This should start the Ollama completions endpoint locally and can be verified by visiting [localhost:11434](http://localhost:11434/).
 
 ### Run Lumigator Evaluation
 The evaluation steps are similar to earlier but we modify model details in the  `test_local_llm_eval.sh` script:
@@ -142,7 +142,7 @@ user@host:~/vllm$ docker run -it --rm -p 8090:8000 \
                   vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
                   --dtype float16
 ```
-If successful, you should see the vLLM server running on http://localhost:8090/docs and your chosen model listed on http://localhost:8090/v1/models.
+If successful, you should see the vLLM server running on [localhost:8090/docs](http://localhost:8090/docs) and your chosen model listed on [localhost:8090/v1/models](http://localhost:8090/v1/models).
 
 We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since 8000 is already used by Lumigator).
 

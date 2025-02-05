@@ -1,5 +1,7 @@
 # Bring Your Own Local LLMs
-Previously we saw how to use Lumigator with models on Hugging Face as well as via APIs hosted by [Open AI and Mistral](../user-guides/inference.md#model-specification). However, sometimes it may be advantageous to run models locally as a more cost-effective solution or when dealing with sensitive data or during the early stages of experimentation. Lumigator supports running inference and evaluation on any locally hosted models through [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Ollama](https://ollama.com/search) and [vLLM](https://docs.vllm.ai/en/latest/), thanks to their compatibility with [OpenAI's Completions API](https://platform.openai.com/docs/guides/completions). This guide will walk you through the process of running evaluation on any local model that you bring from these providers (assuming your machine meets the necessary hardware requirements).
+Previously we saw how to use Lumigator with models on Hugging Face as well as via APIs hosted by [Open AI and Mistral](../user-guides/inference.md#model-specification). However, sometimes it may be advantageous to run models locally as a more cost-effective solution or when dealing with sensitive data or during the early stages of experimentation.
+
+Lumigator supports running inference and evaluation on any locally hosted models through [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Ollama](https://ollama.com/search) and [vLLM](https://docs.vllm.ai/en/latest/), thanks to their compatibility with [OpenAI's](https://platform.openai.com/) Completions API Client. This guide will walk you through the process of running evaluation on any local model that you bring from these providers (assuming your machine meets the necessary hardware requirements).
 
 Before installation and setup, here are some recommended system requirements:
 * Memory (RAM): 8GB minimum, 16GB or more recommended
@@ -7,14 +9,14 @@ Before installation and setup, here are some recommended system requirements:
 * Processor: A relatively modern CPU with atleast 4 cores
 
 ## Getting Started
-Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to some placeholder value.
+Prior to starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
 ```console
 user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
 ```
 
-Next follow the Lumigator [installation steps](../get-started/installation.md#local-deployment) and once you have the application running, the first step is to upload a dataset. You can do this through the [Lumigator UI](../get-started/ui-guide.md), which can be accessed by visiting [localhost](http://localhost). You can get started by uploading the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
+Next follow the Lumigator [installation steps](../get-started/installation.md#local-deployment) and once you have the application running, the first step is to upload a dataset. You can do this through the [Lumigator UI](../get-started/ui-guide.md), which can be accessed by visiting [localhost](http://localhost). To follow along on this tutorial, you can use the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
 
-Create a bash file `common_variables.sh` and initialize the following variables.
+Create a bash file `common_variables.sh` and initialize the following variables before proceeding with different local LLM tools.
 
 ```bash
 #!/bin/bash
@@ -30,14 +32,14 @@ EVAL_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. F
 EVAL_MAX_SAMPLES="10"
 ```
 
-Next, you have a choice between choosing one of the below-mentioned local LLM tools. Next, we describe the steps locally host your desired model and enable Lumigator to query the local model's inference endpoint.
+Next, you have a choice of choosing one among the below-mentioned local LLM tools. We describe the steps locally host your desired model and enable Lumigator to query the local model's inference endpoint.
 
 ## Llamafile
 [Llamafile](https://github.com/Mozilla-Ocho/llamafile) bundles LLM weights and a specially-compiled version of [llama.cpp](https://github.com/ggerganov/llama.cpp) into a single executable file, allowing users to run large language models locally without any additional setup or dependencies.
 
 ### Download and Setup Llamafile Locally
 1. Download any model's Llamafile from the official [repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#other-example-llamafiles). For example, `mistral-7b-instruct-v0.2.Q4_0.llamafile` is a 3.85 GB Llamafile to get started with (alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
-2. Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`
+2. Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`.
 3. Start the application locally with `./mistral-7b-instruct-v0.2.Q4_0.llamafile`.
 
 You should be able to see it running on http://localhost:8080/. Note that this is the endpoint that Lumigator will use to interact with.
@@ -83,7 +85,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
 1. Download and install Ollama for your operating system from the [official website](https://ollama.com/download).
 2. Select a model from the [available list](https://ollama.com/search) that you would like to use for evaluation (e.g. `llama3.2`) and run:
   ```console
-  user@host:~/lumigator$ test_local_llm_eval.sh
+  user@host:~/lumigator$ ollama run llama3.2
   ```
   This should start the Ollama completions endpoint locally and can be verified by visiting http://localhost:11434/.
 
@@ -136,9 +138,9 @@ user@host:~/$ git clone https://github.com/vllm-project/vllm.git
 user@host:~/$ cd vllm
 user@host:~/vllm$ build -f Dockerfile.arm -t vllm-cpu --shm-size=6g .
 user@host:~/vllm$ docker run -it --rm -p 8090:8000 \
---env "HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN" \
-vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
---dtype float16
+                  --env "HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN" \
+                  vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
+                  --dtype float16
 ```
 If successful, you should see the vLLM server running on http://localhost:8090/docs and your chosen model listed on http://localhost:8090/v1/models.
 

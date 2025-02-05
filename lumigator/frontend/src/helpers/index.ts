@@ -72,7 +72,7 @@ export function retrieveEntrypoint(job) {
 
 export function calculateDuration(start, finish) {
   // Calculate the time difference in milliseconds
-  const differenceInMilliseconds = new Date(finish) - new Date(start);
+  const differenceInMilliseconds = new Date(finish).getTime() - new Date(start).getTime();
 
   if (isNaN(differenceInMilliseconds)) {
     throw new Error("Invalid date format. Please provide valid ISO timestamps.");

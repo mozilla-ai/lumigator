@@ -101,7 +101,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia';
 import DataTable from 'primevue/datatable';
@@ -110,7 +110,7 @@ import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel';
 import Tag from 'primevue/tag';
 import LJobsTable from '@/components/molecules/LJobsTable.vue';
-import {useExperimentStore} from "@/stores/experiments/store.js";
+import {useExperimentStore} from "@/stores/experiments/store";
 
 const props = defineProps({
   tableData: {

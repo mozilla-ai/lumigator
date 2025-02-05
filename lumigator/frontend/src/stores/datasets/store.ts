@@ -1,8 +1,9 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia'
 import datasetsService from "@/services/datasets/datasetsService";
-import {downloadContent} from "@/helpers/index.js";
+import {downloadContent} from "@/helpers/index";
 import { useToast } from "primevue/usetoast";
+import type { ToastMessageOptions } from 'primevue';
 
 export const useDatasetStore = defineStore('dataset', () => {
   const datasets = ref([]);
@@ -35,7 +36,7 @@ export const useDatasetStore = defineStore('dataset', () => {
         summary: `${uploadConfirm.data.detail}`,
         messageicon: 'pi pi-exclamation-triangle',
         group: 'br',
-      })
+      } as ToastMessageOptions & {messageicon: string})
     }
     await loadDatasets();
   }

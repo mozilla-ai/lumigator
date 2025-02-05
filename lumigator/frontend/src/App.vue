@@ -50,7 +50,7 @@
               class="toaster-content"
               :class="slotProps.message.severity"
             >
-              <span :class="slotProps.message.messageicon" />
+              <span :class="slotProps.message.messageicon" ></span>
               <div class="toaster-content__text">
                 <h4>   {{ slotProps.message.summary }}</h4>
                 <p v-if="slotProps.message.detail ">{{ slotProps.message.detail  }}  </p>
@@ -65,7 +65,7 @@
           >
             <component
               :is="Component"
-              @s-disable-scroll="disableScroll = $event"
+              @s-disable-scroll.stop=""
             />
           </transition>
         </router-view>
@@ -78,7 +78,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import LMenu from '@/components/organisms/LMenu.vue';
 import { useDatasetStore } from '@/stores/datasets/store'

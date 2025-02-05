@@ -93,24 +93,24 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
-import type { ToastMessageOptions } from 'primevue';
-import type { Dataset } from '@/types/Dataset';
-import type { Job } from '@/types/Experiment';
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import type { ToastMessageOptions } from 'primevue'
+import type { Dataset } from '@/types/Dataset'
+import type { Job } from '@/types/Experiment'
 
-const datasetStore = useDatasetStore();
-const { datasets, selectedDataset } = storeToRefs(datasetStore);
-const experimentStore = useExperimentStore();
-const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore);
-const { showSlidingPanel } = useSlidePanel();
-const toast = useToast();
-const datasetInput = ref();
-const confirm = useConfirm();
-const router = useRouter();
-const currentTab = ref('0');
-const showLogs = ref(false);
-const refDatasetTable = ref();
+const datasetStore = useDatasetStore()
+const { datasets, selectedDataset } = storeToRefs(datasetStore)
+const experimentStore = useExperimentStore()
+const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore)
+const { showSlidingPanel } = useSlidePanel()
+const toast = useToast()
+const datasetInput = ref()
+const confirm = useConfirm()
+const router = useRouter()
+const currentTab = ref('0')
+const showLogs = ref(false)
+const refDatasetTable = ref()
 
 onMounted(async () => {
   await datasetStore.loadDatasets()
@@ -153,8 +153,8 @@ function deleteConfirmation(dataset: Dataset) {
 }
 
 function onDownloadDataset(dataset: Dataset) {
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetFile();
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetFile()
 }
 
 const onDatasetAdded = () => {
@@ -171,39 +171,39 @@ const reloadDatasetTable = () => {
 }
 
 const onDatasetUpload = (datasetFile: File) => {
-  datasetStore.uploadDataset(datasetFile);
-};
+  datasetStore.uploadDataset(datasetFile)
+}
 
 const onDeleteDataset = (datasetID: string) => {
-  datasetStore.deleteDataset(datasetID);
-};
+  datasetStore.deleteDataset(datasetID)
+}
 
 const onDatasetSelected = (dataset: Dataset) => {
-  selectedJob.value = undefined;
-  datasetStore.loadDatasetInfo(dataset.id);
-  showSlidingPanel.value = true;
-};
+  selectedJob.value = undefined
+  datasetStore.loadDatasetInfo(dataset.id)
+  showSlidingPanel.value = true
+}
 
 const onClearSelection = () => {
   datasetStore.resetSelection()
 }
 
 const onExperimentDataset = (dataset: Dataset) => {
-  router.push('experiments');
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetInfo(dataset.id);
-};
+  router.push('experiments')
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetInfo(dataset.id)
+}
 
 const onJobInferenceSelected = (job: Job) => {
-  selectedDataset.value = undefined;
-  experimentStore.loadJobDetails(job.id);
-  showSlidingPanel.value = true;
-};
+  selectedDataset.value = undefined
+  experimentStore.loadJobDetails(job.id)
+  showSlidingPanel.value = true
+}
 
 const onCloseJobDetails = () => {
-  showSlidingPanel.value = false;
-  selectedJob.value = undefined;
-};
+  showSlidingPanel.value = false
+  selectedJob.value = undefined
+}
 
 const onShowLogs = () => {
   showLogs.value = true

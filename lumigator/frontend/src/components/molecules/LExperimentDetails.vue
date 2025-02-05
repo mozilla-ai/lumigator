@@ -150,7 +150,7 @@ const emit = defineEmits([
   'l-job-results',
   'l-show-logs',
   'l-download-results',
-]);
+])
 
 defineProps({
   title: {
@@ -164,31 +164,31 @@ const { experiments, selectedExperiment, jobs, inferenceJobs, selectedJob } =
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
-  isCopied.value = true;
+  isCopied.value = true
   setTimeout(() => {
     isCopied.value = false
   }, 3000)
   await navigator.clipboard.writeText(longString)
 }
 
-const isJobFocused = computed(() => Boolean(selectedJob.value));
-const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value]);
+const isJobFocused = computed(() => Boolean(selectedJob.value))
+const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    const selected = allJobs.value.find((job) => job.id === selectedJob.value?.id);
-    return selected ? selected.status : selectedJob.value?.status;
+    const selected = allJobs.value.find((job) => job.id === selectedJob.value?.id)
+    return selected ? selected.status : selectedJob.value?.status
   }
   const selected = experiments.value.filter(
     (experiment) => experiment.id === selectedExperiment.value?.id,
-  )[0];
-  return selected ? selected.status : selectedExperiment.value?.status;
-});
+  )[0]
+  return selected ? selected.status : selectedExperiment.value?.status
+})
 
 const isInference = computed(() => {
-  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id);
-});
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
+})
 
 const focusedItem = computed(() => {
   if (selectedJob.value) {
@@ -196,9 +196,9 @@ const focusedItem = computed(() => {
   }
   const selected = experiments.value.filter(
     (experiment) => experiment.id === selectedExperiment.value?.id,
-  )[0];
-  return selected ? selected : selectedExperiment.value;
-});
+  )[0]
+  return selected ? selected : selectedExperiment.value
+})
 
 const tagSeverity = computed(() => {
   const status = currentItemStatus.value
@@ -216,16 +216,16 @@ const tagSeverity = computed(() => {
 
 const focusedItemRunTime = computed(() => {
   if (isJobFocused.value) {
-    return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-';
+    return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
   }
 
   if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || [];
+    const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || []
     const lastEndTime = endTimes.reduce((latest, current) => {
-      return new Date(latest) > new Date(current) ? latest : current;
-    });
+      return new Date(latest) > new Date(current) ? latest : current
+    })
     if (lastEndTime && selectedExperiment.value) {
-      return calculateDuration(selectedExperiment.value?.created, lastEndTime);
+      return calculateDuration(selectedExperiment.value?.created, lastEndTime)
     }
   }
   return '-'

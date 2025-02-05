@@ -132,7 +132,7 @@ const emit = defineEmits([
 ])
 
 const copyToClipboard = async (longString: string) => {
-  isCopied.value = true;
+  isCopied.value = true
   setTimeout(() => {
     isCopied.value = false
   }, 3000)

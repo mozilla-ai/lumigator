@@ -6,9 +6,9 @@ import {
   PATH_EXPERIMENT_RESULTS,
   PATH_EXPERIMENT_LOGS,
   PATHS_EXPERIMENTS_ANNOTATE,
-} from './api';
-import type { Job, ObjectData } from '@/types/Experiment';
-import { AxiosError } from 'axios';
+} from './api'
+import type { Job, ObjectData } from '@/types/Experiment'
+import { AxiosError } from 'axios'
 
 /**
  *
@@ -16,18 +16,18 @@ import { AxiosError } from 'axios';
  */
 async function fetchJobs(): Promise<Job[]> {
   try {
-    const response = await http.get(PATH_JOBS_ROOT());
+    const response = await http.get(PATH_JOBS_ROOT())
     return response.data.items.map((job: Job) => ({
       ...job,
       status: job.status.toUpperCase(),
-    }));
+    }))
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error fetching experiments', error.message);
+      console.error('Error fetching experiments', error.message)
     } else {
-      console.error('Error fetching experiments', error);
+      console.error('Error fetching experiments', error)
     }
-    return [];
+    return []
   }
 }
 
@@ -41,17 +41,17 @@ async function fetchExperimentDetails(id: string) {
     return response.data
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error fetching experiment details', error.message);
+      console.error('Error fetching experiment details', error.message)
     } else {
-      console.error('Error fetching experiment details', error);
+      console.error('Error fetching experiment details', error)
     }
-    return;
+    return
   }
 }
 
 async function fetchJobStatus(id: string) {
-  const job = await fetchExperimentDetails(id);
-  return job?.status;
+  const job = await fetchExperimentDetails(id)
+  return job?.status
 }
 
 async function triggerExperiment(experimentPayload: unknown) {
@@ -63,11 +63,11 @@ async function triggerExperiment(experimentPayload: unknown) {
     })
     return response.data
   } catch (error) {
-    console.error('Error while creating experiment', error);
+    console.error('Error while creating experiment', error)
     if (error instanceof Error) {
-      return error.message;
+      return error.message
     } else if (error instanceof AxiosError) {
-      return error.response?.data;
+      return error.response?.data
     }
   }
 }
@@ -81,8 +81,8 @@ async function triggerAnnotationJob(groundTruthPayload: unknown) {
     })
     return response.data
   } catch (error) {
-    console.error('Error while creating ground truth job', error);
-    return;
+    console.error('Error while creating ground truth job', error)
+    return
   }
 }
 export { triggerAnnotationJob }
@@ -105,13 +105,13 @@ async function fetchResults(
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error fetching experiment results', error.message || error);
+      console.error('Error fetching experiment results', error.message || error)
     } else {
-      console.error('Error fetching experiment results', error);
+      console.error('Error fetching experiment results', error)
     }
 
     //TODO: this should throw to the consumer
-    return error;
+    return error
   }
 }
 
@@ -130,13 +130,13 @@ async function downloadResults(experiment_id: string) {
     return blob
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error downloading experiment results', error.message || error);
+      console.error('Error downloading experiment results', error.message || error)
     } else if (error instanceof AxiosError) {
-      console.error('Error downloading experiment results', error.response?.data);
+      console.error('Error downloading experiment results', error.response?.data)
     }
 
     // TODO: propagate the error to the consumer
-    return error;
+    return error
   }
 }
 

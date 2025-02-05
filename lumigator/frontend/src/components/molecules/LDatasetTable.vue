@@ -63,14 +63,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Menu from 'primevue/menu';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import { formatDate } from '@/helpers/index';
-import type { MenuItem } from 'primevue/menuitem';
-import type { Dataset } from '@/types/Dataset';
+import { ref, computed, onMounted, watch } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Menu from 'primevue/menu'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import { formatDate } from '@/helpers/index'
+import type { MenuItem } from 'primevue/menuitem'
+import type { Dataset } from '@/types/Dataset'
 
 const props = defineProps({
   tableData: {
@@ -91,9 +91,9 @@ const style = computed(() => {
   return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 })
 
-const loading = ref(true);
-const focusedItem = ref();
-const optionsMenu = ref();
+const loading = ref(true)
+const focusedItem = ref()
+const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
     label: 'Use in Experiment',
@@ -134,11 +134,11 @@ const ptConfigOptionsMenu = ref({
   separator: 'separator',
 })
 
-const shortenID = (id: string) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`);
+const shortenID = (id: string) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`)
 
 const togglePopover = (event: MouseEvent, dataset: Dataset) => {
-  focusedItem.value = dataset;
-  const experimentOption = options.value.find((option) => option.label === 'Use in Experiment');
+  focusedItem.value = dataset
+  const experimentOption = options.value.find((option) => option.label === 'Use in Experiment')
   if (experimentOption) {
     experimentOption.disabled = !dataset.ground_truth
   }
@@ -146,8 +146,8 @@ const togglePopover = (event: MouseEvent, dataset: Dataset) => {
 }
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : undefined;
-});
+  focusedItem.value = newValue ? focusedItem.value : undefined
+})
 
 watch(props.tableData, (newValue) => {
   if (!newValue.length) {

@@ -82,16 +82,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable';
-import Column from 'primevue/column';
-import { formatDate } from '@/helpers/index';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import Tag from 'primevue/tag';
-import LJobsTable from '@/components/molecules/LJobsTable.vue';
-import { useExperimentStore } from '@/stores/experiments/store';
-import type { Experiment, Job } from '@/types/Experiment';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
+import Column from 'primevue/column'
+import { formatDate } from '@/helpers/index'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import Tag from 'primevue/tag'
+import LJobsTable from '@/components/molecules/LJobsTable.vue'
+import { useExperimentStore } from '@/stores/experiments/store'
+import type { Experiment, Job } from '@/types/Experiment'
 
 const props = defineProps({
   tableData: {
@@ -129,8 +129,8 @@ function handleRowClick(event: DataTableRowClickEvent) {
     return
   }
   // user selected an experiment, clear selected job
-  selectedJob.value = undefined;
-  emit('l-experiment-selected', event.data);
+  selectedJob.value = undefined
+  emit('l-experiment-selected', event.data)
 }
 
 function onJobSelected(job: Job, experiment: Experiment) {
@@ -142,9 +142,9 @@ function onJobSelected(job: Job, experiment: Experiment) {
 }
 
 function retrieveStatus(experimentId: string) {
-  const experiment = experiments.value.find((exp) => exp.id === experimentId);
+  const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {
-    return;
+    return
   }
 
   const jobStatuses = experiment.jobs.map((job) => job.status)
@@ -178,7 +178,7 @@ async function throttledUpdateAllJobs() {
 
 // This is a temporary solution until 'experiments/' endpoint
 // updates the status of each experiment
-let pollingId: number | undefined;
+let pollingId: number | undefined
 onMounted(async () => {
   await experimentStore.updateStatusForIncompleteJobs()
   pollingId = setInterval(async () => {
@@ -191,8 +191,8 @@ onUnmounted(() => {
 })
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : undefined;
-});
+  focusedItem.value = newValue ? focusedItem.value : undefined
+})
 
 watch(
   () => props.tableData.length,

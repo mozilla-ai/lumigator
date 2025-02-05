@@ -82,20 +82,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, type Ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useExperimentStore } from '@/stores/experiments/store';
-import Button from 'primevue/button';
-import FloatLabel from 'primevue/floatlabel';
-import Select from 'primevue/select';
-import Textarea from 'primevue/textarea';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import LModelCards from '@/components/molecules/LModelCards.vue';
-import { useToast } from 'primevue/usetoast';
-import type { ToastMessageOptions } from 'primevue';
-import type { Dataset } from '@/types/Dataset';
+import { ref, computed, onMounted, type Ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/store'
+import Button from 'primevue/button'
+import FloatLabel from 'primevue/floatlabel'
+import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
+import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import LModelCards from '@/components/molecules/LModelCards.vue'
+import { useToast } from 'primevue/usetoast'
+import type { ToastMessageOptions } from 'primevue'
+import type { Dataset } from '@/types/Dataset'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -103,14 +103,14 @@ const datasetStore = useDatasetStore()
 const experimentStore = useExperimentStore()
 const { datasets, selectedDataset } = storeToRefs(datasetStore)
 
-const experimentTypeOptions = ref([{ useCase: 'Summarization' }]);
-const experimentType = experimentTypeOptions.value[0];
-const dataset: Ref<Dataset | undefined> = ref();
-const experimentTitle = ref('');
-const experimentDescription = ref('');
-const maxSamples = ref();
-const modelSelection = ref();
-const toast = useToast();
+const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
+const experimentType = experimentTypeOptions.value[0]
+const dataset: Ref<Dataset | undefined> = ref()
+const experimentTitle = ref('')
+const experimentDescription = ref('')
+const maxSamples = ref()
+const modelSelection = ref()
+const toast = useToast()
 
 const isInvalid = computed(
   () =>
@@ -155,11 +155,11 @@ async function triggerExperiment() {
 }
 
 function resetForm() {
-  experimentTitle.value = '';
-  experimentDescription.value = '';
-  dataset.value = undefined;
-  modelSelection.value.selectedModels = [];
-  maxSamples.value = undefined;
+  experimentTitle.value = ''
+  experimentDescription.value = ''
+  dataset.value = undefined
+  modelSelection.value.selectedModels = []
+  maxSamples.value = undefined
 }
 
 onMounted(async () => {

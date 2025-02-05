@@ -50,74 +50,74 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch, ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store';
-import { useDatasetStore } from '@/stores/datasets/store';
-import { useModelStore } from '@/stores/models/store';
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import LPageHeader from '@/components/molecules/LPageHeader.vue';
-import LExperimentTable from '@/components/molecules/LExperimentTable.vue';
-import LExperimentForm from '@/components/molecules/LExperimentForm.vue';
-import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
-import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
-import LExperimentResults from '@/components/organisms/LExperimentResults.vue';
-import LJobResults from '@/components/molecules/LJobResults.vue';
-import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
-import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue';
-import type { Experiment, Job } from '@/types/Experiment';
+import { onMounted, watch, ref, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/store'
+import { useDatasetStore } from '@/stores/datasets/store'
+import { useModelStore } from '@/stores/models/store'
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import LPageHeader from '@/components/molecules/LPageHeader.vue'
+import LExperimentTable from '@/components/molecules/LExperimentTable.vue'
+import LExperimentForm from '@/components/molecules/LExperimentForm.vue'
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue'
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue'
+import LExperimentResults from '@/components/organisms/LExperimentResults.vue'
+import LJobResults from '@/components/molecules/LJobResults.vue'
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue'
+import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
+import type { Experiment, Job } from '@/types/Experiment'
 
-const { showSlidingPanel } = useSlidePanel();
-const experimentStore = useExperimentStore();
-const datasetStore = useDatasetStore();
-const modelStore = useModelStore();
-const { selectedDataset } = storeToRefs(datasetStore);
+const { showSlidingPanel } = useSlidePanel()
+const experimentStore = useExperimentStore()
+const datasetStore = useDatasetStore()
+const modelStore = useModelStore()
+const { selectedDataset } = storeToRefs(datasetStore)
 const { experiments, selectedExperiment, selectedJob, selectedJobResults } =
-  storeToRefs(experimentStore);
+  storeToRefs(experimentStore)
 
-const showDrawer = ref(false);
-const experimentsDrawer = ref();
-const showLogs = ref();
-const showExpResults = ref();
-const showJobResults = ref();
+const showDrawer = ref(false)
+const experimentsDrawer = ref()
+const showLogs = ref()
+const showExpResults = ref()
+const showJobResults = ref()
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
-const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value);
+const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 onMounted(async () => {
   await experimentStore.loadExperiments()
 })
 
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Logs' : selectedExperiment.value?.name;
-};
+  return showLogs.value ? 'Logs' : selectedExperiment.value?.name
+}
 
 const onCreateExperiment = () => {
-  showSlidingPanel.value = true;
-  selectedExperiment.value = undefined;
-};
+  showSlidingPanel.value = true
+  selectedExperiment.value = undefined
+}
 
 const onSelectExperiment = (experiment: Experiment) => {
-  experimentStore.loadExperimentDetails(experiment.id);
-  showSlidingPanel.value = true;
-};
+  experimentStore.loadExperimentDetails(experiment.id)
+  showSlidingPanel.value = true
+}
 
 const onShowExperimentResults = (experiment: Experiment) => {
-  experimentStore.loadExperimentResults(experiment);
-  showExpResults.value = true;
-  showDrawer.value = true;
-};
+  experimentStore.loadExperimentResults(experiment)
+  showExpResults.value = true
+  showDrawer.value = true
+}
 
 const onShowJobResults = (job: Job) => {
-  experimentStore.loadJobResults(job.id);
-  showDrawer.value = true;
-  showJobResults.value = true;
-};
+  experimentStore.loadJobResults(job.id)
+  showDrawer.value = true
+  showJobResults.value = true
+}
 
 const onDownloadResults = (job: Job) => {
-  experimentStore.loadResultsFile(job.id);
-};
+  experimentStore.loadResultsFile(job.id)
+}
 
 const onShowLogs = () => {
   showLogs.value = true
@@ -125,21 +125,21 @@ const onShowLogs = () => {
 }
 
 const onDismissForm = () => {
-  selectedDataset.value = undefined;
-  showSlidingPanel.value = false;
-};
+  selectedDataset.value = undefined
+  showSlidingPanel.value = false
+}
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false
 }
 
 const resetDrawerContent = () => {
-  selectedJobResults.value = [];
-  showExpResults.value = false;
-  showJobResults.value = false;
-  showLogs.value = false;
-  showDrawer.value = false;
-};
+  selectedJobResults.value = []
+  showExpResults.value = false
+  showJobResults.value = false
+  showLogs.value = false
+  showDrawer.value = false
+}
 
 onMounted(async () => {
   await modelStore.loadModels()
@@ -150,8 +150,8 @@ onMounted(async () => {
 
 watch(showSlidingPanel, (newValue) => {
   if (!newValue) {
-    selectedExperiment.value = undefined;
-    selectedJob.value = undefined;
+    selectedExperiment.value = undefined
+    selectedJob.value = undefined
   }
 })
 </script>

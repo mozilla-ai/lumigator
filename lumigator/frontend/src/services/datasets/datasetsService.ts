@@ -1,6 +1,6 @@
-import http from '@/services/http';
-import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD } from './api';
-import { AxiosError } from 'axios';
+import http from '@/services/http'
+import { PATH_DATASETS_ROOT, PATH_SINGLE_DATASET, PATH_SINGLE_DATASET_DOWNLOAD } from './api'
+import { AxiosError } from 'axios'
 
 async function fetchDatasets() {
   try {
@@ -8,11 +8,11 @@ async function fetchDatasets() {
     return response.data.items
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error fetching datasets:', error.message || error);
+      console.error('Error fetching datasets:', error.message || error)
     } else if (error instanceof AxiosError) {
-      console.error('Error fetching datasets:', error.response?.data || error);
+      console.error('Error fetching datasets:', error.response?.data || error)
     }
-    return [];
+    return []
   }
 }
 
@@ -22,11 +22,11 @@ async function fetchDatasetInfo(id: string) {
     return response.data
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error fetching dataset info:', error.message || error);
+      console.error('Error fetching dataset info:', error.message || error)
     } else if (error instanceof AxiosError) {
-      console.error('Error fetching dataset info:', error.response?.data || error);
+      console.error('Error fetching dataset info:', error.response?.data || error)
     }
-    return [];
+    return []
   }
 }
 
@@ -40,9 +40,9 @@ async function postDataset(formData: FormData) {
     return response.data
   } catch (error) {
     if (error instanceof Error) {
-      return error;
+      return error
     } else if (error instanceof AxiosError) {
-      return error.response;
+      return error.response
     }
   }
 }
@@ -84,9 +84,9 @@ async function downloadDataset(id: string) {
     return fileResponse.data
   } catch (error) {
     if (error instanceof Error) {
-      console.error('Error downloading dataset: ', error.message || error);
+      console.error('Error downloading dataset: ', error.message || error)
     } else if (error instanceof AxiosError) {
-      console.error('Error downloading dataset: ', error.response?.data || error);
+      console.error('Error downloading dataset: ', error.response?.data || error)
     }
   }
 }

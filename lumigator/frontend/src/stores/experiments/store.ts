@@ -1,7 +1,7 @@
-import { ref, watch, computed, type Ref } from 'vue';
-import { defineStore } from 'pinia';
-import experimentService from '@/services/experiments/experimentService';
-import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index';
+import { ref, watch, computed, type Ref } from 'vue'
+import { defineStore } from 'pinia'
+import experimentService from '@/services/experiments/experimentService'
+import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
 import type {
   Experiment,
   ExperimentResults,
@@ -9,20 +9,20 @@ import type {
   JobResults,
   Model,
   ObjectData,
-} from '@/types/Experiment';
+} from '@/types/Experiment'
 
 export const useExperimentStore = defineStore('experiment', () => {
-  const experiments: Ref<Experiment[]> = ref([]);
-  const jobs: Ref<Experiment[]> = ref([]);
-  const inferenceJobs: Ref<Experiment[]> = ref([]);
-  const selectedExperiment: Ref<Experiment | undefined> = ref();
-  const selectedJob: Ref<Experiment | undefined> = ref();
-  const selectedJobResults: Ref<JobResults[]> = ref([]);
-  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([]);
-  const isPolling = ref(false);
-  let experimentInterval: number | undefined = undefined;
-  const experimentLogs: Ref<unknown[]> = ref([]);
-  const completedStatus = ['SUCCEEDED', 'FAILED'];
+  const experiments: Ref<Experiment[]> = ref([])
+  const jobs: Ref<Experiment[]> = ref([])
+  const inferenceJobs: Ref<Experiment[]> = ref([])
+  const selectedExperiment: Ref<Experiment | undefined> = ref()
+  const selectedJob: Ref<Experiment | undefined> = ref()
+  const selectedJobResults: Ref<JobResults[]> = ref([])
+  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+  const isPolling = ref(false)
+  let experimentInterval: number | undefined = undefined
+  const experimentLogs: Ref<unknown[]> = ref([])
+  const completedStatus = ['SUCCEEDED', 'FAILED']
 
   const hasRunningInferenceJob = computed(() => {
     return inferenceJobs.value.some((job) => job.status === 'RUNNING')
@@ -35,13 +35,13 @@ export const useExperimentStore = defineStore('experiment', () => {
       .map((job) => parseJobDetails(job))
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJobDetails(job));
-    experiments.value = getJobsPerExperiment();
+      .map((job) => parseJobDetails(job))
+    experiments.value = getJobsPerExperiment()
   }
 
   function getJobsPerExperiment(): Experiment[] {
     const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
-      const key = `${job.name}-${job.experimentStart}`;
+      const key = `${job.name}-${job.experimentStart}`
       // initialize a grouping object
       if (!acc[key]) {
         acc[key] = {
@@ -59,10 +59,10 @@ export const useExperimentStore = defineStore('experiment', () => {
           status: 'SUCCEEDED',
         }
       }
-      acc[key].jobs.push(job as unknown as Job);
-      acc[key].models = acc[key].jobs.map((singleJob: Job) => singleJob.model) as Model[];
-      return acc;
-    }, {});
+      acc[key].jobs.push(job as unknown as Job)
+      acc[key].models = acc[key].jobs.map((singleJob: Job) => singleJob.model) as Model[]
+      return acc
+    }, {})
 
     return Object.values(experimentMap)
   }
@@ -83,7 +83,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       experimentStart: job.start_time.slice(0, 16),
       end_time: job.end_time,
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
-    };
+    }
   }
 
   /**
@@ -123,7 +123,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   async function runExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
-    const modelArray = experimentData.models;
+    const modelArray = experimentData.models
     const jobRequests = modelArray.map((singleModel) => {
       // trigger one job per model
       const jobPayload = {
@@ -140,26 +140,26 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   function loadExperimentDetails(id: string) {
-    selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id);
+    selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id)
   }
 
   async function loadJobDetails(id: string) {
-    const jobData = await experimentService.fetchExperimentDetails(id);
-    selectedJob.value = parseJobDetails(jobData);
+    const jobData = await experimentService.fetchExperimentDetails(id)
+    selectedJob.value = parseJobDetails(jobData)
   }
 
   async function loadResultsFile(jobId: string) {
-    const blob = await experimentService.downloadResults(jobId);
-    downloadContent(blob, `${selectedJob.value?.name}_results`);
+    const blob = await experimentService.downloadResults(jobId)
+    downloadContent(blob, `${selectedJob.value?.name}_results`)
   }
 
   async function loadExperimentResults(experiment: Experiment) {
     for (const job of experiment.jobs) {
       const results = (await experimentService.fetchResults(job.id)) as {
-        resultsData: ObjectData;
-        id: string;
-        download_url: string;
-      };
+        resultsData: ObjectData
+        id: string
+        download_url: string
+      }
       if (results?.id) {
         const modelRow = {
           model: results.resultsData.model,
@@ -168,21 +168,21 @@ export const useExperimentStore = defineStore('experiment', () => {
           rouge: results.resultsData.rouge,
           runTime: getJobRuntime(results.id),
           jobResults: transformResultsArray(results.resultsData),
-        } as unknown as ExperimentResults;
-        selectedExperimentResults.value.push(modelRow);
+        } as unknown as ExperimentResults
+        selectedExperimentResults.value.push(modelRow)
       }
     }
   }
 
   async function loadJobResults(jobId: string) {
     const results = (await experimentService.fetchResults(jobId)) as {
-      resultsData: ObjectData;
-      id: string;
-      download_url: string;
-    };
+      resultsData: ObjectData
+      id: string
+      download_url: string
+    }
     if (results?.id) {
-      selectedJob.value = jobs.value.find((job) => job.id === results.id);
-      selectedJobResults.value = transformResultsArray(results.resultsData);
+      selectedJob.value = jobs.value.find((job) => job.id === results.id)
+      selectedJobResults.value = transformResultsArray(results.resultsData)
     }
   }
 
@@ -218,27 +218,27 @@ export const useExperimentStore = defineStore('experiment', () => {
           rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
-      } as unknown as JobResults;
-    });
-    return transformedArray;
+      } as unknown as JobResults
+    })
+    return transformedArray
   }
 
   async function retrieveLogs() {
     if (selectedJob.value) {
-      const logsData = await experimentService.fetchLogs(selectedJob.value?.id);
-      const logs = splitByEscapeCharacter(logsData.logs);
+      const logsData = await experimentService.fetchLogs(selectedJob.value?.id)
+      const logs = splitByEscapeCharacter(logsData.logs)
       logs.forEach((log: string) => {
-        const lastEntry = experimentLogs.value[experimentLogs.value.length - 1];
+        const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
         if (experimentLogs.value.length === 0 || lastEntry !== log) {
-          experimentLogs.value.push(log);
+          experimentLogs.value.push(log)
         }
-      });
+      })
     }
   }
 
   function splitByEscapeCharacter(input: string) {
-    const result = input.split('\n');
-    return result;
+    const result = input.split('\n')
+    return result
   }
 
   function startPolling() {
@@ -253,9 +253,9 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   function stopPolling() {
     if (isPolling.value) {
-      isPolling.value = false;
-      clearInterval(experimentInterval);
-      experimentInterval = undefined;
+      isPolling.value = false
+      clearInterval(experimentInterval)
+      experimentInterval = undefined
     }
   }
 
@@ -268,28 +268,28 @@ export const useExperimentStore = defineStore('experiment', () => {
         startPollingForJob(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
-      return;
+      return
     } catch (error) {
-      console.error('Failed to start ground truth generation:', error);
-      return;
+      console.error('Failed to start ground truth generation:', error)
+      return
     }
   }
 
   function startPollingForJob(jobId: string) {
-    isPolling.value = true;
+    isPolling.value = true
     experimentInterval = setInterval(() => {
       updateJobStatus(jobId).then(() => {
-        const job = experiments.value.find((experiment) => experiment.id === jobId);
+        const job = experiments.value.find((experiment) => experiment.id === jobId)
         if (job && completedStatus.includes(job.status)) {
-          stopPolling(); // Stop polling when the job is complete
+          stopPolling() // Stop polling when the job is complete
         }
       })
     }, 3000) // Poll every 3 seconds
   }
 
   function getJobRuntime(jobId: string) {
-    const job = jobs.value.find((job) => job.id === jobId);
-    return job ? job.runTime : undefined;
+    const job = jobs.value.find((job) => job.id === jobId)
+    return job ? job.runTime : undefined
   }
 
   watch(

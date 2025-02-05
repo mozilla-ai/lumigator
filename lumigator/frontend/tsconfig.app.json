@@ -14,9 +14,6 @@
       "@/*": [
         "./src/*"
       ]
-    },
-    // temporary relax typescript settings as not to fail the build
-    // TODO: remove this once all typescript errors are fixed
-    "strict": false,
+    }
   }
 }

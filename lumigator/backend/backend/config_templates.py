@@ -149,14 +149,27 @@ oai_infer_template = """{{
     }}
 }}"""
 
+
+# Theoretically many more models and providers could be supported here
+# See https://docs.litellm.ai/docs/providers for a list of supported providers
+supported_litellm_providers_models = [
+    # GPT Models
+    "gpt-4o-mini",
+    "gpt-4o",
+    # Mistral Models
+    "mistral/open-mistral-7b",
+    "mistral/open-mixtral-8x7b",
+    "mistral/open-mixtral-8x22b",
+    "mistral/open-mistral-nemo",
+    # Deepseek
+    "deepseek/deepseek-reasoner",
+    "deepseek/deepseek-chat",
+]
+
 templates = {
     JobType.INFERENCE: {
         "default": default_infer_template,
-        "gpt-4o-mini": oai_infer_template,
-        "gpt-4o": oai_infer_template,
-        "mistral/open-mistral-7b": oai_infer_template,
-        "deepseek/deepseek-reasoner": oai_infer_template,
-        "deepseek/deepseek-chat": oai_infer_template,
+        **{endpoint: oai_infer_template for endpoint in supported_litellm_providers_models},
         "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
     },
     JobType.EVALUATION: {

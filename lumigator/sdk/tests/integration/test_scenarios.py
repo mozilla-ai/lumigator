@@ -174,7 +174,7 @@ def test_annotate_dataset(lumi_client_int: LumigatorClient, dialog_data_unannota
     logger.info(f"getting result from {download_info.download_url}")
     results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
     logger.info(f"Annotated set has keys: {results.json().keys()}")
-    assert "ground_truth" in results.json().keys()
+    assert "ground_truth" in results.json()["artifacts"].keys()
 
 
 def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):

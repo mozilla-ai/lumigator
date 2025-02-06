@@ -179,10 +179,19 @@ class JobService:
         # Get the dataset from the S3 bucket
         results = self._validate_results(job_id, s3)
 
-        # define the fields we want to keep from the results JSON
-        # and build a CSV file from it as a BytesIO object
-        fields = ["examples", "ground_truth", request.output_field]
-        bin_data = self._results_to_binary_file(results.model_dump(), fields)
+        # make sure the artifacts are present in the results
+        if not all(
+            key in results.artifacts for key in ["examples", "ground_truth", request.output_field]
+        ):
+            raise ValueError("Missing required fields in the evaluation results.")
+
+        dataset_to_save = {
+            "examples": results.artifacts["examples"],
+            "ground_truth": results.artifacts["ground_truth"],
+            request.output_field: results.artifacts[request.output_field],
+        }
+
+        bin_data = self._results_to_binary_file(dataset_to_save, list(dataset_to_save.keys()))
         bin_data_size = len(bin_data.getvalue())
 
         # Figure out the dataset filename

@@ -4,7 +4,6 @@ from uuid import UUID
 import pytest
 import requests
 from fastapi.testclient import TestClient
-from inference.schemas import InferenceJobOutput
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -13,6 +12,7 @@ from lumigator_schemas.jobs import (
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
+    JobResultObject,
     JobStatus,
 )
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
@@ -195,11 +195,9 @@ def test_upload_data_no_gt_launch_annotation(
         logs_annotation_job_results_model.download_url,
         timeout=5,  # 5 seconds
     )
-    logs_annotation_job_output = InferenceJobOutput.model_validate(
-        annotation_job_results_url.json()
-    )
-    assert logs_annotation_job_output.predictions is None
-    assert logs_annotation_job_output.ground_truth is not None
+    logs_annotation_job_output = JobResultObject.model_validate(annotation_job_results_url.json())
+    assert logs_annotation_job_output.artifacts["predictions"] is None
+    assert logs_annotation_job_output.artifacts["ground_truth"] is not None
     logger.info(f"Created results: {logs_annotation_job_output}")
 
 

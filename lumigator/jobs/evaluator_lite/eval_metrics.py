@@ -1,7 +1,8 @@
 import evaluate
 import numpy as np
-from evaluator_lite.schemas import EvalJobMetrics
 from loguru import logger
+
+from schemas import EvalJobMetrics
 
 
 class EvaluationMetrics:

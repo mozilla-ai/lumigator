@@ -2,13 +2,13 @@ import json
 from pathlib import Path
 
 import loguru
-from evaluator_lite.schemas import JobOutput
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
     JobInferenceCreate,
     JobLogsResponse,
     JobResponse,
+    JobResultObject,
     JobStatus,
 )
 from lumigator_schemas.workflows import (
@@ -144,7 +144,7 @@ class WorkflowService:
             with self._dataset_service.s3_filesystem.open(
                 f"{settings.S3_BUCKET}/{result_key}", "r"
             ) as f:
-                eval_output = JobOutput.model_validate(json.loads(f.read()))
+                eval_output = JobResultObject.model_validate(json.loads(f.read()))
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later
@@ -153,14 +153,18 @@ class WorkflowService:
 
             outputs = RunOutputs(
                 metrics={
-                    "rouge1_mean": round(eval_output.rouge.rouge1_mean, 3),
-                    "rouge2_mean": round(eval_output.rouge.rouge2_mean, 3),
-                    "rougeL_mean": round(eval_output.rouge.rougeL_mean, 3),
-                    "rougeLsum_mean": round(eval_output.rouge.rougeLsum_mean, 3),
-                    "bertscore_f1_mean": round(eval_output.bertscore.f1_mean, 3),
-                    "bertscore_precision_mean": round(eval_output.bertscore.precision_mean, 3),
-                    "bertscore_recall_mean": round(eval_output.bertscore.recall_mean, 3),
-                    "meteor_mean": round(eval_output.meteor.meteor_mean, 3),
+                    "rouge1_mean": round(eval_output.metrics["rouge"]["rouge1_mean"], 3),
+                    "rouge2_mean": round(eval_output.metrics["rouge"]["rouge2_mean"], 3),
+                    "rougeL_mean": round(eval_output.metrics["rouge"]["rougeL_mean"], 3),
+                    "rougeLsum_mean": round(eval_output.metrics["rouge"]["rougeLsum_mean"], 3),
+                    "bertscore_f1_mean": round(eval_output.metrics["bertscore"]["f1_mean"], 3),
+                    "bertscore_precision_mean": round(
+                        eval_output.metrics["bertscore"]["precision_mean"], 3
+                    ),
+                    "bertscore_recall_mean": round(
+                        eval_output.metrics["bertscore"]["recall_mean"], 3
+                    ),
+                    "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.

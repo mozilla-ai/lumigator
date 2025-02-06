@@ -154,10 +154,10 @@ export const useExperimentStore = defineStore('experiment', () => {
       const results = await experimentService.fetchResults(job.id);
       if (results?.id) {
         const modelRow = {
-          model: results.resultsData.model,
-          meteor: results.resultsData.meteor,
-          bertscore: results.resultsData.bertscore,
-          rouge: results.resultsData.rouge,
+          model: results.resultsData.artifacts.model,
+          meteor: results.resultsData.metrics.meteor,
+          bertscore: results.resultsData.metrics.bertscore,
+          rouge: results.resultsData.metrics.rouge,
           runTime: getJobRuntime(results.id),
           jobResults: transformResultsArray(results.resultsData)
         }
@@ -176,37 +176,37 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   function transformResultsArray(objectData) {
-    const transformedArray = objectData.examples.map((example, index) => {
+    const transformedArray = objectData.artifacts.examples.map((example, index) => {
       return {
         example,
         bertscore: {
-          f1: objectData.bertscore?.f1?.[index] ?? 0,
-          f1_mean: objectData.bertscore?.f1_mean ?? 0,
-          hashcode: objectData.bertscore?.hashcode ?? 0,
-          precision: objectData.bertscore?.precision?.[index] ?? 0,
-          precision_mean: objectData.bertscore?.precision_mean ?? 0,
-          recall: objectData.bertscore?.recall?.[index] ?? 0,
-          recall_mean: objectData.bertscore?.recall_mean ?? 0,
+          f1: objectData.metrics.bertscore?.f1?.[index] ?? 0,
+          f1_mean: objectData.metrics.bertscore?.f1_mean ?? 0,
+          hashcode: objectData.metrics.bertscore?.hashcode ?? 0,
+          precision: objectData.metrics.bertscore?.precision?.[index] ?? 0,
+          precision_mean: objectData.metrics.bertscore?.precision_mean ?? 0,
+          recall: objectData.metrics.bertscore?.recall?.[index] ?? 0,
+          recall_mean: objectData.metrics.bertscore?.recall_mean ?? 0,
         },
-        evaluation_time: objectData.evaluation_time ?? 0,
-        ground_truth: objectData.ground_truth?.[index],
+        evaluation_time: objectData.metrics.evaluation_time ?? 0,
+        ground_truth: objectData.artifacts.ground_truth?.[index],
         meteor: {
-          meteor: objectData.meteor?.meteor?.[index] ?? 0,
-          meteor_mean: objectData.meteor?.meteor_mean ?? 0,
+          meteor: objectData.metrics.meteor?.meteor?.[index] ?? 0,
+          meteor_mean: objectData.metrics.meteor?.meteor_mean ?? 0,
         },
-        model: objectData.model,
-        predictions: objectData.predictions?.[index],
+        model: objectData.artifacts.model,
+        predictions: objectData.artifacts.predictions?.[index],
         rouge: {
-          rouge1: objectData.rouge?.rouge1?.[index] ?? 0,
-          rouge1_mean: objectData.rouge?.rouge1_mean ?? 0,
-          rouge2: objectData.rouge?.rouge2?.[index] ?? 0,
-          rouge2_mean: objectData.rouge?.rouge2_mean ?? 0,
-          rougeL: objectData.rouge?.rougeL?.[index] ?? 0,
-          rougeL_mean: objectData.rouge?.rougeL_mean ?? 0,
-          rougeLsum: objectData.rouge?.rougeLsum?.[index] ?? 0,
-          rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
+          rouge1: objectData.metrics.rouge?.rouge1?.[index] ?? 0,
+          rouge1_mean: objectData.metrics.rouge?.rouge1_mean ?? 0,
+          rouge2: objectData.metrics.rouge?.rouge2?.[index] ?? 0,
+          rouge2_mean: objectData.metrics.rouge?.rouge2_mean ?? 0,
+          rougeL: objectData.metrics.rouge?.rougeL?.[index] ?? 0,
+          rougeL_mean: objectData.metrics.rouge?.rougeL_mean ?? 0,
+          rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
+          rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
         },
-        summarization_time: objectData.summarization_time,
+        summarization_time: objectData.metrics.summarization_time,
       }
     });
     return transformedArray

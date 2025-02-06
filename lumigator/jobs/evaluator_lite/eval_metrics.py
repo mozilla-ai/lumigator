@@ -1,5 +1,6 @@
 import evaluate
 import numpy as np
+from evaluator_lite.schemas import EvalJobMetrics
 from loguru import logger
 
 
@@ -73,10 +74,10 @@ class EvaluationMetrics:
 
         return evals
 
-    def run_all(self, pred: list, ref: list):
+    def run_all(self, pred: list, ref: list) -> EvalJobMetrics:
         results = {}
 
         for metric in self._chosen_metrics:
             results[metric] = self._supported_metrics[metric](pred, ref)
 
-        return results
+        return EvalJobMetrics(**results)

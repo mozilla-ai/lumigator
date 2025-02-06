@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 import loguru
-from evaluator_lite.schemas import EvalJobOutput
+from evaluator_lite.schemas import JobOutput
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobEvalLiteCreate,
@@ -127,6 +127,7 @@ class WorkflowService:
         status = await self._job_service.wait_for_job_complete(
             evaluation_job.id, max_wait_time_sec=60 * 10
         )
+        self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
@@ -143,7 +144,7 @@ class WorkflowService:
             with self._dataset_service.s3_filesystem.open(
                 f"{settings.S3_BUCKET}/{result_key}", "r"
             ) as f:
-                eval_output = EvalJobOutput.model_validate(json.loads(f.read()))
+                eval_output = JobOutput.model_validate(json.loads(f.read()))
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later

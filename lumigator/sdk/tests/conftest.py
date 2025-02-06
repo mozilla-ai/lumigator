@@ -7,7 +7,6 @@ from typing import BinaryIO
 
 import pytest
 import requests_mock
-from lumigator_sdk.completions import Completions
 from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
 
@@ -20,18 +19,8 @@ def request_mock() -> requests_mock.Mocker:
         yield cm
 
 
-@pytest.fixture(scope="session")
-def mock_vendor_data() -> str:
-    return '["openai", "mistral"]'
-
-
 @pytest.fixture(scope="function")
-def lumi_client(request_mock, mock_vendor_data) -> LumigatorClient:
-    request_mock.get(
-        url=f"http://{LUMI_HOST}/api/v1/{Completions.COMPLETIONS_ROUTE}",
-        status_code=HTTPStatus.OK,
-        json=json.loads(mock_vendor_data),
-    )
+def lumi_client(request_mock) -> LumigatorClient:
     request_mock.get(
         url=f"http://{LUMI_HOST}/api/v1/{Health.HEALTH_ROUTE}",
         status_code=HTTPStatus.OK,

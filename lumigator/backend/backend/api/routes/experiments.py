@@ -1,19 +1,20 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
     ExperimentIdResponse,
     ExperimentResponse,
-    ExperimentResultDownloadResponse,
-    ExperimentResultResponse,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
+    JobResponse,
+    JobResultDownloadResponse,
+    JobResultResponse,
 )
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
@@ -30,14 +31,12 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(
-    service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
-) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
+def create_experiment(service: JobServiceDep, request: ExperimentCreate) -> JobResponse:
+    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
 
 
 @router.get("/{experiment_id}")
-def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
+def get_experiment(service: JobServiceDep, experiment_id: UUID) -> JobResponse:
     return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
 
 
@@ -46,30 +45,26 @@ def list_experiments(
     service: JobServiceDep,
     skip: int = 0,
     limit: int = 100,
-) -> ListingResponse[ExperimentResponse]:
-    return ListingResponse[ExperimentResponse].model_validate(
-        service.list_jobs(skip, limit).model_dump()
-    )
+) -> ListingResponse[JobResponse]:
+    return ListingResponse[JobResponse].model_validate(service.list_jobs(skip, limit).model_dump())
 
 
 @router.get("/{experiment_id}/result")
 def get_experiment_result(
     service: JobServiceDep,
     experiment_id: UUID,
-) -> ExperimentResultResponse:
+) -> JobResultResponse:
     """Return experiment results metadata if available in the DB."""
-    return ExperimentResultResponse.model_validate(
-        service.get_job_result(experiment_id).model_dump()
-    )
+    return JobResultResponse.model_validate(service.get_job_result(experiment_id).model_dump())
 
 
 @router.get("/{experiment_id}/result/download")
 def get_experiment_result_download(
     service: JobServiceDep,
     experiment_id: UUID,
-) -> ExperimentResultDownloadResponse:
+) -> JobResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return ExperimentResultDownloadResponse.model_validate(
+    return JobResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
     )
 

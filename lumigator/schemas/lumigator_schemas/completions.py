@@ -7,3 +7,4 @@ class CompletionResponse(BaseModel):
 
 class CompletionRequest(BaseModel):
     text: str
+    model_name: str

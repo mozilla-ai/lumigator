@@ -61,10 +61,6 @@ def test_set_explicit_inference_job_params(job_record, job_service):
             "http://localhost:8000/v1/chat/completions",
             "http://localhost:8000/v1/chat/completions",
         ),
-        # openai model (from API)
-        ("oai://gpt-4-turbo", None, settings.OAI_API_URL),
-        # mistral model (from API)
-        ("mistral://open-mistral-7b", None, settings.MISTRAL_API_URL),
     ],
 )
 def test_set_model(job_service, model, input_model_url, returned_model_url):
@@ -75,5 +71,5 @@ def test_set_model(job_service, model, input_model_url, returned_model_url):
         model_url=input_model_url,
         dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
     )
-    model_url = job_service._set_model_type(request)
+    model_url = request.model_url
     assert model_url == returned_model_url

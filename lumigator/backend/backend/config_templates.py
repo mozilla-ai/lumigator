@@ -1,6 +1,8 @@
 # Evaluation templates
 from lumigator_schemas.jobs import JobType
 
+from backend.settings import settings
+
 seq2seq_eval_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_uri}" }},
@@ -127,7 +129,6 @@ causal_infer_template = """{{
     "dataset": {{ "path": "{dataset_path}" }}
 }}"""
 
-
 oai_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "dataset": {{ "path": "{dataset_path}" }},
@@ -151,12 +152,44 @@ oai_infer_template = """{{
 }}"""
 
 
+# LiteLLM can support a lot of other options, but we're keeping it simple for now and will keep just
+# a few opinionated options https://docs.litellm.ai/docs/providers
+SUPPORTED_CONFIGS = {
+    "open-mistral-7b": {
+        "litellm_params": {
+            "model": "mistral/open-mistral-7b",
+        },
+        "max_tokens": 256,
+        "temperature": 1,
+        "top_p": 1,
+        "prompt": settings.DEFAULT_SUMMARIZER_PROMPT,
+    },
+    "gpt-4o-mini": {
+        "litellm_params": {
+            "model": "text-completion-openai/gpt-4o-mini",
+        },
+        "max_tokens": 256,
+        "temperature": 1,
+        "top_p": 1,
+        "prompt": settings.DEFAULT_SUMMARIZER_PROMPT,
+    },
+    "gpt-4o": {
+        "litellm_params": {
+            "model": "text-completion-openai/gpt-4o",
+        },
+        "max_tokens": 256,
+        "temperature": 1,
+        "top_p": 1,
+        "prompt": settings.DEFAULT_SUMMARIZER_PROMPT,
+    },
+}
+
 templates = {
     JobType.INFERENCE: {
         "default": default_infer_template,
-        "oai://gpt-4o-mini": oai_infer_template,
-        "oai://gpt-4o": oai_eval_template,
-        "mistral://open-mistral-7b": oai_infer_template,
+        SUPPORTED_CONFIGS["gpt-4o-mini"]["litellm_params"]["model"]: oai_infer_template,
+        SUPPORTED_CONFIGS["gpt-4o"]["litellm_params"]["model"]: oai_infer_template,
+        SUPPORTED_CONFIGS["open-mistral-7b"]["litellm_params"]["model"]: oai_infer_template,
         "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
     },
     JobType.EVALUATION: {

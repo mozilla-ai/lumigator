@@ -25,7 +25,8 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "alembic>=1.13.3",
     "lumigator-schemas",
-    "mlflow>=2.20.0"
+    "mlflow>=2.20.0",
+    "litellm>=1.43.1",
 ]
 
 [tool.uv]

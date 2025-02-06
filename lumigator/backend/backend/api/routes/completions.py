@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, status
 from lumigator_schemas.completions import CompletionRequest
 
-from backend.api.deps import MistralCompletionServiceDep, OpenAICompletionServiceDep
+from backend.api.deps import CompletionServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.completion_exceptions import CompletionUpstreamError
 
@@ -19,16 +19,6 @@ def completion_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     }
 
 
-@router.get("/")
-def list_vendors():
-    return [VENDOR_MISTRAL, VENDOR_OPENAI]
-
-
-@router.post(f"/{VENDOR_MISTRAL}")
-def get_mistral_completion(request: CompletionRequest, service: MistralCompletionServiceDep):
-    return service.get_completions_response(request)
-
-
-@router.post(f"/{VENDOR_OPENAI}")
-def get_openai_completion(request: CompletionRequest, service: OpenAICompletionServiceDep):
+@router.post("/")
+def get_completion(request: CompletionRequest, service: CompletionServiceDep) -> dict:
     return service.get_completions_response(request)

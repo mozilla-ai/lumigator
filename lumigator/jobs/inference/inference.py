@@ -9,12 +9,7 @@ import s3fs
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import (
-    BaseModelClient,
-    HuggingFaceModelClient,
-    MistralModelClient,
-    OpenAIModelClient,
-)
+from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
 from paths import PathPrefix
 from tqdm import tqdm
 
@@ -91,16 +86,8 @@ def run_inference(config: InferenceJobConfig) -> Path:
     # Choose which model client to use
     if config.inference_server is not None:
         # a model *inference service* is passed
-        base_url = config.inference_server.base_url
         output_model_name = config.inference_server.engine
-        if "mistral" in base_url:
-            # run the mistral client
-            logger.info(f"Using Mistral client. Endpoint: {base_url}")
-            model_client = MistralModelClient(base_url, config)
-        else:
-            # run the openai client
-            logger.info(f"Using OAI client. Endpoint: {base_url}")
-            model_client = OpenAIModelClient(base_url, config)
+        model_client = LiteLLMModelClient()
     elif config.hf_pipeline:
         if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
             logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")

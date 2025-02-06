@@ -306,17 +306,6 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request) -> str:
-        """Sets model URL based on protocol address"""
-        if request.model.startswith("oai://"):
-            model_url = settings.OAI_API_URL
-        elif request.model.startswith("mistral://"):
-            model_url = settings.MISTRAL_API_URL
-        else:
-            model_url = request.model_url
-
-        return model_url
-
     def _validate_config(self, job_type: str, config_template: str, config_params: dict):
         if job_type == JobType.INFERENCE:
             InferenceJobConfig.model_validate_json(config_template.format(**config_params))
@@ -350,7 +339,7 @@ class JobService:
         # this section differs between inference and eval
         if job_type == JobType.EVALUATION:
             job_params = job_params | {
-                "model_url": self._set_model_type(request),
+                "model_url": request.model_url,
                 "skip_inference": request.skip_inference,
                 "system_prompt": request.system_prompt,
             }
@@ -359,7 +348,7 @@ class JobService:
                 "accelerator": request.accelerator,
                 "frequency_penalty": request.frequency_penalty,
                 "max_tokens": request.max_tokens,
-                "model_url": self._set_model_type(request),
+                "model_url": request.model_url,
                 "output_field": request.output_field,
                 "revision": request.revision,
                 "system_prompt": request.system_prompt,

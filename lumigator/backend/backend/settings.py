@@ -55,8 +55,6 @@ class BackendSettings(BaseSettings):
         raise ValueError(f"Unsupported tracking backend: {self.TRACKING_BACKEND}")
 
     # Served models
-    OAI_API_URL: str = "https://api.openai.com/v1"
-    MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Eval job details

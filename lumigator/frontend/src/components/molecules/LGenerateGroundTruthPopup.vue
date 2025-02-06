@@ -41,7 +41,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue'
 import Button from 'primevue/button'
 
 // Define the props

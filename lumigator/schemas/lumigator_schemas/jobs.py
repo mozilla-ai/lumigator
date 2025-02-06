@@ -142,6 +142,8 @@ class JobResultDownloadResponse(BaseModel):
 
 class JobResults(BaseModel):
     id: UUID
+    metrics: list[dict[str, Any]] | None = None
+    parameters: list[dict[str, Any]] | None = None
     metric_url: str
     artifact_url: str
 

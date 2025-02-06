@@ -12,7 +12,6 @@ api_router.include_router(jobs.router, prefix="/jobs", tags=[Tags.JOBS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
 api_router.include_router(models.router, prefix="/models", tags=[Tags.MODELS])
-# TODO: Workflows route is not yet ready so it is excluded from the OpenAPI schema
 api_router.include_router(
     workflows.router, prefix="/workflows", tags=[Tags.WORKFLOWS], include_in_schema=False
 )

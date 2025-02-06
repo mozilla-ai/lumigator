@@ -7,7 +7,7 @@ import router from '@/router';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import LumiPreset from './libs/primevue.config.js';
+import LumiPreset from './libs/primevue.config';
 
 const app = createApp(App);
 

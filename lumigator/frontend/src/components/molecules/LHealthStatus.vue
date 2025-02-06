@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useHealthStore } from '@/stores/health/store';

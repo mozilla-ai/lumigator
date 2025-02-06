@@ -11,6 +11,7 @@
     "python.testing.pytestEnabled": true,
     "python.analysis.extraPaths": [
         "./lumigator/schemas",
-        "./lumigator/jobs"
+        "./lumigator/jobs",
+        "./lumigator/sdk"
     ]
 }

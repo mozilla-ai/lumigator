@@ -8,7 +8,8 @@ async function fetchModels(task_name = 'summarization') {
       return response.data.items;
     }
   } catch (error) {
-    throw new Error('Fetching Models failed.', { cause: error });
+    console.error('Fetching Models failed.', { cause: error });
+    throw error;
   }
 }
 

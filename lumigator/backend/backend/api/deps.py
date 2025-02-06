@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
-from backend.services.completions import LiteLLMCompletionService as CompletionService
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
@@ -94,10 +93,3 @@ def get_workflow_service(
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
-
-
-def get_completion_service() -> CompletionService:
-    return CompletionService()
-
-
-CompletionServiceDep = Annotated[CompletionService, Depends(get_workflow_service)]

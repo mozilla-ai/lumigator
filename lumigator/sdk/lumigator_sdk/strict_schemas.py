@@ -1,4 +1,3 @@
-from lumigator_schemas.completions import CompletionResponse
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
     ExperimentIdCreate,
@@ -20,10 +19,6 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.workflows import WorkflowCreateRequest
 from pydantic import ConfigDict
-
-
-class CompletionResponse(CompletionResponse):
-    model_config = ConfigDict(extra="forbid")
 
 
 class DatasetDownloadResponse(DatasetDownloadResponse):

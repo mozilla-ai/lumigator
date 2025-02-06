@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
 from litellm import ModelResponse, completion
+from loguru import logger
 from transformers import pipeline
 
 
@@ -43,20 +44,31 @@ class LiteLLMModelClient(BaseModelClient):
     - Customize the system prompt if needed
     """
 
-    def _chat_completion(
+    def __init__(self, config: InferenceJobConfig):
+        self.config = config
+        self.system = "You are a helpful assisant., please summarize the given input."
+        logger.info(f"LiteLLMModelClient initialized with config: {config}")
+
+    def predict(
         self,
-        config: InferenceJobConfig,
         prompt: str,
-        system: str = "You are a helpful assisant.",
     ) -> ModelResponse:
-        return completion(
-            model=config.inference_server.base_url,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            frequency_penalty=config.params.frequency_penalty,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
+        response = completion(
+            model=self.config.inference_server.base_url,
+            messages=[
+                {"role": "system", "content": self.system},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=self.config.params.max_tokens,
+            frequency_penalty=self.config.params.frequency_penalty,
+            temperature=self.config.params.temperature,
+            top_p=self.config.params.top_p,
         )
+        # LiteLLM gives us the cost of each API which is nice.
+        # Eventually we can add this to the response object as well.
+        cost = response._hidden_params["response_cost"]
+        logger.info(f"Response cost: {cost}")
+        return response
 
 
 class HuggingFaceModelClient(BaseModelClient):

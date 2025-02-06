@@ -9,7 +9,7 @@ class ModelRequirement(str, Enum):
     API_KEY = "api_key"  # pragma: allowlist secret
     """Indicates that this model requires a configured API key for the related service.
 
-        e.g. OPENAI_API_KEY, or MISTRAL_API_KEY.
+        e.g. OPENAI_API_KEY, or MISTRAL_API_KEY or DEEPSEEK_API_KEY.
         """
 
     LLAMAFILE = "llamafile"

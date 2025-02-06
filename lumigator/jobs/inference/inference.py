@@ -87,7 +87,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.inference_server is not None:
         # a model *inference service* is passed
         output_model_name = config.inference_server.engine
-        model_client = LiteLLMModelClient()
+        model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
         if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
             logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")

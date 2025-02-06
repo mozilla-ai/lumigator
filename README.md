@@ -60,7 +60,7 @@ services networked together to make up all the components of the Lumigator appli
 
 > [!NOTE]
 If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
-environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
+environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. Refer to the
 [troubleshooting section](https://mozilla-ai.github.io/lumigator/get-started/troubleshooting.html#tokens-api-keys-not-set)
 in our documentation for more details.
 
@@ -87,10 +87,11 @@ To start Lumigator locally, follow these steps:
     **Important: Continue the next steps in this same terminal.**
 
 
-1. If you intend to use Mistral API or OpenAI API, use that same terminal and run:
+1. If you intend to use Mistral API or OpenAI API or Deepseek API, use that same terminal and run:
     ```bash
     export MISTRAL_API_KEY=your_mistral_api_key
     export OPENAI_API_KEY=your_openai_api_key
+    export DEEPSEEK_API_KEY=your_deepseek_api_key
     ```
     **Important: Continue the next steps in this same terminal.**
 

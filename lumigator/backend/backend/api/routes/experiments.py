@@ -7,13 +7,13 @@ from lumigator_schemas.experiments import (
     ExperimentIdCreate,
     ExperimentIdResponse,
     ExperimentResponse,
-    ExperimentResultDownloadResponse,
     ExperimentResultResponse,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
+    JobResultDownloadResponse,
 )
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
@@ -65,9 +65,9 @@ def get_experiment_result(
 def get_experiment_result_download(
     service: JobServiceDep,
     experiment_id: UUID,
-) -> ExperimentResultDownloadResponse:
+) -> JobResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return ExperimentResultDownloadResponse.model_validate(
+    return JobResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
     )
 

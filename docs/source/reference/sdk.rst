@@ -3,7 +3,7 @@ SDK
 
 The Lumigator SDK is a Python library that provides a simple interface to interact with the
 Lumigator API. You can use it to create, update, delete, and list datasets, submit and monitor jobs,
-download the results, request completions, and more.
+download the results, and more.
 
 Lumigator Client
 ----------------
@@ -41,16 +41,6 @@ The `Jobs` class provides a simple interface to submit and monitor jobs. Current
 types of jobs: Inference and Evaluation.
 
 .. automodule:: lumigator_sdk.jobs
-   :members:
-   :undoc-members:
-
-Completions
------------
-
- The `Completions` class provides a simple interface to request completions from external APIs.
- Currently, we support two APIs: OpenAI's and Mistral's.
-
-.. automodule:: lumigator_sdk.completions
    :members:
    :undoc-members:
 

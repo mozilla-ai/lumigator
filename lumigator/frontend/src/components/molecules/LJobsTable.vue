@@ -60,13 +60,13 @@
   </DataTable>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import DataTable from 'primevue/datatable';
 import Tag from 'primevue/tag';
 import Column from 'primevue/column';
 import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia';
-import { useExperimentStore } from "@/stores/experiments/store.js";
+import { useExperimentStore } from "@/stores/experiments/store";
 
 const experimentStore = useExperimentStore();
 const { jobs } = storeToRefs(experimentStore);

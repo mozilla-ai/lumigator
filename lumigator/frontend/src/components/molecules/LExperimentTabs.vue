@@ -27,7 +27,7 @@
   </Tabs>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';

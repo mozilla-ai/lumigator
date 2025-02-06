@@ -10,7 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
 *.local
+
+/cypress/videos/
+/cypress/screenshots/
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +26,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*.tsbuildinfo
+
+test-results/
+playwright-report/

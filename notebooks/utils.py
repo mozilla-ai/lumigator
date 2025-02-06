@@ -42,7 +42,7 @@ def _parse_model_results(result: dict, model_info: pd.DataFrame):
 
 def _download_text_file(result: JobResultDownloadResponse) -> str:
     download_url = result.download_url
-    download_response = requests.get(download_url)
+    download_response = requests.get(download_url, timeout=10)
     return download_response.text
 
 

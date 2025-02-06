@@ -1,17 +1,20 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
+    ExperimentIdResponse,
     ExperimentResponse,
-    ExperimentResultDownloadResponse,
-    ExperimentResultResponse,
+    GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobEvalCreate,
+    JobResponse,
+    JobResultDownloadResponse,
+    JobResultResponse,
 )
 
 from backend.api.deps import ExperimentServiceDep, JobServiceDep
@@ -28,14 +31,12 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(
-    service: JobServiceDep, request: ExperimentCreate, background_tasks: BackgroundTasks
-) -> ExperimentResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()), background_tasks)
+def create_experiment(service: JobServiceDep, request: ExperimentCreate) -> JobResponse:
+    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
 
 
 @router.get("/{experiment_id}")
-def get_experiment(service: JobServiceDep, experiment_id: UUID) -> ExperimentResponse:
+def get_experiment(service: JobServiceDep, experiment_id: UUID) -> JobResponse:
     return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
 
 
@@ -44,30 +45,26 @@ def list_experiments(
     service: JobServiceDep,
     skip: int = 0,
     limit: int = 100,
-) -> ListingResponse[ExperimentResponse]:
-    return ListingResponse[ExperimentResponse].model_validate(
-        service.list_jobs(skip, limit).model_dump()
-    )
+) -> ListingResponse[JobResponse]:
+    return ListingResponse[JobResponse].model_validate(service.list_jobs(skip, limit).model_dump())
 
 
 @router.get("/{experiment_id}/result")
 def get_experiment_result(
     service: JobServiceDep,
     experiment_id: UUID,
-) -> ExperimentResultResponse:
+) -> JobResultResponse:
     """Return experiment results metadata if available in the DB."""
-    return ExperimentResultResponse.model_validate(
-        service.get_job_result(experiment_id).model_dump()
-    )
+    return JobResultResponse.model_validate(service.get_job_result(experiment_id).model_dump())
 
 
 @router.get("/{experiment_id}/result/download")
 def get_experiment_result_download(
     service: JobServiceDep,
     experiment_id: UUID,
-) -> ExperimentResultDownloadResponse:
+) -> JobResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return ExperimentResultDownloadResponse.model_validate(
+    return JobResultDownloadResponse.model_validate(
         service.get_job_result_download(experiment_id).model_dump()
     )
 
@@ -80,12 +77,12 @@ def get_experiment_result_download(
 # TODO: Eventually this route will become the / route,
 # but right now it is a placeholder while we build up the Workflows routes
 # It's not included in the OpenAPI schema for now so it's not visible in the docs
-@router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=True)
 def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
-) -> ExperimentResponse:
+) -> ExperimentIdResponse:
     """Create an experiment ID."""
-    return ExperimentResponse.model_validate(service.create_experiment(request).model_dump())
+    return ExperimentIdResponse.model_validate(service.create_experiment(request).model_dump())
 
 
 # TODO: FIXME this should not need the /all suffix.
@@ -103,15 +100,12 @@ def list_experiments_new(
 
 
 @router.get("/new/{experiment_id}", include_in_schema=False)
-def get_experiment_new(service: ExperimentServiceDep, experiment_id: UUID) -> ExperimentResponse:
+def get_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
-    return ExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+    return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
 
 
-@router.get("/new/{experiment_id}/workflows", include_in_schema=False)
-def get_workflows(service: ExperimentServiceDep, experiment_id: UUID) -> ListingResponse[UUID]:
-    """TODO: this endpoint should handle passing in an experiment id and the returning a list
-    of all the workflows associated with that experiment. Until workflows are stored and associated
-    with experiments, this is not yet implemented.
-    """
-    raise NotImplementedError
+@router.delete("/new/{experiment_id}", include_in_schema=False)
+def delete_experiment_new(service: ExperimentServiceDep, experiment_id: str) -> None:
+    """Delete an experiment by ID."""
+    service.delete_experiment(experiment_id)

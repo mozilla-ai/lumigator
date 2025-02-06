@@ -19,7 +19,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import Button from 'primevue/button';
 
 defineProps({

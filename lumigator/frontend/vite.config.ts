@@ -1,18 +1,17 @@
 // vite.config.js
 import { fileURLToPath, URL } from 'node:url';
-import { resolve, dirname } from 'node:path';
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import path from 'path';
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
   envPrefix: 'VUE_APP_',
   envDir: '../../',
-  plugins: [vue()],
+  plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // Adds '@' alias for 'src' directory
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
   css: {

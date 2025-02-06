@@ -151,7 +151,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'

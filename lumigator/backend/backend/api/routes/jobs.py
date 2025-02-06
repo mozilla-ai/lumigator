@@ -52,7 +52,11 @@ def create_inference_job(
     response: Response,
     background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
+    job_response = service.create_job(job_create_request)
+
+    service.add_background_task(
+        background_tasks, service.handle_inference_job, job_response.id, job_create_request
+    )
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -78,7 +82,14 @@ def create_annotation_job(
         output_field="ground_truth",
     )
     inference_job_create_request.store_to_dataset = True
-    job_response = service.create_job(inference_job_create_request, background_tasks)
+    job_response = service.create_job(inference_job_create_request)
+
+    service.add_background_task(
+        background_tasks,
+        service.handle_inference_job,
+        job_response.id,
+        inference_job_create_request,
+    )
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -92,9 +103,8 @@ def create_evaluation_job(
     job_create_request: JobEvalCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -110,9 +120,8 @@ def create_evaluation_lite_job(
     job_create_request: JobEvalLiteCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
-    job_response = service.create_job(job_create_request, background_tasks)
+    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -184,7 +193,7 @@ def get_job(service: JobServiceDep, job_id: UUID) -> Job:
 
 @router.get("/{job_id}/logs")
 def get_job_logs(job_id: UUID) -> JobLogsResponse:
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"))
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
         loguru.logger.error(
@@ -244,7 +253,7 @@ def get_job_result_download(
 
 def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
     """Returns metadata that exists in the Ray cluster for all jobs."""
-    resp = requests.get(settings.RAY_JOBS_URL)
+    resp = requests.get(settings.RAY_JOBS_URL, timeout=5)  # 5 seconds
     if resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
             f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}"
@@ -267,7 +276,7 @@ def _get_all_ray_jobs() -> list[JobSubmissionResponse]:
 
 def _get_ray_job(job_id: UUID) -> JobSubmissionResponse:
     """Returns metadata on the specified job if it exists in the Ray cluster."""
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"))
+    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
         loguru.logger.error(

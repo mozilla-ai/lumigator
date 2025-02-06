@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, watch, computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'

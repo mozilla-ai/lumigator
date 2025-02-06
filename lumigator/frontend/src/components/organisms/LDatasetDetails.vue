@@ -106,7 +106,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDatasetStore } from '@/stores/datasets/store';

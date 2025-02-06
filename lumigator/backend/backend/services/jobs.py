@@ -1,12 +1,15 @@
 import asyncio
 import csv
 import json
+from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
+import requests
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
@@ -20,6 +23,7 @@ from lumigator_schemas.jobs import (
     JobEvalCreate,
     JobEvalLiteCreate,
     JobInferenceCreate,
+    JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -247,6 +251,33 @@ class JobService:
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
+    def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        db_logs = self.job_repo.get(job_id).logs
+        if not db_logs:
+            ray_db_logs = self.retrieve_job_logs(job_id)
+            self._update_job_record(job_id, logs=db_logs.logs)
+            return ray_db_logs
+        else:
+            return JobLogsResponse(logs=db_logs)
+
+    def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        resp = requests.get(
+            urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5
+        )  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                "Unexpected status code getting job logs:"
+                f" {resp.status_code}, error: {resp.text or ''}",
+            ) from None
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
+
     async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
@@ -270,6 +301,9 @@ class JobService:
             await asyncio.sleep(5)
             elapsed_time += 5
             job_status = self.get_upstream_job_status(job_id)
+
+        # Once the job is finished, retrieve the log and store it in the internal db
+        self.get_job_logs(job_id)
 
         return job_status
 

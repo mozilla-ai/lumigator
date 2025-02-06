@@ -7,8 +7,6 @@ services:
       context: .
       dockerfile: "Dockerfile"
       target: "dev_image"
-    volumes:
-      -  database_volume:/mzai/backend/local.db
     ports:
       - "5678:5678"
     develop:

@@ -135,6 +135,7 @@ watch(hasRunningInferenceJob, async (newValue) => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
 .l-job-table {
   $root: &;
   width: 100%;

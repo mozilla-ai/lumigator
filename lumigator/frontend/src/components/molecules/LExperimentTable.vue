@@ -203,6 +203,8 @@ watch(
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-table {
   $root: &;
   width: 100%;

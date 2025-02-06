@@ -100,6 +100,8 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 #app {
   height: 100vh;
   display: flex;
@@ -190,6 +192,8 @@ onMounted(async () => {
 </style>
 
 <style lang="scss">
+@use '@/styles/variables' as *;
+
 .toaster-content {
   width: 100%;
   display: flex;

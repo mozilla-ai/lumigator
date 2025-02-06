@@ -162,6 +162,8 @@ defineExpose({ loading })
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-dataset-table {
   $root: &;
   width: 100%;
@@ -180,6 +182,8 @@ defineExpose({ loading })
 </style>
 
 <style lang="scss">
+@use '@/styles/variables' as *;
+
 //  In order to have effect the following
 // css rules must not be "scoped" because
 // the popup-menu is attached to the DOM after the
@@ -205,7 +209,7 @@ defineExpose({ loading })
 }
 
 .separator {
-  padding: $l-spacing-1/2 0;
+  padding: calc($l-spacing-1 / 2) 0;
 }
 
 .l-dataset-table__options-menu > :first-child .l-dataset-table__menu-option {

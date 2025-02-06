@@ -216,6 +216,8 @@ const onGenerateGT = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-datasets {
   $root: &;
   max-width: $l-main-width;
@@ -243,6 +245,8 @@ const onGenerateGT = () => {
 </style>
 
 <style lang="scss">
+@use '@/styles/variables' as *;
+
 .l-datasets .p-tabs {
   $root: &;
 

@@ -120,6 +120,8 @@ function toggleModel(model: Model) {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-models-list {
   width: 100%;
 

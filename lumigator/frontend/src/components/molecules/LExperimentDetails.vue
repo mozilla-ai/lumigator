@@ -241,6 +241,7 @@ const showResults = () => {
 </script>
 
 <style lang="scss">
+@use '@/styles/variables' as *;
 .l-experiment-details {
   $root: &;
   display: flex;
@@ -307,7 +308,7 @@ const showResults = () => {
   }
 
   &__content-item {
-    padding: $l-spacing-1/2 0;
+    padding: calc($l-spacing-1 / 2) 0;
 
     .p-tag-label {
       font-size: $l-font-size-sm;

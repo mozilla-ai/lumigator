@@ -157,6 +157,8 @@ watch(showSlidingPanel, (newValue) => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiments {
   $root: &;
   max-width: $l-main-width;

@@ -55,6 +55,8 @@ const handleAction = () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-page-header {
   $root: &;
   display: flex;
@@ -79,7 +81,7 @@ const handleAction = () => {
     }
 
     &-description {
-      padding-top: $l-spacing-1/2;
+      padding-top: calc($l-spacing-1 / 2);
       max-width: 400px;
       text-align: left;
     }

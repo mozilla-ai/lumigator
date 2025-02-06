@@ -34,6 +34,8 @@ const emit = defineEmits(['l-add-experiment'])
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-empty {
   $root: &;
   margin: auto;
@@ -53,7 +55,7 @@ const emit = defineEmits(['l-add-experiment'])
   }
 
   &__note {
-    padding-top: $l-spacing-1/2;
+    padding-top: calc($l-spacing-1 / 2);
     font-size: $l-font-size-sm;
     color: $l-grey-100;
   }
@@ -61,7 +63,7 @@ const emit = defineEmits(['l-add-experiment'])
   &__action-btn {
     font-weight: $l-font-weight-normal;
     margin-top: $l-spacing-1;
-    margin-bottom: $l-spacing-1/2;
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   p {

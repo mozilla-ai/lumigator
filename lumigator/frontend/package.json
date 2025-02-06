@@ -51,8 +51,6 @@
     "@eslint/js": "^9.19.0",
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^15.14.0",
-    "sass": "^1.83.4",
-    "sass-embedded": "^1.83.4",
-    "sass-loader": "^16.0.4"
+    "sass": "^1.83.4"
   }
 }

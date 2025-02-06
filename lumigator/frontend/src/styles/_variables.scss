@@ -1,3 +1,4 @@
+@use "sass:color";
 // Colors
 $l-primary-color: #e0c414; // Main brand color (gold/yellow)
 $l-primary-color-text: #ffffff;
@@ -49,7 +50,7 @@ $l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 // Button Specific
 $l-button-bg: $l-primary-color;
 $l-button-text-color: #000000;
-$l-button-hover-bg: darken($l-primary-color, 10%);
+$l-button-hover-bg: color.adjust($l-primary-color, $lightness: -10%);
 
 // Sizes
 $l-sliding-panel-size: 370px;

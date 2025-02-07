@@ -3,23 +3,23 @@
 // this file overrides some of the default styles from primevue
 // so the use of !important may be necessary
 
-  :root {
-    --l-tag-info-background: #874B0A!important;
-  }
+:root {
+  --l-tag-info-background: #874b0a !important;
+}
 
 // Menu Styling
 .p-menu {
-  background-color: $l-menu-bg!important;
+  background-color: $l-menu-bg !important;
   font-family: $l-font-family;
-	padding: $l-spacing-1 0;
-	border: none!important;
+  padding: $l-spacing-1 0;
+  border: none !important;
 
   &-item {
-		cursor: pointer;
+    cursor: pointer;
 
-		:hover {
-			background-color: $l-menu-bg;
-		}
+    :hover {
+      background-color: $l-menu-bg;
+    }
   }
 }
 
@@ -40,63 +40,60 @@
 
 // Datable styling
 .p-datatable-table-container {
-		border-radius: 8px;
-		border: 1px solid $l-grey-300;
+  border-radius: 8px;
+  border: 1px solid $l-grey-300;
 
   .p-datatable-thead {
     height: 44px;
   }
-	.p-datatable-column-header-content {
-		color: $l-grey-200;
-		font-size: $l-font-size-sm;
-	}
+  .p-datatable-column-header-content {
+    color: $l-grey-200;
+    font-size: $l-font-size-sm;
+  }
 
-	[class*="p-row-"] {
-		background-color: $l-card-bg;
-		border: none;
-		cursor: pointer;
+  [class*='p-row-'] {
+    background-color: $l-card-bg;
+    border: none;
+    cursor: pointer;
     height: 48px;
 
-		&:hover {
-			background-color: $l-grey-400;
-		}
-
-		td {
-			border: none;
-			color: $l-grey-100;
-			padding: 0.5rem 1rem;
-		}
-
-		&:hover td {
-			color: $white;
-		}
-
-	}
-   .p-datatable-row-selected {
-			background-color: $l-grey-300!important;
-   }
-
-   .p-datatable-column-sorted {
-      background: inherit;
+    &:hover {
+      background-color: $l-grey-400;
     }
 
-    .p-datatable-row-expansion {
-      background: $l-main-bg!important;
-      &:hover {
-        background: $l-main-bg!important;
-      }
-
-      &:hover td {
-        background: $l-main-bg!important;
-      }
-
-      & > td:first-child {
-        padding: 0;
-      }
+    td {
+      border: none;
+      color: $l-grey-100;
+      padding: 0.5rem 1rem;
     }
 
+    &:hover td {
+      color: $white;
+    }
+  }
+  .p-datatable-row-selected {
+    background-color: $l-grey-300 !important;
+  }
+
+  .p-datatable-column-sorted {
+    background: inherit;
+  }
+
+  .p-datatable-row-expansion {
+    background: $l-main-bg !important;
+    &:hover {
+      background: $l-main-bg !important;
+    }
+
+    &:hover td {
+      background: $l-main-bg !important;
+    }
+
+    & > td:first-child {
+      padding: 0;
+    }
+  }
 }
-
 
 // Class for Datatable with visible lines and hover effect disabled
 .gridlines {
@@ -105,42 +102,40 @@
     font-size: $l-font-size-sm;
   }
   tr {
-    box-shadow:inset 0px 1px 0px $l-gridlines-stroke;
+    box-shadow: inset 0px 1px 0px $l-gridlines-stroke;
   }
   td {
     vertical-align: top;
     font-size: $l-font-size-sm;
   }
 
-  [class*="p-row-"] {
-		background-color: $l-card-bg;
+  [class*='p-row-'] {
+    background-color: $l-card-bg;
 
-		&:hover {
-		  background-color: $l-card-bg;
-		}
+    &:hover {
+      background-color: $l-card-bg;
+    }
 
-		&:hover td {
-			color: $l-grey-100;
-		}
-
-	}
+    &:hover td {
+      color: $l-grey-100;
+    }
+  }
 }
 
 .p-datatable-header-cell {
-	background-color: $l-main-bg;
-	text-transform: uppercase
+  background-color: $l-main-bg;
+  text-transform: uppercase;
 }
 
 .p-datatable-tbody {
-	background-color:$l-card-bg ;
-	font-size:$l-table-font-size;
+  background-color: $l-card-bg;
+  font-size: $l-table-font-size;
 }
 .p-button-icon-only.p-button-rounded {
-  height:   $l-button-icon-only-width!important;
-  width:  $l-button-icon-only-width;
+  height: $l-button-icon-only-width !important;
+  width: $l-button-icon-only-width;
   span {
-   font-size: 14px;
-
+    font-size: 14px;
   }
 }
 
@@ -157,38 +152,37 @@
 }
 
 .p-select.p-disabled {
-  background-color: $l-disabled-input-color!important;
-  color: $l-grey-600!important;
+  background-color: $l-disabled-input-color !important;
+  color: $l-grey-600 !important;
 
-   .p-select-label, .p-floatlabel-in {
-    color: $l-grey-600!important;
+  .p-select-label,
+  .p-floatlabel-in {
+    color: $l-grey-600 !important;
   }
 
   .p-select-dropdown {
-    color: $l-grey-600!important;
+    color: $l-grey-600 !important;
   }
-
 }
-
 
 // Radio button
 .p-radiobutton-box {
-  border: 1px solid white!important;
-  background-color: $l-grey-300!important;
-  height: 18px!important;
-  width: 18px!important;
+  border: 1px solid white !important;
+  background-color: $l-grey-300 !important;
+  height: 18px !important;
+  width: 18px !important;
 }
 
 .p-radiobutton-checked .p-radiobutton-box {
-  border-color: var(--l-radiobutton-checked-border-color)!important;
+  border-color: var(--l-radiobutton-checked-border-color) !important;
 
   .p-radiobutton-icon {
-    background: $l-primary-color!important;
+    background: $l-primary-color !important;
   }
 }
 
 .p-inputtext {
-  font-size: 12px!important;
+  font-size: 12px !important;
 }
 
 // Tooltip
@@ -200,7 +194,6 @@
 
 // Tabs
 .p-tabs {
-
   .p-tablist-content > .p-tablist-tab-list {
     align-items: center;
     background: $l-menu-bg;
@@ -226,5 +219,4 @@
     padding: 0;
     background: transparent;
   }
-
 }

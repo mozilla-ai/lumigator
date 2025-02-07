@@ -4,72 +4,61 @@
     dataKey="id"
     :showHeaders="false"
     :tableStyle="columnStyles"
-    :pt="{root:'l-job-table', tableContainer:'width-100'}"
+    :pt="{ root: 'l-job-table', tableContainer: 'width-100' }"
     @row-click="handleRowClick"
   >
-    <Column  :style="columnStyles.expander"></Column>
-    <Column
-      :style="columnStyles.name"
-    >
+    <Column :style="columnStyles.expander"></Column>
+    <Column :style="columnStyles.name">
       <template #body="slotProps">
         {{ shortenedModel(slotProps.data.model.path) }}
       </template>
     </Column>
-    <Column
-      field="created"
-      header="created"
-      :style="columnStyles.created"
-      sortable
-    >
+    <Column field="created" header="created" :style="columnStyles.created" sortable>
       <template #body="slotProps">
         {{ formatDate(slotProps.data.created) }}
       </template>
     </Column>
-    <Column
-      field="status"
-      header="status"
-    >
-
+    <Column field="status" header="status">
       <template #body="slotProps">
         <div>
           <Tag
-            v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED' "
+            v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED'"
             severity="success"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
-            :pt="{root:'l-job-table__tag'}"
+            :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
-            v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED' "
+            v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED'"
             severity="danger"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
-            :pt="{root:'l-job-table__tag'}"
+            :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
             v-else
             severity="warn"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
-            :pt="{root:'l-job-table__tag'}"
+            :pt="{ root: 'l-job-table__tag' }"
           />
         </div>
       </template>
     </Column>
-    <Column  style="width: 6rem"></Column>
+    <Column style="width: 6rem"></Column>
   </DataTable>
 </template>
 
 <script lang="ts" setup>
-import DataTable from 'primevue/datatable';
-import Tag from 'primevue/tag';
-import Column from 'primevue/column';
+import DataTable from 'primevue/datatable'
+import Tag from 'primevue/tag'
+import Column from 'primevue/column'
 import { formatDate } from '@/helpers/index'
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from "@/stores/experiments/store";
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/store'
 
-const experimentStore = useExperimentStore();
-const { jobs } = storeToRefs(experimentStore);
+const experimentStore = useExperimentStore()
+const { jobs } = storeToRefs(experimentStore)
 defineProps({
   tableData: {
     type: Array,
@@ -77,38 +66,36 @@ defineProps({
   },
   columnStyles: {
     type: Object,
-    required: true
-  }
-});
+    required: true,
+  },
+})
 
 const emit = defineEmits(['l-job-selected'])
 
-const shortenedModel = (path) =>
-  path.length <= 30 ? path : `${path.slice(0, 30)}...`;
+const shortenedModel = (path) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`)
 
 function handleRowClick(event) {
   emit('l-job-selected', event.data)
 }
 
 function retrieveStatus(jobID) {
-  const job = jobs.value.find(job => job.id === jobID);
-  return job ? job.status : null;
+  const job = jobs.value.find((job) => job.id === jobID)
+  return job ? job.status : null
 }
-
 </script>
 
 <style scoped lang="scss">
 .l-job-table {
-	$root: &;
-  	width: 100%;
-    display: flex;
-    place-content: center;
+  $root: &;
+  width: 100%;
+  display: flex;
+  place-content: center;
 
-    .p-datatable-table-container {
-      [class*=p-row-] {
-        background-color: $l-main-bg;
-      }
+  .p-datatable-table-container {
+    [class*='p-row-'] {
+      background-color: $l-main-bg;
     }
+  }
 
   &__tag {
     color: $l-grey-100;
@@ -122,18 +109,17 @@ function retrieveStatus(jobID) {
 
 <style lang="scss">
 .l-job-table {
-	$root: &;
-  	width: 100%;
-    display: flex;
-    place-content: center;
+  $root: &;
+  width: 100%;
+  display: flex;
+  place-content: center;
 
-    .p-datatable-table-container {
-      border: none;
-    }
+  .p-datatable-table-container {
+    border: none;
+  }
 
-    .p-datatable-table-container [class*=p-row-] {
-      background-color: $l-main-bg;
-    }
-
+  .p-datatable-table-container [class*='p-row-'] {
+    background-color: $l-main-bg;
+  }
 }
 </style>

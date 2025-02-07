@@ -14,7 +14,7 @@
 
   &:disabled:hover {
     background-color: var(--l-button-secondary-background);
-    cursor:not-allowed;
+    cursor: not-allowed;
   }
 }
 
@@ -33,9 +33,9 @@
 }
 
 .hidden {
-  visibility: hidden!important;
+  visibility: hidden !important;
 }
 
 .width-100 {
-  width: 100%!important
+  width: 100% !important;
 }

@@ -1,9 +1,6 @@
 <template>
   <div class="l-experiment-details">
-    <div
-      class="l-experiment-details__header"
-      style="position: sticky; top: 0;z-index:100"
-    >
+    <div class="l-experiment-details__header" style="position: sticky; top: 0; z-index: 100">
       <h3>{{ title }}</h3>
       <Button
         icon="pi pi-times"
@@ -34,7 +31,7 @@
             :severity="tagSeverity"
             rounded
             :value="currentItemStatus"
-            :pt="{root:'l-experiment-details__tag'}"
+            :pt="{ root: 'l-experiment-details__tag' }"
           />
           <Button
             v-if="isJobFocused"
@@ -44,7 +41,7 @@
             label="Logs"
             aria-label="Logs"
             :disabled="currentItemStatus === 'PENDING'"
-            style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+            style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
             @click="emit('l-show-logs')"
@@ -59,13 +56,13 @@
         <div class="l-experiment-details__content-label">job id</div>
         <div
           class="l-experiment-details__content-field"
-          style="display: flex; justify-content: space-between;cursor:pointer"
+          style="display: flex; justify-content: space-between; cursor: pointer"
         >
           {{ selectedJob.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
-            style="font-size: 14px;padding-left: 3px;"
+            style="font-size: 14px; padding-left: 3px"
           />
         </div>
       </div>
@@ -79,24 +76,15 @@
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">{{ focusedItem.useCase }}</div>
       </div>
-      <div
-        v-if="!isJobFocused"
-        class="l-experiment-details__content-item"
-      >
+      <div v-if="!isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
-            <li
-              v-for="job in selectedExperiment.jobs"
-              :key="job.id"
-            >· {{job.model.path }}</li>
+            <li v-for="job in selectedExperiment.jobs" :key="job.id">· {{ job.model.path }}</li>
           </ul>
         </div>
       </div>
-      <div
-        v-if="isJobFocused"
-        class="l-experiment-details__content-item"
-      >
+      <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">{{ selectedJob.model.path }}</div>
       </div>
@@ -110,10 +98,7 @@
         <div class="l-experiment-details__content-label">run time</div>
         <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
       </div>
-      <div
-        v-if="selectedExperiment"
-        class="l-experiment-details__content-item"
-      >
+      <div v-if="selectedExperiment" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
           {{ selectedExperiment.samples }}
@@ -124,10 +109,7 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
-    <div
-      v-if="!isInference"
-      class="l-experiment-details__actions"
-    >
+    <div v-if="!isInference" class="l-experiment-details__actions">
       <Button
         rounded
         severity="secondary"
@@ -152,99 +134,95 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experiments/store'
 import { formatDate, calculateDuration } from '@/helpers/index'
-import Button from 'primevue/button';
-import Tag from 'primevue/tag';
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
 
 const emit = defineEmits([
   'l-close-details',
   'l-experiment-results',
   'l-job-results',
   'l-show-logs',
-  'l-dnld-results'
-]);
+  'l-dnld-results',
+])
 
 defineProps({
   title: {
     type: String,
-    required: true
-  }
-});
-const experimentStore = useExperimentStore();
-const {
-  experiments,
-  selectedExperiment,
-  jobs,
-  inferenceJobs,
-  selectedJob,
-} = storeToRefs(experimentStore);
-const isCopied = ref(false);
+    required: true,
+  },
+})
+const experimentStore = useExperimentStore()
+const { experiments, selectedExperiment, jobs, inferenceJobs, selectedJob } =
+  storeToRefs(experimentStore)
+const isCopied = ref(false)
 
 const copyToClipboard = async (longString) => {
-  isCopied.value = true;
+  isCopied.value = true
   setTimeout(() => {
-    isCopied.value = false;
-  }, 3000);
-  await navigator.clipboard.writeText(longString);
-};
+    isCopied.value = false
+  }, 3000)
+  await navigator.clipboard.writeText(longString)
+}
 
 const isJobFocused = computed(() => selectedJob.value !== null)
-const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value]);
+const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    const selected = allJobs.value.filter((job) => job.id === selectedJob.value.id)[0];
-    return selected ? selected.status : selectedJob.value.status;
-  };
-  const selected = experiments.value
-    .filter((experiment) => experiment.id === selectedExperiment.value.id)[0];
-  return selected ? selected.status : selectedExperiment.value.status;
-});
+    const selected = allJobs.value.filter((job) => job.id === selectedJob.value.id)[0]
+    return selected ? selected.status : selectedJob.value.status
+  }
+  const selected = experiments.value.filter(
+    (experiment) => experiment.id === selectedExperiment.value.id,
+  )[0]
+  return selected ? selected.status : selectedExperiment.value.status
+})
 
 const isInference = computed(() => {
-  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value.id);
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value.id)
 })
 
 const focusedItem = computed(() => {
   if (selectedJob.value) {
-    return selectedJob.value;
+    return selectedJob.value
   }
-  const selected = experiments.value
-    .filter((experiment) => experiment.id === selectedExperiment.value.id)[0];
-  return selected ? selected : selectedExperiment.value;
+  const selected = experiments.value.filter(
+    (experiment) => experiment.id === selectedExperiment.value.id,
+  )[0]
+  return selected ? selected : selectedExperiment.value
 })
 
 const tagSeverity = computed(() => {
-  const status = currentItemStatus.value;
+  const status = currentItemStatus.value
   switch (status) {
     case 'SUCCEEDED':
-      return 'success';
+      return 'success'
     case 'FAILED':
-      return 'danger';
+      return 'danger'
     case 'INCOMPLETE':
-      return 'info';
+      return 'info'
     default:
-      return 'warn';
+      return 'warn'
   }
 })
 
 const focusedItemRunTime = computed(() => {
   if (isJobFocused.value) {
-    return selectedJob.value.runTime ? selectedJob.value.runTime : '-' ;
+    return selectedJob.value.runTime ? selectedJob.value.runTime : '-'
   }
 
-  if (currentItemStatus.value !== 'RUNNING'
-    && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time);
+  if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
+    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time)
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current
-    });
+    })
     if (lastEndTime) {
-      return calculateDuration(selectedExperiment.value.created, lastEndTime);
+      return calculateDuration(selectedExperiment.value.created, lastEndTime)
     }
   }
   return '-'
@@ -252,12 +230,11 @@ const focusedItemRunTime = computed(() => {
 
 const showResults = () => {
   if (isJobFocused.value) {
-    emit('l-job-results', selectedJob.value);
+    emit('l-job-results', selectedJob.value)
     return
   }
-  emit('l-experiment-results', selectedExperiment.value);
+  emit('l-experiment-results', selectedExperiment.value)
 }
-
 </script>
 
 <style lang="scss">
@@ -284,7 +261,6 @@ const showResults = () => {
       border: none;
       color: $l-grey-100;
     }
-
   }
 
   &__content,
@@ -312,8 +288,8 @@ const showResults = () => {
       span {
         color: $l-grey-100;
       }
-      .logs-btn{
-        font-size: 12px!important;
+      .logs-btn {
+        font-size: 12px !important;
       }
     }
 

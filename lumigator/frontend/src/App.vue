@@ -12,7 +12,7 @@
               size="small"
               label="Hybrid"
               aria-label="Logs"
-              style="padding:0;background: transparent; border: none; font-weight: 400;gap: 4px"
+              style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
               iconClass="mode-icon"
               class="l-mode__selector"
             />
@@ -22,100 +22,80 @@
         <div class="external-links-container">
           <ul>
             <li>
-              <a
-                href="https://github.com/mozilla-ai/lumigator"
-                target="_blank"
-              >GitHub <span class="pi pi-arrow-up-right" />
+              <a href="https://github.com/mozilla-ai/lumigator" target="_blank"
+                >GitHub <span class="pi pi-arrow-up-right" />
               </a>
             </li>
             <li>
-              <a
-                href="https://mozilla-ai.github.io/lumigator/"
-                target="_blank"
-              >Documentation <span class="pi pi-arrow-up-right" />
+              <a href="https://mozilla-ai.github.io/lumigator/" target="_blank"
+                >Documentation <span class="pi pi-arrow-up-right" />
               </a>
             </li>
-
           </ul>
         </div>
       </div>
       <div class="l-main-container">
         <ConfirmDialog></ConfirmDialog>
-        <Toast
-          position="bottom-right"
-          group="br"
-        >
+        <Toast position="bottom-right" group="br">
           <template #message="slotProps">
-            <div
-              class="toaster-content"
-              :class="slotProps.message.severity"
-            >
-              <span :class="slotProps.message.messageicon" ></span>
+            <div class="toaster-content" :class="slotProps.message.severity">
+              <span :class="slotProps.message.messageicon"></span>
               <div class="toaster-content__text">
-                <h4>   {{ slotProps.message.summary }}</h4>
-                <p v-if="slotProps.message.detail ">{{ slotProps.message.detail  }}  </p>
+                <h4>{{ slotProps.message.summary }}</h4>
+                <p v-if="slotProps.message.detail">{{ slotProps.message.detail }}</p>
               </div>
             </div>
           </template>
         </Toast>
         <router-view v-slot="{ Component }">
-          <transition
-            name="transition-fade"
-            mode="out-in"
-          >
-            <component
-              :is="Component"
-              @s-disable-scroll.stop=""
-            />
+          <transition name="transition-fade" mode="out-in">
+            <component :is="Component" @s-disable-scroll.stop="" />
           </transition>
         </router-view>
       </div>
-      <div class="sliding-panel"
-           :class="{ open: showSlidingPanel }"
-      >
-      </div>
+      <div class="sliding-panel" :class="{ open: showSlidingPanel }"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import LMenu from '@/components/organisms/LMenu.vue';
+import { onMounted, ref } from 'vue'
+import LMenu from '@/components/organisms/LMenu.vue'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import ConfirmDialog from 'primevue/confirmdialog';
-import Toast from 'primevue/toast';
-import Button from 'primevue/button';
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import ConfirmDialog from 'primevue/confirmdialog'
+import Toast from 'primevue/toast'
+import Button from 'primevue/button'
 
-const datasetStore = useDatasetStore();
-const experimentStore = useExperimentStore();
+const datasetStore = useDatasetStore()
+const experimentStore = useExperimentStore()
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,
   pt: {
     root: {
       style: {
-      background: `transparent`
-      }
+        background: `transparent`,
+      },
     },
     text: {
       style: {
-      background: `black`,
-      }
+        background: `black`,
+      },
     },
     arrow: {
       style: {
-      ['border-right-color']: `black`
-      }
-    }
-  }
+        ['border-right-color']: `black`,
+      },
+    },
+  },
 })
 
-const { showSlidingPanel } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel()
 onMounted(async () => {
-  await experimentStore.loadExperiments();
-  await datasetStore.loadDatasets();
+  await experimentStore.loadExperiments()
+  await datasetStore.loadDatasets()
 })
 </script>
 
@@ -182,8 +162,7 @@ onMounted(async () => {
     border-radius: $l-main-radius;
     display: grid;
     text-align: center;
-    border: 1px solid black
-
+    border: 1px solid black;
   }
 
   .sliding-panel {
@@ -199,38 +178,40 @@ onMounted(async () => {
   }
 
   .l-main-container {
-    transition: flex-grow 0.3s, margin-right 0.3s;
+    transition:
+      flex-grow 0.3s,
+      margin-right 0.3s;
   }
 
-  .sliding-panel.open+.l-main-container {
+  .sliding-panel.open + .l-main-container {
     margin-right: 0;
   }
 }
 </style>
 
 <style lang="scss">
-  .toaster-content {
-    width: 100%;
-    display: flex;
-    gap: 5px;
+.toaster-content {
+  width: 100%;
+  display: flex;
+  gap: 5px;
 
-    span {
-      padding: 5px;
-    }
-
-    p {
-      font-size: $l-menu-font-size;
-    }
-
-    &.error {
-      color: $l-grey-100;
-      h4 {
-        font-weight: $l-font-weight-semibold;
-      }
-    }
+  span {
+    padding: 5px;
   }
 
-  .mode-icon {
-    font-size: $l-font-size-xs!important;
+  p {
+    font-size: $l-menu-font-size;
   }
+
+  &.error {
+    color: $l-grey-100;
+    h4 {
+      font-weight: $l-font-weight-semibold;
+    }
+  }
+}
+
+.mode-icon {
+  font-size: $l-font-size-xs !important;
+}
 </style>

@@ -31,6 +31,13 @@ async function fetchJobs(): Promise<Job[]> {
   }
 }
 
+/**
+ * Fetches details of a specific job by ID.
+ * @param {string} id - The ID of the job.
+ */
+
+// TODO: Remame fetchJobDetails and refactor accodingly
+
 async function fetchExperimentDetails(id: string) {
   try {
     const response = await http.get(PATH_JOB_DETAILS(id))
@@ -54,6 +61,14 @@ async function fetchJobStatus(id: string) {
   return job?.status
 }
 
+/**
+ * Triggers a new experiment with the given payload, due API limitations at the time.
+ * In fact this funcition triggers an evaluation job.
+ * @param {Object} experimentPayload - The payload for the experiment.
+ *  The schema of experimentPayload can be found @ api/v1/experiments/
+ */
+// TODO: For experiments with multiple models this function is called recursively for every model selected from the form.
+// Check ExperimentForm.vue
 async function triggerExperiment(experimentPayload: unknown) {
   try {
     const response = await http.post(PATH_EXPERIMENTS_EVALUATE(), experimentPayload, {
@@ -87,6 +102,10 @@ async function triggerAnnotationJob(groundTruthPayload: unknown) {
 }
 export { triggerAnnotationJob }
 
+/**
+ * Fetches the results of a specific job.
+ * @param {string} job_id
+ */
 async function fetchResults(
   job_id: string,
 ): Promise<unknown | { resultsData: ObjectData; id: string; download_url: string }> {
@@ -115,6 +134,11 @@ async function fetchResults(
   }
 }
 
+/**
+ * Downloads the results of a specific experiment by ID.
+ * @param {string} experiment_id .
+ * @returns {Promise<Blob|Error>} A promise that resolves to a Blob containing the file data.
+ */
 async function downloadResults(experiment_id: string) {
   try {
     const response = await http.get(PATH_EXPERIMENT_RESULTS(experiment_id))
@@ -140,6 +164,10 @@ async function downloadResults(experiment_id: string) {
   }
 }
 
+/**
+ * Fetches the logs of a specific job by ID.
+ * @param {string} id .
+ */
 async function fetchLogs(id: string) {
   try {
     const logsResponse = await http.get(PATH_EXPERIMENT_LOGS(id))

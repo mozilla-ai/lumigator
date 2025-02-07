@@ -53,7 +53,7 @@ function confirmUpload() {
 }
 
 function reset() {
-  input.value.value = undefined
+  input.value.value = ''
   selectedFile.value = undefined
   fileName.value = ''
 }

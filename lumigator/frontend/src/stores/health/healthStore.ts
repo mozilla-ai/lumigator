@@ -11,7 +11,8 @@ export const useHealthStore = defineStore('health-store', () => {
     try {
       healthStatus.value = await healthService.fetchHealthStatus()
     } catch (error) {
-      console.error(getAxiosError(error as Error | AxiosError))
+      const errorMessage = getAxiosError(error as Error | AxiosError)
+      healthStatus.value = errorMessage
     }
   }
 

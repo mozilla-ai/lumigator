@@ -16,8 +16,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   async function fetchDatasets() {
     try {
       datasets.value = await datasetsService.fetchDatasets()
-    } catch (error) {
-      console.error(getAxiosError(error as Error | AxiosError))
+    } catch {
       datasets.value = []
     }
   }
@@ -25,8 +24,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   async function fetchDatasetDetails(datasetID: string) {
     try {
       selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID)
-    } catch (error) {
-      console.error(getAxiosError(error as Error | AxiosError))
+    } catch {
       selectedDataset.value = undefined
     }
   }
@@ -55,7 +53,6 @@ export const useDatasetStore = defineStore('datasets', () => {
       }
     } catch (error) {
       const errorMessage = getAxiosError(error as Error | AxiosError)
-      console.error(errorMessage)
       toast.add({
         severity: 'error',
         summary: `${errorMessage}`,
@@ -67,29 +64,21 @@ export const useDatasetStore = defineStore('datasets', () => {
   }
 
   async function deleteDataset(id: string) {
-    try {
-      if (!id) {
-        return
-      }
-      if (selectedDataset.value?.id === id) {
-        resetSelection()
-      }
-      await datasetsService.deleteDataset(id)
-      await fetchDatasets()
-    } catch (error) {
-      console.error(getAxiosError(error as Error | AxiosError))
+    if (!id) {
+      return
     }
+    if (selectedDataset.value?.id === id) {
+      resetSelection()
+    }
+    await datasetsService.deleteDataset(id)
+    await fetchDatasets()
   }
 
   // TODO: this shouldnt depend on refs/state, it can be a util function
   async function downloadDatasetFile() {
-    try {
-      if (selectedDataset.value) {
-        const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
-        downloadContent(blob, selectedDataset.value?.filename)
-      }
-    } catch (error) {
-      console.error(getAxiosError(error as Error | AxiosError))
+    if (selectedDataset.value) {
+      const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
+      downloadContent(blob, selectedDataset.value?.filename)
     }
   }
 

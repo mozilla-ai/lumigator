@@ -32,7 +32,12 @@ export const useExperimentStore = defineStore('experiments', () => {
    * Loads all experiments and jobs.
    */
   async function fetchAllJobs() {
-    const allJobs = await experimentsService.fetchJobs()
+    let allJobs: Job[]
+    try {
+      allJobs = await experimentsService.fetchJobs()
+    } catch {
+      allJobs = []
+    }
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJobDetails(job))
@@ -132,7 +137,7 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   /**
    * Runs an experiment with multiple models.
-   * Each model triggers a respecive evaluation job.
+   * Each model triggers a respective evaluation job.
    *
    * @param {Object} experimentData - The data for the experiment to run.
    * @returns {Promise<Array>} The results of the experiment.

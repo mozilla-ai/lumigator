@@ -65,10 +65,28 @@ services:
       - "8265:8265"
       - "10001:10001"
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
-    command: bash -c "RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
+    # Apparently dead head nodes can be selected unless
+    # RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES_ENV_VAR is set
+    # Dead head nodes appear because of the GCS data being
+    # persisted in Redis
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+          set -eaux
+          mkdir -p /tmp/ray_pip_cache
+          # If the file was mounted in a volume instead of
+          # a shared dir, permissions need to be setup
+          # ... || true allows this to fail (-e is set)
+          sudo chmod -R 777 /tmp/ray_pip_cache/ || true
+          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES_ENV_VAR=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
+          mkdir -p /tmp/ray/session_latest/runtime_resources/pip
+          rmdir /tmp/ray/session_latest/runtime_resources/pip/ && ln -s /tmp/ray_pip_cache /tmp/ray/session_latest/runtime_resources/pip
+          sleep infinity
     shm_size: 2g
     volumes:
       - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+      - ray-pip-cache:/tmp/ray_pip_cache
     deploy:
       resources:
         limits:
@@ -99,6 +117,7 @@ services:
 
   backend:
     image: mzdotai/lumigator:v0.1.0-alpha
+    pull_policy: always
     build:
       context: .
       dockerfile: "Dockerfile"
@@ -110,6 +129,9 @@ services:
         condition: "service_started"
         required: false
       ray:
+        condition: "service_started"
+        required: false
+      mlflow:
         condition: "service_started"
         required: false
     ports:
@@ -140,6 +162,7 @@ services:
       - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
       - LUMI_API_CORS_ALLOWED_ORIGINS
+      - MLFLOW_TRACKING_URI
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking
@@ -149,6 +172,7 @@ services:
       - "localhost:host-gateway"
 
   frontend:
+    pull_policy: always
     image: mzdotai/lumigator-frontend:v0.1.0-alpha
     build:
       context: .
@@ -168,7 +192,28 @@ services:
     ports:
       - 80:80
 
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.0.1
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - BACKEND_STORE_URI=sqlite:///mlflow.db
+      - ARTIFACT_ROOT=s3://mlflow`
+    ports:
+      - "8001:5000"
+    depends_on:
+      minio:
+        condition: service_healthy
+    command: mlflow server --backend-store-uri ${BACKEND_STORE_URI} --default-artifact-root ${ARTIFACT_ROOT} --host 0.0.0.0
+    extra_hosts:
+      - "localhost:host-gateway"
+    profiles:
+      - local
+
 volumes:
     minio-data:
     database_volume:
     redis-data:
+    ray-pip-cache:

@@ -1,9 +1,9 @@
 .transition-fade-enter-active {
-  transition: opacity .3s ease-out .3s;
+  transition: opacity 0.3s ease-out 0.3s;
 }
 
 .transition-fade-leave-active {
-  transition: opacity .3s ease-in;
+  transition: opacity 0.3s ease-in;
 }
 
 .transition-fade-leave-from,
@@ -21,9 +21,9 @@
 }
 
 .transition-fade-2s-enter-active {
-  transition: opacity .2s ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
 .transition-fade-2s-leave-active {
-  transition: opacity .2s ease-in;
+  transition: opacity 0.2s ease-in;
 }

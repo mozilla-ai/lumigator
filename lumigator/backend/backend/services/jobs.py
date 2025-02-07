@@ -369,6 +369,7 @@ class JobService:
                 "torch_dtype": request.torch_dtype,
                 "trust_remote_code": request.trust_remote_code,
                 "use_fast": request.use_fast,
+                "max_new_tokens": request.max_new_tokens,
             }
 
         return job_params

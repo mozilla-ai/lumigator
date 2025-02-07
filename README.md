@@ -59,7 +59,7 @@ services networked together to make up all the components of the Lumigator appli
 > uses SQLite for this purpose.
 
 > [!NOTE]
-If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
+If you want to evaluate against LLM APIs like OpenAI/Mistral/Deepseek, you need to set the appropriate
 environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. Refer to the
 [troubleshooting section](https://mozilla-ai.github.io/lumigator/get-started/troubleshooting.html#tokens-api-keys-not-set)
 in our documentation for more details.

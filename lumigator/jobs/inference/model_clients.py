@@ -63,6 +63,7 @@ class LiteLLMModelClient(BaseModelClient):
             frequency_penalty=self.config.params.frequency_penalty,
             temperature=self.config.params.temperature,
             top_p=self.config.params.top_p,
+            drop_params=True
         )
         # LiteLLM gives us the cost of each API which is nice.
         # Eventually we can add this to the response object as well.

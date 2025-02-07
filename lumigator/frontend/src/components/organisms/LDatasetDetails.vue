@@ -166,6 +166,7 @@ async function handleGenerateGroundTruth() {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables' as *;
 .l-dataset-details {
   $root: &;
   display: flex;
@@ -223,7 +224,7 @@ async function handleGenerateGroundTruth() {
     }
   }
   &__content-item {
-    padding: $l-spacing-1/2 0;
+    padding: calc($l-spacing-1 / 2) 0;
   }
   &__actions {
     padding: $l-spacing-1 0;

@@ -40,13 +40,15 @@ const emit = defineEmits(['l-add-dataset'])
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-dataset-empty {
   $root: &;
   max-width: 600px;
   margin: auto;
 
   h2 {
-    margin-bottom: $l-spacing-1/2;
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   &__instructions {
@@ -71,7 +73,7 @@ const emit = defineEmits(['l-add-dataset'])
   &__action-btn {
     font-weight: $l-font-weight-normal;
     margin-top: $l-spacing-1;
-    margin-bottom: $l-spacing-1/2;
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   &__note {

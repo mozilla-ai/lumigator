@@ -1,15 +1,15 @@
-@import 'variables';
+@use 'variables';
 
 // PrimeVue Theme Customizations need -p prefix
 .p-button {
-  background-color: $l-button-bg;
-  color: $l-button-text-color;
-  border-radius: $l-button-border-radius;
-  font-family: $l-font-family;
-  font-weight: $l-font-weight-bold;
+  background-color: variables.$l-button-bg;
+  color: variables.$l-button-text-color;
+  border-radius: variables.$l-button-border-radius;
+  font-family: variables.$l-font-family;
+  font-weight: variables.$l-font-weight-bold;
 
   &:hover {
-    background-color: $l-button-hover-bg;
+    background-color: variables.$l-button-hover-bg;
   }
 
   &:disabled:hover {
@@ -19,17 +19,17 @@
 }
 
 .p-card {
-  background-color: $l-card-bg;
-  color: $l-text-color;
-  border-radius: $l-border-radius;
-  box-shadow: $l-box-shadow;
+  background-color: variables.$l-card-bg;
+  color: variables.$l-text-color;
+  border-radius: variables.$l-border-radius;
+  box-shadow: variables.$l-box-shadow;
 }
 
 .p-inputtext {
-  background-color: $l-main-bg;
-  color: $l-text-color;
-  padding: $l-spacing-1 / 2;
-  border-radius: $l-input-border-radius;
+  background-color: variables.$l-main-bg;
+  color: variables.$l-text-color;
+  padding: variables.$l-spacing-1 * 0.5;
+  border-radius: variables.$l-input-border-radius;
 }
 
 .hidden {

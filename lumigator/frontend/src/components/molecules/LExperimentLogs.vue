@@ -32,6 +32,8 @@ watch(logsLength, () => scrollToBottom())
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-logs {
   $root: &;
   border-radius: $l-main-radius;

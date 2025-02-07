@@ -85,6 +85,8 @@ function retrieveStatus(jobID: string) {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-job-table {
   $root: &;
   width: 100%;
@@ -108,6 +110,8 @@ function retrieveStatus(jobID: string) {
 </style>
 
 <style lang="scss">
+@use '@/styles/variables' as *;
+
 .l-job-table {
   $root: &;
   width: 100%;

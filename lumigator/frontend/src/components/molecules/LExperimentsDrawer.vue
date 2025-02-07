@@ -43,6 +43,7 @@ const drawerVisible = ref(true)
 <!-- Style here cannot be scoped because Drawer is attached to the DOM
 after the LResultsDrawer is mounted -->
 <style lang="scss">
+@use '@/styles/variables' as *;
 .l-experiments-drawer {
   $root: &;
 
@@ -55,7 +56,7 @@ after the LResultsDrawer is mounted -->
     width: 90%;
     display: flex;
     justify-content: space-between;
-    padding-top: $l-spacing-1 / 2;
+    padding-top: calc($l-spacing-1 / 2);
     padding-bottom: 0;
 
     &-title {

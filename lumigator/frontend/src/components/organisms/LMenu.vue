@@ -29,6 +29,8 @@ const { showSlidingPanel } = useSlidePanel()
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-main-menu-container {
   background-color: $l-menu-bg;
   padding: 0;
@@ -45,7 +47,7 @@ const { showSlidingPanel } = useSlidePanel()
     font-weight: 500;
     cursor: default;
     display: flex;
-    padding: $l-spacing-1/2;
+    padding: calc($l-spacing-1 / 2);
     padding-top: 0;
     align-items: center;
 
@@ -58,9 +60,9 @@ const { showSlidingPanel } = useSlidePanel()
   }
 
   &__link {
-    padding: $l-spacing-1/2 $l-spacing-1;
+    padding: calc($l-spacing-1 / 2) $l-spacing-1;
     display: flex;
-    gap: $l-spacing-1/2;
+    gap: calc($l-spacing-1 / 2);
     align-items: center;
     color: $l-menu-item-color;
     text-transform: capitalize;

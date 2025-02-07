@@ -22,7 +22,7 @@ onMounted(async () => {
   font-size: $l-font-size-sm;
   display: flex;
   justify-content: flex-end;
-  padding: $l-spacing-1/2;
+  padding: calc($l-spacing-1 / 2);
   color: $l-grey-100;
 }
 </style>

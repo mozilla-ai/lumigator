@@ -173,6 +173,8 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-form {
   $root: &;
   display: flex;

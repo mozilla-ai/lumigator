@@ -156,10 +156,13 @@ supported_litellm_providers_models = [
     # GPT Models
     "gpt-4o-mini",
     "gpt-4o",
+    "o1",
+    "o3-mini",
     # Mistral Models
     "mistral/open-mistral-7b",
     "mistral/open-mixtral-8x7b",
     "mistral/open-mixtral-8x22b",
+    "mistral/mistral-large-latest",
     "mistral/open-mistral-nemo",
     # Deepseek
     "deepseek/deepseek-reasoner",

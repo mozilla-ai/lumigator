@@ -1,6 +1,6 @@
 accelerate==1.1.1
 datasets==2.20.0
-litellm==1.60.4
+litellm==1.60.6
 loguru==0.7.2
 python-box==7.2.0
 s3fs==2024.5.0

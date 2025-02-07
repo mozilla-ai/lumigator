@@ -121,6 +121,9 @@ def test_job_lifecycle_remote_ok(
     assert jobs is not None
     logger.info(lumi_client_int.datasets.get_dataset(dataset.id))
 
+    infer_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
+    assert infer_jobs_before is not None
+
     job = JobEvalCreate(
         name="test-job-int-001",
         model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
@@ -131,8 +134,16 @@ def test_job_lifecycle_remote_ok(
     job.description = "This is a test job"
     job.max_samples = 2
     job_creation_result = lumi_client_int.jobs.create_job(JobType.EVALUATION, job)
+    all_jobs = lumi_client_int.jobs.get_jobs()
     assert job_creation_result is not None
-    assert lumi_client_int.jobs.get_jobs() is not None
+    assert all_jobs is not None
+    assert all_jobs.items
+    eval_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
+    assert eval_jobs is not None
+    assert eval_jobs.items
+    infer_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
+    assert infer_jobs is not None
+    assert infer_jobs_before.total == infer_jobs.total
 
     job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
     logger.info(job_status)

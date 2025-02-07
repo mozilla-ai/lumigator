@@ -14,6 +14,7 @@ class JobRecord(BaseRecord, NameDescriptionMixin, JobStatusMixin, DateTimeMixin)
 
     experiment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("experiments.id"), nullable=True)
     logs: Mapped[str] = mapped_column(Text)
+    job_type: Mapped[str]
 
 
 class JobResultRecord(BaseRecord):

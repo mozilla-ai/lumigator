@@ -21,7 +21,7 @@
         <Column field="filename" header="Filename" />
         <Column field="id" header="dataset id">
           <template #body="slotProps">
-            {{ shortenedID(slotProps.data.id) }}
+            {{ shortenID(slotProps.data.id) }}
           </template>
         </Column>
         <Column field="created_at" header="submitted">
@@ -70,6 +70,7 @@ import Menu from 'primevue/menu'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import { formatDate } from '@/helpers/index'
 import type { MenuItem } from 'primevue/menuitem'
+import type { Dataset } from '@/types/Dataset'
 
 const props = defineProps({
   tableData: {
@@ -91,7 +92,7 @@ const style = computed(() => {
 })
 
 const loading = ref(true)
-const focusedItem = ref(null)
+const focusedItem = ref()
 const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
@@ -133,9 +134,9 @@ const ptConfigOptionsMenu = ref({
   separator: 'separator',
 })
 
-const shortenedID = (id) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`)
+const shortenID = (id: string) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`)
 
-const togglePopover = (event, dataset) => {
+const togglePopover = (event: MouseEvent, dataset: Dataset) => {
   focusedItem.value = dataset
   const experimentOption = options.value.find((option) => option.label === 'Use in Experiment')
   if (experimentOption) {
@@ -145,7 +146,7 @@ const togglePopover = (event, dataset) => {
 }
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : null
+  focusedItem.value = newValue ? focusedItem.value : undefined
 })
 
 watch(props.tableData, (newValue) => {

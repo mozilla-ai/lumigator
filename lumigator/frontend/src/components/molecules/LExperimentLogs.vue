@@ -13,12 +13,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, watch, computed, nextTick, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experiments/store'
 const experimentStore = useExperimentStore()
 const { experimentLogs } = storeToRefs(experimentStore)
-const logContainer = ref(null)
+const logContainer: Ref<HTMLElement | undefined> = ref()
 const logsLength = computed(() => experimentLogs.value.length)
 
 const scrollToBottom = async () => {

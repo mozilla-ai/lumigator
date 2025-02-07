@@ -63,7 +63,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
-import DataTable from 'primevue/datatable'
+import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
 import { formatDate } from '@/helpers/index'
@@ -89,19 +89,19 @@ defineProps({
 const emit = defineEmits(['l-inference-selected', 'l-inference-finished'])
 const { showSlidingPanel } = useSlidePanel()
 const isThrottled = ref(false)
-const focusedItem = ref(null)
+const focusedItem = ref()
 
 const tableStyle = computed(() => {
   return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 })
 
-function handleRowClick(event) {
+function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-inference-selected', event.data)
 }
 
-function retrieveStatus(jobId) {
+function retrieveStatus(jobId: string) {
   const jobStatus = inferenceJobs.value.find((job) => job.id === jobId)
-  return jobStatus ? jobStatus.status : null
+  return jobStatus ? jobStatus.status : undefined
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
@@ -119,7 +119,7 @@ async function throttledUpdateAllJobs() {
 
 // This is a temporary solution until 'jobs/' endpoint
 // updates the status of each job
-let pollingId
+let pollingId: number | undefined
 watch(hasRunningInferenceJob, async (newValue) => {
   if (newValue) {
     await experimentStore.updateStatusForIncompleteJobs()

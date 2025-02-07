@@ -121,10 +121,11 @@ import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/molecules/LJobResults.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import type { Model } from '@/types/Experiment'
 
 const experimentStore = useExperimentStore()
 const modelStore = useModelStore()
-const { selectedExperimentRslts } = storeToRefs(experimentStore)
+const { selectedExperimentResults } = storeToRefs(experimentStore)
 const { models } = storeToRefs(modelStore)
 const expandedRows = ref([])
 
@@ -186,15 +187,15 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const modelsMap = new Map(models.value.map((model) => [model.uri, model]))
-  return selectedExperimentRslts.value.map((job) => ({
+  const modelsMap = new Map(models.value.map((model: Model) => [model.uri, model]))
+  return selectedExperimentResults.value.map((job) => ({
     ...job,
     model: modelsMap.get(job.model),
   }))
 })
 
 onUnmounted(() => {
-  selectedExperimentRslts.value = []
+  selectedExperimentResults.value = []
 })
 </script>
 

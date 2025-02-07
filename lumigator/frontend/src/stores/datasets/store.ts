@@ -1,28 +1,29 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import datasetsService from '@/services/datasets/datasetsService'
 import { downloadContent } from '@/helpers/index'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
+import type { Dataset } from '@/types/Dataset'
 
 export const useDatasetStore = defineStore('dataset', () => {
-  const datasets = ref([])
-  const selectedDataset = ref(null)
+  const datasets: Ref<Dataset[]> = ref([])
+  const selectedDataset: Ref<Dataset | undefined> = ref()
   const toast = useToast()
 
   async function loadDatasets() {
     datasets.value = await datasetsService.fetchDatasets()
   }
 
-  async function loadDatasetInfo(datasetID) {
+  async function loadDatasetInfo(datasetID: string) {
     selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID)
   }
 
   function resetSelection() {
-    selectedDataset.value = null
+    selectedDataset.value = undefined
   }
 
-  async function uploadDataset(datasetFile) {
+  async function uploadDataset(datasetFile: File) {
     if (!datasetFile) {
       return
     }
@@ -42,7 +43,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     await loadDatasets()
   }
 
-  async function deleteDataset(id) {
+  async function deleteDataset(id: string) {
     if (!id) {
       return
     }
@@ -53,9 +54,12 @@ export const useDatasetStore = defineStore('dataset', () => {
     await loadDatasets()
   }
 
+  // TODO: this shouldnt depend on refs/state, it can be a util function
   async function loadDatasetFile() {
-    const blob = await datasetsService.downloadDataset(selectedDataset.value.id)
-    downloadContent(blob, selectedDataset.value.filename)
+    if (selectedDataset.value) {
+      const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
+      downloadContent(blob, selectedDataset.value?.filename)
+    }
   }
 
   return {

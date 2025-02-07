@@ -9,19 +9,20 @@
         aria-label="Close"
         class="l-experiment-details__close"
         @click="emit('l-close-details')"
-      />
+      >
+      </Button>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Title</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.name }}
+          {{ focusedItem?.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">description</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.description }}
+          {{ focusedItem?.description }}
         </div>
       </div>
       <div class="l-experiment-details__content-item row">
@@ -49,7 +50,7 @@
         </div>
       </div>
       <div
-        v-if="isJobFocused"
+        v-if="isJobFocused && selectedJob"
         class="l-experiment-details__content-item"
         @click="copyToClipboard(selectedJob.id)"
       >
@@ -58,7 +59,7 @@
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
         >
-          {{ selectedJob.id }}
+          {{ selectedJob?.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
@@ -69,28 +70,30 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.dataset.name }}
+          {{ (focusedItem?.dataset as any).name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem.useCase }}</div>
+        <div class="l-experiment-details__content-field">{{ focusedItem?.useCase }}</div>
       </div>
       <div v-if="!isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
-            <li v-for="job in selectedExperiment.jobs" :key="job.id">· {{ job.model.path }}</li>
+            <li v-for="job in selectedExperiment?.jobs" :key="job.id">· {{ job.model.path }}</li>
           </ul>
         </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
-        <div class="l-experiment-details__content-field">{{ selectedJob.model.path }}</div>
+        <div class="l-experiment-details__content-field">
+          {{ (selectedJob as any)?.model.path }}
+        </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
-        <div class="l-experiment-details__content-field">
+        <div class="l-experiment-details__content-field" v-if="focusedItem">
           {{ formatDate(focusedItem.created) }}
         </div>
       </div>
@@ -127,7 +130,7 @@
         icon="pi pi-download"
         label="Download Results"
         :disabled="currentItemStatus !== 'SUCCEEDED'"
-        @click="emit('l-dnld-results', selectedJob)"
+        @click="emit('l-download-results', selectedJob)"
       />
     </div>
   </div>
@@ -146,7 +149,7 @@ const emit = defineEmits([
   'l-experiment-results',
   'l-job-results',
   'l-show-logs',
-  'l-dnld-results',
+  'l-download-results',
 ])
 
 defineProps({
@@ -160,7 +163,7 @@ const { experiments, selectedExperiment, jobs, inferenceJobs, selectedJob } =
   storeToRefs(experimentStore)
 const isCopied = ref(false)
 
-const copyToClipboard = async (longString) => {
+const copyToClipboard = async (longString: string) => {
   isCopied.value = true
   setTimeout(() => {
     isCopied.value = false
@@ -168,23 +171,23 @@ const copyToClipboard = async (longString) => {
   await navigator.clipboard.writeText(longString)
 }
 
-const isJobFocused = computed(() => selectedJob.value !== null)
+const isJobFocused = computed(() => Boolean(selectedJob.value))
 const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isJobFocused.value) {
-    const selected = allJobs.value.filter((job) => job.id === selectedJob.value.id)[0]
-    return selected ? selected.status : selectedJob.value.status
+    const selected = allJobs.value.find((job) => job.id === selectedJob.value?.id)
+    return selected ? selected.status : selectedJob.value?.status
   }
   const selected = experiments.value.filter(
-    (experiment) => experiment.id === selectedExperiment.value.id,
+    (experiment) => experiment.id === selectedExperiment.value?.id,
   )[0]
-  return selected ? selected.status : selectedExperiment.value.status
+  return selected ? selected.status : selectedExperiment.value?.status
 })
 
 const isInference = computed(() => {
-  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value.id)
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
 })
 
 const focusedItem = computed(() => {
@@ -192,7 +195,7 @@ const focusedItem = computed(() => {
     return selectedJob.value
   }
   const selected = experiments.value.filter(
-    (experiment) => experiment.id === selectedExperiment.value.id,
+    (experiment) => experiment.id === selectedExperiment.value?.id,
   )[0]
   return selected ? selected : selectedExperiment.value
 })
@@ -213,16 +216,16 @@ const tagSeverity = computed(() => {
 
 const focusedItemRunTime = computed(() => {
   if (isJobFocused.value) {
-    return selectedJob.value.runTime ? selectedJob.value.runTime : '-'
+    return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
   }
 
   if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
-    const endTimes = selectedExperiment.value.jobs.map((job) => job.end_time)
+    const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || []
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current
     })
-    if (lastEndTime) {
-      return calculateDuration(selectedExperiment.value.created, lastEndTime)
+    if (lastEndTime && selectedExperiment.value) {
+      return calculateDuration(selectedExperiment.value?.created, lastEndTime)
     }
   }
   return '-'

@@ -22,11 +22,11 @@
       </transition>
       <transition name="transition-fade">
         <l-experiment-details
-          v-if="selectedExperiment !== null"
+          v-if="selectedExperiment"
           title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
-          @l-dnld-results="onDnldResults($event)"
+          @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
         />
@@ -40,8 +40,11 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results v-if="showExpResults" />
-      <l-job-results v-if="showJobResults && selectedJobRslts.length" :results="selectedJobRslts" />
-      <l-experiment-logs v-if="showLogs && selectedJobRslts.length === 0" />
+      <l-job-results
+        v-if="showJobResults && selectedJobResults.length"
+        :results="selectedJobResults"
+      />
+      <l-experiment-logs v-if="showLogs && selectedJobResults.length === 0" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -62,56 +65,57 @@ import LExperimentResults from '@/components/organisms/LExperimentResults.vue'
 import LJobResults from '@/components/molecules/LJobResults.vue'
 import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/molecules/LExperimentsEmpty.vue'
+import type { Experiment, Job } from '@/types/Experiment'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedJob, selectedJobRslts } =
+const { experiments, selectedExperiment, selectedJob, selectedJobResults } =
   storeToRefs(experimentStore)
 
 const showDrawer = ref(false)
-const experimentsDrawer = ref(null)
-const showLogs = ref(null)
-const showExpResults = ref(null)
-const showJobResults = ref(null)
+const experimentsDrawer = ref()
+const showLogs = ref()
+const showExpResults = ref()
+const showJobResults = ref()
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
-const isFormVisible = computed(() => showSlidingPanel.value && selectedExperiment.value === null)
+const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 onMounted(async () => {
   await experimentStore.loadExperiments()
 })
 
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Logs' : selectedExperiment.value.name
+  return showLogs.value ? 'Logs' : selectedExperiment.value?.name
 }
 
 const onCreateExperiment = () => {
   showSlidingPanel.value = true
-  selectedExperiment.value = null
+  selectedExperiment.value = undefined
 }
 
-const onSelectExperiment = (experiment) => {
+const onSelectExperiment = (experiment: Experiment) => {
   experimentStore.loadExperimentDetails(experiment.id)
   showSlidingPanel.value = true
 }
 
-const onShowExperimentResults = (experiment) => {
+const onShowExperimentResults = (experiment: Experiment) => {
   experimentStore.loadExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = (job) => {
+const onShowJobResults = (job: Job) => {
   experimentStore.loadJobResults(job.id)
   showDrawer.value = true
   showJobResults.value = true
 }
 
-const onDnldResults = (job) => {
+const onDownloadResults = (job: Job) => {
   experimentStore.loadResultsFile(job.id)
 }
 
@@ -121,7 +125,7 @@ const onShowLogs = () => {
 }
 
 const onDismissForm = () => {
-  selectedDataset.value = null
+  selectedDataset.value = undefined
   showSlidingPanel.value = false
 }
 
@@ -130,7 +134,7 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedJobRslts.value = []
+  selectedJobResults.value = []
   showExpResults.value = false
   showJobResults.value = false
   showLogs.value = false
@@ -146,8 +150,8 @@ onMounted(async () => {
 
 watch(showSlidingPanel, (newValue) => {
   if (!newValue) {
-    selectedExperiment.value = null
-    selectedJob.value = null
+    selectedExperiment.value = undefined
+    selectedJob.value = undefined
   }
 })
 </script>

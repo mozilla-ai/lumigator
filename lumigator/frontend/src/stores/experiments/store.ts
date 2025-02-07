@@ -1,19 +1,27 @@
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import experimentService from '@/services/experiments/experimentService'
 import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
+import type {
+  Experiment,
+  ExperimentResults,
+  Job,
+  JobResults,
+  Model,
+  ObjectData,
+} from '@/types/Experiment'
 
 export const useExperimentStore = defineStore('experiment', () => {
-  const experiments = ref([])
-  const jobs = ref([])
-  const inferenceJobs = ref([])
-  const selectedExperiment = ref(null)
-  const selectedJob = ref(null)
-  const selectedJobRslts = ref([])
-  const selectedExperimentRslts = ref([])
+  const experiments: Ref<Experiment[]> = ref([])
+  const jobs: Ref<Experiment[]> = ref([])
+  const inferenceJobs: Ref<Experiment[]> = ref([])
+  const selectedExperiment: Ref<Experiment | undefined> = ref()
+  const selectedJob: Ref<Experiment | undefined> = ref()
+  const selectedJobResults: Ref<JobResults[]> = ref([])
+  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
   const isPolling = ref(false)
-  let experimentInterval = null
-  const experimentLogs = ref([])
+  let experimentInterval: number | undefined = undefined
+  const experimentLogs: Ref<unknown[]> = ref([])
   const completedStatus = ['SUCCEEDED', 'FAILED']
 
   const hasRunningInferenceJob = computed(() => {
@@ -28,11 +36,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
       .map((job) => parseJobDetails(job))
-    experiments.value = getJobsPerExperiement()
+    experiments.value = getJobsPerExperiment()
   }
 
-  function getJobsPerExperiement() {
-    const experimentMap = jobs.value.reduce((acc, job) => {
+  function getJobsPerExperiment(): Experiment[] {
+    const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
       const key = `${job.name}-${job.experimentStart}`
       // initialize a grouping object
       if (!acc[key]) {
@@ -51,8 +59,8 @@ export const useExperimentStore = defineStore('experiment', () => {
           status: 'SUCCEEDED',
         }
       }
-      acc[key].jobs.push(job)
-      acc[key].models = acc[key].jobs.map((singleJob) => singleJob.model)
+      acc[key].jobs.push(job as unknown as Job)
+      acc[key].models = acc[key].jobs.map((singleJob: Job) => singleJob.model) as Model[]
       return acc
     }, {})
 
@@ -64,7 +72,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseJobDetails(job) {
+  function parseJobDetails(job: Job) {
     return {
       ...retrieveEntrypoint(job),
       status: job.status.toUpperCase(),
@@ -74,7 +82,7 @@ export const useExperimentStore = defineStore('experiment', () => {
       description: job.description,
       experimentStart: job.start_time.slice(0, 16),
       end_time: job.end_time,
-      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : null,
+      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }
 
@@ -91,7 +99,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
   // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
-  async function updateJobStatus(id) {
+  async function updateJobStatus(id: string) {
     try {
       const status = await experimentService.fetchJobStatus(id)
       const inferenceJob = inferenceJobs.value.find((job) => job.id === id)
@@ -114,7 +122,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     await Promise.all(getIncompleteJobIds().map((id) => updateJobStatus(id)))
   }
 
-  async function runExperiment(experimentData) {
+  async function runExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
     const modelArray = experimentData.models
     const jobRequests = modelArray.map((singleModel) => {
       // trigger one job per model
@@ -131,23 +139,27 @@ export const useExperimentStore = defineStore('experiment', () => {
     return results
   }
 
-  function loadExperimentDetails(id) {
+  function loadExperimentDetails(id: string) {
     selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id)
   }
 
-  async function loadJobDetails(id) {
+  async function loadJobDetails(id: string) {
     const jobData = await experimentService.fetchExperimentDetails(id)
     selectedJob.value = parseJobDetails(jobData)
   }
 
-  async function loadResultsFile(jobId) {
+  async function loadResultsFile(jobId: string) {
     const blob = await experimentService.downloadResults(jobId)
-    downloadContent(blob, `${selectedJob.value.name}_results`)
+    downloadContent(blob, `${selectedJob.value?.name}_results`)
   }
 
-  async function loadExperimentResults(experiment) {
+  async function loadExperimentResults(experiment: Experiment) {
     for (const job of experiment.jobs) {
-      const results = await experimentService.fetchResults(job.id)
+      const results = (await experimentService.fetchResults(job.id)) as {
+        resultsData: ObjectData
+        id: string
+        download_url: string
+      }
       if (results?.id) {
         const modelRow = {
           model: results.resultsData.model,
@@ -156,22 +168,26 @@ export const useExperimentStore = defineStore('experiment', () => {
           rouge: results.resultsData.rouge,
           runTime: getJobRuntime(results.id),
           jobResults: transformResultsArray(results.resultsData),
-        }
-        selectedExperimentRslts.value.push(modelRow)
+        } as unknown as ExperimentResults
+        selectedExperimentResults.value.push(modelRow)
       }
     }
   }
 
-  async function loadJobResults(jobId) {
-    const results = await experimentService.fetchResults(jobId)
+  async function loadJobResults(jobId: string) {
+    const results = (await experimentService.fetchResults(jobId)) as {
+      resultsData: ObjectData
+      id: string
+      download_url: string
+    }
     if (results?.id) {
       selectedJob.value = jobs.value.find((job) => job.id === results.id)
-      selectedJobRslts.value = transformResultsArray(results.resultsData)
+      selectedJobResults.value = transformResultsArray(results.resultsData)
     }
   }
 
-  function transformResultsArray(objectData) {
-    const transformedArray = objectData.examples.map((example, index) => {
+  function transformResultsArray(objectData: ObjectData): JobResults[] {
+    const transformedArray = objectData.examples.map((example, index: number) => {
       return {
         example,
         bertscore: {
@@ -202,23 +218,25 @@ export const useExperimentStore = defineStore('experiment', () => {
           rougeLsum_mean: objectData.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.summarization_time,
-      }
+      } as unknown as JobResults
     })
     return transformedArray
   }
 
   async function retrieveLogs() {
-    const logsData = await experimentService.fetchLogs(selectedJob.value.id)
-    const logs = splitByEscapeCharacter(logsData.logs)
-    logs.forEach((log) => {
-      const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
-      if (experimentLogs.value.length === 0 || lastEntry !== log) {
-        experimentLogs.value.push(log)
-      }
-    })
+    if (selectedJob.value) {
+      const logsData = await experimentService.fetchLogs(selectedJob.value?.id)
+      const logs = splitByEscapeCharacter(logsData.logs)
+      logs.forEach((log: string) => {
+        const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
+        if (experimentLogs.value.length === 0 || lastEntry !== log) {
+          experimentLogs.value.push(log)
+        }
+      })
+    }
   }
 
-  function splitByEscapeCharacter(input) {
+  function splitByEscapeCharacter(input: string) {
     const result = input.split('\n')
     return result
   }
@@ -237,11 +255,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     if (isPolling.value) {
       isPolling.value = false
       clearInterval(experimentInterval)
-      experimentInterval = null
+      experimentInterval = undefined
     }
   }
 
-  async function startGroundTruthGeneration(groundTruthPayload) {
+  async function startGroundTruthGeneration(groundTruthPayload: unknown) {
     try {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload)
       if (jobResponse) {
@@ -250,28 +268,28 @@ export const useExperimentStore = defineStore('experiment', () => {
         startPollingForJob(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
-      return null
+      return
     } catch (error) {
       console.error('Failed to start ground truth generation:', error)
-      return null
+      return
     }
   }
 
-  function startPollingForJob(jobId) {
+  function startPollingForJob(jobId: string) {
     isPolling.value = true
     experimentInterval = setInterval(() => {
       updateJobStatus(jobId).then(() => {
         const job = experiments.value.find((experiment) => experiment.id === jobId)
-        if (completedStatus.includes(job?.status)) {
+        if (job && completedStatus.includes(job.status)) {
           stopPolling() // Stop polling when the job is complete
         }
       })
     }, 3000) // Poll every 3 seconds
   }
 
-  function getJobRuntime(jobId) {
+  function getJobRuntime(jobId: string) {
     const job = jobs.value.find((job) => job.id === jobId)
-    return job ? job.runTime : null
+    return job ? job.runTime : undefined
   }
 
   watch(
@@ -320,8 +338,8 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedExperiment,
     selectedJob,
     experimentLogs,
-    selectedExperimentRslts,
-    selectedJobRslts,
+    selectedExperimentResults,
+    selectedJobResults,
     isPolling,
     // computed
     hasRunningInferenceJob,

@@ -2,6 +2,16 @@ name: lumigator
 
 services:
 
+  inference-model:
+    build:
+      context: .
+      dockerfile: cache/Dockerfile.model-inference
+    platform: linux/arm64
+    command: /bin/true
+    volumes:
+      - huggingface_cache_vol:/home/ray/.cache/huggingface
+    profiles:
+      - local
   minio:
     image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     command: server /data --console-address ":9001"
@@ -60,15 +70,29 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      inference-model:
+        condition: service_completed_successfully
     ports:
       - "6379:6379"
       - "8265:8265"
       - "10001:10001"
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
-    command: bash -c "RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001 --block" # pragma: allowlist secret
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+          set -eaux
+          mkdir -p /home/ray/.cache/
+          # If the file was mounted in a volume instead of
+          # a shared dir, permissions need to be setup
+          # ... || true allows this to fail (-e is set)
+          sudo chmod -R 777 /home/ray/.cache/ || true
+          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES_ENV_VAR=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=8265 --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
+          sleep infinity
     shm_size: 2g
     volumes:
-      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+      - huggingface_cache_vol:/home/ray/.cache/huggingface
+      - evaluator_deps_vol:/evaluator_deps
     deploy:
       resources:
         limits:
@@ -172,3 +196,4 @@ volumes:
     minio-data:
     database_volume:
     redis-data:
+    huggingface_cache_vol:

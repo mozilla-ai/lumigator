@@ -1,0 +1,25 @@
+# Dockerfile.huggingface-cache
+FROM --platform=linux/arm64 python:3.11-slim
+
+# Install the transformers library (and any other packages needed)
+RUN pip install --no-cache-dir transformers
+RUN pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+# Create the cache directory (using the same path your code uses)
+RUN mkdir -p /home/ray/.cache/huggingface
+
+# Pre-download the model and tokenizer into a subfolder.
+# (Replace 'facebook/bart-large-cnn' with your actual model name if different.)
+RUN python -c "\
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer; \
+model_name = 'facebook/bart-large-cnn'; \
+print('Downloading model and tokenizer for', model_name); \
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name); \
+tokenizer = AutoTokenizer.from_pretrained(model_name); \
+model.save_pretrained('/home/ray/.cache/huggingface/' + model_name.replace('/', '_')); \
+tokenizer.save_pretrained('/home/ray/.cache/huggingface/' + model_name.replace('/', '_'))"
+
+# Declare the cache directory as a volume so its contents are preserved.
+VOLUME /home/ray/.cache/huggingface
+RUN chown 777 -R /home/ray/.cache/huggingface
+# Exit immediately; this container’s job is only to prepopulate the volume.
+CMD ["/bin/true"]

@@ -1,5 +1,11 @@
 import type { Job } from '@/types/Experiment'
 
+/**
+ * Formats a date string into 'dd-MMM-yyyy, hh:mm' format.
+ *
+ * @param {string} dateString - The date string to format.
+ * @returns {string} The formatted date string.
+ */
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
   return new Intl.DateTimeFormat('en-GB', {
@@ -14,6 +20,14 @@ export function formatDate(dateString: string) {
     .replace(/(\d{4})(\s)/, '$1,$2')
 }
 
+
+/**
+ * Retrieves and normalizes the entrypoint configuration from a job object.
+ *
+ * @param {Object} job - The job object containing the entrypoint.
+ * @param {string} job.entrypoint - The entrypoint stringified JSON provided from the API
+ * @returns {Object|null} The parsed and normalized entrypoint configuration object, or null if invalid.
+ */
 export function retrieveEntrypoint(job: Job) {
   if (!job || !job.entrypoint) {
     console.error('Invalid job data')
@@ -74,6 +88,14 @@ export function retrieveEntrypoint(job: Job) {
   }
 }
 
+/**
+ * Calculates the duration between two ISO timestamps and formats it as 'hh:mm:ss'.
+ * It is used for calculating the duration of jobs OR Experiments until Backend provides this info
+ * @param {string} start - The start timestamp in ISO format.
+ * @param {string} finish - The finish timestamp in ISO format.
+ * @returns {string} The formatted duration as 'hh:mm:ss'.
+ * @throws {Error} If the date format is invalid.
+ */
 export function calculateDuration(start: string, finish: string) {
   // Calculate the time difference in milliseconds
   const differenceInMilliseconds = new Date(finish).getTime() - new Date(start).getTime()
@@ -94,6 +116,12 @@ export function calculateDuration(start: string, finish: string) {
   return formatedDuration
 }
 
+/**
+ * Initiates a download of the provided content as a file.
+ * Used for downloading Resluts and Datasets
+ * @param {Blob} blob - The content to download.
+ * @param {string} filename - The name of the file to be downloaded.
+ */
 export function downloadContent(blob: Blob, filename: string) {
   const downloadUrl = URL.createObjectURL(blob)
   const anchor = document.createElement('a')

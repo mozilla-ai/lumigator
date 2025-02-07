@@ -109,6 +109,7 @@ class JobInferenceCreate(BaseModel):
     top_p: float = 1.0
     config_template: str | None = None
     store_to_dataset: bool = False
+    max_new_tokens: int = 500
 
 
 class JobAnnotateCreate(BaseModel):
@@ -142,6 +143,8 @@ class JobResultDownloadResponse(BaseModel):
 
 class JobResults(BaseModel):
     id: UUID
+    metrics: list[dict[str, Any]] | None = None
+    parameters: list[dict[str, Any]] | None = None
     metric_url: str
     artifact_url: str
 

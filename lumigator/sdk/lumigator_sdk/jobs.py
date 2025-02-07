@@ -114,7 +114,7 @@ class Jobs:
                 return jobinfo
         raise Exception(
             f"Job {id} did not complete in the polling "
-            "time (retries: {retries}, poll_wait: {poll_wait})"
+            f"time (retries: {retries}, poll_wait: {poll_wait})"
         )
 
     def create_job(

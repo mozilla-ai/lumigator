@@ -1,10 +1,7 @@
 <template>
-  <div
-    class="l-page-header"
-    :class="{'column': column}"
-  >
+  <div class="l-page-header" :class="{ column: column }">
     <div class="l-page-header__text-content">
-      <h3>{{ title }} </h3>
+      <h3>{{ title }}</h3>
       <p class="l-page-header__text-content-description">{{ description }}</p>
       <!-- <p>{{ subtitle }}</p> -->
     </div>
@@ -19,45 +16,47 @@
   </div>
 </template>
 
-<script setup>
-import Button from 'primevue/button';
+<script lang="ts" setup>
+import Button from 'primevue/button'
 
 defineProps({
   title: {
     type: String,
     default: '',
-    required: false
+    required: false,
   },
   subtitle: {
     type: String,
     default: '',
-    required: false
+    required: false,
   },
   description: {
     type: String,
     default: '',
-    required: false
+    required: false,
   },
   buttonLabel: {
     type: String,
     default: '',
-    required: false
+    required: false,
   },
   column: {
     type: Boolean,
     default: false,
-    required: false
-  }
-});
+    required: false,
+  },
+})
 
-const emit = defineEmits(['l-header-action']);
+const emit = defineEmits(['l-header-action'])
 
 const handleAction = () => {
   emit('l-header-action')
-};
+}
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-page-header {
   $root: &;
   display: flex;
@@ -82,7 +81,7 @@ const handleAction = () => {
     }
 
     &-description {
-      padding-top: $l-spacing-1/2;
+      padding-top: calc($l-spacing-1 / 2);
       max-width: 400px;
       text-align: left;
     }
@@ -92,10 +91,9 @@ const handleAction = () => {
     font-weight: $l-font-weight-normal;
   }
 
-  &.column{
-   width: 100%;
-   flex-direction: column;
+  &.column {
+    width: 100%;
+    flex-direction: column;
   }
-
 }
 </style>

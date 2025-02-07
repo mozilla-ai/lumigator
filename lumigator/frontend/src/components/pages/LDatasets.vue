@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="l-datasets"
-    :class="{'is-empty': datasets.length === 0 || !datasets}"
-  >
-    <div
-      v-if="datasets.length > 0"
-      class="l-datasets__header-container"
-    >
+  <div class="l-datasets" :class="{ 'is-empty': datasets.length === 0 || !datasets }">
+    <div v-if="datasets.length > 0" class="l-datasets__header-container">
       <l-page-header
         title="Datasets"
         :description="headerDescription"
@@ -15,18 +9,9 @@
         @l-header-action="onDatasetAdded()"
       />
     </div>
-    <l-dataset-empty
-      v-else
-      @l-add-dataset="onDatasetAdded()"
-    />
-    <div
-      v-if="datasets.length > 0"
-      class="l-datasets__table-container"
-    >
-      <Tabs
-        v-model:value="currentTab"
-        @update:value="showSlidingPanel = false"
-      >
+    <l-dataset-empty v-else @l-add-dataset="onDatasetAdded()" />
+    <div v-if="datasets.length > 0" class="l-datasets__table-container">
+      <Tabs v-model:value="currentTab" @update:value="showSlidingPanel = false">
         <TabList>
           <Tab value="0">All Datasets</Tab>
           <Tab value="1">
@@ -57,14 +42,8 @@
         </TabPanels>
       </Tabs>
     </div>
-    <l-file-upload
-      ref="datasetInput"
-      entity="dataset"
-      @l-file-upload="onDatasetUpload($event)"
-    />
-    <Teleport
-      to=".sliding-panel"
-    >
+    <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
+    <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"
         @l-experiment="onExperimentDataset($event)"
@@ -87,60 +66,60 @@
       :position="'bottom'"
       @l-drawer-closed="showLogs = false"
     >
-      <l-experiment-logs
-        v-if="showLogs"
-      />
-
+      <l-experiment-logs v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasets/store'
 import { useExperimentStore } from '@/stores/experiments/store'
-import { useSlidePanel } from '@/composables/SlidingPanel';
-import { useRouter } from 'vue-router';
-import LPageHeader from '@/components/molecules/LPageHeader.vue';
-import LDatasetTable from '@/components/molecules/LDatasetTable.vue';
-import LFileUpload from '@/components/molecules/LFileUpload.vue';
-import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue';
-import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue';
-import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue';
-import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue';
-import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue';
-import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
+import { useSlidePanel } from '@/composables/SlidingPanel'
+import { useRouter } from 'vue-router'
+import LPageHeader from '@/components/molecules/LPageHeader.vue'
+import LDatasetTable from '@/components/molecules/LDatasetTable.vue'
+import LFileUpload from '@/components/molecules/LFileUpload.vue'
+import LDatasetEmpty from '@/components/molecules/LDatasetEmpty.vue'
+import LDatasetDetails from '@/components/organisms/LDatasetDetails.vue'
+import LInferenceJobsTable from '@/components/molecules/LInferenceJobsTable.vue'
+import LExperimentDetails from '@/components/molecules/LExperimentDetails.vue'
+import LExperimentsDrawer from '@/components/molecules/LExperimentsDrawer.vue'
+import LExperimentLogs from '@/components/molecules/LExperimentLogs.vue'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import type { ToastMessageOptions } from 'primevue'
+import type { Dataset } from '@/types/Dataset'
+import type { Job } from '@/types/Experiment'
 
-const datasetStore = useDatasetStore();
-const { datasets, selectedDataset } = storeToRefs(datasetStore);
-const experimentStore = useExperimentStore();
-const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore);
-const { showSlidingPanel  } = useSlidePanel();
-const toast = useToast();
-const datasetInput = ref(null);
-const confirm = useConfirm();
-const router = useRouter();
-const currentTab = ref('0');
-const showLogs = ref(false);
-const refDatasetTable = ref(null)
+const datasetStore = useDatasetStore()
+const { datasets, selectedDataset } = storeToRefs(datasetStore)
+const experimentStore = useExperimentStore()
+const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore)
+const { showSlidingPanel } = useSlidePanel()
+const toast = useToast()
+const datasetInput = ref()
+const confirm = useConfirm()
+const router = useRouter()
+const currentTab = ref('0')
+const showLogs = ref(false)
+const refDatasetTable = ref()
 
 onMounted(async () => {
-  await datasetStore.loadDatasets();
-});
+  await datasetStore.loadDatasets()
+})
 
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
 It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
-function deleteConfirmation(dataset) {
+function deleteConfirmation(dataset: Dataset) {
   confirm.require({
     message: `${dataset.filename}`,
     header: 'Delete  dataset?',
@@ -149,11 +128,11 @@ function deleteConfirmation(dataset) {
     rejectProps: {
       label: 'Cancel',
       severity: 'secondary',
-      outlined: true
+      outlined: true,
     },
     acceptProps: {
       label: 'Delete',
-      severity: 'danger'
+      severity: 'danger',
     },
     accept: () => {
       onDeleteDataset(dataset.id)
@@ -166,76 +145,79 @@ function deleteConfirmation(dataset) {
         messageicon: 'pi pi-trash',
         detail: `${dataset.filename}`,
         group: 'br',
-        life: 3000
-      })
+        life: 3000,
+      } as ToastMessageOptions & { messageicon: string })
     },
-    reject: () => {}
-  });
+    reject: () => {},
+  })
 }
 
-function onDownloadDataset(dataset) {
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetFile();
+function onDownloadDataset(dataset: Dataset) {
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetFile()
 }
 
-const onDatasetAdded = () => { datasetInput.value.input.click() }
+const onDatasetAdded = () => {
+  datasetInput.value.input.click()
+}
 
 const reloadDatasetTable = () => {
-  datasetStore.loadDatasets();
-  refDatasetTable.value.loading = true;
+  datasetStore.loadDatasets()
+  refDatasetTable.value.loading = true
   setTimeout(async () => {
-    await datasetStore.loadDatasets();
-    refDatasetTable.value.loading = false;
-  }, 1500);
+    await datasetStore.loadDatasets()
+    refDatasetTable.value.loading = false
+  }, 1500)
 }
 
-const onDatasetUpload = (datasetFile) => {
-  datasetStore.uploadDataset(datasetFile);
+const onDatasetUpload = (datasetFile: File) => {
+  datasetStore.uploadDataset(datasetFile)
 }
 
-const onDeleteDataset = (datasetID) => {
-  datasetStore.deleteDataset(datasetID);
+const onDeleteDataset = (datasetID: string) => {
+  datasetStore.deleteDataset(datasetID)
 }
 
-const onDatasetSelected = (dataset) => {
-  selectedJob.value = null;
-  datasetStore.loadDatasetInfo(dataset.id);
-  showSlidingPanel.value = true;
+const onDatasetSelected = (dataset: Dataset) => {
+  selectedJob.value = undefined
+  datasetStore.loadDatasetInfo(dataset.id)
+  showSlidingPanel.value = true
 }
 
 const onClearSelection = () => {
-  datasetStore.resetSelection();
+  datasetStore.resetSelection()
 }
 
-const onExperimentDataset = (dataset) => {
+const onExperimentDataset = (dataset: Dataset) => {
   router.push('experiments')
-  selectedDataset.value = dataset;
-  datasetStore.loadDatasetInfo(dataset.id);
+  selectedDataset.value = dataset
+  datasetStore.loadDatasetInfo(dataset.id)
 }
 
-const onJobInferenceSelected = (job) => {
-  selectedDataset.value = null;
+const onJobInferenceSelected = (job: Job) => {
+  selectedDataset.value = undefined
   experimentStore.loadJobDetails(job.id)
-  showSlidingPanel.value = true;
+  showSlidingPanel.value = true
 }
 
 const onCloseJobDetails = () => {
-  showSlidingPanel.value = false;
-  selectedJob.value = null;
+  showSlidingPanel.value = false
+  selectedJob.value = undefined
 }
 
 const onShowLogs = () => {
-  showLogs.value = true;
+  showLogs.value = true
 }
 
 const onGenerateGT = () => {
-  showSlidingPanel.value = false;
-  currentTab.value = '1';
+  showSlidingPanel.value = false
+  currentTab.value = '1'
 }
-
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-datasets {
   $root: &;
   max-width: $l-main-width;
@@ -250,7 +232,7 @@ const onGenerateGT = () => {
   }
 
   &__table-container {
-		padding: $l-spacing-1;
+    padding: $l-spacing-1;
     display: grid;
     width: 100%;
   }
@@ -263,7 +245,9 @@ const onGenerateGT = () => {
 </style>
 
 <style lang="scss">
-.l-datasets .p-tabs{
+@use '@/styles/variables' as *;
+
+.l-datasets .p-tabs {
   $root: &;
 
   & .p-tablist {
@@ -271,7 +255,7 @@ const onGenerateGT = () => {
   }
 
   & .p-tablist-tab-list {
-    background: $l-card-bg!important;
+    background: $l-card-bg !important;
     border-color: $l-main-bg;
 
     & .p-tab {
@@ -280,13 +264,13 @@ const onGenerateGT = () => {
       border-color: $l-main-bg;
 
       &:hover {
-       border-color: $l-main-bg;
+        border-color: $l-main-bg;
       }
     }
   }
 
   .is-running::after {
-    content: "";
+    content: '';
     display: inline-block;
     width: 5px;
     height: 5px;
@@ -296,22 +280,22 @@ const onGenerateGT = () => {
     margin-bottom: 2px;
     animation: pulse-dot 1.5s infinite ease-in-out;
   }
-@keyframes pulse-dot {
-  0% {
-    transform: scale(1);
-    /* Start with no glow */
-   color: rgba(255, 255, 0, 0.7);
-  }
-  50% {
-    /* Dot grows in size slightly */
-    transform: scale(1.2);
-    /* Box-shadow expands outward for the glow effect */
-    color: rgba(255, 255, 0, 0.7);
-  }
-  100% {
-    transform: scale(1);
-    /* Return to no glow */
-    color: rgba(255, 255, 0, 0.7);
+  @keyframes pulse-dot {
+    0% {
+      transform: scale(1);
+      /* Start with no glow */
+      color: rgba(255, 255, 0, 0.7);
+    }
+    50% {
+      /* Dot grows in size slightly */
+      transform: scale(1.2);
+      /* Box-shadow expands outward for the glow effect */
+      color: rgba(255, 255, 0, 0.7);
+    }
+    100% {
+      transform: scale(1);
+      /* Return to no glow */
+      color: rgba(255, 255, 0, 0.7);
     }
   }
 }

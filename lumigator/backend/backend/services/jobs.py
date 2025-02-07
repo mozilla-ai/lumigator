@@ -252,13 +252,13 @@ class JobService:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
-        db_logs = self.job_repo.get(job_id).logs
+        db_logs = self.job_repo.get(job_id)
         if not db_logs:
             ray_db_logs = self.retrieve_job_logs(job_id)
-            self._update_job_record(job_id, logs=db_logs.logs)
+            self._update_job_record(job_id, logs=ray_db_logs.logs)
             return ray_db_logs
         else:
-            return JobLogsResponse(logs=db_logs)
+            return JobLogsResponse(logs=db_logs.logs)
 
     def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
         resp = requests.get(

@@ -2,21 +2,18 @@ name: lumigator
 
 services:
 
+  ray:
+    volumes:
+      - /tmp/ray_pip_cache:/tmp/ray_pip_cache
   backend:
     build:
       context: .
       dockerfile: "Dockerfile"
       target: "dev_image"
     volumes:
-      -  database_volume:/mzai/backend/local.db
+      - database_volume:/mzai/backend/local.db
     ports:
       - "5678:5678"
-    environment:
-      - MLFLOW_TRACKING_URI
-    depends_on:
-      mlflow:
-        condition: "service_started"
-        required: false
     develop:
       watch:
         - path: lumigator/backend/
@@ -36,23 +33,3 @@ services:
             - .venv/
         - path: lumigator/backend/pyproject.toml
           action: rebuild
-
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.0.1
-    environment:
-      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - BACKEND_STORE_URI=sqlite:///mlflow.db
-      - ARTIFACT_ROOT=s3://mlflow`
-    ports:
-      - "8001:5000"
-    depends_on:
-      minio:
-        condition: service_healthy
-    command: mlflow server --backend-store-uri ${BACKEND_STORE_URI} --default-artifact-root ${ARTIFACT_ROOT} --host 0.0.0.0
-    extra_hosts:
-      - "localhost:host-gateway"
-    profiles:
-      - local

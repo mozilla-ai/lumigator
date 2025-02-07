@@ -34,7 +34,7 @@ def save_to_disk(local_path: Path, results: InferenceJobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(results.dict(), f)
+        json.dump(results.model_dump(), f)
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):

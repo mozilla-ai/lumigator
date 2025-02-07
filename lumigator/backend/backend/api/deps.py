@@ -10,14 +10,13 @@ from sqlalchemy.orm import Session
 
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
-from backend.repositories.experiments import ExperimentRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
-from backend.services.completions import MistralCompletionService, OpenAICompletionService
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
+from backend.tracking import tracking_client_manager
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -26,6 +25,14 @@ def get_db_session() -> Generator[Session, None, None]:
 
 
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
+
+
+def get_tracking_client() -> Generator[Session, None, None]:
+    with tracking_client_manager.connect() as client:
+        yield client
+
+
+TrackingClientDep = Annotated[Session, Depends(get_tracking_client)]
 
 
 def get_s3_client() -> Generator[S3Client, None, None]:
@@ -64,40 +71,25 @@ JobServiceDep = Annotated[JobService, Depends(get_job_service)]
 
 def get_experiment_service(
     session: DBSessionDep,
+    tracking_client: TrackingClientDep,
     job_service: JobServiceDep,
     dataset_service: DatasetServiceDep,
 ) -> ExperimentService:
     job_repo = JobRepository(session)
-    experiment_repo = ExperimentRepository(session)
-    return ExperimentService(experiment_repo, job_repo, job_service, dataset_service)
+    return ExperimentService(job_repo, job_service, dataset_service, tracking_client)
 
 
 ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
 def get_workflow_service(
-    session: DBSessionDep, job_service: JobServiceDep, dataset_service: DatasetServiceDep
+    session: DBSessionDep,
+    tracking_client: TrackingClientDep,
+    job_service: JobServiceDep,
+    dataset_service: DatasetServiceDep,
 ) -> WorkflowService:
     job_repo = JobRepository(session)
-    return WorkflowService(job_repo, job_service, dataset_service)
+    return WorkflowService(job_repo, job_service, dataset_service, tracking_client=tracking_client)
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
-
-
-def get_mistral_completion_service() -> MistralCompletionService:
-    return MistralCompletionService()
-
-
-MistralCompletionServiceDep = Annotated[
-    MistralCompletionService, Depends(get_mistral_completion_service)
-]
-
-
-def get_openai_completion_service() -> OpenAICompletionService:
-    return OpenAICompletionService()
-
-
-OpenAICompletionServiceDep = Annotated[
-    OpenAICompletionService, Depends(get_openai_completion_service)
-]

@@ -1,25 +1,22 @@
 # Dockerfile.huggingface-cache
 FROM --platform=linux/arm64 python:3.11-slim
 
-# Install the transformers library (and any other packages needed)
-RUN pip install --no-cache-dir transformers
-RUN pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
-# Create the cache directory (using the same path your code uses)
-RUN mkdir -p /home/ray/.cache/huggingface
+# Install required packages: transformers and huggingface_hub
+RUN pip install --no-cache-dir transformers huggingface_hub
 
-# Pre-download the model and tokenizer into a subfolder.
-# (Replace 'facebook/bart-large-cnn' with your actual model name if different.)
+# Ensure the cache directory exists (snapshot_download will create its own subfolders)
+RUN mkdir -p /home/ray/.cache/huggingface/hub
+
+# Use the huggingface_hub API to download the model exactly as the Hub does.
+# This will create a folder with the proper structure (e.g. blobs, refs, snapshots).
 RUN python -c "\
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer; \
-model_name = 'facebook/bart-large-cnn'; \
-print('Downloading model and tokenizer for', model_name); \
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name); \
-tokenizer = AutoTokenizer.from_pretrained(model_name); \
-model.save_pretrained('/home/ray/.cache/huggingface/' + model_name.replace('/', '_')); \
-tokenizer.save_pretrained('/home/ray/.cache/huggingface/' + model_name.replace('/', '_'))"
+from huggingface_hub import snapshot_download; \
+model_path = snapshot_download('facebook/bart-large-cnn', cache_dir='/home/ray/.cache/huggingface/hub'); \
+print('Model downloaded to:', model_path)\
+"
 
-# Declare the cache directory as a volume so its contents are preserved.
+# Declare the cache directory as a volume so that its contents persist and can be shared.
 VOLUME /home/ray/.cache/huggingface
-RUN chown 777 -R /home/ray/.cache/huggingface
-# Exit immediately; this container’s job is only to prepopulate the volume.
+
+# Exit immediately (this container’s only job is to populate the cache)
 CMD ["/bin/true"]

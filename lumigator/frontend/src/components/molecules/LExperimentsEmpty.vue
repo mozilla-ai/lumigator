@@ -1,12 +1,10 @@
 <template>
   <div class="l-experiment-empty">
     <h2 class="l-experiment-empty__instructions">
-      Experiments are a logical sequence of inference and evaluation tasks that
-      run sequentially to evaluate an LLM.</h2>
-    <p class="l-experiment-empty__instructions-text">
-
-
-    </p>
+      Experiments are a logical sequence of inference and evaluation tasks that run sequentially to
+      evaluate an LLM.
+    </h2>
+    <p class="l-experiment-empty__instructions-text"></p>
     <Button
       rounded
       size="small"
@@ -15,23 +13,29 @@
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
     />
-    <p class="l-experiment-empty__note">   <span>
-      We evaluate Summarization tasks using ROUGE, METEOR, and BERT score,
-      each focusing on different aspects of prediction-ground truth similarity.
-      <a href="https://mozilla-ai.github.io/lumigator/"
-         target="_blank"
-         style="background-color: transparent;"
-      >Learn more <span class="pi pi-arrow-up-right" /></a>
-    </span></p>
+    <p class="l-experiment-empty__note">
+      <span>
+        We evaluate Summarization tasks using ROUGE, METEOR, and BERT score, each focusing on
+        different aspects of prediction-ground truth similarity.
+        <a
+          href="https://mozilla-ai.github.io/lumigator/"
+          target="_blank"
+          style="background-color: transparent"
+          >Learn more <span class="pi pi-arrow-up-right"
+        /></a>
+      </span>
+    </p>
   </div>
 </template>
 
-<script setup>
-import Button from 'primevue/button';
-const emit  = defineEmits(['l-add-experiment'])
+<script lang="ts" setup>
+import Button from 'primevue/button'
+const emit = defineEmits(['l-add-experiment'])
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-empty {
   $root: &;
   margin: auto;
@@ -51,7 +55,7 @@ const emit  = defineEmits(['l-add-experiment'])
   }
 
   &__note {
-    padding-top: $l-spacing-1/2;
+    padding-top: calc($l-spacing-1 / 2);
     font-size: $l-font-size-sm;
     color: $l-grey-100;
   }
@@ -59,12 +63,11 @@ const emit  = defineEmits(['l-add-experiment'])
   &__action-btn {
     font-weight: $l-font-weight-normal;
     margin-top: $l-spacing-1;
-    margin-bottom: $l-spacing-1/2;
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   p {
     margin-bottom: $l-spacing-1;
   }
-
 }
 </style>

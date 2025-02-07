@@ -68,8 +68,8 @@ import Tag from 'primevue/tag'
 import Column from 'primevue/column'
 import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/store'
-import { useDatasetStore } from '@/stores/datasets/store'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useDatasetStore } from '@/stores/datasets/datasetsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 
 const experimentStore = useExperimentStore()
@@ -129,7 +129,7 @@ watch(hasRunningInferenceJob, async (newValue) => {
   } else {
     clearInterval(pollingId)
     emit('l-inference-finished')
-    datasetStore.loadDatasets()
+    datasetStore.fetchDatasets()
   }
 })
 </script>

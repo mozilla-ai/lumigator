@@ -84,8 +84,8 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
-import { useExperimentStore } from '@/stores/experiments/store'
+import { useDatasetStore } from '@/stores/datasets/datasetsStore'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
 import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
 import Select from 'primevue/select'
@@ -134,7 +134,7 @@ async function triggerExperiment() {
   }
   const success = await experimentStore.runExperiment(experimentPayload)
   if (success.length) {
-    await experimentStore.loadExperiments()
+    await experimentStore.fetchAllJobs()
     emit('l-close-form')
     resetForm()
     toast.add({
@@ -164,7 +164,7 @@ function resetForm() {
 
 onMounted(async () => {
   if (datasets.value?.length === 0) {
-    await datasetStore.loadDatasets()
+    await datasetStore.fetchDatasets()
   }
   if (selectedDataset.value) {
     dataset.value = selectedDataset.value

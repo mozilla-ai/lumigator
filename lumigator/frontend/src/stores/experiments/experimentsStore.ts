@@ -1,6 +1,6 @@
 import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import experimentService from '@/services/experiments/experimentService'
+import { experimentsService } from '@/services/experiments/experimentService'
 import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
 import type {
   Experiment,
@@ -11,7 +11,7 @@ import type {
   ObjectData,
 } from '@/types/Experiment'
 
-export const useExperimentStore = defineStore('experiment', () => {
+export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<Experiment[]> = ref([])
   const jobs: Ref<Experiment[]> = ref([])
   const inferenceJobs: Ref<Experiment[]> = ref([])
@@ -31,16 +31,15 @@ export const useExperimentStore = defineStore('experiment', () => {
   /**
    * Loads all experiments and jobs.
    */
-  // TODO: Rename to loadAllJobs
-  async function loadExperiments() {
-    const allJobs = await experimentService.fetchJobs()
+  async function fetchAllJobs() {
+    const allJobs = await experimentsService.fetchJobs()
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJobDetails(job))
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
       .map((job) => parseJobDetails(job))
-    experiments.value = getJobsPerExperiment()
+    experiments.value = groupJobsByExperiment()
   }
 
   /**
@@ -48,7 +47,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    *  Jobs with same name and starting time belong to the same experiment.
    * @returns {Array} Array of experiments with their associated jobs.
    */
-  function getJobsPerExperiment(): Experiment[] {
+  function groupJobsByExperiment(): Experiment[] {
     const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
       const key = `${job.name}-${job.experimentStart}`
       // initialize a grouping object
@@ -110,7 +109,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
   async function updateJobStatus(id: string) {
     try {
-      const status = await experimentService.fetchJobStatus(id)
+      const status = await experimentsService.fetchJobStatus(id)
       const inferenceJob = inferenceJobs.value.find((job) => job.id === id)
       if (inferenceJob) {
         inferenceJob.status = status
@@ -146,7 +145,7 @@ export const useExperimentStore = defineStore('experiment', () => {
         ...experimentData,
         model: singleModel.uri,
       }
-      return experimentService.triggerExperiment(jobPayload)
+      return experimentsService.triggerExperiment(jobPayload)
     })
 
     // Execute all requests in parallel
@@ -159,19 +158,19 @@ export const useExperimentStore = defineStore('experiment', () => {
     selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id)
   }
 
-  async function loadJobDetails(id: string) {
-    const jobData = await experimentService.fetchExperimentDetails(id)
+  async function fetchJobDetails(id: string) {
+    const jobData = await experimentsService.fetchJobDetails(id)
     selectedJob.value = parseJobDetails(jobData)
   }
 
-  async function loadResultsFile(jobId: string) {
-    const blob = await experimentService.downloadResults(jobId)
+  async function fetchExperimentResultsFile(jobId: string) {
+    const blob = await experimentsService.downloadResults(jobId)
     downloadContent(blob, `${selectedJob.value?.name}_results`)
   }
 
-  async function loadExperimentResults(experiment: Experiment) {
+  async function fetchExperimentResults(experiment: Experiment) {
     for (const job of experiment.jobs) {
-      const results = (await experimentService.fetchResults(job.id)) as {
+      const results = (await experimentsService.fetchExperimentResults(job.id)) as {
         resultsData: ObjectData
         id: string
         download_url: string
@@ -183,22 +182,22 @@ export const useExperimentStore = defineStore('experiment', () => {
           bertscore: results.resultsData.bertscore,
           rouge: results.resultsData.rouge,
           runTime: getJobRuntime(results.id),
-          jobResults: transformResultsArray(results.resultsData),
+          jobResults: transformJobResults(results.resultsData),
         } as unknown as ExperimentResults
         selectedExperimentResults.value.push(modelRow)
       }
     }
   }
 
-  async function loadJobResults(jobId: string) {
-    const results = (await experimentService.fetchResults(jobId)) as {
+  async function fetchJobResults(jobId: string) {
+    const results = (await experimentsService.fetchExperimentResults(jobId)) as {
       resultsData: ObjectData
       id: string
       download_url: string
     }
     if (results?.id) {
       selectedJob.value = jobs.value.find((job) => job.id === results.id)
-      selectedJobResults.value = transformResultsArray(results.resultsData)
+      selectedJobResults.value = transformJobResults(results.resultsData)
     }
   }
 
@@ -208,7 +207,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    * @param {Object} objectData .
    * @returns {Array} Transformed results array.
    */
-  function transformResultsArray(objectData: ObjectData): JobResults[] {
+  function transformJobResults(objectData: ObjectData): JobResults[] {
     const transformedArray = objectData.examples.map((example, index: number) => {
       return {
         example,
@@ -247,7 +246,7 @@ export const useExperimentStore = defineStore('experiment', () => {
 
   async function retrieveLogs() {
     if (selectedJob.value) {
-      const logsData = await experimentService.fetchLogs(selectedJob.value?.id)
+      const logsData = await experimentsService.fetchLogs(selectedJob.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
       logs.forEach((log: string) => {
         const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
@@ -289,7 +288,7 @@ export const useExperimentStore = defineStore('experiment', () => {
    */
   async function startGroundTruthGeneration(groundTruthPayload: unknown) {
     try {
-      const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload)
+      const jobResponse = await experimentsService.triggerAnnotationJob(groundTruthPayload)
       if (jobResponse) {
         // Start polling to monitor the job status
         await updateJobStatus(jobResponse.id) // Ensure initial update
@@ -372,13 +371,13 @@ export const useExperimentStore = defineStore('experiment', () => {
     // computed
     hasRunningInferenceJob,
     // actions
-    loadExperiments,
+    fetchAllJobs,
     updateStatusForIncompleteJobs,
     loadExperimentDetails,
-    loadJobDetails,
-    loadExperimentResults,
-    loadJobResults,
-    loadResultsFile,
+    fetchJobDetails,
+    fetchExperimentResults,
+    fetchJobResults,
+    fetchExperimentResultsFile,
     startGroundTruthGeneration,
     runExperiment,
   }

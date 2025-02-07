@@ -1,21 +1,21 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import datasetsService from '@/services/datasets/datasetsService'
+import { datasetsService } from '@/services/datasets/datasetsService'
 import { downloadContent } from '@/helpers/index'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
 
-export const useDatasetStore = defineStore('dataset', () => {
+export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
   const toast = useToast()
 
-  async function loadDatasets() {
+  async function fetchDatasets() {
     datasets.value = await datasetsService.fetchDatasets()
   }
 
-  async function loadDatasetInfo(datasetID: string) {
+  async function fetchDatasetDetails(datasetID: string) {
     selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID)
   }
 
@@ -40,7 +40,7 @@ export const useDatasetStore = defineStore('dataset', () => {
         group: 'br',
       } as ToastMessageOptions & { messageicon: string })
     }
-    await loadDatasets()
+    await fetchDatasets()
   }
 
   async function deleteDataset(id: string) {
@@ -51,11 +51,11 @@ export const useDatasetStore = defineStore('dataset', () => {
       resetSelection()
     }
     await datasetsService.deleteDataset(id)
-    await loadDatasets()
+    await fetchDatasets()
   }
 
   // TODO: this shouldnt depend on refs/state, it can be a util function
-  async function loadDatasetFile() {
+  async function downloadDatasetFile() {
     if (selectedDataset.value) {
       const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
       downloadContent(blob, selectedDataset.value?.filename)
@@ -64,12 +64,12 @@ export const useDatasetStore = defineStore('dataset', () => {
 
   return {
     datasets,
-    loadDatasets,
+    fetchDatasets,
     selectedDataset,
-    loadDatasetInfo,
+    fetchDatasetDetails,
     resetSelection,
     uploadDataset,
     deleteDataset,
-    loadDatasetFile,
+    downloadDatasetFile,
   }
 })

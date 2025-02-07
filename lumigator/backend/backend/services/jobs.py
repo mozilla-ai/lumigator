@@ -29,6 +29,7 @@ from lumigator_schemas.jobs import (
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
+from sqlalchemy.sql.expression import or_
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -412,7 +413,6 @@ class JobService:
             name=request.name,
             description=request.description,
             job_type=job_type,
-            experiment_id=experiment_id,
         )
 
         # prepare configuration parameters, which depend both on the user inputs
@@ -505,32 +505,19 @@ class JobService:
 
         return JobResponse.model_validate(record)
 
-    def _list_job_records_per_type(self, job_type: str, skip: int, limit: int) -> list[JobRecord]:
-        records = self.job_repo.list_by_job_type(job_type, skip, limit)
-        if records is None:
-            return []
-        return records
-
-    def list_jobs_per_type(
-        self,
-        job_type: str,
-        skip: int = DEFAULT_SKIP,
-        limit: int = DEFAULT_LIMIT,
-    ) -> ListingResponse[JobResponse]:
-        records = self._list_job_records_per_type(job_type, skip, limit)
-        responses = [self.update_job_status(record) for record in records]
-        return ListingResponse(
-            total=len(responses),
-            items=responses,
-        )
-
     def list_jobs(
         self,
         skip: int = DEFAULT_SKIP,
         limit: int = DEFAULT_LIMIT,
+        job_types: list[str] = (),
     ) -> ListingResponse[JobResponse]:
-        total = self.job_repo.count()
-        records = self.job_repo.list(skip, limit)
+        # It would be better if we could just feed an empty dict,
+        # but this complicates things at the ORM level,
+        # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
+        records = self.job_repo.list(
+            skip, limit, criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])]
+        )
+        total = len(records)
         return ListingResponse(
             total=total,
             items=[self.get_job(record.id) for record in records],

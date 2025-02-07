@@ -1,12 +1,12 @@
 import json
 from http import HTTPStatus
+from typing import Annotated
 from urllib.parse import urljoin
 from uuid import UUID
-from typing import Annotated
 
 import loguru
 import requests
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Query
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -135,7 +135,7 @@ def list_jobs(
     service: JobServiceDep,
     skip: int = 0,
     limit: int = 100,
-    job_types: Annotated[list[str] | None, Query()] = None
+    job_types: Annotated[list[str], Query()] = (),
 ) -> ListingResponse[Job]:
     """Retrieves job data from the Lumigator repository where Ray
     metadata is also available.
@@ -144,14 +144,13 @@ def list_jobs(
 
     NOTE: Lumigator repository data takes precedence over Ray metadata.
     """
-
-    # if job_type not in ["inference", "annotate", "evaluate"]:
+    # if job_type not in ["inference", "annotate", "evaluate"]:
     #     raise ValueError(f"Unknown job type {job_type}") from None
     # jobs = service.list_jobs_per_type(job_type, skip, limit)
 
+    loguru.logger.info(f"Listing jobs, job_types={job_types}")
 
-
-    jobs = service.list_jobs(skip, limit)
+    jobs = service.list_jobs(skip, limit, job_types)
     if not jobs or jobs.total == 0 or len(jobs.items) == 0:
         return jobs
 
@@ -205,48 +204,6 @@ def get_job(
     lm_info = job.model_dump()
     merged = {**ray_info, **lm_info}
     return Job(**merged)
-
-
-@router.get("/{job_type}/")
-def get_job_per_type(
-    service: JobServiceDep,
-    job_type: str,
-    skip: int = 0,
-    limit: int = 100,
-) -> ListingResponse[Job]:
-    """Retrieves merged job data from the Lumigator repository and Ray
-    for a valid job type (currently `inference` or `evaluation`).
-
-    Results are a merged representation which form an augmented view of a 'job'.
-
-    NOTE: Lumigator repository data takes precedence over Ray metadata.
-    """
-    if job_type not in ["inference", "annotate", "evaluate"]:
-        raise ValueError(f"Unknown job type {job_type}") from None
-    jobs = service.list_jobs_per_type(job_type, skip, limit)
-
-    # Get all jobs Ray knows about.
-    ray_jobs = _get_all_ray_jobs()
-
-    results = list[Job]()
-
-    # Merge Ray jobs into the repositories jobs
-    job: JobResponse
-    for job in jobs.items:
-        found_job: RayJobDetails
-        found_job = next(
-            (job for job in filter(lambda x: x.submission_id == str(job.id), ray_jobs)), None
-        )
-        if found_job is None:
-            continue
-
-        # Combine both types of response.
-        ray_info = found_job.dict()
-        lm_info = job.model_dump()
-        merged = {**ray_info, **lm_info}
-        results.append(Job(**merged))
-
-    return ListingResponse[Job](total=jobs.total, items=results)
 
 
 @router.get("/{job_id}/logs")

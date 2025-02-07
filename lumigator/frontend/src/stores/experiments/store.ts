@@ -202,7 +202,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
-    /**
+  /**
    * Transforms results data into a format which accommodates the UI
    *
    * @param {Object} objectData .

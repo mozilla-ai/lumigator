@@ -20,7 +20,6 @@ export function formatDate(dateString: string) {
     .replace(/(\d{4})(\s)/, '$1,$2')
 }
 
-
 /**
  * Retrieves and normalizes the entrypoint configuration from a job object.
  *

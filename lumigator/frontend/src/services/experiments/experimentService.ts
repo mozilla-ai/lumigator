@@ -67,8 +67,8 @@ async function fetchJobStatus(id: string) {
  * @param {Object} experimentPayload - The payload for the experiment.
  *  The schema of experimentPayload can be found @ api/v1/experiments/
  */
- // TODO: For experiments with multiple models this function is called recursively for every model selected from the form.
- // Check ExperimentForm.vue
+// TODO: For experiments with multiple models this function is called recursively for every model selected from the form.
+// Check ExperimentForm.vue
 async function triggerExperiment(experimentPayload: unknown) {
   try {
     const response = await http.post(PATH_EXPERIMENTS_EVALUATE(), experimentPayload, {

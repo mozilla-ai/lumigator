@@ -25,7 +25,7 @@
   </nav>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import Menu from 'primevue/menu';
 import { routes } from '@/router'
 import { useSlidePanel } from '@/composables/SlidingPanel';

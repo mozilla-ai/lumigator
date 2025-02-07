@@ -69,7 +69,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useExperimentStore } from '@/stores/experiments/store'

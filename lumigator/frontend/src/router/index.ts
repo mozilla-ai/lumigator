@@ -1,25 +1,24 @@
 import {
   createRouter,
   createWebHistory,
+  type RouteRecordRaw,
 } from 'vue-router';
 
 const LDatasetes = () => import('@/components/pages/LDatasets.vue')
 const LExperiments = () => import('@/components/pages/LExperiments.vue')
 
-export const routes = [
+export const routes: Array<RouteRecordRaw & {icon?: string}> = [
 	{
 		path: '/datasets',
 		name: 'datasets',
-		disabled: false,
 		component: LDatasetes,
-		icon: 'pi pi-dataset'
+		icon: 'pi pi-dataset',
 	},
 	{
 		path: '/experiments',
 		name: 'experiments',
-		disabled: false,
 		component: LExperiments,
-		icon: 'pi pi-experiments'
+		icon: 'pi pi-experiments',
   },
   {
     path: '/:pathMatch(.*)*', // Catch-all route for undefined paths

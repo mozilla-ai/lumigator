@@ -5,7 +5,6 @@ class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
     JOBS = "jobs"
-    COMPLETIONS = "completions"
     EXPERIMENTS = "experiments"
     WORKFLOWS = "workflows"
     MODELS = "models"
@@ -31,10 +30,6 @@ TAGS_METADATA = [
     {
         "name": Tags.JOBS,
         "description": "Create and manage jobs running on Ray.",
-    },
-    {
-        "name": Tags.COMPLETIONS,
-        "description": "Access models via external vendor endpoints",
     },
     {
         "name": Tags.MODELS,

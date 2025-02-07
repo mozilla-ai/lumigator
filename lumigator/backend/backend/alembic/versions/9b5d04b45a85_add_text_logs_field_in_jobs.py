@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "9b5d04b45a85"  # pragma: allowlist secret
-down_revision: str | None = "4c0345b3d525"  # pragma: allowlist secret
+down_revision: str | None = "3be4994d87d5"  # pragma: allowlist secret
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

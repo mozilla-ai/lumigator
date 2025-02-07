@@ -264,6 +264,8 @@ class JobService:
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
         db_logs = self.job_repo.get(job_id)
         if not db_logs:
+            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs")
+        elif not db_logs.logs:
             ray_db_logs = self.retrieve_job_logs(job_id)
             self._update_job_record(job_id, logs=ray_db_logs.logs)
             return ray_db_logs

@@ -2,11 +2,16 @@ name: lumigator
 
 services:
 
+  ray:
+    volumes:
+      - /tmp/ray_pip_cache:/tmp/ray_pip_cache
   backend:
     build:
       context: .
       dockerfile: "Dockerfile"
       target: "dev_image"
+    volumes:
+      - database_volume:/mzai/backend/local.db
     ports:
       - "5678:5678"
     develop:

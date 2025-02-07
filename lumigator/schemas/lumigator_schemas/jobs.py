@@ -109,6 +109,7 @@ class JobInferenceCreate(BaseModel):
     top_p: float = 1.0
     config_template: str | None = None
     store_to_dataset: bool = False
+    max_new_tokens: int = 500
 
 
 class JobAnnotateCreate(BaseModel):

@@ -99,7 +99,7 @@ default_infer_template = """{{
         "use_fast": "{use_fast}",
         "trust_remote_code": "{trust_remote_code}",
         "torch_dtype": "{torch_dtype}",
-        "max_length": 500
+        "max_new_tokens": "{max_new_tokens}"
     }},
      "job": {{
         "max_samples": {max_samples},
@@ -111,14 +111,27 @@ default_infer_template = """{{
 seq2seq_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "model": {{ "path": "{model_uri}" }},
-    "dataset": {{ "path": "{dataset_path}" }},
+    "dataset": {{ "path": "{dataset_path}" }}
 }}"""
 
 bart_infer_template = """{{
     "name": "{job_name}/{job_id}",
-    "model": {{ "path": "{model_uri}" }},
-    "tokenizer": {{ "path": "{model_uri}", "mod_max_length": 1024 }},
     "dataset": {{ "path": "{dataset_path}" }},
+    "hf_pipeline": {{
+        "model_uri": "{model_uri}",
+        "task": "{task}",
+        "accelerator": "{accelerator}",
+        "revision": "{revision}",
+        "use_fast": "{use_fast}",
+        "trust_remote_code": "{trust_remote_code}",
+        "torch_dtype": "{torch_dtype}",
+        "max_new_tokens": 142
+    }},
+     "job": {{
+        "max_samples": {max_samples},
+        "storage_path": "{storage_path}",
+        "output_field": "{output_field}"
+    }}
 }}"""
 
 causal_infer_template = """{{
@@ -154,6 +167,7 @@ oai_infer_template = """{{
 templates = {
     JobType.INFERENCE: {
         "default": default_infer_template,
+        "hf://facebook/bart-large-cnn": bart_infer_template,
         "oai://gpt-4o-mini": oai_infer_template,
         "oai://gpt-4o": oai_eval_template,
         "mistral://open-mistral-7b": oai_infer_template,

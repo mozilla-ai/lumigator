@@ -101,16 +101,6 @@ class BackendSettings(BaseSettings):
 
     @computed_field
     @property
-    def OAI_API_KEY(self) -> str:  # noqa: N802
-        return os.environ.get("OPENAI_API_KEY", "")
-
-    @computed_field
-    @property
-    def MISTRAL_API_KEY(self) -> str:  # noqa: N802
-        return os.environ.get("MISTRAL_API_KEY", "")
-
-    @computed_field
-    @property
     def LD_PRELOAD_PREFIX(self) -> str:  # noqa: N802
         """Sets the LD_PRELOAD env var for aarch64.
 

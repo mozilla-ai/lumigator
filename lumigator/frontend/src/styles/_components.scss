@@ -1,224 +1,217 @@
-@import 'variables';
+@use 'variables';
 
 // this file overrides some of the default styles from primevue
 // so the use of !important may be necessary
 
-  :root {
-    --l-tag-info-background: #874B0A!important;
-  }
+:root {
+  --l-tag-info-background: #874b0a !important;
+}
 
 // Menu Styling
 .p-menu {
-  background-color: $l-menu-bg!important;
-  font-family: $l-font-family;
-	padding: $l-spacing-1 0;
-	border: none!important;
+  background-color: variables.$l-menu-bg !important;
+  font-family: variables.$l-font-family;
+  padding: variables.$l-spacing-1 0;
+  border: none !important;
 
   &-item {
-		cursor: pointer;
+    cursor: pointer;
 
-		:hover {
-			background-color: $l-menu-bg;
-		}
+    :hover {
+      background-color: variables.$l-menu-bg;
+    }
   }
 }
 
 // Button Styling
 .p-button {
-  background-color: $l-primary-color;
-  color: $l-primary-color-text;
+  background-color: variables.$l-primary-color;
+  color: variables.$l-primary-color-text;
   padding: 0.75rem 1.5rem;
-  border-radius: $l-button-border-radius;
+  border-radius: variables.$l-button-border-radius;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: $l-button-hover-bg;
+    background-color: variables.$l-button-hover-bg;
   }
 }
 
 // Datable styling
 .p-datatable-table-container {
-		border-radius: 8px;
-		border: 1px solid $l-grey-300;
+  border-radius: 8px;
+  border: 1px solid variables.$l-grey-300;
 
   .p-datatable-thead {
     height: 44px;
   }
-	.p-datatable-column-header-content {
-		color: $l-grey-200;
-		font-size: $l-font-size-sm;
-	}
+  .p-datatable-column-header-content {
+    color: variables.$l-grey-200;
+    font-size: variables.$l-font-size-sm;
+  }
 
-	[class*="p-row-"] {
-		background-color: $l-card-bg;
-		border: none;
-		cursor: pointer;
+  [class*='p-row-'] {
+    background-color: variables.$l-card-bg;
+    border: none;
+    cursor: pointer;
     height: 48px;
 
-		&:hover {
-			background-color: $l-grey-400;
-		}
-
-		td {
-			border: none;
-			color: $l-grey-100;
-			padding: 0.5rem 1rem;
-		}
-
-		&:hover td {
-			color: $white;
-		}
-
-	}
-   .p-datatable-row-selected {
-			background-color: $l-grey-300!important;
-   }
-
-   .p-datatable-column-sorted {
-      background: inherit;
+    &:hover {
+      background-color: variables.$l-grey-400;
     }
 
-    .p-datatable-row-expansion {
-      background: $l-main-bg!important;
-      &:hover {
-        background: $l-main-bg!important;
-      }
-
-      &:hover td {
-        background: $l-main-bg!important;
-      }
-
-      & > td:first-child {
-        padding: 0;
-      }
+    td {
+      border: none;
+      color: variables.$l-grey-100;
+      padding: 0.5rem 1rem;
     }
 
+    &:hover td {
+      color: variables.$white;
+    }
+  }
+  .p-datatable-row-selected {
+    background-color: variables.$l-grey-300 !important;
+  }
+
+  .p-datatable-column-sorted {
+    background: inherit;
+  }
+
+  .p-datatable-row-expansion {
+    background: variables.$l-main-bg !important;
+    &:hover {
+      background: variables.$l-main-bg !important;
+    }
+
+    &:hover td {
+      background: variables.$l-main-bg !important;
+    }
+
+    & > td:first-child {
+      padding: 0;
+    }
+  }
 }
-
 
 // Class for Datatable with visible lines and hover effect disabled
 .gridlines {
   .p-datatable-column-title {
     text-wrap: nowrap;
-    font-size: $l-font-size-sm;
+    font-size: variables.$l-font-size-sm;
   }
   tr {
-    box-shadow:inset 0px 1px 0px $l-gridlines-stroke;
+    box-shadow: inset 0px 1px 0px variables.$l-gridlines-stroke;
   }
   td {
     vertical-align: top;
-    font-size: $l-font-size-sm;
+    font-size: variables.$l-font-size-sm;
   }
 
-  [class*="p-row-"] {
-		background-color: $l-card-bg;
+  [class*='p-row-'] {
+    background-color: variables.$l-card-bg;
 
-		&:hover {
-		  background-color: $l-card-bg;
-		}
+    &:hover {
+      background-color: variables.$l-card-bg;
+    }
 
-		&:hover td {
-			color: $l-grey-100;
-		}
-
-	}
+    &:hover td {
+      color: variables.$l-grey-100;
+    }
+  }
 }
 
 .p-datatable-header-cell {
-	background-color: $l-main-bg;
-	text-transform: uppercase
+  background-color: variables.$l-main-bg;
+  text-transform: uppercase;
 }
 
 .p-datatable-tbody {
-	background-color:$l-card-bg ;
-	font-size:$l-table-font-size;
+  background-color: variables.$l-card-bg;
+  font-size: variables.$l-table-font-size;
 }
 .p-button-icon-only.p-button-rounded {
-  height:   $l-button-icon-only-width!important;
-  width:  $l-button-icon-only-width;
+  height: variables.$l-button-icon-only-width !important;
+  width: variables.$l-button-icon-only-width;
   span {
-   font-size: 14px;
-
+    font-size: 14px;
   }
 }
 
 .p-select-label {
-  font-size: $l-font-size-sm;
+  font-size: variables.$l-font-size-sm;
 }
 
 .p-floatlabel-in {
-  font-size: $l-font-size-sm;
+  font-size: variables.$l-font-size-sm;
 }
 
 .p-select-option-label {
-  font-size: $l-font-size-sm;
+  font-size: variables.$l-font-size-sm;
 }
 
 .p-select.p-disabled {
-  background-color: $l-disabled-input-color!important;
-  color: $l-grey-600!important;
+  background-color: variables.$l-disabled-input-color !important;
+  color: variables.$l-grey-600 !important;
 
-   .p-select-label, .p-floatlabel-in {
-    color: $l-grey-600!important;
+  .p-select-label,
+  .p-floatlabel-in {
+    color: variables.$l-grey-600 !important;
   }
 
   .p-select-dropdown {
-    color: $l-grey-600!important;
+    color: variables.$l-grey-600 !important;
   }
-
 }
-
 
 // Radio button
 .p-radiobutton-box {
-  border: 1px solid white!important;
-  background-color: $l-grey-300!important;
-  height: 18px!important;
-  width: 18px!important;
+  border: 1px solid white !important;
+  background-color: variables.$l-grey-300 !important;
+  height: 18px !important;
+  width: 18px !important;
 }
 
 .p-radiobutton-checked .p-radiobutton-box {
-  border-color: var(--l-radiobutton-checked-border-color)!important;
+  border-color: var(--l-radiobutton-checked-border-color) !important;
 
   .p-radiobutton-icon {
-    background: $l-primary-color!important;
+    background: variables.$l-primary-color !important;
   }
 }
 
 .p-inputtext {
-  font-size: 12px!important;
+  font-size: 12px !important;
 }
 
 // Tooltip
 .p-tooltip {
-  font-size: $l-font-size-sm;
-  color: $l-grey-100;
-  background-color: $l-main-bg;
+  font-size: variables.$l-font-size-sm;
+  color: variables.$l-grey-100;
+  background-color: variables.$l-main-bg;
 }
 
 // Tabs
 .p-tabs {
-
   .p-tablist-content > .p-tablist-tab-list {
     align-items: center;
-    background: $l-menu-bg;
-    gap: $l-spacing-1;
+    background: variables.$l-menu-bg;
+    gap: variables.$l-spacing-1;
 
     .p-tab {
       padding: 0.5rem 0;
-      font-size: $l-menu-font-size;
-      font-weight: $l-font-weight-normal;
+      font-size: variables.$l-menu-font-size;
+      font-weight: variables.$l-font-weight-normal;
     }
 
     .p-tab-active {
-      border-color: $white;
-      color: $white;
+      border-color: variables.$white;
+      color: variables.$white;
     }
 
     .p-tablist-active-bar {
-      background-color: $white;
+      background-color: variables.$white;
     }
   }
 
@@ -226,5 +219,4 @@
     padding: 0;
     background: transparent;
   }
-
 }

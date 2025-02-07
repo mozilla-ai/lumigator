@@ -6,6 +6,7 @@ be started prior to running these tests using
 from time import sleep
 from uuid import UUID
 
+import pytest
 import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
@@ -120,6 +121,9 @@ def test_job_lifecycle_remote_ok(
     assert jobs is not None
     logger.info(lumi_client_int.datasets.get_dataset(dataset.id))
 
+    infer_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
+    assert infer_jobs_before is not None
+
     job = JobEvalCreate(
         name="test-job-int-001",
         model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
@@ -130,8 +134,16 @@ def test_job_lifecycle_remote_ok(
     job.description = "This is a test job"
     job.max_samples = 2
     job_creation_result = lumi_client_int.jobs.create_job(JobType.EVALUATION, job)
+    all_jobs = lumi_client_int.jobs.get_jobs()
     assert job_creation_result is not None
-    assert lumi_client_int.jobs.get_jobs() is not None
+    assert all_jobs is not None
+    assert all_jobs.items
+    eval_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
+    assert eval_jobs is not None
+    assert eval_jobs.items
+    infer_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
+    assert infer_jobs is not None
+    assert infer_jobs_before.total == infer_jobs.total
 
     job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
     logger.info(job_status)
@@ -141,24 +153,41 @@ def test_job_lifecycle_remote_ok(
     requests.get(download_info.download_url, allow_redirects=True, timeout=10)
 
 
-def test_annotate_dataset(lumi_client_int: LumigatorClient, dialog_data_unannotated):
+@pytest.mark.parametrize(
+    "dataset_name, dataset_fixture",
+    [
+        ("dialog", "dialog_data_unannotated"),
+        ("mock_long_sequences", "long_sequences_data_unannotated"),
+    ],
+)
+def test_annotate_datasets(
+    lumi_client_int: LumigatorClient, dataset_name: str, dataset_fixture: str, request
+):
+    # Clear existing datasets
     datasets = lumi_client_int.datasets.get_datasets()
     if datasets.total > 0:
         for removed_dataset in datasets.items:
             lumi_client_int.datasets.delete_dataset(removed_dataset.id)
+
     datasets = lumi_client_int.datasets.get_datasets()
     n_initial_datasets = datasets.total
-    dataset = lumi_client_int.datasets.create_dataset(
-        dataset=dialog_data_unannotated, format=DatasetFormat.JOB
+
+    # Get the dataset from the fixture
+    dataset = request.getfixturevalue(dataset_fixture)
+    created_dataset = lumi_client_int.datasets.create_dataset(
+        dataset=dataset, format=DatasetFormat.JOB
     )
+
+    # Verify dataset creation
     datasets = lumi_client_int.datasets.get_datasets()
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
+    # Create annotation job
     job = JobAnnotateCreate(
-        name="test_annotate",
-        description="Test run for Huggingface model",
-        dataset=str(dataset.id),
+        name=f"test_annotate_{dataset_name}",
+        description=f"Test run for {dataset_name} dataset annotation with default BART",
+        dataset=str(created_dataset.id),
         max_samples=2,
         task="summarization",
     )
@@ -170,6 +199,7 @@ def test_annotate_dataset(lumi_client_int: LumigatorClient, dialog_data_unannota
     job_status = lumi_client_int.jobs.wait_for_job(job_creation_result.id, retries=11, poll_wait=30)
     logger.info(job_status)
 
+    # Download and verify results
     download_info = lumi_client_int.jobs.get_job_download(job_creation_result.id)
     logger.info(f"getting result from {download_info.download_url}")
     results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)

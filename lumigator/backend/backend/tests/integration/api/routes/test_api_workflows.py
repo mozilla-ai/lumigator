@@ -61,10 +61,10 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_after_response = local_client.get("/datasets/")
-    assert get_ds_after_response.status_code == 200
-    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    assert get_ds_after.total == get_ds.total + 1
+    get_ds_before_response = local_client.get("/datasets/")
+    assert get_ds_before_response.status_code == 200
+    get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
+    assert get_ds_before.total == get_ds.total + 1
 
     infer_payload = {
         "name": "test_run_hugging_face",
@@ -137,10 +137,10 @@ def test_upload_data_launch_job(
 
     # FIXME Either remove the store_to_dataset option, or
     # restore it to the jobs service
-    # get_ds_after_response = local_client.get("/datasets/")
-    # assert get_ds_after_response.status_code == 200
-    # get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    # assert get_ds_after.total == get_ds.total + 1
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds_before.total + 1
 
     get_all_jobs = local_client.get("/jobs")
     assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2

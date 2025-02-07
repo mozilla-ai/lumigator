@@ -73,7 +73,7 @@ class Jobs:
         Returns:
             ListingResponse[JobResponse]: All existing jobs.
         """
-        response = self.client.get_response(f"{self.JOBS_ROUTE}/{job_type.value}/")
+        response = self.client.get_response(f"{self.JOBS_ROUTE}?job_type={job_type.value}")
 
         return ListingResponse[Job](**response.json())
 

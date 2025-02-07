@@ -5,6 +5,7 @@ import pytest
 from lumigator_schemas.jobs import JobStatus, JobType
 from sqlalchemy.exc import IntegrityError
 
+from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 
 
@@ -35,11 +36,11 @@ def test_create_and_get_jobs_per_type(job_repository):
     created_infer_job = job_repository.create(
         name="test", description="", job_type=JobType.INFERENCE.value
     )
-    retrieved_eval_job = job_repository.list_by_job_type(
-        job_type=JobType.EVALUATION.value, skip=0, limit=None
+    retrieved_eval_job = job_repository.list(
+        skip=0, limit=None, criteria=[JobRecord.job_type == JobType.EVALUATION.value]
     )
-    retrieved_infer_job = job_repository.list_by_job_type(
-        job_type=JobType.INFERENCE.value, skip=0, limit=None
+    retrieved_infer_job = job_repository.list(
+        skip=0, limit=None, criteria=[JobRecord.job_type == JobType.INFERENCE.value]
     )
     assert job_repository.count() == 3
     assert len(retrieved_eval_job) == 1

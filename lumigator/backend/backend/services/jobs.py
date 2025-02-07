@@ -293,6 +293,7 @@ class JobService:
         loguru.logger.info("Handling inference job result")
 
         await self.wait_for_job_complete(job_id)
+        loguru.logger.critical("sending to db")
         self._add_dataset_to_db(
             job_id,
             request,

@@ -56,7 +56,6 @@ from fastapi import APIRouter
 
 
 from backend.api.routes import (
-    completions,
     datasets,
     experiments,
     health,
@@ -70,7 +69,6 @@ api_router = APIRouter(prefix=API_V1_PREFIX)
 api_router.include_router(health.router, prefix="/health", tags=[Tags.HEALTH])
 api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASETS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
-api_router.include_router(completions.router, prefix="/completions", tags=[Tags.COMPLETIONS])
 api_router.include_router(tasks.router, prefix="/tasks", tags=[Tags.TASKS])  # NEW
 ```
 
@@ -86,7 +84,6 @@ class Tags(str, Enum):
     HEALTH = "health"
     DATASETS = "datasets"
     EXPERIMENTS = "experiments"
-    COMPLETIONS = "completions"
     TASKS = "tasks" ### NEW
 
 
@@ -102,10 +99,6 @@ TAGS_METADATA = [
     {
         "name": Tags.EXPERIMENTS,
         "description": "Create and manage evaluation experiments.",
-    },
-    {
-        "name": Tags.COMPLETIONS,
-        "description": "Access models via external vendor endpoints",
     },
     # NEW TAGS BELOW
     {

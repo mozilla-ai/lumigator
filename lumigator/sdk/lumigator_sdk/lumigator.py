@@ -1,11 +1,12 @@
 from urllib3 import Retry
 
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.completions import Completions
+from lumigator_sdk.experiments import Experiments
 from lumigator_sdk.health import Health
 from lumigator_sdk.jobs import Jobs
 from lumigator_sdk.lm_datasets import Datasets
 from lumigator_sdk.models import Models
+from lumigator_sdk.workflows import Workflows
 
 # Only retries initial connections
 # No HTTP errors are retried
@@ -50,7 +51,8 @@ class LumigatorClient:
         self.health = Health(self.client)
         if self.health.healthcheck() is None:
             raise Exception("LumigatorClient cannot connect")
-        self.completions = Completions(self.client)
         self.jobs = Jobs(self.client)
         self.datasets = Datasets(self.client)
         self.models = Models(self.client)
+        self.workflows = Workflows(self.client)
+        self.experiments = Experiments(self.client)

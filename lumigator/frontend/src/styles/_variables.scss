@@ -1,16 +1,17 @@
+@use 'sass:color';
 // Colors
 $l-primary-color: #e0c414; // Main brand color (gold/yellow)
 $l-primary-color-text: #ffffff;
 $white: #ffffff;
 $black: #000000;
-$l-grey-100: #BBBBBB;
-$l-grey-150: #A2A2A2;
+$l-grey-100: #bbbbbb;
+$l-grey-150: #a2a2a2;
 $l-grey-200: #888888;
 $l-grey-300: #363636;
 $l-grey-400: #222222;
 $l-grey-600: #111111;
 $l-menu-bg: #111111;
-$l-menu-item-color: #7F7F7F;
+$l-menu-item-color: #7f7f7f;
 $l-logs-bg: #080808;
 $l-main-bg: #111111;
 $l-card-bg: #222222;
@@ -18,7 +19,7 @@ $l-overlay-color: rgba(0, 0, 0, 0.6);
 $l-text-color: #eaeaea;
 $l-text-secondary-color: #b3b3b3;
 $l-disabled-input-color: #363636;
-$l-gridlines-stroke: #3F3F46;
+$l-gridlines-stroke: #3f3f46;
 
 // Typography
 $l-font-family: 'Inter', sans-serif;
@@ -49,7 +50,7 @@ $l-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 // Button Specific
 $l-button-bg: $l-primary-color;
 $l-button-text-color: #000000;
-$l-button-hover-bg: darken($l-primary-color, 10%);
+$l-button-hover-bg: color.adjust($l-primary-color, $lightness: -10%);
 
 // Sizes
 $l-sliding-panel-size: 370px;

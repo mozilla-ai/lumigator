@@ -110,10 +110,10 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
-import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button'
 import LGenerateGroundTruthPopup from '@/components/molecules/LGenerateGroundTruthPopup.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
+import { formatDate } from '@/helpers/formatDate'
 
 const datasetStore = useDatasetStore()
 

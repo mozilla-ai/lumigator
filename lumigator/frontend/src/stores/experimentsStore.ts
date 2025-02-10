@@ -1,7 +1,7 @@
 import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { experimentsService } from '@/sdk/experiments/experimentService'
-import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
+import { experimentsService } from '@/sdk/experimentService'
+
 import type {
   Experiment,
   ExperimentResults,
@@ -10,6 +10,9 @@ import type {
   Model,
   ObjectData,
 } from '@/types/Experiment'
+import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
+import { calculateDuration } from '@/helpers/calculateDuration'
+import { downloadContent } from '@/helpers/downloadContent'
 
 export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<Experiment[]> = ref([])

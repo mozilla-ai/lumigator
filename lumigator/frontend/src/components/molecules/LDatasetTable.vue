@@ -68,9 +68,9 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Menu from 'primevue/menu'
 import { useSlidePanel } from '@/composables/SlidingPanel'
-import { formatDate } from '@/helpers/index'
 import type { MenuItem } from 'primevue/menuitem'
 import type { Dataset } from '@/types/Dataset'
+import { formatDate } from '@/helpers/formatDate'
 
 const props = defineProps({
   tableData: {

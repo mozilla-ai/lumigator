@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useHealthStore } from '@/stores/health/healthStore'
+import { useHealthStore } from '@/stores/healthStore'
 
 const healthStore = useHealthStore()
 const { healthStatus } = storeToRefs(healthStore)

@@ -53,9 +53,9 @@
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
-import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
+import { formatDate } from '@/helpers/formatDate'
 
 const experimentStore = useExperimentStore()
 const { jobs } = storeToRefs(experimentStore)

@@ -132,7 +132,7 @@ async function triggerExperiment() {
     dataset: dataset.value?.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
-  const success = await experimentStore.runExperiment(experimentPayload)
+  const success = await experimentStore.createExperiment(experimentPayload)
   if (success.length) {
     await experimentStore.fetchAllJobs()
     emit('l-close-form')

@@ -142,7 +142,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {Object} experimentData - The data for the experiment to run.
    * @returns {Promise<Array>} The results of the experiment.
    */
-  async function runExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
+  async function createExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
     const modelArray = experimentData.models
     const jobRequests = modelArray.map((singleModel) => {
       // trigger one job per model
@@ -384,6 +384,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     fetchJobResults,
     fetchExperimentResultsFile,
     startGroundTruthGeneration,
-    runExperiment,
+    createExperiment,
   }
 })

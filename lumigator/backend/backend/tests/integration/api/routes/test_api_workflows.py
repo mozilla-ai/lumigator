@@ -14,7 +14,7 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobStatus,
-    JobType
+    JobType,
 )
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
 

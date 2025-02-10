@@ -8,7 +8,6 @@ from lumigator_schemas.jobs import (
     JobCreate,
     JobEvalLiteConfig,
     JobInferenceConfig,
-    JobResponse,
     JobLogsResponse,
     JobStatus,
 )
@@ -37,13 +36,14 @@ class WorkflowService:
         job_repo: JobRepository,
         job_service: JobService,
         dataset_service: DatasetService,
+        background_tasks: BackgroundTasks,
         tracking_client: TrackingClient,
-        background_tasks: BackgroundTasks
     ):
         self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
         self._tracking_client = tracking_client
+        self._background_tasks = background_tasks
         self.NON_TERMINAL_STATUS = [
             JobStatus.CREATED.value,
             JobStatus.PENDING.value,
@@ -80,8 +80,6 @@ class WorkflowService:
         # submit inference job first
         inference_job = self._job_service.create_job(
             job_infer_create,
-            self.background_tasks,
-            experiment_id=request.experiment_id,
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
@@ -127,8 +125,6 @@ class WorkflowService:
         # submit the job
         evaluation_job = self._job_service.create_job(
             job_eval_create,
-            self.background_tasks,
-            experiment_id=request.experiment_id,
         )
 
         # wait for the evaluation job to complete
@@ -188,14 +184,11 @@ class WorkflowService:
             raise WorkflowNotFoundError(workflow_id)
         return tracking_server_workflow
 
-    def create_workflow(
-        self, request: WorkflowCreateRequest
-    ) -> WorkflowResponse:
+    def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
             request (WorkflowCreateRequest): The request containing the workflow configuration.
-            background_tasks (BackgroundTasks): The background tasks manager for scheduling tasks.
 
         Returns:
             WorkflowResponse: The response object containing the details of the created workflow.
@@ -205,13 +198,15 @@ class WorkflowService:
         )
 
         workflow = self._tracking_client.create_workflow(
-            experiment_id=request.experiment_id, description=request.description, name=request.name
-        # input is WorkflowCreate, we need to split the configs and generate one
-        # JobInferenceCreate and one JobEvalCreate
+            experiment_id=request.experiment_id,
+            description=request.description,
+            name=request.name,
+            # input is WorkflowCreate, we need to split the configs and generate one
+            # JobInferenceCreate and one JobEvalCreate
         )
 
         # Run the inference and evaluation pipeline as a background task
-        self.background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
+        self._background_tasks.add_task(self._run_inference_eval_pipeline, workflow, request)
 
         return workflow
 

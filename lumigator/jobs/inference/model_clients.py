@@ -8,6 +8,7 @@ from mistralai.client import MistralClient
 from openai import OpenAI, OpenAIError
 from openai.types import Completion
 from transformers import pipeline
+from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
 
 def strip_path_prefix(path: str) -> str:
@@ -151,6 +152,51 @@ class MistralModelClient(APIModelClient):
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
+        self._set_tokenizer_max_length()
+
+    def _set_tokenizer_max_length(self):
+        """Set the tokenizer's model_max_length if it's currently the default very large integer.
+        Checks various possible max_length parameters which varies on model architecture.
+        """
+        config = self._pipeline.model.config
+        logger.info(f"Selected HF model's tokenizer has maximum number of input tokens: \
+                    {self._pipeline.tokenizer.model_max_length}")
+        # If suitable model_max_length is already available, don't override it
+        if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
+            return
+        # Only override if it's the default value:
+        # i.e., VERY_LARGE_INTEGER for models that don't have a model_max_length explicity set
+        # Common parameter names to check in config
+        plausible_max_length_params = [
+            # BERT-based, LLaMA
+            "max_position_embeddings",
+            # GPT-2-based
+            "n_positions",
+            "n_ctx",
+            # ChatGLM-based
+            "max_sequence_length",
+            "seq_length",
+            # Mistral-based
+            "sliding_window",
+        ]
+
+        # Check config parameters
+        for param in plausible_max_length_params:
+            if hasattr(config, param):
+                value = getattr(config, param)
+                if (
+                    isinstance(value, int) and value < VERY_LARGE_INTEGER
+                ):  # Sanity check for reasonable values
+                    self._pipeline.tokenizer.model_max_length = value
+                    logger.info(f"Setting the maximum length of input tokens to {value} \
+                                based on the config.{param} attribute.")
+                    return
+
+        # If no suitable parameter is found, warn the user and continue with the HF default
+        logger.warning(
+            f"Could not find a suitable parameter in the model config to set model_max_length. \
+                Using default value: {self._pipeline.tokenizer.model_max_length}"
+        )
 
     def predict(self, prompt):
         prediction = self._pipeline(prompt)[0]

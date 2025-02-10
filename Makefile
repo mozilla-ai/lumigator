@@ -176,6 +176,7 @@ test-backend-unit:
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
@@ -186,6 +187,7 @@ test-backend-integration:
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	RAY_WORKER_GPUS="0.0" \
 	RAY_WORKER_GPUS_FRACTION="0.0" \
 	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \

@@ -1,19 +1,16 @@
-import { ref } from 'vue';
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import healthService from "@/services/health/healthService";
+import healthService from '@/services/health/healthService'
 
 export const useHealthStore = defineStore('health', () => {
-  const healthStatus = ref(null);
+  const healthStatus = ref()
 
   async function loadHealthStatus() {
-    healthStatus.value = await healthService.fetchHealthStatus();
+    healthStatus.value = await healthService.fetchHealthStatus()
   }
-
-
 
   return {
     healthStatus,
-    loadHealthStatus
+    loadHealthStatus,
   }
-
 })

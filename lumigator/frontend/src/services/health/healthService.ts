@@ -1,16 +1,12 @@
-import http from '@/services/http'
-import { PATH_HEALTH_ROOT } from './api'
+import { lumigatorApiAxiosInstance } from '@/helpers/lumigator-axios-instance'
 
-async function fetchHealthStatus() {
-  try {
-    const response = await http.get(PATH_HEALTH_ROOT())
-    return response.data.status
-  } catch (error) {
-    console.error('Error getting health status', error)
-    return error
-  }
+const PATH_HEALTH_ROOT = () => `health/`
+
+export async function fetchHealthStatus() {
+  const response = await lumigatorApiAxiosInstance.get(PATH_HEALTH_ROOT())
+  return response.data.status
 }
 
-export default {
+export const healthService = {
   fetchHealthStatus,
 }

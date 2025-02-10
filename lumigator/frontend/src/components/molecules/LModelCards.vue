@@ -78,7 +78,7 @@
 <script lang="ts" setup>
 import { ref, computed, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useModelStore } from '@/stores/models/store'
+import { useModelStore } from '@/stores/models/modelsStore'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import type { Model } from '@/types/Experiment'

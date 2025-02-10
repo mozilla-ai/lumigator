@@ -86,12 +86,13 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
-import { formatDate } from '@/helpers/index'
+
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import Tag from 'primevue/tag'
 import LJobsTable from '@/components/molecules/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import type { Experiment, Job } from '@/types/Experiment'
+import { formatDate } from '@/helpers/formatDate'
 
 const props = defineProps({
   tableData: {

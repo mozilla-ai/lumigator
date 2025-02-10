@@ -140,9 +140,11 @@
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
-import { formatDate, calculateDuration } from '@/helpers/index'
+
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
+import { formatDate } from '@/helpers/formatDate'
+import { calculateDuration } from '@/helpers/calculateDuration'
 
 const emit = defineEmits([
   'l-close-details',

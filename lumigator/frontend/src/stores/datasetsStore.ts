@@ -1,12 +1,13 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { datasetsService } from '@/sdk/datasets/datasetsService'
-import { downloadContent } from '@/helpers/index'
+import { datasetsService } from '@/sdk/datasetsService'
+
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import type { AxiosError } from 'axios'
+import { downloadContent } from '@/helpers/downloadContent'
 
 export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])

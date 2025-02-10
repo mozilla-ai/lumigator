@@ -66,11 +66,11 @@ import { ref, computed, watch } from 'vue'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
-import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
+import { formatDate } from '@/helpers/formatDate'
 
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()

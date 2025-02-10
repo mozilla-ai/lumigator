@@ -8,10 +8,11 @@ CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
-CONFIG_BUILD_DIR="build"
-CONFIG_DEFAULT="config.default.yaml"
-CONFIG_USER="config.user.yaml"
-CONFIG_OUTPUT="config.deploy.yaml"
+# NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
+CONFIG_BUILD_DIR=build
+CONFIG_DEFAULT=config.default.yaml
+CONFIG_USER=config.user.yaml
+CONFIG_OUTPUT=config.deploy.yaml
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)

@@ -39,14 +39,16 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 ## Llamafile
 [Llamafile](https://github.com/Mozilla-Ocho/llamafile) bundles LLM weights and a specially-compiled version of [llama.cpp](https://github.com/ggerganov/llama.cpp) into a single executable file, allowing users to run large language models locally without any additional setup or dependencies.
 
-### Download and Setup Llamafile Locally
-1. Download any model's Llamafile from the official [repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#other-example-llamafiles). For example, `mistral-7b-instruct-v0.2.Q4_0.llamafile` is a 3.85 GB Llamafile to get started with (alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
-2. Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`.
-3. Start the application locally with `./mistral-7b-instruct-v0.2.Q4_0.llamafile`.
+### Procedure
+#### 1. Download and Setup Llamafile Locally
+   * Download any model's Llamafile from the official [repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#other-example-llamafiles). For example, `mistral-7b-instruct-v0.2.Q4_0.llamafile` is a 3.85 GB Llamafile to get started with (alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
+   * Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`.
+   * Start the application locally with `./mistral-7b-instruct-v0.2.Q4_0.llamafile`.
 
+#### 2. Verify Llamafile is Running
 You should be able to see it running on [localhost:8080](http://localhost:8080/). Note that this is the endpoint that Lumigator will use to interact with.
 
-### Run Lumigator Evaluation
+#### 3. Run Lumigator Evaluation
 Create a new bash script `test_local_llm_eval.sh`:
 ```bash
 #!/bin/bash
@@ -70,7 +72,6 @@ curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
     "model_url": "'"$EVAL_MODEL_URL"'",
     "system_prompt": "'"$EVAL_SYSTEM_PROMPT"'"
   }'
-
 ```
 
 Finally run the evaluation:
@@ -83,15 +84,18 @@ You can view the results on the UI as described [below](./local-models.md#view-e
 ## Ollama
 [Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://docs.openwebui.com/).
 
-### Setup Ollama Completions Endpoint Locally
-1. Download and install Ollama for your operating system from the [official website](https://ollama.com/download).
-2. Select a model from the [available list](https://ollama.com/search) that you would like to use for evaluation (e.g. `llama3.2`) and run:
+### Procedure
+#### 1. Setup Ollama Completions Endpoint Locally
+* Download and install Ollama for your operating system from the [official website](https://ollama.com/download).
+* Select a model from the [available list](https://ollama.com/search) that you would like to use for evaluation (e.g. `llama3.2`) and run:
   ```console
   user@host:~/lumigator$ ollama run llama3.2
   ```
-  This should start the Ollama completions endpoint locally and can be verified by visiting [localhost:11434](http://localhost:11434/).
 
-### Run Lumigator Evaluation
+#### 2. Verify Ollama is Running
+A Ollama completions endpoint should start running locally and can be verified by visiting [localhost:11434](http://localhost:11434/).
+
+#### 3. Run Lumigator Evaluation
 The evaluation steps are similar to earlier but we modify model details in the  `test_local_llm_eval.sh` script:
 ```bash
 #!/bin/bash
@@ -133,22 +137,27 @@ As a pre-requisite, you will need to create an account on HuggingFace and [setup
 user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 ```
 
-### Setup vLLM Completions Endpoint Locally
-While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://github.com/vllm-project/vllm/blob/main/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/Dockerfile.arm) for ARM architecture.
-```console
-user@host:~/$ git clone https://github.com/vllm-project/vllm.git
-user@host:~/$ cd vllm
-user@host:~/vllm$ build -f Dockerfile.arm -t vllm-cpu --shm-size=6g .
-user@host:~/vllm$ docker run -it --rm -p 8090:8000 \
-                  --env "HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN" \
-                  vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
-                  --dtype float16
-```
+### Procedure
+#### 1. Setup vLLM Completions Endpoint Locally
+* While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://github.com/vllm-project/vllm/blob/main/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/Dockerfile.arm) for ARM architecture.
+  ```console
+  user@host:~/$ git clone https://github.com/vllm-project/vllm.git
+  user@host:~/$ cd vllm
+  user@host:~/vllm$ build -f Dockerfile.arm -t vllm-cpu --shm-size=6g .
+  user@host:~/vllm$ docker run -it --rm -p 8090:8000 \
+                    --env "HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN" \
+                    vllm-cpu --model HuggingFaceTB/SmolLM2-360M-Instruct \
+                    --dtype float16
+  ```
+  ```{note}
+  We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since the vLLM default port 8000 is already being used by Lumigator).
+  ```
+
+#### 2. Verify vLLM is Running
 If successful, you should see the vLLM server running on [localhost:8090/docs](http://localhost:8090/docs) and your chosen model listed on [localhost:8090/v1/models](http://localhost:8090/v1/models).
 
-We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since 8000 is already used by Lumigator).
 
-### Run Lumigator Evaluation
+#### 3. Run Lumigator Evaluation
 And make the necessary changes to your evaluation script to point to the local vLLM server and use the correct model:
 ```bash
 #!/bin/bash

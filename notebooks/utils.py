@@ -20,11 +20,11 @@ EVAL_METRICS = {
 def _parse_model_results(result: dict, model_info: pd.DataFrame):
     row = {}
 
-    model_name = result["model"]
+    model_name = result["artifacts"]["model"]
     row["Model"] = model_name
 
     for column, metric in EVAL_METRICS.items():
-        temp_result = result
+        temp_result = result["metrics"]
         for key in metric:
             value = temp_result.get(key)
             if value is None:

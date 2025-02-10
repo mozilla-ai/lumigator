@@ -1,0 +1,11 @@
+{
+  "name": "test-job-001",
+  "description": "This is a test inference job",
+  "dataset": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
+  "max_samples": 5,
+  "job_config": {
+    "job_type": "annotate",
+    "task": "summarization",
+    "store_to_dataset": false
+  }
+}

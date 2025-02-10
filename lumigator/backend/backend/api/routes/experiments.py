@@ -1,7 +1,8 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
+from loguru import logger
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
@@ -11,13 +12,16 @@ from lumigator_schemas.experiments import (
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobEvalCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
 )
+from lumigator_schemas.workflows import (
+    WorkflowCreateRequest,
+    WorkflowResponse,
+)
 
-from backend.api.deps import ExperimentServiceDep, JobServiceDep
+from backend.api.deps import ExperimentServiceDep, JobServiceDep, WorkflowServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 
@@ -31,8 +35,28 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment(service: JobServiceDep, request: ExperimentCreate) -> JobResponse:
-    return service.create_job(JobEvalCreate.model_validate(request.model_dump()))
+def create_experiment(
+    experiment_service: ExperimentServiceDep,
+    workflow_service: WorkflowServiceDep,
+    request: ExperimentCreate,
+    background_tasks: BackgroundTasks,
+) -> ExperimentResponse:
+    # To keep the interface consistent to the UI, we'll start
+    # a workflow
+    experiment_response = ExperimentResponse.model_validate(
+        experiment_service.create_experiment(
+            ExperimentIdCreate(**request.model_dump())
+        ).model_dump()
+    )
+    logger.info(f"--> Experiment response: {experiment_response}")
+    workflow_response = WorkflowResponse.model_validate(
+        workflow_service.create_workflow(
+            WorkflowCreateRequest(**request.model_dump(), experiment_id=experiment_response.id),
+            background_tasks,
+        )
+    )
+    logger.info(f"--> Workflow response: {workflow_response}")
+    return experiment_response
 
 
 @router.get("/{experiment_id}")

@@ -28,6 +28,10 @@ export const useExperimentStore = defineStore('experiment', () => {
     return inferenceJobs.value.some((job) => job.status === 'RUNNING')
   })
 
+  /**
+   * Loads all experiments and jobs.
+   */
+  // TODO: Rename to loadAllJobs
   async function loadExperiments() {
     const allJobs = await experimentService.fetchJobs()
     inferenceJobs.value = allJobs
@@ -39,6 +43,11 @@ export const useExperimentStore = defineStore('experiment', () => {
     experiments.value = getJobsPerExperiment()
   }
 
+  /**
+   * Groups jobs by experiment.
+   *  Jobs with same name and starting time belong to the same experiment.
+   * @returns {Array} Array of experiments with their associated jobs.
+   */
   function getJobsPerExperiment(): Experiment[] {
     const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
       const key = `${job.name}-${job.experimentStart}`
@@ -87,7 +96,7 @@ export const useExperimentStore = defineStore('experiment', () => {
   }
 
   /**
-   *
+   * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
@@ -122,6 +131,13 @@ export const useExperimentStore = defineStore('experiment', () => {
     await Promise.all(getIncompleteJobIds().map((id) => updateJobStatus(id)))
   }
 
+  /**
+   * Runs an experiment with multiple models.
+   * Each model triggers a respecive evaluation job.
+   *
+   * @param {Object} experimentData - The data for the experiment to run.
+   * @returns {Promise<Array>} The results of the experiment.
+   */
   async function runExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
     const modelArray = experimentData.models
     const jobRequests = modelArray.map((singleModel) => {
@@ -186,6 +202,12 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  /**
+   * Transforms results data into a format which accommodates the UI
+   *
+   * @param {Object} objectData .
+   * @returns {Array} Transformed results array.
+   */
   function transformResultsArray(objectData: ObjectData): JobResults[] {
     const transformedArray = objectData.examples.map((example, index: number) => {
       return {
@@ -259,6 +281,12 @@ export const useExperimentStore = defineStore('experiment', () => {
     }
   }
 
+  /**
+   * Starts ground truth generation aka an inference job.
+   *
+   * @param {Object} groundTruthPayload - The payload for ground truth generation.
+   * @returns {Promise<Object|null>} The response from the annotation job or null if it fails.
+   */
   async function startGroundTruthGeneration(groundTruthPayload: unknown) {
     try {
       const jobResponse = await experimentService.triggerAnnotationJob(groundTruthPayload)

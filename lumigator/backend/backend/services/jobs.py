@@ -11,13 +11,12 @@ from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput, EvaluationConfig
+from evaluator_lite.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
     HfPipelineConfig,
     InferenceJobConfig,
-    InferenceJobOutput,
     InferenceServerConfig,
     SamplingParameters,
 )
@@ -101,11 +100,13 @@ class JobService:
         result_repo: JobResultRepository,
         ray_client: JobSubmissionClient,
         dataset_service: DatasetService,
+        background_tasks: BackgroundTasks,
     ):
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+        self._background_tasks = background_tasks
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
         records = self.job_repo.get_by_job_type(job_type)
@@ -402,7 +403,7 @@ class JobService:
                     use_fast=request.job_config.use_fast,
                     trust_remote_code=request.job_config.trust_remote_code,
                     torch_dtype=request.job_config.torch_dtype,
-                    max_length=500,
+                    max_new_tokens=500,
                 )
         return job_config
 
@@ -425,7 +426,6 @@ class JobService:
     def create_job(
         self,
         request: JobCreate,
-        background_tasks: BackgroundTasks,
         experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
@@ -433,6 +433,8 @@ class JobService:
         job_type = request.job_config.job_type
 
         # Create a db record for the job
+        # To find the experiment that a job belongs to,
+        # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
         record = self.job_repo.create(
             name=request.name,
             description=request.description,
@@ -504,6 +506,12 @@ class JobService:
         )
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
+
+        # TODO Defer to specific job
+        if job_type == JobType.INFERENCE:
+            self.add_background_task(
+                self._background_tasks, self.handle_inference_job, record.id, request
+            )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

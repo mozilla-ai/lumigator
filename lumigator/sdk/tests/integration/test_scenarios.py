@@ -15,8 +15,8 @@ from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import (
     DatasetDownloadResponse,
-    JobAnnotateConfig,
     ExperimentIdCreate,
+    JobAnnotateConfig,
     JobCreate,
     JobEvalLiteConfig,
     JobInferenceConfig,
@@ -131,6 +131,9 @@ def test_job_lifecycle_remote_ok(
     infer_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
     assert infer_jobs_before is not None
 
+    eval_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+    assert eval_jobs_before is not None
+
     infer_job_config = JobInferenceConfig(
         # FIXME make a const
         model=TEST_CAUSAL_MODEL,
@@ -150,9 +153,9 @@ def test_job_lifecycle_remote_ok(
     assert job_infer_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    eval_jobs = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
-    assert eval_jobs is not None
-    assert eval_jobs.items
+    eval_jobs_after = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+    assert eval_jobs_after is not None
+    assert eval_jobs_after.total - eval_jobs_before.total == 0
 
     infer_job_status = lumi_client_int.jobs.wait_for_job(
         job_infer_creation_result.id, retries=11, poll_wait=30
@@ -197,8 +200,6 @@ def test_job_lifecycle_remote_ok(
     assert infer_jobs_after.total - infer_jobs_before.total == 1
 
 
-
-
 @pytest.mark.parametrize(
     "dataset_name, dataset_fixture",
     [
@@ -233,7 +234,7 @@ def test_annotate_datasets(
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",
-        dataset=str(dataset.id),
+        dataset=str(created_dataset.id),
         max_samples=2,
         job_config=annotate_job_config,
     )

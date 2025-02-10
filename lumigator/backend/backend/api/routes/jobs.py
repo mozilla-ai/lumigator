@@ -6,7 +6,7 @@ from uuid import UUID
 
 import loguru
 import requests
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -49,13 +49,8 @@ def create_inference_job(
     job_create_request: JobCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
     job_response = service.create_job(job_create_request)
-
-    service.add_background_task(
-        background_tasks, service.handle_inference_job, job_response.id, job_create_request
-    )
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"
@@ -69,7 +64,6 @@ def create_annotation_job(
     job_create_request: JobCreate,
     request: Request,
     response: Response,
-    background_tasks: BackgroundTasks,
 ) -> JobResponse:
     """This uses a hardcoded model, that is, Lumigator's opinion on what
     reference model should be used to generate annotations.
@@ -85,7 +79,7 @@ def create_annotation_job(
     inference_job_create_request_dict["job_config"] = inference_job_create_config_dict
 
     inference_job_create_request = JobCreate(**inference_job_create_request_dict)
-    job_response = service.create_job(inference_job_create_request, background_tasks)
+    job_response = service.create_job(inference_job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

@@ -61,10 +61,10 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_after_response = local_client.get("/datasets/")
-    assert get_ds_after_response.status_code == 200
-    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    assert get_ds_after.total == get_ds.total + 1
+    get_ds_before_response = local_client.get("/datasets/")
+    assert get_ds_before_response.status_code == 200
+    get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
+    assert get_ds_before.total == get_ds.total + 1
 
     infer_payload = {
         "name": "test_run_hugging_face",
@@ -134,6 +134,20 @@ def test_upload_data_launch_job(
     )
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
+
+    # FIXME Either remove the store_to_dataset option, or
+    # restore it to the jobs service
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds_before.total + 1
+
+    get_all_jobs = local_client.get("/jobs")
+    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
+    get_jobs_infer = local_client.get("/jobs?job_types=inference")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
+    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])

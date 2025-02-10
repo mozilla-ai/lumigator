@@ -29,6 +29,7 @@ from lumigator_schemas.jobs import (
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
+from sqlalchemy.sql.expression import or_
 
 from backend.config_templates import lookup_template
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -41,6 +42,9 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
 )
 from backend.settings import settings
+
+DEFAULT_SKIP = 0
+DEFAULT_LIMIT = 100
 
 
 class JobService:
@@ -93,6 +97,12 @@ class JobService:
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+
+    def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
+        records = self.job_repo.get_by_job_type(job_type)
+        if records is None:
+            return []
+        return records
 
     def _get_job_record(self, job_id: UUID) -> JobRecord:
         """Gets a job from the repository (database) by ID.
@@ -298,7 +308,7 @@ class JobService:
 
         return config_template
 
-    def _set_model_type(self, request) -> str:
+    def _set_model_type(self, request: BaseModel) -> str:
         """Sets model URL based on protocol address"""
         if request.model.startswith("oai://"):
             model_url = settings.OAI_API_URL
@@ -391,7 +401,11 @@ class JobService:
             raise JobTypeUnsupportedError(request) from None
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name,
+            description=request.description,
+            job_type=job_type,
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -485,11 +499,17 @@ class JobService:
 
     def list_jobs(
         self,
-        skip: int = 0,
-        limit: int = 100,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
+        job_types: list[str] = (),
     ) -> ListingResponse[JobResponse]:
-        total = self.job_repo.count()
-        records = self.job_repo.list(skip, limit)
+        # It would be better if we could just feed an empty dict,
+        # but this complicates things at the ORM level,
+        # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
+        records = self.job_repo.list(
+            skip, limit, criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])]
+        )
+        total = len(records)
         return ListingResponse(
             total=total,
             items=[self.get_job(record.id) for record in records],

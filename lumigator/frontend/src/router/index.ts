@@ -22,7 +22,7 @@ export const routes: Array<RouteRecordRaw & { icon?: string }> = [
   },
 ]
 
-const router = createRouter({
+export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
@@ -33,4 +33,3 @@ const router = createRouter({
     }
   },
 })
-export default router

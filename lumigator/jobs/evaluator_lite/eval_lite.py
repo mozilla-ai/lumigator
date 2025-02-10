@@ -7,14 +7,14 @@ from datasets import load_from_disk
 from eval_metrics import EvaluationMetrics
 from loguru import logger
 
-from schemas import EvalJobConfig
+from schemas import EvalJobArtifacts, EvalJobConfig, EvalJobMetrics, JobOutput
 
 
-def save_to_disk(local_path: Path, data_dict: dict):
+def save_to_disk(local_path: Path, data: JobOutput):
     logger.info(f"Storing evaluation results into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data_dict, f)
+        json.dump(data.model_dump(), f)
 
 
 def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):
@@ -25,7 +25,7 @@ def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: EvalJobConfig, eval_results: dict) -> Path:
+def save_outputs(config: EvalJobConfig, eval_results: JobOutput) -> Path:
     storage_path = config.evaluation.storage_path
 
     # generate local temp file ANYWAY:
@@ -49,11 +49,12 @@ def save_outputs(config: EvalJobConfig, eval_results: dict) -> Path:
         logger.error(e)
 
 
-def run_eval_metrics(predictions: list, ground_truth: list, evaluation_metrics: list):
+def run_eval_metrics(
+    predictions: list, ground_truth: list, evaluation_metrics: list
+) -> EvalJobMetrics:
     em = EvaluationMetrics(evaluation_metrics)
     evaluation_results = em.run_all(predictions, ground_truth)
-
-    return evaluation_results
+    return EvalJobMetrics.model_validate(evaluation_results)
 
 
 def run_eval(config: EvalJobConfig) -> Path:
@@ -71,17 +72,23 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     logger.info(dataset)
 
-    # run evaluation and append to results dict
-    predictions = dataset["predictions"]
-    ground_truth = dataset["ground_truth"]
-
-    evaluation_results = run_eval_metrics(predictions, ground_truth, config.evaluation.metrics)
+    metric_results = run_eval_metrics(
+        dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+    )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
-        evaluation_results["predictions"] = dataset["predictions"]
-        evaluation_results["ground_truth"] = dataset["ground_truth"]
-
+        artifacts = EvalJobArtifacts(
+            predictions=dataset["predictions"],
+            ground_truth=dataset["ground_truth"],
+        )
+    else:
+        artifacts = None
+    evaluation_results = JobOutput(
+        metrics=metric_results,
+        parameters=config,
+        artifacts=artifacts,
+    )
     output_path = save_outputs(config, evaluation_results)
     return output_path
 

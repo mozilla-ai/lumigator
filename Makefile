@@ -2,6 +2,12 @@
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
+
+# Required binaries in order to correctly run the makefile, if any cannot be found the script will fail
+REQUIRED_BINARIES := git docker yq uv
+$(foreach bin,$(REQUIRED_BINARIES),\
+  $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
+
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 

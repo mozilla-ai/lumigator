@@ -10,9 +10,9 @@ import loguru
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
+from evaluator_lite.schemas import EvalJobConfig
 from fastapi import BackgroundTasks, UploadFile
-from inference.schemas import InferenceJobConfig, InferenceJobOutput
+from inference.schemas import InferenceJobConfig
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -22,6 +22,7 @@ from lumigator_schemas.jobs import (
     JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
+    JobResultObject,
     JobResultResponse,
     JobStatus,
     JobType,
@@ -186,15 +187,21 @@ class JobService:
         loguru.logger.info("Adding a new dataset entry to the database...")
 
         # Get the dataset from the S3 bucket
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            # Validate that the output file adheres to the expected inference output schema
-            results = InferenceJobOutput.model_validate(json.loads(f.read()))
+        results = self._validate_results(job_id, s3)
 
-        # define the fields we want to keep from the results JSON
-        # and build a CSV file from it as a BytesIO object
-        fields = ["examples", "ground_truth", request.output_field]
-        bin_data = self._results_to_binary_file(results.model_dump(), fields)
+        # make sure the artifacts are present in the results
+        if not all(
+            key in results.artifacts for key in ["examples", "ground_truth", request.output_field]
+        ):
+            raise ValueError("Missing required fields in the job results.")
+
+        dataset_to_save = {
+            "examples": results.artifacts["examples"],
+            "ground_truth": results.artifacts["ground_truth"],
+            request.output_field: results.artifacts[request.output_field],
+        }
+
+        bin_data = self._results_to_binary_file(dataset_to_save, list(dataset_to_save.keys()))
         bin_data_size = len(bin_data.getvalue())
 
         # Figure out the dataset filename
@@ -213,16 +220,14 @@ class JobService:
             format=DatasetFormat.JOB,
             run_id=job_id,
             generated=True,
-            generated_by=results.model,
+            generated_by=results.artifacts["model"],
         )
 
         loguru.logger.info(
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _validate_evaluation_results(
-        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
-    ):
+    def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
@@ -238,7 +243,7 @@ class JobService:
 
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            EvalJobOutput.model_validate(json.loads(f.read()))
+            return JobResultObject.model_validate(json.loads(f.read()))
 
     def get_upstream_job_status(self, job_id: UUID) -> str:
         """Returns the (lowercase) status of the upstream job.

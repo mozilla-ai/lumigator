@@ -74,6 +74,7 @@ class JobEvalConfig(BaseModel):
     model_url: str | None = None
     system_prompt: str | None = None
     skip_inference: bool = False
+    metrics: list[str] = ["meteor", "rouge", "bertscore"]
 
 
 class JobEvalLiteConfig(BaseModel):

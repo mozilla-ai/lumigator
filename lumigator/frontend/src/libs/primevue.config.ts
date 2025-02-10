@@ -1,7 +1,7 @@
 import { definePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 
-const LumiPreset = definePreset(Aura, {
+export const LumiPreset = definePreset(Aura, {
   semantic: {
     colorScheme: {
       light: {},
@@ -17,5 +17,3 @@ const LumiPreset = definePreset(Aura, {
     },
   },
 })
-
-export default LumiPreset

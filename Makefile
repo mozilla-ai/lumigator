@@ -5,7 +5,7 @@ UNAME:= $(shell uname -o)
 PROJECT_ROOT := $(shell git rev-parse --show-toplevel)
 CONTAINERS_RUNNING := $(shell docker ps -q --filter "name=lumigator-")
 
-KEEP_CONTAINERS_UP := $(shell grep -E '^KEEP_CONTAINERS_UP=' .env | cut -d'=' -f2 | tr -d '"' || echo "FALSE")
+KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
 CONFIG_BUILD_DIR="build"
@@ -91,13 +91,20 @@ endef
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 
+define remove_config_dir
+	@echo "Cleaning up config build directory: '$(CONFIG_BUILD_DIR)'..."
+	@rm -rf $(CONFIG_BUILD_DIR)
+	@echo "Cleanup complete."
+endef
+
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: config-generate-env
 	uv run pre-commit install
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
 
-local-down: config-clean
-	docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
+local-down:
+	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
+	$(call remove_config_dir)
 
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
@@ -115,8 +122,9 @@ start-lumigator-external-services: config-generate-env
 	docker compose $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 
-stop-lumigator: config-clean
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+stop-lumigator:
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) down
+	$(call remove_config_dir)
 
 clean-docker-buildcache:
 	docker builder prune --all -f
@@ -219,9 +227,7 @@ test-all: test-sdk test-backend test-jobs-unit
 
 # config-clean: removes any generated config files from the build directory (including the directory itself).
 config-clean:
-	@echo "Cleaning up generated config files in '$(CONFIG_BUILD_DIR)'..."
-	@rm -rf $(CONFIG_BUILD_DIR)
-	@echo "Cleanup complete."
+	$(call remove_config_dir)
 
 # config-generate: merges default and user YAML config files to produce a YAML file in the build directory.
 # Any keys missing from the user config will be substituted with the default key/values.

@@ -25,6 +25,7 @@ from evaluator.jobs.model_clients import (
     SummarizationPipelineModelClient,
 )
 from evaluator.jobs.utils import timer
+from evaluator.schemas import JobResultObject
 
 
 @timer
@@ -45,14 +46,14 @@ def evaluate(predictions: list, ground_truth: list, evaluation_metrics: list):
     return evaluation_results
 
 
-def save_outputs(config: HuggingFaceEvalJobConfig, evaluation_results: dict) -> Path:
+def save_outputs(config: HuggingFaceEvalJobConfig, results: JobResultObject) -> Path:
     storage_path = config.evaluation.storage_path
 
     def save_to_disk(local_path: Path):
         logger.info(f"Storing into {local_path}...")
         local_path.parent.mkdir(exist_ok=True, parents=True)
         with local_path.open("w") as f:
-            json.dump(evaluation_results, f)
+            json.dump(results.model_dump(), f)
 
     def save_to_s3(local_path: Path, storage_path: str):
         s3 = s3fs.S3FileSystem()
@@ -136,23 +137,22 @@ def run_eval(config: HuggingFaceEvalJobConfig) -> Path:
         predictions, ground_truth, config.evaluation.metrics
     )
 
-    # add timing to results dict
-    evaluation_results["summarization_time"] = summarization_time
-    evaluation_results["evaluation_time"] = evaluation_time
+    results = JobResultObject(
+        metrics={
+            "summarization_time": summarization_time,
+            "evaluation_time": evaluation_time,
+            **evaluation_results,
+        },
+        parameters=config.model_dump(),
+        artifacts={
+            "predictions": predictions if config.evaluation.return_predictions else None,
+            "ground_truth": ground_truth if config.evaluation.return_input_data else None,
+            "examples": input_samples if config.evaluation.return_input_data else None,
+            "model": output_model_name,
+        },
+    )
 
-    # add input data to results dict
-    if config.evaluation.return_input_data:
-        evaluation_results["examples"] = dataset["examples"]
-        evaluation_results["ground_truth"] = dataset["ground_truth"]
-
-    # add predictions to results dict
-    if config.evaluation.return_predictions:
-        evaluation_results["predictions"] = predictions
-
-    # add model name to results dict
-    evaluation_results["model"] = output_model_name
-
-    output_path = save_outputs(config, evaluation_results)
+    output_path = save_outputs(config, results)
     return output_path
 
 

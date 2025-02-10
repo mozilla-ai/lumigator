@@ -90,15 +90,19 @@ export type Rouge = {
 }
 
 export type ObjectData = {
-  examples: string[]
-  bertscore?: Bertscore
-  evaluation_time?: number
-  ground_truth?: string[]
-  meteor?: Meteor
-  model: string
-  predictions?: string[]
-  rouge?: Rouge
-  summarization_time: number
+  metrics: {
+    bertscore?: Bertscore
+    meteor?: Meteor
+    rouge?: Rouge
+    summarization_time: number
+    evaluation_time?: number
+  }
+  artifacts: {
+    predictions?: string[]
+    ground_truth?: string[]
+    model: string
+    examples: string[]
+  }
 }
 
 export type JobResults = {

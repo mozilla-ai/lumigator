@@ -520,7 +520,9 @@ class JobService:
         # but this complicates things at the ORM level,
         # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
         records = self.job_repo.list(
-            skip, limit, criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])]
+            skip,
+            limit,
+            criteria=[or_(False, *[JobRecord.job_type == job_type for job_type in job_types])],
         )
         total = len(records)
         return ListingResponse(

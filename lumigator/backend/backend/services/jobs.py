@@ -201,7 +201,6 @@ class JobService:
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             # Validate that the output file adheres to the expected inference output schema
             results_json = json.loads(f.read())
-            loguru.logger.critical(f"Got results: {results_json}")
             # TODO Move into job-specific territory
             # Specifically, this works only for inferences!
             results = InferenceJobOutput.model_validate(results_json)
@@ -434,6 +433,8 @@ class JobService:
         job_type = request.job_config.job_type
 
         # Create a db record for the job
+        # To find the experiment that a job belongs to,
+        # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
         record = self.job_repo.create(
             name=request.name,
             description=request.description,

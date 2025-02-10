@@ -80,7 +80,6 @@ class WorkflowService:
         # submit inference job first
         inference_job = self._job_service.create_job(
             job_infer_create,
-            experiment_id=request.experiment_id,
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
@@ -126,8 +125,6 @@ class WorkflowService:
         # submit the job
         evaluation_job = self._job_service.create_job(
             job_eval_create,
-            self._background_tasks,
-            experiment_id=request.experiment_id,
         )
 
         # wait for the evaluation job to complete

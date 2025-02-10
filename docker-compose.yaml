@@ -13,6 +13,8 @@ services:
     profiles:
       - local
   minio:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     command: server /data --console-address ":9001"
     ports:
@@ -34,6 +36,8 @@ services:
       - local
 
   minio-admin:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
     depends_on:
       minio:
@@ -53,6 +57,8 @@ services:
       - local
 
   redis:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: redis:8.0-M03-alpine
     command: redis-server --save 60 1 --loglevel warning
     profiles:
@@ -66,6 +72,8 @@ services:
       retries: 5
 
   ray:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX}
     depends_on:
       redis:
@@ -125,6 +133,8 @@ services:
       - local
 
   backend:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: mzdotai/lumigator:v0.1.0-alpha
     pull_policy: always
     build:
@@ -181,6 +191,8 @@ services:
       - "localhost:host-gateway"
 
   frontend:
+    labels:
+      ai.mozilla.product_name: lumigator
     pull_policy: always
     image: mzdotai/lumigator-frontend:v0.1.0-alpha
     build:
@@ -223,7 +235,15 @@ services:
 
 volumes:
     minio-data:
+      labels:
+        ai.mozilla.product_name: lumigator
     database_volume:
+      labels:
+        ai.mozilla.product_name: lumigator
     redis-data:
     huggingface_cache_vol:
+      labels:
+        ai.mozilla.product_name: lumigator
     ray-pip-cache:
+      labels:
+        ai.mozilla.product_name: lumigator

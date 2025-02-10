@@ -135,7 +135,7 @@ clean-docker-buildcache:
 	docker builder prune --all -f
 
 clean-docker-containers:
-	docker container prune
+	docker container prune --filter label=ai.mozilla.product_name=lumigator
 
 # remove all dangling images + all mzdotai/* ones
 clean-docker-images:

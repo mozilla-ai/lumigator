@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 import Menu from 'primevue/menu'
 import { routes } from '@/router'
-import { useSlidePanel } from '@/composables/SlidingPanel'
+import { useSlidePanel } from '@/composables/useSlidePanel'
 const { showSlidingPanel } = useSlidePanel()
 </script>
 

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
 import { mount } from '@vue/test-utils'
-import LPageHeader from '../molecules/LPageHeader.vue'
+import LPageHeader from '@/components/layout/LPageHeader.vue'
 
 describe('LPageHeader', () => {
   it('renders properly', () => {

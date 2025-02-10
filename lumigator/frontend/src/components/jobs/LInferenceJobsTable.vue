@@ -69,7 +69,7 @@ import Column from 'primevue/column'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import { useSlidePanel } from '@/composables/SlidingPanel'
+import { useSlidePanel } from '@/composables/useSlidePanel'
 import { formatDate } from '@/helpers/formatDate'
 
 const experimentStore = useExperimentStore()

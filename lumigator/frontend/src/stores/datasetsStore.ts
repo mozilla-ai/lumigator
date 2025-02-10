@@ -1,6 +1,6 @@
 import { ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { datasetsService } from '@/services/datasets/datasetsService'
+import { datasetsService } from '@/sdk/datasets/datasetsService'
 import { downloadContent } from '@/helpers/index'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'

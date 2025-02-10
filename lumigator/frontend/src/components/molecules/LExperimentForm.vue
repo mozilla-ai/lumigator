@@ -84,8 +84,8 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/datasetsStore'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useDatasetStore } from '@/stores/datasetsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
 import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
 import Select from 'primevue/select'

@@ -1,4 +1,4 @@
-import { lumigatorApiAxiosInstance } from '@/helpers/lumigator-axios-instance'
+import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 import type { Job, ObjectData } from '@/types/Experiment'
 
 export const PATH_JOBS_ROOT = () => `jobs/`

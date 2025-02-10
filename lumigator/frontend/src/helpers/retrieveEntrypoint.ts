@@ -1,26 +1,6 @@
 import type { Job } from '@/types/Experiment'
 
 /**
- * Formats a date string into 'dd-MMM-yyyy, hh:mm' format.
- *
- * @param {string} dateString - The date string to format.
- * @returns {string} The formatted date string.
- */
-export function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-    .format(date)
-    .replace(/(\d{4})(\s)/, '$1,$2')
-}
-
-/**
  * Retrieves and normalizes the entrypoint configuration from a job object.
  *
  * @param {Object} job - The job object containing the entrypoint.
@@ -85,50 +65,4 @@ export function retrieveEntrypoint(job: Job) {
     console.error('Failed to parse JSON in entrypoint:', error)
     return
   }
-}
-
-/**
- * Calculates the duration between two ISO timestamps and formats it as 'hh:mm:ss'.
- * It is used for calculating the duration of jobs OR Experiments until Backend provides this info
- * @param {string} start - The start timestamp in ISO format.
- * @param {string} finish - The finish timestamp in ISO format.
- * @returns {string} The formatted duration as 'hh:mm:ss'.
- * @throws {Error} If the date format is invalid.
- */
-export function calculateDuration(start: string, finish: string) {
-  // Calculate the time difference in milliseconds
-  const differenceInMilliseconds = new Date(finish).getTime() - new Date(start).getTime()
-
-  if (isNaN(differenceInMilliseconds)) {
-    throw new Error('Invalid date format. Please provide valid ISO timestamps.')
-  }
-
-  const totalSeconds = Math.floor(differenceInMilliseconds / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  // Format the result as hh:mm:ss
-  const formatedDuration = `${String(hours).padStart(2, '0')}:
-  ${String(minutes).padStart(2, '0')}:
-  ${String(seconds).padStart(2, '0')}`
-  return formatedDuration
-}
-
-/**
- * Initiates a download of the provided content as a file.
- * Used for downloading Resluts and Datasets
- * @param {Blob} blob - The content to download.
- * @param {string} filename - The name of the file to be downloaded.
- */
-export function downloadContent(blob: Blob, filename: string) {
-  const downloadUrl = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.className = 'hidden'
-  anchor.href = downloadUrl
-  anchor.download = filename
-  document.body.appendChild(anchor)
-  anchor.click()
-  URL.revokeObjectURL(downloadUrl)
-  document.body.removeChild(anchor)
 }

@@ -52,9 +52,9 @@
 <script lang="ts" setup>
 import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
-import { useDatasetStore } from '@/stores/datasets/datasetsStore'
-import { useModelStore } from '@/stores/models/modelsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
+import { useDatasetStore } from '@/stores/datasetsStore'
+import { useModelStore } from '@/stores/modelsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import LPageHeader from '@/components/molecules/LPageHeader.vue'
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue'

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { healthService } from '@/services/health/healthService'
+import { healthService } from '@/sdk/health/healthService'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import type { AxiosError } from 'axios'
 

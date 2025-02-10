@@ -55,7 +55,7 @@ import Tag from 'primevue/tag'
 import Column from 'primevue/column'
 import { formatDate } from '@/helpers/index'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
 
 const experimentStore = useExperimentStore()
 const { jobs } = storeToRefs(experimentStore)

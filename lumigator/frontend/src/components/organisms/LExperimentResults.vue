@@ -115,8 +115,8 @@
 
 <script lang="ts" setup>
 import { computed, ref, onUnmounted } from 'vue'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
-import { useModelStore } from '@/stores/models/modelsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
+import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/molecules/LJobResults.vue'
 import DataTable from 'primevue/datatable'

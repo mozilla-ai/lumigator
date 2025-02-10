@@ -90,7 +90,7 @@ import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import Tag from 'primevue/tag'
 import LJobsTable from '@/components/molecules/LJobsTable.vue'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
 import type { Experiment, Job } from '@/types/Experiment'
 
 const props = defineProps({

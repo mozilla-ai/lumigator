@@ -74,8 +74,8 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/datasetsStore'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useDatasetStore } from '@/stores/datasetsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import { useRouter } from 'vue-router'
 import LPageHeader from '@/components/molecules/LPageHeader.vue'

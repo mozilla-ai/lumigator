@@ -1,4 +1,4 @@
-import { lumigatorApiAxiosInstance } from '@/helpers/lumigator-axios-instance'
+import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 
 export const PATH_DATASETS_ROOT = () => `datasets/`
 export const PATH_SINGLE_DATASET = (id: string) => `datasets/${id}`

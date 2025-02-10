@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 import { ref, watch, computed, nextTick, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
 const experimentStore = useExperimentStore()
 const { experimentLogs } = storeToRefs(experimentStore)
 const logContainer: Ref<HTMLElement | undefined> = ref()

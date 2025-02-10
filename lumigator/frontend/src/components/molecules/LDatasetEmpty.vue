@@ -3,8 +3,8 @@
     <h2 class="l-dataset-empty__instructions">Submit a dataset to start using Lumigator.</h2>
     <p class="l-dataset-empty__instructions-text">
       <span>
-        Use a dataset as the basis for your evaluation.
-        It includes data for the model you'd like to evaluate and possibly a ground truth "answer".
+        Use a dataset as the basis for your evaluation. It includes data for the model you'd like to
+        evaluate and possibly a ground truth "answer".
       </span>
     </p>
     <Button
@@ -17,34 +17,38 @@
     />
     <p class="l-dataset-empty__note">
       Your dataset should be a CSV file and include the following columns:
-      <span  class="l-dataset-empty__note-item">examples</span>,
-      <span  class="l-dataset-empty__note-item">ground_truth</span>.
+      <span class="l-dataset-empty__note-item">examples</span>,
+      <span class="l-dataset-empty__note-item">ground_truth</span>.
     </p>
     <p class="l-dataset-empty__note">
       The
-      <span  class="l-dataset-empty__note-item">ground_truth</span>
+      <span class="l-dataset-empty__note-item">ground_truth</span>
       column is optional, as it can be generated using Lumigator.
-      <a href="https://mozilla-ai.github.io/lumigator/"
-         target="_blank"
-         style="background-color: transparent;"
-      >Learn more <span class="pi pi-arrow-up-right" /></a>
+      <a
+        href="https://mozilla-ai.github.io/lumigator/"
+        target="_blank"
+        style="background-color: transparent"
+        >Learn more <span class="pi pi-arrow-up-right"
+      /></a>
     </p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Button from 'primevue/button';
-const emit  = defineEmits(['l-add-dataset'])
+import Button from 'primevue/button'
+const emit = defineEmits(['l-add-dataset'])
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-dataset-empty {
   $root: &;
   max-width: 600px;
   margin: auto;
 
   h2 {
-    margin-bottom: $l-spacing-1/2;
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   &__instructions {
@@ -69,8 +73,7 @@ const emit  = defineEmits(['l-add-dataset'])
   &__action-btn {
     font-weight: $l-font-weight-normal;
     margin-top: $l-spacing-1;
-    margin-bottom: $l-spacing-1/2;
-
+    margin-bottom: calc($l-spacing-1 / 2);
   }
 
   &__note {
@@ -79,6 +82,5 @@ const emit  = defineEmits(['l-add-dataset'])
       background: $black;
     }
   }
-
 }
 </style>

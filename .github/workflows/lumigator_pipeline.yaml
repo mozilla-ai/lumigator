@@ -79,6 +79,11 @@ jobs:
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
       - name: Spinning up containers for the tests
         run: make start-lumigator-build
 
@@ -126,6 +131,11 @@ jobs:
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
 
       - name: Setup containers
         run: make start-lumigator-build

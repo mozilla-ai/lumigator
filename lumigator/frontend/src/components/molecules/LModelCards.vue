@@ -3,12 +3,13 @@
     <div class="l-models-list__options-container">
       <div class="l-models-list__options-container-section">
         <p>VIA HUGGING FACE</p>
-        <span>Ensure you have sufficient compute resources
-          available before running models in your environment.
+        <span
+          >Ensure you have sufficient compute resources available before running models in your
+          environment.
         </span>
       </div>
       <div
-        v-for="model in modelsRequiringNoAPIKey"
+        v-for="model of modelsRequiringNoAPIKey"
         :key="model.name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
@@ -35,14 +36,11 @@
           @click.stop
         />
       </div>
-      <div
-        v-if="modelsRequiringAPIKey.length"
-        class="l-models-list__options-container-section"
-      >
+      <div v-if="modelsRequiringAPIKey.length" class="l-models-list__options-container-section">
         <p>VIA APIs</p>
-        <span>Ensure your API keys are
-          added to your environment variables (.env)
-          file before using API-based models.
+        <span
+          >Ensure your API keys are added to your environment variables (.env) file before using
+          API-based models.
         </span>
       </div>
       <div
@@ -77,51 +75,53 @@
   </div>
 </template>
 
-
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useModelStore } from '@/stores/models/store';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
+import { ref, computed, type Ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useModelStore } from '@/stores/models/modelsStore'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import type { Model } from '@/types/Experiment'
 
-const modelStore = useModelStore();
-const { models } = storeToRefs(modelStore);
-const selectedModels = ref([]);
+const modelStore = useModelStore()
+const { models } = storeToRefs(modelStore)
+const selectedModels: Ref<Model[]> = ref([])
 
 defineProps({
-  modelLink: String
+  modelLink: String,
 })
 
 defineExpose({
-  selectedModels
+  selectedModels,
 })
 
-const modelsByRequirement = (requirementKey, isRequired) => {
-  return models.value.filter((x) => {
-    const isKeyPresent = x?.requirements?.includes(requirementKey);
-    return isRequired ? isKeyPresent : !isKeyPresent;
-  });
+const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
+  return models.value.filter((model: Model) => {
+    const isKeyPresent = model.requirements?.includes(requirementKey)
+    return isRequired ? isKeyPresent : !isKeyPresent
+  })
 }
 
-const modelsRequiringAPIKey = computed(() => modelsByRequirement("api_key", true));
+const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
 
-const modelsRequiringNoAPIKey = computed(() => modelsByRequirement("api_key", false));
+const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
 
-function toggleModel(model) {
+function toggleModel(model: Model) {
   const index = selectedModels.value.findIndex(
-    (selected) => selected.name === model.name
-  );
+    (selectedModel: Model) => selectedModel.name === model.name,
+  )
 
   if (index === -1) {
-    selectedModels.value.push(model);
+    selectedModels.value.push(model)
   } else {
-    selectedModels.value.splice(index, 1);
+    selectedModels.value.splice(index, 1)
   }
 }
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-models-list {
   width: 100%;
 
@@ -155,7 +155,7 @@ function toggleModel(model) {
 
       label {
         font-size: $l-font-size-sm;
-      cursor: pointer;
+        cursor: pointer;
         color: $l-grey-100;
       }
 

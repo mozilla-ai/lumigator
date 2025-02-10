@@ -41,5 +41,5 @@ class BaseRepository(Generic[RecordType]):
         self.session.commit()
         return count
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[RecordType]:
-        return self.session.query(self.record_cls).offset(skip).limit(limit).all()
+    def list(self, skip: int = 0, limit: int = 100, criteria: list = ()) -> list[RecordType]:
+        return self.session.query(self.record_cls).filter(*criteria).offset(skip).limit(limit).all()

@@ -1,49 +1,47 @@
 .pi.pi-dataset::before {
-    content: "";
-    display: inline-block;
-    width: 1.25em;
-    height: 1.25em;
-    background-color: currentColor; /* Use currentColor for SVG fill */
-    -webkit-mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
-    mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  content: '';
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  background-color: currentColor; /* Use currentColor for SVG fill */
+  -webkit-mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
+  mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
-
 
 .pi.pi-experiments::before {
-    content: "";
-    display: inline-block;
-    width: 1.25em;
-    height: 1.25em;
-    background-color: currentColor; /* Use currentColor for SVG fill */
-    -webkit-mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
-    mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  content: '';
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  background-color: currentColor; /* Use currentColor for SVG fill */
+  -webkit-mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
+  mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
-
 .pi.pi-download::before {
-    content: "";
-    display: inline-block;
-    width: 1.25em;
-    height: 1.25em;
-    background-color: currentColor; /* Use currentColor for SVG fill */
-    -webkit-mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
-    mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  content: '';
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  background-color: currentColor; /* Use currentColor for SVG fill */
+  -webkit-mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
+  mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .pi.pi-bin::before {
-    content: "";
-    display: inline-block;
-    width: 1.25em;
-    height: 1.25em;
-    background-color: currentColor; /* Use currentColor for SVG fill */
-    -webkit-mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
-    mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
+  content: '';
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  background-color: currentColor; /* Use currentColor for SVG fill */
+  -webkit-mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
+  mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }

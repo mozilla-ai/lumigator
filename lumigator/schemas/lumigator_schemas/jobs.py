@@ -156,9 +156,9 @@ class JobResultObject(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    metrics: dict | None
-    parameters: dict | None
-    artifacts: dict | None
+    metrics: BaseModel
+    parameters: BaseModel
+    artifacts: BaseModel
 
 
 class Job(JobResponse, JobSubmissionResponse):

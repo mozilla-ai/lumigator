@@ -183,7 +183,7 @@ class JobService:
         if not all(
             key in results.artifacts for key in ["examples", "ground_truth", request.output_field]
         ):
-            raise ValueError("Missing required fields in the evaluation results.")
+            raise ValueError("Missing required fields in the job results.")
 
         dataset_to_save = {
             "examples": results.artifacts["examples"],

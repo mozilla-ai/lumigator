@@ -165,7 +165,7 @@ oai_infer_template = """{{
 
 
 # Locally hosted models using oai client
-OAI_COMPATIBLE_PREFIXES = ("ollama://", "llamafile://")
+OAI_COMPATIBLE_PREFIXES = ("ollama://", "llamafile://", "vllm://")
 
 INFERENCE_TEMPLATES = {
     "default": default_infer_template,

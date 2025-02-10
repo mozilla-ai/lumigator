@@ -23,18 +23,4 @@ version: 0.1.0
 # It is recommended to use it with quotes.
 appVersion: "v0.1.0-alpha"
 
-dependencies:
-  - name: postgresql
-    repository: "oci://registry-1.docker.io/bitnamicharts"
-    version: "15.5.20"
-    condition: postgresql.enabled
-
-  - name: kuberay-operator
-    repository: "https://ray-project.github.io/kuberay-helm/"
-    version: "1.2.2"
-    condition: ray.enabled
-
-  - name: ray-cluster
-    repository: "https://ray-project.github.io/kuberay-helm/"
-    version: "1.2.2"
-    condition: ray.enabled
+dependencies: []

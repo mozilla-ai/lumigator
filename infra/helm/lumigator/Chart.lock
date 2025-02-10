@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.5.20
+- name: kuberay-operator
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+- name: ray-cluster
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+digest: sha256:1e4d17f5e4f723fba4fa14e22d1e87be558958f9e5b6afff04c800d1d805c6c8
+generated: "2025-02-09T21:35:41.957432-05:00"

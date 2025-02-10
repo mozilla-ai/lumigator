@@ -1,8 +1,6 @@
 Schemas
 =======
 
-.. automodule:: lumigator_schemas.completions
-   :members:
 
 .. automodule:: lumigator_schemas.datasets
    :members:

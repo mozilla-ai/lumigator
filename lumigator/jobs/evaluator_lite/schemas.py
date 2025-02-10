@@ -59,9 +59,18 @@ class Rouge(BaseModel):
     rougeLsum_mean: float  # noqa: N815
 
 
-class EvalJobOutput(BaseModel):
+class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
-    predictions: list[str]
-    ground_truth: list[str]
+
+
+class EvalJobArtifacts(BaseModel):
+    predictions: list[str] | None = None
+    ground_truth: list[str] | None = None
+
+
+class JobOutput(BaseModel):
+    metrics: EvalJobMetrics
+    parameters: EvalJobConfig
+    artifacts: EvalJobArtifacts | None

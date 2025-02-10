@@ -1,9 +1,6 @@
 <template>
   <div class="l-dataset-table">
-    <transition
-      name="transition-fade"
-      mode="out-in"
-    >
+    <transition name="transition-fade" mode="out-in">
       <DataTable
         v-if="tableData.length"
         v-model:selection="focusedItem"
@@ -16,43 +13,26 @@
         :sortOrder="-1"
         scrollable
         scrollHeight="75vh"
-        :pt="{table:'table-root'}"
+        :pt="{ table: 'table-root' }"
         :loading
         @row-click="emit('l-dataset-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
       >
-        <Column
-          field="filename"
-          header="Filename"
-        />
-        <Column
-          field="id"
-          header="dataset id"
-        >
+        <Column field="filename" header="Filename" />
+        <Column field="id" header="dataset id">
           <template #body="slotProps">
-            {{ shortenedID(slotProps.data.id) }}
+            {{ shortenID(slotProps.data.id) }}
           </template>
         </Column>
-        <Column
-          field="created_at"
-          header="submitted"
-        >
+        <Column field="created_at" header="submitted">
           <template #body="slotProps">
             {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
-        <Column
-          field="size"
-          header="size"
-        >
-          <template #body="slotProps">
-            {{ Math.floor(slotProps.data.size / 1000) }} KB
-          </template>
+        <Column field="size" header="size">
+          <template #body="slotProps"> {{ Math.floor(slotProps.data.size / 1000) }} KB </template>
         </Column>
-        <Column
-          field="ground_truth"
-          header="Ground Truth"
-        >
+        <Column field="ground_truth" header="Ground Truth">
           <template #body="slotProps">
             <span class="capitalize">
               {{ slotProps.data.generated ? 'True (AI Generated)' : slotProps.data.ground_truth }}
@@ -61,9 +41,10 @@
         </Column>
         <Column header="options">
           <template #body="slotProps">
-            <span class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
-                  aria-controls="optionsMenu"
-                  @click.stop="togglePopover($event, slotProps.data)"
+            <span
+              class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
+              aria-controls="optionsMenu"
+              @click.stop="togglePopover($event, slotProps.data)"
             />
           </template>
         </Column>
@@ -82,37 +63,37 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Menu from 'primevue/menu';
-import { useSlidePanel } from '@/composables/SlidingPanel';
+import { ref, computed, onMounted, watch } from 'vue'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Menu from 'primevue/menu'
+import { useSlidePanel } from '@/composables/SlidingPanel'
 import { formatDate } from '@/helpers/index'
-import type { MenuItem } from 'primevue/menuitem';
+import type { MenuItem } from 'primevue/menuitem'
+import type { Dataset } from '@/types/Dataset'
 
 const props = defineProps({
-	tableData: {
-		type: Array,
-		required: true,
-	}
+  tableData: {
+    type: Array,
+    required: true,
+  },
 })
 
 const emit = defineEmits([
   'l-delete-dataset',
   'l-dataset-selected',
   'l-experiment',
-  'l-download-dataset']);
+  'l-download-dataset',
+])
 
-
-const { showSlidingPanel  } = useSlidePanel();
+const { showSlidingPanel } = useSlidePanel()
 const style = computed(() => {
-  return showSlidingPanel.value ?
-    'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
-});
+  return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
+})
 
-const loading = ref(true);
-const focusedItem = ref(null);
-const optionsMenu = ref();
+const loading = ref(true)
+const focusedItem = ref()
+const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
     label: 'Use in Experiment',
@@ -120,7 +101,7 @@ const options = ref<MenuItem[]>([
     disabled: false,
     command: () => {
       emit('l-experiment', focusedItem.value)
-    }
+    },
   },
   {
     separator: true,
@@ -130,108 +111,109 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-download',
     command: () => {
       emit('l-download-dataset', focusedItem.value)
-    }
+    },
   },
   {
     label: 'Delete',
     icon: 'pi pi-trash',
     command: () => {
       emit('l-delete-dataset', focusedItem.value)
-    }
+    },
   },
-]);
+])
 
 onMounted(() => {
   setTimeout(() => {
-    loading.value = false;
-  }, 1000);
+    loading.value = false
+  }, 1000)
 })
 const ptConfigOptionsMenu = ref({
   list: 'l-dataset-table__options-menu',
   itemLink: 'l-dataset-table__menu-option',
   itemIcon: 'l-dataset-table__menu-option-icon',
-  separator: 'separator'
-});
+  separator: 'separator',
+})
 
-const shortenedID = (id) =>
-	id.length <= 20 ? id : `${id.slice(0, 20)}...`;
+const shortenID = (id: string) => (id.length <= 20 ? id : `${id.slice(0, 20)}...`)
 
-
-const togglePopover = (event, dataset) => {
-  focusedItem.value = dataset;
-  const experimentOption = options.value.find(option => option.label === 'Use in Experiment');
+const togglePopover = (event: MouseEvent, dataset: Dataset) => {
+  focusedItem.value = dataset
+  const experimentOption = options.value.find((option) => option.label === 'Use in Experiment')
   if (experimentOption) {
-    experimentOption.disabled = !dataset.ground_truth;
+    experimentOption.disabled = !dataset.ground_truth
   }
-	optionsMenu.value.toggle(event);
+  optionsMenu.value.toggle(event)
 }
 
 watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : null;
-});
+  focusedItem.value = newValue ? focusedItem.value : undefined
+})
 
 watch(props.tableData, (newValue) => {
   if (!newValue.length) {
-    loading.value = true;
+    loading.value = true
     setTimeout(() => {
-    loading.value = false;
-  }, 500);
+      loading.value = false
+    }, 500)
   }
-});
+})
 
-defineExpose({loading});
+defineExpose({ loading })
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-dataset-table {
-	$root: &;
-	width: 100%;
-	display: flex;
-	place-content: center;
+  $root: &;
+  width: 100%;
+  display: flex;
+  place-content: center;
 
   & .p-datatable {
     width: 100%;
   }
 
-	&__options-trigger {
-		padding: 0;
-		margin-left: 20% !important;
-	}
-
+  &__options-trigger {
+    padding: 0;
+    margin-left: 20% !important;
+  }
 }
 </style>
 
-
 <style lang="scss">
+@use '@/styles/variables' as *;
+
 //  In order to have effect the following
 // css rules must not be "scoped" because
 // the popup-menu is attached to the DOM after the
 // parent component is mounted
 .l-dataset-table__options-menu {
-	padding: 0 $l-spacing-1;
+  padding: 0 $l-spacing-1;
 }
 
 .l-dataset-table__menu-option {
-	color: $l-grey-100;
-	padding: $l-spacing-1 $l-spacing-1 $l-spacing-1 0 $l-spacing-1;
-	font-size: $l-menu-font-size;
+  color: $l-grey-100;
+  padding: $l-spacing-1 $l-spacing-1 $l-spacing-1 0 $l-spacing-1;
+  font-size: $l-menu-font-size;
 
-	&:hover {
-		color: white;
-	}
+  &:hover {
+    color: white;
+  }
 
-  &-icon,  span.pi {
-	  color: $l-grey-100;
+  &-icon,
+  span.pi {
+    color: $l-grey-100;
     font-size: $l-font-size-sm;
   }
 }
 
 .separator {
-	padding: $l-spacing-1/2 0;
+  padding: calc($l-spacing-1 / 2) 0;
 }
 
-.l-dataset-table__options-menu> :first-child .l-dataset-table__menu-option {
-	padding-bottom: 1rem;
-	padding-top: 0rem;
+.l-dataset-table__options-menu > :first-child .l-dataset-table__menu-option {
+  padding-bottom: 1rem;
+  padding-top: 0rem;
 }
 </style>

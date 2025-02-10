@@ -1,18 +1,13 @@
-import http from '@/services/http';
-import { PATH_MODELS_ROOT } from './api';
+import { lumigatorApiAxiosInstance } from '@/helpers/lumigator-axios-instance'
 
-async function fetchModels(task_name = 'summarization') {
-  try {
-    const response = await http.get(PATH_MODELS_ROOT(task_name))
-    if (response) {
-      return response.data.items;
-    }
-  } catch (error) {
-    console.error('Fetching Models failed.', { cause: error });
-    throw error;
-  }
+const PATH_MODELS_ROOT = (task_name: string) => `models/${task_name}`
+
+export async function fetchModels(task_name = 'summarization') {
+  const response = await lumigatorApiAxiosInstance.get(PATH_MODELS_ROOT(task_name))
+
+  return response.data.items
 }
 
-export default {
-  fetchModels
+export const modelsService = {
+  fetchModels,
 }

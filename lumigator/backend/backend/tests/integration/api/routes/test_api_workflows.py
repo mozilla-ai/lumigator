@@ -4,7 +4,6 @@ from uuid import UUID
 import pytest
 import requests
 from fastapi.testclient import TestClient
-from inference.schemas import InferenceJobOutput
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -13,6 +12,7 @@ from lumigator_schemas.jobs import (
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
+    JobResultObject,
     JobStatus,
 )
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
@@ -61,10 +61,10 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_after_response = local_client.get("/datasets/")
-    assert get_ds_after_response.status_code == 200
-    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    assert get_ds_after.total == get_ds.total + 1
+    get_ds_before_response = local_client.get("/datasets/")
+    assert get_ds_before_response.status_code == 200
+    get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
+    assert get_ds_before.total == get_ds.total + 1
 
     infer_payload = {
         "name": "test_run_hugging_face",
@@ -135,6 +135,20 @@ def test_upload_data_launch_job(
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
+    # FIXME Either remove the store_to_dataset option, or
+    # restore it to the jobs service
+    get_ds_after_response = local_client.get("/datasets/")
+    assert get_ds_after_response.status_code == 200
+    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
+    assert get_ds_after.total == get_ds_before.total + 1
+
+    get_all_jobs = local_client.get("/jobs")
+    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
+    get_jobs_infer = local_client.get("/jobs?job_types=inference")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
+    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
+
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
@@ -195,11 +209,9 @@ def test_upload_data_no_gt_launch_annotation(
         logs_annotation_job_results_model.download_url,
         timeout=5,  # 5 seconds
     )
-    logs_annotation_job_output = InferenceJobOutput.model_validate(
-        annotation_job_results_url.json()
-    )
-    assert logs_annotation_job_output.predictions is None
-    assert logs_annotation_job_output.ground_truth is not None
+    logs_annotation_job_output = JobResultObject.model_validate(annotation_job_results_url.json())
+    assert logs_annotation_job_output.artifacts["predictions"] is None
+    assert logs_annotation_job_output.artifacts["ground_truth"] is not None
     logger.info(f"Created results: {logs_annotation_job_output}")
 
 

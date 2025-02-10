@@ -43,7 +43,8 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     torch_dtype: str
     accelerator: str
     model_config = ConfigDict(extra="forbid")
-    max_length: int
+    max_new_tokens: int
+    truncation: bool = True
     task: str | None = None
 
 
@@ -62,3 +63,11 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
+
+
+class JobOutput(BaseModel):
+    # Nothing to put in metrics yet
+    # but eventually we will have metrics like tok/s, latency, average output length, etc.
+    metrics: None
+    artifacts: InferenceJobOutput
+    parameters: InferenceJobConfig

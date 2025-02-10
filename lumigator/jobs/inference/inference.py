@@ -13,7 +13,7 @@ from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelC
 from paths import PathPrefix
 from tqdm import tqdm
 
-from schemas import InferenceJobOutput
+from schemas import InferenceJobOutput, JobOutput
 
 
 def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
@@ -25,11 +25,11 @@ def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     return predictions
 
 
-def save_to_disk(local_path: Path, results: InferenceJobOutput):
+def save_to_disk(local_path: Path, results: JobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(results.dict(), f)
+        json.dump(results.model_dump(), f)
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
@@ -40,7 +40,7 @@ def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: InferenceJobConfig, inference_results: InferenceJobOutput) -> Path:
+def save_outputs(config: InferenceJobConfig, results: JobOutput) -> Path:
     storage_path = config.job.storage_path
 
     # generate local temp file ANYWAY:
@@ -49,7 +49,7 @@ def save_outputs(config: InferenceJobConfig, inference_results: InferenceJobOutp
     local_path = Path(Path.home() / ".lumigator" / "results" / config.name / "results.json")
 
     try:
-        save_to_disk(local_path, inference_results)
+        save_to_disk(local_path, results)
 
         # copy to s3 and return path
         if storage_path is not None and storage_path.startswith("s3://"):
@@ -112,7 +112,13 @@ def run_inference(config: InferenceJobConfig) -> Path:
     output["model"] = output_model_name
     logger.info(output)
 
-    output_path = save_outputs(config, InferenceJobOutput.model_validate(output))
+    results = JobOutput(
+        metrics=None,
+        parameters=config,
+        artifacts=InferenceJobOutput.model_validate(output),
+    )
+
+    output_path = save_outputs(config, results)
     return output_path
 
 

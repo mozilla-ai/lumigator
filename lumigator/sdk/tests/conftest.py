@@ -161,6 +161,13 @@ def dialog_data_unannotated(common_resources_dir):
         yield file
 
 
+@pytest.fixture(scope="function")
+def long_sequences_data_unannotated(common_resources_dir):
+    # Dataset with long sequences
+    with Path.open(common_resources_dir / "mock_long_sequences_no_gt.csv") as file:
+        yield file
+
+
 @pytest.fixture(scope="session")
 def simple_eval_template():
     return """{{

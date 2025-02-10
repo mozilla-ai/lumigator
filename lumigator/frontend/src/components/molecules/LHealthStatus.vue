@@ -5,15 +5,15 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useHealthStore } from '@/stores/health/store';
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useHealthStore } from '@/stores/health/healthStore'
 
-const healthStore = useHealthStore();
-const { healthStatus } = storeToRefs(healthStore);
+const healthStore = useHealthStore()
+const { healthStatus } = storeToRefs(healthStore)
 
 onMounted(async () => {
-  await healthStore.loadHealthStatus();
+  await healthStore.fetchHealthStatus()
 })
 </script>
 
@@ -22,7 +22,7 @@ onMounted(async () => {
   font-size: $l-font-size-sm;
   display: flex;
   justify-content: flex-end;
-  padding: $l-spacing-1/2;
+  padding: calc($l-spacing-1 / 2);
   color: $l-grey-100;
 }
 </style>

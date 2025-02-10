@@ -1,11 +1,6 @@
 <template>
-  <div
-    class="l-experiment-logs"
-  >
-    <div
-      ref="logContainer"
-      class="l-experiment-logs__container"
-    >
+  <div class="l-experiment-logs">
+    <div ref="logContainer" class="l-experiment-logs__container">
       <div
         v-for="(log, index) in experimentLogs"
         :key="index"
@@ -18,26 +13,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useExperimentStore } from '@/stores/experiments/store'
-const experimentStore = useExperimentStore();
-const { experimentLogs } = storeToRefs(experimentStore);
-const logContainer = ref(null);
+import { ref, watch, computed, nextTick, type Ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+const experimentStore = useExperimentStore()
+const { experimentLogs } = storeToRefs(experimentStore)
+const logContainer: Ref<HTMLElement | undefined> = ref()
 const logsLength = computed(() => experimentLogs.value.length)
 
 const scrollToBottom = async () => {
   if (logContainer.value) {
-    await nextTick();
-    logContainer.value.scrollTop = logContainer.value.scrollHeight;
+    await nextTick()
+    logContainer.value.scrollTop = logContainer.value.scrollHeight
   }
-};
-
+}
 
 watch(logsLength, () => scrollToBottom())
 </script>
 
 <style scoped lang="scss">
+@use '@/styles/variables' as *;
+
 .l-experiment-logs {
   $root: &;
   border-radius: $l-main-radius;
@@ -59,7 +55,6 @@ watch(logsLength, () => scrollToBottom())
       margin-bottom: $l-spacing-1;
       word-wrap: break-word;
     }
-
   }
 }
 </style>

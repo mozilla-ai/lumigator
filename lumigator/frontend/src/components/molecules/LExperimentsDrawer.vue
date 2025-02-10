@@ -5,13 +5,10 @@
       :header
       :position
       class="l-experiments-drawer"
-      :class="[{'dark ': position === 'bottom'}]"
+      :class="[{ 'dark ': position === 'bottom' }]"
       @hide="emit('l-drawer-closed')"
     >
-      <template
-        v-if=" position === 'bottom'"
-        #header
-      >
+      <template v-if="position === 'bottom'" #header>
         <div class="l-experiments-drawer__header">
           <span class="l-experiments-drawer__header-title">Experiment Logs</span>
           <!-- header actions here -->
@@ -24,29 +21,29 @@
 
 <script lang="ts" setup>
 import { ref, type PropType } from 'vue'
-import Drawer from 'primevue/drawer';
-import type { DrawerProps } from 'primevue';
+import Drawer from 'primevue/drawer'
+import type { DrawerProps } from 'primevue'
 
 const emit = defineEmits(['l-drawer-closed'])
 defineProps({
   header: {
     type: String,
     required: true,
-    default: 'Results'
+    default: 'Results',
   },
   position: {
-    type: String as PropType<DrawerProps["position"]>,
+    type: String as PropType<DrawerProps['position']>,
     required: false,
-    default: 'full'
-  }
+    default: 'full',
+  },
 })
-const drawerVisible = ref(true);
-
+const drawerVisible = ref(true)
 </script>
 
 <!-- Style here cannot be scoped because Drawer is attached to the DOM
 after the LResultsDrawer is mounted -->
 <style lang="scss">
+@use '@/styles/variables' as *;
 .l-experiments-drawer {
   $root: &;
 
@@ -59,7 +56,7 @@ after the LResultsDrawer is mounted -->
     width: 90%;
     display: flex;
     justify-content: space-between;
-    padding-top: $l-spacing-1 / 2;
+    padding-top: calc($l-spacing-1 / 2);
     padding-bottom: 0;
 
     &-title {

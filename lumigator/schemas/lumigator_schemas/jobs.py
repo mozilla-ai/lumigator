@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LowercaseEnum(str, Enum):
@@ -48,6 +48,9 @@ class JobLogsResponse(BaseModel):
     logs: str | None = None
 
 
+# Check Ray items actually used and copy
+# those from the schema
+# ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     submission_id: str | None = None
@@ -109,6 +112,7 @@ class JobInferenceCreate(BaseModel):
     top_p: float = 1.0
     config_template: str | None = None
     store_to_dataset: bool = False
+    max_new_tokens: int = 500
 
 
 class JobAnnotateCreate(BaseModel):
@@ -146,6 +150,19 @@ class JobResults(BaseModel):
     parameters: list[dict[str, Any]] | None = None
     metric_url: str
     artifact_url: str
+
+
+class JobResultObject(BaseModel):
+    """This is a very loose definition of what data
+    should be stored in the output settings.S3_JOB_RESULTS_FILENAME.
+    As long as a job result file only has the fields defined here,
+    it should be accepted by the backend.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    metrics: dict | None = {}
+    parameters: dict | None = {}
+    artifacts: dict | None = {}
 
 
 class Job(JobResponse, JobSubmissionResponse):

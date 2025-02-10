@@ -1,7 +1,7 @@
-import { definePreset } from '@primevue/themes';
-import Aura from '@primevue/themes/aura';
+import { definePreset } from '@primevue/themes'
+import Aura from '@primevue/themes/aura'
 
-const LumiPreset = definePreset(Aura, {
+export const LumiPreset = definePreset(Aura, {
   semantic: {
     colorScheme: {
       light: {},
@@ -12,10 +12,8 @@ const LumiPreset = definePreset(Aura, {
           hoverColor: '#FFF646',
           activeColor: '#E0C414',
           lgFontSize: '14px',
-				},
+        },
       },
     },
   },
-});
-
-export default LumiPreset
+})

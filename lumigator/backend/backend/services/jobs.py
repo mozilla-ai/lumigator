@@ -10,9 +10,9 @@ import loguru
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvalJobOutput
+from evaluator_lite.schemas import EvalJobConfig
 from fastapi import BackgroundTasks, UploadFile
-from inference.schemas import InferenceJobConfig, InferenceJobOutput
+from inference.schemas import InferenceJobConfig
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -22,6 +22,7 @@ from lumigator_schemas.jobs import (
     JobInferenceCreate,
     JobResponse,
     JobResultDownloadResponse,
+    JobResultObject,
     JobResultResponse,
     JobStatus,
     JobType,
@@ -29,6 +30,7 @@ from lumigator_schemas.jobs import (
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
+from sqlalchemy.sql.expression import or_
 
 from backend import config_templates
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
@@ -41,6 +43,9 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
 )
 from backend.settings import settings
+
+DEFAULT_SKIP = 0
+DEFAULT_LIMIT = 100
 
 
 class JobService:
@@ -93,6 +98,12 @@ class JobService:
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+
+    def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
+        records = self.job_repo.get_by_job_type(job_type)
+        if records is None:
+            return []
+        return records
 
     def _get_job_record(self, job_id: UUID) -> JobRecord:
         """Gets a job from the repository (database) by ID.
@@ -176,15 +187,21 @@ class JobService:
         loguru.logger.info("Adding a new dataset entry to the database...")
 
         # Get the dataset from the S3 bucket
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            # Validate that the output file adheres to the expected inference output schema
-            results = InferenceJobOutput.model_validate(json.loads(f.read()))
+        results = self._validate_results(job_id, s3)
 
-        # define the fields we want to keep from the results JSON
-        # and build a CSV file from it as a BytesIO object
-        fields = ["examples", "ground_truth", request.output_field]
-        bin_data = self._results_to_binary_file(results.model_dump(), fields)
+        # make sure the artifacts are present in the results
+        if not all(
+            key in results.artifacts for key in ["examples", "ground_truth", request.output_field]
+        ):
+            raise ValueError("Missing required fields in the job results.")
+
+        dataset_to_save = {
+            "examples": results.artifacts["examples"],
+            "ground_truth": results.artifacts["ground_truth"],
+            request.output_field: results.artifacts[request.output_field],
+        }
+
+        bin_data = self._results_to_binary_file(dataset_to_save, list(dataset_to_save.keys()))
         bin_data_size = len(bin_data.getvalue())
 
         # Figure out the dataset filename
@@ -203,16 +220,14 @@ class JobService:
             format=DatasetFormat.JOB,
             run_id=job_id,
             generated=True,
-            generated_by=results.model,
+            generated_by=results.artifacts["model"],
         )
 
         loguru.logger.info(
             f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
         )
 
-    def _validate_evaluation_results(
-        self, job_id: UUID, request: JobEvalLiteCreate, s3: S3FileSystem
-    ):
+    def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
@@ -228,7 +243,7 @@ class JobService:
 
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            EvalJobOutput.model_validate(json.loads(f.read()))
+            return JobResultObject.model_validate(json.loads(f.read()))
 
     def get_upstream_job_status(self, job_id: UUID) -> str:
         """Returns the (lowercase) status of the upstream job.
@@ -358,6 +373,7 @@ class JobService:
                 "torch_dtype": request.torch_dtype,
                 "trust_remote_code": request.trust_remote_code,
                 "use_fast": request.use_fast,
+                "max_new_tokens": request.max_new_tokens,
             }
 
         return job_params
@@ -387,7 +403,11 @@ class JobService:
             raise JobTypeUnsupportedError(request) from None
 
         # Create a db record for the job
-        record = self.job_repo.create(name=request.name, description=request.description)
+        record = self.job_repo.create(
+            name=request.name,
+            description=request.description,
+            job_type=job_type,
+        )
 
         # prepare configuration parameters, which depend both on the user inputs
         # (request) and on the job type
@@ -481,11 +501,17 @@ class JobService:
 
     def list_jobs(
         self,
-        skip: int = 0,
-        limit: int = 100,
+        skip: int = DEFAULT_SKIP,
+        limit: int = DEFAULT_LIMIT,
+        job_types: list[str] = (),
     ) -> ListingResponse[JobResponse]:
-        total = self.job_repo.count()
-        records = self.job_repo.list(skip, limit)
+        # It would be better if we could just feed an empty dict,
+        # but this complicates things at the ORM level,
+        # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
+        records = self.job_repo.list(
+            skip, limit, criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])]
+        )
+        total = len(records)
         return ListingResponse(
             total=total,
             items=[self.get_job(record.id) for record in records],

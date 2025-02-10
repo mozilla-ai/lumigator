@@ -100,11 +100,13 @@ class JobService:
         result_repo: JobResultRepository,
         ray_client: JobSubmissionClient,
         dataset_service: DatasetService,
+        background_tasks: BackgroundTasks,
     ):
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+        self._background_tasks = background_tasks
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
         records = self.job_repo.get_by_job_type(job_type)
@@ -197,7 +199,11 @@ class JobService:
         result_key = self._get_results_s3_key(job_id)
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             # Validate that the output file adheres to the expected inference output schema
-            results = InferenceJobOutput.model_validate(json.loads(f.read()))
+            results_json = json.loads(f.read())
+            loguru.logger.critical(f"Got results: {results_json}")
+            # TODO Move into job-specific territory
+            # Specifically, this works only for inferences!
+            results = InferenceJobOutput.model_validate(results_json)
 
         # define the fields we want to keep from the results JSON
         # and build a CSV file from it as a BytesIO object
@@ -397,7 +403,7 @@ class JobService:
                     use_fast=request.job_config.use_fast,
                     trust_remote_code=request.job_config.trust_remote_code,
                     torch_dtype=request.job_config.torch_dtype,
-                    max_length=500,
+                    max_new_tokens=500,
                 )
         return job_config
 
@@ -420,7 +426,6 @@ class JobService:
     def create_job(
         self,
         request: JobCreate,
-        background_tasks: BackgroundTasks,
         experiment_id: UUID = None,
     ) -> JobResponse:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
@@ -432,6 +437,7 @@ class JobService:
             name=request.name,
             description=request.description,
             job_type=job_type,
+            experiment_id=experiment_id,
         )
 
         # TODO defer to specific job
@@ -499,6 +505,12 @@ class JobService:
         )
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
+
+        # TODO Defer to specific job
+        if job_type == JobType.INFERENCE:
+            self.add_background_task(
+                self._background_tasks, self.handle_inference_job, record.id, request
+            )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

@@ -14,7 +14,7 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobStatus,
-    JobType
+    JobType,
 )
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
 
@@ -265,6 +265,7 @@ def create_experiment(local_client: TestClient):
             "description": "Test for an experiment with associated workflows",
         },
     )
+    logger.critical(f"Reporting experiment: {experiment}")
     assert experiment.status_code == 201
     return experiment.json()["id"]
 

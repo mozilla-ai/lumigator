@@ -8,31 +8,33 @@ Before installation and setup, here are some recommended system requirements:
 * Storage: At least 10GB or more of free space
 * Processor: A relatively modern CPU with atleast 4 cores
 
-## Getting Started
-Prior to starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
-```console
-user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
-```
+## What You’ll Need
+1. A running instance of [Lumigator](../get-started/installation.md).
+    ```{note}
+    **Before to starting up** the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
+    ```console
+    user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
+    ```
 
-Next follow the Lumigator [installation steps](../get-started/installation.md#local-deployment) and once you have the application running, the first step is to upload a dataset. You can do this through the [Lumigator UI](../get-started/ui-guide.md), which can be accessed by visiting [localhost](http://localhost). To follow along on this tutorial, you can use the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
+2. A dataset for experimentation: You can use the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
 
-Create a bash file `common_variables.sh` and initialize the following variables before proceeding with different local LLM tools.
 
-```bash
-#!/bin/bash
-BACKEND_URL=http://localhost:8000 # Lumigator runs on port 8000
+3. Create a bash file `common_variables.sh` and initialize the following variables before proceeding with different local LLM tools.
+    ```bash
+    #!/bin/bash
+    BACKEND_URL=http://localhost:8000 # Lumigator runs on port 8000
 
-# Get the most recently uploaded dataset
-EVAL_DATASET_ID=$(curl -s "$BACKEND_URL/api/v1/datasets/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
+    # Get the most recently uploaded dataset
+    EVAL_DATASET_ID=$(curl -s "$BACKEND_URL/api/v1/datasets/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
 
-# Basic prompt for LLM, summarization task
-EVAL_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
+    # Basic prompt for LLM, summarization task
+    EVAL_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
 
-# Run eval on first 10 rows in the csv, set to -1 if you would like to run it for all rows
-EVAL_MAX_SAMPLES="10"
-```
+    # Run eval on first 10 rows in the csv, set to -1 if you would like to run it for all rows
+    EVAL_MAX_SAMPLES="10"
+    ```
 
-Next, you have a choice of choosing one among the below-mentioned local LLM tools. We describe the steps locally host your desired model and enable Lumigator to query the local model's inference endpoint.
+You have a choice of choosing one among the below-mentioned local LLM tools. We describe the steps to locally stand up your desired model and enable Lumigator to query the local model's inference endpoint.
 
 ## Llamafile
 [Llamafile](https://github.com/Mozilla-Ocho/llamafile) bundles LLM weights and a specially-compiled version of [llama.cpp](https://github.com/ggerganov/llama.cpp) into a single executable file, allowing users to run large language models locally without any additional setup or dependencies.

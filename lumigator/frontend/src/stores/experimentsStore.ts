@@ -1,6 +1,6 @@
 import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { experimentsService } from '@/services/experiments/experimentService'
+import { experimentsService } from '@/sdk/experiments/experimentService'
 import { retrieveEntrypoint, calculateDuration, downloadContent } from '@/helpers/index'
 import type {
   Experiment,

@@ -1,4 +1,4 @@
-import { lumigatorApiAxiosInstance } from '@/helpers/lumigator-axios-instance'
+import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 
 const PATH_HEALTH_ROOT = () => `health/`
 

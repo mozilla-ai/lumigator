@@ -6,11 +6,11 @@ from lumigator_schemas.experiments import (
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateCreate,
-    JobConfig,
-    JobEvalCreate,
+    JobAnnotateConfig,
+    JobCreate,
+    JobEvalLiteConfig,
     JobEvent,
-    JobInferenceCreate,
+    JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -49,10 +49,6 @@ class Job(Job):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobConfig(JobConfig):
-    model_config = ConfigDict(extra="forbid")
-
-
 class JobEvent(JobEvent):
     model_config = ConfigDict(extra="forbid")
 
@@ -65,15 +61,19 @@ class JobSubmissionResponse(JobSubmissionResponse):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobEvalCreate(JobEvalCreate):
+class JobCreate(JobCreate):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobInferenceCreate(JobInferenceCreate):
+class JobInferenceConfig(JobInferenceConfig):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobAnnotateCreate(JobAnnotateCreate):
+class JobEvalLiteConfig(JobEvalLiteConfig):
+    model_config = ConfigDict(extra="forbid")
+
+
+class JobAnnotateConfig(JobAnnotateConfig):
     model_config = ConfigDict(extra="forbid")
 
 

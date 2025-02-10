@@ -17,10 +17,9 @@ EVAL_METRICS = {
 }
 
 
-def _parse_model_results(result: dict, model_info: pd.DataFrame):
+def _parse_model_results(result: dict, model_name: str, model_info: pd.DataFrame):
     row = {}
 
-    model_name = result["artifacts"]["model"]
     row["Model"] = model_name
 
     for column, metric in EVAL_METRICS.items():
@@ -60,7 +59,7 @@ def job_result_download(result: JobResultDownloadResponse) -> str:
     return json.loads(exp_results)
 
 
-def results_to_table(results: list[dict]) -> pd.DataFrame:
+def results_to_table(results: list[dict, str]) -> pd.DataFrame:
     """Visualize results as a table.
 
     Args:
@@ -73,8 +72,8 @@ def results_to_table(results: list[dict]) -> pd.DataFrame:
 
     model_info = pd.read_csv(MODEL_INFO_FILE)
 
-    for result in results:
-        evaluation_results.append(_parse_model_results(result, model_info))
+    for result, model_name in results:
+        evaluation_results.append(_parse_model_results(result, model_name, model_info))
 
     return pd.DataFrame(evaluation_results)
 

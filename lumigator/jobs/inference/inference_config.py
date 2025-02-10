@@ -161,6 +161,9 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
         return self.accelerator
 
 
+# FIXME It seems like _either_ params _or_ hf_pipeline
+# is needed; a subclass, generic or similar should be used
+# to model this situation
 class InferenceJobConfig(BaseInferenceJobConfig):
     name: str
     dataset: DatasetConfig

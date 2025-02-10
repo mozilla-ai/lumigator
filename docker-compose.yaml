@@ -193,7 +193,7 @@ services:
       - 80:80
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.0.1
+    image: ghcr.io/mlflow/mlflow:v2.20.1
     environment:
       - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}

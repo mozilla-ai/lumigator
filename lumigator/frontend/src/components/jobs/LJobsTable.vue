@@ -7,7 +7,7 @@
     :pt="{ root: 'l-job-table', tableContainer: 'width-100' }"
     @row-click="handleRowClick"
   >
-    <Column :style="columnStyles.expander"><h1> Hello </h1></Column>
+    <Column :style="columnStyles.expander"><h1>Hello</h1></Column>
     <Column :style="columnStyles.name">
       <template #body="slotProps">
         {{ shortenedModel(slotProps.data.model.path) }}

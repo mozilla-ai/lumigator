@@ -90,7 +90,7 @@ import { formatDate } from '@/helpers/index'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import Tag from 'primevue/tag'
 import LJobsTable from '@/components/molecules/LJobsTable.vue'
-import { useExperimentStore } from '@/stores/experiments/store'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
 import type { Experiment, Job } from '@/types/Experiment'
 
 const props = defineProps({
@@ -136,7 +136,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
 function onJobSelected(job: Job, experiment: Experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
-  experimentStore.loadJobDetails(job.id)
+  experimentStore.fetchJobDetails(job.id)
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
 }

@@ -28,3 +28,13 @@ frontend/
 ├── vite.config.js       # Vite configuration
 └── README.md            # Frontend README file (this file)
 ```
+
+
+## Running the project
+- You can start the project by running `yarn dev` or `npm run-script dev`
+
+## Unit testing
+- To run unit tests you can run `yarn test:unit` or `npm run-script test:unit`
+
+## E2E testing
+- To run e2e tests you can run `yarn test:e2e` or `npm run-script test:e2e`

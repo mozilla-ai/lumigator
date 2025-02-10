@@ -108,12 +108,12 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
+import { useDatasetStore } from '@/stores/datasets/datasetsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import { formatDate } from '@/helpers/index'
 import Button from 'primevue/button'
 import LGenerateGroundTruthPopup from '@/components/molecules/LGenerateGroundTruthPopup.vue'
-import { useExperimentStore } from '@/stores/experiments/store'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
 
 const datasetStore = useDatasetStore()
 
@@ -158,7 +158,7 @@ async function handleGenerateGroundTruth() {
   }
   const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload)
   if (inferenceStarted) {
-    experimentStore.loadExperiments()
+    experimentStore.fetchAllJobs()
     isGenerateGroundTruthPopupVisible.value = false
     emit('l-generate-gt')
   }

@@ -31,14 +31,14 @@ app:
     minio_api_cors_allow_origin: "*"
     deployment_type: local
     database_url: sqlite:///local.db
-    # LUMI_API_CORS_ALLOWED_ORIGINS:
+    # lumigator_api_cors_allowed_origins:
     # Array of origins (See: https://developer.mozilla.org/en-US/docs/Glossary/Origin)
     # that should be allowed to make Cross-Domain (CORS) API requests to the Lumigator backend API.
     # The expected format of each is: scheme + domain + port (if no port is specified then 80 is assumed).
     # e.g. "http://localhost:3000,http://lumigator.mydomain.com"
     # To allow CORS requests from anywhere specify "*" as any, or the only value.
     # e.g.  - "*"
-    lumi_api_cors_allowed_origins:
+    lumigator_api_cors_allowed_origins:
         - http://localhost
         - http://localhost:3000
     evaluator_pip_reqs: /mzai/lumigator/jobs/evaluator/requirements.txt

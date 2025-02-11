@@ -1,7 +1,7 @@
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
     ExperimentIdCreate,
-    ExperimentResponse,
+    GetExperimentResponse,
 )
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
@@ -33,7 +33,7 @@ class ExperimentIdCreate(ExperimentIdCreate):
     model_config = ConfigDict(extra="forbid")
 
 
-class ExperimentResponse(ExperimentResponse, from_attributes=True):
+class GetExperimentResponse(GetExperimentResponse, from_attributes=True):
     model_config = ConfigDict(extra="forbid")
 
 

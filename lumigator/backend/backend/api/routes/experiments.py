@@ -5,8 +5,6 @@ from fastapi import APIRouter, status
 from lumigator_schemas.experiments import (
     ExperimentCreate,
     ExperimentIdCreate,
-    ExperimentIdResponse,
-    ExperimentResponse,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
@@ -34,13 +32,13 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 def create_experiment(
     service: JobServiceDep,
     request: ExperimentCreate,
-) -> ExperimentResponse:
+) -> GetExperimentResponse:
     return service.create_job(JobCreate.model_validate(request.model_dump()))
 
 
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> JobResponse:
-    return ExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
+    return GetExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
 
 
 @router.get("/")
@@ -83,9 +81,9 @@ def get_experiment_result_download(
 @router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=True)
 def create_experiment_id(
     service: ExperimentServiceDep, request: ExperimentIdCreate
-) -> ExperimentIdResponse:
+) -> GetExperimentResponse:
     """Create an experiment ID."""
-    return ExperimentIdResponse.model_validate(service.create_experiment(request).model_dump())
+    return GetExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 
 
 # TODO: FIXME this should not need the /all suffix.
@@ -95,9 +93,9 @@ def list_experiments_new(
     service: ExperimentServiceDep,
     skip: int = 0,
     limit: int = 100,
-) -> ListingResponse[ExperimentResponse]:
+) -> ListingResponse[GetExperimentResponse]:
     """List all experiments."""
-    return ListingResponse[ExperimentResponse].model_validate(
+    return ListingResponse[GetExperimentResponse].model_validate(
         service.list_experiments(skip, limit).model_dump()
     )
 

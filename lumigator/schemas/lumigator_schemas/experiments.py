@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from lumigator_schemas.workflows import WorkflowDetailsResponse
+from lumigator_schemas.workflows import WorkflowCreateRequest, WorkflowDetailsResponse
 
 
 class ExperimentCreate(BaseModel):
@@ -21,6 +21,7 @@ class ExperimentCreate(BaseModel):
 class ExperimentIdCreate(BaseModel):
     name: str
     description: str = ""
+    workflow: WorkflowCreateRequest | None = None
 
 
 class ExperimentIdResponse(BaseModel):

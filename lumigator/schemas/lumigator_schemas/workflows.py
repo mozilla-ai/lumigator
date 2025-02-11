@@ -19,7 +19,7 @@ class WorkflowStatus(LowercaseEnum):
 class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
-    experiment_id: str
+    experiment_id: str | None = None
     model: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default

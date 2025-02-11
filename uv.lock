@@ -550,7 +550,7 @@ wheels = [
 
 [[package]]
 name = "datasets"
-version = "3.2.0"
+version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -563,14 +563,15 @@ dependencies = [
     { name = "packaging" },
     { name = "pandas" },
     { name = "pyarrow" },
+    { name = "pyarrow-hotfix" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "tqdm" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/48/744286c044e2b942d4fa67f92816126522ad1f0675def0ea3264e6242005/datasets-3.2.0.tar.gz", hash = "sha256:9a6e1a356052866b5dbdd9c9eedb000bf3fc43d986e3584d9b028f4976937229", size = 558366 }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/59/b94bfb5f6225c4c931cd516390b3f006e232a036a48337f72889c6c9ab27/datasets-2.20.0.tar.gz", hash = "sha256:3c4dbcd27e0f642b9d41d20ff2efa721a5e04b32b2ca4009e0fc9139e324553f", size = 2225757 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/84/0df6c5981f5fc722381662ff8cfbdf8aad64bec875f75d80b55bfef394ce/datasets-3.2.0-py3-none-any.whl", hash = "sha256:f3d2ba2698b7284a4518019658596a6a8bc79f31e51516524249d6c59cf0fe2a", size = 480647 },
+    { url = "https://files.pythonhosted.org/packages/60/2d/963b266bb8f88492d5ab4232d74292af8beb5b6fdae97902df9e284d4c32/datasets-2.20.0-py3-none-any.whl", hash = "sha256:76ac02e3bdfff824492e20678f0b6b1b6d080515957fe834b00c2ba8d6b18e5e", size = 547777 },
 ]
 
 [[package]]
@@ -844,11 +845,11 @@ wheels = [
 
 [[package]]
 name = "fsspec"
-version = "2024.9.0"
+version = "2024.5.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/62/7c/12b0943011daaaa9c35c2a2e22e5eb929ac90002f08f1259d69aedad84de/fsspec-2024.9.0.tar.gz", hash = "sha256:4b0afb90c2f21832df142f292649035d80b421f60a9e1c027802e5a0da2b04e8", size = 286206 }
+sdist = { url = "https://files.pythonhosted.org/packages/71/28/cbf337fddd6f22686b7c2639b80e006accd904db152fe333fd98f4cd8d1e/fsspec-2024.5.0.tar.gz", hash = "sha256:1d021b0b0f933e3b3029ed808eb400c08ba101ca2de4b3483fbc9ca23fcee94a", size = 400066 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/a0/6aaea0c2fbea2f89bfd5db25fb1e3481896a423002ebe4e55288907a97a3/fsspec-2024.9.0-py3-none-any.whl", hash = "sha256:a0947d552d8a6efa72cc2c730b12c41d043509156966cca4fb157b0f2a0c574b", size = 179253 },
+    { url = "https://files.pythonhosted.org/packages/ba/a3/16e9fe32187e9c8bc7f9b7bcd9728529faa725231a0c96f2f98714ff2fc5/fsspec-2024.5.0-py3-none-any.whl", hash = "sha256:e0fdbc446d67e182f49a70b82cf7889028a63588fde6b222521f10937b2b670c", size = 316106 },
 ]
 
 [package.optional-dependencies]
@@ -1413,7 +1414,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.13.3" },
     { name = "boto3", specifier = "==1.34.105" },
     { name = "boto3-stubs", extras = ["essential", "s3"], specifier = ">=1.34.105" },
-    { name = "datasets", specifier = ">=2.20.0" },
+    { name = "datasets", specifier = "==2.20.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.0" },
     { name = "loguru", specifier = "==0.7.2" },
     { name = "lumigator-schemas", editable = "lumigator/schemas" },
@@ -1427,7 +1428,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "ray", extras = ["client"], specifier = ">=2.30.0" },
     { name = "requests", specifier = ">=2,<3" },
-    { name = "s3fs", specifier = ">=2024.9.0" },
+    { name = "s3fs", specifier = ">=2024.5.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = "==2.0.28" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.28.0" },
 ]
@@ -2388,6 +2389,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyarrow-hotfix"
+version = "0.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/0a/71da7b0db0c7078d4cf34ecf0c70ded5ed29decc06612097474e0114f4cc/pyarrow_hotfix-0.6.tar.gz", hash = "sha256:79d3e030f7ff890d408a100ac16d6f00b14d44a502d7897cd9fc3e3a534e9945", size = 9754 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/f4/9ec2222f5f5f8ea04f66f184caafd991a39c8782e31f5b0266f101cb68ca/pyarrow_hotfix-0.6-py3-none-any.whl", hash = "sha256:dcc9ae2d220dff0083be6a9aa8e0cdee5182ad358d4931fce825c545e5c89178", size = 7888 },
+]
+
+[[package]]
 name = "pyasn1"
 version = "0.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2835,16 +2845,16 @@ wheels = [
 
 [[package]]
 name = "s3fs"
-version = "2024.9.0"
+version = "2024.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiobotocore" },
     { name = "aiohttp" },
     { name = "fsspec" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e3/de/1dbadd86b81a587d9d6cce18512ab130062d386edf0e368a1ff7c2e2f462/s3fs-2024.9.0.tar.gz", hash = "sha256:6493705abb50374d6b7994f9616d27adbdd8a219c8635100bdc286382efd91f5", size = 74925 }
+sdist = { url = "https://files.pythonhosted.org/packages/e6/37/bede54962c7946613f68c393f14731023c25ef5508c3c8cbe87dfc8c0fbb/s3fs-2024.5.0.tar.gz", hash = "sha256:b03471ae0d066b275b7dd0b0383cc5a93538ef40b2f6e730ce447bce849c1e32", size = 74910 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/af/add60ba3a0bb78d900f6d9365000c1b0e06c97284154e20f0bda02dbb717/s3fs-2024.9.0-py3-none-any.whl", hash = "sha256:3a7dc7acae4358af8e8dfb693e82a8477f9f2c847de5d44cf65fee75752eaca3", size = 29463 },
+    { url = "https://files.pythonhosted.org/packages/48/da/8e924dcfe126e402f0c6d967368ceddab9519ee0292ea2312f212722cb1e/s3fs-2024.5.0-py3-none-any.whl", hash = "sha256:edccd9cc9f33a344a090e54b71e9f507e5b2d79369353b0e101237b20a720bc6", size = 29462 },
 ]
 
 [[package]]

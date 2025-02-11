@@ -63,3 +63,11 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
+
+
+class JobOutput(BaseModel):
+    # Nothing to put in metrics yet
+    # but eventually we will have metrics like tok/s, latency, average output length, etc.
+    metrics: None
+    artifacts: InferenceJobOutput
+    parameters: InferenceJobConfig

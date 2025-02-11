@@ -74,8 +74,8 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDatasetStore } from '@/stores/datasets/store'
-import { useExperimentStore } from '@/stores/experiments/store'
+import { useDatasetStore } from '@/stores/datasets/datasetsStore'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import { useRouter } from 'vue-router'
 import LPageHeader from '@/components/molecules/LPageHeader.vue'
@@ -113,7 +113,7 @@ const showLogs = ref(false)
 const refDatasetTable = ref()
 
 onMounted(async () => {
-  await datasetStore.loadDatasets()
+  await datasetStore.fetchDatasets()
 })
 
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
@@ -154,7 +154,7 @@ function deleteConfirmation(dataset: Dataset) {
 
 function onDownloadDataset(dataset: Dataset) {
   selectedDataset.value = dataset
-  datasetStore.loadDatasetFile()
+  datasetStore.downloadDatasetFile()
 }
 
 const onDatasetAdded = () => {
@@ -162,10 +162,10 @@ const onDatasetAdded = () => {
 }
 
 const reloadDatasetTable = () => {
-  datasetStore.loadDatasets()
+  datasetStore.fetchDatasets()
   refDatasetTable.value.loading = true
   setTimeout(async () => {
-    await datasetStore.loadDatasets()
+    await datasetStore.fetchDatasets()
     refDatasetTable.value.loading = false
   }, 1500)
 }
@@ -180,7 +180,7 @@ const onDeleteDataset = (datasetID: string) => {
 
 const onDatasetSelected = (dataset: Dataset) => {
   selectedJob.value = undefined
-  datasetStore.loadDatasetInfo(dataset.id)
+  datasetStore.fetchDatasetDetails(dataset.id)
   showSlidingPanel.value = true
 }
 
@@ -191,12 +191,12 @@ const onClearSelection = () => {
 const onExperimentDataset = (dataset: Dataset) => {
   router.push('experiments')
   selectedDataset.value = dataset
-  datasetStore.loadDatasetInfo(dataset.id)
+  datasetStore.fetchDatasetDetails(dataset.id)
 }
 
 const onJobInferenceSelected = (job: Job) => {
   selectedDataset.value = undefined
-  experimentStore.loadJobDetails(job.id)
+  experimentStore.fetchJobDetails(job.id)
   showSlidingPanel.value = true
 }
 

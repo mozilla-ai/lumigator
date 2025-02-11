@@ -52,9 +52,9 @@
 <script lang="ts" setup>
 import { onMounted, watch, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experiments/store'
-import { useDatasetStore } from '@/stores/datasets/store'
-import { useModelStore } from '@/stores/models/store'
+import { useExperimentStore } from '@/stores/experiments/experimentsStore'
+import { useDatasetStore } from '@/stores/datasets/datasetsStore'
+import { useModelStore } from '@/stores/models/modelsStore'
 import { useSlidePanel } from '@/composables/SlidingPanel'
 import LPageHeader from '@/components/molecules/LPageHeader.vue'
 import LExperimentTable from '@/components/molecules/LExperimentTable.vue'
@@ -86,7 +86,7 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 onMounted(async () => {
-  await experimentStore.loadExperiments()
+  await experimentStore.fetchAllJobs()
 })
 
 const getDrawerHeader = () => {
@@ -104,19 +104,19 @@ const onSelectExperiment = (experiment: Experiment) => {
 }
 
 const onShowExperimentResults = (experiment: Experiment) => {
-  experimentStore.loadExperimentResults(experiment)
+  experimentStore.fetchExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
 
 const onShowJobResults = (job: Job) => {
-  experimentStore.loadJobResults(job.id)
+  experimentStore.fetchJobResults(job.id)
   showDrawer.value = true
   showJobResults.value = true
 }
 
 const onDownloadResults = (job: Job) => {
-  experimentStore.loadResultsFile(job.id)
+  experimentStore.fetchExperimentResultsFile(job.id)
 }
 
 const onShowLogs = () => {
@@ -142,7 +142,7 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
-  await modelStore.loadModels()
+  await modelStore.fetchModels()
   if (selectedDataset.value) {
     onCreateExperiment()
   }

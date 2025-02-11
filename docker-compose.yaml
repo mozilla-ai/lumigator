@@ -151,7 +151,7 @@ services:
       - DEPLOYMENT_TYPE=local
       # The local file needs to be available through a mount,
       # if persistence is needed
-      - SQLALCHEMY_DATABASE_URL=sqlite:///local.db
+      - SQLALCHEMY_DATABASE_URL=sqlite:////db-data/local.db
       - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
@@ -181,6 +181,9 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
+    volumes:
+      - database-data:/db-data
+
 
   frontend:
     labels:
@@ -229,7 +232,7 @@ volumes:
     minio-data:
       labels:
         ai.mozilla.product_name: lumigator
-    database_volume:
+    database-data:
       labels:
         ai.mozilla.product_name: lumigator
     redis-data:

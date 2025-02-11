@@ -80,18 +80,26 @@ def test_get_job_results(
 
 def test_job_logs(
     app_client: TestClient,
+    job_repository,
     request_mock,
+    json_ray_version,
+    dependency_overrides_fakes,
 ):
-    job_id = "d34dd34d-d34d-d34d-d34d-d34dd34dd34d"
+    created_job = job_repository.create(name="test", description="")
     log = "2024-11-13 02:00:08,889\\tINFO job_manager.py:530 -- Runtime env is setting up.\\n"
     logs_content = f'{{"logs": "{log}"}}'
 
     request_mock.get(
-        url=urllib.parse.urljoin(f"{settings.RAY_JOBS_URL}", f"{job_id}/logs"),
+        url=urllib.parse.urljoin(f"{settings.RAY_JOBS_URL}", f"{created_job.id}/logs"),
         status_code=status.HTTP_200_OK,
         text=logs_content,
     )
-    response = app_client.get(f"/jobs/{job_id}/logs")
+    request_mock.get(
+        url=settings.RAY_VERSION_URL,
+        status_code=status.HTTP_200_OK,
+        text=json.dumps(load_json(json_ray_version)),
+    )
+    response = app_client.get(f"/jobs/{created_job.id}/logs")
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
     assert json.loads(logs_content)["logs"] == json.loads(f'"{log}"')

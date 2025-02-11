@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LowercaseEnum(str, Enum):
@@ -150,6 +150,19 @@ class JobResults(BaseModel):
     parameters: list[dict[str, Any]] | None = None
     metric_url: str
     artifact_url: str
+
+
+class JobResultObject(BaseModel):
+    """This is a very loose definition of what data
+    should be stored in the output settings.S3_JOB_RESULTS_FILENAME.
+    As long as a job result file only has the fields defined here,
+    it should be accepted by the backend.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    metrics: dict | None = {}
+    parameters: dict | None = {}
+    artifacts: dict | None = {}
 
 
 class Job(JobResponse, JobSubmissionResponse):

@@ -10,7 +10,7 @@ import loguru
 import requests
 from fastapi import HTTPException
 from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
-from lumigator_schemas.jobs import JobLogsResponse, JobResults
+from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
@@ -222,7 +222,7 @@ class MLflowTrackingClient(TrackingClient):
         # check if the compiled results already exist
         s3 = S3FileSystem()
         if not s3.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
-            compiled_results = {}
+            compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
             for job in workflow_details.jobs:
                 # look for all parameter keys that end in "_s3_path" and download the file
                 for param in job.parameters:
@@ -230,15 +230,21 @@ class MLflowTrackingClient(TrackingClient):
                         # download the file
                         # get the file from the S3 bucket
                         with s3.open(f"{param['value']}") as f:
-                            job_results = json.loads(f.read())
+                            job_results = JobResultObject.model_validate(json.loads(f.read()))
                         # if any keys are the same, log a warning and then overwrite the key
-                        for key in job_results.keys():
-                            if key in compiled_results:
-                                loguru.logger.warning(
-                                    f"Key '{key}' already exists in the results. Overwriting."
+                        for job_result_item in job_results:
+                            if job_result_item[1] is None:
+                                loguru.logger.info(
+                                    f"No {job_result_item[0]} found for job {job.id}."
                                 )
-                        # merge the results into the compiled results
-                        compiled_results.update(job_results)
+                                continue
+                            for key in job_result_item[1].keys():
+                                if key in compiled_results[job_result_item[0]]:
+                                    loguru.logger.warning(
+                                        f"Key '{key}' already exists in the results. Overwriting."
+                                    )
+                                # merge the results into the compiled results
+                                compiled_results[job_result_item[0]][key] = job_result_item[1][key]
             with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
                 f.write(json.dumps(compiled_results))
             # Generate presigned download URL for the object

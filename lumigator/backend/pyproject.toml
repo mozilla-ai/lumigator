@@ -26,7 +26,7 @@ dependencies = [
     "alembic>=1.13.3",
     "mlflow>=2.20.0",
     # Lumigator components
-    "lumigator-schemas"
+    "lumigator-schemas==0.1.0-alpha"
 ]
 
 [dependency-groups]

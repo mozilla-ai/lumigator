@@ -1,12 +1,15 @@
 import asyncio
 import csv
 import json
+from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
+import requests
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
 #   once the new experiments API is merged
@@ -20,6 +23,7 @@ from lumigator_schemas.jobs import (
     JobEvalCreate,
     JobEvalLiteCreate,
     JobInferenceCreate,
+    JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultObject,
@@ -32,7 +36,7 @@ from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
 
-from backend import config_templates
+from backend.config_templates import lookup_template
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
@@ -262,6 +266,35 @@ class JobService:
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
+    def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        db_logs = self.job_repo.get(job_id)
+        if not db_logs:
+            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs")
+        elif not db_logs.logs:
+            ray_db_logs = self.retrieve_job_logs(job_id)
+            self._update_job_record(job_id, logs=ray_db_logs.logs)
+            return ray_db_logs
+        else:
+            return JobLogsResponse(logs=db_logs.logs)
+
+    def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        resp = requests.get(
+            urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5
+        )  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                "Unexpected status code getting job logs:"
+                f" {resp.status_code}, error: {resp.text or ''}",
+            ) from None
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
+
     async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
@@ -286,6 +319,9 @@ class JobService:
             elapsed_time += 5
             job_status = self.get_upstream_job_status(job_id)
 
+        # Once the job is finished, retrieve the log and store it in the internal db
+        self.get_job_logs(job_id)
+
         return job_status
 
     async def handle_inference_job(self, job_id: UUID, request: JobInferenceCreate):
@@ -309,15 +345,7 @@ class JobService:
         background_tasks.add_task(task, *args)
 
     def _get_config_template(self, job_type: str, model_name: str) -> str:
-        job_templates = config_templates.templates[job_type]
-
-        if model_name in job_templates:
-            # if no config template is provided, get the default one for the model
-            config_template = job_templates[model_name]
-        else:
-            # if no default config template is provided, get the causal template
-            # (which works with seq2seq models too except it does not use pipeline)
-            config_template = job_templates["default"]
+        config_template = lookup_template(job_type, model_name)
 
         return config_template
 

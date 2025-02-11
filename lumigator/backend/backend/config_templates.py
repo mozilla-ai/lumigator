@@ -164,29 +164,45 @@ oai_infer_template = """{{
 }}"""
 
 
-templates = {
-    JobType.INFERENCE: {
-        "default": default_infer_template,
-        "hf://facebook/bart-large-cnn": bart_infer_template,
-        "oai://gpt-4o-mini": oai_infer_template,
-        "oai://gpt-4o": oai_eval_template,
-        "mistral://open-mistral-7b": oai_infer_template,
-        "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_infer_template,
-    },
-    JobType.EVALUATION: {
-        "default": causal_eval_template,
-        "hf://facebook/bart-large-cnn": bart_eval_template,
-        "hf://Falconsai/text_summarization": seq2seq_eval_template,
-        "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
-        "oai://gpt-4o-mini": oai_eval_template,
-        "oai://gpt-4o": oai_eval_template,
-        "mistral://open-mistral-7b": oai_eval_template,
-        "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_eval_template,
-    },
+# Locally hosted models using oai client
+OAI_COMPATIBLE_PREFIXES = ("ollama://", "llamafile://", "vllm://")
+
+INFERENCE_TEMPLATES = {
+    "default": default_infer_template,
+    "hf://facebook/bart-large-cnn": bart_infer_template,
+    "oai://gpt-4o-mini": oai_infer_template,
+    "oai://gpt-4o": oai_infer_template,
+    "mistral://open-mistral-7b": oai_infer_template,
+}
+
+# For eval, the default template is the causal template
+# which works with seq2seq models too except it does not use pipeline
+
+EVALUATION_TEMPLATES = {
+    "default": causal_eval_template,
+    "hf://facebook/bart-large-cnn": bart_eval_template,
+    "hf://Falconsai/text_summarization": seq2seq_eval_template,
+    "hf://mistralai/Mistral-7B-Instruct-v0.3": causal_eval_template,
+    "oai://gpt-4o-mini": oai_eval_template,
+    "oai://gpt-4o": oai_eval_template,
+    "mistral://open-mistral-7b": oai_eval_template,
+    "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_eval_template,
+}
+
+
+def lookup_template(job_type: JobType, model_name: str) -> str:
+    if job_type == JobType.INFERENCE:
+        if model_name.startswith(OAI_COMPATIBLE_PREFIXES):
+            return oai_infer_template
+        # If no config template is provided, use the default one for the job type
+        return INFERENCE_TEMPLATES.get(model_name, default_infer_template)
+
+    if job_type == JobType.EVALUATION:
+        return EVALUATION_TEMPLATES.get(model_name, causal_eval_template)
+
     # TODO: Remove the old EVALUATION section and rename EVALUATION_LITE
     #       to EVALUATION after we deprecate evaluator. Also remove the
     #       unused templates above (all the eval templates except default)
-    JobType.EVALUATION_LITE: {
-        "default": default_eval_template,
-    },
-}
+
+    if job_type == JobType.EVALUATION_LITE:
+        return default_eval_template

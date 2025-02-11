@@ -256,4 +256,4 @@ config-generate: config-clean
 config-generate-env: config-generate
 	@echo "Generating .env file for Docker Compose using 'app' config section..."
 	@scripts/config_generate_env.sh $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT) "$(CONFIG_BUILD_DIR)/.env"
-	@echo ".env file generated at $(CONFIG_BUILD_DIR)/.env"
+	@echo ".env file generated at '$(CONFIG_BUILD_DIR)/.env'"

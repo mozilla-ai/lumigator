@@ -28,12 +28,13 @@ class MLflowTrackingClient(TrackingClient):
     def __init__(self, tracking_uri: str):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
-    def create_experiment(self, name: str, description: str) -> GetExperimentResponse:
+    def create_experiment(self, name: str, description: str, task: str) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
+            self._client.set_experiment_tag(experiment_id, "task", task)
         except MlflowException as e:
             # if the experiment name already exists,
             # log a warning and then append a short timestamp to the name
@@ -49,6 +50,7 @@ class MLflowTrackingClient(TrackingClient):
         return GetExperimentResponse(
             id=experiment_id,
             description=description,
+            task=task,
             name=name,
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
         )
@@ -122,6 +124,7 @@ class MLflowTrackingClient(TrackingClient):
             id=experiment_id,
             name=experiment.name,
             description=experiment.tags.get("description") or "",
+            task=experiment.tags.get("task") or "",
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
             updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
             workflows=workflows,
@@ -168,7 +171,9 @@ class MLflowTrackingClient(TrackingClient):
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
     # which correspond to what we call "jobs" in our system
-    def create_workflow(self, experiment_id: str, description: str, name: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         # make sure its status is CREATED
         workflow = self._client.create_run(
@@ -177,12 +182,14 @@ class MLflowTrackingClient(TrackingClient):
                 "mlflow.runName": name,
                 "status": WorkflowStatus.CREATED,
                 "description": description,
+                "model": model,
             },
         )
         return WorkflowResponse(
             id=workflow.info.run_id,
             experiment_id=experiment_id,
             name=name,
+            model=model,
             description=description,
             status=WorkflowStatus.CREATED,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
@@ -209,6 +216,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=workflow.info.experiment_id,
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
+            model=workflow.data.tags.get("model"),
             status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
@@ -338,6 +346,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=workflow.info.experiment_id,
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
+            model=workflow.data.tags.get("model"),
             status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )

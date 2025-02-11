@@ -10,6 +10,7 @@ class ExperimentCreate(BaseModel):
     name: str
     description: str = ""
     model: str
+    task: str | None = "summarization"
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     model_url: str | None = None
@@ -21,6 +22,7 @@ class ExperimentCreate(BaseModel):
 class ExperimentIdCreate(BaseModel):
     name: str
     description: str = ""
+    task: str | None = "summarization"
 
 
 class GetExperimentResponse(BaseModel, from_attributes=True):
@@ -28,6 +30,7 @@ class GetExperimentResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     created_at: datetime.datetime
+    task: str
     updated_at: datetime.datetime | None = None
     workflows: list[WorkflowDetailsResponse] | None = None
 

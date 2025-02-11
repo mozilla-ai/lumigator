@@ -261,6 +261,7 @@ def create_experiment(local_client: TestClient):
         json={
             "name": "test_create_exp_workflow_check_results",
             "description": "Test for an experiment with associated workflows",
+            "task": "summarization",
         },
     )
     assert experiment.status_code == 201

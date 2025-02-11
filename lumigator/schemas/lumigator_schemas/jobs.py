@@ -128,6 +128,22 @@ class JobCreate(BaseModel):
     job_config: JobSpecificConfig = Field(discriminator="job_type")
 
 
+class JobAnnotateCreate(JobCreate):
+    job_config: JobAnnotateConfig
+
+
+class JobEvaluateCreate(JobCreate):
+    job_config: JobEvalConfig
+
+
+class JobEvalLiteCreate(JobCreate):
+    job_config: JobEvalLiteConfig
+
+
+class JobInferenceCreate(JobCreate):
+    job_config: JobInferenceConfig
+
+
 class JobResponse(BaseModel, from_attributes=True):
     id: UUID
     name: str

@@ -209,7 +209,6 @@ services:
       - 80:80
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.0.1
     labels:
       ai.mozilla.product_name: lumigator
     image: ghcr.io/mlflow/mlflow:v2.20.1

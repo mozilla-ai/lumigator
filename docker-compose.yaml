@@ -151,7 +151,7 @@ services:
       - DEPLOYMENT_TYPE=local
       # The local file needs to be available through a mount,
       # if persistence is needed
-      - SQLALCHEMY_DATABASE_URL=sqlite:////db-data/local.db
+      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL:-sqlite:////tmp/local.db}
       - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
@@ -209,6 +209,8 @@ services:
       - 80:80
 
   mlflow:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: ghcr.io/mlflow/mlflow:v2.20.1
     environment:
       - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}

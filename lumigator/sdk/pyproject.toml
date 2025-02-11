@@ -7,18 +7,20 @@ requires-python = ">=3.11"
 dependencies = [
     "loguru==0.7.2",
     "requests>=2,<3",
+    # Lumigator components
     "lumigator-schemas==0.1.0-alpha"
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=8.3.3",
     "requests-mock>=1.12.1",
     "debugpy>=1.8.12",
+    "ruff>=0.9.6",
 ]
 
 [tool.uv.sources]
-lumigator-schemas = { path = "../schemas", editable = true }
+lumigator-schemas = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

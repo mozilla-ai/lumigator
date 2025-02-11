@@ -522,7 +522,7 @@ class JobService:
         records = self.job_repo.list(
             skip,
             limit,
-            criteria=[or_(False, *[JobRecord.job_type == job_type for job_type in job_types])],
+            criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])],
         )
         total = len(records)
         return ListingResponse(

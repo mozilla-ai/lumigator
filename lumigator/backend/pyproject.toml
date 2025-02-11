@@ -18,7 +18,7 @@ dependencies = [
     "sqlalchemy[asyncio]==2.0.28",
     "uvicorn[standard]==0.28.0",
     "s3fs>=2024.09.0",
-    "datasets>=3.2.0",
+    "datasets>=2.20.0",
     "ray[client]>=2.30.0",
     "psycopg2-binary==2.9.9",
     # For sqlalchemy

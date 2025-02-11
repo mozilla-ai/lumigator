@@ -21,7 +21,7 @@ app:
     # Cache for HuggingFace models and artifacts
     hf_home: ${HOME}/.cache/huggingface
     # Access token to use when attempting to access gated models in HuggingFace
-    hf_token: foobar
+    hf_token:
     mistral_api_key: lumigator # pragma: allowlist secret
     openai_api_key: lumigator # pragma: allowlist secret
     # MLFlow Configuration

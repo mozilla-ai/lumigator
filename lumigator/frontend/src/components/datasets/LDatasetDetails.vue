@@ -149,14 +149,7 @@ function showGenerateGroundTruthPopup() {
 }
 
 async function handleGenerateGroundTruth() {
-  const groundTruthPayload = {
-    name: `Ground truth for ${selectedDataset.value?.filename}`,
-    description: `Ground truth generation for dataset ${selectedDataset.value?.id}`,
-    dataset: selectedDataset.value?.id,
-    max_samples: -1,
-    task: 'summarization',
-  }
-  const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload)
+  const inferenceStarted = await experimentStore.startGroundTruthGeneration(selectedDataset.value!)
   if (inferenceStarted) {
     experimentStore.fetchAllJobs()
     isGenerateGroundTruthPopupVisible.value = false

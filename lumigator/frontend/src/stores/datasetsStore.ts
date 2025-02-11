@@ -43,15 +43,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     formData.append('dataset', datasetFile) // Attach the file
     formData.append('format', 'job') // Specification @localhost:8000/docs
     try {
-      const uploadConfirm = await datasetsService.postDataset(formData)
-      if (uploadConfirm.status) {
-        toast.add({
-          severity: 'error',
-          summary: `${uploadConfirm.data.detail}`,
-          messageicon: 'pi pi-exclamation-triangle',
-          group: 'br',
-        } as ToastMessageOptions & { messageicon: string })
-      }
+      await datasetsService.postDataset(formData)
     } catch (error) {
       const errorMessage = getAxiosError(error as Error | AxiosError)
       toast.add({
@@ -75,7 +67,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     await fetchDatasets()
   }
 
-  // TODO: this shouldnt depend on refs/state, it can be a util function
+  // TODO: this shouldn't depend on refs/state, it can be a util function
   async function downloadDatasetFile() {
     if (selectedDataset.value) {
       const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)

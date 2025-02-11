@@ -85,10 +85,6 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
-onMounted(async () => {
-  await experimentStore.fetchAllJobs()
-})
-
 const getDrawerHeader = () => {
   return showLogs.value ? 'Logs' : selectedExperiment.value?.name
 }
@@ -142,7 +138,8 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
-  await modelStore.fetchModels()
+  await Promise.all([experimentStore.fetchAllJobs(), modelStore.fetchModels()])
+
   if (selectedDataset.value) {
     onCreateExperiment()
   }

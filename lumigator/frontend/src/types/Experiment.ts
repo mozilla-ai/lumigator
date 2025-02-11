@@ -1,7 +1,10 @@
+import type { Model } from './Model'
+import type { WorkflowStatus } from './Workflow'
+
 export type Experiment = {
   id: string
   created: string
-  dataset: unknown
+  dataset: string
   description: string
   name: string
   experimentStart: string
@@ -11,12 +14,12 @@ export type Experiment = {
   samples?: number
   models: Model[]
   max_samples?: number
-  status: string
+  status: WorkflowStatus
 }
 
 export type Job = {
   id: string
-  status: string
+  status: WorkflowStatus
   metadata: Record<string, unknown>
   end_time: string
   model: Record<string, unknown>
@@ -26,21 +29,6 @@ export type Job = {
   start_time: string
   description: string
   entrypoint: string
-}
-
-export type Model = {
-  id: string
-  description: string
-  info?: {
-    parameter_count: string
-    model_size: string
-    tensor_type: string
-  }
-  name: string
-  requirements: Array<string>
-  tasks: Array<Task>
-  uri: string
-  website_url: string
 }
 
 export type Task = {

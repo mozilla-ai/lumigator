@@ -1,34 +1,37 @@
 import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { experimentsService } from '@/sdk/experimentService'
+import { experimentsService, type ExperimentPayload } from '@/sdk/experimentsService'
 
-import type {
-  Experiment,
-  ExperimentResults,
-  Job,
-  JobResults,
-  Model,
-  ObjectData,
-} from '@/types/Experiment'
+import type { Experiment, ExperimentResults, Job, JobResults, ObjectData } from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { calculateDuration } from '@/helpers/calculateDuration'
 import { downloadContent } from '@/helpers/downloadContent'
+import type { Dataset } from '@/types/Dataset'
+import type { Model } from '@/types/Model'
+import { workflowsService } from '@/sdk/workflowsService'
+import type { ExperimentNew } from '@/types/ExperimentNew'
+import { WorkflowStatus } from '@/types/Workflow'
+import { jobsService } from '@/sdk/jobsService'
 
 export const useExperimentStore = defineStore('experiments', () => {
-  const experiments: Ref<Experiment[]> = ref([])
+  const experiments: Ref<ExperimentNew[]> = ref([])
+
   const jobs: Ref<Experiment[]> = ref([])
   const inferenceJobs: Ref<Experiment[]> = ref([])
-  const selectedExperiment: Ref<Experiment | undefined> = ref()
+
+  const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
   const selectedJob: Ref<Experiment | undefined> = ref()
+
   const selectedJobResults: Ref<JobResults[]> = ref([])
   const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+
   const isPolling = ref(false)
   let experimentInterval: number | undefined = undefined
   const experimentLogs: Ref<unknown[]> = ref([])
-  const completedStatus = ['SUCCEEDED', 'FAILED']
+  const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
   const hasRunningInferenceJob = computed(() => {
-    return inferenceJobs.value.some((job) => job.status === 'RUNNING')
+    return inferenceJobs.value.some((job) => job.status === WorkflowStatus.RUNNING)
   })
 
   /**
@@ -37,7 +40,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   async function fetchAllJobs() {
     let allJobs: Job[]
     try {
-      allJobs = await experimentsService.fetchJobs()
+      allJobs = await jobsService.fetchJobs()
     } catch {
       allJobs = []
     }
@@ -47,40 +50,8 @@ export const useExperimentStore = defineStore('experiments', () => {
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
       .map((job) => parseJobDetails(job))
-    experiments.value = groupJobsByExperiment()
-  }
 
-  /**
-   * Groups jobs by experiment.
-   *  Jobs with same name and starting time belong to the same experiment.
-   * @returns {Array} Array of experiments with their associated jobs.
-   */
-  function groupJobsByExperiment(): Experiment[] {
-    const experimentMap = jobs.value.reduce((acc: Record<string, Experiment>, job) => {
-      const key = `${job.name}-${job.experimentStart}`
-      // initialize a grouping object
-      if (!acc[key]) {
-        acc[key] = {
-          id: key, // temporary key until BE provides one
-          created: job.created,
-          dataset: job.dataset,
-          description: job.description,
-          name: job.name,
-          experimentStart: job.experimentStart,
-          jobs: [],
-          useCase: job.useCase,
-          runTime: '',
-          samples: job.max_samples,
-          models: [],
-          status: 'SUCCEEDED',
-        }
-      }
-      acc[key].jobs.push(job as unknown as Job)
-      acc[key].models = acc[key].jobs.map((singleJob: Job) => singleJob.model) as Model[]
-      return acc
-    }, {})
-
-    return Object.values(experimentMap)
+    experiments.value = await experimentsService.fetchExperiments()
   }
 
   /**
@@ -117,7 +88,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
   async function updateJobStatus(id: string) {
     try {
-      const status = await experimentsService.fetchJobStatus(id)
+      const status = await jobsService.fetchJobStatus(id)
       const inferenceJob = inferenceJobs.value.find((job) => job.id === id)
       if (inferenceJob) {
         inferenceJob.status = status
@@ -145,21 +116,22 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {Object} experimentData - The data for the experiment to run.
    * @returns {Promise<Array>} The results of the experiment.
    */
-  async function createExperiment(experimentData: Partial<Experiment> & { models: Model[] }) {
-    const modelArray = experimentData.models
-    const jobRequests = modelArray.map((singleModel) => {
-      // trigger one job per model
-      const jobPayload = {
-        ...experimentData,
-        model: singleModel.uri,
-      }
-      return experimentsService.triggerExperiment(jobPayload)
-    })
+  async function createExperimentWithWorkflows(
+    experimentData: ExperimentPayload & { models: Model[] },
+  ) {
+    // first we create an experiment as a container
+    const { id: experimentId } = await experimentsService.createExperiment(experimentData)
 
-    // Execute all requests in parallel
-    // and wait for all of them to resolve or reject
-    const results = await Promise.all(jobRequests)
-    return results
+    // then we create a workflow for each model to be attached to the experiment
+    return Promise.all(
+      (experimentData.models as Model[]).map((model: Model) =>
+        workflowsService.createWorkflow({
+          ...experimentData,
+          experiment_id: experimentId,
+          model: model.uri,
+        }),
+      ),
+    )
   }
 
   function loadExperimentDetails(id: string) {
@@ -167,7 +139,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   }
 
   async function fetchJobDetails(id: string) {
-    const jobData = await experimentsService.fetchJobDetails(id)
+    const jobData = await jobsService.fetchJobDetails(id)
     selectedJob.value = parseJobDetails(jobData)
   }
 
@@ -254,7 +226,7 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   async function retrieveLogs() {
     if (selectedJob.value) {
-      const logsData = await experimentsService.fetchLogs(selectedJob.value?.id)
+      const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
       logs.forEach((log: string) => {
         const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
@@ -294,13 +266,13 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {Object} groundTruthPayload - The payload for ground truth generation.
    * @returns {Promise<Object|null>} The response from the annotation job or null if it fails.
    */
-  async function startGroundTruthGeneration(groundTruthPayload: unknown) {
+  async function startGroundTruthGeneration(dataset: Dataset) {
     try {
-      const jobResponse = await experimentsService.triggerAnnotationJob(groundTruthPayload)
+      const jobResponse = await jobsService.triggerAnnotationJob(dataset)
       if (jobResponse) {
         // Start polling to monitor the job status
         await updateJobStatus(jobResponse.id) // Ensure initial update
-        startPollingForJob(jobResponse.id) // Add polling for ground truth job
+        startPollingForAnnotationJob(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
       return
@@ -310,11 +282,11 @@ export const useExperimentStore = defineStore('experiments', () => {
     }
   }
 
-  function startPollingForJob(jobId: string) {
+  function startPollingForAnnotationJob(jobId: string) {
     isPolling.value = true
     experimentInterval = setInterval(() => {
       updateJobStatus(jobId).then(() => {
-        const job = experiments.value.find((experiment) => experiment.id === jobId)
+        const job = jobs.value.find((job) => job.id === jobId)
         if (job && completedStatus.includes(job.status)) {
           stopPolling() // Stop polling when the job is complete
         }
@@ -330,7 +302,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   watch(
     selectedExperiment,
     (newValue) => {
-      if (newValue?.status === 'RUNNING') {
+      if (newValue?.workflows.some((workflow) => workflow.status === WorkflowStatus.RUNNING)) {
         // startPolling()
         return
       } else if (isPolling.value) {
@@ -355,7 +327,7 @@ export const useExperimentStore = defineStore('experiments', () => {
         }
         retrieveLogs()
       }
-      if (newValue?.status === 'RUNNING') {
+      if (newValue?.status === WorkflowStatus.RUNNING) {
         startPolling()
         return
       } else if (isPolling.value) {
@@ -387,6 +359,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     fetchJobResults,
     fetchExperimentResultsFile,
     startGroundTruthGeneration,
-    createExperiment,
+    createExperimentWithWorkflows,
   }
 })

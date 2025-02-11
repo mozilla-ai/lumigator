@@ -210,6 +210,8 @@ services:
       - 80:80
 
   mlflow:
+    labels:
+      ai.mozilla.product_name: lumigator
     image: ghcr.io/mlflow/mlflow:v2.20.1
     environment:
       - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}

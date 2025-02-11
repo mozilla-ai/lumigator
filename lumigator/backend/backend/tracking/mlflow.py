@@ -9,7 +9,7 @@ import boto3
 import loguru
 import requests
 from fastapi import HTTPException
-from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
+from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.exceptions import MlflowException
@@ -48,6 +48,7 @@ class MLflowTrackingClient(TrackingClient):
         experiment = self._client.get_experiment(experiment_id)
         return GetExperimentResponse(
             id=experiment_id,
+            description=description,
             name=name,
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
         )
@@ -120,7 +121,9 @@ class MLflowTrackingClient(TrackingClient):
         return GetExperimentResponse(
             id=experiment_id,
             name=experiment.name,
+            description=experiment.tags.get("description") or "",
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
+            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
             workflows=workflows,
         )
 
@@ -128,7 +131,7 @@ class MLflowTrackingClient(TrackingClient):
         """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list[ExperimentResponse]:
+    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
         """List all experiments."""
         page_token = None
         experiments = []
@@ -148,7 +151,7 @@ class MLflowTrackingClient(TrackingClient):
                 break
         reduced_experiments = experiments[:limit] if limit is not None else experiments
         return [
-            ExperimentResponse(
+            GetExperimentResponse(
                 id=experiment.experiment_id,
                 name=experiment.name,
                 description=experiment.tags.get("description") or "",

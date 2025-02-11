@@ -16,7 +16,7 @@ Before you start, make sure you have the following:
 
 ## Local Deployment
 
-You can run and develop Lumigator locally using `docker-compose.` This creates numerous container
+You can run and develop Lumigator locally using `docker-compose.` This creates multiple container
 services networked together to make up all the components of the Lumigator application:
 
 - `minio`: Local storage for datasets that mimics S3-API compatible functionality.

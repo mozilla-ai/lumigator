@@ -181,6 +181,9 @@ services:
     #       deployments.
     extra_hosts:
       - "localhost:host-gateway"
+    volumes:
+      - database-data:/db-data
+
 
   frontend:
     labels:
@@ -229,7 +232,7 @@ volumes:
     minio-data:
       labels:
         ai.mozilla.product_name: lumigator
-    database_volume:
+    database-data:
       labels:
         ai.mozilla.product_name: lumigator
     redis-data:

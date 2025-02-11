@@ -93,7 +93,7 @@ services:
           sleep infinity
     shm_size: 2g
     volumes:
-      - ${HF_HOME}:/home/ray/.cache/huggingface
+      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
       - ray-pip-cache:/tmp/ray_pip_cache
     deploy:
       resources:

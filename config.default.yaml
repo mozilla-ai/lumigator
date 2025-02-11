@@ -18,8 +18,8 @@ app:
     ray_worker_gpus_fraction: 0
     nvidia_visible_devices: all
     gpu_count: 0
-    # Cache for HuggingFace models and artifacts
-    hf_home: ${HOME}/.cache/huggingface
+    # Cache for HuggingFace models and artifacts ($ escapes resolution during deployment)
+    hf_home: $${HOME}/.cache/huggingface
     # Access token to use when attempting to access gated models in HuggingFace
     hf_token:
     mistral_api_key: lumigator # pragma: allowlist secret

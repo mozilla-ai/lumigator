@@ -22,14 +22,14 @@
       <template #body="slotProps">
         <div>
           <Tag
-            v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED'"
+            v-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.SUCCEEDED"
             severity="success"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
             :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
-            v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED'"
+            v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.FAILED"
             severity="danger"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
@@ -56,6 +56,7 @@ import Column from 'primevue/column'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
+import { WorkflowStatus } from '@/types/Workflow'
 
 const experimentStore = useExperimentStore()
 const { jobs } = storeToRefs(experimentStore)

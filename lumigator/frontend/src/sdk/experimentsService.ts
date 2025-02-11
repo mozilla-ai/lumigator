@@ -1,6 +1,5 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { Dataset } from '@/types/Dataset'
-import type { Job, ObjectData } from '@/types/Experiment'
+import type { ObjectData } from '@/types/Experiment'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 
 export async function fetchExperiments(): Promise<ExperimentNew[]> {

@@ -13,4 +13,8 @@ export enum WorkflowStatus {
   RUNNING = 'running',
   FAILED = 'failed',
   SUCCEEDED = 'succeeded',
+
+  // Added by frontend
+  INCOMPLETE = 'incomplete',
+  PENDING = 'pending',
 }

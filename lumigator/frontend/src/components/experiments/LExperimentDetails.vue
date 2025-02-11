@@ -41,7 +41,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
-            :disabled="currentItemStatus === 'PENDING'"
+            :disabled="currentItemStatus === WorkflowStatus.PENDING"
             style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
@@ -119,7 +119,7 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="currentItemStatus !== 'SUCCEEDED'"
+        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="showResults"
       />
       <Button
@@ -129,7 +129,7 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="currentItemStatus !== 'SUCCEEDED'"
+        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="emit('l-download-results', selectedJob)"
       />
     </div>
@@ -145,6 +145,7 @@ import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
 import { calculateDuration } from '@/helpers/calculateDuration'
+import { WorkflowStatus } from '@/types/Workflow'
 
 const emit = defineEmits([
   'l-close-details',
@@ -182,9 +183,9 @@ const currentItemStatus = computed(() => {
     const selected = allJobs.value.find((job) => job.id === selectedJob.value?.id)
     return selected ? selected.status : selectedJob.value?.status
   }
-  const selected = experiments.value.filter(
+  const selected = experiments.value.find(
     (experiment) => experiment.id === selectedExperiment.value?.id,
-  )[0]
+  )
   return selected ? selected.status : selectedExperiment.value?.status
 })
 
@@ -196,20 +197,20 @@ const focusedItem = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
   }
-  const selected = experiments.value.filter(
+  const selected = experiments.value.find(
     (experiment) => experiment.id === selectedExperiment.value?.id,
-  )[0]
+  )
   return selected ? selected : selectedExperiment.value
 })
 
 const tagSeverity = computed(() => {
   const status = currentItemStatus.value
   switch (status) {
-    case 'SUCCEEDED':
+    case WorkflowStatus.SUCCEEDED:
       return 'success'
-    case 'FAILED':
+    case WorkflowStatus.FAILED:
       return 'danger'
-    case 'INCOMPLETE':
+    case WorkflowStatus.INCOMPLETE:
       return 'info'
     default:
       return 'warn'
@@ -221,7 +222,10 @@ const focusedItemRunTime = computed(() => {
     return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
   }
 
-  if (currentItemStatus.value !== 'RUNNING' && currentItemStatus.value !== 'PENDING') {
+  if (
+    currentItemStatus.value !== WorkflowStatus.RUNNING &&
+    currentItemStatus.value !== WorkflowStatus.PENDING
+  ) {
     const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || []
     const lastEndTime = endTimes.reduce((latest, current) => {
       return new Date(latest) > new Date(current) ? latest : current

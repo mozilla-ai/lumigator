@@ -132,14 +132,14 @@ async function triggerExperiment() {
     dataset: dataset.value!.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
   }
-  const success = await experimentStore.createExperimentWithWorkflows(experimentPayload)
-  if (success.length) {
+  const workflows = await experimentStore.createExperimentWithWorkflows(experimentPayload)
+  if (workflows.length) {
     await experimentStore.fetchAllJobs()
     emit('l-close-form')
     resetForm()
     toast.add({
       severity: 'secondary',
-      summary: `${success[0].name} Started`,
+      summary: `${workflows[0].name} Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
       life: 3000,

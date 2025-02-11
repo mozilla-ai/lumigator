@@ -28,21 +28,21 @@
           <template #body="slotProps">
             <div>
               <Tag
-                v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED'"
+                v-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.SUCCEEDED"
                 severity="success"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED'"
+                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.FAILED"
                 severity="danger"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === 'INCOMPLETE'"
+                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.INCOMPLETE"
                 severity="info"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
@@ -89,10 +89,11 @@ import Column from 'primevue/column'
 
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import Tag from 'primevue/tag'
-import LJobsTable from '@/components/jobs/LJobsTable.vue'
+import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import type { Experiment, Job } from '@/types/Experiment'
 import { formatDate } from '@/helpers/formatDate'
+import { WorkflowStatus } from '@/types/Workflow'
 
 const props = defineProps({
   tableData: {
@@ -148,19 +149,19 @@ function retrieveStatus(experimentId: string) {
     return
   }
 
-  const jobStatuses = experiment.jobs.map((job) => job.status)
-  const uniqueStatuses = new Set(jobStatuses)
+  const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
+  const uniqueStatuses = new Set(workflowStatuses)
   if (uniqueStatuses.size === 1) {
     experiment.status = [...uniqueStatuses][0]
     return [...uniqueStatuses][0]
   }
-  if (uniqueStatuses.has('RUNNING')) {
-    experiment.status = 'RUNNING'
-    return 'RUNNING'
+  if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
+    experiment.status = WorkflowStatus.RUNNING
+    return WorkflowStatus.RUNNING
   }
-  if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
-    experiment.status = 'INCOMPLETE'
-    return 'INCOMPLETE'
+  if (uniqueStatuses.has(WorkflowStatus.FAILED) && uniqueStatuses.has(WorkflowStatus.SUCCEEDED)) {
+    experiment.status = WorkflowStatus.INCOMPLETE
+    return WorkflowStatus.INCOMPLETE
   }
 }
 

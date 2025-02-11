@@ -17,10 +17,7 @@ export async function fetchLogs(id: string) {
  */
 export async function fetchJobs(): Promise<Job[]> {
   const response = await lumigatorApiAxiosInstance.get('/jobs')
-  return response.data.items.map((job: Job) => ({
-    ...job,
-    status: job.status.toUpperCase(),
-  }))
+  return response.data.items
 }
 
 /**
@@ -29,10 +26,6 @@ export async function fetchJobs(): Promise<Job[]> {
  */
 export async function fetchJobDetails(id: string) {
   const response = await lumigatorApiAxiosInstance.get(`jobs/${id}`)
-  if (response.data?.status) {
-    // Ensure that we transform status at the point the API returns it.
-    response.data.status = response.data.status.toUpperCase()
-  }
   return response.data
 }
 

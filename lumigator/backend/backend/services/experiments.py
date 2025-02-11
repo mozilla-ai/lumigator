@@ -26,7 +26,9 @@ class ExperimentService:
         self._tracking_session = tracking_session
 
     def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
-        experiment = self._tracking_session.create_experiment(request.name, request.description)
+        experiment = self._tracking_session.create_experiment(
+            request.name, request.description, request.task
+        )
         loguru.logger.info(
             f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'."
         )

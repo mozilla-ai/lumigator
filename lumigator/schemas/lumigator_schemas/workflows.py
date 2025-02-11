@@ -32,6 +32,7 @@ class WorkflowCreateRequest(BaseModel):
 class WorkflowResponse(BaseModel, from_attributes=True):
     id: str
     experiment_id: str
+    model: str
     name: str
     description: str
     status: WorkflowStatus

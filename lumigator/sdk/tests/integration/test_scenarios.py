@@ -278,6 +278,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = ExperimentIdCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
+        task="summarization",
     )
     experiment_response = lumi_client_int.experiments.create_experiment(request)
     assert experiment_response is not None

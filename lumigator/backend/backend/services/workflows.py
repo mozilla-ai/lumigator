@@ -7,8 +7,8 @@ from lumigator_schemas.jobs import (
     JobCreate,
     JobEvalLiteConfig,
     JobInferenceConfig,
-    JobResultObject,
     JobLogsResponse,
+    JobResultObject,
     JobStatus,
 )
 from lumigator_schemas.workflows import (
@@ -206,6 +206,7 @@ class WorkflowService:
             experiment_id=request.experiment_id,
             description=request.description,
             name=request.name,
+            model=request.model,
             # input is WorkflowCreate, we need to split the configs and generate one
             # JobInferenceCreate and one JobEvalCreate
         )

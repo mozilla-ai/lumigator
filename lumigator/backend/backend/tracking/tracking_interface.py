@@ -26,7 +26,7 @@ class TrackingClient(ABC):
     """Abstract base class for tracking clients."""
 
     @abstractmethod
-    def create_experiment(self, name: str, description: str) -> GetExperimentResponse:
+    def create_experiment(self, name: str, description: str, task: str) -> GetExperimentResponse:
         """Create a new experiment."""
         pass
 
@@ -56,7 +56,9 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def create_workflow(self, experiment_id: str, description: str, name: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         pass
 

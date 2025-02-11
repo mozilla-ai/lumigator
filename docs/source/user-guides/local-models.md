@@ -199,9 +199,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
 
-1. View Evaluation Results. To view the evalution results, go to the [Lumigator UI](http://localhost)
-   and navigate to the "Experiments" tab. Then, select the most recent experiment with your local
-   LLM and click "View Results".
+To view the evalution results on the UI, refer to the section [below](#view-evaluation-results)
 
 ## View Evaluation Results
 To view the evalution results, go to the [Lumigator UI](http://localhost) and navigate to the "Experiments" tab. Then, select the most recent experiment with your local LLM and click "View Results".

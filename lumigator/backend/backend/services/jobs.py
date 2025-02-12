@@ -41,6 +41,7 @@ from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
@@ -194,10 +195,10 @@ class JobService:
         results = self._validate_results(job_id, s3)
 
         # make sure the artifacts are present in the results
-        if not all(
-            key in results.artifacts for key in ["examples", "ground_truth", request.output_field]
-        ):
-            raise ValueError("Missing required fields in the job results.")
+        required_keys = {"examples", "ground_truth", request.output_field}
+        missing_keys = required_keys - set(results.artifacts.keys())
+        if missing_keys:
+            raise DatasetMissingFieldsError(set(missing_keys)) from None
 
         dataset_to_save = {
             "examples": results.artifacts["examples"],
@@ -227,16 +228,13 @@ class JobService:
             generated_by=results.artifacts["model"],
         )
 
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
+        loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
     def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
             job_id (UUID): The unique identifier of the job.
-            request (JobEvalLiteCreate): The request object containing job evaluation details.
             s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
         Note:
@@ -278,16 +276,13 @@ class JobService:
             return JobLogsResponse(logs=db_logs.logs)
 
     def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
-        resp = requests.get(
-            urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5
-        )  # 5 seconds
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
         if resp.status_code == HTTPStatus.NOT_FOUND:
             raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                "Unexpected status code getting job logs:"
-                f" {resp.status_code}, error: {resp.text or ''}",
+                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
             ) from None
         try:
             metadata = json.loads(resp.text)
@@ -417,9 +412,7 @@ class JobService:
 
         return job_params
 
-    def create_job(
-        self, request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate
-    ) -> JobResponse:
+    def create_job(self, request: JobEvalCreate | JobEvalLiteCreate | JobInferenceCreate) -> JobResponse:
         """Creates a new workload to run on Ray based on the type of request.
 
         :param request: contains information on the requested job, including type,

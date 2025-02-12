@@ -26,6 +26,8 @@ app:
     openai_api_key: lumigator # pragma: allowlist secret
     # MLFlow Configuration
     mlflow_tracking_uri: http://mlflow:5000
+    mlflow_database_url: sqlite:///mlflow.db
+    mlflow_s3_root_path: s3://mlflow
     minio_root_user: minioadmin
     minio_root_password: minioadmin # pragma: allowlist secret
     minio_api_cors_allow_origin: "*"

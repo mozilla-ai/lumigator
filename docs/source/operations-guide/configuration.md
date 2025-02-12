@@ -73,6 +73,8 @@ The following section documents the available settings for `app`.
 | mistral_api_key                    | string  | Sensitive API key used to access Mistral                                                                               |
 | openai_api_key                     | string  | Sensitive API key used to access OpenAI                                                                                |
 | mlflow_tracking_uri                | string  | The URL used to access MLFlow                                                                                          |
+| mlflow_database_url                | string  | DB connection string/URL usef for MLFlow                                                                               |
+| mlflow_s3_root_path                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                       |
 | minio_root_user                    | string  | The root user name for accessing MinIO                                                                                 |
 | minio_root_password                | string  | Sensitive secret for accessing MinIO as root                                                                           |
 | minio_api_cors_allow_origin        | string  | Allowed origins for CORS requests to MinIO (defaults to "*")                                                           |

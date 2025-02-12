@@ -78,7 +78,7 @@ def create_annotation_job(
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """
     inference_job_create_request = JobInferenceCreate(
-        **job_create_request.dict(),
+        **job_create_request.model_dump(),
         model="hf://facebook/bart-large-cnn",
         output_field="ground_truth",
     )

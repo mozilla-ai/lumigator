@@ -1,12 +1,15 @@
 import asyncio
 import csv
 import json
+from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
+import requests
 from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
 
 # TODO: the evaluator_lite import will need to be renamed to evaluator
@@ -29,6 +32,7 @@ from lumigator_schemas.jobs import (
     JobEvalConfig,
     JobEvalLiteConfig,
     JobInferenceConfig,
+    JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultObject,
@@ -199,10 +203,7 @@ class JobService:
         results = self._validate_results(job_id, s3)
 
         # make sure the artifacts are present in the results
-        if not all(
-            key in results.artifacts
-            for key in ["examples", "ground_truth", request.job_config.output_field]
-        ):
+        if not all(key in results.artifacts for key in ["examples", "ground_truth", request.job_config.output_field]):
             raise ValueError("Missing required fields in the job results.")
 
         dataset_to_save = {
@@ -233,9 +234,7 @@ class JobService:
             generated_by=results.artifacts["model"],
         )
 
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
+        loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
     def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
@@ -272,6 +271,32 @@ class JobService:
         except RuntimeError as e:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
+    def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        db_logs = self.job_repo.get(job_id)
+        if not db_logs:
+            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs")
+        elif not db_logs.logs:
+            ray_db_logs = self.retrieve_job_logs(job_id)
+            self._update_job_record(job_id, logs=ray_db_logs.logs)
+            return ray_db_logs
+        else:
+            return JobLogsResponse(logs=db_logs.logs)
+
+    def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
+            ) from None
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
+
     async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
@@ -295,6 +320,9 @@ class JobService:
             await asyncio.sleep(5)
             elapsed_time += 5
             job_status = self.get_upstream_job_status(job_id)
+
+        # Once the job is finished, retrieve the log and store it in the internal db
+        self.get_job_logs(job_id)
 
         return job_status
 
@@ -342,9 +370,7 @@ class JobService:
     # For the moment, something will convert one into the other, and we'll decide where
     # to put this. The jobs should ideally have no dependency towards the backend.
 
-    def generate_inference_job_config(
-        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
-    ):
+    def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
@@ -448,9 +474,7 @@ class JobService:
 
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
-            job_config = self.generate_inference_job_config(
-                request, record.id, dataset_s3_path, self.storage_path
-            )
+            job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
         elif job_type == JobType.EVALUATION_LITE:
             job_config = self.generate_evaluation_lite_job_config(
                 request, record.id, dataset_s3_path, self.storage_path
@@ -510,9 +534,7 @@ class JobService:
 
         # TODO Defer to specific job
         if job_type == JobType.INFERENCE:
-            self.add_background_task(
-                self._background_tasks, self.handle_inference_job, record.id, request
-            )
+            self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
@@ -551,7 +573,9 @@ class JobService:
         # but this complicates things at the ORM level,
         # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
         records = self.job_repo.list(
-            skip, limit, criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])]
+            skip,
+            limit,
+            criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])],
         )
         total = len(records)
         return ListingResponse(

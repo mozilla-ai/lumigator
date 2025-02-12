@@ -75,13 +75,15 @@
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem?.useCase }}</div>
+        <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
       </div>
       <div v-if="!isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
-            <li v-for="job in selectedExperiment?.jobs" :key="job.id">· {{ job.model.path }}</li>
+            <li v-for="workflow in selectedExperiment?.workflows" :key="workflow.id">
+              · {{ workflow.model }}
+            </li>
           </ul>
         </div>
       </div>
@@ -94,13 +96,14 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
         <div class="l-experiment-details__content-field" v-if="focusedItem">
-          {{ formatDate(focusedItem.created) }}
+          {{ formatDate(focusedItem.created_at) }}
         </div>
       </div>
-      <div class="l-experiment-details__content-item">
+      <!-- TODO: double check with design since this cant be shown now that we can lazily add workflows -->
+      <!-- <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">run time</div>
         <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
-      </div>
+      </div> -->
       <div v-if="selectedExperiment" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">samples limit</div>
         <div class="l-experiment-details__content-field">
@@ -217,25 +220,25 @@ const tagSeverity = computed(() => {
   }
 })
 
-const focusedItemRunTime = computed(() => {
-  if (isJobFocused.value) {
-    return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
-  }
+// const focusedItemRunTime = computed(() => {
+//   if (isJobFocused.value) {
+//     return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
+//   }
 
-  if (
-    currentItemStatus.value !== WorkflowStatus.RUNNING &&
-    currentItemStatus.value !== WorkflowStatus.PENDING
-  ) {
-    const endTimes = selectedExperiment.value?.jobs.map((job) => job.end_time) || []
-    const lastEndTime = endTimes.reduce((latest, current) => {
-      return new Date(latest) > new Date(current) ? latest : current
-    })
-    if (lastEndTime && selectedExperiment.value) {
-      return calculateDuration(selectedExperiment.value?.created, lastEndTime)
-    }
-  }
-  return '-'
-})
+//   if (
+//     currentItemStatus.value !== WorkflowStatus.RUNNING &&
+//     currentItemStatus.value !== WorkflowStatus.PENDING
+//   ) {
+//     const endTimes = selectedExperiment.value?.workflows.map((workflow) => workflow.end_time) || []
+//     const lastEndTime = endTimes.reduce((latest, current) => {
+//       return new Date(latest) > new Date(current) ? latest : current
+//     })
+//     if (lastEndTime && selectedExperiment.value) {
+//       return calculateDuration(selectedExperiment.value?.created_at, lastEndTime)
+//     }
+//   }
+//   return '-'
+// })
 
 const showResults = () => {
   if (isJobFocused.value) {

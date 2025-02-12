@@ -48,7 +48,7 @@ export type ExperimentResults = {
   bertscore: Bertscore
   rouge: Rouge
   runTime: string | undefined
-  jobResults: JobResults
+  jobResults: EvaluationJobResults[]
 }
 
 export type Bertscore = {
@@ -93,7 +93,7 @@ export type ObjectData = {
   }
 }
 
-export type JobResults = {
+export type EvaluationJobResults = {
   example: string
   bertscore: {
     f1: number

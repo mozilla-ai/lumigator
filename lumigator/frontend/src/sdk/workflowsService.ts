@@ -1,16 +1,7 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { Workflow } from '@/types/Workflow'
+import type { CreateWorkflowPayload, Workflow } from '@/types/Workflow'
 
-type ExperimentPayload = {
-  name: string
-  description: string
-  model: string
-  dataset: string
-  experiment_id: string
-  max_samples: number
-}
-
-async function createWorkflow(experimentPayload: ExperimentPayload): Promise<Workflow> {
+async function createWorkflow(experimentPayload: CreateWorkflowPayload): Promise<Workflow> {
   const response = await lumigatorApiAxiosInstance.post('workflows', experimentPayload, {
     headers: {
       'Content-Type': 'application/json',

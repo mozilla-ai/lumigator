@@ -1,10 +1,19 @@
 import { ref, watch, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { experimentsService, type ExperimentPayload } from '@/sdk/experimentsService'
+import {
+  experimentsService,
+  type createExperimentWithWorkflowsPayload,
+} from '@/sdk/experimentsService'
 
-import type { Experiment, ExperimentResults, Job, JobResults, ObjectData } from '@/types/Experiment'
+import type {
+  EvaluationJobResults,
+  Experiment,
+  ExperimentResults,
+  Job,
+  ObjectData,
+} from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
-import { calculateDuration } from '@/helpers/calculateDuration'
+// import { calculateDuration } from '@/helpers/calculateDuration'
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
@@ -16,13 +25,13 @@ import { jobsService } from '@/sdk/jobsService'
 export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<ExperimentNew[]> = ref([])
 
-  const jobs: Ref<Experiment[]> = ref([])
-  const inferenceJobs: Ref<Experiment[]> = ref([])
+  const jobs: Ref<ExperimentNew[]> = ref([])
+  const inferenceJobs: Ref<ExperimentNew[]> = ref([])
 
   const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
-  const selectedJob: Ref<Experiment | undefined> = ref()
+  const selectedJob: Ref<ExperimentNew | undefined> = ref()
 
-  const selectedJobResults: Ref<JobResults[]> = ref([])
+  const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
   const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
 
   const isPolling = ref(false)
@@ -117,14 +126,15 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @returns {Promise<Array>} The results of the experiment.
    */
   async function createExperimentWithWorkflows(
-    experimentData: ExperimentPayload & { models: Model[] },
+    experimentData: createExperimentWithWorkflowsPayload,
+    models: Model[],
   ) {
     // first we create an experiment as a container
     const { id: experimentId } = await experimentsService.createExperiment(experimentData)
 
     // then we create a workflow for each model to be attached to the experiment
     return Promise.all(
-      (experimentData.models as Model[]).map((model: Model) =>
+      models.map((model: Model) =>
         workflowsService.createWorkflow({
           ...experimentData,
           experiment_id: experimentId,
@@ -161,7 +171,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           meteor: results.resultsData.metrics.meteor,
           bertscore: results.resultsData.metrics.bertscore,
           rouge: results.resultsData.metrics.rouge,
-          runTime: getJobRuntime(results.id),
+          // runTime: getJobRuntime(results.id),
           jobResults: transformJobResults(results.resultsData),
         } as unknown as ExperimentResults
         selectedExperimentResults.value.push(modelRow)
@@ -187,7 +197,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {Object} objectData .
    * @returns {Array} Transformed results array.
    */
-  function transformJobResults(objectData: ObjectData): JobResults[] {
+  function transformJobResults(objectData: ObjectData): EvaluationJobResults[] {
     const transformedArray = objectData.artifacts.examples.map((example, index: number) => {
       return {
         example,
@@ -219,7 +229,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
         },
         summarization_time: objectData.metrics.summarization_time,
-      } as unknown as JobResults
+      } as unknown as EvaluationJobResults
     })
     return transformedArray
   }
@@ -294,10 +304,10 @@ export const useExperimentStore = defineStore('experiments', () => {
     }, 3000) // Poll every 3 seconds
   }
 
-  function getJobRuntime(jobId: string) {
-    const job = jobs.value.find((job) => job.id === jobId)
-    return job ? job.runTime : undefined
-  }
+  // function getJobRuntime(jobId: string) {
+  //   const job = jobs.value.find((job) => job.id === jobId)
+  //   return job ? job.runTime : undefined
+  // }
 
   watch(
     selectedExperiment,
@@ -317,14 +327,14 @@ export const useExperimentStore = defineStore('experiments', () => {
     (newValue) => {
       experimentLogs.value = []
       if (newValue) {
-        const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
-        if (isEvaluationJob) {
-          // switch to the experiment the job belongs
-          const selectedExperimentId = `${newValue.name}-${newValue.experimentStart}`
-          selectedExperiment.value = experiments.value.find(
-            (exp) => exp.id === selectedExperimentId,
-          )
-        }
+        // const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
+        // if (isEvaluationJob) {
+        // switch to the experiment the job belongs
+        // const selectedExperimentId = experiments.value.find(experiment => {
+        //   return experiment.workflows.some(workflow => workflow.id === newValue.id)
+        // })
+        selectedExperiment.value = experiments.value.find((exp) => exp.id === newValue.id)
+        // }
         retrieveLogs()
       }
       if (newValue?.status === WorkflowStatus.RUNNING) {

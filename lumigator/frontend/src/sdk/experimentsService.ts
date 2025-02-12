@@ -1,6 +1,7 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 import type { ObjectData } from '@/types/Experiment'
 import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { CreateWorkflowPayload } from '@/types/Workflow'
 
 export async function fetchExperiments(): Promise<ExperimentNew[]> {
   const response = await lumigatorApiAxiosInstance.get('/experiments/new/all')
@@ -17,20 +18,20 @@ export async function deleteExperiment(id: string) {
   return response.data
 }
 
-export type ExperimentPayload = {
+export type CreateExperimentPayload = {
   name: string
   description: string
-  model?: string
-  dataset: string
-  max_samples: number
-  model_url?: string
-  system_prompt?: string
-  inference_output_field?: string
-  config_template?: string
+  task: 'summarization'
 }
 
+// experiment_id and model are set by the inner function
+export type createExperimentWithWorkflowsPayload = Omit<
+  CreateExperimentPayload & CreateWorkflowPayload,
+  'experiment_id' | 'model'
+>
+
 export async function createExperiment(
-  experimentPayload: ExperimentPayload,
+  experimentPayload: CreateExperimentPayload,
 ): Promise<ExperimentNew> {
   // first we create an experiment as a container for different workflows
   const response: { data: ExperimentNew } = await lumigatorApiAxiosInstance.post(

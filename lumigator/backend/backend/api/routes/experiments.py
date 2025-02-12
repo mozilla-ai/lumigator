@@ -65,9 +65,7 @@ def get_experiment_result_download(
     experiment_id: UUID,
 ) -> JobResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return JobResultDownloadResponse.model_validate(
-        service.get_job_result_download(experiment_id).model_dump()
-    )
+    return JobResultDownloadResponse.model_validate(service.get_job_result_download(experiment_id).model_dump())
 
 
 ####################################################################################################
@@ -79,10 +77,9 @@ def get_experiment_result_download(
 # but right now it is a placeholder while we build up the Workflows routes
 # It's not included in the OpenAPI schema for now so it's not visible in the docs
 @router.post("/new", status_code=status.HTTP_201_CREATED, include_in_schema=True)
-def create_experiment_id(
-    service: ExperimentServiceDep, request: ExperimentIdCreate
-) -> GetExperimentResponse:
+def create_experiment_id(service: ExperimentServiceDep, request: ExperimentIdCreate) -> GetExperimentResponse:
     """Create an experiment ID."""
+    # FIXME Shouldn't the model set this
     return GetExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 
 
@@ -95,9 +92,7 @@ def list_experiments_new(
     limit: int = 100,
 ) -> ListingResponse[GetExperimentResponse]:
     """List all experiments."""
-    return ListingResponse[GetExperimentResponse].model_validate(
-        service.list_experiments(skip, limit).model_dump()
-    )
+    return ListingResponse[GetExperimentResponse].model_validate(service.list_experiments(skip, limit).model_dump())
 
 
 @router.get("/new/{experiment_id}", include_in_schema=False)

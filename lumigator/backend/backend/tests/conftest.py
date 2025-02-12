@@ -26,6 +26,7 @@ from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
+from starlette.background import BackgroundTasks
 
 from backend.api.deps import get_db_session, get_s3_client, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
@@ -49,6 +50,11 @@ MAX_POLLS = 18
 
 # Time between job status polls.
 POLL_WAIT_TIME = 10
+
+
+@pytest.fixture(scope="session")
+def background_tasks() -> BackgroundTasks:
+    return BackgroundTasks()
 
 
 @pytest.fixture
@@ -96,9 +102,7 @@ def wait_for_experiment(client, experiment_id: UUID) -> bool:
     for _ in range(1, MAX_POLLS):
         get_experiment_response = client.get(f"/experiments/new/{experiment_id}")
         assert get_experiment_response.status_code == 200
-        get_experiment_response_model = GetExperimentResponse.model_validate(
-            get_experiment_response.json()
-        )
+        get_experiment_response_model = GetExperimentResponse.model_validate(get_experiment_response.json())
         if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             timed_out = False
@@ -223,9 +227,7 @@ def db_session(db_engine: Engine):
 @pytest.fixture(scope="function")
 def fake_s3fs() -> S3FileSystem:
     """Replace the filesystem registry for S3 with a MemoryFileSystem implementation."""
-    fsspec.register_implementation(
-        "s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS"
-    )
+    fsspec.register_implementation("s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS")
     yield MemoryFileSystem()
     logger.info(f"final s3fs contents: {str(MemoryFileSystem.store)}")
 
@@ -381,9 +383,7 @@ def result_repository(db_session):
 @pytest.fixture(scope="function")
 def dataset_service(db_session, fake_s3_client, fake_s3fs):
     dataset_repo = DatasetRepository(db_session)
-    return DatasetService(
-        dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs
-    )
+    return DatasetService(dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs)
 
 
 @pytest.fixture(scope="function")
@@ -392,8 +392,8 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service):
-    return JobService(job_repository, result_repository, None, dataset_service)
+def job_service(db_session, job_repository, result_repository, dataset_service, background_tasks):
+    return JobService(job_repository, result_repository, None, dataset_service, background_tasks)
 
 
 @pytest.fixture(scope="function")

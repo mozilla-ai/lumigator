@@ -1,6 +1,7 @@
 import contextlib
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from uuid import UUID
 
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
@@ -26,7 +27,9 @@ class TrackingClient(ABC):
     """Abstract base class for tracking clients."""
 
     @abstractmethod
-    def create_experiment(self, name: str, description: str, task: str) -> GetExperimentResponse:
+    def create_experiment(
+        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+    ) -> GetExperimentResponse:
         """Create a new experiment."""
         pass
 
@@ -56,9 +59,7 @@ class TrackingClient(ABC):
         pass
 
     @abstractmethod
-    def create_workflow(
-        self, experiment_id: str, description: str, name: str, model: str
-    ) -> WorkflowResponse:
+    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
         """Create a new workflow."""
         pass
 

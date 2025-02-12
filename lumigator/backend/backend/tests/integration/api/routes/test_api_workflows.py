@@ -36,7 +36,6 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-"""
 def test_upload_data_launch_job(
     local_client: TestClient,
     dialog_dataset,
@@ -78,34 +77,24 @@ def test_upload_data_launch_job(
             "store_to_dataset": True,
         },
     }
-    create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=POST_HEADER, json=infer_payload
-    )
+    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     assert create_inference_job_response.status_code == 201
 
-    create_inference_job_response_model = JobResponse.model_validate(
-        create_inference_job_response.json()
-    )
+    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
 
     assert wait_for_job(local_client, create_inference_job_response_model.id)
 
-    logs_infer_job_response = local_client.get(
-        f"/jobs/{create_inference_job_response_model.id}/logs"
-    )
+    logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
 
     # retrieve the DS for the infer job...
-    output_infer_job_response = local_client.get(
-        f"/jobs/{create_inference_job_response_model.id}/dataset"
-    )
+    output_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/dataset")
     assert output_infer_job_response is not None
     assert output_infer_job_response.status_code == 200
 
-    output_infer_job_response_model = DatasetResponse.model_validate(
-        output_infer_job_response.json()
-    )
+    output_infer_job_response_model = DatasetResponse.model_validate(output_infer_job_response.json())
     assert output_infer_job_response_model is not None
 
     eval_payload = {
@@ -120,23 +109,15 @@ def test_upload_data_launch_job(
         },
     }
 
-    create_evaluation_job_response = local_client.post(
-        "/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload
-    )
+    create_evaluation_job_response = local_client.post("/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
-    create_evaluation_job_response_model = JobResponse.model_validate(
-        create_evaluation_job_response.json()
-    )
+    create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
 
     assert wait_for_job(local_client, create_evaluation_job_response_model.id)
 
-    logs_evaluation_job_response = local_client.get(
-        f"/jobs/{create_evaluation_job_response_model.id}/logs"
-    )
-    logs_evaluation_job_response_model = JobLogsResponse.model_validate(
-        logs_evaluation_job_response.json()
-    )
+    logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
+    logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
@@ -153,9 +134,8 @@ def test_upload_data_launch_job(
     assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
     get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
-"""
 
-"""
+
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
@@ -184,33 +164,21 @@ def test_upload_data_no_gt_launch_annotation(
             "task": "summarization",
         },
     }
-    create_annotation_job_response = local_client.post(
-        "/jobs/annotate/", headers=POST_HEADER, json=annotation_payload
-    )
+    create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201
 
-    create_annotation_job_response_model = JobResponse.model_validate(
-        create_annotation_job_response.json()
-    )
+    create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
 
     assert wait_for_job(local_client, create_annotation_job_response_model.id)
 
-    logs_annotation_job_response = local_client.get(
-        f"/jobs/{create_annotation_job_response_model.id}/logs"
-    )
+    logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
-    logs_annotation_job_response_model = JobLogsResponse.model_validate(
-        logs_annotation_job_response.json()
-    )
+    logs_annotation_job_response_model = JobLogsResponse.model_validate(logs_annotation_job_response.json())
     logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
     logger.info(f"#{logs_annotation_job_response_model.logs}#")
 
-    logs_annotation_job_results = local_client.get(
-        f"/jobs/{create_annotation_job_response_model.id}/result/download"
-    )
-    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(
-        logs_annotation_job_results.json()
-    )
+    logs_annotation_job_results = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/result/download")
+    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(logs_annotation_job_results.json())
     logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
     annotation_job_results_url = requests.get(
         logs_annotation_job_results_model.download_url,
@@ -220,7 +188,6 @@ def test_upload_data_no_gt_launch_annotation(
     assert logs_annotation_job_output.artifacts["predictions"] is None
     assert logs_annotation_job_output.artifacts["ground_truth"] is not None
     logger.info(f"Created results: {logs_annotation_job_output}")
-"""
 
 
 def check_backend_health_status(local_client: TestClient):
@@ -366,21 +333,18 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     delete_experiment_and_validate(local_client, experiment_id)
 
 
-"""
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
-"""
 
-"""
+
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
-"""
 
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):

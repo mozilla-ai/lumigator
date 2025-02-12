@@ -13,6 +13,7 @@ from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
@@ -40,7 +41,6 @@ class MLflowTrackingClient(TrackingClient):
             self._client.set_experiment_tag(experiment_id, "description", description)
             self._client.set_experiment_tag(experiment_id, "task", task)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
-            loguru.logger.critical(f"Storing max_samples: {str(max_samples)}")
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
         # FIXME Let the user decide in the case of failures.
         # Also, use a uuid as name and an arbitrary tag as descriptive name
@@ -54,7 +54,6 @@ class MLflowTrackingClient(TrackingClient):
                 self._client.set_experiment_tag(experiment_id, "description", description)
                 self._client.set_experiment_tag(experiment_id, "task", task)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
-                loguru.logger.critical(f"Storing max_samples: {str(max_samples)}")
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             else:
                 raise e
@@ -129,19 +128,19 @@ class MLflowTrackingClient(TrackingClient):
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
+        return self._format_experiment(experiment)
 
+    def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
-        workflow_ids = self._find_workflows(experiment_id)
+        workflow_ids = self._find_workflows(experiment.experiment_id)
         workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
-        max_samples = int(experiment.tags.get("max_samples"))
-        loguru.logger.critical(f"Retrieving max_samples: {max_samples}")
         return GetExperimentResponse(
-            id=experiment_id,
+            id=experiment.experiment_id,
             name=experiment.name,
             description=experiment.tags.get("description") or "",
             task=experiment.tags.get("task") or "",
             dataset=experiment.tags.get("dataset") or "",
-            max_samples=max_samples,
+            max_samples=int(experiment.tags.get("max_samples") or "-1"),
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
             updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
             workflows=workflows,
@@ -170,16 +169,7 @@ class MLflowTrackingClient(TrackingClient):
             if response.token is None:
                 break
         reduced_experiments = experiments[:limit] if limit is not None else experiments
-        return [
-            GetExperimentResponse(
-                id=experiment.experiment_id,
-                name=experiment.name,
-                description=experiment.tags.get("description") or "",
-                created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
-                updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
-            )
-            for experiment in reduced_experiments
-        ]
+        return [self._format_experiment(experiment) for experiment in reduced_experiments]
 
     def experiments_count(self):
         """Get the number of experiments."""

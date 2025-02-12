@@ -22,12 +22,15 @@ app:
     hf_home: $${HOME}/.cache/huggingface
     # Access token to use when attempting to access gated models in HuggingFace
     hf_token:
-    mistral_api_key: lumigator # pragma: allowlist secret
-    openai_api_key: lumigator # pragma: allowlist secret
+    # Access token to use when attempting to interact with Mistral's API
+    mistral_api_key:
+    # Access token to use when attempting to interact with OpenAI's API
+    openai_api_key:
     # MLFlow Configuration
     mlflow_tracking_uri: http://mlflow:5000
     mlflow_database_url: sqlite:///mlflow.db
     mlflow_s3_root_path: s3://mlflow
+    # S3 Configuration (MinIO)
     minio_root_user: minioadmin
     minio_root_password: minioadmin # pragma: allowlist secret
     minio_api_cors_allow_origin: "*"

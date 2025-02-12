@@ -1,0 +1,33 @@
+name: lumigator
+
+services:
+
+  postgres:
+    labels:
+      ai.mozilla.product_name: lumigator
+    image: postgres:16-alpine
+    volumes:
+      - database-volume:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=lumigator
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "lumigator"]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+
+  backend:
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+    environment:
+      - SQLALCHEMY_DATABASE_URL=postgresql://admin:password@postgres/lumigator
+
+volumes:
+  database-volume:
+    labels:
+      ai.mozilla.product_name: lumigator

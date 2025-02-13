@@ -21,7 +21,7 @@
         <Column field="name" :style="columnStyles.name" header="experiment title" />
         <Column field="created" header="created" sortable :style="columnStyles.created">
           <template #body="slotProps">
-            {{ formatDate(slotProps.data.created) }}
+            {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
         <Column field="status" header="status">
@@ -91,9 +91,10 @@ import { useSlidePanel } from '@/composables/useSlidePanel'
 import Tag from 'primevue/tag'
 import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
-import type { Experiment, Job } from '@/types/Experiment'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
+import type { JobDetails } from '@/types/JobDetails'
+import type { ExperimentNew } from '@/types/ExperimentNew'
 
 const props = defineProps({
   tableData: {
@@ -135,7 +136,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-function onJobSelected(job: Job, experiment: Experiment) {
+function onJobSelected(job: JobDetails, experiment: ExperimentNew) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   experimentStore.fetchJobDetails(job.id)

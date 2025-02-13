@@ -42,14 +42,10 @@ export async function createExperiment(
   return response.data
 }
 
-/**
- * Fetches the results of a specific job.
- * @param {string} job_id
- */
 export async function fetchExperimentResults(
-  job_id: string,
+  workflowId: string,
 ): Promise<unknown | { resultsData: ObjectData; id: string; download_url: string }> {
-  const response = await lumigatorApiAxiosInstance.get(`experiments/${job_id}/result/download`)
+  const response = await lumigatorApiAxiosInstance.get(`experiments/${workflowId}/result/download`)
   const { download_url, id } = response.data
   if (!download_url) {
     console.error('No download_url found in the response.')

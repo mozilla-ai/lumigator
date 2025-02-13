@@ -1,4 +1,4 @@
-import type { Job } from '@/types/Experiment'
+import type { JobDetails } from '@/types/JobDetails'
 
 /**
  * Retrieves and normalizes the entrypoint configuration from a job object.
@@ -7,7 +7,7 @@ import type { Job } from '@/types/Experiment'
  * @param {string} job.entrypoint - The entrypoint stringified JSON provided from the API
  * @returns {Object|null} The parsed and normalized entrypoint configuration object, or null if invalid.
  */
-export function retrieveEntrypoint(job: Job) {
+export function retrieveEntrypoint(job: JobDetails) {
   if (!job || !job.entrypoint) {
     console.error('Invalid job data')
     return

@@ -35,7 +35,7 @@
           <TabPanel value="1">
             <l-inference-jobs-table
               :table-data="inferenceJobs"
-              @l-inference-selected="onJobInferenceSelected($event)"
+              @l-inference-selected="onInferenceJobSelected($event)"
               @l-inference-finished="reloadDatasetTable"
             />
           </TabPanel>
@@ -97,7 +97,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
-import type { Job } from '@/types/Experiment'
+import type { JobDetails } from '@/types/JobDetails'
 
 const datasetStore = useDatasetStore()
 const { datasets, selectedDataset } = storeToRefs(datasetStore)
@@ -194,7 +194,7 @@ const onExperimentDataset = (dataset: Dataset) => {
   datasetStore.fetchDatasetDetails(dataset.id)
 }
 
-const onJobInferenceSelected = (job: Job) => {
+const onInferenceJobSelected = (job: JobDetails) => {
   selectedDataset.value = undefined
   experimentStore.fetchJobDetails(job.id)
   showSlidingPanel.value = true

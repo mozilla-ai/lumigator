@@ -5,15 +5,8 @@ import {
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
 
-import type {
-  EvaluationJobResults,
-  Experiment,
-  ExperimentResults,
-  Job,
-  ObjectData,
-} from '@/types/Experiment'
+import type { EvaluationJobResults, ExperimentResults, ObjectData } from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
-// import { calculateDuration } from '@/helpers/calculateDuration'
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
@@ -21,15 +14,17 @@ import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 import { WorkflowStatus } from '@/types/Workflow'
 import { jobsService } from '@/sdk/jobsService'
+import { calculateDuration } from '@/helpers/calculateDuration'
+import type { JobDetails } from '@/types/JobDetails'
 
 export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<ExperimentNew[]> = ref([])
 
-  const jobs: Ref<ExperimentNew[]> = ref([])
+  const jobs: Ref<JobDetails[]> = ref([])
   const inferenceJobs: Ref<ExperimentNew[]> = ref([])
 
   const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
-  const selectedJob: Ref<ExperimentNew | undefined> = ref()
+  const selectedJob: Ref<JobDetails | undefined> = ref()
 
   const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
   const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
@@ -47,7 +42,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * Loads all experiments and jobs.
    */
   async function fetchAllJobs() {
-    let allJobs: Job[]
+    let allJobs: JobDetails[]
     try {
       allJobs = await jobsService.fetchJobs()
     } catch {
@@ -68,16 +63,11 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseJobDetails(job: Job) {
+  function parseJobDetails(job: JobDetails) {
+    const { entrypoint, ...rest } = job
     return {
+      ...rest,
       ...retrieveEntrypoint(job),
-      status: job.status.toUpperCase(),
-      id: job.submission_id,
-      useCase: `summarization`,
-      created: job.start_time,
-      description: job.description,
-      experimentStart: job.start_time.slice(0, 16),
-      end_time: job.end_time,
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }
@@ -158,9 +148,9 @@ export const useExperimentStore = defineStore('experiments', () => {
     downloadContent(blob, `${selectedJob.value?.name}_results`)
   }
 
-  async function fetchExperimentResults(experiment: Experiment) {
-    for (const job of experiment.jobs) {
-      const results = (await experimentsService.fetchExperimentResults(job.id)) as {
+  async function fetchExperimentResults(experiment: ExperimentNew) {
+    for (const workflow of experiment.workflows) {
+      const results = (await experimentsService.fetchExperimentResults(workflow.id)) as {
         resultsData: ObjectData
         id: string
         download_url: string

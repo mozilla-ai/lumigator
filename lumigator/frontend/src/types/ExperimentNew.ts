@@ -8,11 +8,9 @@ export type ExperimentNew = {
   updated_at: string
   workflows: Workflow[]
   task: 'summarization'
+  dataset: string
+  max_samples: number
 
   // added by the frontend, TODO: refactor
   status: WorkflowStatus
-
-  // To be added:
-  dataset: string
-  samples: number
 }

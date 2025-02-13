@@ -65,7 +65,8 @@ import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
-import type { Experiment, Job } from '@/types/Experiment'
+import type { JobDetails } from '@/types/JobDetails'
+import type { ExperimentNew } from '@/types/ExperimentNew'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -94,24 +95,24 @@ const onCreateExperiment = () => {
   selectedExperiment.value = undefined
 }
 
-const onSelectExperiment = (experiment: Experiment) => {
+const onSelectExperiment = (experiment: ExperimentNew) => {
   experimentStore.loadExperimentDetails(experiment.id)
   showSlidingPanel.value = true
 }
 
-const onShowExperimentResults = (experiment: Experiment) => {
+const onShowExperimentResults = (experiment: ExperimentNew) => {
   experimentStore.fetchExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = (job: Job) => {
+const onShowJobResults = (job: JobDetails | ExperimentNew) => {
   experimentStore.fetchJobResults(job.id)
   showDrawer.value = true
   showJobResults.value = true
 }
 
-const onDownloadResults = (job: Job) => {
+const onDownloadResults = (job: JobDetails | ExperimentNew) => {
   experimentStore.fetchExperimentResultsFile(job.id)
 }
 

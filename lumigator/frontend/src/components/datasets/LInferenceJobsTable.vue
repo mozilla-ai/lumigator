@@ -19,7 +19,7 @@
     </Column>
     <Column field="created" header="created" sortable>
       <template #body="slotProps">
-        {{ formatDate(slotProps.data.created) }}
+        {{ formatDate(slotProps.data.created_at) }}
       </template>
     </Column>
     <Column field="status" header="status">

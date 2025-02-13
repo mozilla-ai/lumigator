@@ -1,35 +1,35 @@
-import type { Model } from './Model'
-import type { WorkflowStatus } from './Workflow'
+// import type { Model } from './Model'
+// import type { WorkflowStatus } from './Workflow'
 
-export type Experiment = {
-  id: string
-  created: string
-  dataset: string
-  description: string
-  name: string
-  experimentStart: string
-  jobs: Job[]
-  useCase: string
-  runTime: string
-  samples?: number
-  models: Model[]
-  max_samples?: number
-  status: WorkflowStatus
-}
+// export type Experiment = {
+//   id: string
+//   created: string
+//   dataset: string
+//   description: string
+//   name: string
+//   experimentStart: string
+//   jobs: Job[]
+//   useCase: string
+//   runTime: string
+//   samples?: number
+//   models: Model[]
+//   max_samples?: number
+//   status: WorkflowStatus
+// }
 
-export type Job = {
-  id: string
-  status: WorkflowStatus
-  metadata: Record<string, unknown>
-  end_time: string
-  model: Record<string, unknown>
-  name: string
-  experimentStart: string
-  submission_id: string
-  start_time: string
-  description: string
-  entrypoint: string
-}
+// export type Job = {
+//   id: string
+//   status: WorkflowStatus
+//   metadata: Record<string, unknown>
+//   end_time: string
+//   model: Record<string, unknown>
+//   name: string
+//   experimentStart: string
+//   submission_id: string
+//   start_time: string
+//   description: string
+//   entrypoint: string
+// }
 
 export type Task = {
   summarization: {

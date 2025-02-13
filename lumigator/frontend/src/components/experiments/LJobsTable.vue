@@ -15,7 +15,7 @@
     </Column>
     <Column field="created" header="created" :style="columnStyles.created" sortable>
       <template #body="slotProps">
-        {{ formatDate(slotProps.data.created) }}
+        {{ formatDate(slotProps.data.created_at) }}
       </template>
     </Column>
     <Column field="status" header="status">

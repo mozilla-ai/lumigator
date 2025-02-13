@@ -1,6 +1,6 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 import type { Dataset } from '@/types/Dataset'
-import type { Job } from '@/types/Experiment'
+import type { JobDetails } from '@/types/JobDetails'
 
 /**
  * Fetches the logs of a specific job by ID.
@@ -15,7 +15,7 @@ export async function fetchLogs(id: string) {
  *
  * @returns {array} of all jobs, regardless the experiment
  */
-export async function fetchJobs(): Promise<Job[]> {
+export async function fetchJobs(): Promise<JobDetails[]> {
   const response = await lumigatorApiAxiosInstance.get('/jobs')
   return response.data.items
 }
@@ -24,8 +24,9 @@ export async function fetchJobs(): Promise<Job[]> {
  * Fetches details of a specific job by ID.
  * @param {string} id - The ID of the job.
  */
-export async function fetchJobDetails(id: string) {
+export async function fetchJobDetails(id: string): Promise<JobDetails> {
   const response = await lumigatorApiAxiosInstance.get(`jobs/${id}`)
+  console.log(response.data)
   return response.data
 }
 

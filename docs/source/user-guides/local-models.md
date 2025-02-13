@@ -14,7 +14,7 @@ Before installation and setup, here are some recommended system requirements:
 1. A running instance of [Lumigator](../get-started/installation.md).
 
     ```{note}
-    **Before to starting up** the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
+Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
       ```console
       user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
       ```

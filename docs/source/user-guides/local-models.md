@@ -80,7 +80,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
 
-You can view the results on the UI as described [below](./local-models.md#view-evaluation-results).
+You can then download the results following the steps described [below](#download-inference-results)
 
 ## Ollama
 [Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://docs.openwebui.com/).
@@ -129,7 +129,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
 
-Finally, view the results on the UI as described [below](./local-models.md#view-evaluation-results).
+Finally, download the results as described [below](#download-inference-results)
 
 ## vLLM
 
@@ -192,10 +192,31 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
 
-To view the evalution results on the UI, refer to the section [below](#view-evaluation-results)
+To download the inference results, refer to the section [below](#download-inference-results)
 
-## View Evaluation Results
-To view the evalution results, go to the [Lumigator UI](http://localhost) and navigate to the "Experiments" tab. Then, select the most recent experiment with your local LLM and click "View Results".
+## Download Inference Results
+You can download and view the results of the inference job with the following script `download_local_llm_results.sh`:
+```bash
+#!/bin/bash
+
+source common_variables.sh
+
+JOB_ID=$(curl -s "$BACKEND_URL/api/v1/jobs/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
+
+echo "Looking for $JOB_ID results..."
+DOWNLOAD_RESPONSE=$(curl -s $BACKEND_URL/api/v1/jobs/$JOB_ID/result/download)
+DOWNLOAD_URL=$(echo $DOWNLOAD_RESPONSE | grep -o '"download_url":"[^"]*"' | sed 's/"download_url":"//;s/"//')
+
+echo "Downloading from $DOWNLOAD_URL..."
+   RESULTS_RESPONSE=$(curl -s $DOWNLOAD_URL -H 'Accept: application/json' -H 'Content-Type: application/json')
+
+echo $RESULTS_RESPONSE | python -m json.tool
+```
+
+And the last step is to execute the script:
+```console
+user@host:~/lumigator$ bash download_local_llm_results.sh
+```
 
 ## Conclusion
 

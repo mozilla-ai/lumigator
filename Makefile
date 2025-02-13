@@ -106,10 +106,20 @@ define remove_config_dir
 	@echo "Cleanup complete."
 endef
 
+# config-check: checks if the user config is already present, and calls the appropriate config-generate target.
+define config_check
+	@if [ -e $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT) ]; then \
+		make config-generate-env; \
+	else \
+		make config-generate; \
+	fi
+endef
+
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
-local-up: config-generate-env
+local-up:
+	$(call config_check)
 	uv run pre-commit install
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} up --watch --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
 
 local-down: config-generate-env
 	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
@@ -119,7 +129,8 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in) - postgres version
-start-lumigator-postgres: config-generate-env
+start-lumigator-postgres:
+	$(call config_check)
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
 
 stop-lumigator-postgres: config-generate-env
@@ -127,19 +138,23 @@ stop-lumigator-postgres: config-generate-env
 	$(call remove_config_dir)
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
-start-lumigator: config-generate-env
+start-lumigator:
+	$(call config_check)
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build: config-generate-env
+start-lumigator-build:
+	$(call config_check)
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build-postgres: config-generate-env
+start-lumigator-build-postgres:
+	$(call config_check)
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
-start-lumigator-external-services: config-generate-env
+start-lumigator-external-services:
+	$(call config_check)
 	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"$(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator: config-generate-env

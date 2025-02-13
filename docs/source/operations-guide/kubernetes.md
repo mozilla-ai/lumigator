@@ -25,13 +25,14 @@ those values that are required to make the sub charts work together (like the ad
 By default, the backend chart also deploys a PostgreSQL instance, and a Ray cluster into Kubernetes,
 with a minimal configuration ready to work with Lumigator.
 
-> [!NOTE]If the Mistral and/or the OpenAI API is used, there are two ways to provide
-> it to Lumigator:
->
-> - Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
->   and/or `existingOpenaiAPISecret`
-> - Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
->   which will be added in a new Secret.
+```{note}
+If the Mistral and/or the OpenAI API is used, there are two ways to provide
+it to Lumigator:
+- Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
+  and/or `existingOpenaiAPISecret`
+- Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
+  which will be added in a new Secret.
+```
 
 In order to be able to use Mistral and/or the OpenAI API, you also have to add this configuration to your values file:
 
@@ -41,10 +42,10 @@ ray-cluster:
     containerEnv:
       - name: MISTRAL_API_KEY
             valueFrom: "name-of-the-mistral-secret"
-              secretKeyRef: "name-of-the-mistral-secret-key"
+              secretKeyRef: "name-of-the-mistral-secret-key" # pragma: allowlist secret
       - name: OPENAI_API_KEY
             valueFrom: "name-of-the-openai-secret"
-              secretKeyRef: "name-of-the-openai-secret-key"
+              secretKeyRef: "name-of-the-openai-secret-key" # pragma: allowlist secret
 ```
 
 ## Example values configurations
@@ -56,7 +57,7 @@ Backend:
 ```console
 s3Bucket: "example-bucket-name"  # Name of the S3 bucket you want to use.
 AWSAccessKey: "EXAMPLE_AWS_ACCESS_KEY"  # AWS access key.
-AWSSecretKey: "EXAMPLE_AWS_SECRET_KEY"  # AWS secret key.
+AWSSecretKey: "EXAMPLE_AWS_SECRET_KEY"  # AWS secret key. # pragma: allowlist secret
 rayAddress: "example-ray-cluster-head-address"  # Address of the Ray cluster head service. If you use the Ray cluster deployed with the backend chart, the value is the first word of your helm release name + -lumigator-kuberay-head-svc
 
 ray-cluster:

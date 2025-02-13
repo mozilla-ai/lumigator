@@ -304,6 +304,11 @@ def delete_experiment_and_validate(local_client: TestClient, experiment_id):
     assert response.status_code == 404
 
 
+def list_experiments(local_client: TestClient):
+    response = local_client.get("/experiments/new/all").json()
+    ListingResponse[GetExperimentResponse].model_validate(response)
+
+
 @pytest.mark.integration
 def test_full_experiment_launch(local_client: TestClient, dialog_dataset, dependency_overrides_services):
     """This is the main integration test: it checks:
@@ -328,6 +333,7 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+    list_experiments(local_client)
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)

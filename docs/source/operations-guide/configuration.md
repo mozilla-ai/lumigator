@@ -9,7 +9,7 @@ This guide explains how configuration works in Lumigator and how you can make ch
 
 ## Where are the config files?
 
-The default Lumigator settings are found in the repository root under {{ '[`config.default.yaml`](https://github.com/mozilla-ai/lumigator/blob/{}/config.default.yaml)'.format(commit_id) }}.
+The default Lumigator settings are found in the repository root under {{ '[`.config.default.yaml`](https://github.com/mozilla-ai/lumigator/blob/{}/.config.default.yaml)'.format(commit_id) }}.
 
 They are specified in `YAML` and at present all settings are under `app` section within the config file.
 
@@ -19,34 +19,33 @@ When you start Lumigator using commands like `make local-up` or `make start-lumi
 
 1. Any temporary config files used for deployment are removed
 1. Default and user settings are combined (with user settings prefered - see below for information on using your own settings)
-1. The generated config file (`config.deploy.yaml`) is placed under the `build` directory in the repository root
-1. `config.deploy.yaml` is used to generate a `.env` file (also stored under the `build` directory)
+1. The generated config file (`.env`) is placed under the `build` directory in the repository root
 1. Docker Compose is supplied with the environment file path to the generated `.env` file
 
 From there the `.env` file variables are used in Lumigator's application or supplied to components (such as Ray, MinIO, MLFlow).
 
-When you stop Lumigator using commands like `make local-down` or `make stop-lumigator`, or detach from `make local-up`, the temporary files stored under `build` are removed. While Lumigator is running they are present if you wish to examine their contents.
+When you stop Lumigator using commands like `make local-down` or `make stop-lumigator`, the temporary files stored under `build` are removed. While Lumigator is running they are present if you wish to examine their contents.
 
 > [!NOTE]
 > The `build` directory is marked in `.gitignore`
 
 ## How should I set my own settings?
 
-User specific configuration is stored in a file named `config.user.yaml`, this file is configured in `.gitignore` and will never be commited to version control.
+User specific configuration can be stored in a file named `config.yaml`, this file is configured in `.gitignore` and will never be commited to version control.
 
-It is possible to manually create the `config.user.yaml` file and only add key/values for the settings you wish to change from the defaults. Please review `config.default.yaml` for the format.
+It is possible to manually create the `config.yaml` file and only add key/values for the settings you wish to change from the defaults (under `app`). Please review `.config.default.yaml` for the format and setting names.
 
-Alternatively, you can generate the user config file using the `config-generate` `Makefile` target:
+Alternatively, you can generate the user config file using the `config-generate-env` `Makefile` target:
 
 ```console
-user@host:~/lumigator$ make config-generate
+user@host:~/lumigator$ make config-generate-env
 ```
 
 You can edit this file to update your settings, remove any settings you don't want to explicitly set, and the defaults for those settings will always be used when running Lumigator.
 
 ## Can I configure everything?
 
-Not currently, there are a lot of settings available in `config.default.yaml` but for example you cannot yet change the URL that is exposed via FastAPI on our Backend component from http://localhost:8000.
+Not currently, there are a lot of settings available in `.config.default.yaml` but for example you cannot yet change the URL that is exposed via FastAPI on our Backend component from http://localhost:8000.
 
 ## Settings
 

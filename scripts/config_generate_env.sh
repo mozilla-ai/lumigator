@@ -16,4 +16,4 @@ yq eval '
   )
   | map(.value |= to_string)
   | map("\(.key)=\(.value)")
-  | .[] ' "$1" > "$2";
+  | .[] ' - "$1" > "$2";

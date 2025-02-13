@@ -1,8 +1,9 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate config-generate-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
+# TODO: PW: Not all of these are required EVERY TIME...
 # Required binaries in order to correctly run the makefile, if any cannot be found the script will fail
 REQUIRED_BINARIES := git docker yq uv
 $(foreach bin,$(REQUIRED_BINARIES),\
@@ -16,9 +17,12 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 # Configuration to identify the input and output config files
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
 CONFIG_BUILD_DIR=build
-CONFIG_DEFAULT=config.default.yaml
-CONFIG_USER=config.user.yaml
-CONFIG_OUTPUT=config.deploy.yaml
+# Default config prefixed with dot to hide from user
+CONFIG_DEFAULT=.config.default.yaml
+# User editable config file (will be generated if missing)
+CONFIG_USER=config.yaml
+# TODO: PW: Can this just go away, nobody seems to like the intermediate step :D
+#CONFIG_OUTPUT=config.deploy.yaml
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -106,12 +110,10 @@ define remove_config_dir
 	@echo "Cleanup complete."
 endef
 
-# config-check: checks if the user config is already present, and calls the appropriate config-generate target.
+# config-check: checks if the user config is already present, and calls the appropriate config-generate-env target if not.
 define config_check
-	@if [ -e $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT) ]; then \
+	@if [ -n $(CONFIG_BUILD_DIR)/.env ]; then \
 		make config-generate-env; \
-	else \
-		make config-generate; \
 	fi
 endef
 
@@ -266,23 +268,18 @@ test-all: test-sdk test-backend test-jobs-unit
 config-clean:
 	$(call remove_config_dir)
 
-# config-generate: merges default and user YAML config files to produce a YAML file in the build directory.
-# Any keys missing from the user config will be substituted with the default key/values.
-# Values in the user config take prescedence over the default values.
-config-generate: config-clean
+# config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
+config-generate-env:
 	@mkdir -p $(CONFIG_BUILD_DIR)
-	@if [ -e $(CONFIG_USER) ]; then \
+
+	@if [ -f $(CONFIG_USER) ]; then \
 		echo "Found user configuration"; \
-		yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(CONFIG_DEFAULT) $(CONFIG_USER) > $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT); \
+		yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(CONFIG_DEFAULT) $(CONFIG_USER) | scripts/config_generate_env.sh - "$(CONFIG_BUILD_DIR)/.env"; \
 	else \
 		echo "No user defined config found, default will be used"; \
+		cat $(CONFIG_DEFAULT) | scripts/config_generate_env.sh - "$(CONFIG_BUILD_DIR)/.env"; \
+		echo "User config file created at ' $(CONFIG_USER)'"; \
 		cp $(CONFIG_DEFAULT) $(CONFIG_USER); \
-		cp $(CONFIG_DEFAULT) $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT); \
 	fi
-	@echo "Config generation complete."
 
-# config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
-config-generate-env: config-generate
-	@echo "Generating .env file for Docker Compose using 'app' config section..."
-	@scripts/config_generate_env.sh $(CONFIG_BUILD_DIR)/$(CONFIG_OUTPUT) "$(CONFIG_BUILD_DIR)/.env"
-	@echo ".env file generated at '$(CONFIG_BUILD_DIR)/.env'"
+	@echo ".env file generated at '$(CONFIG_BUILD_DIR)/.env'";

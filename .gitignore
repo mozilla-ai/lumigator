@@ -177,4 +177,4 @@ cython_debug/
 
 # Deployment/config files
 build/
-config.user.yaml
+config.yaml

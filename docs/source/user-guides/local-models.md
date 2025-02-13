@@ -27,13 +27,13 @@ Before installation and setup, here are some recommended system requirements:
     BACKEND_URL=http://localhost:8000 # Lumigator runs on port 8000
 
     # Get the most recently uploaded dataset
-    EVAL_DATASET_ID=$(curl -s "$BACKEND_URL/api/v1/datasets/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
+    INFERENCE_DATASET_ID=$(curl -s "$BACKEND_URL/api/v1/datasets/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
 
     # Basic prompt for LLM, summarization task
-    EVAL_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
+    INFERENCE_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
 
     # Run eval on first 10 rows in the csv, set to -1 if you would like to run it for all rows
-    EVAL_MAX_SAMPLES="10"
+    INFERENCE_MAX_SAMPLES="10"
     ```
 
 You have a choice of choosing one among the below-mentioned local LLM tools. We describe the steps to locally stand up your desired model and enable Lumigator to query the local model's inference endpoint.
@@ -56,22 +56,22 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
    #!/bin/bash
    source common_variables.sh
 
-   EVAL_NAME="Llamafile mistral-7b-instruct-v0.2"
-   EVAL_DESC="Test inference with mistral-7b-instruct-v0.2"
-   EVAL_MODEL="llamafile://mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
-   EVAL_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
+   INFERENCE_NAME="Llamafile mistral-7b-instruct-v0.2"
+   INFERENCE_DESC="Test inference with mistral-7b-instruct-v0.2"
+   INFERENCE_MODEL="llamafile://mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
+   INFERENCE_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
    -d '{
-      "name": "'"$EVAL_NAME"'",
-      "description": "'"$EVAL_DESC"'",
-      "model": "'"$EVAL_MODEL"'",
-      "dataset": "'"$EVAL_DATASET_ID"'",
-      "max_samples": "'"$EVAL_MAX_SAMPLES"'",
-      "model_url": "'"$EVAL_MODEL_URL"'",
-      "system_prompt": "'"$EVAL_SYSTEM_PROMPT"'"
+      "name": "'"$INFERENCE_NAME"'",
+      "description": "'"$INFERENCE_DESC"'",
+      "model": "'"$INFERENCE_MODEL"'",
+      "dataset": "'"$INFERENCE_DATASET_ID"'",
+      "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
+      "model_url": "'"$INFERENCE_MODEL_URL"'",
+      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
    }'
    ```
 
@@ -105,22 +105,22 @@ You can then download the results following the steps described [below](#downloa
    #!/bin/bash
    source common_variables.sh
 
-   EVAL_NAME="Ollama Llama3.2"
-   EVAL_DESC="Test inference with Ollama's Llama3.2"
-   EVAL_MODEL="ollama://llama3.2" # Format expected ollama://<model_name>, the model_name must be same as one used in the `ollama run <model_name>` command
-   EVAL_MODEL_URL="http://localhost:11434/v1" # Ollama runs on port 11434
+   INFERENCE_NAME="Ollama Llama3.2"
+   INFERENCE_DESC="Test inference with Ollama's Llama3.2"
+   INFERENCE_MODEL="ollama://llama3.2" # Format expected ollama://<model_name>, the model_name must be same as one used in the `ollama run <model_name>` command
+   INFERENCE_MODEL_URL="http://localhost:11434/v1" # Ollama runs on port 11434
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
    -d '{
-      "name": "'"$EVAL_NAME"'",
-      "description": "'"$EVAL_DESC"'",
-      "model": "'"$EVAL_MODEL"'",
-      "dataset": "'"$EVAL_DATASET_ID"'",
-      "max_samples": "'"$EVAL_MAX_SAMPLES"'",
-      "model_url": "'"$EVAL_MODEL_URL"'",
-      "system_prompt": "'"$EVAL_SYSTEM_PROMPT"'"
+      "name": "'"$INFERENCE_NAME"'",
+      "description": "'"$INFERENCE_DESC"'",
+      "model": "'"$INFERENCE_MODEL"'",
+      "dataset": "'"$INFERENCE_DATASET_ID"'",
+      "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
+      "model_url": "'"$INFERENCE_MODEL_URL"'",
+      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
    }'
    ```
 
@@ -168,22 +168,22 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    #!/bin/bash
    source common_variables.sh
 
-   EVAL_NAME="vLLM HuggingFaceTB/SmolLM2-360M-Instruct"
-   EVAL_DESC="Test inference with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
-   EVAL_MODEL="vllm://HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
-   EVAL_MODEL_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
+   INFERENCE_NAME="vLLM HuggingFaceTB/SmolLM2-360M-Instruct"
+   INFERENCE_DESC="Test inference with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
+   INFERENCE_MODEL="vllm://HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
+   INFERENCE_MODEL_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
    -d '{
-      "name": "'"$EVAL_NAME"'",
-      "description": "'"$EVAL_DESC"'",
-      "model": "'"$EVAL_MODEL"'",
-      "dataset": "'"$EVAL_DATASET_ID"'",
-      "max_samples": "'"$EVAL_MAX_SAMPLES"'",
-      "model_url": "'"$EVAL_MODEL_URL"'",
-      "system_prompt": "'"$EVAL_SYSTEM_PROMPT"'"
+      "name": "'"$INFERENCE_NAME"'",
+      "description": "'"$INFERENCE_DESC"'",
+      "model": "'"$INFERENCE_MODEL"'",
+      "dataset": "'"$INFERENCE_DATASET_ID"'",
+      "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
+      "model_url": "'"$INFERENCE_MODEL_URL"'",
+      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
    }'
    ```
 

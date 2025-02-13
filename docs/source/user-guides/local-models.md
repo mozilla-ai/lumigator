@@ -1,6 +1,6 @@
 # Bring Your Own Local LLMs
 
-Previously we saw how to use Lumigator with models on Hugging Face as well as via APIs hosted by [Open AI and Mistral](../user-guides/inference.md#model-specification). However, sometimes it may be advantageous to run models locally as a more cost-effective solution or when dealing with sensitive data or during the early stages of experimentation.
+Previously we saw how to use Lumigator with models on Hugging Face as well as via APIs hosted by [Open AI and Mistral](../user-guides/inference.md#model-specification). However, sometimes it may be advantageous to run models on-premise as a more cost-effective solution or when dealing with sensitive data or during the early stages of experimentation.
 
 Lumigator supports running inference and evaluation on any locally hosted models through [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Ollama](https://ollama.com/search) and [vLLM](https://docs.vllm.ai/en/latest/), thanks to their compatibility with [OpenAI's Completions API Client](https://github.com/openai/openai-python). This guide will walk you through the process of running evaluation on any local model that you bring from these providers (assuming your machine meets the necessary hardware requirements).
 

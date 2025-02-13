@@ -3,9 +3,9 @@
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
-# TODO: PW: Not all of these are required EVERY TIME...
-# Required binaries in order to correctly run the makefile, if any cannot be found the script will fail
-REQUIRED_BINARIES := git docker yq uv
+# Required binaries in order to correctly run the makefile, if any cannot be found the script will fail.
+# uv is only required for local-up (dev).
+REQUIRED_BINARIES := git docker yq
 $(foreach bin,$(REQUIRED_BINARIES),\
   $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 
@@ -21,8 +21,6 @@ CONFIG_BUILD_DIR=build
 CONFIG_DEFAULT=.config.default.yaml
 # User editable config file (will be generated if missing)
 CONFIG_USER=config.yaml
-# TODO: PW: Can this just go away, nobody seems to like the intermediate step :D
-#CONFIG_OUTPUT=config.deploy.yaml
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)

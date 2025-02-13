@@ -73,7 +73,7 @@
       >
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ (focusedItem?.dataset as any).name }}
+          {{ (focusedItem.dataset) }}
         </div>
       </div>
       <div
@@ -204,7 +204,6 @@ const isInference = computed(() => {
 })
 
 const focusedItem: ComputedRef<JobDetails | ExperimentNew | undefined> = computed(() => {
-  // debugger
 
   if (selectedJob.value) {
     return selectedJob.value

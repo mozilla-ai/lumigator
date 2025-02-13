@@ -64,9 +64,9 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @returns job data parsed for display as an experiment
    */
   function parseJobDetails(job: JobDetails) {
-    const { entrypoint: _entrypoint, ...rest} = job
     return {
-      ...rest,
+      ...job,
+      entrypoint: undefined,
       ...retrieveEntrypoint(job),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
@@ -149,8 +149,9 @@ export const useExperimentStore = defineStore('experiments', () => {
   }
 
   async function fetchExperimentResults(experiment: ExperimentNew) {
-    for (const workflow of experiment.workflows) {
-      const results = (await experimentsService.fetchExperimentResults(workflow.id)) as {
+    // for (const workflow of experiment.workflows) {
+    //   console.log({experiment, workflow})
+      const results = (await experimentsService.fetchExperimentResults(experiment.id)) as {
         resultsData: ObjectData
         id: string
         download_url: string
@@ -166,7 +167,7 @@ export const useExperimentStore = defineStore('experiments', () => {
         } as unknown as ExperimentResults
         selectedExperimentResults.value.push(modelRow)
       }
-    }
+    // }
   }
 
   async function fetchJobResults(jobId: string) {
@@ -360,5 +361,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     fetchExperimentResultsFile,
     startGroundTruthGeneration,
     createExperimentWithWorkflows,
+    parseJobDetails,
   }
 })

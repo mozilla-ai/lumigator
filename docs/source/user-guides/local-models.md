@@ -19,7 +19,7 @@ Before installation and setup, here are some recommended system requirements:
       user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
       ```
 
-2. A dataset for experimentation: You can upload the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
+2. A dataset for experimentation: you can upload the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
 
 3. Create a bash file `common_variables.sh` and initialize the following variables before proceeding with different local LLM tools.
     ```bash

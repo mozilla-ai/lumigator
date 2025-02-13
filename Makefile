@@ -18,9 +18,9 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
 CONFIG_BUILD_DIR=build
 # Default config prefixed with dot to hide from user
-CONFIG_DEFAULT=.config.default.yaml
+CONFIG_DEFAULT=.default.env
 # User editable config file (will be generated if missing)
-CONFIG_USER=config.yaml
+CONFIG_USER=.env
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -268,12 +268,11 @@ config-generate-env:
 
 	@if [ -f $(CONFIG_USER) ]; then \
 		echo "Found user configuration"; \
-		yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(CONFIG_DEFAULT) $(CONFIG_USER) | scripts/config_generate_env.sh - "$(CONFIG_BUILD_DIR)/.env"; \
 	else \
 		echo "No user defined config found, default will be used"; \
-		cat $(CONFIG_DEFAULT) | scripts/config_generate_env.sh - "$(CONFIG_BUILD_DIR)/.env"; \
-		echo "User config file created at ' $(CONFIG_USER)'"; \
 		cp $(CONFIG_DEFAULT) $(CONFIG_USER); \
 	fi
 
+	@scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_USER) > "$(CONFIG_BUILD_DIR)/.env";
+	@echo "User config file created at ' $(CONFIG_USER)'";
 	@echo ".env file generated at '$(CONFIG_BUILD_DIR)/.env'";

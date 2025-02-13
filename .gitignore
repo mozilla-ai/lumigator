@@ -136,6 +136,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+build/
 
 # Spyder project settings
 .spyderproject
@@ -174,7 +175,3 @@ cython_debug/
 .ijwb
 *.db
 *.db-journal
-
-# Deployment/config files
-build/
-config.yaml

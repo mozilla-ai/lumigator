@@ -9,16 +9,16 @@ This guide explains how configuration works in Lumigator and how you can make ch
 
 ## Where are the config files?
 
-The default Lumigator settings are found in the repository root under {{ '[`.config.default.yaml`](https://github.com/mozilla-ai/lumigator/blob/{}/.config.default.yaml)'.format(commit_id) }}.
+The default Lumigator settings are found in the repository root under {{ '[`.default.env`](https://github.com/mozilla-ai/lumigator/blob/{}/.default.env)'.format(commit_id) }}.
 
-They are specified in `YAML` and at present all settings are under `app` section within the config file.
+They are specified in key=value format within the config file.
 
 ## How are these settings used?
 
 When you start Lumigator using commands like `make local-up` or `make start-lumigator`, configuration steps are automatically run which do the following:
 
 1. Any temporary config files used for deployment are removed
-1. Default and user settings are combined (with user settings prefered - see below for information on using your own settings)
+1. Default and user settings are combined (with user settings preferred - see below for information on using your own settings)
 1. The generated config file (`.env`) is placed under the `build` directory in the repository root
 1. Docker Compose is supplied with the environment file path to the generated `.env` file
 
@@ -31,9 +31,9 @@ When you stop Lumigator using commands like `make local-down` or `make stop-lumi
 
 ## How should I set my own settings?
 
-User specific configuration can be stored in a file named `config.yaml`, this file is configured in `.gitignore` and will never be commited to version control.
+User specific configuration can be stored in a file named `.env`, this file is configured in `.gitignore` and will never be commited to version control.
 
-It is possible to manually create the `config.yaml` file and only add key/values for the settings you wish to change from the defaults (under `app`). Please review `.config.default.yaml` for the format and setting names.
+It is possible to manually create the `.env` file and only add key/values for the settings you wish to change from the defaults. Please review `.default.env` for the format and setting names.
 
 Alternatively, you can generate the user config file using the `config-generate-env` `Makefile` target:
 
@@ -45,44 +45,44 @@ You can edit this file to update your settings, remove any settings you don't wa
 
 ## Can I configure everything?
 
-Not currently, there are a lot of settings available in `.config.default.yaml` but for example you cannot yet change the URL that is exposed via FastAPI on our Backend component from http://localhost:8000.
+Not currently, there are a lot of settings available in `.default.env` but for example you cannot yet change the URL that is exposed via FastAPI on our Backend component from http://localhost:8000.
 
 ## Settings
 
-The following section documents the available settings for `app`.
+The following section documents the available settings:
 
 > [!Note]
 > To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
 
-| Name                               | Type    | Description                                                                                                            |
-|------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------|
-| aws_access_key_id                  | string  | AWS credential, used for auth with S3 services (e.g. MinIO)                                                            |
-| aws_secret_access_key              | string  | Sensitive AWS secret, used for auth with S3 services (e.g. MinIO)                                                      |
-| aws_default_region                 | string  | AWS default region name                                                                                                |
-| aws_endpoint_url                   | string  | URL used to contact S3 services (e.g. MinIO)                                                                           |
-| s3_bucket                          | string  | The S3 bucket name to store Lumigator data under                                                                       |
-| ray_head_node_host                 | string  | The hostname of the head Ray node that Lumigator should contact                                                        |
-| ray_dashboard_port                 | integer | The dashboard port for the Ray cluster that Lumigator is interacting with                                              |
-| ray_worker_gpus                    | integer | The number of worker GPUs available to Ray that should be used for jobs                                                |
-| ray_worker_gpus_fraction           | float   | If not `0`, the fraction of the worker GPUs that should be used by a Ray job                                           |
-| nvidia_visible_devices             | string  | Defaults to 'all', specifies which NVIDIA devices should be visible to Ray                                             |
-| gpu_count                          | int     | The number of GPUs                                                                                                     |
-| hf_home                            | string  | The home directory for HuggingFace (used for caching)                                                                  |
-| hf_token                           | string  | Sensitive API token used to access gated models in HuggingFace                                                         |
-| mistral_api_key                    | string  | Sensitive API key used to access Mistral                                                                               |
-| openai_api_key                     | string  | Sensitive API key used to access OpenAI                                                                                |
-| mlflow_tracking_uri                | string  | The URL used to access MLFlow                                                                                          |
-| mlflow_database_url                | string  | DB connection string/URL usef for MLFlow                                                                               |
-| mlflow_s3_root_path                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                       |
-| minio_root_user                    | string  | The root user name for accessing MinIO                                                                                 |
-| minio_root_password                | string  | Sensitive secret for accessing MinIO as root                                                                           |
-| minio_api_cors_allow_origin        | string  | Allowed origins for CORS requests to MinIO (defaults to "*")                                                           |
-| deployment_type                    | string  | Allows the user to define which environment Lumigator is deployed in, local', 'development', 'staging' or 'production' |
-| database_url                       | string  | DB connection string/URL used for Lumigator's local DB storage                                                         |
-| lumigator_api_cors_allowed_origins | array   | A string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all             |
-| inference_pip_reqs                 | string  | Path within the container to the requirements.txt file for inference jobs                                              |
-| inference_work_dir                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                  |
-| evaluator_pip_reqs                 | string  | Path within the container to the requirements.txt file for evaluation jobs                                             |
-| evaluator_work_dir                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job                 |
-| evaluator_lite_pip_reqs            | string  | Path within the container to the requirements.txt file for evaluation (lite) jobs                                      |
-| evaluator_lite_work_dir            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation (lite) job          |
+| Name                               | Type    | Description                                                                                                                |
+|------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| AWS_ACCESS_KEY_ID                  | string  | AWS credential, used for auth with S3 services (e.g. MinIO)                                                                |
+| AWS_SECRET_ACCESS_KEY              | string  | Sensitive AWS secret, used for auth with S3 services (e.g. MinIO)                                                          |
+| AWS_DEFAULT_REGION                 | string  | AWS default region name                                                                                                    |
+| AWS_ENDPOINT_URL                   | string  | URL used to contact S3 services (e.g. MinIO)                                                                               |
+| S3_BUCKET                          | string  | The S3 bucket name to store Lumigator data under                                                                           |
+| RAY_HEAD_NODE_HOST                 | string  | The hostname of the head Ray node that Lumigator should contact                                                            |
+| RAY_DASHBOARD_PORT                 | integer | The dashboard port for the Ray cluster that Lumigator is interacting with                                                  |
+| RAY_WORKER_GPUS                    | integer | The number of worker GPUs available to Ray that should be used for jobs                                                    |
+| RAY_WORKER_GPUS_FRACTION           | float   | If not `0`, the fraction of the worker GPUs that should be used by a Ray job                                               |
+| NVIDIA_VISIBLE_DEVICES             | string  | Defaults to 'all', specifies which NVIDIA devices should be visible to Ray                                                 |
+| GPU_COUNT                          | int     | The number of GPUs                                                                                                         |
+| HF_HOME                            | string  | The home directory for HuggingFace (used for caching)                                                                      |
+| HF_TOKEN                           | string  | Sensitive API token used to access gated models in HuggingFace                                                             |
+| MISTRAL_API_KEY                    | string  | Sensitive API key used to access Mistral                                                                                   |
+| OPENAI_API_KEY                     | string  | Sensitive API key used to access OpenAI                                                                                    |
+| MLFLOW_TRACKING_URI                | string  | The URL used to access MLFlow                                                                                              |
+| MLFLOW_DATABASE_URL                | string  | DB connection string/URL used for MLFlow                                                                                   |
+| MLFLOW_S3_ROOT_PATH                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                           |
+| MINIO_ROOT_USER                    | string  | The root user name for accessing MinIO                                                                                     |
+| MINIO_ROOT_PASSWORD                | string  | Sensitive secret for accessing MinIO as root                                                                               |
+| MINIO_API_CORS_ALLOW_ORIGIN        | string  | Allowed origins for CORS requests to MinIO (defaults to "*")                                                               |
+| DEPLOYMENT_TYPE                    | string  | Allows the user to define which environment Lumigator is deployed in, local', 'development', 'staging' or 'production'     |
+| DATABASE_URL                       | string  | DB connection string/URL used for Lumigator's local DB storage                                                             |
+| LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
+| INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
+| INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |
+| EVALUATOR_PIP_REQS                 | string  | Path within the container to the requirements.txt file for evaluation jobs                                                 |
+| EVALUATOR_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job                     |
+| EVALUATOR_LITE_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation (lite) jobs                                          |
+| EVALUATOR_LITE_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation (lite) job              |

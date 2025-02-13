@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all check-dot-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all check-dot-env
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -14,6 +14,7 @@ COMPUTE_TYPE := -cpu
 RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
+SQLALCHEMY_DATABASE_URL ?= sqlite:////tmp/local.db
 
 DEBUGPY_ARGS :=
 ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
@@ -84,6 +85,7 @@ endef
 
 LOCAL_DOCKERCOMPOSE_FILE:= docker-compose.yaml
 DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
+POSTGRES_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose-postgres.override.yaml
 
 check-dot-env:
 #    Create .env from template if it doesn't exist
@@ -116,6 +118,13 @@ local-down:
 local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
+# Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in) - postgres version
+start-lumigator-postgres: check-dot-env
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
+
+stop-lumigator-postgres:
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) down
+
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
 start-lumigator: check-dot-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
@@ -123,6 +132,10 @@ start-lumigator: check-dot-env
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: check-dot-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+
+# Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
+start-lumigator-build-postgres: check-dot-env
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: check-dot-env
@@ -191,8 +204,8 @@ test-backend-integration:
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
 	RAY_WORKER_GPUS="0.0" \
 	RAY_WORKER_GPUS_FRACTION="0.0" \
 	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \

@@ -7,7 +7,7 @@ Lumigator supports running inference on any locally hosted models through [Llama
 Before installation and setup, here are some recommended system requirements:
 * Memory (RAM): 8GB minimum, 16GB or more recommended
 * Storage: At least 10GB or more of free space
-* Processor: A relatively modern CPU with atleast 4 cores
+* Processor: A relatively modern CPU with at least 4 cores
 
 ## What You’ll Need
 

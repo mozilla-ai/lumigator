@@ -93,7 +93,7 @@ import Tag from 'primevue/tag'
 import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import { WorkflowStatus } from '@/types/Workflow'
 import type { JobDetails } from '@/types/JobDetails'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 const props = defineProps({
@@ -107,12 +107,10 @@ const emit = defineEmits(['l-experiment-selected'])
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
-const { experiments, selectedJob,  } = storeToRefs(experimentStore)
+const { experiments, selectedJob } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
 const focusedItem = ref()
 const expandedRows = ref([])
-
-const parseJobDetails = experimentStore.parseJobDetails
 
 const style = computed(() => {
   return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'

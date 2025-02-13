@@ -21,7 +21,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<ExperimentNew[]> = ref([])
 
   const jobs: Ref<JobDetails[]> = ref([])
-  const inferenceJobs: Ref<ExperimentNew[]> = ref([])
+  const inferenceJobs: Ref<JobDetails[]> = ref([])
 
   const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
   const selectedJob: Ref<JobDetails | undefined> = ref()
@@ -151,22 +151,22 @@ export const useExperimentStore = defineStore('experiments', () => {
   async function fetchExperimentResults(experiment: ExperimentNew) {
     // for (const workflow of experiment.workflows) {
     //   console.log({experiment, workflow})
-      const results = (await experimentsService.fetchExperimentResults(experiment.id)) as {
-        resultsData: ObjectData
-        id: string
-        download_url: string
-      }
-      if (results?.id) {
-        const modelRow = {
-          model: results.resultsData.artifacts.model,
-          meteor: results.resultsData.metrics.meteor,
-          bertscore: results.resultsData.metrics.bertscore,
-          rouge: results.resultsData.metrics.rouge,
-          // runTime: getJobRuntime(results.id),
-          jobResults: transformJobResults(results.resultsData),
-        } as unknown as ExperimentResults
-        selectedExperimentResults.value.push(modelRow)
-      }
+    const results = (await experimentsService.fetchExperimentResults(experiment.id)) as {
+      resultsData: ObjectData
+      id: string
+      download_url: string
+    }
+    if (results?.id) {
+      const modelRow = {
+        model: results.resultsData.artifacts.model,
+        meteor: results.resultsData.metrics.meteor,
+        bertscore: results.resultsData.metrics.bertscore,
+        rouge: results.resultsData.metrics.rouge,
+        // runTime: getJobRuntime(results.id),
+        jobResults: transformJobResults(results.resultsData),
+      } as unknown as ExperimentResults
+      selectedExperimentResults.value.push(modelRow)
+    }
     // }
   }
 

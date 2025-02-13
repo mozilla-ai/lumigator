@@ -53,15 +53,15 @@
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
-import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
+// import { storeToRefs } from 'pinia'
+// import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { PropType } from 'vue'
 // import type { JobDetails } from '@/types/JobDetails'
 
-const experimentStore = useExperimentStore()
-const { jobs } = storeToRefs(experimentStore)
+// const experimentStore = useExperimentStore()
+// const { jobs } = storeToRefs(experimentStore)
 defineProps({
   tableData: {
     type: Array as PropType<Workflow[]>,
@@ -80,7 +80,6 @@ const shortenedModel = (path: string) => (path.length <= 30 ? path : `${path.sli
 function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-job-selected', event.data)
 }
-
 </script>
 
 <style scoped lang="scss">

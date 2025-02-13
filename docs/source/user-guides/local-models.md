@@ -2,7 +2,7 @@
 
 Previously we saw how to use Lumigator with models on Hugging Face as well as via APIs hosted by [Open AI and Mistral](../user-guides/inference.md#model-specification). However, sometimes it may be advantageous to run models on-premise as a more cost-effective solution or when dealing with sensitive data or during the early stages of experimentation.
 
-Lumigator supports running inference and evaluation on any locally hosted models through [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Ollama](https://ollama.com/search) and [vLLM](https://docs.vllm.ai/en/latest/), thanks to their compatibility with [OpenAI's Completions API Client](https://github.com/openai/openai-python). This guide will walk you through the process of running evaluation on any local model that you bring from these providers (assuming your machine meets the necessary hardware requirements).
+Lumigator supports running inference and evaluation on any locally hosted models through [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Ollama](https://ollama.com/search) and [vLLM](https://docs.vllm.ai/en/latest/), thanks to their compatibility with [OpenAI's Completions API Client](https://github.com/openai/openai-python). This guide will walk you through the process of running inference (i.e. get predictions made by the model you are running locally) on any local model that you bring from these providers (assuming your machine meets the necessary hardware requirements).
 
 Before installation and setup, here are some recommended system requirements:
 * Memory (RAM): 8GB minimum, 16GB or more recommended
@@ -44,24 +44,23 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 ### Procedure
 
 1. Download and setup Llamafile locally following the instructions from the [official repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#quickstart).
-   For example, you could use `mistral-7b-instruct-v0.2.Q4_0.llamafile` which is a 3.85 GB Llamafile to get started ( or alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
+   For example, you could use `mistral-7b-instruct-v0.2.Q4_0.llamafile` which is a 3.85 GB Llamafile to get started (or alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` which is only 1.11 GB).
 
 1. Verify Llamafile is Running. You should be able to see it running on
    [localhost:8080](http://localhost:8080/). Note that this is the endpoint that Lumigator will use
    to interact with.
 
-1. Run Lumigator Evaluation. Create a new bash script `test_local_llm_eval.sh`:
+1. Run Lumigator Inference. Create a new bash script `test_local_llm_eval.sh`:
 
    ```bash
    #!/bin/bash
    source common_variables.sh
 
    EVAL_NAME="Llamafile mistral-7b-instruct-v0.2"
-   EVAL_DESC="Test evaluation with mistral-7b-instruct-v0.2"
+   EVAL_DESC="Test inference with mistral-7b-instruct-v0.2"
    EVAL_MODEL="llamafile://mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
    EVAL_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
 
-   # TODO: change to evaluate endpoint after experiments_new migration
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
@@ -91,7 +90,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
 1. Setup Ollama Completions Endpoint Locally
 
    * Download and install Ollama for your operating system from the [official website](https://ollama.com/download).
-   * Select a model from the [available list](https://ollama.com/search) that you would like to use for evaluation (e.g. `llama3.2`) and run:
+   * Select a model from the [available list](https://ollama.com/search) that you would like to use for inference (e.g. `llama3.2`) and run:
       ```console
       user@host:~/lumigator$ ollama run llama3.2
       ```
@@ -99,7 +98,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
 1. Verify Ollama is Running. An Ollama completions endpoint should start running locally and can be
    verified by visiting [localhost:11434](http://localhost:11434/).
 
-1. Run Lumigator Evaluation. The evaluation steps are similar to earlier but we modify model details
+1. Run Lumigator Inference. The inference steps are similar to earlier but we modify model details
    in the  `test_local_llm_eval.sh` script:
 
    ```bash
@@ -107,11 +106,10 @@ You can view the results on the UI as described [below](./local-models.md#view-e
    source common_variables.sh
 
    EVAL_NAME="Ollama Llama3.2"
-   EVAL_DESC="Test evaluation with Ollama's Llama3.2"
+   EVAL_DESC="Test inference with Ollama's Llama3.2"
    EVAL_MODEL="ollama://llama3.2" # Format expected ollama://<model_name>, the model_name must be same as one used in the `ollama run <model_name>` command
    EVAL_MODEL_URL="http://localhost:11434/v1" # Ollama runs on port 11434
 
-   # TODO: change to evaluate endpoint after experiments_new migration
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
@@ -164,18 +162,17 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 1. Verify vLLM is Running. If successful, you should see the vLLM server running on [localhost:8090/docs](http://localhost:8090/docs) and your chosen model listed on [localhost:8090/v1/models](http://localhost:8090/v1/models).
 
 
-1. Run Lumigator Evaluation. Make the necessary changes to your evaluation script to point to the local vLLM server and use the correct model:
+1. Run Lumigator Inference. Make the necessary changes to your inference script to point to the local vLLM server and use the correct model:
 
    ```bash
    #!/bin/bash
    source common_variables.sh
 
    EVAL_NAME="vLLM HuggingFaceTB/SmolLM2-360M-Instruct"
-   EVAL_DESC="Test evaluation with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
+   EVAL_DESC="Test inference with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
    EVAL_MODEL="vllm://HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
    EVAL_MODEL_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
 
-   # TODO: change to evaluate endpoint after experiments_new migration
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
    -H 'Content-Type: application/json' \
@@ -202,4 +199,4 @@ To view the evalution results, go to the [Lumigator UI](http://localhost) and na
 
 ## Conclusion
 
-Congratulations. You are now ready to run Lumigator evaluation on any local LLM of your choice!
+Congratulations. You are now ready to run Lumigator inference on any local LLM of your choice!

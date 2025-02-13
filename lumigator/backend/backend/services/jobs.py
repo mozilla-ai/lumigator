@@ -283,7 +283,7 @@ class JobService:
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
             ) from None
         try:
             metadata = json.loads(resp.text)

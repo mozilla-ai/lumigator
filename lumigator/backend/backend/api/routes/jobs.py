@@ -26,7 +26,6 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep, JobServiceDep
 from backend.api.http_headers import HttpHeaders
-from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
@@ -38,7 +37,11 @@ from backend.settings import settings
 router = APIRouter()
 
 
-def job_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+def job_exception_mappings() -> (
+    dict[
+        type[JobNotFoundError] | type[JobTypeUnsupportedError] | type[JobUpstreamError] | type[JobValidationError], int
+    ]
+):
     return {
         JobNotFoundError: status.HTTP_404_NOT_FOUND,
         JobTypeUnsupportedError: status.HTTP_501_NOT_IMPLEMENTED,

@@ -27,9 +27,7 @@ class JobNotFoundError(NotFoundError):
 class JobTypeUnsupportedError(ServiceError):
     """Raised when a job type is not yet supported."""
 
-    def __init__(
-        self, job_type: JobType | object, message: str | None = None, exc: Exception | None = None
-    ):
+    def __init__(self, job_type: JobType | object, message: str | None = None, exc: Exception | None = None):
         """Creates a JobTypeNotSupportedError
 
         :param job_type: the type of job that is not supported,

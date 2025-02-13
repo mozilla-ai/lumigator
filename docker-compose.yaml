@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: cache/Dockerfile.model-inference
-    platform: linux/arm64
+    platform: linux/${ARCH}
     command: /bin/true
     volumes:
       - huggingface_cache_vol:/home/ray/.cache/huggingface

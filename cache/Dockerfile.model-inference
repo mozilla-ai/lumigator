@@ -1,5 +1,5 @@
 # Dockerfile.huggingface-cache
-FROM --platform=linux/arm64 python:3.11-slim
+FROM python:3.11-slim
 
 # Install required packages: transformers and huggingface_hub
 RUN pip install --no-cache-dir transformers huggingface_hub

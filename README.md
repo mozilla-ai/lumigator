@@ -45,6 +45,7 @@ need to have the following prerequisites installed on your machine:
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The system Python (version managers such as uv should be deactivated)
+- At least 10 GB available on disk and allocated for docker, since some small language models will be pre downloaded
 
 You can run and develop Lumigator locally using Docker Compose. This creates four container
 services networked together to make up all the components of the Lumigator application:

@@ -50,7 +50,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
    [localhost:8080](http://localhost:8080/). Note that this is the endpoint that Lumigator will use
    to interact with.
 
-1. Run Lumigator Inference. Create a new bash script `test_local_llm_eval.sh`:
+1. Run Lumigator Inference. Create a new bash script `test_local_llm_inference.sh`:
 
    ```bash
    #!/bin/bash
@@ -77,7 +77,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 
    Finally execute the bash script:
    ```console
-   user@host:~/lumigator$ bash test_local_llm_eval.sh
+   user@host:~/lumigator$ bash test_local_llm_inference.sh
    ```
 
 You can then download the results following the steps described [below](#download-inference-results)
@@ -99,7 +99,7 @@ You can then download the results following the steps described [below](#downloa
    verified by visiting [localhost:11434](http://localhost:11434/).
 
 1. Run Lumigator Inference. The inference steps are similar to earlier but we modify model details
-   in the  `test_local_llm_eval.sh` script:
+   in the  `test_local_llm_inference.sh` script:
 
    ```bash
    #!/bin/bash
@@ -126,7 +126,7 @@ You can then download the results following the steps described [below](#downloa
 
    Finally execute the bash script:
    ```console
-   user@host:~/lumigator$ bash test_local_llm_eval.sh
+   user@host:~/lumigator$ bash test_local_llm_inference.sh
    ```
 
 Finally, download the results as described [below](#download-inference-results)
@@ -189,7 +189,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 
    Finally execute the bash script:
    ```console
-   user@host:~/lumigator$ bash test_local_llm_eval.sh
+   user@host:~/lumigator$ bash test_local_llm_inference.sh
    ```
 
 To download the inference results, refer to the section [below](#download-inference-results)

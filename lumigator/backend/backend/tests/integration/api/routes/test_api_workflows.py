@@ -77,34 +77,24 @@ def test_upload_data_launch_job(
             "store_to_dataset": True,
         },
     }
-    create_inference_job_response = local_client.post(
-        "/jobs/inference/", headers=POST_HEADER, json=infer_payload
-    )
+    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     assert create_inference_job_response.status_code == 201
 
-    create_inference_job_response_model = JobResponse.model_validate(
-        create_inference_job_response.json()
-    )
+    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
 
     assert wait_for_job(local_client, create_inference_job_response_model.id)
 
-    logs_infer_job_response = local_client.get(
-        f"/jobs/{create_inference_job_response_model.id}/logs"
-    )
+    logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
 
     # retrieve the DS for the infer job...
-    output_infer_job_response = local_client.get(
-        f"/jobs/{create_inference_job_response_model.id}/dataset"
-    )
+    output_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/dataset")
     assert output_infer_job_response is not None
     assert output_infer_job_response.status_code == 200
 
-    output_infer_job_response_model = DatasetResponse.model_validate(
-        output_infer_job_response.json()
-    )
+    output_infer_job_response_model = DatasetResponse.model_validate(output_infer_job_response.json())
     assert output_infer_job_response_model is not None
 
     eval_payload = {
@@ -119,23 +109,15 @@ def test_upload_data_launch_job(
         },
     }
 
-    create_evaluation_job_response = local_client.post(
-        "/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload
-    )
+    create_evaluation_job_response = local_client.post("/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
-    create_evaluation_job_response_model = JobResponse.model_validate(
-        create_evaluation_job_response.json()
-    )
+    create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
 
     assert wait_for_job(local_client, create_evaluation_job_response_model.id)
 
-    logs_evaluation_job_response = local_client.get(
-        f"/jobs/{create_evaluation_job_response_model.id}/logs"
-    )
-    logs_evaluation_job_response_model = JobLogsResponse.model_validate(
-        logs_evaluation_job_response.json()
-    )
+    logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
+    logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
@@ -182,33 +164,21 @@ def test_upload_data_no_gt_launch_annotation(
             "task": "summarization",
         },
     }
-    create_annotation_job_response = local_client.post(
-        "/jobs/annotate/", headers=POST_HEADER, json=annotation_payload
-    )
+    create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201
 
-    create_annotation_job_response_model = JobResponse.model_validate(
-        create_annotation_job_response.json()
-    )
+    create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
 
     assert wait_for_job(local_client, create_annotation_job_response_model.id)
 
-    logs_annotation_job_response = local_client.get(
-        f"/jobs/{create_annotation_job_response_model.id}/logs"
-    )
+    logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
-    logs_annotation_job_response_model = JobLogsResponse.model_validate(
-        logs_annotation_job_response.json()
-    )
+    logs_annotation_job_response_model = JobLogsResponse.model_validate(logs_annotation_job_response.json())
     logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
     logger.info(f"#{logs_annotation_job_response_model.logs}#")
 
-    logs_annotation_job_results = local_client.get(
-        f"/jobs/{create_annotation_job_response_model.id}/result/download"
-    )
-    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(
-        logs_annotation_job_results.json()
-    )
+    logs_annotation_job_results = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/result/download")
+    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(logs_annotation_job_results.json())
     logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
     annotation_job_results_url = requests.get(
         logs_annotation_job_results_model.download_url,
@@ -253,7 +223,7 @@ def check_dataset_count_after_upload(local_client: TestClient, initial_count):
     return get_ds_after
 
 
-def create_experiment(local_client: TestClient):
+def create_experiment(local_client: TestClient, dataset_id: UUID):
     """Create an experiment."""
     experiment = local_client.post(
         "/experiments/new/",
@@ -261,6 +231,9 @@ def create_experiment(local_client: TestClient):
         json={
             "name": "test_create_exp_workflow_check_results",
             "description": "Test for an experiment with associated workflows",
+            "task": "summarization",
+            "dataset": str(dataset_id),
+            "max_samples": 1,
         },
     )
     logger.critical(f"Reporting experiment: {experiment}")
@@ -294,9 +267,9 @@ def validate_experiment_results(local_client: TestClient, experiment_id, workflo
     )
     assert workflow_details.experiment_id == experiment_results.id
     assert len(experiment_results.workflows) == 1
-    assert workflow_details.model_dump(
-        exclude={"artifacts_download_url"}
-    ) == experiment_results.workflows[0].model_dump(exclude={"artifacts_download_url"})
+    assert workflow_details.model_dump(exclude={"artifacts_download_url"}) == experiment_results.workflows[
+        0
+    ].model_dump(exclude={"artifacts_download_url"})
 
 
 def validate_updated_experiment_results(
@@ -322,9 +295,7 @@ def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
     assert logs.logs is not None
     assert "Inference results stored at" in logs.logs
     assert "Storing evaluation results into" in logs.logs
-    assert logs.logs.index("Inference results stored at") < logs.logs.index(
-        "Storing evaluation results into"
-    )
+    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results into")
 
 
 def delete_experiment_and_validate(local_client: TestClient, experiment_id):
@@ -335,9 +306,7 @@ def delete_experiment_and_validate(local_client: TestClient, experiment_id):
 
 
 @pytest.mark.integration
-def test_full_experiment_launch(
-    local_client: TestClient, dialog_dataset, dependency_overrides_services
-):
+def test_full_experiment_launch(local_client: TestClient, dialog_dataset, dependency_overrides_services):
     """This is the main integration test: it checks:
     * The backend health status
     * Uploading a dataset
@@ -354,15 +323,13 @@ def test_full_experiment_launch(
     initial_count = check_initial_dataset_count(local_client)
     dataset = upload_dataset(local_client, dialog_dataset)
     check_dataset_count_after_upload(local_client, initial_count)
-    experiment_id = create_experiment(local_client)
+    experiment_id = create_experiment(local_client, dataset.id)
     workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1")
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
-    validate_updated_experiment_results(
-        local_client, experiment_id, workflow_1_details, workflow_2_details
-    )
+    validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)
 
@@ -385,9 +352,7 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
     workflow_status = JobStatus.PENDING
     while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
         time.sleep(1)
-        workflow_details = WorkflowDetailsResponse.model_validate(
-            local_client.get(f"/workflows/{workflow_id}").json()
-        )
+        workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())
         workflow_status = workflow_details.status
         logger.info(f"Workflow status: {workflow_status}")
     return workflow_details

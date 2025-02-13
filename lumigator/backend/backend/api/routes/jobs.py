@@ -12,6 +12,7 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
     JobCreate,
+    JobEvaluateCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -90,7 +91,7 @@ def create_annotation_job(
 @router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
 def create_evaluation_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobEvaluateCreate,
     request: Request,
     response: Response,
 ) -> JobResponse:
@@ -196,35 +197,8 @@ def get_job(
 
 
 @router.get("/{job_id}/logs")
-def get_job_logs(job_id: UUID) -> JobLogsResponse:
-    resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
-
-    if resp.status_code == HTTPStatus.NOT_FOUND:
-        loguru.logger.error(
-            f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}"
-        )
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job logs for ID: {job_id} not found",
-        )
-    elif resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(
-            f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}"
-        )
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error getting job logs for ID: {job_id}",
-        )
-
-    try:
-        metadata = json.loads(resp.text)
-        return JobLogsResponse(**metadata)
-    except json.JSONDecodeError as e:
-        loguru.logger.error(f"JSON decode error: {e}")
-        loguru.logger.error(f"Response text: {resp.text}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
+def get_job_logs(service: JobServiceDep, job_id: UUID) -> JobLogsResponse:
+    return service.get_job_logs(job_id)
 
 
 @router.get("/{job_id}/result")
@@ -259,9 +233,7 @@ def _get_all_ray_jobs() -> list[RayJobDetails]:
     """Returns metadata that exists in the Ray cluster for all jobs."""
     resp = requests.get(settings.RAY_JOBS_URL, timeout=5)  # 5 seconds
     if resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(
-            f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}"
-        )
+        loguru.logger.error(f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Unexpected error getting job logs",
@@ -273,9 +245,7 @@ def _get_all_ray_jobs() -> list[RayJobDetails]:
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
 
 
 def _get_ray_job(job_id: UUID) -> RayJobDetails:
@@ -283,17 +253,14 @@ def _get_ray_job(job_id: UUID) -> RayJobDetails:
     resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
-        loguru.logger.error(
-            f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}"
-        )
+        loguru.logger.error(f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"Job metadata for ID: {job_id} not found",
         )
     elif resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
-            "Unexpected status code getting job metadata text: "
-            f"{resp.status_code}, error: {resp.text or ''}"
+            f"Unexpected status code getting job metadata text: {resp.status_code}, error: {resp.text or ''}"
         )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -306,6 +273,4 @@ def _get_ray_job(job_id: UUID) -> RayJobDetails:
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text or ''}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e

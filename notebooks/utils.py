@@ -20,7 +20,8 @@ EVAL_METRICS = {
 def _parse_model_results(result: dict, model_name: str, model_info: pd.DataFrame):
     row = {}
 
-    row["Model"] = model_name
+    model_name = result["artifacts"]["model"]
+    # row["Model"] = model_name
 
     for column, metric in EVAL_METRICS.items():
         temp_result = result["metrics"]

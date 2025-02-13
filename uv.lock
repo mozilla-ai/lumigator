@@ -455,7 +455,7 @@ requires-dist = [
     { name = "loguru", marker = "extra == 'docs'", specifier = "==0.7.2" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4.0.0" },
     { name = "pre-commit", specifier = ">=4.0.1" },
-    { name = "pydantic", marker = "extra == 'docs'", specifier = ">=2.8.0" },
+    { name = "pydantic", marker = "extra == 'docs'", specifier = ">=2.10.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.1.3" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = ">=0.5.2" },
     { name = "sphinx-design", marker = "extra == 'docs'", specifier = ">=0.6.1" },

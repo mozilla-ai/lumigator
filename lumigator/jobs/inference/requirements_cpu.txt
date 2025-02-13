@@ -3,6 +3,9 @@ accelerate==1.1.1
 datasets==2.20.0
 litellm==1.60.4
 loguru==0.7.2
+mistralai==0.4.2
+openai==1.55.3
+pydantic>=2.10.0
 python-box==7.2.0
 s3fs==2024.5.0
 sentencepiece==0.2.0

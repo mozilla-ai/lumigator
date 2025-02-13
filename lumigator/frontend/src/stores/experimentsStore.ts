@@ -64,7 +64,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @returns job data parsed for display as an experiment
    */
   function parseJobDetails(job: JobDetails) {
-    const { entrypoint, ...rest } = job
+    const { entrypoint: _entrypoint, ...rest} = job
     return {
       ...rest,
       ...retrieveEntrypoint(job),

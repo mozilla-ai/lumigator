@@ -33,7 +33,7 @@
             rounded
             :value="currentItemStatus"
             :pt="{ root: 'l-experiment-details__tag' }"
-          />
+          ></Tag>
           <Button
             v-if="isJobFocused"
             icon="pi pi-external-link"
@@ -46,7 +46,7 @@
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
             @click="emit('l-show-logs')"
-          />
+          ></Button>
         </div>
       </div>
       <div
@@ -64,16 +64,22 @@
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
             style="font-size: 14px; padding-left: 3px"
-          />
+          ></i>
         </div>
       </div>
-      <div class="l-experiment-details__content-item" v-if="focusedItem && isExperiment(focusedItem)">
+      <div
+        class="l-experiment-details__content-item"
+        v-if="focusedItem && isExperiment(focusedItem)"
+      >
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
           {{ (focusedItem?.dataset as any).name }}
         </div>
       </div>
-      <div class="l-experiment-details__content-item" v-if="focusedItem && isExperiment(focusedItem)">
+      <div
+        class="l-experiment-details__content-item"
+        v-if="focusedItem && isExperiment(focusedItem)"
+      >
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
       </div>
@@ -96,7 +102,7 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
         <div class="l-experiment-details__content-field">
-          {{ formatDate(focusedItem.created_at) }}
+          {{ formatDate(focusedItem!.created_at) }}
         </div>
       </div>
       <!-- TODO: double check with design since this cant be shown now that we can lazily add workflows -->
@@ -124,7 +130,7 @@
         label="View Results"
         :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="showResults"
-      />
+      ></Button>
       <Button
         v-if="isJobFocused"
         rounded
@@ -134,7 +140,7 @@
         label="Download Results"
         :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="emit('l-download-results', selectedJob)"
-      />
+      ></Button>
     </div>
   </div>
 </template>
@@ -147,7 +153,6 @@ import { useExperimentStore } from '@/stores/experimentsStore'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
-import { calculateDuration } from '@/helpers/calculateDuration'
 import { WorkflowStatus } from '@/types/Workflow'
 import type { JobDetails } from '@/types/JobDetails'
 import type { ExperimentNew } from '@/types/ExperimentNew'
@@ -252,14 +257,13 @@ const showResults = () => {
   emit('l-experiment-results', selectedExperiment.value)
 }
 
-function isExperiment(item: ExperimentNew | JobDetails): item is ExperimentNew  {
+function isExperiment(item: ExperimentNew | JobDetails): item is ExperimentNew {
   return 'workflows' in item
 }
 
-function isJob(item: ExperimentNew | JobDetails): item is JobDetails {
-  return 'entrypoint' in item
-}
-
+// function _isJob(item: ExperimentNew | JobDetails): item is JobDetails {
+//   return 'entrypoint' in item
+// }
 </script>
 
 <style lang="scss">

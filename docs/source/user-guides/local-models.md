@@ -17,6 +17,7 @@ Before installation and setup, here are some recommended system requirements:
    Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value:
       ```console
       user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
+      ```
 
 2. A dataset for experimentation: you can upload the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
 
@@ -155,7 +156,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    ```
 
    ```{note}
-   We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since the vLLM default port 8000 is already being used by Lumigator).
+   We are using the [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) model here but you can specify any other model from the [Hugging Face Hub](https://huggingface.co/models) that runs on your hardware, but please note that requirements may vary significantly for different models. For specific setup instructions, please refer to the vLLM and Hugging Face documentation. We allocate 6 GB of memory for the docker container so that the model fits in memory and use port 8090 for the vLLM server (since the vLLM default port 8000 is already being used by Lumigator).
    ```
 
 1. Verify vLLM is Running. If successful, you should see the vLLM server running on [localhost:8090/docs](http://localhost:8090/docs) and your chosen model listed on [localhost:8090/v1/models](http://localhost:8090/v1/models).

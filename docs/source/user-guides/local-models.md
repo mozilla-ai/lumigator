@@ -14,7 +14,7 @@ Before installation and setup, here are some recommended system requirements:
 1. A running instance of [Lumigator](../get-started/installation.md).
 
     ```{note}
-Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
+   Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value.
       ```console
       user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
       ```
@@ -76,7 +76,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
    }'
    ```
 
-1. Finally run the evaluation:
+   Finally execute the bash script:
    ```console
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
@@ -126,7 +126,7 @@ You can view the results on the UI as described [below](./local-models.md#view-e
    }'
    ```
 
-1. Run the evaluation:
+   Finally execute the bash script:
    ```console
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```
@@ -190,8 +190,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    }'
    ```
 
-1. Run the evaluation:
-
+   Finally execute the bash script:
    ```console
    user@host:~/lumigator$ bash test_local_llm_eval.sh
    ```

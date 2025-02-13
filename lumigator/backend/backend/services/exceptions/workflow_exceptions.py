@@ -2,7 +2,7 @@ from backend.services.exceptions.base_exceptions import NotFoundError, Validatio
 
 
 class WorkflowNotFoundError(NotFoundError):
-    """Raised when an workflow does not exist."""
+    """Raised when a workflow does not exist."""
 
     def __init__(self, resource_id: str, message: str | None = None, exc: Exception | None = None):
         """Creates a WorkflowNotFoundError.

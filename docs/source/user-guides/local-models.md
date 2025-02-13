@@ -43,11 +43,8 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 
 ### Procedure
 
-1. Download and Setup Llamafile Locally:
-
-   * Download any model's Llamafile from the official [repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#other-example-llamafiles). For example, `mistral-7b-instruct-v0.2.Q4_0.llamafile` is a 3.85 GB Llamafile to get started with (alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
-   * Grant execution permissions: `chmod +x mistral-7b-instruct-v0.2.Q4_0.llamafile`.
-   * Start the application locally with `./mistral-7b-instruct-v0.2.Q4_0.llamafile`.
+1. Download and setup Llamafile locally following the instructions from the [official repo](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#quickstart).
+   For example, you could use `mistral-7b-instruct-v0.2.Q4_0.llamafile` which is a 3.85 GB Llamafile to get started ( or alternatively `Llama-3.2-1B-Instruct.Q6_K.llamafile` is smaller at 1.11 GB).
 
 1. Verify Llamafile is Running. You should be able to see it running on
    [localhost:8080](http://localhost:8080/). Note that this is the endpoint that Lumigator will use

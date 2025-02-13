@@ -32,7 +32,7 @@ Before installation and setup, here are some recommended system requirements:
     # Basic prompt for LLM, summarization task
     INFERENCE_SYSTEM_PROMPT="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
 
-    # Run eval on first 10 rows in the csv, set to -1 if you would like to run it for all rows
+    # Run inference on first 10 rows in the csv, set to -1 if you would like to run it for all rows
     INFERENCE_MAX_SAMPLES="10"
     ```
 

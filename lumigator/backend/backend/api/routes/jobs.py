@@ -28,22 +28,25 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep, JobServiceDep
 from backend.api.http_headers import HttpHeaders
-from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
     JobUpstreamError,
+    JobValidationError,
 )
 from backend.settings import settings
 
 router = APIRouter()
 
 
-def job_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+def job_exception_mappings() -> dict[
+    type[JobNotFoundError] | type[JobTypeUnsupportedError] | type[JobUpstreamError] | type[JobValidationError], int
+]:
     return {
         JobNotFoundError: status.HTTP_404_NOT_FOUND,
         JobTypeUnsupportedError: status.HTTP_501_NOT_IMPLEMENTED,
         JobUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        JobValidationError: status.HTTP_400_BAD_REQUEST,
     }
 
 
@@ -236,9 +239,7 @@ def _get_all_ray_jobs() -> list[RayJobDetails]:
     """Returns metadata that exists in the Ray cluster for all jobs."""
     resp = requests.get(settings.RAY_JOBS_URL, timeout=5)  # 5 seconds
     if resp.status_code != HTTPStatus.OK:
-        loguru.logger.error(
-            f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}"
-        )
+        loguru.logger.error(f"Unexpected status code getting all jobs: {resp.status_code}, error: {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Unexpected error getting job logs",
@@ -250,9 +251,7 @@ def _get_all_ray_jobs() -> list[RayJobDetails]:
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
 
 
 def _get_ray_job(job_id: UUID) -> RayJobDetails:
@@ -260,17 +259,14 @@ def _get_ray_job(job_id: UUID) -> RayJobDetails:
     resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}"), timeout=5)  # 5 seconds
 
     if resp.status_code == HTTPStatus.NOT_FOUND:
-        loguru.logger.error(
-            f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}"
-        )
+        loguru.logger.error(f"Upstream job metadata not found ({resp.status_code}), error:  {resp.text or ''}")
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=f"Job metadata for ID: {job_id} not found",
         )
     elif resp.status_code != HTTPStatus.OK:
         loguru.logger.error(
-            "Unexpected status code getting job metadata text: "
-            f"{resp.status_code}, error: {resp.text or ''}"
+            f"Unexpected status code getting job metadata text: {resp.status_code}, error: {resp.text or ''}"
         )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -283,6 +279,4 @@ def _get_ray_job(job_id: UUID) -> RayJobDetails:
     except json.JSONDecodeError as e:
         loguru.logger.error(f"JSON decode error: {e}")
         loguru.logger.error(f"Response text: {resp.text or ''}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-        ) from e
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e

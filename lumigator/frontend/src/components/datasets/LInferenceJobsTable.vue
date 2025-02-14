@@ -71,10 +71,7 @@ import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import { formatDate } from '@/helpers/formatDate'
-<<<<<<<< HEAD:lumigator/frontend/src/components/datasets/LInferenceJobsTable.vue
 import { WorkflowStatus } from '@/types/Workflow'
-========
->>>>>>>> origin/new-workflow-api:lumigator/frontend/src/components/jobs/LInferenceJobsTable.vue
 
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()

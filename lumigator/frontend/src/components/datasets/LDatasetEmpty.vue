@@ -30,7 +30,7 @@
       <span class="l-dataset-empty__note-item">ground_truth</span>
       column is optional, as it can be generated using Lumigator.
       <a
-        href="https://mozilla-ai.github.io/lumigator/"
+        href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#upload-a-dataset"
         target="_blank"
         style="background-color: transparent"
         >Learn more <span class="pi pi-arrow-up-right"

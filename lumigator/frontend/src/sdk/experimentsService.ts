@@ -1,7 +1,7 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { ObjectData } from '@/types/Experiment'
+
 import type { ExperimentNew } from '@/types/ExperimentNew'
-import type { CreateWorkflowPayload } from '@/types/Workflow'
+import type { CreateWorkflowPayload, WorkflowResults } from '@/types/Workflow'
 
 export async function fetchExperiments(): Promise<ExperimentNew[]> {
   const response = await lumigatorApiAxiosInstance.get('/experiments/new/all')
@@ -44,7 +44,7 @@ export async function createExperiment(
 
 export async function fetchExperimentResults(
   workflowId: string,
-): Promise<unknown | { resultsData: ObjectData; id: string; download_url: string }> {
+): Promise<unknown | { resultsData: WorkflowResults; id: string; download_url: string }> {
   const response = await lumigatorApiAxiosInstance.get(`experiments/${workflowId}/result/download`)
   const { download_url, id } = response.data
   if (!download_url) {

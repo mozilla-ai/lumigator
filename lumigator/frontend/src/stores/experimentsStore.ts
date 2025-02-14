@@ -5,14 +5,14 @@ import {
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
 
-import type { EvaluationJobResults, ExperimentResults, ObjectData } from '@/types/Experiment'
+import type { EvaluationJobResults, ExperimentResults } from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus, type Metrics, type Workflow, type WorkflowResults } from '@/types/Workflow'
+import { WorkflowStatus, type WorkflowResults } from '@/types/Workflow'
 import { jobsService } from '@/sdk/jobsService'
 import { calculateDuration } from '@/helpers/calculateDuration'
 import type { JobDetails } from '@/types/JobDetails'
@@ -151,14 +151,12 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   async function fetchExperimentResults(experiment: ExperimentNew) {
     for (const workflow of experiment.workflows) {
-    //   console.log({experiment, workflow})
-    if(workflow.artifacts_download_url) {
+      //   console.log({experiment, workflow})
+      if (workflow.artifacts_download_url) {
+        const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
+        console.log(data)
 
-
-    const { data }: {data: WorkflowResults} = await axios.get(workflow.artifacts_download_url)
-    console.log(data)
-
-     const modelRow = {
+        const modelRow = {
           model: data.artifacts.model,
           meteor: data.metrics.meteor,
           bertscore: data.metrics.bertscore,
@@ -174,12 +172,12 @@ export const useExperimentStore = defineStore('experiments', () => {
         //   // runTime: workflow.runTime,
         // })
       }
-  }
+    }
   }
 
   async function fetchJobResults(jobId: string) {
     const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-      resultsData: ObjectData
+      resultsData: WorkflowResults
       id: string
       download_url: string
     }

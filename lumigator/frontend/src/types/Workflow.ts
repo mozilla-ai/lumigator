@@ -1,4 +1,4 @@
-import type { Bertscore, Meteor, Rouge } from "./Experiment"
+import type { Bertscore, Meteor, Rouge } from './Experiment'
 
 export type Workflow = {
   id: string
@@ -48,9 +48,13 @@ export type Artifacts = {
 }
 
 export type MetricsResult = {
-  bertscore: Bertscore,
-  meteor: Meteor,
+  bertscore: Bertscore
+  meteor: Meteor
   rouge: Rouge
+
+  // TODO: to be added by the backend
+  summarization_time: number
+  evaluation_time: number
 }
 
 export type Parameters = {

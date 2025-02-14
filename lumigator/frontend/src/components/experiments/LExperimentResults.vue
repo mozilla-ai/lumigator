@@ -187,7 +187,7 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const data =  selectedExperimentResults.value.map((results) => ({
+  const data = selectedExperimentResults.value.map((results) => ({
     ...results,
     model: models.value.find((model: Model) => model.name === results.model),
   }))

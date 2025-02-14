@@ -45,6 +45,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :maxdepth: 2
    :caption: Operations Guide
 
+   operations-guide/configuration
    operations-guide/kubernetes
    operations-guide/alembic
    operations-guide/dev

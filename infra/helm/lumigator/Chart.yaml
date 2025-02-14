@@ -25,4 +25,6 @@ appVersion: "v0.1.0-alpha"
 
 dependencies:
   - name: backend
+    version: 0.1.0
   - name: frontend
+    version: 0.1.0

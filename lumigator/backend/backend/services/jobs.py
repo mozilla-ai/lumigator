@@ -52,6 +52,7 @@ from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsE
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobUpstreamError,
+    JobValidationError,
 )
 from backend.settings import settings
 
@@ -291,7 +292,7 @@ class JobService:
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
             ) from None
         try:
             metadata = json.loads(resp.text)
@@ -373,13 +374,17 @@ class JobService:
     # to put this. The jobs should ideally have no dependency towards the backend.
 
     def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
+        # TODO Move to a custom validator in the schema
+        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
+            raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
             job=InferJobConfig(
                 max_samples=request.max_samples,
                 storage_path=storage_path,
-                output_field=request.job_config.output_field,
+                # TODO Should be unnecessary, check
+                output_field=request.job_config.output_field or "predictions",
             ),
         )
         # Maybe use just the protocol to decide?

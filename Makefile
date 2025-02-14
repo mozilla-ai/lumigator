@@ -253,9 +253,9 @@ config-clean:
 config-generate-env: config-clean
 	@mkdir -p $(CONFIG_BUILD_DIR)
 
-	@if [ -f $(CONFIG_USER) ]; then \
-		echo "Found user configuration: '$(CONFIG_USER)', overrides will be applied"; \
-		@scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_USER) > "$(CONFIG_BUILD_DIR)/.env"; \
+	@if [ -f $(CONFIG_OVERRIDE) ]; then \
+		echo "Found user configuration: '$(CONFIG_OVERRIDE)', overrides will be applied"; \
+		@scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_OVERRIDE) > "$(CONFIG_BUILD_DIR)/.env"; \
 	else \
 		echo "No user configuration found, default will be used: '$(CONFIG_DEFAULT)'"; \
 		cp $(CONFIG_DEFAULT) "$(CONFIG_BUILD_DIR)/.env"; \

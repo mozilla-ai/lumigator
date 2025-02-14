@@ -44,10 +44,7 @@
         v-if="selectedWorkflowResults && showJobResults && selectedWorkflowResults.length"
         :results="selectedWorkflowResults"
       />
-      <l-experiment-logs
-        :logType="'workflow'"
-        v-if="showLogs"
-      />
+      <l-experiment-logs :logType="'workflow'" v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>

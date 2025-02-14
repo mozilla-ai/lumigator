@@ -33,7 +33,7 @@ export type JobDetails = {
   experiment_id?: string
   driver_exit_code: number
   dataset: {
-    id: string;
-    name: string;
+    id: string
+    name: string
   }
 }

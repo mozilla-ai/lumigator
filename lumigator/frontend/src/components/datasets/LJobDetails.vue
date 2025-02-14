@@ -67,21 +67,17 @@
           ></i>
         </div>
       </div>
-      <div
-        class="l-experiment-details__content-item"
-        v-if="focusedItem"
-      >
+      <div class="l-experiment-details__content-item" v-if="focusedItem">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
           {{ focusedItem.dataset.name }}
         </div>
       </div>
-      <div
-        class="l-experiment-details__content-item"
-        v-if="focusedItem"
-      >
+      <div class="l-experiment-details__content-item" v-if="focusedItem">
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem?.type }} - {{ focusedItem?.metadata.job_type }}</div>
+        <div class="l-experiment-details__content-field">
+          {{ focusedItem?.type }} - {{ focusedItem?.metadata.job_type }}
+        </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
@@ -172,7 +168,7 @@ const isJobFocused = computed(() => Boolean(selectedJob.value))
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
-    return selectedJob.value?.status
+  return selectedJob.value?.status
 })
 
 const isInference = computed(() => {
@@ -183,9 +179,7 @@ const focusedItem: ComputedRef<JobDetails | undefined> = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
   }
-  const selected = jobs.value.find(
-    (job) => job.id === selectedJob.value?.id,
-  )
+  const selected = jobs.value.find((job) => job.id === selectedJob.value?.id)
   return selected ? selected : selectedJob.value
 })
 

@@ -188,7 +188,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     if (selectedWorkflow.value) {
       const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
-      console.log({logs })
+      console.log({ logs })
       logs.forEach((log: string) => {
         const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
         if (workflowLogs.value.length === 0 || lastEntry !== log) {

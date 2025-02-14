@@ -66,8 +66,7 @@
       :position="'bottom'"
       @l-drawer-closed="showLogs = false"
     >
-      <l-experiment-logs v-if="showLogs"         :logType="'job'"
- />
+      <l-experiment-logs v-if="showLogs" :logType="'job'" />
     </l-experiments-drawer>
   </div>
 </template>

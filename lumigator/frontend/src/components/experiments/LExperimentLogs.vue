@@ -22,7 +22,6 @@ const { workflowLogs } = storeToRefs(experimentStore)
 const datasetStore = useDatasetStore()
 const { jobLogs } = storeToRefs(datasetStore)
 
-
 const props = defineProps({
   logType: {
     type: String as PropType<'workflow' | 'job'>,
@@ -30,9 +29,11 @@ const props = defineProps({
   },
 })
 
-const logSource = computed(() => props.logType === 'workflow' ? workflowLogs.value : jobLogs.value)
+const logSource = computed(() =>
+  props.logType === 'workflow' ? workflowLogs.value : jobLogs.value,
+)
 
-console.log({ logSource: logSource.value})
+console.log({ logSource: logSource.value })
 const logContainer: Ref<HTMLElement | undefined> = ref()
 
 const logsLength = computed(() => logSource.value.length)

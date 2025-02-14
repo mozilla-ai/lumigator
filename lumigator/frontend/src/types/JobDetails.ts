@@ -1,3 +1,4 @@
+import type { Dataset } from './Dataset'
 import type { WorkflowStatus } from './Workflow'
 
 export type JobDetails = {
@@ -31,4 +32,8 @@ export type JobDetails = {
   updated_at: string
   experiment_id?: string
   driver_exit_code: number
+  dataset: {
+    id: string;
+    name: string;
+  }
 }

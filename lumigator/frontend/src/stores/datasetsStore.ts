@@ -24,7 +24,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
   const jobs: Ref<JobDetails[]> = ref([])
   const inferenceJobs: Ref<JobDetails[]> = ref([])
-  const jobLogs: Ref<unknown[]> = ref([])
+  const jobLogs: Ref<string[]> = ref([])
   const isPolling = ref(false)
   let jobLogsInterval: number | undefined = undefined
 
@@ -280,6 +280,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     fetchDatasets,
     selectedDataset,
     fetchDatasetDetails,
+    jobLogs,
     resetSelection,
     uploadDataset,
     deleteDataset,

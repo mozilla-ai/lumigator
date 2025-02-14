@@ -2,7 +2,7 @@
   <div class="l-experiment-logs">
     <div ref="logContainer" class="l-experiment-logs__container">
       <div
-        v-for="(log, index) in experimentLogs"
+        v-for="(log, index) in logSource"
         :key="index"
         class="l-experiment-logs__container-log-entry"
       >
@@ -13,13 +13,29 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick, type Ref } from 'vue'
+import { ref, watch, computed, nextTick, type Ref, type PropType } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
+import { useDatasetStore } from '@/stores/datasetsStore'
 const experimentStore = useExperimentStore()
-const { experimentLogs } = storeToRefs(experimentStore)
+const { workflowLogs } = storeToRefs(experimentStore)
+const datasetStore = useDatasetStore()
+const { jobLogs } = storeToRefs(datasetStore)
+
+
+const props = defineProps({
+  logType: {
+    type: String as PropType<'workflow' | 'job'>,
+    required: true,
+  },
+})
+
+const logSource = computed(() => props.logType === 'workflow' ? workflowLogs.value : jobLogs.value)
+
+console.log({ logSource: logSource.value})
 const logContainer: Ref<HTMLElement | undefined> = ref()
-const logsLength = computed(() => experimentLogs.value.length)
+
+const logsLength = computed(() => logSource.value.length)
 
 const scrollToBottom = async () => {
   if (logContainer.value) {

@@ -25,7 +25,7 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   const isPolling = ref(false)
   let experimentInterval: number | undefined = undefined
-  const experimentLogs: Ref<unknown[]> = ref([])
+  const workflowLogs: Ref<string[]> = ref([])
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
   async function fetchAllExperiments() {
@@ -186,12 +186,13 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   async function retrieveWorkflowLogs() {
     if (selectedWorkflow.value) {
-      const logsData = await jobsService.fetchLogs(selectedWorkflow.value?.id)
+      const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
+      console.log({logs })
       logs.forEach((log: string) => {
-        const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
-        if (experimentLogs.value.length === 0 || lastEntry !== log) {
-          experimentLogs.value.push(log)
+        const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
+        if (workflowLogs.value.length === 0 || lastEntry !== log) {
+          workflowLogs.value.push(log)
         }
       })
     }
@@ -203,7 +204,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   }
 
   function startPollingForWorkflowLogs() {
-    experimentLogs.value = []
+    workflowLogs.value = []
     if (!isPolling.value) {
       isPolling.value = true
       retrieveWorkflowLogs()
@@ -241,7 +242,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   watch(
     selectedWorkflow,
     (newValue) => {
-      experimentLogs.value = []
+      workflowLogs.value = []
       if (newValue) {
         // switch to the experiment the job belongs
         const found = experiments.value.find((experiment) => {
@@ -265,7 +266,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     // state
     experiments,
     selectedExperiment,
-    experimentLogs,
+    workflowLogs,
     selectedExperimentResults,
     selectedWorkflow,
     selectedWorkflowResults,

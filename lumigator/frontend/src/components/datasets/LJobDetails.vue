@@ -67,15 +67,15 @@
           ></i>
         </div>
       </div>
-      <!-- <div
+      <div
         class="l-experiment-details__content-item"
         v-if="focusedItem"
       >
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.dataset }}
+          {{ focusedItem.dataset.name }}
         </div>
-      </div> -->
+      </div>
       <div
         class="l-experiment-details__content-item"
         v-if="focusedItem"
@@ -105,8 +105,8 @@
         <div class="l-experiment-details__content-field">0.5</div>
       </div>
     </div>
-    <!-- <div v-if="!isInference" class="l-experiment-details__actions"> -->
-    <div class="l-experiment-details__actions">
+
+    <div v-if="!isInference" class="l-experiment-details__actions">
       <Button
         rounded
         severity="secondary"
@@ -156,7 +156,7 @@ defineProps({
   },
 })
 const datasetStore = useDatasetStore()
-const { jobs, selectedJob } = storeToRefs(datasetStore)
+const { jobs, selectedJob, inferenceJobs } = storeToRefs(datasetStore)
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
@@ -175,9 +175,9 @@ const currentItemStatus = computed(() => {
     return selectedJob.value?.status
 })
 
-// const isInference = computed(() => {
-//   return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
-// })
+const isInference = computed(() => {
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
+})
 
 const focusedItem: ComputedRef<JobDetails | undefined> = computed(() => {
   if (selectedJob.value) {

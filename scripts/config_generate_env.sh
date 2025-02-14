@@ -1,6 +1,6 @@
 #!/bin/bash
 
-merge_env_files() {
+merge_conf_files() {
     temp_file=$(mktemp)
     keys_order=()
 
@@ -23,8 +23,8 @@ merge_env_files() {
 }
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-    echo "Usage: $0 <env_file1> [env_file2]"
+    echo "Usage: $0 <conf_file_default> [conf_file_override]"
     exit 1
 fi
 
-merge_env_files "$@"
+merge_conf_files "$@"

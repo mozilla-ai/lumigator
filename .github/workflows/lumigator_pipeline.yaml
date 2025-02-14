@@ -58,7 +58,7 @@ jobs:
 
   integration-tests:
     name: Integration tests (SQLite)
-    runs-on: ubuntu-latest
+    runs-on: lumigator-integration-test-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -105,7 +105,7 @@ jobs:
 
   integration-tests-postgres:
     name: Integration tests (PostgreSQL)
-    runs-on: ubuntu-latest
+    runs-on: lumigator-integration-test-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -153,7 +153,7 @@ jobs:
 
   notebook-integration-test:
     name: Notebook integration tests
-    runs-on: ubuntu-latest
+    runs-on: lumigator-integration-test-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     steps:

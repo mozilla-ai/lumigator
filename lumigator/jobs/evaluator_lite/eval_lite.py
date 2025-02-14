@@ -6,6 +6,7 @@ import s3fs
 from datasets import load_from_disk
 from eval_metrics import EvaluationMetrics
 from loguru import logger
+from utils import timer
 
 from schemas import EvalJobArtifacts, EvalJobConfig, EvalJobMetrics, JobOutput
 
@@ -49,9 +50,8 @@ def save_outputs(config: EvalJobConfig, eval_results: JobOutput) -> Path:
         logger.error(e)
 
 
-def run_eval_metrics(
-    predictions: list, ground_truth: list, evaluation_metrics: list
-) -> EvalJobMetrics:
+@timer
+def run_eval_metrics(predictions: list, ground_truth: list, evaluation_metrics: list) -> EvalJobMetrics:
     em = EvaluationMetrics(evaluation_metrics)
     evaluation_results = em.run_all(predictions, ground_truth)
     return EvalJobMetrics.model_validate(evaluation_results)
@@ -72,15 +72,14 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     logger.info(dataset)
 
-    metric_results = run_eval_metrics(
+    metric_results, evaluation_time = run_eval_metrics(
         dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
     )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
         artifacts = EvalJobArtifacts(
-            predictions=dataset["predictions"],
-            ground_truth=dataset["ground_truth"],
+            predictions=dataset["predictions"], ground_truth=dataset["ground_truth"], evaluation_time=evaluation_time
         )
     else:
         artifacts = None

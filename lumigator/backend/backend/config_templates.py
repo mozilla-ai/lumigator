@@ -91,6 +91,7 @@ default_eval_template = """{{
 default_infer_template = """{{
     "name": "{job_name}/{job_id}",
     "dataset": {{ "path": "{dataset_path}" }},
+    "system_prompt": "{system_prompt}",
     "hf_pipeline": {{
         "model_uri": "{model_uri}",
         "task": "{task}",

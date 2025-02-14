@@ -309,6 +309,16 @@ def list_experiments(local_client: TestClient):
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
+def check_artifacts_times(artifacts_url):
+    artifacts = requests.get(
+        artifacts_url,
+        timeout=5,  # 5 seconds
+    ).json()
+    logger.critical(artifacts)
+    assert "evaluation_time" in artifacts["artifacts"]
+    assert "summarization_time" in artifacts["artifacts"]
+
+
 @pytest.mark.integration
 def test_full_experiment_launch(local_client: TestClient, dialog_dataset, dependency_overrides_services):
     """This is the main integration test: it checks:
@@ -330,9 +340,11 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     experiment_id = create_experiment(local_client, dataset.id)
     workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1")
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+    check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+    check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
@@ -355,9 +367,14 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
     workflow_status = JobStatus.PENDING
-    while workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+    for _ in range(1, 300):
         time.sleep(1)
         workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())
         workflow_status = workflow_details.status
-        logger.info(f"Workflow status: {workflow_status}")
+        if workflow_status in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+            logger.info(f"Workflow status: {workflow_status}")
+            break
+    if workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        raise Exception(f"Stopped, job remains in {workflow_status} status")
+
     return workflow_details

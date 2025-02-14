@@ -121,7 +121,7 @@ import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
-import type { Model } from '@/types/Experiment'
+import type { Model } from '@/types/Model'
 
 const experimentStore = useExperimentStore()
 const modelStore = useModelStore()
@@ -187,11 +187,12 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const modelsMap = new Map(models.value.map((model: Model) => [model.uri, model]))
-  return selectedExperimentResults.value.map((job) => ({
-    ...job,
-    model: modelsMap.get(job.model),
+  const data = selectedExperimentResults.value.map((results) => ({
+    ...results,
+    model: models.value.find((model: Model) => model.name === results.model),
   }))
+
+  return data
 })
 
 onUnmounted(() => {

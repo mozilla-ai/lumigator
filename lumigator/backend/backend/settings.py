@@ -16,7 +16,7 @@ class BackendSettings(BaseSettings):
     MAX_DATASET_SIZE: ByteSize = MAX_DATASET_SIZE_HUMAN_READABLE
 
     # Backend API env vars
-    _api_cors_allowed_origins: str = os.environ.get("LUMI_API_CORS_ALLOWED_ORIGINS", "")
+    _api_cors_allowed_origins: str = os.environ.get("LUMIGATOR_API_CORS_ALLOWED_ORIGINS", "")
 
     # AWS
     S3_ENDPOINT_URL: str | None = None

@@ -73,7 +73,7 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
-              @l-job-selected="onJobSelected($event, slotProps.data)"
+              @l-job-selected="onWorkflowSelected($event, slotProps.data)"
             />
           </div>
         </template>
@@ -93,8 +93,7 @@ import Tag from 'primevue/tag'
 import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus } from '@/types/Workflow'
-import type { JobDetails } from '@/types/JobDetails'
+import { WorkflowStatus, type JobResult, type Workflow } from '@/types/Workflow'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 const props = defineProps({
   tableData: {
@@ -136,10 +135,13 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-function onJobSelected(job: JobDetails, experiment: ExperimentNew) {
+function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
   // fetching job details from BE instead of filtering
   // because job might be still running
-  experimentStore.fetchJobDetails(job.id)
+  // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
+  if (workflow.jobs) {
+    experimentStore.fetchJobDetails(workflow.jobs[0].id)
+  }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
 }

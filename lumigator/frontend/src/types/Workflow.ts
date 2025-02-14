@@ -45,16 +45,15 @@ export type Artifacts = {
   ground_truth: string[]
   model: string
   predictions: string[]
+
+  summarization_time: number
+  evaluation_time: number
 }
 
 export type MetricsResult = {
   bertscore: Bertscore
   meteor: Meteor
   rouge: Rouge
-
-  // TODO: to be added by the backend
-  summarization_time: number
-  evaluation_time: number
 }
 
 export type Parameters = {

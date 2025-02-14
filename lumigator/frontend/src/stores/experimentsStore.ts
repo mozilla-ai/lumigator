@@ -206,7 +206,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           recall: objectData.metrics.bertscore?.recall?.[index] ?? 0,
           recall_mean: objectData.metrics.bertscore?.recall_mean ?? 0,
         },
-        evaluation_time: objectData.metrics.evaluation_time ?? 0,
+        evaluation_time: objectData.artifacts.evaluation_time ?? 0,
         ground_truth: objectData.artifacts.ground_truth?.[index],
         meteor: {
           meteor: objectData.metrics.meteor?.meteor?.[index] ?? 0,
@@ -224,7 +224,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
           rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
         },
-        summarization_time: objectData.metrics.summarization_time,
+        summarization_time: objectData.artifacts.summarization_time,
       } as unknown as EvaluationJobResults
     })
     return transformedArray

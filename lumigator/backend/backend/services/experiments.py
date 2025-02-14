@@ -1,8 +1,6 @@
 import loguru
 from lumigator_schemas.experiments import (
     ExperimentCreate,
-    ExperimentIdResponse,
-    ExperimentResponse,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
@@ -27,11 +25,11 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def create_experiment(self, request: ExperimentCreate) -> ExperimentIdResponse:
-        experiment = self._tracking_session.create_experiment(request.name, request.description)
-        loguru.logger.info(
-            f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'."
+    def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
+        experiment = self._tracking_session.create_experiment(
+            request.name, request.description, request.task, request.dataset, request.max_samples
         )
+        loguru.logger.info(f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'.")
         return experiment
 
     def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
@@ -40,11 +38,11 @@ class ExperimentService:
             raise ExperimentNotFoundError(experiment_id) from None
         return GetExperimentResponse.model_validate(record)
 
-    def list_experiments(self, skip: int, limit: int) -> ListingResponse[ExperimentResponse]:
+    def list_experiments(self, skip: int, limit: int) -> ListingResponse[GetExperimentResponse]:
         records = self._tracking_session.list_experiments(skip, limit)
         return ListingResponse(
             total=self._tracking_session.experiments_count(),
-            items=[ExperimentResponse.model_validate(x) for x in records],
+            items=[GetExperimentResponse.model_validate(x) for x in records],
         )
 
     def delete_experiment(self, experiment_id: str):

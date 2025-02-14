@@ -53,12 +53,18 @@
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
+<<<<<<<< HEAD:lumigator/frontend/src/components/experiments/LJobsTable.vue
 // import { storeToRefs } from 'pinia'
 // import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { PropType } from 'vue'
 // import type { JobDetails } from '@/types/JobDetails'
+========
+import { storeToRefs } from 'pinia'
+import { useExperimentStore } from '@/stores/experimentsStore'
+import { formatDate } from '@/helpers/formatDate'
+>>>>>>>> origin/new-workflow-api:lumigator/frontend/src/components/jobs/LJobsTable.vue
 
 // const experimentStore = useExperimentStore()
 // const { jobs } = storeToRefs(experimentStore)

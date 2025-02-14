@@ -46,6 +46,7 @@ from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
     JobUpstreamError,
+    JobValidationError,
 )
 from backend.settings import settings
 
@@ -282,7 +283,7 @@ class JobService:
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
             ) from None
         try:
             metadata = json.loads(resp.text)
@@ -431,6 +432,9 @@ class JobService:
             job_type = JobType.INFERENCE
             if not request.output_field:
                 request.output_field = "predictions"
+
+            if request.task == "text-generation" and not request.system_prompt:
+                raise JobValidationError("System prompt is required for text generation tasks.") from None
         else:
             raise JobTypeUnsupportedError(request) from None
 

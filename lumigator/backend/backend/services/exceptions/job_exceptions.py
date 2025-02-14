@@ -6,6 +6,7 @@ from backend.services.exceptions.base_exceptions import (
     NotFoundError,
     ServiceError,
     UpstreamError,
+    ValidationError,
     _append_message,
 )
 
@@ -26,9 +27,7 @@ class JobNotFoundError(NotFoundError):
 class JobTypeUnsupportedError(ServiceError):
     """Raised when a job type is not yet supported."""
 
-    def __init__(
-        self, job_type: JobType | object, message: str | None = None, exc: Exception | None = None
-    ):
+    def __init__(self, job_type: JobType | object, message: str | None = None, exc: Exception | None = None):
         """Creates a JobTypeNotSupportedError
 
         :param job_type: the type of job that is not supported,
@@ -58,3 +57,15 @@ class JobUpstreamError(UpstreamError):
         :param exc: optional exception
         """
         super().__init__(service_name, message, exc)
+
+
+class JobValidationError(ValidationError):
+    """Raised when there are issues during Job validation."""
+
+    def __init__(self, message: str, exc: Exception | None = None):
+        """Creates a JobValidationError
+
+        :param message: an optional error message
+        :param exc: optional exception
+        """
+        super().__init__(message, exc)

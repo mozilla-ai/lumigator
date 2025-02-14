@@ -52,6 +52,7 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
+    system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None

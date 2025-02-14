@@ -165,6 +165,7 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     name: str
     dataset: DatasetConfig
     job: JobConfig
+    system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
     params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None

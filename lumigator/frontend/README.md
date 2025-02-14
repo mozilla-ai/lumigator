@@ -13,19 +13,19 @@ This directory contains the **frontend** code for the **Lumigator** project, bui
 frontend/
 ├── public/              # Static assets
 ├── src/
-│   ├── api/             # API services
+│   ├── sdk/             # API services
 │   ├── assets/          # Images, fonts, and other assets
 │   ├── components/      # Reusable Vue components
-│   ├── layouts/         # Page layouts
-│   ├── pages/           # Views and pages
+│   ├── helpers/         # Utility helper methods
+│   ├── views/           # router based views
 │   ├── router/          # Vue Router setup
-│   ├── store/           # Pinia store setup
-│   ├── styles/          # Global styles, including Quasar variables
+│   ├── stores/          # Pinia store setup
+│   ├── styles/          # Global styles
 │   ├── App.vue          # Main Vue component
-│   └── main.js          # Application entry point
+│   └── main.ts          # Application entry point
 ├── index.html           # HTML entry point
 ├── package.json         # Project configuration and dependencies
-├── vite.config.js       # Vite configuration
+├── vite.config.ts       # Vite configuration
 └── README.md            # Frontend README file (this file)
 ```
 

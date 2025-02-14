@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-const LDatasetes = () => import('@/components/pages/LDatasets.vue')
-const LExperiments = () => import('@/components/pages/LExperiments.vue')
+const LDatasetes = () => import('@/components/views/LDatasets.vue')
+const LExperiments = () => import('@/components/views/LExperiments.vue')
 
 export const routes: Array<RouteRecordRaw & { icon?: string }> = [
   {

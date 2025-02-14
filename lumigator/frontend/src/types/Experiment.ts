@@ -1,47 +1,35 @@
-export type Experiment = {
-  id: string
-  created: string
-  dataset: unknown
-  description: string
-  name: string
-  experimentStart: string
-  jobs: Job[]
-  useCase: string
-  runTime: string
-  samples?: number
-  models: Model[]
-  max_samples?: number
-  status: string
-}
+// import type { Model } from './Model'
+// import type { WorkflowStatus } from './Workflow'
 
-export type Job = {
-  id: string
-  status: string
-  metadata: Record<string, unknown>
-  end_time: string
-  model: Record<string, unknown>
-  name: string
-  experimentStart: string
-  submission_id: string
-  start_time: string
-  description: string
-  entrypoint: string
-}
+// export type Experiment = {
+//   id: string
+//   created: string
+//   dataset: string
+//   description: string
+//   name: string
+//   experimentStart: string
+//   jobs: Job[]
+//   useCase: string
+//   runTime: string
+//   samples?: number
+//   models: Model[]
+//   max_samples?: number
+//   status: WorkflowStatus
+// }
 
-export type Model = {
-  id: string
-  description: string
-  info?: {
-    parameter_count: string
-    model_size: string
-    tensor_type: string
-  }
-  name: string
-  requirements: Array<string>
-  tasks: Array<Task>
-  uri: string
-  website_url: string
-}
+// export type Job = {
+//   id: string
+//   status: WorkflowStatus
+//   metadata: Record<string, unknown>
+//   end_time: string
+//   model: Record<string, unknown>
+//   name: string
+//   experimentStart: string
+//   submission_id: string
+//   start_time: string
+//   description: string
+//   entrypoint: string
+// }
 
 export type Task = {
   summarization: {
@@ -60,7 +48,7 @@ export type ExperimentResults = {
   bertscore: Bertscore
   rouge: Rouge
   runTime: string | undefined
-  jobResults: JobResults
+  jobResults: EvaluationJobResults[]
 }
 
 export type Bertscore = {
@@ -89,50 +77,14 @@ export type Rouge = {
   rougeLsum_mean: number
 }
 
-export type ObjectData = {
-  metrics: {
-    bertscore?: Bertscore
-    meteor?: Meteor
-    rouge?: Rouge
-    summarization_time: number
-    evaluation_time?: number
-  }
-  artifacts: {
-    predictions?: string[]
-    ground_truth?: string[]
-    model: string
-    examples: string[]
-  }
-}
-
-export type JobResults = {
+export type EvaluationJobResults = {
   example: string
-  bertscore: {
-    f1: number
-    f1_mean: number
-    hashcode: number
-    precision: number
-    precision_mean: number
-    recall: number
-    recall_mean: number
-  }
+  bertscore: Bertscore
   evaluation_time: number
   ground_truth?: string
-  meteor: {
-    meteor: number
-    meteor_mean: number
-  }
+  meteor: Meteor
   model: string
   predictions?: string
-  rouge: {
-    rouge1: number
-    rouge1_mean: number
-    rouge2: number
-    rouge2_mean: number
-    rougeL: number
-    rougeL_mean: number
-    rougeLsum: number
-    rougeLsum_mean: number
-  }
+  rouge: Rouge
   summarization_time: number
 }

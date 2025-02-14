@@ -7,7 +7,7 @@ export type Workflow = {
   status: WorkflowStatus
   created_at: string
   updated_at: string
-  metrics?: Record<string, unknown>
+  metrics?: Metrics
   parameters?: Record<string, unknown>
   artifacts_download_url?: string
   jobs?: JobResult[]
@@ -15,10 +15,21 @@ export type Workflow = {
 
 export type JobResult = {
   id: string
-  metrics?: Record<string, unknown>
+  metrics?: Metrics
   parameters?: Record<string, unknown>
   metric_url: string
   artifact_url: string
+}
+
+export type Metrics = {
+  meteor_mean: number
+  rouge1_mean: number
+  bertscore_precision_mean: number
+  bertscore_f1_mean: number
+  bertscore_recall_mean: number
+  rougeL_mean: number
+  rougeLsum_mean: number
+  rouge2_mean: number
 }
 
 export enum WorkflowStatus {

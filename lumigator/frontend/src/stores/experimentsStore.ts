@@ -5,17 +5,18 @@ import {
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
 
-import type { EvaluationJobResults, ExperimentResults, ObjectData } from '@/types/Experiment'
+import type { EvaluationJobResults, ObjectData } from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus } from '@/types/Workflow'
+import { WorkflowStatus, type Metrics } from '@/types/Workflow'
 import { jobsService } from '@/sdk/jobsService'
 import { calculateDuration } from '@/helpers/calculateDuration'
 import type { JobDetails } from '@/types/JobDetails'
+import axios from 'axios'
 
 export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<ExperimentNew[]> = ref([])
@@ -27,7 +28,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   const selectedJob: Ref<JobDetails | undefined> = ref()
 
   const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
-  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+  const selectedExperimentResults: Ref<Array<Metrics & {model:string}>> = ref([])
 
   const isPolling = ref(false)
   let experimentInterval: number | undefined = undefined
@@ -149,25 +150,23 @@ export const useExperimentStore = defineStore('experiments', () => {
   }
 
   async function fetchExperimentResults(experiment: ExperimentNew) {
-    // for (const workflow of experiment.workflows) {
+    for (const workflow of experiment.workflows) {
     //   console.log({experiment, workflow})
-    const results = (await experimentsService.fetchExperimentResults(experiment.id)) as {
-      resultsData: ObjectData
-      id: string
-      download_url: string
-    }
-    if (results?.id) {
-      const modelRow = {
-        model: results.resultsData.artifacts.model,
-        meteor: results.resultsData.metrics.meteor,
-        bertscore: results.resultsData.metrics.bertscore,
-        rouge: results.resultsData.metrics.rouge,
-        // runTime: getJobRuntime(results.id),
-        jobResults: transformJobResults(results.resultsData),
-      } as unknown as ExperimentResults
-      selectedExperimentResults.value.push(modelRow)
-    }
-    // }
+    if(workflow.artifacts_download_url) {
+
+
+    const { data } = await axios.get(workflow.artifacts_download_url)
+
+    const metrics = workflow.metrics
+
+        selectedExperimentResults.value.push({
+          ...metrics,
+          // jobResults: [],
+          model: workflow.model,
+          // runTime: workflow.runTime,
+        })
+      }
+  }
   }
 
   async function fetchJobResults(jobId: string) {

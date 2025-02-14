@@ -95,32 +95,12 @@ export type ObjectData = {
 
 export type EvaluationJobResults = {
   example: string
-  bertscore: {
-    f1: number
-    f1_mean: number
-    hashcode: number
-    precision: number
-    precision_mean: number
-    recall: number
-    recall_mean: number
-  }
+  bertscore: Bertscore
   evaluation_time: number
   ground_truth?: string
-  meteor: {
-    meteor: number
-    meteor_mean: number
-  }
+  meteor: Meteor
   model: string
   predictions?: string
-  rouge: {
-    rouge1: number
-    rouge1_mean: number
-    rouge2: number
-    rouge2_mean: number
-    rougeL: number
-    rougeL_mean: number
-    rougeLsum: number
-    rougeLsum_mean: number
-  }
+  rouge: Rouge
   summarization_time: number
 }

@@ -28,10 +28,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            exclude_paths:
+              - '!docs/**'
+
       - name: Install uv
+        if: steps.filter.outputs.exclude_paths == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Lint
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uvx ruff check --config ruff.toml
         continue-on-error: false
 
@@ -47,13 +57,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            exclude_paths:
+              - '!docs/**'
+
       - name: Install uv
+        if: steps.filter.outputs.exclude_paths == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uv python install
 
       - name: Run ${{ matrix.test }} unit tests
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: make test-${{ matrix.test }}-unit
 
   integration-tests:
@@ -68,26 +89,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            exclude_paths:
+              - '!docs/**'
+
       - name: Install uv
+        if: steps.filter.outputs.exclude_paths == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uv python install
 
       - name: Create HF cache
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Create pip cache
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Spinning up containers for the tests
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: make test-${{ matrix.test }}-integration
 
       - name: Collect Ray logs in case of failure
@@ -115,21 +150,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            exclude_paths:
+              - '!docs/**'
+
       - name: Install uv
+        if: steps.filter.outputs.exclude_paths == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uv python install
 
       - name: Create HF cache
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Spinning up containers for the tests
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: make start-lumigator-build-postgres
 
       - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.exclude_paths == 'true'
         # This setting only affects backend integration tests
         # localhost is used since the postgres DB needs to be
         # accessed from pytest
@@ -160,35 +208,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            exclude_paths:
+              - '!docs/**'
+
       - name: Install uv
+        if: steps.filter.outputs.exclude_paths == 'true'
         uses: astral-sh/setup-uv@v3
 
       - name: Create a virtual environment
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uv venv
         working-directory: notebooks
 
       - name: Install required packages
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: uv pip install -r requirements.txt
         working-directory: notebooks
 
       - name: Install kernel
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
         working-directory: notebooks
 
       - name: Create HF cache
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Create pip cache
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Setup containers
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: make start-lumigator-build
 
       - name: Run notebook
+        if: steps.filter.outputs.exclude_paths == 'true'
         run: source .venv/bin/activate && jupyter execute --kernel_name=lumigator walkthrough.ipynb
         working-directory: notebooks
         shell: bash

@@ -18,9 +18,9 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
 CONFIG_BUILD_DIR=build
 # Default config prefixed with dot to hide from user
-CONFIG_DEFAULT=.default.env
+CONFIG_DEFAULT=.default.conf
 # User editable config file (will be generated if missing)
-CONFIG_USER=.env
+CONFIG_OVERRIDE=user.conf
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -103,21 +103,13 @@ DEV_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose.override.yaml
 POSTGRES_DOCKER_COMPOSE_FILE:= .devcontainer/docker-compose-postgres.override.yaml
 
 define remove_config_dir
-	@echo "Cleaning up config build directory: '$(CONFIG_BUILD_DIR)'..."
+	@echo "Cleaning up temporary config directory: '$(CONFIG_BUILD_DIR)'..."
 	@rm -rf $(CONFIG_BUILD_DIR)
-	@echo "Cleanup complete."
-endef
-
-# config-check: checks if the user config is already present, and calls the appropriate config-generate-env target if not.
-define config_check
-	@if [ -n $(CONFIG_BUILD_DIR)/.env ]; then \
-		make config-generate-env; \
-	fi
+	@echo "Cleanup complete"
 endef
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
-local-up:
-	$(call config_check)
+local-up: config-generate-env
 	uv run pre-commit install
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
 
@@ -129,28 +121,23 @@ local-logs:
 	docker compose -f $(LOCAL_DOCKERCOMPOSE_FILE) logs
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in) - postgres version
-start-lumigator-postgres:
-	$(call config_check)
+start-lumigator-postgres: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
-start-lumigator:
-	$(call config_check)
+start-lumigator: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build:
-	$(call config_check)
+start-lumigator-build: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
-start-lumigator-build-postgres:
-	$(call config_check)
+start-lumigator-build-postgres: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
-start-lumigator-external-services:
-	$(call config_check)
+start-lumigator-external-services: config-generate-env
 	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"$(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator: config-generate-env
@@ -263,16 +250,15 @@ config-clean:
 	$(call remove_config_dir)
 
 # config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
-config-generate-env:
+config-generate-env: config-clean
 	@mkdir -p $(CONFIG_BUILD_DIR)
 
 	@if [ -f $(CONFIG_USER) ]; then \
-		echo "Found user configuration"; \
+		echo "Found user configuration: '$(CONFIG_USER)', overrides will be applied"; \
+		@scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_USER) > "$(CONFIG_BUILD_DIR)/.env"; \
 	else \
-		echo "No user defined config found, default will be used"; \
-		cp $(CONFIG_DEFAULT) $(CONFIG_USER); \
+		echo "No user configuration found, default will be used: '$(CONFIG_DEFAULT)'"; \
+		cp $(CONFIG_DEFAULT) "$(CONFIG_BUILD_DIR)/.env"; \
 	fi
 
-	@scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_USER) > "$(CONFIG_BUILD_DIR)/.env";
-	@echo "User config file created at ' $(CONFIG_USER)'";
-	@echo ".env file generated at '$(CONFIG_BUILD_DIR)/.env'";
+	@echo "Config file generated: '$(CONFIG_BUILD_DIR)/.env'";

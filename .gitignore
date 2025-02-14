@@ -136,7 +136,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-build/
 
 # Spyder project settings
 .spyderproject
@@ -175,3 +174,9 @@ cython_debug/
 .ijwb
 *.db
 *.db-journal
+
+# Config: User supplied overrides
+user.conf
+
+# Config: Temporary build directory
+build/

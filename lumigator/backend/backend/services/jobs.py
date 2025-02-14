@@ -48,6 +48,7 @@ from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobUpstreamError,
@@ -203,8 +204,10 @@ class JobService:
         results = self._validate_results(job_id, s3)
 
         # make sure the artifacts are present in the results
-        if not all(key in results.artifacts for key in ["examples", "ground_truth", request.job_config.output_field]):
-            raise ValueError("Missing required fields in the job results.")
+        required_keys = {"examples", "ground_truth", request.job_config.output_field}
+        missing_keys = required_keys - set(results.artifacts.keys())
+        if missing_keys:
+            raise DatasetMissingFieldsError(set(missing_keys)) from None
 
         dataset_to_save = {
             "examples": results.artifacts["examples"],
@@ -241,7 +244,6 @@ class JobService:
 
         Args:
             job_id (UUID): The unique identifier of the job.
-            request (JobEvalLiteCreate): The request object containing job evaluation details.
             s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
         Note:

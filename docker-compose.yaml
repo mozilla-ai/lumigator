@@ -251,6 +251,8 @@ volumes:
       labels:
         ai.mozilla.product_name: lumigator
     redis-data:
+      labels:
+        ai.mozilla.product_name: lumigator
     huggingface_cache_vol:
       labels:
         ai.mozilla.product_name: lumigator

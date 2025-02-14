@@ -137,7 +137,7 @@ export const useExperimentStore = defineStore('experiments', () => {
       selectedWorkflow.value = workflow
       selectedWorkflowResults.value = transformJobResults(
         results,
-      ) as unknown as EvaluationJobResults
+      )
     }
   }
 

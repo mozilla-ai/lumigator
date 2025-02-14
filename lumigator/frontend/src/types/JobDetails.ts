@@ -1,4 +1,3 @@
-import type { Dataset } from './Dataset'
 import type { WorkflowStatus } from './Workflow'
 
 export type JobDetails = {

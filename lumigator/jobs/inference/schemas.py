@@ -14,7 +14,7 @@ class DatasetConfig(BaseModel):
 class JobConfig(BaseModel):
     max_samples: int
     storage_path: str
-    output_field: str | None = None
+    output_field: str | None = "predictions"
     enable_tqdm: bool | None = None
     model_config = ConfigDict(extra="forbid")
 
@@ -64,6 +64,7 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
+    summarization_time: float
 
 
 class JobOutput(BaseModel):

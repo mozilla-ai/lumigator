@@ -4,14 +4,16 @@ from collections.abc import Generator
 from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urljoin
+from uuid import UUID
 
 import boto3
 import loguru
 import requests
 from fastapi import HTTPException
-from lumigator_schemas.experiments import ExperimentResponse, GetExperimentResponse
+from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
@@ -28,12 +30,21 @@ class MLflowTrackingClient(TrackingClient):
     def __init__(self, tracking_uri: str):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
-    def create_experiment(self, name: str, description: str) -> GetExperimentResponse:
+    def create_experiment(
+        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+    ) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
+        # Refactor like "for key in [...] set tag ..."
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
+            self._client.set_experiment_tag(experiment_id, "task", task)
+            self._client.set_experiment_tag(experiment_id, "dataset", dataset)
+            self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
+            self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
+        # FIXME Let the user decide in the case of failures.
+        # Also, use a uuid as name and an arbitrary tag as descriptive name
         except MlflowException as e:
             # if the experiment name already exists,
             # log a warning and then append a short timestamp to the name
@@ -42,13 +53,21 @@ class MLflowTrackingClient(TrackingClient):
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
+                self._client.set_experiment_tag(experiment_id, "task", task)
+                self._client.set_experiment_tag(experiment_id, "dataset", dataset)
+                self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
+                self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
             else:
                 raise e
         # get the experiment so you can populate the response
         experiment = self._client.get_experiment(experiment_id)
         return GetExperimentResponse(
             id=experiment_id,
+            description=description,
+            task=task,
             name=name,
+            dataset=dataset,
+            max_samples=max_samples,
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
         )
 
@@ -89,9 +108,7 @@ class MLflowTrackingClient(TrackingClient):
                 # TODO: this is a hacky way to handle this,
                 #  we should come up with a better solution but at least it keeps the info
                 if parameter in parameters:
-                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[
-                        parameter
-                    ]
+                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
                 parameters[parameter] = run.data.params[parameter]
         return parameters
 
@@ -113,14 +130,21 @@ class MLflowTrackingClient(TrackingClient):
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
+        return self._format_experiment(experiment)
 
+    def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
-        workflow_ids = self._find_workflows(experiment_id)
+        workflow_ids = self._find_workflows(experiment.experiment_id)
         workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
         return GetExperimentResponse(
-            id=experiment_id,
+            id=experiment.experiment_id,
             name=experiment.name,
+            description=experiment.tags.get("description") or "",
+            task=experiment.tags.get("task") or "",
+            dataset=experiment.tags.get("dataset") or "",
+            max_samples=int(experiment.tags.get("max_samples") or "-1"),
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
+            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
             workflows=workflows,
         )
 
@@ -128,13 +152,15 @@ class MLflowTrackingClient(TrackingClient):
         """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list[ExperimentResponse]:
+    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
         """List all experiments."""
         page_token = None
         experiments = []
         skipped = 0
         while True:
-            response = self._client.search_experiments(page_token=page_token)
+            response = self._client.search_experiments(
+                page_token=page_token, filter_string='tags.lumigator_version != ""'
+            )
             if skipped < skip:
                 skipped += len(response)
                 if skipped > skip:
@@ -147,17 +173,9 @@ class MLflowTrackingClient(TrackingClient):
             if response.token is None:
                 break
         reduced_experiments = experiments[:limit] if limit is not None else experiments
-        return [
-            ExperimentResponse(
-                id=experiment.experiment_id,
-                name=experiment.name,
-                description=experiment.tags.get("description") or "",
-                created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
-                updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
-            )
-            for experiment in reduced_experiments
-        ]
+        return [self._format_experiment(experiment) for experiment in reduced_experiments]
 
+    # TODO find a cheaper call
     def experiments_count(self):
         """Get the number of experiments."""
         return len(self.list_experiments(skip=0, limit=None))
@@ -165,7 +183,7 @@ class MLflowTrackingClient(TrackingClient):
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
     # which correspond to what we call "jobs" in our system
-    def create_workflow(self, experiment_id: str, description: str, name: str) -> WorkflowResponse:
+    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
         """Create a new workflow."""
         # make sure its status is CREATED
         workflow = self._client.create_run(
@@ -174,12 +192,14 @@ class MLflowTrackingClient(TrackingClient):
                 "mlflow.runName": name,
                 "status": WorkflowStatus.CREATED,
                 "description": description,
+                "model": model,
             },
         )
         return WorkflowResponse(
             id=workflow.info.run_id,
             experiment_id=experiment_id,
             name=name,
+            model=model,
             description=description,
             status=WorkflowStatus.CREATED,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
@@ -206,6 +226,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=workflow.info.experiment_id,
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
+            model=workflow.data.tags.get("model"),
             status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
@@ -234,15 +255,11 @@ class MLflowTrackingClient(TrackingClient):
                         # if any keys are the same, log a warning and then overwrite the key
                         for job_result_item in job_results:
                             if job_result_item[1] is None:
-                                loguru.logger.info(
-                                    f"No {job_result_item[0]} found for job {job.id}."
-                                )
+                                loguru.logger.info(f"No {job_result_item[0]} found for job {job.id}.")
                                 continue
                             for key in job_result_item[1].keys():
                                 if key in compiled_results[job_result_item[0]]:
-                                    loguru.logger.warning(
-                                        f"Key '{key}' already exists in the results. Overwriting."
-                                    )
+                                    loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
                                 # merge the results into the compiled results
                                 compiled_results[job_result_item[0]][key] = job_result_item[1][key]
             with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
@@ -266,14 +283,10 @@ class MLflowTrackingClient(TrackingClient):
 
     def _get_ray_job_logs(self, ray_job_id: str):
         """Get the logs for a Ray job."""
-        resp = requests.get(
-            urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5
-        )  # 5 sec
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
-            loguru.logger.error(
-                f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}"
-            )
+            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
                 detail=f"Job logs for ID: {ray_job_id} not found",
@@ -294,9 +307,7 @@ class MLflowTrackingClient(TrackingClient):
         except json.JSONDecodeError as e:
             loguru.logger.error(f"JSON decode error: {e}")
             loguru.logger.error(f"Response text: {resp.text}")
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response"
-            ) from e
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
@@ -335,6 +346,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=workflow.info.experiment_id,
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
+            model=workflow.data.tags.get("model"),
             status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
@@ -368,9 +380,7 @@ class MLflowTrackingClient(TrackingClient):
             return None
         return JobResults(
             id=job_id,
-            metrics=[
-                {"name": metric[0], "value": metric[1]} for metric in run.data.metrics.items()
-            ],
+            metrics=[{"name": metric[0], "value": metric[1]} for metric in run.data.metrics.items()],
             parameters=[{"name": param[0], "value": param[1]} for param in run.data.params.items()],
             metric_url="TODO",
             artifact_url="TODO",

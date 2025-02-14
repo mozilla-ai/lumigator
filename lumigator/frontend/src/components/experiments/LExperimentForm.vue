@@ -96,6 +96,7 @@ import LModelCards from '@/components/experiments/LModelCards.vue'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
+import type { createExperimentWithWorkflowsPayload } from '@/sdk/experimentsService'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -125,21 +126,24 @@ const filteredDatasets = computed(() =>
 )
 
 async function triggerExperiment() {
-  const experimentPayload = {
+  const experimentPayload: createExperimentWithWorkflowsPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
-    models: modelSelection.value.selectedModels,
-    dataset: dataset.value?.id,
+    dataset: dataset.value!.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
+    task: 'summarization',
   }
-  const success = await experimentStore.createExperiment(experimentPayload)
-  if (success.length) {
-    await experimentStore.fetchAllJobs()
+  const workflows = await experimentStore.createExperimentWithWorkflows(
+    experimentPayload,
+    modelSelection.value.selectedModels,
+  )
+  if (workflows.length) {
+    await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()
     toast.add({
       severity: 'secondary',
-      summary: `${success[0].name} Started`,
+      summary: `${workflows[0].name} Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
       life: 3000,

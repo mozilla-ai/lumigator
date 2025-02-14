@@ -41,10 +41,10 @@
     >
       <l-experiment-results v-if="showExpResults" />
       <l-job-results
-        v-if="showJobResults && selectedJobResults.length"
-        :results="selectedJobResults"
+        v-if="selectedWorkflowResults && showJobResults && selectedWorkflowResults.length"
+        :results="selectedWorkflowResults"
       />
-      <l-experiment-logs v-if="showLogs && selectedJobResults.length === 0" />
+      <l-experiment-logs :logType="'workflow'" v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -65,14 +65,15 @@ import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
-import type { Experiment, Job } from '@/types/Experiment'
+import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { Workflow } from '@/types/Workflow'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedJob, selectedJobResults } =
+const { experiments, selectedExperiment, selectedWorkflow, selectedWorkflowResults } =
   storeToRefs(experimentStore)
 
 const showDrawer = ref(false)
@@ -85,10 +86,6 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
-onMounted(async () => {
-  await experimentStore.fetchAllJobs()
-})
-
 const getDrawerHeader = () => {
   return showLogs.value ? 'Logs' : selectedExperiment.value?.name
 }
@@ -98,25 +95,25 @@ const onCreateExperiment = () => {
   selectedExperiment.value = undefined
 }
 
-const onSelectExperiment = (experiment: Experiment) => {
+const onSelectExperiment = (experiment: ExperimentNew) => {
   experimentStore.loadExperimentDetails(experiment.id)
   showSlidingPanel.value = true
 }
 
-const onShowExperimentResults = (experiment: Experiment) => {
+const onShowExperimentResults = (experiment: ExperimentNew) => {
   experimentStore.fetchExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = (job: Job) => {
-  experimentStore.fetchJobResults(job.id)
+const onShowJobResults = (workflow: Workflow) => {
+  experimentStore.fetchWorkflowResults(workflow)
   showDrawer.value = true
   showJobResults.value = true
 }
 
-const onDownloadResults = (job: Job) => {
-  experimentStore.fetchExperimentResultsFile(job.id)
+const onDownloadResults = (workflow: Workflow | ExperimentNew) => {
+  experimentStore.fetchExperimentResultsFile(workflow.id)
 }
 
 const onShowLogs = () => {
@@ -134,7 +131,7 @@ const onCloseDetails = () => {
 }
 
 const resetDrawerContent = () => {
-  selectedJobResults.value = []
+  selectedWorkflowResults.value = []
   showExpResults.value = false
   showJobResults.value = false
   showLogs.value = false
@@ -142,7 +139,8 @@ const resetDrawerContent = () => {
 }
 
 onMounted(async () => {
-  await modelStore.fetchModels()
+  await Promise.all([experimentStore.fetchAllExperiments(), modelStore.fetchModels()])
+
   if (selectedDataset.value) {
     onCreateExperiment()
   }
@@ -151,7 +149,7 @@ onMounted(async () => {
 watch(showSlidingPanel, (newValue) => {
   if (!newValue) {
     selectedExperiment.value = undefined
-    selectedJob.value = undefined
+    selectedWorkflow.value = undefined
   }
 })
 </script>

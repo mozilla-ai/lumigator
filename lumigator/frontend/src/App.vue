@@ -95,7 +95,11 @@ const tooltipConfig = ref({
 const { showSlidingPanel } = useSlidePanel()
 
 onMounted(async () => {
-  await Promise.all([experimentsStore.fetchAllJobs(), datasetsStore.fetchDatasets()])
+  await Promise.all([
+    datasetsStore.fetchAllJobs(),
+    datasetsStore.fetchDatasets(),
+    experimentsStore.fetchAllExperiments(),
+  ])
 })
 </script>
 

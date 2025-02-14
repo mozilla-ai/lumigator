@@ -63,6 +63,7 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
+    summarization_time: float
 
 
 class JobOutput(BaseModel):

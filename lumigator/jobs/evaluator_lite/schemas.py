@@ -67,6 +67,7 @@ class EvalJobMetrics(BaseModel):
 class EvalJobArtifacts(BaseModel):
     predictions: list[str] | None = None
     ground_truth: list[str] | None = None
+    evaluation_time: float | None
 
 
 class JobOutput(BaseModel):

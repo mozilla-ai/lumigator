@@ -1,0 +1,22 @@
+# Dockerfile.huggingface-cache
+FROM python:3.11-slim
+
+# Install required packages: transformers and huggingface_hub
+RUN pip install --no-cache-dir transformers huggingface_hub
+
+# Ensure the cache directory exists (snapshot_download will create its own subfolders)
+RUN mkdir -p /home/ray/.cache/huggingface/hub
+
+# Use the huggingface_hub API to download the model exactly as the Hub does.
+# This will create a folder with the proper structure (e.g. blobs, refs, snapshots).
+RUN python -c "\
+from huggingface_hub import snapshot_download; \
+model_path = snapshot_download('facebook/bart-large-cnn', cache_dir='/home/ray/.cache/huggingface/hub'); \
+print('Model downloaded to:', model_path)\
+"
+
+# Declare the cache directory as a volume so that its contents persist and can be shared.
+VOLUME /home/ray/.cache/huggingface
+
+# Exit immediately (this container’s only job is to populate the cache)
+CMD ["/bin/true"]

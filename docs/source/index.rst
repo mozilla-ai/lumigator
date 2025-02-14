@@ -55,6 +55,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :caption: User Guides
 
    user-guides/inference
+   user-guides/local-models
 
 .. toctree::
    :maxdepth: 2

@@ -48,6 +48,7 @@ from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobUpstreamError,
@@ -203,11 +204,10 @@ class JobService:
         results = self._validate_results(job_id, s3)
 
         # make sure the artifacts are present in the results
-        if not all(
-            key in results.artifacts
-            for key in ["examples", "ground_truth", request.job_config.output_field]
-        ):
-            raise ValueError("Missing required fields in the job results.")
+        required_keys = {"examples", "ground_truth", request.job_config.output_field}
+        missing_keys = required_keys - set(results.artifacts.keys())
+        if missing_keys:
+            raise DatasetMissingFieldsError(set(missing_keys)) from None
 
         dataset_to_save = {
             "examples": results.artifacts["examples"],
@@ -237,16 +237,13 @@ class JobService:
             generated_by=results.artifacts["model"],
         )
 
-        loguru.logger.info(
-            f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database."
-        )
+        loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
     def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
             job_id (UUID): The unique identifier of the job.
-            request (JobEvalLiteCreate): The request object containing job evaluation details.
             s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
         Note:
@@ -288,16 +285,13 @@ class JobService:
             return JobLogsResponse(logs=db_logs.logs)
 
     def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
-        resp = requests.get(
-            urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5
-        )  # 5 seconds
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
         if resp.status_code == HTTPStatus.NOT_FOUND:
             raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                "Unexpected status code getting job logs:"
-                f" {resp.status_code}, error: {resp.text or ''}",
+                "Unexpected status code getting job logs:" f" {resp.status_code}, error: {resp.text or ''}",
             ) from None
         try:
             metadata = json.loads(resp.text)
@@ -378,9 +372,7 @@ class JobService:
     # For the moment, something will convert one into the other, and we'll decide where
     # to put this. The jobs should ideally have no dependency towards the backend.
 
-    def generate_inference_job_config(
-        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
-    ):
+    def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
@@ -484,9 +476,7 @@ class JobService:
 
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
-            job_config = self.generate_inference_job_config(
-                request, record.id, dataset_s3_path, self.storage_path
-            )
+            job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
         elif job_type == JobType.EVALUATION_LITE:
             job_config = self.generate_evaluation_lite_job_config(
                 request, record.id, dataset_s3_path, self.storage_path
@@ -546,9 +536,7 @@ class JobService:
 
         # TODO Defer to specific job
         if job_type == JobType.INFERENCE:
-            self.add_background_task(
-                self._background_tasks, self.handle_inference_job, record.id, request
-            )
+            self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

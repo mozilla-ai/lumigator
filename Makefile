@@ -5,7 +5,7 @@ UNAME:= $(shell uname -o)
 
 # Required binaries in order to correctly run the makefile, if any cannot be found the script will fail.
 # uv is only required for local-up (dev).
-REQUIRED_BINARIES := git docker yq
+REQUIRED_BINARIES := git docker
 $(foreach bin,$(REQUIRED_BINARIES),\
   $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 

@@ -13,9 +13,9 @@ services:
               count: $GPU_COUNT
               capabilities: [gpu]
     environment:
-      - NVIDIA_VISIBLE_DEVICES=$NVIDIA_VISIBLE_DEVICES
+      - NVIDIA_VISIBLE_DEVICES
 
   backend:
     environment:
-      - RAY_WORKER_GPUS=$RAY_WORKER_GPUS
-      - RAY_WORKER_GPUS_FRACTION=$RAY_WORKER_GPUS_FRACTION
+      - RAY_WORKER_GPUS
+      - RAY_WORKER_GPUS_FRACTION

@@ -14,12 +14,13 @@ command:
 user@host:~/lumigator$ make local-up
 ```
 
-This creates four container services networked together to make up all the components of the
+This creates multiple container services networked together to make up all the components of the
 Lumigator application:
 
 - `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: A Ray cluster for submitting several types of jobs.
+- `mlflow`: Used to track experiments and metrics.
 - `frontend`: Lumigator's Web UI
 
 The `local-up` make target will also set a watch on the backend codebase, so that any changes you

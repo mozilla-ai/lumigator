@@ -13,9 +13,9 @@
         <template #header>
           <span class="p-datatable-column-title">Model </span>
         </template>
-        <!-- <template #body="slotProps">
+        <template #body="slotProps">
           {{ slotProps.data.model.name }}
-        </template> -->
+        </template>
       </Column>
       <Column field="meteor.meteor_mean" sortable>
         <template #header>
@@ -80,21 +80,21 @@
           <span class="p-datatable-column-title">model size </span>
         </template>
         <template #body="slotProps">
-          <!-- {{ slotProps.data.model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2') }} -->
+          {{ slotProps.data.model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2') }}
         </template>
       </Column>
       <Column field="model.info.parameter_count" sortable>
         <template #header>
           <span class="p-datatable-column-title">parameters </span>
         </template>
-        <!-- <template #body="slotProps">
+        <template #body="slotProps">
           {{
             slotProps.data.model.info.parameter_count.replace(
               /(\d+(?:\.\d+)?)([a-zA-Z]+)/g,
               '$1 $2',
             )
           }}
-        </template> -->
+        </template>
       </Column>
       <Column field="runTime" sortable>
         <template #header>
@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted, type ComputedRef } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
@@ -122,7 +122,6 @@ import LJobResults from '@/components/experiments/LJobResults.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { Model } from '@/types/Model'
-import type { Metrics } from '@/types/Workflow'
 
 const experimentStore = useExperimentStore()
 const modelStore = useModelStore()
@@ -188,11 +187,12 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const modelsMap = new Map(models.value.map((model: Model) => [model.uri, model]))
-  return selectedExperimentResults.value.map((results) => ({
+  const data =  selectedExperimentResults.value.map((results) => ({
     ...results,
-    model: modelsMap.get(results.model),
+    model: models.value.find((model: Model) => model.name === results.model),
   }))
+
+  return data
 })
 
 onUnmounted(() => {

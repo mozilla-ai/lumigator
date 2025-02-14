@@ -77,22 +77,6 @@ export type Rouge = {
   rougeLsum_mean: number
 }
 
-export type ObjectData = {
-  metrics: {
-    bertscore?: Bertscore
-    meteor?: Meteor
-    rouge?: Rouge
-    summarization_time: number
-    evaluation_time?: number
-  }
-  artifacts: {
-    predictions?: string[]
-    ground_truth?: string[]
-    model: string
-    examples: string[]
-  }
-}
-
 export type EvaluationJobResults = {
   example: string
   bertscore: Bertscore

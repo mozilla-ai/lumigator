@@ -5,14 +5,14 @@ import {
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
 
-import type { EvaluationJobResults, ObjectData } from '@/types/Experiment'
+import type { EvaluationJobResults, ExperimentResults, ObjectData } from '@/types/Experiment'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus, type Metrics } from '@/types/Workflow'
+import { WorkflowStatus, type Metrics, type Workflow, type WorkflowResults } from '@/types/Workflow'
 import { jobsService } from '@/sdk/jobsService'
 import { calculateDuration } from '@/helpers/calculateDuration'
 import type { JobDetails } from '@/types/JobDetails'
@@ -28,7 +28,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   const selectedJob: Ref<JobDetails | undefined> = ref()
 
   const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
-  const selectedExperimentResults: Ref<Array<Metrics & {model:string}>> = ref([])
+  const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
 
   const isPolling = ref(false)
   let experimentInterval: number | undefined = undefined
@@ -155,16 +155,24 @@ export const useExperimentStore = defineStore('experiments', () => {
     if(workflow.artifacts_download_url) {
 
 
-    const { data } = await axios.get(workflow.artifacts_download_url)
+    const { data }: {data: WorkflowResults} = await axios.get(workflow.artifacts_download_url)
+    console.log(data)
 
-    const metrics = workflow.metrics
+     const modelRow = {
+          model: data.artifacts.model,
+          meteor: data.metrics.meteor,
+          bertscore: data.metrics.bertscore,
+          rouge: data.metrics.rouge,
+          // runTime: getJobRuntime(results.id),
+          jobResults: transformJobResults(data),
+        } as unknown as ExperimentResults
+        selectedExperimentResults.value.push(modelRow)
 
-        selectedExperimentResults.value.push({
-          ...metrics,
-          // jobResults: [],
-          model: workflow.model,
-          // runTime: workflow.runTime,
-        })
+        // selectedExperimentResults.value.push({
+        //   ...results,
+        //   model: workflow.model,
+        //   // runTime: workflow.runTime,
+        // })
       }
   }
   }
@@ -187,7 +195,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * @param {Object} objectData .
    * @returns {Array} Transformed results array.
    */
-  function transformJobResults(objectData: ObjectData): EvaluationJobResults[] {
+  function transformJobResults(objectData: WorkflowResults): EvaluationJobResults[] {
     const transformedArray = objectData.artifacts.examples.map((example, index: number) => {
       return {
         example,

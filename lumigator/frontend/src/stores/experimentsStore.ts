@@ -1,4 +1,4 @@
-import { ref, watch, computed, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
   experimentsService,
@@ -6,28 +6,21 @@ import {
 } from '@/sdk/experimentsService'
 
 import type { EvaluationJobResults, ExperimentResults } from '@/types/Experiment'
-import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { downloadContent } from '@/helpers/downloadContent'
-import type { Dataset } from '@/types/Dataset'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus, type WorkflowResults } from '@/types/Workflow'
+import { WorkflowStatus, type Workflow, type WorkflowResults } from '@/types/Workflow'
 import { jobsService } from '@/sdk/jobsService'
-import { calculateDuration } from '@/helpers/calculateDuration'
-import type { JobDetails } from '@/types/JobDetails'
 import axios from 'axios'
 
 export const useExperimentStore = defineStore('experiments', () => {
   const experiments: Ref<ExperimentNew[]> = ref([])
 
-  const jobs: Ref<JobDetails[]> = ref([])
-  const inferenceJobs: Ref<JobDetails[]> = ref([])
-
   const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
-  const selectedJob: Ref<JobDetails | undefined> = ref()
+  const selectedWorkflow: Ref<Workflow | undefined> = ref()
+  const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
 
-  const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
   const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
 
   const isPolling = ref(false)
@@ -35,67 +28,30 @@ export const useExperimentStore = defineStore('experiments', () => {
   const experimentLogs: Ref<unknown[]> = ref([])
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
-  const hasRunningInferenceJob = computed(() => {
-    return inferenceJobs.value.some((job) => job.status === WorkflowStatus.RUNNING)
-  })
-
-  /**
-   * Loads all experiments and jobs.
-   */
-  async function fetchAllJobs() {
-    let allJobs: JobDetails[]
-    try {
-      allJobs = await jobsService.fetchJobs()
-    } catch {
-      allJobs = []
-    }
-    inferenceJobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'inference')
-      .map((job) => parseJobDetails(job))
-    jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJobDetails(job))
-
+  async function fetchAllExperiments() {
     experiments.value = await experimentsService.fetchExperiments()
-  }
-
-  /**
-   *
-   * @param {*} job - the job data to parse
-   * @returns job data parsed for display as an experiment
-   */
-  function parseJobDetails(job: JobDetails) {
-    return {
-      ...job,
-      entrypoint: undefined,
-      ...retrieveEntrypoint(job),
-      runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
-    }
   }
 
   /**
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteJobIds() {
-    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
+  function getIncompleteExperimentIds() {
+    return experiments.value
+      .filter((experiment) => !completedStatus.includes(experiment.status))
+      .map((experiment) => experiment.id)
   }
 
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  // TODO: Refactor for each kind of job OR gather all jobs into one array for internal use
-  async function updateJobStatus(id: string) {
+  async function updateExperimentStatus(id: string) {
     try {
       const status = await jobsService.fetchJobStatus(id)
-      const inferenceJob = inferenceJobs.value.find((job) => job.id === id)
-      if (inferenceJob) {
-        inferenceJob.status = status
-      }
-      const job = jobs.value.find((job) => job.id === id)
-      if (job) {
-        job.status = status
+      const experiment = experiments.value.find((experiment) => experiment.id === id)
+      if (experiment) {
+        experiment.status = status
       }
     } catch (error) {
       console.error(`Failed to update status for job ${id} ${error}`)
@@ -105,8 +61,8 @@ export const useExperimentStore = defineStore('experiments', () => {
   /**
    * Updates the status for stored experiments that are not completed
    */
-  async function updateStatusForIncompleteJobs() {
-    await Promise.all(getIncompleteJobIds().map((id) => updateJobStatus(id)))
+  async function updateStatusForIncompleteExperiments() {
+    await Promise.all(getIncompleteExperimentIds().map((id) => updateExperimentStatus(id)))
   }
 
   /**
@@ -139,14 +95,9 @@ export const useExperimentStore = defineStore('experiments', () => {
     selectedExperiment.value = experiments.value.find((experiment) => experiment.id === id)
   }
 
-  async function fetchJobDetails(id: string) {
-    const jobData = await jobsService.fetchJobDetails(id)
-    selectedJob.value = parseJobDetails(jobData)
-  }
-
   async function fetchExperimentResultsFile(jobId: string) {
     const blob = await experimentsService.downloadResults(jobId)
-    downloadContent(blob, `${selectedJob.value?.name}_results`)
+    downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
   }
 
   async function fetchExperimentResults(experiment: ExperimentNew) {
@@ -161,29 +112,32 @@ export const useExperimentStore = defineStore('experiments', () => {
           meteor: data.metrics.meteor,
           bertscore: data.metrics.bertscore,
           rouge: data.metrics.rouge,
-          // runTime: getJobRuntime(results.id),
+          runTime: undefined, //getJobRuntime(results.id),
           jobResults: transformJobResults(data),
-        } as unknown as ExperimentResults
+        }
         selectedExperimentResults.value.push(modelRow)
-
-        // selectedExperimentResults.value.push({
-        //   ...results,
-        //   model: workflow.model,
-        //   // runTime: workflow.runTime,
-        // })
       }
     }
   }
 
-  async function fetchJobResults(jobId: string) {
-    const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-      resultsData: WorkflowResults
-      id: string
-      download_url: string
-    }
-    if (results?.id) {
-      selectedJob.value = jobs.value.find((job) => job.id === results.id)
-      selectedJobResults.value = transformJobResults(results.resultsData)
+  // async function fetchJobResults(jobId: string) {
+  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
+  //     resultsData: WorkflowResults
+  //     id: string
+  //     download_url: string
+  //   }
+  //   if (results?.id) {
+  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
+  //     selectedJobResults.value = transformJobResults(results.resultsData)
+  //   }
+  // }
+  async function fetchWorkflowResults(workflow: Workflow) {
+    const results = await workflowsService.fetchWorkflowResults(workflow)
+    if (results) {
+      selectedWorkflow.value = workflow
+      selectedWorkflowResults.value = transformJobResults(
+        results,
+      ) as unknown as EvaluationJobResults
     }
   }
 
@@ -230,9 +184,9 @@ export const useExperimentStore = defineStore('experiments', () => {
     return transformedArray
   }
 
-  async function retrieveLogs() {
-    if (selectedJob.value) {
-      const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
+  async function retrieveWorkflowLogs() {
+    if (selectedWorkflow.value) {
+      const logsData = await jobsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
       logs.forEach((log: string) => {
         const lastEntry = experimentLogs.value[experimentLogs.value.length - 1]
@@ -248,56 +202,22 @@ export const useExperimentStore = defineStore('experiments', () => {
     return result
   }
 
-  function startPolling() {
+  function startPollingForWorkflowLogs() {
     experimentLogs.value = []
     if (!isPolling.value) {
       isPolling.value = true
-      retrieveLogs()
+      retrieveWorkflowLogs()
       // Poll every 3 seconds
-      experimentInterval = setInterval(retrieveLogs, 3000)
+      experimentInterval = setInterval(retrieveWorkflowLogs, 3000)
     }
   }
 
-  function stopPolling() {
+  function stopPollingForWorkflowLogs() {
     if (isPolling.value) {
       isPolling.value = false
       clearInterval(experimentInterval)
       experimentInterval = undefined
     }
-  }
-
-  /**
-   * Starts ground truth generation aka an inference job.
-   *
-   * @param {Object} groundTruthPayload - The payload for ground truth generation.
-   * @returns {Promise<Object|null>} The response from the annotation job or null if it fails.
-   */
-  async function startGroundTruthGeneration(dataset: Dataset) {
-    try {
-      const jobResponse = await jobsService.triggerAnnotationJob(dataset)
-      if (jobResponse) {
-        // Start polling to monitor the job status
-        await updateJobStatus(jobResponse.id) // Ensure initial update
-        startPollingForAnnotationJob(jobResponse.id) // Add polling for ground truth job
-        return jobResponse
-      }
-      return
-    } catch (error) {
-      console.error('Failed to start ground truth generation:', error)
-      return
-    }
-  }
-
-  function startPollingForAnnotationJob(jobId: string) {
-    isPolling.value = true
-    experimentInterval = setInterval(() => {
-      updateJobStatus(jobId).then(() => {
-        const job = jobs.value.find((job) => job.id === jobId)
-        if (job && completedStatus.includes(job.status)) {
-          stopPolling() // Stop polling when the job is complete
-        }
-      })
-    }, 3000) // Poll every 3 seconds
   }
 
   // function getJobRuntime(jobId: string) {
@@ -309,35 +229,33 @@ export const useExperimentStore = defineStore('experiments', () => {
     selectedExperiment,
     (newValue) => {
       if (newValue?.workflows.some((workflow) => workflow.status === WorkflowStatus.RUNNING)) {
-        // startPolling()
+        startPollingForWorkflowLogs()
         return
       } else if (isPolling.value) {
-        stopPolling()
+        stopPollingForWorkflowLogs()
       }
     },
     { deep: true },
   )
 
   watch(
-    selectedJob,
+    selectedWorkflow,
     (newValue) => {
       experimentLogs.value = []
       if (newValue) {
-        // const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
-        // if (isEvaluationJob) {
         // switch to the experiment the job belongs
-        // const selectedExperimentId = experiments.value.find(experiment => {
-        //   return experiment.workflows.some(workflow => workflow.id === newValue.id)
-        // })
-        selectedExperiment.value = experiments.value.find((exp) => exp.id === newValue.id)
-        // }
-        retrieveLogs()
+        const found = experiments.value.find((experiment) => {
+          return experiment.workflows.some((workflow) => workflow.id === newValue.id)
+        })
+        selectedExperiment.value = found
+
+        retrieveWorkflowLogs()
       }
       if (newValue?.status === WorkflowStatus.RUNNING) {
-        startPolling()
+        startPollingForWorkflowLogs()
         return
       } else if (isPolling.value) {
-        stopPolling()
+        stopPollingForWorkflowLogs()
       }
     },
     { deep: true },
@@ -346,26 +264,20 @@ export const useExperimentStore = defineStore('experiments', () => {
   return {
     // state
     experiments,
-    jobs,
-    inferenceJobs,
     selectedExperiment,
-    selectedJob,
     experimentLogs,
     selectedExperimentResults,
-    selectedJobResults,
+    selectedWorkflow,
+    selectedWorkflowResults,
     isPolling,
     // computed
-    hasRunningInferenceJob,
     // actions
-    fetchAllJobs,
-    updateStatusForIncompleteJobs,
     loadExperimentDetails,
-    fetchJobDetails,
     fetchExperimentResults,
-    fetchJobResults,
     fetchExperimentResultsFile,
-    startGroundTruthGeneration,
     createExperimentWithWorkflows,
-    parseJobDetails,
+    fetchAllExperiments,
+    updateStatusForIncompleteExperiments,
+    fetchWorkflowResults,
   }
 })

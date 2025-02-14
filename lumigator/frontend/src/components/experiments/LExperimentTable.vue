@@ -93,7 +93,7 @@ import Tag from 'primevue/tag'
 import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus, type JobResult, type Workflow } from '@/types/Workflow'
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 const props = defineProps({
   tableData: {
@@ -106,7 +106,7 @@ const emit = defineEmits(['l-experiment-selected'])
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
-const { experiments, selectedJob } = storeToRefs(experimentStore)
+const { experiments, selectedWorkflow } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
 const focusedItem = ref()
 const expandedRows = ref([])
@@ -131,7 +131,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
     return
   }
   // user selected an experiment, clear selected job
-  selectedJob.value = undefined
+  selectedWorkflow.value = undefined
   emit('l-experiment-selected', event.data)
 }
 
@@ -140,7 +140,8 @@ function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
   if (workflow.jobs) {
-    experimentStore.fetchJobDetails(workflow.jobs[0].id)
+    // experimentStore.fetchJobDetails(workflow.jobs[0].id)
+    selectedWorkflow.value = workflow
   }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
@@ -169,13 +170,13 @@ function retrieveStatus(experimentId: string) {
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
-async function throttledUpdateAllJobs() {
+async function throttledUpdateAllWorkflows() {
   if (isThrottled.value) {
     return
   } // Skip if throttle is active
 
   isThrottled.value = true
-  await experimentStore.updateStatusForIncompleteJobs()
+  await experimentStore.updateStatusForIncompleteExperiments()
   setTimeout(() => {
     isThrottled.value = false // Release throttle after delay
   }, 5000) // 5 seconds throttle
@@ -185,9 +186,9 @@ async function throttledUpdateAllJobs() {
 // updates the status of each experiment
 let pollingId: number | undefined
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteJobs()
+  await experimentStore.updateStatusForIncompleteExperiments()
   pollingId = setInterval(async () => {
-    await throttledUpdateAllJobs()
+    await throttledUpdateAllWorkflows()
   }, 1000)
 }) // Check every second, throttled to execute every 5 seconds
 
@@ -202,7 +203,7 @@ watch(showSlidingPanel, (newValue) => {
 watch(
   () => props.tableData.length,
   async () => {
-    await experimentStore.updateStatusForIncompleteJobs()
+    await experimentStore.updateStatusForIncompleteExperiments()
   },
 )
 </script>

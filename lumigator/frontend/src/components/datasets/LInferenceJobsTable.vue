@@ -55,7 +55,7 @@
           class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
           style="cursor: not-allowed; pointer-events: all"
           aria-controls="optionsMenu"
-        />
+        ></span>
       </template>
     </Column>
   </DataTable>
@@ -67,15 +67,13 @@ import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
 
-const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
-const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(experimentStore)
+const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(datasetStore)
 defineProps({
   tableData: {
     type: Array,
@@ -112,7 +110,7 @@ async function throttledUpdateAllJobs() {
   } // Skip if throttle is active
 
   isThrottled.value = true
-  await experimentStore.updateStatusForIncompleteJobs()
+  await datasetStore.updateStatusForIncompleteJobs()
   setTimeout(() => {
     isThrottled.value = false // Release throttle after delay
   }, 5000) // 5 seconds throttle
@@ -123,7 +121,7 @@ async function throttledUpdateAllJobs() {
 let pollingId: number | undefined
 watch(hasRunningInferenceJob, async (newValue) => {
   if (newValue) {
-    await experimentStore.updateStatusForIncompleteJobs()
+    await datasetStore.updateStatusForIncompleteJobs()
     pollingId = setInterval(async () => {
       await throttledUpdateAllJobs()
     }, 1000)

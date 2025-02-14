@@ -138,7 +138,7 @@ async function triggerExperiment() {
     modelSelection.value.selectedModels,
   )
   if (workflows.length) {
-    await experimentStore.fetchAllJobs()
+    await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()
     toast.add({

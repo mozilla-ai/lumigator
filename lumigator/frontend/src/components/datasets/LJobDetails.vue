@@ -35,7 +35,7 @@
             :pt="{ root: 'l-experiment-details__tag' }"
           ></Tag>
           <Button
-            v-if="isWorkflowFocused"
+            v-if="isJobFocused"
             icon="pi pi-external-link"
             severity="secondary"
             size="small"
@@ -50,16 +50,16 @@
         </div>
       </div>
       <div
-        v-if="isWorkflowFocused && selectedWorkflow"
+        v-if="isJobFocused && selectedJob"
         class="l-experiment-details__content-item"
-        @click="copyToClipboard(selectedWorkflow.id)"
+        @click="copyToClipboard(selectedJob.id)"
       >
         <div class="l-experiment-details__content-label">job id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
         >
-          {{ selectedWorkflow?.id }}
+          {{ selectedJob?.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
@@ -67,36 +67,26 @@
           ></i>
         </div>
       </div>
-      <div
+      <!-- <div
         class="l-experiment-details__content-item"
-        v-if="focusedItem && isExperiment(focusedItem)"
+        v-if="focusedItem"
       >
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
           {{ focusedItem.dataset }}
         </div>
-      </div>
+      </div> -->
       <div
         class="l-experiment-details__content-item"
-        v-if="focusedItem && isExperiment(focusedItem)"
+        v-if="focusedItem"
       >
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
+        <div class="l-experiment-details__content-field">{{ focusedItem?.type }} - {{ focusedItem?.metadata.job_type }}</div>
       </div>
-      <div v-if="!isWorkflowFocused" class="l-experiment-details__content-item">
-        <div class="l-experiment-details__content-label">Evaluated Models</div>
-        <div class="l-experiment-details__content-field">
-          <ul>
-            <li v-for="workflow in selectedExperiment?.workflows" :key="workflow.id">
-              · {{ workflow.model }}
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div v-if="isWorkflowFocused" class="l-experiment-details__content-item">
+      <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedWorkflow as any)?.model.path }}
+          {{ (selectedJob as any)?.model.path }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -110,12 +100,6 @@
         <div class="l-experiment-details__content-label">run time</div>
         <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
       </div> -->
-      <div v-if="selectedExperiment" class="l-experiment-details__content-item">
-        <div class="l-experiment-details__content-label">samples limit</div>
-        <div class="l-experiment-details__content-field">
-          {{ selectedExperiment.max_samples }}
-        </div>
-      </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">top-p</div>
         <div class="l-experiment-details__content-field">0.5</div>
@@ -133,14 +117,14 @@
         @click="showResults"
       ></Button>
       <Button
-        v-if="isWorkflowFocused"
+        v-if="isJobFocused"
         rounded
         severity="secondary"
         size="small"
         icon="pi pi-download"
         label="Download Results"
         :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
-        @click="emit('l-download-results', selectedWorkflow)"
+        @click="emit('l-download-results', selectedJob)"
       ></Button>
     </div>
   </div>
@@ -149,13 +133,13 @@
 <script lang="ts" setup>
 import { computed, ref, type ComputedRef } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
 
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { ExperimentNew } from '@/types/ExperimentNew'
+import { WorkflowStatus } from '@/types/Workflow'
+import { useDatasetStore } from '@/stores/datasetsStore'
+import type { JobDetails } from '@/types/JobDetails'
 
 const emit = defineEmits([
   'l-close-details',
@@ -171,8 +155,8 @@ defineProps({
     required: true,
   },
 })
-const experimentStore = useExperimentStore()
-const { experiments, selectedExperiment, selectedWorkflow } = storeToRefs(experimentStore)
+const datasetStore = useDatasetStore()
+const { jobs, selectedJob } = storeToRefs(datasetStore)
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
@@ -183,32 +167,26 @@ const copyToClipboard = async (longString: string) => {
   await navigator.clipboard.writeText(longString)
 }
 
-const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
+const isJobFocused = computed(() => Boolean(selectedJob.value))
 // const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
-  if (isWorkflowFocused.value) {
-    return selectedWorkflow.value?.status
-  }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
-  )
-  return selected ? selected.status : selectedExperiment.value?.status
+    return selectedJob.value?.status
 })
 
 // const isInference = computed(() => {
-//   return isWorkflowFocused.value && inferenceJobs.value.some((job) => job.id === selectedWorkflow.value?.id)
+//   return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
 // })
 
-const focusedItem: ComputedRef<Workflow | ExperimentNew | undefined> = computed(() => {
-  if (selectedWorkflow.value) {
-    return selectedWorkflow.value
+const focusedItem: ComputedRef<JobDetails | undefined> = computed(() => {
+  if (selectedJob.value) {
+    return selectedJob.value
   }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
+  const selected = jobs.value.find(
+    (job) => job.id === selectedJob.value?.id,
   )
-  return selected ? selected : selectedExperiment.value
+  return selected ? selected : selectedJob.value
 })
 
 const tagSeverity = computed(() => {
@@ -226,40 +204,32 @@ const tagSeverity = computed(() => {
 })
 
 // const focusedItemRunTime = computed(() => {
-//   if (isWorkflowFocused.value) {
-//     return selectedWorkflow.value?.runTime ? selectedWorkflow.value?.runTime : '-'
+//   if (isJobFocused.value) {
+//     return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
 //   }
 
 //   if (
 //     currentItemStatus.value !== WorkflowStatus.RUNNING &&
 //     currentItemStatus.value !== WorkflowStatus.PENDING
 //   ) {
-//     const endTimes = selectedExperiment.value?.workflows.map((workflow) => workflow.end_time) || []
+//     const endTimes = selectedJob.value?.workflows.map((workflow) => workflow.end_time) || []
 //     const lastEndTime = endTimes.reduce((latest, current) => {
 //       return new Date(latest) > new Date(current) ? latest : current
 //     })
-//     if (lastEndTime && selectedExperiment.value) {
-//       return calculateDuration(selectedExperiment.value?.created_at, lastEndTime)
+//     if (lastEndTime && selectedJob.value) {
+//       return calculateDuration(selectedJob.value?.created_at, lastEndTime)
 //     }
 //   }
 //   return '-'
 // })
 
 const showResults = () => {
-  if (isWorkflowFocused.value) {
-    emit('l-job-results', selectedWorkflow.value)
+  if (isJobFocused.value) {
+    emit('l-job-results', selectedJob.value)
     return
   }
-  emit('l-experiment-results', selectedExperiment.value)
+  emit('l-experiment-results', selectedJob.value)
 }
-
-function isExperiment(item: ExperimentNew | Workflow): item is ExperimentNew {
-  return 'workflows' in item
-}
-
-// function _isJob(item: ExperimentNew | JobDetails): item is JobDetails {
-//   return 'entrypoint' in item
-// }
 </script>
 
 <style lang="scss">

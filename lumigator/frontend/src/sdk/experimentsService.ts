@@ -43,9 +43,11 @@ export async function createExperiment(
 }
 
 export async function fetchExperimentResults(
-  workflowId: string,
+  experimentId: string,
 ): Promise<unknown | { resultsData: WorkflowResults; id: string; download_url: string }> {
-  const response = await lumigatorApiAxiosInstance.get(`experiments/${workflowId}/result/download`)
+  const response = await lumigatorApiAxiosInstance.get(
+    `experiments/${experimentId}/result/download`,
+  )
   const { download_url, id } = response.data
   if (!download_url) {
     console.error('No download_url found in the response.')

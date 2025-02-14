@@ -174,6 +174,8 @@ INFERENCE_TEMPLATES = {
     "oai://gpt-4o-mini": oai_infer_template,
     "oai://gpt-4o": oai_infer_template,
     "mistral://open-mistral-7b": oai_infer_template,
+    "ds://deepseek-chat": oai_infer_template,
+    "ds://deepseek-reasoner": oai_infer_template,
 }
 
 # For eval, the default template is the causal template
@@ -187,6 +189,8 @@ EVALUATION_TEMPLATES = {
     "oai://gpt-4o-mini": oai_eval_template,
     "oai://gpt-4o": oai_eval_template,
     "mistral://open-mistral-7b": oai_eval_template,
+    "ds://deepseek-chat": oai_eval_template,
+    "ds://deepseek-reasoner": oai_eval_template,
     "llamafile://mistralai/Mistral-7B-Instruct-v0.2": oai_eval_template,
 }
 

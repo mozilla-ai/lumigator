@@ -47,6 +47,11 @@ class Meteor(BaseModel):
     meteor_mean: float
 
 
+class Bleu(BaseModel):
+    bleu: list[float]
+    bleu_mean: float
+
+
 class Rouge(BaseModel):
     rouge1: list[float]
     rouge2: list[float]
@@ -62,6 +67,7 @@ class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
+    bleu: Bleu | None = None
 
 
 class EvalJobArtifacts(BaseModel):

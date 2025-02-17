@@ -439,7 +439,7 @@ jobs:
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
 
   helm:
-    name: Code linting
+    name: Helm
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

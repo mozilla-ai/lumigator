@@ -32,9 +32,9 @@ dependencies:
   - name: kuberay-operator
     repository: "https://ray-project.github.io/kuberay-helm/"
     version: "1.2.2"
-    condition: ray.enabled
+    condition: kuberay-operator.enabled
 
   - name: ray-cluster
     repository: "https://ray-project.github.io/kuberay-helm/"
     version: "1.2.2"
-    condition: ray.enabled
+    condition: ray-cluster.enabled

@@ -120,6 +120,7 @@ services:
       - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
       - MISTRAL_API_KEY
       - OPENAI_API_KEY
+      - DEEPSEEK_API_KEY
       - HF_TOKEN
       - HF_HOME
       - AWS_ACCESS_KEY_ID

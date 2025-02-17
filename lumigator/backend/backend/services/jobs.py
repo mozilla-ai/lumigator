@@ -445,16 +445,30 @@ class JobService:
                     top_p=request.job_config.top_p,
                 )
             case _:
-                job_config.hf_pipeline = HfPipelineConfig(
-                    model_uri=request.job_config.model,
-                    task=request.job_config.task,
-                    accelerator=request.job_config.accelerator,
-                    revision=request.job_config.revision,
-                    use_fast=request.job_config.use_fast,
-                    trust_remote_code=request.job_config.trust_remote_code,
-                    torch_dtype=request.job_config.torch_dtype,
-                    max_new_tokens=500,
-                )
+                if request.job_config.model_url and request.job_config.model_url.startswith("http://"):
+                    job_config.inference_server = InferenceServerConfig(
+                        base_url=self._set_model_type(request),
+                        engine=request.job_config.model,
+                        system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                        max_retries=3,
+                    )
+                    job_config.params = SamplingParameters(
+                        max_tokens=request.job_config.max_tokens,
+                        frequency_penalty=request.job_config.frequency_penalty,
+                        temperature=request.job_config.temperature,
+                        top_p=request.job_config.top_p,
+                    )
+                else:
+                    job_config.hf_pipeline = HfPipelineConfig(
+                        model_uri=request.job_config.model,
+                        task=request.job_config.task,
+                        accelerator=request.job_config.accelerator,
+                        revision=request.job_config.revision,
+                        use_fast=request.job_config.use_fast,
+                        trust_remote_code=request.job_config.trust_remote_code,
+                        torch_dtype=request.job_config.torch_dtype,
+                        max_new_tokens=500,
+                    )
         return job_config
 
     def generate_evaluation_lite_job_config(

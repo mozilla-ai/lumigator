@@ -569,8 +569,13 @@ class JobService:
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        # TODO Defer to specific job
-        if job_type == JobType.INFERENCE:
+        # NOTE: Only inference jobs can store results in a dataset atm. Among them:
+        # - prediction jobs are run in a workflow before evaluations => they trigger dataset saving
+        #   at workflow level so it is prepended to the eval job
+        # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
+        # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
+        # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
+        if job_type == JobType.INFERENCE and request.job_config.store_to_dataset:
             self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 
         loguru.logger.info("Getting response...")

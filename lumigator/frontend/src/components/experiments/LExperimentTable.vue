@@ -21,28 +21,28 @@
         <Column field="name" :style="columnStyles.name" header="experiment title" />
         <Column field="created" header="created" sortable :style="columnStyles.created">
           <template #body="slotProps">
-            {{ formatDate(slotProps.data.created) }}
+            {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
         <Column field="status" header="status">
           <template #body="slotProps">
             <div>
               <Tag
-                v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED'"
+                v-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.SUCCEEDED"
                 severity="success"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED'"
+                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.FAILED"
                 severity="danger"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === 'INCOMPLETE'"
+                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.INCOMPLETE"
                 severity="info"
                 rounded
                 :value="retrieveStatus(slotProps.data.id)"
@@ -64,15 +64,16 @@
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
               style="cursor: not-allowed; pointer-events: all"
               aria-controls="optionsMenu"
-            />
+            >
+            </span>
           </template>
         </Column>
         <template #expansion="slotProps">
           <div class="l-experiment-table__jobs-table-container">
             <l-jobs-table
               :column-styles="columnStyles"
-              :table-data="slotProps.data.jobs"
-              @l-job-selected="onJobSelected($event, slotProps.data)"
+              :table-data="slotProps.data.workflows"
+              @l-job-selected="onWorkflowSelected($event, slotProps.data)"
             />
           </div>
         </template>
@@ -82,21 +83,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, type PropType } from 'vue'
 import { storeToRefs } from 'pinia'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
 
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import Tag from 'primevue/tag'
-import LJobsTable from '@/components/jobs/LJobsTable.vue'
+import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
-import type { Experiment, Job } from '@/types/Experiment'
 import { formatDate } from '@/helpers/formatDate'
-
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import type { ExperimentNew } from '@/types/ExperimentNew'
 const props = defineProps({
   tableData: {
-    type: Array,
+    type: Array as PropType<ExperimentNew[]>,
     required: true,
   },
 })
@@ -105,7 +106,7 @@ const emit = defineEmits(['l-experiment-selected'])
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
-const { experiments, selectedJob } = storeToRefs(experimentStore)
+const { experiments, selectedWorkflow } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
 const focusedItem = ref()
 const expandedRows = ref([])
@@ -130,48 +131,53 @@ function handleRowClick(event: DataTableRowClickEvent) {
     return
   }
   // user selected an experiment, clear selected job
-  selectedJob.value = undefined
+  selectedWorkflow.value = undefined
   emit('l-experiment-selected', event.data)
 }
 
-function onJobSelected(job: Job, experiment: Experiment) {
+function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
   // fetching job details from BE instead of filtering
   // because job might be still running
-  experimentStore.fetchJobDetails(job.id)
+  // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
+  if (workflow.jobs) {
+    experimentStore.fetchWorkflowDetails(workflow.id)
+    selectedWorkflow.value = workflow
+  }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
 }
 
+// aggregates the experiment's status based on its workflows statuses
 function retrieveStatus(experimentId: string) {
   const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {
     return
   }
 
-  const jobStatuses = experiment.jobs.map((job) => job.status)
-  const uniqueStatuses = new Set(jobStatuses)
+  const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
+  const uniqueStatuses = new Set(workflowStatuses)
   if (uniqueStatuses.size === 1) {
     experiment.status = [...uniqueStatuses][0]
     return [...uniqueStatuses][0]
   }
-  if (uniqueStatuses.has('RUNNING')) {
-    experiment.status = 'RUNNING'
-    return 'RUNNING'
+  if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
+    experiment.status = WorkflowStatus.RUNNING
+    return WorkflowStatus.RUNNING
   }
-  if (uniqueStatuses.has('FAILED') && uniqueStatuses.has('SUCCEEDED')) {
-    experiment.status = 'INCOMPLETE'
-    return 'INCOMPLETE'
+  if (uniqueStatuses.has(WorkflowStatus.FAILED) && uniqueStatuses.has(WorkflowStatus.SUCCEEDED)) {
+    experiment.status = WorkflowStatus.INCOMPLETE
+    return WorkflowStatus.INCOMPLETE
   }
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
-async function throttledUpdateAllJobs() {
+async function throttledUpdateAllWorkflows() {
   if (isThrottled.value) {
     return
   } // Skip if throttle is active
 
   isThrottled.value = true
-  await experimentStore.updateStatusForIncompleteJobs()
+  await experimentStore.updateStatusForIncompleteExperiments()
   setTimeout(() => {
     isThrottled.value = false // Release throttle after delay
   }, 5000) // 5 seconds throttle
@@ -181,9 +187,9 @@ async function throttledUpdateAllJobs() {
 // updates the status of each experiment
 let pollingId: number | undefined
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteJobs()
+  await experimentStore.updateStatusForIncompleteExperiments()
   pollingId = setInterval(async () => {
-    await throttledUpdateAllJobs()
+    await throttledUpdateAllWorkflows()
   }, 1000)
 }) // Check every second, throttled to execute every 5 seconds
 
@@ -198,7 +204,7 @@ watch(showSlidingPanel, (newValue) => {
 watch(
   () => props.tableData.length,
   async () => {
-    await experimentStore.updateStatusForIncompleteJobs()
+    await experimentStore.updateStatusForIncompleteExperiments()
   },
 )
 </script>

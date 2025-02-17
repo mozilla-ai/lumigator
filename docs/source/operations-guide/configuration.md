@@ -1,7 +1,8 @@
 # Configuring Lumigator
 
-> [!NOTE]
-> This guide only covers configuring Lumigator when deployed using Docker.
+```{note}
+This guide only covers configuring Lumigator when deployed using Docker.
+```
 
 Lumigator comes with sensible defaults that allow you to [start using it](../get-started/installation.md) without modification using [`Docker Compose`](https://docs.docker.com/compose/).
 
@@ -26,8 +27,9 @@ From there the `.env` file variables are used in Lumigator's application or supp
 
 When you stop Lumigator using commands like `make local-down` or `make stop-lumigator`, the temporary files stored under `build` are removed. While Lumigator is running they are present if you wish to examine their contents.
 
-> [!NOTE]
-> The `build` directory and the user defined config file are both marked in `.gitignore`
+```{note}
+The `build` directory and the user defined config file are both marked in `.gitignore`
+```
 
 ## How should I set my own settings?
 

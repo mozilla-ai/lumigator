@@ -35,7 +35,7 @@
           <TabPanel value="1">
             <l-inference-jobs-table
               :table-data="inferenceJobs"
-              @l-inference-selected="onJobInferenceSelected($event)"
+              @l-inference-selected="onInferenceJobSelected($event)"
               @l-inference-finished="reloadDatasetTable"
             />
           </TabPanel>
@@ -52,7 +52,7 @@
         @l-delete-dataset="deleteConfirmation($event)"
         @l-download-dataset="onDownloadDataset($event)"
       />
-      <l-experiment-details
+      <l-job-details
         v-if="showSlidingPanel && selectedJob"
         title="Job Details"
         @l-close-details="onCloseJobDetails"
@@ -66,7 +66,7 @@
       :position="'bottom'"
       @l-drawer-closed="showLogs = false"
     >
-      <l-experiment-logs v-if="showLogs" />
+      <l-experiment-logs v-if="showLogs" :logType="'job'" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -75,7 +75,6 @@
 import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import { useRouter } from 'vue-router'
 import LPageHeader from '@/components/layout/LPageHeader.vue'
@@ -83,8 +82,7 @@ import LDatasetTable from '@/components/datasets/LDatasetTable.vue'
 import LFileUpload from '@/components/common/LFileUpload.vue'
 import LDatasetEmpty from '@/components/datasets/LDatasetEmpty.vue'
 import LDatasetDetails from '@/components/datasets/LDatasetDetails.vue'
-import LInferenceJobsTable from '@/components/jobs/LInferenceJobsTable.vue'
-import LExperimentDetails from '@/components/experiments/LExperimentDetails.vue'
+import LInferenceJobsTable from '@/components/datasets/LInferenceJobsTable.vue'
 import LExperimentsDrawer from '@/components/experiments/LExperimentsDrawer.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import Tabs from 'primevue/tabs'
@@ -97,12 +95,12 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
-import type { Job } from '@/types/Experiment'
+import type { JobDetails } from '@/types/JobDetails'
+import LJobDetails from '../datasets/LJobDetails.vue'
 
 const datasetStore = useDatasetStore()
-const { datasets, selectedDataset } = storeToRefs(datasetStore)
-const experimentStore = useExperimentStore()
-const { inferenceJobs, selectedJob, hasRunningInferenceJob } = storeToRefs(experimentStore)
+const { datasets, selectedDataset, selectedJob, inferenceJobs, hasRunningInferenceJob } =
+  storeToRefs(datasetStore)
 const { showSlidingPanel } = useSlidePanel()
 const toast = useToast()
 const datasetInput = ref()
@@ -194,9 +192,9 @@ const onExperimentDataset = (dataset: Dataset) => {
   datasetStore.fetchDatasetDetails(dataset.id)
 }
 
-const onJobInferenceSelected = (job: Job) => {
+const onInferenceJobSelected = (job: JobDetails) => {
   selectedDataset.value = undefined
-  experimentStore.fetchJobDetails(job.id)
+  datasetStore.fetchJobDetails(job.id)
   showSlidingPanel.value = true
 }
 

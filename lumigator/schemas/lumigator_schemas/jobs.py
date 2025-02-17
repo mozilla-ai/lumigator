@@ -1,9 +1,16 @@
 import datetime as dt
+import json
+import re
 from enum import Enum
-from typing import Any, Literal, TypeVar
+from itertools import dropwhile
+from json import JSONDecodeError
+from shlex import split
+from typing import Any, ClassVar, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from lumigator_schemas.redactable_base_model import RedactableBaseModel
 
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
@@ -57,12 +64,12 @@ class JobLogsResponse(BaseModel):
 # Check Ray items actually used and copy
 # those from the schema
 # ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
-class JobSubmissionResponse(BaseModel):
+class JobSubmissionResponse(RedactableBaseModel):
     type: str | None = None
     submission_id: str | None = None
     driver_info: str | None = None
     status: str | None = None
-    entrypoint: str | None = None
+    config: dict | None = Field(default_factory=dict)
     message: str | None = None
     error_type: str | None = None
     start_time: dt.datetime | None = None
@@ -72,6 +79,91 @@ class JobSubmissionResponse(BaseModel):
     driver_agent_http_address: str | None = None
     driver_node_id: str | None = None
     driver_exit_code: int | None = None
+
+    # Key used to identify the entrypoint in data sent to Ray.
+    _entrypoint_key: ClassVar[str] = "entrypoint"
+
+    # Flag used to indicate 'config' in the entrypoint sent to Ray.
+    _config_flag: ClassVar[str] = "--config"
+
+    # Key used to identify config on the JobSubmission model.
+    _config_key: ClassVar[str] = "config"
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """Normalize and redact 'entrypoint' field before model validation."""
+        entrypoint = values.get(cls._entrypoint_key, None)
+
+        if not isinstance(entrypoint, str):
+            return values
+
+        parsed_entrypoint = cls.parse_entrypoint(entrypoint)
+        if parsed_entrypoint:
+            values[cls._config_key] = cls.redactor.redact(parsed_entrypoint)
+
+        return values
+
+    @staticmethod
+    def extract_json_token(tokens: list[str], flag: str) -> dict[str, Any] | None:
+        """Extract the token following the flag and parse it as JSON."""
+        # Drop tokens until we reach the flag
+        token_iter = dropwhile(lambda t: t != flag, tokens)
+        next(token_iter, None)  # Consume the flag itself
+        config_json = next(token_iter, None)  # Get the actual config JSON
+
+        if not config_json:
+            return None
+
+        # Remove potential wrapping single quotes.
+        config_json = config_json.strip().lstrip("'").rstrip("'")
+
+        try:
+            return json.loads(config_json)
+        except JSONDecodeError:
+            return None
+
+    @staticmethod
+    def extract_model_path(json_object: dict[str, Any]) -> str | None:
+        """Extract and normalize the model path from the given JSON object."""
+        model_path = (
+            json_object.get("model", {}).get("path")
+            or json_object.get("model", {}).get("inference", {}).get("engine")
+            or json_object.get("hf_pipeline", {}).get("model_uri")
+            or json_object.get("inference_server", {}).get("engine")
+        )
+
+        return model_path
+
+    @classmethod
+    def parse_entrypoint(cls, entrypoint: str) -> dict[str, Any] | None:
+        """Parse the entrypoint string and extract the config JSON."""
+        tokens = split(entrypoint)
+
+        # Extract JSON for the specified flag.
+        json_object = cls.extract_json_token(tokens, cls._config_flag)
+        if not json_object:
+            return None
+
+        # Normalize dataset field
+        dataset_match = re.search(r"datasets/([^/]+)/([^/]+)", json_object.get("dataset", {}).get("path", ""))
+        if dataset_match:
+            json_object["dataset"] = {"id": dataset_match.group(1), "name": dataset_match.group(2)}
+
+        # Normalize job max_samples field
+        json_object["max_samples"] = json_object.get("job", {}).get("max_samples") or json_object.get(
+            "evaluation", {}
+        ).get("max_samples")
+
+        if json_object["max_samples"] is None:
+            raise ValueError(f"Unable to parse max_samples from entrypoint config: {json_object}")
+
+        # Some jobs don't have models attached (e.g. evaluation).
+        model_path = cls.extract_model_path(json_object)
+
+        json_object.setdefault("model", {})["path"] = model_path
+
+        return json_object
 
 
 class JobEvalConfig(BaseModel):

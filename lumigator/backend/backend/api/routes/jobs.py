@@ -19,13 +19,14 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
+    JobSubmissionResponse,
     JobType,
 )
 from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
 from starlette.responses import Response
 
-from backend.api.deps import DatasetServiceDep, JobServiceDep
+from backend.api.deps import DatasetServiceDep, JobServiceDep, RedactorDep
 from backend.api.http_headers import HttpHeaders
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
@@ -114,6 +115,7 @@ def create_evaluation_job(
 @router.get("/")
 def list_jobs(
     service: JobServiceDep,
+    redactor: RedactorDep,
     skip: int = 0,
     limit: int = 100,
     job_types: Annotated[list[str], Query()] = (),
@@ -137,12 +139,15 @@ def list_jobs(
 
     # Force a DB update of the job status by querying each one, not ideal for will do for now.
     for job in jobs.items:
-        job = service.get_job(job.id)
+        _ = service.get_job(job.id)
 
     # Get all jobs Ray knows about on a dict
     ray_jobs = {ray_job.submission_id: ray_job for ray_job in _get_all_ray_jobs()}
 
     results = list[Job]()
+
+    # Configure redaction
+    JobSubmissionResponse.redactor = redactor
 
     # Merge Ray jobs into the repositories jobs
     job: JobResponse
@@ -166,6 +171,7 @@ def list_jobs(
 @router.get("/{job_id}")
 def get_job(
     service: JobServiceDep,
+    redactor: RedactorDep,
     job_id: UUID,
 ) -> Job:
     """Retrieves merged job data from the Lumigator repository and Ray
@@ -179,6 +185,8 @@ def get_job(
     job = service.get_job(job_id)
     ray_job: RayJobDetails
     ray_job = _get_ray_job(job_id)
+
+    JobSubmissionResponse.redactor = redactor
 
     # Combine both types of response.
     ray_info = ray_job.dict()

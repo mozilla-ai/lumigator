@@ -5,7 +5,17 @@ export type Job = {
   submission_id: string
   driver_info?: unknown
   status: WorkflowStatus
-  entrypoint: string
+  config: {
+    name: string
+    dataset?: {
+      id: string
+      name: string
+    }
+    max_samples?: number
+    model?: {
+      path: string
+    }
+  }
   message: string
   error_type?: unknown
   start_time: string
@@ -31,8 +41,4 @@ export type Job = {
   updated_at: string
   experiment_id?: string
   driver_exit_code: number
-  dataset: {
-    id: string
-    name: string
-  }
 }

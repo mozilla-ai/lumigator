@@ -63,8 +63,6 @@ export const useDatasetStore = defineStore('datasets', () => {
   function parseJob(job: Job) {
     return {
       ...job,
-      entrypoint: undefined,
-      ...retrieveEntrypoint(job),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }

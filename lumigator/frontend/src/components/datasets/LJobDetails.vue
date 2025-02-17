@@ -82,7 +82,7 @@
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedJob as any)?.model.path }}
+          {{ (selectedJob as any)?.config.model?.path }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

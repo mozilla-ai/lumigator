@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Form, Query, UploadFile, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, status
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from starlette.requests import Request
@@ -35,6 +35,21 @@ def dataset_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     }
 
 
+def preprocess_run_id(
+    run_id: Annotated[UUID | str | None, Form(description="Provide the Job ID that generated this dataset.")] = None,
+) -> UUID | None:
+    """Preprocess the run_id to ensure it is a valid UUID or None, but not an empty string."""
+    if not run_id or run_id == "":
+        return None
+    try:
+        return UUID(run_id)  # if not valid UUID, will raise ValueError
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid run_id: '{run_id}'. Must be a valid UUID.",
+        ) from e
+
+
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
@@ -52,9 +67,7 @@ def upload_dataset(
     format: Annotated[DatasetFormat, Form()],
     request: Request,
     response: Response,
-    run_id: Annotated[
-        UUID | None, Form(description="Provide the Job ID that generated this dataset.")
-    ] = None,
+    run_id: Annotated[UUID | None, Depends(preprocess_run_id)],  # Uses custom preprocess dependency
     generated: Annotated[bool, Form(description="Is the dataset AI-generated?")] = False,
     generated_by: Annotated[
         str | None, Form(description="The name of the AI model that generated this dataset.")
@@ -68,8 +81,12 @@ def upload_dataset(
     NOTE: The recreated version of the CSV file may not have identical delimiters as it will follow
     the format that HuggingFace uses when it generates the CSV.
     """
+    # If user did not provide generated_by value, set it to None
+    if generated_by == "":
+        generated_by = None
+
     ds_response = service.upload_dataset(
-        dataset, format, run_id=run_id, generated=generated, generated_by=generated_by
+        dataset=dataset, format=format, run_id=run_id, generated=generated, generated_by=generated_by
     )
 
     url = request.url_for(get_dataset.__name__, dataset_id=ds_response.id)

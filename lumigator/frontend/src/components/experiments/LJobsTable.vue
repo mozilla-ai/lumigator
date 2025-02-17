@@ -10,36 +10,36 @@
     <Column :style="columnStyles.expander"></Column>
     <Column :style="columnStyles.name">
       <template #body="slotProps">
-        {{ shortenedModel(slotProps.data.model.path) }}
+        {{ shortenedModel(slotProps.data.model) }}
       </template>
     </Column>
     <Column field="created" header="created" :style="columnStyles.created" sortable>
       <template #body="slotProps">
-        {{ formatDate(slotProps.data.created) }}
+        {{ formatDate(slotProps.data.created_at) }}
       </template>
     </Column>
     <Column field="status" header="status">
       <template #body="slotProps">
         <div>
           <Tag
-            v-if="retrieveStatus(slotProps.data.id) === 'SUCCEEDED'"
+            v-if="slotProps.data.status === WorkflowStatus.SUCCEEDED"
             severity="success"
             rounded
-            :value="retrieveStatus(slotProps.data.id)"
+            :value="slotProps.data.status"
             :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
-            v-else-if="retrieveStatus(slotProps.data.id) === 'FAILED'"
+            v-else-if="slotProps.data.status === WorkflowStatus.FAILED"
             severity="danger"
             rounded
-            :value="retrieveStatus(slotProps.data.id)"
+            :value="slotProps.data.status"
             :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
             v-else
             severity="warn"
             rounded
-            :value="retrieveStatus(slotProps.data.id)"
+            :value="slotProps.data.status"
             :pt="{ root: 'l-job-table__tag' }"
           />
         </div>
@@ -53,15 +53,17 @@
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
-import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
+// import { storeToRefs } from 'pinia'
+// import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
-
-const experimentStore = useExperimentStore()
-const { jobs } = storeToRefs(experimentStore)
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import type { PropType } from 'vue'
+// import type { JobDetails } from '@/types/JobDetails'
+// const experimentStore = useExperimentStore()
+// const { jobs } = storeToRefs(experimentStore)
 defineProps({
   tableData: {
-    type: Array,
+    type: Array as PropType<Workflow[]>,
     required: true,
   },
   columnStyles: {
@@ -76,11 +78,6 @@ const shortenedModel = (path: string) => (path.length <= 30 ? path : `${path.sli
 
 function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-job-selected', event.data)
-}
-
-function retrieveStatus(jobID: string) {
-  const job = jobs.value.find((job) => job.id === jobID)
-  return job ? job.status : undefined
 }
 </script>
 

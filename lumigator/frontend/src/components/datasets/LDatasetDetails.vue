@@ -112,7 +112,6 @@ import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import Button from 'primevue/button'
 import LGenerateGroundTruthPopup from '@/components/datasets/LGenerateGroundTruthPopup.vue'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 
 const datasetStore = useDatasetStore()
@@ -121,7 +120,6 @@ const { selectedDataset } = storeToRefs(datasetStore)
 const { showSlidingPanel } = useSlidePanel()
 const isCopied = ref(false)
 const isGenerateGroundTruthPopupVisible = ref(false)
-const experimentStore = useExperimentStore()
 
 const emit = defineEmits([
   'l-delete-dataset',
@@ -149,16 +147,9 @@ function showGenerateGroundTruthPopup() {
 }
 
 async function handleGenerateGroundTruth() {
-  const groundTruthPayload = {
-    name: `Ground truth for ${selectedDataset.value?.filename}`,
-    description: `Ground truth generation for dataset ${selectedDataset.value?.id}`,
-    dataset: selectedDataset.value?.id,
-    max_samples: -1,
-    task: 'summarization',
-  }
-  const inferenceStarted = await experimentStore.startGroundTruthGeneration(groundTruthPayload)
+  const inferenceStarted = await datasetStore.startGroundTruthGeneration(selectedDataset.value!)
   if (inferenceStarted) {
-    experimentStore.fetchAllJobs()
+    datasetStore.fetchAllJobs()
     isGenerateGroundTruthPopupVisible.value = false
     emit('l-generate-gt')
   }

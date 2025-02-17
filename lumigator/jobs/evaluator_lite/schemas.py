@@ -28,7 +28,6 @@ class EvaluationConfig(BaseModel):
 class EvalJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
-    model: ModelConfig
     evaluation: EvaluationConfig
     model_config = ConfigDict(extra="forbid")
 
@@ -68,6 +67,7 @@ class EvalJobMetrics(BaseModel):
 class EvalJobArtifacts(BaseModel):
     predictions: list[str] | None = None
     ground_truth: list[str] | None = None
+    evaluation_time: float | None
 
 
 class JobOutput(BaseModel):

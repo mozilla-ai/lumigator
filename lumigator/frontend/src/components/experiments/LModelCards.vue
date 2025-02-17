@@ -81,7 +81,7 @@ import { storeToRefs } from 'pinia'
 import { useModelStore } from '@/stores/modelsStore'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
-import type { Model } from '@/types/Experiment'
+import type { Model } from '@/types/Model'
 
 const modelStore = useModelStore()
 const { models } = storeToRefs(modelStore)

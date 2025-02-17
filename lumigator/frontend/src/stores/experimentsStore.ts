@@ -11,7 +11,6 @@ import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 import { WorkflowStatus, type Workflow, type WorkflowResults } from '@/types/Workflow'
-import { jobsService } from '@/sdk/jobsService'
 import axios from 'axios'
 
 export const useExperimentStore = defineStore('experiments', () => {
@@ -29,32 +28,74 @@ export const useExperimentStore = defineStore('experiments', () => {
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
   async function fetchAllExperiments() {
-    experiments.value = await experimentsService.fetchExperiments()
+    experiments.value = (await experimentsService.fetchExperiments()).map((experiment) => {
+      return {
+        ...experiment,
+        status: retrieveStatus(experiment),
+      }
+    })
+  }
+
+  // aggregates the experiment's status based on its workflows statuses
+  function retrieveStatus(experiment: ExperimentNew): WorkflowStatus {
+    const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
+    const uniqueStatuses = new Set(workflowStatuses)
+
+    if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
+      return WorkflowStatus.RUNNING
+    } else if (
+      uniqueStatuses.has(WorkflowStatus.FAILED) &&
+      uniqueStatuses.has(WorkflowStatus.SUCCEEDED)
+    ) {
+      return WorkflowStatus.INCOMPLETE
+    } else {
+      // if none of its workflows are running, or if some failed and others succeeded, then it probably means they all have the same status so just return it
+      return [...uniqueStatuses][0]
+    }
   }
 
   /**
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteExperimentIds() {
-    return experiments.value
-      .filter((experiment) => !completedStatus.includes(experiment.status))
-      .map((experiment) => experiment.id)
+  function getIncompleteExperiments(): ExperimentNew[] {
+    return experiments.value.filter((experiment) => !completedStatus.includes(experiment.status))
   }
 
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  async function updateExperimentStatus(id: string) {
+  async function updateExperimentStatus(experiment: ExperimentNew): Promise<void> {
     try {
-      const status = await jobsService.fetchJobStatus(id)
-      const experiment = experiments.value.find((experiment) => experiment.id === id)
-      if (experiment) {
-        experiment.status = status
-      }
+      const incompleteWorkflows = experiment.workflows.filter(
+        (workflow) => !completedStatus.includes(workflow.status),
+      )
+
+      const incompleteWorkflowDetails = await Promise.all(
+        incompleteWorkflows.map((workflow) => workflowsService.fetchWorkflowDetails(workflow.id)),
+      )
+
+      incompleteWorkflowDetails.forEach((workflow) => {
+        const existingWorkflow = experiment.workflows.find((w) => w.id === workflow.id)
+        if (existingWorkflow) {
+          existingWorkflow.status = workflow.status
+        }
+      })
+
+      const status = incompleteWorkflowDetails.every((workflow) =>
+        completedStatus.includes(workflow.status),
+      )
+        ? WorkflowStatus.SUCCEEDED
+        : retrieveStatus(experiment)
+
+      // const e = experiments.value.find((exp) => exp.id === experiment.id)
+      // if (e) {
+      // e.status = status
+      experiment.status = status
+      // }
     } catch (error) {
-      console.error(`Failed to update status for job ${id} ${error}`)
+      console.error(`Failed to update status for exp ${experiment} ${error}`)
     }
   }
 
@@ -62,7 +103,9 @@ export const useExperimentStore = defineStore('experiments', () => {
    * Updates the status for stored experiments that are not completed
    */
   async function updateStatusForIncompleteExperiments() {
-    await Promise.all(getIncompleteExperimentIds().map((id) => updateExperimentStatus(id)))
+    await Promise.all(
+      getIncompleteExperiments().map((experiment) => updateExperimentStatus(experiment)),
+    )
   }
 
   /**
@@ -135,10 +178,12 @@ export const useExperimentStore = defineStore('experiments', () => {
     const results = await workflowsService.fetchWorkflowResults(workflow)
     if (results) {
       selectedWorkflow.value = workflow
-      selectedWorkflowResults.value = transformJobResults(
-        results,
-      )
+      selectedWorkflowResults.value = transformJobResults(results)
     }
+  }
+
+  async function fetchWorkflowDetails(workflowId: string) {
+    return workflowsService.fetchWorkflowDetails(workflowId)
   }
 
   /**
@@ -280,5 +325,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     fetchAllExperiments,
     updateStatusForIncompleteExperiments,
     fetchWorkflowResults,
+    fetchWorkflowDetails,
   }
 })

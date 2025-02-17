@@ -24,8 +24,14 @@ export async function fetchWorkflowResults(workflow: Workflow): Promise<Workflow
   return response.data
 }
 
+export async function fetchWorkflowDetails(id: string): Promise<Workflow> {
+  const response = await lumigatorApiAxiosInstance.get(`workflows/${id}`)
+  return response.data
+}
+
 export const workflowsService = {
   createWorkflow,
   fetchLogs,
   fetchWorkflowResults,
+  fetchWorkflowDetails,
 }

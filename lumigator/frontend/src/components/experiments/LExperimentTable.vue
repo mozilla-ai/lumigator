@@ -140,13 +140,14 @@ function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
   if (workflow.jobs) {
-    // experimentStore.fetchJobDetails(workflow.jobs[0].id)
+    experimentStore.fetchWorkflowDetails(workflow.id)
     selectedWorkflow.value = workflow
   }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
 }
 
+// aggregates the experiment's status based on its workflows statuses
 function retrieveStatus(experimentId: string) {
   const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {

@@ -416,7 +416,8 @@ class JobService:
                     temperature=request.job_config.temperature,
                     top_p=request.job_config.top_p,
                 )
-            case "llamafile://mistralai/Mistral-7B-Instruct-v0.2":
+            # case "llamafile://mistralai/Mistral-7b-Instruct-v0.2":
+            case "llamafile://mistralai/mistral-7b-instruct-v0.2":
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,

@@ -15,11 +15,12 @@ from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
-from mlflow.exceptions import MlflowException
+from mlflow.exceptions import MlflowException, RestException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -234,6 +235,8 @@ class MLflowTrackingClient(TrackingClient):
         # sort the jobs by created_at, with the oldest last
         all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
 
+        loguru.logger.critical(f"{workflow_id} ==> {workflow.info.status}")
+        loguru.logger.critical(f"{workflow_id} ==> {workflow.data.tags.get('status')}")
         workflow_details = WorkflowDetailsResponse(
             id=workflow_id,
             experiment_id=workflow.info.experiment_id,
@@ -247,7 +250,7 @@ class MLflowTrackingClient(TrackingClient):
             parameters=self._compile_parameters(all_job_ids),
         )
         # Currently, only compile the result json artifact if the workflow has succeeded
-        if workflow_details.status != WorkflowStatus.SUCCEEDED:
+        if workflow_details.status != WorkflowStatus.SUCCEEDED.value:
             return workflow_details
         # now we need to combine all of the files that were output into a single json.
         # look through every job associated with this workflow and get the results
@@ -360,7 +363,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(workflow.data.tags.get("status")),
+            status=WorkflowStatus(workflow.data.tags.get("status")).value,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 

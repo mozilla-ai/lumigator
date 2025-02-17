@@ -5,7 +5,7 @@ from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from uuid import UUID
 
 import loguru
@@ -15,7 +15,7 @@ from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
-    HfPipelineConfig,
+    HuggingFacePipelineConfig,
     InferenceJobConfig,
     InferenceServerConfig,
     SamplingParameters,
@@ -36,6 +36,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
@@ -47,6 +48,7 @@ from backend.services.datasets import DatasetService
 from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
+    JobTypeUnsupportedError,
     JobUpstreamError,
     JobValidationError,
 )
@@ -57,25 +59,123 @@ DEFAULT_LIMIT = 100
 JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
+# The end result should be that InferenceJobConfig is actually JobInferenceConfig
+# (resp. Eval)
+# For the moment, something will convert one into the other, and we'll decide where
+# to put this. The jobs should ideally have no dependency towards the backend.
+
+
+class JobInterface:
+    command: str
+    pip_reqs: str | None
+    work_dir: str | None
+    ray_worker_gpus_fraction: float
+    ray_worker_gpus: float
+    config_model: BaseModel
+
+    # This should end up not being necessary, since we'd expose the whole job config
+    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str) -> BaseModel:
+        pass
+
+    def store_as_dataset(self) -> bool:
+        pass
+
+    def __init__(self, command, pip_reqs, work_dir, ray_worker_gpus_fraction, ray_worker_gpus, config_model):
+        self.command = command
+        self.pip_reqs = pip_reqs
+        self.work_dir = work_dir
+        self.ray_worker_gpus_fraction = ray_worker_gpus_fraction
+        self.ray_worker_gpus = ray_worker_gpus
+        self.config_model = config_model
+
+
+class JobInterfaceInference(JobInterface):
+    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
+        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
+            raise JobValidationError("System prompt is required for text generation tasks.") from None
+        job_config = InferenceJobConfig(
+            name=f"{request.name}/{record_id}",
+            dataset=IDatasetConfig(path=dataset_path),
+            job=InferJobConfig(
+                max_samples=request.max_samples,
+                storage_path=storage_path,
+                # TODO Should be unnecessary, check
+                output_field=request.job_config.output_field or "predictions",
+            ),
+        )
+        if request.job_config.provider == "hf":
+            # Custom logic: if provider is hf, we run the hf model inside the ray job
+            job_config.hf_pipeline = HuggingFacePipelineConfig(
+                model_name_or_path=request.job_config.model,
+                task=request.job_config.task,
+                accelerator=request.job_config.accelerator,
+                revision=request.job_config.revision,
+                use_fast=request.job_config.use_fast,
+                trust_remote_code=request.job_config.trust_remote_code,
+                torch_dtype=request.job_config.torch_dtype,
+                max_new_tokens=500,
+            )
+        else:
+            # It will be a pass through to LiteLLM
+            job_config.inference_server = InferenceServerConfig(
+                base_url=request.job_config.base_url if request.job_config.base_url else None,
+                model=request.job_config.model,
+                provider=request.job_config.provider,
+                system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                max_retries=3,
+            )
+            job_config.params = SamplingParameters(
+                max_tokens=request.job_config.max_tokens,
+                frequency_penalty=request.job_config.frequency_penalty,
+                temperature=request.job_config.temperature,
+                top_p=request.job_config.top_p,
+            )
+        return job_config
+
+    def store_as_dataset(self) -> bool:
+        return True
+
+
+class JobInterfaceEvalLite(JobInterface):
+    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
+        job_config = EvalJobConfig(
+            name=f"{request.name}/{record_id}",
+            dataset=ELDatasetConfig(path=dataset_path),
+            evaluation=EvaluationConfig(
+                metrics=request.job_config.metrics,
+                max_samples=request.max_samples,
+                return_input_data=True,
+                return_predictions=True,
+                storage_path=storage_path,
+            ),
+        )
+        return job_config
+
+    def store_as_dataset(self) -> bool:
+        return False
+
+
 class JobService:
     # set storage path
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
     job_settings = {
-        JobType.INFERENCE: {
-            "command": settings.INFERENCE_COMMAND,
-            "pip": settings.INFERENCE_PIP_REQS,
-            "work_dir": settings.INFERENCE_WORK_DIR,
-            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
-            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
-        },
-        JobType.EVALUATION: {
-            "command": settings.EVALUATOR_COMMAND,
-            "pip": settings.EVALUATOR_PIP_REQS,
-            "work_dir": settings.EVALUATOR_WORK_DIR,
-            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
-            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
-        },
+        JobType.INFERENCE: JobInterfaceInference(
+            command=settings.INFERENCE_COMMAND,
+            pip_reqs=settings.INFERENCE_PIP_REQS,
+            work_dir=settings.INFERENCE_WORK_DIR,
+            ray_worker_gpus_fraction=settings.RAY_WORKER_GPUS_FRACTION,
+            ray_worker_gpus=settings.RAY_WORKER_GPUS,
+            config_model=InferenceJobConfig,
+        ),
+        JobType.EVALUATION: JobInterfaceEvalLite(
+            command=settings.EVALUATOR_COMMAND,
+            pip_reqs=settings.EVALUATOR_PIP_REQS,
+            work_dir=settings.EVALUATOR_WORK_DIR,
+            ray_worker_gpus_fraction=settings.RAY_WORKER_GPUS_FRACTION,
+            ray_worker_gpus=settings.RAY_WORKER_GPUS,
+            config_model=EvalJobConfig,
+        ),
     }
 
     NON_TERMINAL_STATUS = [
@@ -266,7 +366,7 @@ class JobService:
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
         db_logs = self.job_repo.get(job_id)
         if not db_logs:
-            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs")
+            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs") from None
         elif not db_logs.logs:
             ray_db_logs = self.retrieve_job_logs(job_id)
             self._update_job_record(job_id, logs=ray_db_logs.logs)
@@ -338,64 +438,6 @@ class JobService:
         """Adds a background task to the background tasks queue."""
         background_tasks.add_task(task, *args)
 
-    def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        # TODO Move to a custom validator in the schema
-        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
-            raise JobValidationError("System prompt is required for text generation tasks.") from None
-        job_config = InferenceJobConfig(
-            name=f"{request.name}/{record_id}",
-            dataset=IDatasetConfig(path=dataset_path),
-            job=InferJobConfig(
-                max_samples=request.max_samples,
-                storage_path=storage_path,
-                # TODO Should be unnecessary, check
-                output_field=request.job_config.output_field or "predictions",
-            ),
-        )
-        if request.job_config.provider == "hf":
-            # Custom logic: if provider is hf, we run the hf model inside the ray job
-            job_config.hf_pipeline = HfPipelineConfig(
-                model_name_or_path=request.job_config.model,
-                task=request.job_config.task,
-                accelerator=request.job_config.accelerator,
-                revision=request.job_config.revision,
-                use_fast=request.job_config.use_fast,
-                trust_remote_code=request.job_config.trust_remote_code,
-                torch_dtype=request.job_config.torch_dtype,
-                max_new_tokens=500,
-            )
-        else:
-            # It will be a pass through to LiteLLM
-            job_config.inference_server = InferenceServerConfig(
-                base_url=request.job_config.base_url if request.job_config.base_url else None,
-                model=request.job_config.model,
-                provider=request.job_config.provider,
-                system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                max_retries=3,
-            )
-            job_config.params = SamplingParameters(
-                max_tokens=request.job_config.max_tokens,
-                frequency_penalty=request.job_config.frequency_penalty,
-                temperature=request.job_config.temperature,
-                top_p=request.job_config.top_p,
-            )
-
-        return job_config
-
-    def generate_evaluation_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        job_config = EvalJobConfig(
-            name=f"{request.name}/{record_id}",
-            dataset=ELDatasetConfig(path=dataset_path),
-            evaluation=EvaluationConfig(
-                metrics=request.job_config.metrics,
-                max_samples=request.max_samples,
-                return_input_data=True,
-                return_predictions=True,
-                storage_path=storage_path,
-            ),
-        )
-        return job_config
-
     def create_job(
         self,
         request: JobCreate,
@@ -404,24 +446,21 @@ class JobService:
         """Creates a new evaluation workload to run on Ray and returns the response status."""
         # Typing won't allow other job_type's
         job_type = request.job_config.job_type
+        # Prepare the job configuration that will be sent to submit the ray job.
+        # This includes both the command that is going to be executed and its
+        # arguments defined in eval_config_args
+        try:
+            job_settings = self.job_settings[job_type]
+        except KeyError as e:
+            raise JobTypeUnsupportedError("Unknown job type") from e
 
         # Create a db record for the job
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
         record = self.job_repo.create(name=request.name, description=request.description, job_type=job_type)
 
-        # TODO defer to specific job
-        if job_type == JobType.INFERENCE and not request.job_config.output_field:
-            request.job_config.output_field = "predictions"
-
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
-        if job_type == JobType.INFERENCE:
-            job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
-        elif job_type == JobType.EVALUATION:
-            job_config = self.generate_evaluation_job_config(request, record.id, dataset_s3_path, self.storage_path)
-        else:
-            # This should not happen since the job_type's are type checked
-            raise Exception("Unknown job type")
+        job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
@@ -430,18 +469,13 @@ class JobService:
 
         # ...and use directly Job*Config(request.job.config.model_dump_json())
         job_config_args = {
-            "--config": job_config.model_dump_json(exclude_unset=True, exclude_none=True),
+            "--config": job_config.model_dump_json(),
         }
-
-        # Prepare the job configuration that will be sent to submit the ray job.
-        # This includes both the command that is going to be executed and its
-        # arguments defined in eval_config_args
-        job_settings = self.job_settings[job_type]
 
         ray_config = JobConfig(
             job_id=record.id,
             job_type=job_type,
-            command=job_settings["command"],
+            command=job_settings.command,
             args=job_config_args,
         )
 
@@ -449,15 +483,9 @@ class JobService:
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
         settings.inherit_ray_env(runtime_env_vars)
 
-        # set num_gpus per worker (zero if we are just hitting a service)
-        if job_type == JobType.INFERENCE and not request.job_config.provider == "hf":
-            worker_gpus = job_settings["ray_worker_gpus_fraction"]
-        else:
-            worker_gpus = job_settings["ray_worker_gpus"]
-
         runtime_env = {
-            "pip": job_settings["pip"],
-            "working_dir": job_settings["work_dir"],
+            "pip": job_settings.pip_reqs,
+            "working_dir": job_settings.work_dir,
             "env_vars": runtime_env_vars,
         }
 
@@ -467,7 +495,10 @@ class JobService:
         loguru.logger.info(f"{runtime_env}")
 
         entrypoint = RayJobEntrypoint(
-            config=ray_config, metadata=metadata, runtime_env=runtime_env, num_gpus=worker_gpus
+            config=ray_config,
+            metadata=metadata,
+            runtime_env=runtime_env,
+            num_gpus=settings.RAY_WORKER_GPUS,
         )
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
@@ -478,7 +509,8 @@ class JobService:
         # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        if job_type == JobType.INFERENCE and request.job_config.store_to_dataset:
+        # if job_type == JobType.INFERENCE and request.job_config.store_to_dataset:
+        if job_settings.store_as_dataset():
             self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 
         loguru.logger.info("Getting response...")

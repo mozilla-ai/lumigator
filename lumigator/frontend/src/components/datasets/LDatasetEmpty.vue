@@ -1,15 +1,19 @@
 <template>
   <div class="l-dataset-empty">
-    <h2 class="l-dataset-empty__instructions">Use a dataset as the basis for your evaluation. It includes data for the model you'd like to
-      evaluate and possibly a ground truth "answer".</h2>
-      <p class="l-dataset-empty__instructions-text">
+    <h2 class="l-dataset-empty__instructions">
+      Use a dataset as the basis for your evaluation. It includes data for the model you'd like to
+      evaluate and possibly a ground truth "answer".
+    </h2>
+    <p class="l-dataset-empty__instructions-text">
       <span>
         If you don't have your dataset yet, you can use our
         <a
-        href="https://github.com/mozilla-ai/lumigator/tree/main/lumigator/sample_data"
-        target="_blank"
-        style="background-color: transparent"
-        > <span class="underline">sample datasets</span> <span class="pi pi-arrow-up-right"></span></a>
+          href="https://github.com/mozilla-ai/lumigator/tree/main/lumigator/sample_data"
+          target="_blank"
+          style="background-color: transparent"
+        >
+          <span class="underline">sample datasets</span> <span class="pi pi-arrow-up-right"></span
+        ></a>
       </span>
     </p>
     <Button

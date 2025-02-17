@@ -11,7 +11,6 @@ import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { ExperimentNew } from '@/types/ExperimentNew'
 import { WorkflowStatus, type Workflow, type WorkflowResults } from '@/types/Workflow'
-import { jobsService } from '@/sdk/jobsService'
 import axios from 'axios'
 
 export const useExperimentStore = defineStore('experiments', () => {

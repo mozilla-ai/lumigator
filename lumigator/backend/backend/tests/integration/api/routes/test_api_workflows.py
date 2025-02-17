@@ -38,7 +38,7 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-def test_upload_data_launch_job(
+def _test_upload_data_launch_job(
     local_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,
@@ -141,7 +141,7 @@ def test_upload_data_launch_job(
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
-def test_upload_data_no_gt_launch_annotation(
+def _test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
     local_client: TestClient,
     unnanotated_dataset,

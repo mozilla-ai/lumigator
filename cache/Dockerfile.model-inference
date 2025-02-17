@@ -15,8 +15,5 @@ model_path = snapshot_download('facebook/bart-large-cnn', cache_dir='/home/ray/.
 print('Model downloaded to:', model_path)\
 "
 
-# Declare the cache directory as a volume so that its contents persist and can be shared.
-VOLUME /home/ray/.cache/huggingface
-
 # Exit immediately (this container’s only job is to populate the cache)
 CMD ["/bin/true"]

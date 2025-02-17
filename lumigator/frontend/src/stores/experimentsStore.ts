@@ -92,8 +92,8 @@ export const useExperimentStore = defineStore('experiments', () => {
 
       // const e = experiments.value.find((exp) => exp.id === experiment.id)
       // if (e) {
-        // e.status = status
-        experiment.status = status
+      // e.status = status
+      experiment.status = status
       // }
     } catch (error) {
       console.error(`Failed to update status for exp ${experiment} ${error}`)

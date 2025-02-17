@@ -1,14 +1,15 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
+import type { Experiment } from '@/types/Experiment'
+import type { WorkflowResults } from '@/types/Metrics'
 
-import type { ExperimentNew } from '@/types/ExperimentNew'
-import type { CreateWorkflowPayload, WorkflowResults } from '@/types/Workflow'
+import type { CreateWorkflowPayload } from '@/types/Workflow'
 
-export async function fetchExperiments(): Promise<ExperimentNew[]> {
+export async function fetchExperiments(): Promise<Experiment[]> {
   const response = await lumigatorApiAxiosInstance.get('/experiments/new/all')
   return response.data.items
 }
 
-export async function fetchExperiment(id: string): Promise<ExperimentNew> {
+export async function fetchExperiment(id: string): Promise<Experiment> {
   const response = await lumigatorApiAxiosInstance.get(`experiments/new/${id}`)
   return response.data
 }
@@ -32,9 +33,9 @@ export type createExperimentWithWorkflowsPayload = Omit<
 
 export async function createExperiment(
   experimentPayload: CreateExperimentPayload,
-): Promise<ExperimentNew> {
+): Promise<Experiment> {
   // first we create an experiment as a container for different workflows
-  const response: { data: ExperimentNew } = await lumigatorApiAxiosInstance.post(
+  const response: { data: Experiment } = await lumigatorApiAxiosInstance.post(
     'experiments/new',
     experimentPayload,
   )

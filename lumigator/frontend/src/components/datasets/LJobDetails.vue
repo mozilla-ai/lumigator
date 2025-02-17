@@ -135,7 +135,7 @@ import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import type { JobDetails } from '@/types/JobDetails'
+import type { Job } from '@/types/Job'
 
 const emit = defineEmits([
   'l-close-details',
@@ -175,7 +175,7 @@ const isInference = computed(() => {
   return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
 })
 
-const focusedItem: ComputedRef<JobDetails | undefined> = computed(() => {
+const focusedItem: ComputedRef<Job | undefined> = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
   }

@@ -9,7 +9,7 @@ import { getAxiosError } from '@/helpers/getAxiosError'
 import type { AxiosError } from 'axios'
 import { downloadContent } from '@/helpers/downloadContent'
 import { jobsService } from '@/sdk/jobsService'
-import type { JobDetails } from '@/types/JobDetails'
+import type { Job } from '@/types/Job'
 import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import type { EvaluationJobResults } from '@/types/Experiment'
 import { WorkflowStatus } from '@/types/Workflow'
@@ -18,12 +18,12 @@ import { calculateDuration } from '@/helpers/calculateDuration'
 export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
-  const selectedJob: Ref<JobDetails | undefined> = ref()
+  const selectedJob: Ref<Job | undefined> = ref()
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
   const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
-  const jobs: Ref<JobDetails[]> = ref([])
-  const inferenceJobs: Ref<JobDetails[]> = ref([])
+  const jobs: Ref<Job[]> = ref([])
+  const inferenceJobs: Ref<Job[]> = ref([])
   const jobLogs: Ref<string[]> = ref([])
   const isPolling = ref(false)
   let jobLogsInterval: number | undefined = undefined
@@ -46,7 +46,7 @@ export const useDatasetStore = defineStore('datasets', () => {
    * Loads all experiments and jobs.
    */
   async function fetchAllJobs() {
-    let allJobs: JobDetails[]
+    let allJobs: Job[]
     try {
       allJobs = await jobsService.fetchJobs()
     } catch {
@@ -54,10 +54,10 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
-      .map((job) => parseJobDetails(job))
+      .map((job) => parseJob(job))
     jobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJobDetails(job))
+      .map((job) => parseJob(job))
   }
 
   /**
@@ -65,7 +65,7 @@ export const useDatasetStore = defineStore('datasets', () => {
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseJobDetails(job: JobDetails) {
+  function parseJob(job: Job) {
     return {
       ...job,
       entrypoint: undefined,
@@ -82,9 +82,9 @@ export const useDatasetStore = defineStore('datasets', () => {
     return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
   }
 
-  async function fetchJobDetails(id: string) {
-    const jobData = await jobsService.fetchJobDetails(id)
-    selectedJob.value = parseJobDetails(jobData)
+  async function fetchJob(id: string) {
+    const jobData = await jobsService.fetchJob(id)
+    selectedJob.value = parseJob(jobData)
   }
 
   async function retrieveJobLogs() {
@@ -292,9 +292,9 @@ export const useDatasetStore = defineStore('datasets', () => {
     hasRunningInferenceJob,
     fetchAllJobs,
     updateStatusForIncompleteJobs,
-    fetchJobDetails,
+    fetchJob,
     // fetchJobResults,
     startGroundTruthGeneration,
-    parseJobDetails,
+    parseJob,
   }
 })

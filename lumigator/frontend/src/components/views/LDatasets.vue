@@ -55,7 +55,7 @@
       <l-job-details
         v-if="showSlidingPanel && selectedJob"
         title="Job Details"
-        @l-close-details="onCloseJobDetails"
+        @l-close-details="onCloseJob"
         @l-show-logs="onShowLogs"
       />
     </Teleport>
@@ -95,8 +95,8 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
-import type { JobDetails } from '@/types/JobDetails'
 import LJobDetails from '../datasets/LJobDetails.vue'
+import type { Job } from '@/types/Job'
 
 const datasetStore = useDatasetStore()
 const { datasets, selectedDataset, selectedJob, inferenceJobs, hasRunningInferenceJob } =
@@ -192,13 +192,13 @@ const onExperimentDataset = (dataset: Dataset) => {
   datasetStore.fetchDatasetDetails(dataset.id)
 }
 
-const onInferenceJobSelected = (job: JobDetails) => {
+const onInferenceJobSelected = (job: Job) => {
   selectedDataset.value = undefined
-  datasetStore.fetchJobDetails(job.id)
+  datasetStore.fetchJob(job.id)
   showSlidingPanel.value = true
 }
 
-const onCloseJobDetails = () => {
+const onCloseJob = () => {
   showSlidingPanel.value = false
   selectedJob.value = undefined
 }

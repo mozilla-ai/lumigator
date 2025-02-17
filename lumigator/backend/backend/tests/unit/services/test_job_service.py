@@ -74,6 +74,8 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         ("oai://gpt-4-turbo", None, settings.OAI_API_URL),
         # mistral model (from API)
         ("mistral://open-mistral-7b", None, settings.MISTRAL_API_URL),
+        # deepseek model (from API)
+        ("ds://deepseek-chat", None, settings.DEEPSEEK_API_URL),
     ],
 )
 def test_set_model(job_service, model, input_model_url, returned_model_url):

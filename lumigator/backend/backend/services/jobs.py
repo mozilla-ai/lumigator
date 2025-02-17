@@ -355,6 +355,8 @@ class JobService:
             model_url = settings.OAI_API_URL
         elif request.job_config.model.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
+        elif request.job_config.model.startswith("ds://"):
+            model_url = settings.DEEPSEEK_API_URL
         else:
             model_url = request.job_config.model_url
 
@@ -404,6 +406,19 @@ class JobService:
                     top_p=request.job_config.top_p,
                 )
             case "mistral://open-mistral-7b":
+                job_config.inference_server = InferenceServerConfig(
+                    base_url=self._set_model_type(request),
+                    engine=request.job_config.model,
+                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    max_retries=3,
+                )
+                job_config.params = SamplingParameters(
+                    max_tokens=request.job_config.max_tokens,
+                    frequency_penalty=request.job_config.frequency_penalty,
+                    temperature=request.job_config.temperature,
+                    top_p=request.job_config.top_p,
+                )
+            case "ds://deepseek-chat" | "ds://deepseek-reasoner":
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,

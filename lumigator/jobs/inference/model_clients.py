@@ -60,11 +60,7 @@ class APIModelClient(BaseModelClient):
         prompt: str,
     ) -> tuple[str, str]:
         current_retry_attempt = 1
-        max_retries = (
-            1
-            if config.inference_server.max_retries is None
-            else config.inference_server.max_retries
-        )
+        max_retries = 1 if config.inference_server.max_retries is None else config.inference_server.max_retries
         while current_retry_attempt <= max_retries:
             try:
                 response = self._chat_completion(self._config, self._client, prompt, self._system)
@@ -98,6 +94,31 @@ class OpenAIModelClient(APIModelClient):
     def __init__(self, base_url: str, config: InferenceJobConfig):
         super().__init__(config)
         self._client = OpenAI(base_url=base_url)
+
+    def _chat_completion(
+        self,
+        config: InferenceJobConfig,
+        client: OpenAI,
+        prompt: str,
+        system: str = "You are a helpful assisant.",
+    ) -> Completion:
+        """Connects to a remote OpenAI-API-compatible endpoint
+        and returns a chat completion holding the model's response.
+        """
+        return client.chat.completions.create(
+            model=self._engine,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+            max_tokens=config.params.max_tokens,
+            frequency_penalty=config.params.frequency_penalty,
+            temperature=config.params.temperature,
+            top_p=config.params.top_p,
+        )
+
+
+class DeepSeekModelClient(APIModelClient):
+    def __init__(self, base_url: str, config: InferenceJobConfig):
+        super().__init__(config)
+        self._client = OpenAI(base_url=base_url, api_key=os.environ["DEEPSEEK_API_KEY"])
 
     def _chat_completion(
         self,
@@ -162,8 +183,10 @@ class HuggingFaceModelClient(BaseModelClient):
         Checks various possible max_length parameters which varies on model architecture.
         """
         config = self._pipeline.model.config
-        logger.info(f"Selected HF model's tokenizer has maximum number of input tokens: \
-                    {self._pipeline.tokenizer.model_max_length}")
+        logger.info(
+            f"Selected HF model's tokenizer has maximum number of input tokens: \
+                    {self._pipeline.tokenizer.model_max_length}"
+        )
         # If suitable model_max_length is already available, don't override it
         if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
             return
@@ -187,12 +210,12 @@ class HuggingFaceModelClient(BaseModelClient):
         for param in plausible_max_length_params:
             if hasattr(config, param):
                 value = getattr(config, param)
-                if (
-                    isinstance(value, int) and value < VERY_LARGE_INTEGER
-                ):  # Sanity check for reasonable values
+                if isinstance(value, int) and value < VERY_LARGE_INTEGER:  # Sanity check for reasonable values
                     self._pipeline.tokenizer.model_max_length = value
-                    logger.info(f"Setting the maximum length of input tokens to {value} \
-                                based on the config.{param} attribute.")
+                    logger.info(
+                        f"Setting the maximum length of input tokens to {value} \
+                                based on the config.{param} attribute."
+                    )
                     return
 
         # If no suitable parameter is found, warn the user and continue with the HF default

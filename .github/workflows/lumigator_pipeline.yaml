@@ -437,3 +437,17 @@ jobs:
       - name: Upload schemas packages to PyPI
         working-directory: lumigator/schemas
         run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
+
+  helm:
+    name: Code linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.17.0

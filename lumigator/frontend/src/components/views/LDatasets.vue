@@ -55,7 +55,7 @@
       <l-job-details
         v-if="showSlidingPanel && selectedJob"
         title="Job Details"
-        @l-close-details="onCloseJob"
+        @l-close-details="onCloseJobDetails"
         @l-show-logs="onShowLogs"
       />
     </Teleport>
@@ -198,7 +198,7 @@ const onInferenceJobSelected = (job: Job) => {
   showSlidingPanel.value = true
 }
 
-const onCloseJob = () => {
+const onCloseJobDetails = () => {
   showSlidingPanel.value = false
   selectedJob.value = undefined
 }

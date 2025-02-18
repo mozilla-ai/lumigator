@@ -14,7 +14,6 @@ from lumigator_schemas.jobs import (
     JobAnnotateCreate,
     JobCreate,
     JobEvalLiteCreate,
-    JobEvaluateCreate,
     JobInferenceCreate,
     JobLogsResponse,
     JobResponse,
@@ -87,21 +86,6 @@ def create_annotation_job(
 
     inference_job_create_request = JobCreate(**inference_job_create_request_dict)
     job_response = service.create_job(inference_job_create_request)
-
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
-    response.headers[HttpHeaders.LOCATION] = f"{url}"
-
-    return job_response
-
-
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_job(
-    service: JobServiceDep,
-    job_create_request: JobEvaluateCreate,
-    request: Request,
-    response: Response,
-) -> JobResponse:
-    job_response = service.create_job(job_create_request)
 
     url = request.url_for(get_job.__name__, job_id=job_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

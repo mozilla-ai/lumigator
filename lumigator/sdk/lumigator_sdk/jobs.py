@@ -79,7 +79,7 @@ class Jobs:
                 from sdk.lumigator import LumigatorClient
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION)
+                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
 
         Returns:
             ListingResponse[JobResponse]: All existing jobs.
@@ -163,10 +163,7 @@ class Jobs:
                 raise Exception(f"Job {id} stopped")
             elif jobinfo["status"] == "SUCCEEDED":
                 return jobinfo
-        raise Exception(
-            f"Job {id} did not complete in the polling "
-            f"time (retries: {retries}, poll_wait: {poll_wait})"
-        )
+        raise Exception(f"Job {id} did not complete in the polling time (retries: {retries}, poll_wait: {poll_wait})")
 
     def create_job(self, request: JobCreate) -> JobResponse:
         """Create a new job.
@@ -194,9 +191,7 @@ class Jobs:
         elif request.job_config.job_type == JobType.EVALUATION_LITE:
             JobEvalLiteConfigStrict.model_validate(JobEvalLiteConfig.model_dump(request.job_config))
         elif request.job_config.job_type == JobType.INFERENCE:
-            JobInferenceConfigStrict.model_validate(
-                JobInferenceConfig.model_dump(request.job_config)
-            )
+            JobInferenceConfigStrict.model_validate(JobInferenceConfig.model_dump(request.job_config))
 
         response = self.client.get_response(
             f"{self.JOBS_ROUTE}/{request.job_config.job_type.value}/",

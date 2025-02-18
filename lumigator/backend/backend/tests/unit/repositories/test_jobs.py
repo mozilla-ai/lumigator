@@ -30,31 +30,17 @@ def test_create_and_get_job(job_repository):
 def test_create_and_get_jobs_per_type(job_repository):
     created_job = job_repository.create(name="test", description="")
     retrieved_job = job_repository.get(created_job.id)
-    created_eval_job = job_repository.create(
-        name="test", description="", job_type=JobType.EVALUATION.value
-    )
-    created_infer_job = job_repository.create(
-        name="test", description="", job_type=JobType.INFERENCE.value
-    )
-    retrieved_eval_job = job_repository.list(
-        skip=0, limit=None, criteria=[JobRecord.job_type == JobType.EVALUATION.value]
-    )
+    created_infer_job = job_repository.create(name="test", description="", job_type=JobType.INFERENCE.value)
     retrieved_infer_job = job_repository.list(
         skip=0, limit=None, criteria=[JobRecord.job_type == JobType.INFERENCE.value]
     )
     assert job_repository.count() == 3
-    assert len(retrieved_eval_job) == 1
     assert retrieved_job.job_type is None
-    assert created_eval_job.id == retrieved_eval_job[0].id
-    assert created_eval_job.name == retrieved_eval_job[0].name
-    assert created_eval_job.job_type == JobType.EVALUATION.value
-    assert created_eval_job.status == JobStatus.CREATED
     assert len(retrieved_infer_job) == 1
     assert created_infer_job.id == retrieved_infer_job[0].id
     assert created_infer_job.name == retrieved_infer_job[0].name
     assert created_infer_job.job_type == JobType.INFERENCE.value
     assert created_infer_job.status == JobStatus.CREATED
-    assert retrieved_infer_job[0].id != retrieved_eval_job[0].id
 
 
 def test_job_foreign_key(result_repository):

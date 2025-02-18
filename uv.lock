@@ -1379,7 +1379,7 @@ dev = [
 
 [[package]]
 name = "lumigator-backend"
-version = "0.1.0"
+version = "0.1.1a0"
 source = { virtual = "lumigator/backend" }
 dependencies = [
     { name = "alembic" },
@@ -1448,7 +1448,7 @@ dev = [
 
 [[package]]
 name = "lumigator-schemas"
-version = "0.1.0a0"
+version = "0.1.1a0"
 source = { editable = "lumigator/schemas" }
 dependencies = [
     { name = "pydantic" },
@@ -1459,7 +1459,7 @@ requires-dist = [{ name = "pydantic", specifier = ">=2.10.0" }]
 
 [[package]]
 name = "lumigator-sdk"
-version = "0.1.0a0"
+version = "0.1.1a0"
 source = { editable = "lumigator/sdk" }
 dependencies = [
     { name = "loguru" },

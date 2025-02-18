@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, status
 from lumigator_schemas.experiments import (
-    ExperimentIdCreate,
+    ExperimentCreate,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
@@ -21,7 +21,7 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment_id(service: ExperimentServiceDep, request: ExperimentIdCreate) -> GetExperimentResponse:
+def create_experiment_id(service: ExperimentServiceDep, request: ExperimentCreate) -> GetExperimentResponse:
     """Create an experiment ID."""
     return GetExperimentResponse.model_validate(service.create_experiment(request).model_dump())
 

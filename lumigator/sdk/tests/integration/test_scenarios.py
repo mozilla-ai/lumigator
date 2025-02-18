@@ -15,7 +15,7 @@ from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import (
     DatasetDownloadResponse,
-    ExperimentIdCreate,
+    ExperimentCreate,
     JobAnnotateConfig,
     JobCreate,
     JobEvalConfig,
@@ -257,7 +257,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     dataset_id = dataset_response.id
 
     # Create an experiment
-    request = ExperimentIdCreate(
+    request = ExperimentCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
         task="summarization",

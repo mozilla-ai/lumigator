@@ -16,17 +16,6 @@ export type Experiment = {
   status: WorkflowStatus
 }
 
-export type Task = {
-  summarization: {
-    early_stopping: boolean
-    length_penalty: number
-    max_length: number
-    min_length: number
-    no_repeat_ngram_size: number
-    num_beats: number
-  } | null
-}
-
 export type ExperimentResults = {
   model: string
   meteor: Meteor

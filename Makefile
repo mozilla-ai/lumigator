@@ -210,8 +210,6 @@ test-backend-integration:
 	RAY_WORKER_GPUS_FRACTION="0.0" \
 	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
 	INFERENCE_WORK_DIR=../jobs/inference \
-	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
-	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
 	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
 	PYTHONPATH=../jobs:$$PYTHONPATH \

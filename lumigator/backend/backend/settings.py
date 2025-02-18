@@ -63,11 +63,6 @@ class BackendSettings(BaseSettings):
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
     EVALUATOR_PIP_REQS: str | None = None
-
-    # TODO: the following should all be refactored to EVALUATOR_* and the above should
-    #       be removed when we deprecate evaluator
-    EVALUATOR_WORK_DIR: str | None = None
-    EVALUATOR_PIP_REQS: str | None = None
     EVALUATOR_COMMAND: str = "python evaluator.py"
 
     # Inference job details

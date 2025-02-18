@@ -416,8 +416,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=JobType.EVALUATION_LITE,
-        command=settings.EVALUATOR_LITE_COMMAND,
+        job_type=JobType.EVALUATION,
+        command=settings.EVALUATOR_COMMAND,
         args=conf_args,
     )
 

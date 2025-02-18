@@ -79,7 +79,7 @@ class Jobs:
                 from sdk.lumigator import LumigatorClient
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION)
 
         Returns:
             ListingResponse[JobResponse]: All existing jobs.

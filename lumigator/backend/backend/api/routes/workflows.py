@@ -26,9 +26,7 @@ def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_workflow(
-    service: WorkflowServiceDep, request: WorkflowCreateRequest
-) -> WorkflowResponse:
+async def create_workflow(service: WorkflowServiceDep, request: WorkflowCreateRequest) -> WorkflowResponse:
     """A workflow is a single execution for an experiment.
     A workflow is a collection of 1 or more jobs.
     It must be associated with an experiment id,
@@ -39,11 +37,7 @@ async def create_workflow(
 
 @router.get("/{workflow_id}")
 def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
-    """TODO: The workflow objects are currently not saved in the database so it can't be retrieved.
-    In order to get all the info about a workflow,
-    you need to get all the jobs for an experiment and make some decisions about how to use them.
-    This means you can't yet easily compile a list of all workflows for an experiment.
-    """
+    """Get a workflow by ID."""
     return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
 
 

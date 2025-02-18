@@ -126,7 +126,12 @@ class MLflowTrackingClient(TrackingClient):
 
     def get_experiment(self, experiment_id: str):
         """Get an experiment and all its workflows."""
-        experiment = self._client.get_experiment(experiment_id)
+        try:
+            experiment = self._client.get_experiment(experiment_id)
+        except MlflowException as e:
+            # if the experiment doesn't exist, return None
+            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+                return None
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None

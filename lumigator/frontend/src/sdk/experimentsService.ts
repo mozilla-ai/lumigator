@@ -5,17 +5,17 @@ import type { WorkflowResults } from '@/types/Metrics'
 import type { CreateWorkflowPayload } from '@/types/Workflow'
 
 export async function fetchExperiments(): Promise<Experiment[]> {
-  const response = await lumigatorApiAxiosInstance.get('/experiments/new/all')
+  const response = await lumigatorApiAxiosInstance.get('/experiments')
   return response.data.items
 }
 
 export async function fetchExperiment(id: string): Promise<Experiment> {
-  const response = await lumigatorApiAxiosInstance.get(`experiments/new/${id}`)
+  const response = await lumigatorApiAxiosInstance.get(`experiments/${id}`)
   return response.data
 }
 
 export async function deleteExperiment(id: string) {
-  const response = await lumigatorApiAxiosInstance.delete(`experiments/new/${id}`)
+  const response = await lumigatorApiAxiosInstance.delete(`experiments/${id}`)
   return response.data
 }
 
@@ -36,7 +36,7 @@ export async function createExperiment(
 ): Promise<Experiment> {
   // first we create an experiment as a container for different workflows
   const response: { data: Experiment } = await lumigatorApiAxiosInstance.post(
-    'experiments/new',
+    '/experiments',
     experimentPayload,
   )
 

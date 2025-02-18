@@ -5,7 +5,7 @@ import loguru
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResultObject,
@@ -116,7 +116,7 @@ class WorkflowService:
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
             max_samples=request.max_samples,
-            job_config=JobEvalLiteConfig(),
+            job_config=JobEvalConfig(),
         )
 
         # submit the job

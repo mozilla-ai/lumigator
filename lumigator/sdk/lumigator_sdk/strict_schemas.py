@@ -1,6 +1,6 @@
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
-    ExperimentIdCreate,
+    ExperimentCreate,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import HealthResponse, ListingResponse
@@ -8,7 +8,7 @@ from lumigator_schemas.jobs import (
     Job,
     JobAnnotateConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobEvent,
     JobInferenceConfig,
     JobLogsResponse,
@@ -29,7 +29,7 @@ class DatasetResponse(DatasetResponse, from_attributes=True):
     model_config = ConfigDict(extra="forbid")
 
 
-class ExperimentIdCreate(ExperimentIdCreate):
+class ExperimentCreate(ExperimentCreate):
     model_config = ConfigDict(extra="forbid")
 
 
@@ -69,7 +69,7 @@ class JobInferenceConfig(JobInferenceConfig):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobEvalLiteConfig(JobEvalLiteConfig):
+class JobEvalConfig(JobEvalConfig):
     model_config = ConfigDict(extra="forbid")
 
 

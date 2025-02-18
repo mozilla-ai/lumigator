@@ -26,7 +26,6 @@ export async function fetchJobs(): Promise<Job[]> {
  */
 export async function fetchJob(id: string): Promise<Job> {
   const response = await lumigatorApiAxiosInstance.get(`jobs/${id}`)
-  console.log(response.data)
   return response.data
 }
 

@@ -146,10 +146,8 @@ export const useExperimentStore = defineStore('experiments', () => {
 
   async function fetchExperimentResults(experiment: Experiment) {
     for (const workflow of experiment.workflows) {
-      //   console.log({experiment, workflow})
       if (workflow.artifacts_download_url) {
         const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
-        console.log(data)
 
         const modelRow = {
           model: data.artifacts.model,
@@ -234,7 +232,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     if (selectedWorkflow.value) {
       const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
-      console.log({ logs })
+
       logs.forEach((log: string) => {
         const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
         if (workflowLogs.value.length === 0 || lastEntry !== log) {

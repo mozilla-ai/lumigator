@@ -62,7 +62,7 @@ class WorkflowService:
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
-        # JobInferenceCreate and one JobEvalLiteCreate
+        # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
             model=request.model,
             model_url=request.model_url,

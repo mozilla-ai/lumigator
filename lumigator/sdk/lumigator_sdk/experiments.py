@@ -11,7 +11,7 @@ from lumigator_sdk.strict_schemas import ExperimentIdCreate as ExperimentIdCreat
 
 
 class Experiments:
-    EXPERIMENTS_ROUTE = "experiments/new"
+    EXPERIMENTS_ROUTE = "experiments"
 
     def __init__(self, c: ApiClient):
         self.__client = c
@@ -19,9 +19,7 @@ class Experiments:
     def create_experiment(self, experiment: ExperimentIdCreate) -> GetExperimentResponse:
         """Creates a new experiment."""
         ExperimentIdCreateStrict.model_validate(ExperimentIdCreate.model_dump(experiment))
-        response = self.__client.get_response(
-            self.EXPERIMENTS_ROUTE, HTTPMethod.POST, experiment.model_dump_json()
-        )
+        response = self.__client.get_response(self.EXPERIMENTS_ROUTE, HTTPMethod.POST, experiment.model_dump_json())
 
         data = response.json()
         return GetExperimentResponse(**data)
@@ -33,9 +31,7 @@ class Experiments:
         data = response.json()
         return GetExperimentResponse(**data)
 
-    def get_experiments(
-        self, skip: int = 0, limit: int = 100
-    ) -> ListingResponse[GetExperimentResponse]:
+    def get_experiments(self, skip: int = 0, limit: int = 100) -> ListingResponse[GetExperimentResponse]:
         """Returns information on all experiments."""
         response = self.__client.get_response(f"{self.EXPERIMENTS_ROUTE}/all")
 

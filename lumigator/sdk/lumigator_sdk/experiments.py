@@ -11,7 +11,7 @@ from lumigator_sdk.strict_schemas import ExperimentIdCreate as ExperimentIdCreat
 
 
 class Experiments:
-    EXPERIMENTS_ROUTE = "experiments/"
+    EXPERIMENTS_ROUTE = "experiments"
 
     def __init__(self, c: ApiClient):
         self.__client = c

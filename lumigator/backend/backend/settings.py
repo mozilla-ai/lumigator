@@ -40,8 +40,8 @@ class BackendSettings(BaseSettings):
 
     # Sensitive data patterns for redaction
     sensitive_patterns: list[re.Pattern] = [
-        re.compile(r"(?i)_api_key"),  # Matches fields like openia_api_key, mistral_api_key etc.
-        re.compile(r"(?i)_token"),  # Matches fields like token, access_token, HF_TOKEN etc.
+        re.compile(r"(?i)_api_key"),  # Matches fields like OPENAI_API_KEY, MISTRAL_API_KEY etc.
+        re.compile(r"(?i)_token"),  # Matches fields like access_token, HF_TOKEN etc.
     ]
 
     # Tracking

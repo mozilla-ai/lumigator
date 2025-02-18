@@ -21,7 +21,7 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.1.0-alpha"
+appVersion: "v0.1.1-alpha"
 
 dependencies:
   - name: postgresql
@@ -32,9 +32,9 @@ dependencies:
   - name: kuberay-operator
     repository: "https://ray-project.github.io/kuberay-helm/"
     version: "1.2.2"
-    condition: ray.enabled
+    condition: kuberay-operator.enabled
 
   - name: ray-cluster
     repository: "https://ray-project.github.io/kuberay-helm/"
     version: "1.2.2"
-    condition: ray.enabled
+    condition: ray-cluster.enabled

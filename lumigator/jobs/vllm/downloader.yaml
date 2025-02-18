@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hf-downloader
+spec:
+  containers:
+    - name: hf-downloader
+      image: huggingface/transformers-pytorch-gpu:latest
+      command: ["sleep", "50000"]
+      volumeMounts:
+        - mountPath: /mnt/models
+          name: models
+      env:
+        - name: HF_HOME
+          value: /mnt/models
+  volumes:
+    - name: models
+      persistentVolumeClaim:
+        claimName: models

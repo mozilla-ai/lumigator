@@ -1,0 +1,101 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: deepseek-r1-distill-qwen-14b
+spec:
+  serveConfigV2: |
+    applications:
+    - name: DeepSeek-R1-Distill-Qwen-14B
+      route_prefix: /
+      import_path:  lumigator.jobs.vllm.serve:model
+      deployments:
+      - name: VLLMDeployment
+        num_replicas: 1
+        ray_actor_options:
+          num_cpus: 8
+          num_gpus: 1
+      runtime_env:
+        working_dir: "https://github.com/mozilla-ai/lumigator/archive/refs/heads/ds-deploy.zip"
+        pip: ["vllm==0.7.2"]
+        env_vars:
+          MODEL_ID: "/mnt/models/DeepSeek-R1-Distill-Qwen-14B"
+          SERVED_MODEL_NAME: "DeepSeek-R1-Distill-Qwen-14B"
+          TENSOR_PARALLELISM: "1"
+          PIPELINE_PARALLELISM: "1"
+          DTYPE: "bfloat16"
+          GPU_MEMORY_UTILIZATION: "0.80"
+          DISTRIBUTED_EXECUTOR_BACKEND: "ray"
+          TRUST_REMOTE_CODE: "true"
+  rayClusterConfig:
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+        object-store-memory: "2000000000"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: rayproject/ray:2.41.0-py311-gpu
+              resources:
+                limits:
+                  cpu: "8"
+                  memory: "64Gi"
+                requests:
+                  cpu: "8"
+                  memory: "64Gi"
+              volumeMounts:
+                - mountPath: /mnt/models
+                  name: models
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8000
+                  name: serve
+          volumes:
+            - name: models
+              persistentVolumeClaim:
+                claimName: models
+    workerGroupSpecs:
+      - groupName: gpu-group
+        replicas: 1
+        rayStartParams:
+          dashboard-host: "0.0.0.0"
+          object-store-memory: "2000000000"
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: rayproject/ray:2.41.0-py311-gpu
+                resources:
+                  limits:
+                    cpu: "16"
+                    memory: "64Gi"
+                    nvidia.com/gpu: "1"
+                  requests:
+                    cpu: "16"
+                    memory: "64Gi"
+                    nvidia.com/gpu: "1"
+                volumeMounts:
+                  - mountPath: /mnt/models
+                    name: models
+            volumes:
+              - name: models
+                persistentVolumeClaim:
+                  claimName: models
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: gpu.nvidia.com/class
+                          operator: In
+                          values:
+                            - A100_NVLINK_80GB
+                        - key: topology.kubernetes.io/region
+                          operator: In
+                          values:
+                            - US-EAST-04

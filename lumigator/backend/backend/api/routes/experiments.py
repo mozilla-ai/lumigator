@@ -9,7 +9,6 @@ from lumigator_schemas.experiments import (
 )
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
-    JobCreate,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -33,12 +32,13 @@ def create_experiment(
     service: JobServiceDep,
     request: ExperimentCreate,
 ) -> GetExperimentResponse:
-    return service.create_job(JobCreate.model_validate(request.model_dump()))
+    raise NotImplementedError("🚧 This route is under construction, and is not yet implemented")
 
 
 @router.get("/{experiment_id}")
 def get_experiment(service: JobServiceDep, experiment_id: UUID) -> JobResponse:
-    return GetExperimentResponse.model_validate(service.get_job(experiment_id).model_dump())
+    # mark this route as deprecated
+    raise NotImplementedError("🚧 This route is under construction, and is not yet implemented")
 
 
 @router.get("/")
@@ -47,7 +47,7 @@ def list_experiments(
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[JobResponse]:
-    return ListingResponse[JobResponse].model_validate(service.list_jobs(skip, limit).model_dump())
+    raise NotImplementedError("🚧 This route is under construction, and is not yet implemented")
 
 
 @router.get("/{experiment_id}/result")
@@ -56,7 +56,7 @@ def get_experiment_result(
     experiment_id: UUID,
 ) -> JobResultResponse:
     """Return experiment results metadata if available in the DB."""
-    return JobResultResponse.model_validate(service.get_job_result(experiment_id).model_dump())
+    raise NotImplementedError("🚧 This route is under construction, and is not yet implemented")
 
 
 @router.get("/{experiment_id}/result/download")
@@ -65,7 +65,7 @@ def get_experiment_result_download(
     experiment_id: UUID,
 ) -> JobResultDownloadResponse:
     """Return experiment results file URL for downloading."""
-    return JobResultDownloadResponse.model_validate(service.get_job_result_download(experiment_id).model_dump())
+    raise NotImplementedError("🚧 This route is under construction, and is not yet implemented")
 
 
 ####################################################################################################

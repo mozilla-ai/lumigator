@@ -45,6 +45,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :maxdepth: 2
    :caption: Operations Guide
 
+   operations-guide/configuration
    operations-guide/kubernetes
    operations-guide/alembic
    operations-guide/dev
@@ -55,6 +56,7 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :caption: User Guides
 
    user-guides/inference
+   user-guides/local-models
 
 .. toctree::
    :maxdepth: 2

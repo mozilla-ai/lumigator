@@ -42,6 +42,7 @@ class MLflowTrackingClient(TrackingClient):
             self._client.set_experiment_tag(experiment_id, "task", task)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
+            self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
         # FIXME Let the user decide in the case of failures.
         # Also, use a uuid as name and an arbitrary tag as descriptive name
         except MlflowException as e:
@@ -55,6 +56,7 @@ class MLflowTrackingClient(TrackingClient):
                 self._client.set_experiment_tag(experiment_id, "task", task)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
+                self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
             else:
                 raise e
         # get the experiment so you can populate the response
@@ -124,7 +126,12 @@ class MLflowTrackingClient(TrackingClient):
 
     def get_experiment(self, experiment_id: str):
         """Get an experiment and all its workflows."""
-        experiment = self._client.get_experiment(experiment_id)
+        try:
+            experiment = self._client.get_experiment(experiment_id)
+        except MlflowException as e:
+            # if the experiment doesn't exist, return None
+            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+                return None
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -156,7 +163,9 @@ class MLflowTrackingClient(TrackingClient):
         experiments = []
         skipped = 0
         while True:
-            response = self._client.search_experiments(page_token=page_token)
+            response = self._client.search_experiments(
+                page_token=page_token, filter_string='tags.lumigator_version != ""'
+            )
             if skipped < skip:
                 skipped += len(response)
                 if skipped > skip:
@@ -171,6 +180,7 @@ class MLflowTrackingClient(TrackingClient):
         reduced_experiments = experiments[:limit] if limit is not None else experiments
         return [self._format_experiment(experiment) for experiment in reduced_experiments]
 
+    # TODO find a cheaper call
     def experiments_count(self):
         """Get the number of experiments."""
         return len(self.list_experiments(skip=0, limit=None))

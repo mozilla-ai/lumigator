@@ -12,10 +12,12 @@ from loguru import logger
 from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
 from paths import PathPrefix
 from tqdm import tqdm
+from utils import timer
 
 from schemas import InferenceJobOutput, JobOutput
 
 
+@timer
 def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
     predictions = []
 
@@ -108,8 +110,9 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    output[config.job.output_field] = predict(dataset_iterable, model_client)
+    output[config.job.output_field], summarization_time = predict(dataset_iterable, model_client)
     output["model"] = output_model_name
+    output["summarization_time"] = summarization_time
     logger.info(output)
 
     results = JobOutput(

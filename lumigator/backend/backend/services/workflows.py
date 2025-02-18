@@ -5,7 +5,7 @@ import loguru
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResultObject,
@@ -62,13 +62,14 @@ class WorkflowService:
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
-        # JobInferenceCreate and one JobEvalCreate
+        # JobInferenceCreate and one JobEvalLiteCreate
         job_infer_config = JobInferenceConfig(
             model=request.model,
             model_url=request.model_url,
             output_field=request.inference_output_field,
             system_prompt=request.system_prompt,
-            store_to_dataset=True,
+            # we store the dataset explicitly below, so it gets queued before eval
+            store_to_dataset=False,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
@@ -115,7 +116,7 @@ class WorkflowService:
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
             max_samples=request.max_samples,
-            job_config=JobEvalLiteConfig(),
+            job_config=JobEvalConfig(),
         )
 
         # submit the job

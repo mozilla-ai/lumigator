@@ -1,0 +1,17 @@
+absl-py==2.1.0
+bert_score==0.3.13
+click>=8.1.7
+datasets==2.20.0
+evaluate==0.4.3
+loguru==0.7.2
+nltk==3.8.1
+numpy<2.0.0
+platformdirs>=2.1
+pydantic>=2.10.0
+pydantic-yaml>=1.2.0
+rouge-score==0.1.2
+ruff==0.5.5
+s3fs==2024.5.0
+six>=1.14
+transformers==4.48.0
+urllib3==2.3.0

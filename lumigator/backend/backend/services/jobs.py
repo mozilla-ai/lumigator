@@ -10,17 +10,16 @@ from uuid import UUID
 
 import loguru
 import requests
-from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
+from evaluator.schemas import DatasetConfig as ELDatasetConfig
 
-# TODO: the evaluator_lite import will need to be renamed to evaluator
+# TODO: the evaluator import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvaluationConfig
+from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
     HfPipelineConfig,
     InferenceJobConfig,
-    InferenceJobOutput,
     InferenceServerConfig,
     SamplingParameters,
 )
@@ -31,7 +30,6 @@ from lumigator_schemas.jobs import (
     JobConfig,
     JobCreate,
     JobEvalConfig,
-    JobEvalLiteConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
@@ -49,15 +47,17 @@ from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobUpstreamError,
+    JobValidationError,
 )
 from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
-JobSpecificRestrictedConfig = type[JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig]
+JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
 class JobService:
@@ -76,13 +76,6 @@ class JobService:
             "command": settings.EVALUATOR_COMMAND,
             "pip": settings.EVALUATOR_PIP_REQS,
             "work_dir": settings.EVALUATOR_WORK_DIR,
-            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
-            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
-        },
-        JobType.EVALUATION_LITE: {
-            "command": settings.EVALUATOR_LITE_COMMAND,
-            "pip": settings.EVALUATOR_LITE_PIP_REQS,
-            "work_dir": settings.EVALUATOR_LITE_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -207,11 +200,13 @@ class JobService:
             results_json = json.loads(f.read())
             # TODO Move into job-specific territory
             # Specifically, this works only for inferences!
-            results = InferenceJobOutput.model_validate(results_json)
+            results = JobResultObject.model_validate(results_json)
 
         # make sure the artifacts are present in the results
-        if not all(key in results.artifacts for key in ["examples", "ground_truth", request.job_config.output_field]):
-            raise ValueError("Missing required fields in the job results.")
+        required_keys = {"examples", "ground_truth", request.job_config.output_field}
+        missing_keys = required_keys - set(results.artifacts.keys())
+        if missing_keys:
+            raise DatasetMissingFieldsError(set(missing_keys)) from None
 
         dataset_to_save = {
             "examples": results.artifacts["examples"],
@@ -248,7 +243,6 @@ class JobService:
 
         Args:
             job_id (UUID): The unique identifier of the job.
-            request (JobEvalLiteCreate): The request object containing job evaluation details.
             s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
         Note:
@@ -359,6 +353,8 @@ class JobService:
             model_url = settings.OAI_API_URL
         elif request.job_config.model.startswith("mistral://"):
             model_url = settings.MISTRAL_API_URL
+        elif request.job_config.model.startswith("ds://"):
+            model_url = settings.DEEPSEEK_API_URL
         else:
             model_url = request.job_config.model_url
 
@@ -367,7 +363,7 @@ class JobService:
     def _validate_config(self, job_type: str, config_template: str, config_params: dict):
         if job_type == JobType.INFERENCE:
             InferenceJobConfig.model_validate_json(config_template.format(**config_params))
-        elif job_type == JobType.EVALUATION_LITE:
+        elif job_type == JobType.EVALUATION:
             EvalJobConfig.model_validate_json(config_template.format(**config_params))
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
@@ -378,13 +374,17 @@ class JobService:
     # to put this. The jobs should ideally have no dependency towards the backend.
 
     def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
+        # TODO Move to a custom validator in the schema
+        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
+            raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
             job=InferJobConfig(
                 max_samples=request.max_samples,
                 storage_path=storage_path,
-                output_field=request.job_config.output_field,
+                # TODO Should be unnecessary, check
+                output_field=request.job_config.output_field or "predictions",
             ),
         )
         # Maybe use just the protocol to decide?
@@ -393,7 +393,8 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt,
+                    # FIXME Inferences may not always be summarizations!
+                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -406,7 +407,20 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt,
+                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    max_retries=3,
+                )
+                job_config.params = SamplingParameters(
+                    max_tokens=request.job_config.max_tokens,
+                    frequency_penalty=request.job_config.frequency_penalty,
+                    temperature=request.job_config.temperature,
+                    top_p=request.job_config.top_p,
+                )
+            case "ds://deepseek-chat" | "ds://deepseek-reasoner":
+                job_config.inference_server = InferenceServerConfig(
+                    base_url=self._set_model_type(request),
+                    engine=request.job_config.model,
+                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -419,7 +433,7 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt,
+                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -441,9 +455,7 @@ class JobService:
                 )
         return job_config
 
-    def generate_evaluation_lite_job_config(
-        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
-    ):
+    def generate_evaluation_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=ELDatasetConfig(path=dataset_path),
@@ -483,10 +495,8 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
             job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
-        elif job_type == JobType.EVALUATION_LITE:
-            job_config = self.generate_evaluation_lite_job_config(
-                request, record.id, dataset_s3_path, self.storage_path
-            )
+        elif job_type == JobType.EVALUATION:
+            job_config = self.generate_evaluation_job_config(request, record.id, dataset_s3_path, self.storage_path)
         else:
             # This should not happen since the job_type's are type checked
             raise Exception("Unknown job type")
@@ -540,8 +550,13 @@ class JobService:
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        # TODO Defer to specific job
-        if job_type == JobType.INFERENCE:
+        # NOTE: Only inference jobs can store results in a dataset atm. Among them:
+        # - prediction jobs are run in a workflow before evaluations => they trigger dataset saving
+        #   at workflow level so it is prepended to the eval job
+        # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
+        # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
+        # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
+        if job_type == JobType.INFERENCE and request.job_config.store_to_dataset:
             self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 
         loguru.logger.info("Getting response...")

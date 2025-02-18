@@ -11,7 +11,7 @@ This Helm chart deploys the Lumigator Frontend built with Vue 3, and Vite, and d
 | fullnameOverride | `""` | - |
 | image.pullPolicy | `"IfNotPresent"` | The Kubernetes [imagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) value |
 | image.repository | `"mzdotai/lumigator-frontend"` | Repository where the Lumigator Frontend image is located |
-| image.tag | `"v0.1.0-alpha"` | The Lumigator Frontend Docker image tag |
+| image.tag | `"v0.1.1-alpha"` | The Lumigator Frontend Docker image tag |
 | imagePullSecrets | `[]` | Setting to pull an image from a private repository more information can be found [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
 | livenessProbe.httpGet.path | `"/"` | Path against the liveness probe to be executed |
 | livenessProbe.httpGet.port | `"http"` | Port against the liveness probe to be executed |

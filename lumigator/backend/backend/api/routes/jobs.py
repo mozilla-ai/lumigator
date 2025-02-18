@@ -12,7 +12,7 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
     JobCreate,
-    JobEvaluateCreate,
+    JobEvalCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -25,22 +25,25 @@ from starlette.responses import Response
 
 from backend.api.deps import DatasetServiceDep, JobServiceDep
 from backend.api.http_headers import HttpHeaders
-from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
     JobUpstreamError,
+    JobValidationError,
 )
 from backend.settings import settings
 
 router = APIRouter()
 
 
-def job_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
+def job_exception_mappings() -> dict[
+    type[JobNotFoundError] | type[JobTypeUnsupportedError] | type[JobUpstreamError] | type[JobValidationError], int
+]:
     return {
         JobNotFoundError: status.HTTP_404_NOT_FOUND,
         JobTypeUnsupportedError: status.HTTP_501_NOT_IMPLEMENTED,
         JobUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        JobValidationError: status.HTTP_400_BAD_REQUEST,
     }
 
 
@@ -88,27 +91,12 @@ def create_annotation_job(
     return job_response
 
 
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_job(
-    service: JobServiceDep,
-    job_create_request: JobEvaluateCreate,
-    request: Request,
-    response: Response,
-) -> JobResponse:
-    job_response = service.create_job(job_create_request)
-
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
-    response.headers[HttpHeaders.LOCATION] = f"{url}"
-
-    return job_response
-
-
 # TODO: remove the code above and refactor the method below to answer
 #       to "/evaluate/" when we deprecate evaluator
-@router.post("/eval_lite/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_lite_job(
+@router.post("/evaluator/", status_code=status.HTTP_201_CREATED)
+def create_evaluation_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobEvalCreate,
     request: Request,
     response: Response,
 ) -> JobResponse:

@@ -60,10 +60,10 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import LMenu from '@/components/organisms/LMenu.vue'
-import { useDatasetStore } from '@/stores/datasets/datasetsStore'
-import { useExperimentStore } from '@/stores/experiments/experimentsStore'
-import { useSlidePanel } from '@/composables/SlidingPanel'
+import LMenu from '@/components/layout/LMenu.vue'
+import { useDatasetStore } from '@/stores/datasetsStore'
+import { useExperimentStore } from '@/stores/experimentsStore'
+import { useSlidePanel } from '@/composables/useSlidePanel'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
@@ -95,7 +95,11 @@ const tooltipConfig = ref({
 const { showSlidingPanel } = useSlidePanel()
 
 onMounted(async () => {
-  await Promise.all([experimentsStore.fetchAllJobs(), datasetsStore.fetchDatasets()])
+  await Promise.all([
+    datasetsStore.fetchAllJobs(),
+    datasetsStore.fetchDatasets(),
+    experimentsStore.fetchAllExperiments(),
+  ])
 })
 </script>
 

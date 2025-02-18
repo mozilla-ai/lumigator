@@ -9,18 +9,20 @@ In this guide, we'll show you how to get started with a local deployment.
 Before you start, make sure you have the following:
 
 - A working installation of [Docker](https://docs.docker.com/engine/install/)
-    - On MAC, Docker Desktop >= 4.3, and `docker-compose` >= 1.28.
+    - On Mac, Docker Desktop >= 4.37, and `docker-compose` >= 2.31.
     - On Linux, please also complete the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
+- The [`uv`](https://github.com/astral-sh/uv?tab=readme-ov-file#installation) Python package manager installed.
 - The system Python; no version manager, such as `uv`, should be active.
 
 ## Local Deployment
 
-You can run and develop Lumigator locally using `docker-compose.` This creates four container
+You can run and develop Lumigator locally using `docker-compose.` This creates multiple container
 services networked together to make up all the components of the Lumigator application:
 
 - `minio`: Local storage for datasets that mimics S3-API compatible functionality.
 - `backend`: Lumigator’s FastAPI REST API.
 - `ray`: A Ray cluster for submitting several types of jobs.
+- `mlflow`: Used to track experiments and metrics.
 - `frontend`: Lumigator's Web UI
 
 ```{note}

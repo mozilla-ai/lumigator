@@ -12,5 +12,6 @@ export type Model = {
   requirements: Array<string>
   tasks: Array<Task>
   uri: string
+  base_url: string
   website_url: string
 }

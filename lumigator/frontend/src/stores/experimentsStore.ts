@@ -129,6 +129,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           ...experimentData,
           experiment_id: experimentId,
           model: model.uri,
+          base_url: model.base_url,
         }),
       ),
     )

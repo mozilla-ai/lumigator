@@ -51,7 +51,7 @@
       },
       {
         "name": "gpt-4o-mini",
-        "uri": "oai://gpt-4o-mini",
+        "uri": "openai/gpt-4o-mini",
         "website_url": "https://platform.openai.com/docs/models#gpt-4o-mini",
         "description": "OpenAI's GPT-4o-mini model.",
         "requirements": [ "api_key" ],
@@ -64,7 +64,7 @@
       },
       {
         "name": "gpt-4o",
-        "uri": "oai://gpt-4o",
+        "uri": "openai/gpt-4o",
         "website_url": "https://platform.openai.com/docs/models#gpt-4o",
         "description": "OpenAI's GPT-4o model.",
         "requirements": [ "api_key" ],
@@ -77,7 +77,7 @@
       },
       {
         "name": "open-mistral-7b",
-        "uri": "mistral://open-mistral-7b",
+        "uri": "mistral/open-mistral-7b",
         "website_url": " https://mistral.ai/technology/#models",
         "description": "Mistral's 7B model.",
         "requirements": [ "api_key" ],
@@ -90,8 +90,8 @@
       },
       {
         "name": "mistralai/Mistral-7B-Instruct-v0.2",
-        "uri": "llamafile://mistralai/Mistral-7B-Instruct-v0.2",
-        "website_url": " https://mistral.ai/technology/#models",
+        "uri": "llamafile://mistral/Mistral-7B-Instruct-v0.2",
+        "website_url": "https://huggingface.co/Mozilla/Mistral-7B-Instruct-v0.2-llamafile",
         "description": "A llamafile package of Mistral's 7B Instruct model.",
         "requirements": [ "llamafile" ],
         "info": {

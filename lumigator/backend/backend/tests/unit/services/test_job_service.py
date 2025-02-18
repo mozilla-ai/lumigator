@@ -54,11 +54,11 @@ def test_set_explicit_inference_job_params(job_record, job_service):
 
 
 @pytest.mark.parametrize(
-    ["model", "input_model_url", "returned_model_url"],
+    ["model", "input_base_url", "returned_base_url"],
     [
         # generic HF model loaded locally
         ("hf://facebook/bart-large-cnn", None, None),
-        # vLLM served model (with HF model name specified to be passed as "engine")
+        # vLLM served model (with HF model name specified to be passed as "model")
         (
             "hf://mistralai/Mistral-7B-Instruct-v0.3",
             "http://localhost:8000/v1/chat/completions",
@@ -66,31 +66,31 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         ),
         # llamafile served model (with custom model name)
         (
-            "llamafile://mistralai/Mistral-7B-Instruct-v0.2",
+            "openai/mistralai/Mistral-7B-Instruct-v0.2",
             "http://localhost:8000/v1/chat/completions",
             "http://localhost:8000/v1/chat/completions",
         ),
         # openai model (from API)
-        ("oai://gpt-4-turbo", None, settings.OAI_API_URL),
+        ("gpt-4-turbo", None, settings.OAI_API_URL),
         # mistral model (from API)
-        ("mistral://open-mistral-7b", None, settings.MISTRAL_API_URL),
+        ("mistral/open-mistral-7b", None, settings.MISTRAL_API_URL),
         # deepseek model (from API)
-        ("ds://deepseek-chat", None, settings.DEEPSEEK_API_URL),
+        ("deepseek/deepseek-chat", None, settings.DEEPSEEK_API_URL),
     ],
 )
-def test_set_model(job_service, model, input_model_url, returned_model_url):
+def test_set_model(job_service, model, input_base_url, returned_base_url):
     request = JobCreate(
         name="test_run",
         description="Test run to verify how model URL is set",
         job_config=JobInferenceConfig(
             job_type=JobType.INFERENCE,
             model=model,
-            model_url=input_model_url,
+            base_url=input_base_url,
         ),
         dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
     )
-    model_url = request.model_url
-    assert model_url == returned_model_url
+    base_url = request.base_url
+    assert base_url == returned_base_url
 
 
 def test_invalid_text_generation(job_service):

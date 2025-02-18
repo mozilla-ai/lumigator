@@ -96,11 +96,10 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
 
 * `name`: an identification name for the model
-* `uri`: a URI specifying how to use the model. The following protocols are supported:
+* `uri`: a URI specifying how and where to use the model. The following protocols are supported:
   * `hf://`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
-  * `llamafile://`: model set up with [`llamafile`](https://github.com/Mozilla-Ocho/llamafile) on its default host and port
-  * `oai://`: OpenAI or compatible external API; needs a value for the environment variable OPENAI_API_KEY with a valid key
-  * `mistral://`: Mistral or compatible external API; needs a value for the environment variable MISTRAL_API_KEY with a valid key
+  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc.
+* `base_url`: this field can be filled out if running a custom model that uses the openai protocol. For example, llamafile is generally hosted on your computer at `http://localhost:8080/v1`.
 * `website_url`: a link to a web page with more information about the model
 * `description`: a short description about the model
 * `info`: a map containing information about the model like parameter count or model size

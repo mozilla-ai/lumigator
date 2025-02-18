@@ -81,7 +81,7 @@ class JobInferenceConfig(BaseModel):
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
-    model_url: str | None = None
+    base_url: str | None = None
     system_prompt: str | None = Field(
         title="System Prompt",
         default=None,

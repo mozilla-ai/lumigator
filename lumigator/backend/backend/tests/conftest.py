@@ -409,7 +409,7 @@ def create_job_config() -> JobConfig:
         "model": "hf://facebook/bart-large-cnn",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,
-        "model_url": "hf://facebook/bart-large-cnn",
+        "base_url": "hf://facebook/bart-large-cnn",
         "system_prompt": "Hello Lumigator",
         "config_template": str,
     }

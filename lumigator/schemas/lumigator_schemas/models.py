@@ -29,7 +29,12 @@ class ModelsResponse(BaseModel):
     uri: str = Field(
         title="Model URI",
         description="URI specifying the model location and use "
-        "(supported protocols: `hf://`, `llamafile://`, `oai://`, `mistral://`)",
+        "(supported protocols: `hf://`, `openai/`, `mistral/`, any LiteLLM supported provider)",
+    )
+    base_url: str | None = Field(
+        title="Base URL",
+        description="Base URL for the model API (if applicable, e.g. for Llamafile, vLLM, etc)",
+        default=None,
     )
     website_url: str = Field(
         title="Information page URL",
@@ -43,9 +48,7 @@ class ModelsResponse(BaseModel):
         "(e.g. `{ModelRequirement.LLAMAFILE}` to indicate that a llamafile needs to be running "
         "or `{ModelRequirement.API_KEY}` to indicate that an API key is necessary)",
     )
-    info: ModelInfo | None = Field(
-        None, title="Model info", description="Detailed model capabilities"
-    )
+    info: ModelInfo | None = Field(None, title="Model info", description="Detailed model capabilities")
     tasks: list[dict[str, dict | None]] = Field(
         ..., title="Applicable tasks", description="List of tasks to which the model can be applied"
     )

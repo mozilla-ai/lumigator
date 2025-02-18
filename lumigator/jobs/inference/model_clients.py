@@ -36,12 +36,12 @@ class LiteLLMModelClient(BaseModelClient):
     """Model client for models served via openai-compatible API.
     For OpenAI models:
     - The base_url is fixed
-    - Choose an engine name (see https://platform.openai.com/docs/models)
+    - Choose an model name (see https://platform.openai.com/docs/models)
     - Customize the system prompt if needed
 
     For compatible models:
     - Works with local/remote vLLM-served models and llamafiles
-    - Provide base_url and engine
+    - Provide base_url and model
     - Customize the system prompt if needed
     """
 
@@ -55,7 +55,7 @@ class LiteLLMModelClient(BaseModelClient):
         prompt: str,
     ) -> ModelResponse:
         response = completion(
-            model=self.config.inference_server.base_url,
+            model=self.config.inference_server.model,
             messages=[
                 {"role": "system", "content": self.system},
                 {"role": "user", "content": prompt},
@@ -65,6 +65,7 @@ class LiteLLMModelClient(BaseModelClient):
             temperature=self.config.params.temperature,
             top_p=self.config.params.top_p,
             drop_params=True,
+            api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
         # LiteLLM gives us the cost of each API which is nice.
         # Eventually we can add this to the response object as well.

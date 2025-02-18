@@ -29,7 +29,6 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
     JobCreate,
-    JobEvalConfig,
     JobEvalLiteConfig,
     JobInferenceConfig,
     JobLogsResponse,
@@ -58,7 +57,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
-JobSpecificRestrictedConfig = type[JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig]
+JobSpecificRestrictedConfig = type[JobEvalLiteConfig | JobInferenceConfig]
 
 
 class JobService:
@@ -70,13 +69,6 @@ class JobService:
             "command": settings.INFERENCE_COMMAND,
             "pip": settings.INFERENCE_PIP_REQS,
             "work_dir": settings.INFERENCE_WORK_DIR,
-            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
-            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
-        },
-        JobType.EVALUATION: {
-            "command": settings.EVALUATOR_COMMAND,
-            "pip": settings.EVALUATOR_PIP_REQS,
-            "work_dir": settings.EVALUATOR_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },

@@ -353,9 +353,9 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/experiments/{non_existing_id}")
+    response = local_client.get(f"/experiments/new/{non_existing_id}")
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
+    assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):

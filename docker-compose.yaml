@@ -162,8 +162,8 @@ services:
       - S3_BUCKET
       # TODO: the following two rows should be renamed to EVALUATOR_*
       #       and the two above should be removed when we depreate evaluator
-      - EVALUATOR_LITE_PIP_REQS
-      - EVALUATOR_LITE_WORK_DIR
+      - EVALUATOR_PIP_REQS
+      - EVALUATOR_WORK_DIR
       - INFERENCE_PIP_REQS
       - INFERENCE_WORK_DIR
       - RAY_DASHBOARD_PORT

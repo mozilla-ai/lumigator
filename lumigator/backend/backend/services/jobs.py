@@ -10,11 +10,11 @@ from uuid import UUID
 
 import loguru
 import requests
-from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
+from evaluator.schemas import DatasetConfig as ELDatasetConfig
 
-# TODO: the evaluator_lite import will need to be renamed to evaluator
+# TODO: the evaluator import will need to be renamed to evaluator
 #   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvaluationConfig
+from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
@@ -29,7 +29,7 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     JobConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
@@ -57,7 +57,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
-JobSpecificRestrictedConfig = type[JobEvalLiteConfig | JobInferenceConfig]
+JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
 class JobService:
@@ -72,10 +72,10 @@ class JobService:
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
-        JobType.EVALUATION_LITE: {
-            "command": settings.EVALUATOR_LITE_COMMAND,
-            "pip": settings.EVALUATOR_LITE_PIP_REQS,
-            "work_dir": settings.EVALUATOR_LITE_WORK_DIR,
+        JobType.EVALUATION: {
+            "command": settings.EVALUATOR_COMMAND,
+            "pip": settings.EVALUATOR_PIP_REQS,
+            "work_dir": settings.EVALUATOR_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -357,7 +357,7 @@ class JobService:
     def _validate_config(self, job_type: str, config_template: str, config_params: dict):
         if job_type == JobType.INFERENCE:
             InferenceJobConfig.model_validate_json(config_template.format(**config_params))
-        elif job_type == JobType.EVALUATION_LITE:
+        elif job_type == JobType.EVALUATION:
             EvalJobConfig.model_validate_json(config_template.format(**config_params))
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
@@ -449,9 +449,7 @@ class JobService:
                 )
         return job_config
 
-    def generate_evaluation_lite_job_config(
-        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
-    ):
+    def generate_evaluation_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=ELDatasetConfig(path=dataset_path),
@@ -490,10 +488,8 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
             job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
-        elif job_type == JobType.EVALUATION_LITE:
-            job_config = self.generate_evaluation_lite_job_config(
-                request, record.id, dataset_s3_path, self.storage_path
-            )
+        elif job_type == JobType.EVALUATION:
+            job_config = self.generate_evaluation_job_config(request, record.id, dataset_s3_path, self.storage_path)
         else:
             # This should not happen since the job_type's are type checked
             raise Exception("Unknown job type")

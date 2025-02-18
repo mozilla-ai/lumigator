@@ -1,13 +1,13 @@
 from http import HTTPMethod
 
 from lumigator_schemas.experiments import (
-    ExperimentIdCreate,
+    ExperimentCreate,
     GetExperimentResponse,
 )
 from lumigator_schemas.extras import ListingResponse
 
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import ExperimentIdCreate as ExperimentIdCreateStrict
+from lumigator_sdk.strict_schemas import ExperimentCreate as ExperimentCreateStrict
 
 
 class Experiments:
@@ -16,9 +16,9 @@ class Experiments:
     def __init__(self, c: ApiClient):
         self.__client = c
 
-    def create_experiment(self, experiment: ExperimentIdCreate) -> GetExperimentResponse:
+    def create_experiment(self, experiment: ExperimentCreate) -> GetExperimentResponse:
         """Creates a new experiment."""
-        ExperimentIdCreateStrict.model_validate(ExperimentIdCreate.model_dump(experiment))
+        ExperimentCreateStrict.model_validate(ExperimentCreate.model_dump(experiment))
         response = self.__client.get_response(self.EXPERIMENTS_ROUTE, HTTPMethod.POST, experiment.model_dump_json())
 
         data = response.json()

@@ -17,8 +17,6 @@ serviceAccountName: ""
 existingMistralAPISecret: ""
 mistralAPIKey: ""
 
-# TODO: These need to be updated with the eval_lite refactor,
-# see https://github.com/mozilla-ai/lumigator/issues/573
 evaluatorPipReqs: "/mzai/lumigator/jobs/evaluator/requirements.txt"
 evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 

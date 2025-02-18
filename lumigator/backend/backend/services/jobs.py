@@ -11,9 +11,6 @@ from uuid import UUID
 import loguru
 import requests
 from evaluator.schemas import DatasetConfig as ELDatasetConfig
-
-# TODO: the evaluator import will need to be renamed to evaluator
-#   once the new experiments API is merged
 from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig

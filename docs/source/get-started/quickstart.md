@@ -4,6 +4,9 @@ Now that you have a local deployment of Lumigator, you can start using it. In th
 we will show you how to upload a dataset and create a simple evaluation job. Finally, we'll show you
 how to retrieve the results of the evaluation job.
 
+WARNING: This documentation is in progress and may not be functional, 
+see https://github.com/mozilla-ai/lumigator/issues/905 to track the issue.
+
 ## Upload a Dataset
 
 The Lumigator backend provides an API endpoint for uploading datasets and running evaluation jobs.
@@ -151,7 +154,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/evaluate/ \
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-from lumigator_schemas.jobs import JobType, JobEvalCreate
+from lumigator_schemas.jobs import JobType, JobEvalLiteCreate
 
 dataset_id = datasets.items[-1].id
 
@@ -164,7 +167,7 @@ team_name = "lumigator_enthusiasts"
 
 responses = []
 for model in models:
-    job_args = JobEvalCreate(
+    job_args = JobEvalLiteCreate(
         name=team_name,
         description="Test",
         model=model,
@@ -172,7 +175,7 @@ for model in models:
         max_samples=max_samples
     )
     # descr = f"Testing {model} summarization model on {dataset_name}"
-    responses.append(lm_client.jobs.create_job(JobType.EVALUATION, job_args))
+    responses.append(lm_client.jobs.create_job(JobType.EVALUATION_LITE, job_args))
 ```
 :::
 

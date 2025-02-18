@@ -9,7 +9,7 @@ from lumigator_sdk.strict_schemas import (
     DatasetDownloadResponse,
     JobAnnotateConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
 )
 from pydantic import ValidationError
@@ -36,9 +36,7 @@ def test_create_job_ok_all(lumi_client, json_data_job_response, json_data_job_al
     assert job_ret.status == "created"
 
 
-def test_create_job_ok_minimal(
-    lumi_client, json_data_job_response, json_data_job_minimal, request_mock
-):
+def test_create_job_ok_minimal(lumi_client, json_data_job_response, json_data_job_minimal, request_mock):
     job_json = load_json(json_data_job_minimal)
     path = job_json["job_config"]["job_type"]
 
@@ -55,9 +53,7 @@ def test_create_job_ok_minimal(
     assert job_ret.status == "created"
 
 
-def test_create_job_ok_extra(
-    lumi_client, json_data_job_response, json_data_job_extra, request_mock
-):
+def test_create_job_ok_extra(lumi_client, json_data_job_response, json_data_job_extra, request_mock):
     job_json = load_json(json_data_job_extra)
     path = job_json["job_config"]["job_type"]
 

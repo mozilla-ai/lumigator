@@ -8,7 +8,7 @@ from lumigator_schemas.jobs import (
     Job,
     JobAnnotateConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobEvent,
     JobInferenceConfig,
     JobLogsResponse,
@@ -69,7 +69,7 @@ class JobInferenceConfig(JobInferenceConfig):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobEvalLiteConfig(JobEvalLiteConfig):
+class JobEvalConfig(JobEvalConfig):
     model_config = ConfigDict(extra="forbid")
 
 

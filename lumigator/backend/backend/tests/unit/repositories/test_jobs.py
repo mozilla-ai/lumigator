@@ -34,7 +34,7 @@ def test_create_and_get_jobs_per_type(job_repository):
     retrieved_infer_job = job_repository.list(
         skip=0, limit=None, criteria=[JobRecord.job_type == JobType.INFERENCE.value]
     )
-    assert job_repository.count() == 3
+    assert job_repository.count() == 2
     assert retrieved_job.job_type is None
     assert len(retrieved_infer_job) == 1
     assert created_infer_job.id == retrieved_infer_job[0].id

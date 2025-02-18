@@ -125,7 +125,7 @@ const isInvalid = computed(
 )
 
 const filteredDatasets = computed(() =>
-  datasets.value.filter((dataset) => dataset.ground_truth === true),
+  datasets.value.filter((dataset) => dataset.ground_truth),
 )
 
 async function triggerExperiment() {

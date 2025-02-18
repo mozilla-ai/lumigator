@@ -80,5 +80,5 @@ The following section documents the available settings:
 | LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
 | INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
 | INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |
-| EVALUATOR_LITE_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation (lite) jobs                                          |
-| EVALUATOR_LITE_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation (lite) job              |
+| EVALUATOR_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation jobs                                          |
+| EVALUATOR_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job              |

@@ -18,7 +18,7 @@ from lumigator_sdk.strict_schemas import (
     ExperimentIdCreate,
     JobAnnotateConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     WorkflowCreateRequest,
 )
@@ -125,7 +125,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     infer_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.INFERENCE)
     assert infer_jobs_before is not None
 
-    eval_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+    eval_jobs_before = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
     assert eval_jobs_before is not None
 
     infer_job_config = JobInferenceConfig(
@@ -147,7 +147,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     assert job_infer_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    eval_jobs_after = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+    eval_jobs_after = lumi_client_int.jobs.get_jobs_per_type(JobType.EVALUATION)
     assert eval_jobs_after is not None
     assert eval_jobs_after.total - eval_jobs_before.total == 0
 
@@ -162,7 +162,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
 
     assert infer_dataset is not None
 
-    eval_job_config = JobEvalLiteConfig(
+    eval_job_config = JobEvalConfig(
         metrics=["rouge", "meteor"],
     )
     eval_job = JobCreate(

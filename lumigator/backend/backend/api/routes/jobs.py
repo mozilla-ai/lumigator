@@ -13,8 +13,7 @@ from lumigator_schemas.jobs import (
     Job,
     JobAnnotateCreate,
     JobCreate,
-    JobEvalLiteCreate,
-    JobEvaluateCreate,
+    JobEvalCreate,
     JobInferenceCreate,
     JobLogsResponse,
     JobResponse,
@@ -94,27 +93,12 @@ def create_annotation_job(
     return job_response
 
 
-@router.post("/evaluate/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_job(
-    service: JobServiceDep,
-    job_create_request: JobEvaluateCreate,
-    request: Request,
-    response: Response,
-) -> JobResponse:
-    job_response = service.create_job(job_create_request)
-
-    url = request.url_for(get_job.__name__, job_id=job_response.id)
-    response.headers[HttpHeaders.LOCATION] = f"{url}"
-
-    return job_response
-
-
 # TODO: remove the code above and refactor the method below to answer
 #       to "/evaluate/" when we deprecate evaluator
-@router.post("/eval_lite/", status_code=status.HTTP_201_CREATED)
-def create_evaluation_lite_job(
+@router.post("/evaluator/", status_code=status.HTTP_201_CREATED)
+def create_evaluation_job(
     service: JobServiceDep,
-    job_create_request: JobEvalLiteCreate,
+    job_create_request: JobEvalCreate,
     request: Request,
     response: Response,
 ) -> JobResponse:

@@ -1,6 +1,6 @@
 [project]
 name = "lumigator-backend"
-version = "0.1.0"
+version = "0.1.1-alpha"
 description = "Lumigators backend component - hosts API"
 readme = "README.md"
 requires-python = ">=3.11"

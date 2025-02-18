@@ -103,13 +103,13 @@ def test_upload_data_launch_job(
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
         "job_config": {
-            "job_type": JobType.EVALUATION_LITE,
+            "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_CAUSAL_MODEL,
         },
     }
 
-    create_evaluation_job_response = local_client.post("/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload)
+    create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
@@ -132,7 +132,7 @@ def test_upload_data_launch_job(
     assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
     get_jobs_infer = local_client.get("/jobs?job_types=inference")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
-    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 
@@ -353,9 +353,9 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/experiments/{non_existing_id}")
+    response = local_client.get(f"/experiments/new/{non_existing_id}")
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
+    assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):

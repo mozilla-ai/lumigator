@@ -5,7 +5,7 @@ import loguru
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResultObject,
@@ -62,13 +62,14 @@ class WorkflowService:
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
-        # JobInferenceCreate and one JobEvalCreate
+        # JobInferenceCreate and one JobEvalLiteCreate
         job_infer_config = JobInferenceConfig(
             model=request.model,
             model_url=request.model_url,
             output_field=request.inference_output_field,
             system_prompt=request.system_prompt,
-            store_to_dataset=True,
+            # we store the dataset explicitly below, so it gets queued before eval
+            store_to_dataset=False,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
@@ -85,9 +86,7 @@ class WorkflowService:
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
 
         # wait for the inference job to complete
-        status = await self._job_service.wait_for_job_complete(
-            inference_job.id, max_wait_time_sec=60 * 10
-        )
+        status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=60 * 10)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Inference job {inference_job.id} failed")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
@@ -106,9 +105,7 @@ class WorkflowService:
             parameters={"inference_output_s3_path": inf_path},
             ray_job_id=str(inference_job.id),
         )
-        self._tracking_client.create_job(
-            request.experiment_id, workflow.id, "inference", inference_job_output
-        )
+        self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)
 
         # FIXME The ray status is now _not enough_ to set the job status,
         # use the inference job id to recover the dataset record
@@ -119,7 +116,7 @@ class WorkflowService:
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
             max_samples=request.max_samples,
-            job_config=JobEvalLiteConfig(),
+            job_config=JobEvalConfig(),
         )
 
         # submit the job
@@ -128,9 +125,7 @@ class WorkflowService:
         )
 
         # wait for the evaluation job to complete
-        status = await self._job_service.wait_for_job_complete(
-            evaluation_job.id, max_wait_time_sec=60 * 10
-        )
+        status = await self._job_service.wait_for_job_complete(evaluation_job.id, max_wait_time_sec=60 * 10)
         self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
@@ -140,13 +135,9 @@ class WorkflowService:
 
             result_key = str(
                 Path(settings.S3_JOB_RESULTS_PREFIX)
-                / settings.S3_JOB_RESULTS_FILENAME.format(
-                    job_name=job_eval_create.name, job_id=evaluation_job.id
-                )
+                / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_eval_create.name, job_id=evaluation_job.id)
             )
-            with self._dataset_service.s3_filesystem.open(
-                f"{settings.S3_BUCKET}/{result_key}", "r"
-            ) as f:
+            with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
                 eval_output = JobResultObject.model_validate(json.loads(f.read()))
 
             # TODO this generic interface should probably be the output type of the eval job but
@@ -161,12 +152,8 @@ class WorkflowService:
                     "rougeL_mean": round(eval_output.metrics["rouge"]["rougeL_mean"], 3),
                     "rougeLsum_mean": round(eval_output.metrics["rouge"]["rougeLsum_mean"], 3),
                     "bertscore_f1_mean": round(eval_output.metrics["bertscore"]["f1_mean"], 3),
-                    "bertscore_precision_mean": round(
-                        eval_output.metrics["bertscore"]["precision_mean"], 3
-                    ),
-                    "bertscore_recall_mean": round(
-                        eval_output.metrics["bertscore"]["recall_mean"], 3
-                    ),
+                    "bertscore_precision_mean": round(eval_output.metrics["bertscore"]["precision_mean"], 3),
+                    "bertscore_recall_mean": round(eval_output.metrics["bertscore"]["recall_mean"], 3),
                     "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
@@ -174,9 +161,7 @@ class WorkflowService:
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
                 ray_job_id=str(evaluation_job.id),
             )
-            self._tracking_client.create_job(
-                request.experiment_id, workflow.id, "evaluation", outputs
-            )
+            self._tracking_client.create_job(request.experiment_id, workflow.id, "evaluation", outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
         except Exception as e:
             loguru.logger.error(f"Error validating evaluation results: {e}")
@@ -198,9 +183,7 @@ class WorkflowService:
         Returns:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
-        loguru.logger.info(
-            f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'."
-        )
+        loguru.logger.info(f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'.")
 
         workflow = self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,

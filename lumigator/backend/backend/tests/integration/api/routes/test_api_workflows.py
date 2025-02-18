@@ -236,7 +236,6 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
             "max_samples": 1,
         },
     )
-    logger.critical(f"Reporting experiment: {experiment}")
     assert experiment.status_code == 201
     return experiment.json()["id"]
 

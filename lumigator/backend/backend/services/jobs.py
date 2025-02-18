@@ -191,13 +191,7 @@ class JobService:
         loguru.logger.info("Adding a new dataset entry to the database...")
 
         # Get the dataset from the S3 bucket
-        result_key = self._get_results_s3_key(job_id)
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            # Validate that the output file adheres to the expected inference output schema
-            results_json = json.loads(f.read())
-            # TODO Move into job-specific territory
-            # Specifically, this works only for inferences!
-            results = JobResultObject.model_validate(results_json)
+        results = self._validate_results(job_id, s3)
 
         # make sure the artifacts are present in the results
         required_keys = {"examples", "ground_truth", request.job_config.output_field}
@@ -235,7 +229,7 @@ class JobService:
 
         loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
-    def _validate_evaluation_results(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
+    def _validate_results(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
         """Handles the evaluation result for a given job.
 
         Args:

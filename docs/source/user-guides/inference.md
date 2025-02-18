@@ -98,7 +98,7 @@ Different models can be chosen for summarization. The information about those mo
 * `name`: an identification name for the model
 * `uri`: a URI specifying how and where to use the model. The following protocols are supported:
   * `hf://`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
-  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc.
+  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc. You will need to have set the correct API keys for them, e.g. OPENAI_API_KEY, or MISTRAL_API_KEY, or DEEPSEEK_API_KEY
 * `base_url`: this field can be filled out if running a custom model that uses the openai protocol. For example, llamafile is generally hosted on your computer at `http://localhost:8080/v1`.
 * `website_url`: a link to a web page with more information about the model
 * `description`: a short description about the model

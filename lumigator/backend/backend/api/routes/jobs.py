@@ -8,17 +8,19 @@ import loguru
 import requests
 from fastapi import APIRouter, HTTPException, Query, status
 from lumigator_schemas.datasets import DatasetResponse
-from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
+    JobAnnotateCreate,
     JobCreate,
     JobEvalCreate,
+    JobInferenceCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
     JobType,
 )
+from lumigator_szchemas.extras import ListingResponse
 from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
 from starlette.responses import Response
@@ -50,7 +52,7 @@ def job_exception_mappings() -> dict[
 @router.post("/inference/", status_code=status.HTTP_201_CREATED)
 def create_inference_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobInferenceCreate,
     request: Request,
     response: Response,
 ) -> JobResponse:
@@ -65,7 +67,7 @@ def create_inference_job(
 @router.post("/annotate/", status_code=status.HTTP_201_CREATED)
 def create_annotation_job(
     service: JobServiceDep,
-    job_create_request: JobCreate,
+    job_create_request: JobAnnotateCreate,
     request: Request,
     response: Response,
 ) -> JobResponse:

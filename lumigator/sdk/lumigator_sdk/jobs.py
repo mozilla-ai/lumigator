@@ -13,7 +13,7 @@ from lumigator_schemas.jobs import (
     Job,
     JobAnnotateConfig,
     JobCreate,
-    JobEvalLiteConfig,
+    JobEvalConfig,
     JobInferenceConfig,
     JobResponse,
     JobResultDownloadResponse,
@@ -29,7 +29,7 @@ from lumigator_sdk.strict_schemas import (
     JobCreate as JobCreateStrict,
 )
 from lumigator_sdk.strict_schemas import (
-    JobEvalLiteConfig as JobEvalLiteConfigStrict,
+    JobEvalConfig as JobEvalConfigStrict,
 )
 from lumigator_sdk.strict_schemas import (
     JobInferenceConfig as JobInferenceConfigStrict,
@@ -79,7 +79,7 @@ class Jobs:
                 from sdk.lumigator import LumigatorClient
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION_LITE)
+                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION)
 
         Returns:
             ListingResponse[JobResponse]: All existing jobs.
@@ -173,14 +173,14 @@ class Jobs:
             .. code-block:: python
 
                 from sdk.lumigator import LumigatorClient
-                from lumigator_schemas.jobs import JobCreate, JobEvalLiteConfig
+                from lumigator_schemas.jobs import JobCreate, JobEvalConfig
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.create_job(JobCreate(JobEvalLiteConfig))
+                lm_client.jobs.create_job(JobCreate(JobEvalConfig))
 
         Args:
             request(JobCreate): The job's configuration. Its job_type
-                can be ANNOTATION, EVALUATION_LITE, or INFERENCE.
+                can be ANNOTATION, EVALUATION, or INFERENCE.
 
         Returns:
             JobResponse: The information for the newly created job.
@@ -188,8 +188,8 @@ class Jobs:
         JobCreateStrict.model_validate(JobCreate.model_dump(request))
         if request.job_config.job_type == JobType.ANNOTATION:
             JobAnnotateConfigStrict.model_validate(JobAnnotateConfig.model_dump(request.job_config))
-        elif request.job_config.job_type == JobType.EVALUATION_LITE:
-            JobEvalLiteConfigStrict.model_validate(JobEvalLiteConfig.model_dump(request.job_config))
+        elif request.job_config.job_type == JobType.EVALUATION:
+            JobEvalConfigStrict.model_validate(JobEvalConfig.model_dump(request.job_config))
         elif request.job_config.job_type == JobType.INFERENCE:
             JobInferenceConfigStrict.model_validate(JobInferenceConfig.model_dump(request.job_config))
 

@@ -103,13 +103,13 @@ def test_upload_data_launch_job(
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
         "job_config": {
-            "job_type": JobType.EVALUATION_LITE,
+            "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_CAUSAL_MODEL,
         },
     }
 
-    create_evaluation_job_response = local_client.post("/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload)
+    create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
@@ -132,7 +132,7 @@ def test_upload_data_launch_job(
     assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
     get_jobs_infer = local_client.get("/jobs?job_types=inference")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
-    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 

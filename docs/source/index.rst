@@ -52,9 +52,10 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    :maxdepth: 1
    :caption: Get Started
 
-   get-started/installation
    get-started/quickstart
+   get-started/development-guide
    get-started/ui-guide
+   get-started/sdk-guide
    get-started/suggested-models
    get-started/troubleshooting
 
@@ -63,7 +64,7 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    :caption: Operations Guide
 
    operations-guide/configuration
-   operations-guide/kubernetes
+   operations-guide/kubernetes-installation
    operations-guide/alembic
    operations-guide/dev
    operations-guide/configure-S3

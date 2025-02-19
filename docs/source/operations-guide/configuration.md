@@ -4,7 +4,7 @@
 This guide only covers configuring Lumigator when deployed using Docker.
 ```
 
-Lumigator comes with sensible defaults that allow you to [start using it](../get-started/installation.md) without modification using [`Docker Compose`](https://docs.docker.com/compose/).
+Lumigator comes with sensible defaults that allow you to [start using it](../get-started/quickstart.md) without modification using [`Docker Compose`](https://docs.docker.com/compose/).
 
 This guide explains how configuration works in Lumigator and how you can make changes to settings if required.
 

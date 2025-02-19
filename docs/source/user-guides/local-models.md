@@ -11,7 +11,7 @@ Before installation and setup, here are some recommended system requirements:
 
 ## What You’ll Need
 
-1. A running instance of [Lumigator](../get-started/installation.md).
+1. A running instance of [Lumigator](../get-started/quickstart.md).
 
    ```{note}
    Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value:

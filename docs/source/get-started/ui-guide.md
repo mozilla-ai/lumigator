@@ -2,7 +2,7 @@
 Lumigator comes with a web-based UI that allows you to interact with the Lumigator API. It is designed to be easy to use and to provide a quick way to get started with Lumigator.
 
 ## Getting Started
-Follow the [installation guide](installation.md#local-deployment) to get Lumigator up and running. The UI can then be accessed by visiting [localhost](http://localhost) on your web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
+Follow the [quickstart](quickstart.md) to get Lumigator up and running. The UI can then be accessed by visiting [localhost](http://localhost) on your web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
 
 ## Upload a Dataset
 The main purpose of Lumigator is to help you select a model that works well for your particular data. It does this by evaluating multiple models on a sample of your data: your dataset.

@@ -23,7 +23,7 @@ from s3fs import S3FileSystem
 
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
-from backend.tracking.tracking_interface import TrackingClient, TrackingClientManager
+from backend.tracking.tracking_interface import TrackingClient
 
 
 class MLflowTrackingClient(TrackingClient):
@@ -408,11 +408,14 @@ class MLflowTrackingClient(TrackingClient):
         raise NotImplementedError
 
 
-class MLflowClientManager(TrackingClientManager):
+class MLflowClientManager:
     """Connection manager for MLflow client."""
 
+    def __init__(self, tracking_uri: str):
+        self._tracking_uri = tracking_uri
+
     @contextlib.contextmanager
-    def connect(self) -> Generator[MLflowTrackingClient, None, None]:
+    def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
         tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
         try:

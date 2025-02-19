@@ -48,7 +48,6 @@ from backend.services.exceptions.dataset_exceptions import DatasetMissingFieldsE
 from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobUpstreamError,
-    JobValidationError,
 )
 from backend.settings import settings
 
@@ -365,9 +364,6 @@ class JobService:
     # to put this. The jobs should ideally have no dependency towards the backend.
 
     def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        # TODO Move to a custom validator in the schema
-        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
-            raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),

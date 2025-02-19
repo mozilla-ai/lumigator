@@ -6,6 +6,7 @@ from lumigator_schemas.jobs import (
     JobInferenceConfig,
     JobType,
 )
+from pydantic import ValidationError
 
 from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.services.jobs import JobService
@@ -94,17 +95,17 @@ def test_set_model(job_service, model, input_model_url, returned_model_url):
 
 
 def test_invalid_text_generation(job_service):
-    request = JobCreate(
-        name="test_text_generation_run",
-        description="Test run to verify that system prompt is set.",
-        job_config=JobInferenceConfig(
-            job_type=JobType.INFERENCE, model="hf://microsoft/Phi-3.5-mini-instruct", task="text-generation"
-        ),
-        dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
-    )
-    with patch(
-        "backend.services.datasets.DatasetService.get_dataset_s3_path",
-        return_value="s3://bucket/path/to/dataset",
-    ):
-        with pytest.raises(JobValidationError):
-            job_service.create_job(request=request)
+    with pytest.raises(ValidationError) as excinfo:
+        JobCreate(
+            name="test_text_generation_run",
+            description="Test run to verify that system prompt is set.",
+            job_config=JobInferenceConfig(
+                job_type=JobType.INFERENCE,
+                model="hf://microsoft/Phi-3.5-mini-instruct",
+                task="text-generation",
+                # system_prompt is intentionally omitted
+            ),
+            dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
+        )
+
+    assert "system_prompt must be provided for text generation tasks." in str(excinfo.value)

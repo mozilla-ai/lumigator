@@ -229,7 +229,7 @@ class JobService:
 
         loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
-    def _validate_results(self, job_id: UUID, s3: S3FileSystem):
+    def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
@@ -408,12 +408,7 @@ class JobService:
         # Create a db record for the job
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
-        record = self.job_repo.create(
-            name=request.name,
-            description=request.description,
-            job_type=job_type,
-            experiment_id=experiment_id,
-        )
+        record = self.job_repo.create(name=request.name, description=request.description, job_type=job_type)
 
         # TODO defer to specific job
         if job_type == JobType.INFERENCE and not request.job_config.output_field:

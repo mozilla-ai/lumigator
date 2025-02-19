@@ -116,7 +116,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted, toRefs, type ComputedRef } from 'vue'
+import { computed, ref, toRefs, type ComputedRef } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/experiments/LJobResults.vue'
@@ -203,10 +203,6 @@ const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = comp
   console.log('data', data)
 
   return data
-})
-
-onUnmounted(() => {
-  // results.value = []
 })
 </script>
 

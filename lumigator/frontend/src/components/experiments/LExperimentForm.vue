@@ -130,32 +130,6 @@ const filteredDatasets = computed(() =>
   datasets.value.filter((dataset) => dataset.ground_truth === true),
 )
 
-/**
- * Runs an experiment with multiple models.
- * Each model triggers a respective evaluation job.
- *
- * @param {Object} experimentData - The data for the experiment to run.
- * @returns {Promise<Array>} The results of the experiment.
- */
-async function createExperimentWithWorkflows(
-  experimentData: createExperimentWithWorkflowsPayload,
-  models: Model[],
-) {
-  // first we create an experiment as a container
-  const { id: experimentId } = await experimentsService.createExperiment(experimentData)
-
-  // then we create a workflow for each model to be attached to the experiment
-  return Promise.all(
-    models.map((model: Model) =>
-      workflowsService.createWorkflow({
-        ...experimentData,
-        experiment_id: experimentId,
-        model: model.uri,
-      }),
-    ),
-  )
-}
-
 async function triggerExperiment() {
   const experimentPayload: createExperimentWithWorkflowsPayload = {
     name: experimentTitle.value,
@@ -164,7 +138,7 @@ async function triggerExperiment() {
     max_samples: maxSamples.value ? maxSamples.value : 0,
     task: 'summarization',
   }
-  const workflows = await createExperimentWithWorkflows(
+  const workflows = await experimentsService.createExperimentWithWorkflows(
     experimentPayload,
     modelSelection.value.selectedModels,
   )

@@ -174,7 +174,7 @@ function startPollingForAnnotationJobLogs() {
 async function retrieveJobLogs() {
   if (selectedJob.value) {
     const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
-    const logs = splitByEscapeCharacter(logsData.logs)
+    const logs = logsData.logs.split('\n')
     logs.forEach((log: string) => {
       const lastEntry = jobLogs.value[jobLogs.value.length - 1]
       if (jobLogs.value.length === 0 || lastEntry !== log) {
@@ -182,11 +182,6 @@ async function retrieveJobLogs() {
       }
     })
   }
-}
-
-function splitByEscapeCharacter(input: string) {
-  const result = input.split('\n')
-  return result
 }
 
 // start/stop polling for selected job (if its running) as the user clicks through them

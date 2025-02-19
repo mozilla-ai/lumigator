@@ -96,6 +96,7 @@ import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { workflowsService } from '@/sdk/workflowsService'
+import { retrieveStatus } from '@/helpers/retrieveStatus'
 const props = defineProps({
   tableData: {
     type: Array as PropType<Experiment[]>,
@@ -147,24 +148,6 @@ function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
-}
-
-// aggregates the experiment's status based on its workflows statuses
-function retrieveStatus(experiment: Experiment): WorkflowStatus {
-  const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
-  const uniqueStatuses = new Set(workflowStatuses)
-
-  if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
-    return WorkflowStatus.RUNNING
-  } else if (
-    uniqueStatuses.has(WorkflowStatus.FAILED) &&
-    uniqueStatuses.has(WorkflowStatus.SUCCEEDED)
-  ) {
-    return WorkflowStatus.INCOMPLETE
-  } else {
-    // if none of its workflows are running, or if some failed and others succeeded, then it probably means they all have the same status so just return it
-    return [...uniqueStatuses][0]
-  }
 }
 
 /**

@@ -9,7 +9,7 @@
         </span>
       </div>
       <div
-        v-for="model of modelsRequiringNoAPIKey"
+        v-for="model in modelsRequiringNoAPIKey"
         :key="model.name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
@@ -34,8 +34,10 @@
           :href="model.website_url"
           target="_blank"
           @click.stop
-        />
+        >
+        </Button>
       </div>
+      <!-- TODO: this is copy pasted and can be extracted into a component -->
       <div v-if="modelsRequiringAPIKey.length" class="l-models-list__options-container-section">
         <p>VIA APIs</p>
         <span

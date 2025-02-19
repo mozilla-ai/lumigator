@@ -78,6 +78,7 @@ import type { WorkflowResults } from '@/types/Metrics'
 import { experimentsService } from '@/sdk/experimentsService'
 import { downloadContent } from '@/helpers/downloadContent'
 import axios from 'axios'
+import { getExperimentResults, transformJobResults } from '@/helpers/getExperimentResults'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -125,22 +126,7 @@ const onSelectWorkflow = (workflow: Workflow) => {
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {
-  for (const workflow of experiment.workflows) {
-    if (workflow.artifacts_download_url) {
-      const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
-
-      const modelRow = {
-        model: data.artifacts.model,
-        meteor: data.metrics.meteor,
-        bertscore: data.metrics.bertscore,
-        rouge: data.metrics.rouge,
-        runTime: undefined, //getJobRuntime(results.id),
-        jobResults: transformJobResults(data),
-      }
-      selectedExperimentResults.value.push(modelRow)
-    }
-  }
-
+  selectedExperimentResults.value = await getExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
@@ -153,49 +139,6 @@ const onShowJobResults = async (workflow: Workflow) => {
   }
   showDrawer.value = true
   showJobResults.value = true
-}
-
-/**
- * Transforms results data into a format which accommodates the UI
- *
- * @param {Object} objectData .
- * @returns {Array} Transformed results array.
- */
-function transformJobResults(objectData: WorkflowResults): EvaluationJobResults[] {
-  const transformedArray = objectData.artifacts.examples.map((example, index: number) => {
-    return {
-      example,
-      bertscore: {
-        f1: objectData.metrics.bertscore?.f1?.[index] ?? 0,
-        f1_mean: objectData.metrics.bertscore?.f1_mean ?? 0,
-        hashcode: objectData.metrics.bertscore?.hashcode ?? 0,
-        precision: objectData.metrics.bertscore?.precision?.[index] ?? 0,
-        precision_mean: objectData.metrics.bertscore?.precision_mean ?? 0,
-        recall: objectData.metrics.bertscore?.recall?.[index] ?? 0,
-        recall_mean: objectData.metrics.bertscore?.recall_mean ?? 0,
-      },
-      evaluation_time: objectData.artifacts.evaluation_time ?? 0,
-      ground_truth: objectData.artifacts.ground_truth?.[index],
-      meteor: {
-        meteor: objectData.metrics.meteor?.meteor?.[index] ?? 0,
-        meteor_mean: objectData.metrics.meteor?.meteor_mean ?? 0,
-      },
-      model: objectData.artifacts.model,
-      predictions: objectData.artifacts.predictions?.[index],
-      rouge: {
-        rouge1: objectData.metrics.rouge?.rouge1?.[index] ?? 0,
-        rouge1_mean: objectData.metrics.rouge?.rouge1_mean ?? 0,
-        rouge2: objectData.metrics.rouge?.rouge2?.[index] ?? 0,
-        rouge2_mean: objectData.metrics.rouge?.rouge2_mean ?? 0,
-        rougeL: objectData.metrics.rouge?.rougeL?.[index] ?? 0,
-        rougeL_mean: objectData.metrics.rouge?.rougeL_mean ?? 0,
-        rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
-        rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
-      },
-      summarization_time: objectData.artifacts.summarization_time,
-    } as unknown as EvaluationJobResults
-  })
-  return transformedArray
 }
 
 const onDownloadResults = async (workflow: Workflow | Experiment) => {
@@ -220,7 +163,7 @@ const onCloseDetails = () => {
 async function retrieveWorkflowLogs() {
   if (selectedWorkflow.value) {
     const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
-    const logs = splitByEscapeCharacter(logsData.logs)
+    const logs = logsData.logs.split('\n')
 
     logs.forEach((log: string) => {
       const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
@@ -229,11 +172,6 @@ async function retrieveWorkflowLogs() {
       }
     })
   }
-}
-
-function splitByEscapeCharacter(input: string) {
-  const result = input.split('\n')
-  return result
 }
 
 function startPollingForWorkflowLogs() {

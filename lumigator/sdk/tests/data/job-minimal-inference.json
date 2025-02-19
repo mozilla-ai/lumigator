@@ -5,6 +5,7 @@
   "max_samples": 5,
   "job_config": {
     "job_type": "inference",
-    "model": "some_model"
+    "model": "some_model",
+    "provider": "some_provider"
   }
 }

@@ -14,7 +14,7 @@
           <span class="p-datatable-column-title">Model </span>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.model.name }}
+          {{ slotProps.data.model.display_name }}
         </template>
       </Column>
       <Column field="meteor.meteor_mean" sortable>
@@ -196,7 +196,7 @@ const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = comp
   const data = results.value.map((result) => ({
     ...result,
     model: models.value.find(
-      (model: Model) => model.uri === result.model || model.name === result.model,
+      (model: Model) => model.model === result.model || model.display_name === result.model,
     )!,
   }))
 

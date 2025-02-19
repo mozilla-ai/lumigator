@@ -338,32 +338,6 @@ class JobService:
         """Adds a background task to the background tasks queue."""
         background_tasks.add_task(task, *args)
 
-    def _set_model_type(self, request: JobCreate) -> str:
-        """Sets model URL based on protocol address"""
-        if request.job_config.model.startswith("oai://"):
-            model_url = settings.OAI_API_URL
-        elif request.job_config.model.startswith("mistral://"):
-            model_url = settings.MISTRAL_API_URL
-        elif request.job_config.model.startswith("ds://"):
-            model_url = settings.DEEPSEEK_API_URL
-        else:
-            model_url = request.job_config.model_url
-
-        return model_url
-
-    def _validate_config(self, job_type: str, config_template: str, config_params: dict):
-        if job_type == JobType.INFERENCE:
-            InferenceJobConfig.model_validate_json(config_template.format(**config_params))
-        elif job_type == JobType.EVALUATION:
-            EvalJobConfig.model_validate_json(config_template.format(**config_params))
-        else:
-            loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
-
-    # The end result should be that InferenceJobConfig is actually JobInferenceConfig
-    # (resp. Eval)
-    # For the moment, something will convert one into the other, and we'll decide where
-    # to put this. The jobs should ideally have no dependency towards the backend.
-
     def generate_inference_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         # TODO Move to a custom validator in the schema
         if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
@@ -378,86 +352,34 @@ class JobService:
                 output_field=request.job_config.output_field or "predictions",
             ),
         )
-        # Maybe use just the protocol to decide?
-        match request.job_config.model:
-            case "oai://gpt-4o-mini" | "oai://gpt-4o":
-                job_config.inference_server = InferenceServerConfig(
-                    base_url=self._set_model_type(request),
-                    engine=request.job_config.model,
-                    # FIXME Inferences may not always be summarizations!
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                    max_retries=3,
-                )
-                job_config.params = SamplingParameters(
-                    max_tokens=request.job_config.max_tokens,
-                    frequency_penalty=request.job_config.frequency_penalty,
-                    temperature=request.job_config.temperature,
-                    top_p=request.job_config.top_p,
-                )
-            case "mistral://open-mistral-7b":
-                job_config.inference_server = InferenceServerConfig(
-                    base_url=self._set_model_type(request),
-                    engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                    max_retries=3,
-                )
-                job_config.params = SamplingParameters(
-                    max_tokens=request.job_config.max_tokens,
-                    frequency_penalty=request.job_config.frequency_penalty,
-                    temperature=request.job_config.temperature,
-                    top_p=request.job_config.top_p,
-                )
-            case "ds://deepseek-chat" | "ds://deepseek-reasoner":
-                job_config.inference_server = InferenceServerConfig(
-                    base_url=self._set_model_type(request),
-                    engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                    max_retries=3,
-                )
-                job_config.params = SamplingParameters(
-                    max_tokens=request.job_config.max_tokens,
-                    frequency_penalty=request.job_config.frequency_penalty,
-                    temperature=request.job_config.temperature,
-                    top_p=request.job_config.top_p,
-                )
-            case "llamafile://mistralai/mistral-7b-instruct-v0.2":
-                job_config.inference_server = InferenceServerConfig(
-                    base_url=self._set_model_type(request),
-                    engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                    max_retries=3,
-                )
-                job_config.params = SamplingParameters(
-                    max_tokens=request.job_config.max_tokens,
-                    frequency_penalty=request.job_config.frequency_penalty,
-                    temperature=request.job_config.temperature,
-                    top_p=request.job_config.top_p,
-                )
-            case _:
-                if request.job_config.model_url and request.job_config.model_url.startswith("http://"):
-                    job_config.inference_server = InferenceServerConfig(
-                        base_url=self._set_model_type(request),
-                        engine=request.job_config.model,
-                        system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
-                        max_retries=3,
-                    )
-                    job_config.params = SamplingParameters(
-                        max_tokens=request.job_config.max_tokens,
-                        frequency_penalty=request.job_config.frequency_penalty,
-                        temperature=request.job_config.temperature,
-                        top_p=request.job_config.top_p,
-                    )
-                else:
-                    job_config.hf_pipeline = HfPipelineConfig(
-                        model_uri=request.job_config.model,
-                        task=request.job_config.task,
-                        accelerator=request.job_config.accelerator,
-                        revision=request.job_config.revision,
-                        use_fast=request.job_config.use_fast,
-                        trust_remote_code=request.job_config.trust_remote_code,
-                        torch_dtype=request.job_config.torch_dtype,
-                        max_new_tokens=500,
-                    )
+        if request.job_config.provider == "hf":
+            # Custom logic: if provider is hf, we run the hf model inside the ray job
+            job_config.hf_pipeline = HfPipelineConfig(
+                model_name_or_path=request.job_config.model,
+                task=request.job_config.task,
+                accelerator=request.job_config.accelerator,
+                revision=request.job_config.revision,
+                use_fast=request.job_config.use_fast,
+                trust_remote_code=request.job_config.trust_remote_code,
+                torch_dtype=request.job_config.torch_dtype,
+                max_new_tokens=500,
+            )
+        else:
+            # It will be a pass through to LiteLLM
+            job_config.inference_server = InferenceServerConfig(
+                base_url=request.job_config.base_url if request.job_config.base_url else None,
+                model=request.job_config.model,
+                provider=request.job_config.provider,
+                system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                max_retries=3,
+            )
+            job_config.params = SamplingParameters(
+                max_tokens=request.job_config.max_tokens,
+                frequency_penalty=request.job_config.frequency_penalty,
+                temperature=request.job_config.temperature,
+                top_p=request.job_config.top_p,
+            )
+
         return job_config
 
     def generate_evaluation_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
@@ -486,11 +408,7 @@ class JobService:
         # Create a db record for the job
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
-        record = self.job_repo.create(
-            name=request.name,
-            description=request.description,
-            job_type=job_type,
-        )
+        record = self.job_repo.create(name=request.name, description=request.description, job_type=job_type)
 
         # TODO defer to specific job
         if job_type == JobType.INFERENCE and not request.job_config.output_field:
@@ -532,7 +450,7 @@ class JobService:
         settings.inherit_ray_env(runtime_env_vars)
 
         # set num_gpus per worker (zero if we are just hitting a service)
-        if job_type == JobType.INFERENCE and not request.job_config.model.startswith("hf://"):
+        if job_type == JobType.INFERENCE and not request.job_config.provider == "hf":
             worker_gpus = job_settings["ray_worker_gpus_fraction"]
         else:
             worker_gpus = job_settings["ray_worker_gpus"]

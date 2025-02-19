@@ -30,7 +30,7 @@ export type CreateExperimentPayload = {
 // experiment_id and model are set by the inner function
 export type createExperimentWithWorkflowsPayload = Omit<
   CreateExperimentPayload & CreateWorkflowPayload,
-  'experiment_id' | 'model'
+  'experiment_id' | 'model' | 'provider'
 >
 
 export async function createExperiment(
@@ -105,7 +105,9 @@ export async function createExperimentWithWorkflows(
       workflowsService.createWorkflow({
         ...experimentData,
         experiment_id: experimentId,
-        model: model.uri,
+        model: model.model,
+        provider: model.provider,
+        base_url: model.base_url,
       }),
     ),
   )

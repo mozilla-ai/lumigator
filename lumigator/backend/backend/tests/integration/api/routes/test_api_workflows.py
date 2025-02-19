@@ -103,13 +103,13 @@ def test_upload_data_launch_job(
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
         "job_config": {
-            "job_type": JobType.EVALUATION_LITE,
+            "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_CAUSAL_MODEL,
         },
     }
 
-    create_evaluation_job_response = local_client.post("/jobs/eval_lite/", headers=POST_HEADER, json=eval_payload)
+    create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
@@ -132,7 +132,7 @@ def test_upload_data_launch_job(
     assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
     get_jobs_infer = local_client.get("/jobs?job_types=inference")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
-    get_jobs_eval = local_client.get("/jobs?job_types=eval_lite")
+    get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 
@@ -226,7 +226,7 @@ def check_dataset_count_after_upload(local_client: TestClient, initial_count):
 def create_experiment(local_client: TestClient, dataset_id: UUID):
     """Create an experiment."""
     experiment = local_client.post(
-        "/experiments/new/",
+        "/experiments/",
         headers=POST_HEADER,
         json={
             "name": "test_create_exp_workflow_check_results",
@@ -261,9 +261,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
 
 def validate_experiment_results(local_client: TestClient, experiment_id, workflow_details):
     """Validate experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(
-        local_client.get(f"/experiments/new/{experiment_id}").json()
-    )
+    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
     assert workflow_details.experiment_id == experiment_results.id
     assert len(experiment_results.workflows) == 1
     assert workflow_details.model_dump(exclude={"artifacts_download_url"}) == experiment_results.workflows[
@@ -275,9 +273,7 @@ def validate_updated_experiment_results(
     local_client: TestClient, experiment_id, workflow_1_details, workflow_2_details
 ):
     """Validate updated experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(
-        local_client.get(f"/experiments/new/{experiment_id}").json()
-    )
+    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
     assert len(experiment_results.workflows) == 2
     assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
@@ -299,13 +295,13 @@ def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
 
 def delete_experiment_and_validate(local_client: TestClient, experiment_id):
     """Delete the experiment and ensure associated workflows are also deleted."""
-    local_client.delete(f"/experiments/new/{experiment_id}")
-    response = local_client.get(f"/experiments/new/{experiment_id}")
+    local_client.delete(f"/experiments/{experiment_id}")
+    response = local_client.get(f"/experiments/{experiment_id}")
     assert response.status_code == 404
 
 
 def list_experiments(local_client: TestClient):
-    response = local_client.get("/experiments/new/all").json()
+    response = local_client.get("/experiments/").json()
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
@@ -316,7 +312,7 @@ def check_artifacts_times(artifacts_url):
     ).json()
     logger.critical(artifacts)
     assert "evaluation_time" in artifacts["artifacts"]
-    assert "summarization_time" in artifacts["artifacts"]
+    assert "inference_time" in artifacts["artifacts"]
 
 
 @pytest.mark.integration
@@ -355,7 +351,7 @@ def test_experiment_non_existing(local_client: TestClient, dependency_overrides_
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
+    assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):

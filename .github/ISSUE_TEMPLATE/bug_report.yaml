@@ -2,7 +2,7 @@ name: "\U0001F41B Bug Report"
 description: Submit a bug report to help us improve
 title: "[BUG]: "
 projects:
-  - "Lumigator"
+  - mozilla-ai/6
 labels:
   - bug
 body:

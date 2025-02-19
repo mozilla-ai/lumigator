@@ -9,15 +9,15 @@ import type { EvaluationJobResults, ExperimentResults } from '@/types/Experiment
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
-import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus, type Workflow, type WorkflowResults } from '@/types/Workflow'
-import { jobsService } from '@/sdk/jobsService'
+import type { Experiment } from '@/types/Experiment'
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import axios from 'axios'
+import type { WorkflowResults } from '@/types/Metrics'
 
 export const useExperimentStore = defineStore('experiments', () => {
-  const experiments: Ref<ExperimentNew[]> = ref([])
+  const experiments: Ref<Experiment[]> = ref([])
 
-  const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
+  const selectedExperiment: Ref<Experiment | undefined> = ref()
   const selectedWorkflow: Ref<Workflow | undefined> = ref()
   const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
 
@@ -29,32 +29,74 @@ export const useExperimentStore = defineStore('experiments', () => {
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
   async function fetchAllExperiments() {
-    experiments.value = await experimentsService.fetchExperiments()
+    experiments.value = (await experimentsService.fetchExperiments()).map((experiment) => {
+      return {
+        ...experiment,
+        status: retrieveStatus(experiment),
+      }
+    })
+  }
+
+  // aggregates the experiment's status based on its workflows statuses
+  function retrieveStatus(experiment: Experiment): WorkflowStatus {
+    const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
+    const uniqueStatuses = new Set(workflowStatuses)
+
+    if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
+      return WorkflowStatus.RUNNING
+    } else if (
+      uniqueStatuses.has(WorkflowStatus.FAILED) &&
+      uniqueStatuses.has(WorkflowStatus.SUCCEEDED)
+    ) {
+      return WorkflowStatus.INCOMPLETE
+    } else {
+      // if none of its workflows are running, or if some failed and others succeeded, then it probably means they all have the same status so just return it
+      return [...uniqueStatuses][0]
+    }
   }
 
   /**
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteExperimentIds() {
-    return experiments.value
-      .filter((experiment) => !completedStatus.includes(experiment.status))
-      .map((experiment) => experiment.id)
+  function getIncompleteExperiments(): Experiment[] {
+    return experiments.value.filter((experiment) => !completedStatus.includes(experiment.status))
   }
 
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  async function updateExperimentStatus(id: string) {
+  async function updateExperimentStatus(experiment: Experiment): Promise<void> {
     try {
-      const status = await jobsService.fetchJobStatus(id)
-      const experiment = experiments.value.find((experiment) => experiment.id === id)
-      if (experiment) {
-        experiment.status = status
-      }
+      const incompleteWorkflows = experiment.workflows.filter(
+        (workflow) => !completedStatus.includes(workflow.status),
+      )
+
+      const incompleteWorkflowDetails = await Promise.all(
+        incompleteWorkflows.map((workflow) => workflowsService.fetchWorkflowDetails(workflow.id)),
+      )
+
+      incompleteWorkflowDetails.forEach((workflow) => {
+        const existingWorkflow = experiment.workflows.find((w) => w.id === workflow.id)
+        if (existingWorkflow) {
+          existingWorkflow.status = workflow.status
+        }
+      })
+
+      const status = incompleteWorkflowDetails.every((workflow) =>
+        completedStatus.includes(workflow.status),
+      )
+        ? WorkflowStatus.SUCCEEDED
+        : retrieveStatus(experiment)
+
+      // const e = experiments.value.find((exp) => exp.id === experiment.id)
+      // if (e) {
+      // e.status = status
+      experiment.status = status
+      // }
     } catch (error) {
-      console.error(`Failed to update status for job ${id} ${error}`)
+      console.error(`Failed to update status for exp ${experiment} ${error}`)
     }
   }
 
@@ -62,7 +104,9 @@ export const useExperimentStore = defineStore('experiments', () => {
    * Updates the status for stored experiments that are not completed
    */
   async function updateStatusForIncompleteExperiments() {
-    await Promise.all(getIncompleteExperimentIds().map((id) => updateExperimentStatus(id)))
+    await Promise.all(
+      getIncompleteExperiments().map((experiment) => updateExperimentStatus(experiment)),
+    )
   }
 
   /**
@@ -100,12 +144,10 @@ export const useExperimentStore = defineStore('experiments', () => {
     downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
   }
 
-  async function fetchExperimentResults(experiment: ExperimentNew) {
+  async function fetchExperimentResults(experiment: Experiment) {
     for (const workflow of experiment.workflows) {
-      //   console.log({experiment, workflow})
       if (workflow.artifacts_download_url) {
         const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
-        console.log(data)
 
         const modelRow = {
           model: data.artifacts.model,
@@ -120,25 +162,16 @@ export const useExperimentStore = defineStore('experiments', () => {
     }
   }
 
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
   async function fetchWorkflowResults(workflow: Workflow) {
     const results = await workflowsService.fetchWorkflowResults(workflow)
     if (results) {
       selectedWorkflow.value = workflow
-      selectedWorkflowResults.value = transformJobResults(
-        results,
-      )
+      selectedWorkflowResults.value = transformJobResults(results)
     }
+  }
+
+  async function fetchWorkflowDetails(workflowId: string) {
+    return workflowsService.fetchWorkflowDetails(workflowId)
   }
 
   /**
@@ -178,7 +211,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
           rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
         },
-        summarization_time: objectData.artifacts.summarization_time,
+        inference_time: objectData.artifacts.inference_time,
       } as unknown as EvaluationJobResults
     })
     return transformedArray
@@ -188,7 +221,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     if (selectedWorkflow.value) {
       const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
-      console.log({ logs })
+
       logs.forEach((log: string) => {
         const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
         if (workflowLogs.value.length === 0 || lastEntry !== log) {
@@ -280,5 +313,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     fetchAllExperiments,
     updateStatusForIncompleteExperiments,
     fetchWorkflowResults,
+    fetchWorkflowDetails,
   }
 })

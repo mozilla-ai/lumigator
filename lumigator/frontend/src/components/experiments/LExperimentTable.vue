@@ -83,7 +83,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted, type PropType } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onUnmounted,
+  type PropType,
+  onBeforeMount,
+  onBeforeUnmount,
+} from 'vue'
 import { storeToRefs } from 'pinia'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -94,10 +103,10 @@ import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { Experiment } from '@/types/Experiment'
 const props = defineProps({
   tableData: {
-    type: Array as PropType<ExperimentNew[]>,
+    type: Array as PropType<Experiment[]>,
     required: true,
   },
 })
@@ -135,18 +144,19 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
+function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
   if (workflow.jobs) {
-    // experimentStore.fetchJobDetails(workflow.jobs[0].id)
+    experimentStore.fetchWorkflowDetails(workflow.id)
     selectedWorkflow.value = workflow
   }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)
 }
 
+// aggregates the experiment's status based on its workflows statuses
 function retrieveStatus(experimentId: string) {
   const experiment = experiments.value.find((exp) => exp.id === experimentId)
   if (!experiment) {
@@ -192,7 +202,7 @@ onMounted(async () => {
   }, 1000)
 }) // Check every second, throttled to execute every 5 seconds
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   clearInterval(pollingId)
 })
 

@@ -57,36 +57,13 @@ class BackendSettings(BaseSettings):
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
+    DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
     DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None
     EVALUATOR_PIP_REQS: str | None = None
-
-    @computed_field
-    @property
-    def EVALUATOR_COMMAND(self) -> str:  # noqa: N802
-        """Returns the command required to run evaluator.
-
-        The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
-        on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
-        """
-        return f"{self.LD_PRELOAD_PREFIX} python -m evaluator evaluate huggingface"
-
-    # TODO: CHANGE JOB TO POINT HERE ONCE NEW INFER-EVAL WORKFLOW WORKS
-    def EVALUATOR_COMMAND_WITH_LD_PRELOAD(self) -> str:  # noqa: N802
-        """Returns the command required to run evaluator.
-
-        The prefix is provided to fix an issue loading libgomp (an sklearn dependency)
-        on the aarch64 ray image (see LD_PRELOAD_PREFIX definition below for more details)
-        """
-        return f"{self.LD_PRELOAD_PREFIX} {self.NEW_EVALUATOR_COMMAND}"
-
-    # TODO: the following should all be refactored to EVALUATOR_* and the above should
-    #       be removed when we deprecate evaluator
-    EVALUATOR_LITE_WORK_DIR: str | None = None
-    EVALUATOR_LITE_PIP_REQS: str | None = None
-    EVALUATOR_LITE_COMMAND: str = "python eval_lite.py"
+    EVALUATOR_COMMAND: str = "python evaluator.py"
 
     # Inference job details
     INFERENCE_WORK_DIR: str | None = None
@@ -98,24 +75,6 @@ class BackendSettings(BaseSettings):
             env_var = os.environ.get(env_var_name, None)
             if env_var is not None:
                 runtime_env_vars[env_var_name] = env_var
-
-    @computed_field
-    @property
-    def LD_PRELOAD_PREFIX(self) -> str:  # noqa: N802
-        """Sets the LD_PRELOAD env var for aarch64.
-
-        The ray image on Mac has a known issue ("cannot allocate memory in static TLS block")
-        loading libgomp (see https://github.com/mozilla-ai/lumigator/issues/156).
-        To fix this we preload the library adding it to the LD_PRELOAD env variable.
-        As the path is relative to ray workers' virtual environment, we set this variable
-        right before calling the job command by prepending it to the command itself.
-        """
-        lib_path = "lib/python3.11/site-packages/scikit_learn.libs/libgomp-d22c30c5.so.1.0.0"
-
-        # We set the LD_PRELOAD env var ONLY if the architecture is aarch64.
-        # NOTE that we are using POSIX compliant commands (e.g. "=" instead of "==")
-        # as the default shell in the container is /bin/sh
-        return f'if [ `arch` = "aarch64" ]; then export LD_PRELOAD=$VIRTUAL_ENV/{lib_path}; fi;'
 
     # URL for Ray jobs API
     @computed_field

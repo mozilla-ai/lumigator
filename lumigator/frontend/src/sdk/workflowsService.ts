@@ -1,5 +1,6 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { CreateWorkflowPayload, Workflow, WorkflowResults } from '@/types/Workflow'
+import type { WorkflowResults } from '@/types/Metrics'
+import type { CreateWorkflowPayload, Workflow } from '@/types/Workflow'
 
 async function createWorkflow(experimentPayload: CreateWorkflowPayload): Promise<Workflow> {
   const response = await lumigatorApiAxiosInstance.post('workflows', experimentPayload, {
@@ -24,8 +25,14 @@ export async function fetchWorkflowResults(workflow: Workflow): Promise<Workflow
   return response.data
 }
 
+export async function fetchWorkflowDetails(id: string): Promise<Workflow> {
+  const response = await lumigatorApiAxiosInstance.get(`workflows/${id}`)
+  return response.data
+}
+
 export const workflowsService = {
   createWorkflow,
   fetchLogs,
   fetchWorkflowResults,
+  fetchWorkflowDetails,
 }

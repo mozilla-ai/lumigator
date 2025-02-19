@@ -11,6 +11,7 @@ from inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import (
     BaseModelClient,
+    DeepSeekModelClient,
     HuggingFaceModelClient,
     MistralModelClient,
     OpenAIModelClient,
@@ -99,6 +100,11 @@ def run_inference(config: InferenceJobConfig) -> Path:
             # run the mistral client
             logger.info(f"Using Mistral client. Endpoint: {base_url}")
             model_client = MistralModelClient(base_url, config)
+        elif "deepseek" in base_url:
+            # run the openai client using the DeepSeek URL (api.deepseek.com/v1)
+            # see: https://api-docs.deepseek.com/
+            logger.info(f"Using the DeepSeek client. Endpoint: {base_url}")
+            model_client = DeepSeekModelClient(base_url, config)
         else:
             # run the openai client
             logger.info(f"Using OAI client. Endpoint: {base_url}")
@@ -123,9 +129,9 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    output[config.job.output_field], summarization_time = predict(dataset_iterable, model_client)
+    output[config.job.output_field], inference_time = predict(dataset_iterable, model_client)
     output["model"] = output_model_name
-    output["summarization_time"] = summarization_time
+    output["inference_time"] = inference_time
     logger.info(output)
 
     results = JobOutput(

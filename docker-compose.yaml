@@ -94,7 +94,7 @@ services:
           sleep infinity
     shm_size: 2g
     volumes:
-      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+      - ${HF_HOME}:/home/ray/.cache/huggingface
       - ray-pip-cache:/tmp/ray_pip_cache
     deploy:
       resources:
@@ -108,8 +108,8 @@ services:
       - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
       - MISTRAL_API_KEY
       - OPENAI_API_KEY
+      - DEEPSEEK_API_KEY
       - HF_TOKEN
-      - HF_HOME
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION
@@ -128,7 +128,7 @@ services:
   backend:
     labels:
       ai.mozilla.product_name: lumigator
-    image: mzdotai/lumigator:v0.1.0-alpha
+    image: mzdotai/lumigator:v0.1.1-alpha
     pull_policy: always
     build:
       context: .
@@ -159,12 +159,10 @@ services:
       - AWS_DEFAULT_REGION
       - AWS_ENDPOINT_URL
       - S3_BUCKET
-      - EVALUATOR_PIP_REQS
-      - EVALUATOR_WORK_DIR
       # TODO: the following two rows should be renamed to EVALUATOR_*
       #       and the two above should be removed when we depreate evaluator
-      - EVALUATOR_LITE_PIP_REQS
-      - EVALUATOR_LITE_WORK_DIR
+      - EVALUATOR_PIP_REQS
+      - EVALUATOR_WORK_DIR
       - INFERENCE_PIP_REQS
       - INFERENCE_WORK_DIR
       - RAY_DASHBOARD_PORT
@@ -190,7 +188,7 @@ services:
     labels:
       ai.mozilla.product_name: lumigator
     pull_policy: always
-    image: mzdotai/lumigator-frontend:v0.1.0-alpha
+    image: mzdotai/lumigator-frontend:v0.1.1-alpha
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"

@@ -79,25 +79,25 @@ jobs:
         run: npm run test:unit
         working-directory: lumigator/frontend
 
-    e2e-tests-frontend:
-      name: E2E tests Frontend
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4
+  e2e-tests-frontend:
+    name: E2E tests Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-        - name: Set up Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: lts
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts
 
-        - name: Install dependencies
-          run: npm ci
-          working-directory: lumigator/frontend
+      - name: Install dependencies
+        run: npm ci
+        working-directory: lumigator/frontend
 
-        - name: Run tests
-          run: npm run test:e2e
-          working-directory: lumigator/frontend
+      - name: Run tests
+        run: npm run test:e2e
+        working-directory: lumigator/frontend
 
   unit-tests:
     name: Unit tests

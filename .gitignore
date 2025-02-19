@@ -15,6 +15,7 @@ mzaivenv/
 .Python
 build/
 develop-eggs/
+develop-eggs/
 dist/
 downloads/
 eggs/
@@ -165,9 +166,9 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.
 **/.idea/*
-!**/.idea/*.iml
-!**/.idea/modules.xml
-!**/.idea/misc.xml
+**/.idea/*.iml
+!/.idea/*.iml
+!/.idea/modules.xml
 
 # Ruff
 .ruff_cache

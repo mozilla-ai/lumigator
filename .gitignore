@@ -15,7 +15,6 @@ mzaivenv/
 .Python
 build/
 develop-eggs/
-develop-eggs/
 dist/
 downloads/
 eggs/

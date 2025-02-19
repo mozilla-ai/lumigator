@@ -49,7 +49,7 @@ from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
 job_settings = {}
-job_settings[JobType.EVALUATION] = jobs.evaluatorevaluator.JOB_INTERFACE
+job_settings[JobType.EVALUATION] = jobs.evaluator.JOB_INTERFACE
 job_settings[JobType.INFERENCE] = jobs.inference.JOB_INTERFACE
 ############################
 

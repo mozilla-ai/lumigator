@@ -7,6 +7,8 @@ from typing import BinaryIO
 
 import pytest
 import requests_mock
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.models import ModelsResponse
 from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
 
@@ -158,8 +160,30 @@ def json_data_job_response(resources_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
-def json_data_models(resources_dir) -> Path:
-    return resources_dir / "models.json"
+def json_data_models() -> ListingResponse[ModelsResponse]:
+    """Returns a fake response for the models endpoint,
+    to allow for SDK testing of the models endpoint.
+    """
+    model = {
+        "display_name": "facebook/bart-large-cnn",
+        "model": "facebook/bart-large-cnn",
+        "provider": "hf",
+        "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
+        "tasks": [
+            {
+                "summarization": {
+                    "max_length": 142,
+                    "min_length": 56,
+                    "length_penalty": 2.0,
+                    "early_stopping": True,
+                    "no_repeat_ngram_size": 3,
+                    "num_beams": 4,
+                }
+            }
+        ],
+        "website_url": "https://huggingface.co/facebook/bart-large-cnn",
+    }
+    return ListingResponse[ModelsResponse].model_validate({"total": 1, "items": [model]}).model_dump()
 
 
 @pytest.fixture(scope="function")
@@ -185,7 +209,7 @@ def long_sequences_data_unannotated(common_resources_dir):
 def simple_eval_template():
     return """{{
         "name": "{job_name}/{job_id}",
-        "model": {{ "path": "{model_uri}" }},
+        "model": {{ "path": "{model_name_or_path}" }},
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],

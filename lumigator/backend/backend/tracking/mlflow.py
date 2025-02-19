@@ -195,7 +195,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=experiment_id,
             tags={
                 "mlflow.runName": name,
-                "status": WorkflowStatus.CREATED,
+                "status": WorkflowStatus.CREATED.value,
                 "description": description,
                 "model": model,
             },
@@ -232,7 +232,7 @@ class MLflowTrackingClient(TrackingClient):
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
+            status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
             metrics=self._compile_metrics(all_job_ids),
@@ -284,7 +284,7 @@ class MLflowTrackingClient(TrackingClient):
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update the status of a workflow."""
-        self._client.set_tag(workflow_id, "status", status)
+        self._client.set_tag(workflow_id, "status", status.value)
 
     def _get_ray_job_logs(self, ray_job_id: str):
         """Get the logs for a Ray job."""
@@ -352,7 +352,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
+            status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 

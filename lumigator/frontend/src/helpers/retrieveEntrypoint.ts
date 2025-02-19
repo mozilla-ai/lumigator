@@ -48,12 +48,12 @@ export function retrieveEntrypoint(job: Job) {
     let modelPath = ''
     if (jsonObject?.model?.path) {
       modelPath = jsonObject.model.path
-    } else if (jsonObject?.model?.inference?.engine) {
-      modelPath = jsonObject.model.inference.engine
-    } else if (jsonObject?.hf_pipeline?.model_uri) {
-      modelPath = jsonObject.hf_pipeline.model_uri
-    } else if (jsonObject?.inference_server?.engine) {
-      modelPath = jsonObject.inference_server.engine
+    } else if (jsonObject?.model?.inference?.model) {
+      modelPath = jsonObject.model.inference.model
+    } else if (jsonObject?.hf_pipeline?.model_name_or_path) {
+      modelPath = jsonObject.hf_pipeline.model_name_or_path
+    } else if (jsonObject?.inference_server?.model) {
+      modelPath = jsonObject.inference_server.model
     } else {
       throw new Error('Unable to parse model path from entrypoint config: ' + configString)
     }

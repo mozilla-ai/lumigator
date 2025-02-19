@@ -15,7 +15,7 @@ class JobConfig(BaseModel):
     max_samples: int
     storage_path: str
     output_field: str | None = "predictions"
-    enable_tqdm: bool | None = None
+    enable_tqdm: bool = True
     model_config = ConfigDict(extra="forbid")
 
 

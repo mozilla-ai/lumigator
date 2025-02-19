@@ -6,7 +6,6 @@ from huggingface_hub.utils import validate_repo_id
 from loguru import logger
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
 from transformers.pipelines import check_task, get_supported_tasks
-from utils import resolve_model_repo
 
 from schemas import DatasetConfig
 from schemas import HfPipelineConfig as BaseHfPipelineConfig
@@ -42,7 +41,7 @@ def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
 TorchDtype = Annotated[torch.dtype | str, BeforeValidator(lambda x: _validate_torch_dtype(x))]
 
 
-def _validate_model_uri(path: str) -> str:
+def _validate_model_name_or_path(path: str) -> str:
     """Validate the given model RI.
 
     Resorve the model repo ID and check if it is a valid HuggingFace repo ID.
@@ -53,15 +52,13 @@ def _validate_model_uri(path: str) -> str:
     Raises:
         ValueError: If the path is not a valid HuggingFace repo ID.
     """
-    raw_path = resolve_model_repo(path)
-
-    if validate_repo_id(raw_path):  # if the path is a valid repo this will return None
-        raise ValueError(f"'{raw_path}' is not a valid HuggingFace repo ID.")
+    if validate_repo_id(path):  # if the path is a valid repo this will return None
+        raise ValueError(f"'{path}' is not a valid HuggingFace repo ID.")
 
     return path
 
 
-AssetPath = Annotated[str, AfterValidator(lambda x: _validate_model_uri(x))]
+AssetPath = Annotated[str, AfterValidator(lambda x: _validate_model_name_or_path(x))]
 
 
 def _validate_task(task: str) -> None:
@@ -117,7 +114,7 @@ class SamplingParameters(BaseSamplingParameters):
 
 
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
-    model_uri: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
+    model_name_or_path: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
     task: SupportedTask
     revision: str = "main"  # Model version: branch, tag, or commit ID
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
@@ -135,7 +132,7 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
         Returns:
             str: The model name.
         """
-        return resolve_model_repo(self.model_uri)
+        return self.model_name_or_path
 
     @computed_field
     @property

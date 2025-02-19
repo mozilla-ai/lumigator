@@ -14,7 +14,7 @@
           <span class="p-datatable-column-title">Model </span>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.model.name }}
+          {{ slotProps.data.model.display_name }}
         </template>
       </Column>
       <Column field="meteor.meteor_mean" sortable>
@@ -189,7 +189,7 @@ const tooltips = ref({
 const tableData = computed(() => {
   const data = selectedExperimentResults.value.map((results) => ({
     ...results,
-    model: models.value.find((model: Model) => model.name === results.model),
+    model: models.value.find((model: Model) => model.display_name === results.model),
   }))
 
   return data

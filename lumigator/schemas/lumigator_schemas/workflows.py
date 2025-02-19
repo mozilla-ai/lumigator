@@ -21,9 +21,10 @@ class WorkflowCreateRequest(BaseModel):
     description: str = ""
     experiment_id: str | None = None
     model: str
+    provider: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    model_url: str | None = None
+    base_url: str | None = None
     system_prompt: str | None = None
     inference_output_field: str = "predictions"
     config_template: str | None = None

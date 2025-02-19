@@ -116,7 +116,8 @@ Set the following variables:
 ```console
 user@host:~/lumigator$ export EVAL_NAME="test_run_hugging_face" \
        EVAL_DESC="Test run for Huggingface model" \
-       EVAL_MODEL="hf://facebook/bart-large-cnn" \
+       EVAL_MODEL="facebook/bart-large-cnn" \
+       EVAL_MODEL_PROVIDER="hf" \
        EVAL_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
        EVAL_MAX_SAMPLES="10"
 ```
@@ -127,9 +128,10 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
         --arg name "$EVAL_NAME" \
         --arg desc "$EVAL_DESC" \
         --arg model "$EVAL_MODEL" \
+        --arg provider "$EVAL_PROVIDER" \
         --arg dataset_id "$EVAL_DATASET" \
         --arg max_samples "$EVAL_MAX_SAMPLES" \
-        '{name: $name, description: $desc, model: $model, dataset: $dataset_id, max_samples: $max_samples}'
+        '{name: $name, description: $desc, model: $model, provider: $provider, dataset: $dataset_id, max_samples: $max_samples}'
 )
 ```
 
@@ -158,7 +160,7 @@ from lumigator_schemas.jobs import JobType, JobEvalCreate
 
 dataset_id = datasets.items[-1].id
 
-models = ['hf://facebook/bart-large-cnn',]
+models = ['facebook/bart-large-cnn',]
 
 # set this value to limit the evaluation to the first max_samples items (0=all)
 max_samples = 10
@@ -171,6 +173,7 @@ for model in models:
         name=team_name,
         description="Test",
         model=model,
+        provider="hf",
         dataset=str(dataset_id),
         max_samples=max_samples
     )

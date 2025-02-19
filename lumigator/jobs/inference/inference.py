@@ -9,14 +9,7 @@ import s3fs
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import (
-    BaseModelClient,
-    DeepSeekModelClient,
-    HuggingFaceModelClient,
-    MistralModelClient,
-    OpenAIModelClient,
-)
-from paths import PathPrefix
+from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
 from tqdm import tqdm
 from utils import timer
 
@@ -94,28 +87,12 @@ def run_inference(config: InferenceJobConfig) -> Path:
     # Choose which model client to use
     if config.inference_server is not None:
         # a model *inference service* is passed
-        base_url = config.inference_server.base_url
-        output_model_name = config.inference_server.engine
-        if "mistral" in base_url:
-            # run the mistral client
-            logger.info(f"Using Mistral client. Endpoint: {base_url}")
-            model_client = MistralModelClient(base_url, config)
-        elif "deepseek" in base_url:
-            # run the openai client using the DeepSeek URL (api.deepseek.com/v1)
-            # see: https://api-docs.deepseek.com/
-            logger.info(f"Using the DeepSeek client. Endpoint: {base_url}")
-            model_client = DeepSeekModelClient(base_url, config)
-        else:
-            # run the openai client
-            logger.info(f"Using OAI client. Endpoint: {base_url}")
-            model_client = OpenAIModelClient(base_url, config)
+        output_model_name = config.inference_server.model
+        model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
-        if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
-            logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")
-            model_client = HuggingFaceModelClient(config)
-            output_model_name = config.hf_pipeline.model
-        else:
-            raise ValueError("Unsupported model type.")
+        logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
+        model_client = HuggingFaceModelClient(config)
+        output_model_name = config.hf_pipeline.model
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 

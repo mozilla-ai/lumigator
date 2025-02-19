@@ -20,6 +20,12 @@ uv sync --dev && \
 source .venv/bin/activate
 ```
 
+You can instead, initialize virtual environments for **all** `uv` managed projects using:
+
+```console
+user@host:~/lumigator$ make setup
+```
+
 ## Make usage
 
 The available Makefile contains targets to:

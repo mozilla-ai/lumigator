@@ -55,7 +55,6 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    get-started/quickstart
    get-started/development-guide
    get-started/ui-guide
-   get-started/sdk-guide
    get-started/suggested-models
    get-started/troubleshooting
 

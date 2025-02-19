@@ -162,17 +162,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     }
   }
 
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
   async function fetchWorkflowResults(workflow: Workflow) {
     const results = await workflowsService.fetchWorkflowResults(workflow)
     if (results) {

@@ -57,9 +57,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJob(job))
-    jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJob(job))
   }
 
   /**
@@ -81,7 +78,9 @@ export const useDatasetStore = defineStore('datasets', () => {
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
-    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
+    return inferenceJobs.value
+      .filter((job) => !completedStatus.includes(job.status))
+      .map((job) => job.id)
   }
 
   async function fetchJob(id: string) {
@@ -118,14 +117,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     (newValue) => {
       jobLogs.value = []
       if (newValue) {
-        // const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
-        // if (isEvaluationJob) {
-        // switch to the experiment the job belongs
-        // const selectedExperimentId = experiments.value.find(experiment => {
-        //   return experiment.workflows.some(workflow => workflow.id === newValue.id)
-        // })
-        // selectedExperiment.value = experiments.value.find((exp) => exp.id === newValue.id)
-        // }
         retrieveJobLogs()
       }
       if (newValue?.status === WorkflowStatus.RUNNING) {
@@ -181,9 +172,9 @@ export const useDatasetStore = defineStore('datasets', () => {
 
   function startPollingForAnnotationJobStatus(jobId: string) {
     isPollingForJobStatus.value = true
-    jobLogsInterval = setInterval(() => {
-      updateJobStatus(jobId).then(() => {
-        const job = jobs.value.find((job) => job.id === jobId)
+    jobStatusInterval = setInterval(async () => {
+      await updateJobStatus(jobId).then(() => {
+        const job = inferenceJobs.value.find((job) => job.id === jobId)
         if (job && completedStatus.includes(job.status)) {
           stopPollingForAnnotationJobStatus() // Stop polling when the job is complete
         }
@@ -210,7 +201,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (inferenceJob) {
         inferenceJob.status = status
       }
-      const job = jobs.value.find((job) => job.id === id)
+      const job = inferenceJobs.value.find((job) => job.id === id)
       if (job) {
         job.status = status
       }
@@ -253,18 +244,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     await fetchDatasets()
   }
 
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
-
   async function deleteDataset(id: string) {
     if (!id) {
       return
@@ -302,6 +281,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     fetchAllJobs,
     updateStatusForIncompleteJobs,
     fetchJob,
+    stopPollingForAnnotationJobStatus,
     // fetchJobResults,
     startGroundTruthGeneration,
     parseJob,

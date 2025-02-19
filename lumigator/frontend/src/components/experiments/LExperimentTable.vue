@@ -83,7 +83,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted, type PropType, onBeforeMount, onBeforeUnmount } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onUnmounted,
+  type PropType,
+  onBeforeMount,
+  onBeforeUnmount,
+} from 'vue'
 import { storeToRefs } from 'pinia'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Column from 'primevue/column'

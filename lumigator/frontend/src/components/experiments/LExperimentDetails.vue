@@ -184,7 +184,6 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {

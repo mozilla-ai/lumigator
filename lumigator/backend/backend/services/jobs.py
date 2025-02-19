@@ -5,7 +5,7 @@ from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from uuid import UUID
 
 import loguru
@@ -352,7 +352,8 @@ class JobService:
                 output_field=request.job_config.output_field or "predictions",
             ),
         )
-        if request.job_config.model.startswith("hf://"):
+        model_parsed = urlparse(request.job_config.model)
+        if model_parsed.scheme == "hf":
             job_config.hf_pipeline = HfPipelineConfig(
                 model_uri=request.job_config.model,
                 task=request.job_config.task,

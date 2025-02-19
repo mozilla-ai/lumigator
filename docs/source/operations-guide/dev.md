@@ -13,13 +13,14 @@ codebase.
 
 Once you have cloned the repository, you will need to create virtual environments and sync dependencies with `uv`.
 
-This can be done automatically using the `setup.sh` script in the repository root:
+This can be done automatically using:
 
 ```console
-user@host:~/lumigator$ ./setup.sh
+user@host:~/lumigator$ make setup
 ```
 
-This created virtual environments for all `uv` managed projects and synchronizes the dependencies.
+This will ensure `uv` is installed, and create virtual environments for all `uv` managed projects and synchronize
+the dependencies.
 
 ## Backend Setup
 

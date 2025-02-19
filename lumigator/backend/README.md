@@ -20,9 +20,11 @@ uv sync --dev && \
 source .venv/bin/activate
 ```
 
-You can initialize virtual environments for all `uv` managed projects using the
-[setup.sh](../../setup.sh) script in the repository root.
+You can instead, initialize virtual environments for **all** `uv` managed projects using:
 
+```console
+user@host:~/lumigator$ make setup
+```
 
 ## Make usage
 

@@ -1,5 +1,3 @@
-import type { Task } from './Experiment'
-
 export type Model = {
   id: string
   description: string
@@ -13,4 +11,15 @@ export type Model = {
   tasks: Array<Task>
   uri: string
   website_url: string
+}
+
+export type Task = {
+  summarization: {
+    early_stopping: boolean
+    length_penalty: number
+    max_length: number
+    min_length: number
+    no_repeat_ngram_size: number
+    num_beats: number
+  } | null
 }

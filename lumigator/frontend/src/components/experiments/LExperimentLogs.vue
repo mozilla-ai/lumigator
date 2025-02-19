@@ -33,7 +33,6 @@ const logSource = computed(() =>
   props.logType === 'workflow' ? workflowLogs.value : jobLogs.value,
 )
 
-console.log({ logSource: logSource.value })
 const logContainer: Ref<HTMLElement | undefined> = ref()
 
 const logsLength = computed(() => logSource.value.length)

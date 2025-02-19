@@ -155,7 +155,7 @@ import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { Experiment } from '@/types/Experiment'
 
 const emit = defineEmits([
   'l-close-details',
@@ -201,7 +201,7 @@ const currentItemStatus = computed(() => {
 //   return isWorkflowFocused.value && inferenceJobs.value.some((job) => job.id === selectedWorkflow.value?.id)
 // })
 
-const focusedItem: ComputedRef<Workflow | ExperimentNew | undefined> = computed(() => {
+const focusedItem: ComputedRef<Workflow | Experiment | undefined> = computed(() => {
   if (selectedWorkflow.value) {
     return selectedWorkflow.value
   }
@@ -253,11 +253,11 @@ const showResults = () => {
   emit('l-experiment-results', selectedExperiment.value)
 }
 
-function isExperiment(item: ExperimentNew | Workflow): item is ExperimentNew {
+function isExperiment(item: Experiment | Workflow): item is Experiment {
   return 'workflows' in item
 }
 
-// function _isJob(item: ExperimentNew | JobDetails): item is JobDetails {
+// function _isJob(item: Experiment | Job): item is Job {
 //   return 'entrypoint' in item
 // }
 </script>

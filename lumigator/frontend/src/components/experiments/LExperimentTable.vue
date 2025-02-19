@@ -94,10 +94,10 @@ import LJobsTable from '@/components/experiments/LJobsTable.vue'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { Experiment } from '@/types/Experiment'
 const props = defineProps({
   tableData: {
-    type: Array as PropType<ExperimentNew[]>,
+    type: Array as PropType<Experiment[]>,
     required: true,
   },
 })
@@ -135,7 +135,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-function onWorkflowSelected(workflow: Workflow, experiment: ExperimentNew) {
+function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)

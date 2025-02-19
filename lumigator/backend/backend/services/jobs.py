@@ -5,7 +5,7 @@ from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
@@ -352,10 +352,10 @@ class JobService:
                 output_field=request.job_config.output_field or "predictions",
             ),
         )
-        model_parsed = urlparse(request.job_config.model)
-        if model_parsed.scheme == "hf":
+        if request.job_config.provider == "hf":
+            # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HfPipelineConfig(
-                model_uri=request.job_config.model,
+                model_name_or_path=request.job_config.model,
                 task=request.job_config.task,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
@@ -365,9 +365,11 @@ class JobService:
                 max_new_tokens=500,
             )
         else:
+            # It will be a pass through to LiteLLM
             job_config.inference_server = InferenceServerConfig(
                 base_url=request.job_config.base_url if request.job_config.base_url else None,
                 model=request.job_config.model,
+                provider=request.job_config.provider,
                 system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
                 max_retries=3,
             )
@@ -453,7 +455,7 @@ class JobService:
         settings.inherit_ray_env(runtime_env_vars)
 
         # set num_gpus per worker (zero if we are just hitting a service)
-        if job_type == JobType.INFERENCE and not request.job_config.model.startswith("hf://"):
+        if job_type == JobType.INFERENCE and not request.job_config.provider == "hf":
             worker_gpus = job_settings["ray_worker_gpus_fraction"]
         else:
             worker_gpus = job_settings["ray_worker_gpus"]

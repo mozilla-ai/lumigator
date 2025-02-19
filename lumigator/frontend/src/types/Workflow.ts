@@ -82,7 +82,7 @@ export type Parameters = {
 export type HfPipeline = {
   accelerator: string
   max_new_tokens: number
-  model_uri: string
+  model: string
   revision: string
   task: string
   torch_dtype: string
@@ -107,6 +107,7 @@ export type CreateWorkflowPayload = {
   description: string
   experiment_id: string
   model: string
+  provider: string
   dataset: string
   max_samples: number
   base_url?: string

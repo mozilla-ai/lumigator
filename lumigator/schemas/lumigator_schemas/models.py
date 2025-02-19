@@ -25,11 +25,16 @@ class ModelInfo(BaseModel):
 class ModelsResponse(BaseModel):
     """Contains detailed model information"""
 
-    name: str = Field(title="Model name", description="Name of the model used in the task")
-    uri: str = Field(
-        title="Model URI",
-        description="URI specifying the model location and use "
-        "(supported protocols: `hf://`, `openai/`, `mistral/`, any LiteLLM supported provider)",
+    display_name: str = Field(
+        title="Model name", description="Name of the model used in the task. It's just a display name"
+    )
+    model: str = Field(title="Model ID", description="Model ID used in the task")
+    provider: str = Field(
+        title="Model Provider",
+        description=(
+            "LiteLLM key for where the model is hosted (e.g. `openai`, `deepseek`, `gpt3`, etc). "
+            "If using a HF model that is hosted in the inference job, use `hf`"
+        ),
     )
     base_url: str | None = Field(
         title="Base URL",

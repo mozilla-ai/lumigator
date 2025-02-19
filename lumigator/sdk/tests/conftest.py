@@ -165,8 +165,9 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
     to allow for SDK testing of the models endpoint.
     """
     model = {
-        "name": "facebook/bart-large-cnn",
-        "uri": "hf://facebook/bart-large-cnn",
+        "display_name": "facebook/bart-large-cnn",
+        "model": "facebook/bart-large-cnn",
+        "provider": "hf",
         "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
         "tasks": [
             {
@@ -208,7 +209,7 @@ def long_sequences_data_unannotated(common_resources_dir):
 def simple_eval_template():
     return """{{
         "name": "{job_name}/{job_id}",
-        "model": {{ "path": "{model_uri}" }},
+        "model": {{ "path": "{model_name_or_path}" }},
         "dataset": {{ "path": "{dataset_path}" }},
         "evaluation": {{
             "metrics": ["meteor", "rouge"],

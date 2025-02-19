@@ -22,6 +22,7 @@ class JobConfig(BaseModel):
 class InferenceServerConfig(BaseModel):
     base_url: str | None
     model: str
+    provider: str
     system_prompt: str | None
     max_retries: int
     model_config = ConfigDict(extra="forbid")
@@ -36,7 +37,7 @@ class SamplingParameters(BaseModel):
 
 
 class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
-    model_uri: str
+    model_name_or_path: str
     revision: str
     use_fast: bool
     trust_remote_code: bool

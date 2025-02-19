@@ -65,6 +65,7 @@ class WorkflowService:
         # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
             model=request.model,
+            provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
             system_prompt=request.system_prompt,

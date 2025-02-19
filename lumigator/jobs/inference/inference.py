@@ -10,7 +10,6 @@ from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
 from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
-from paths import PathPrefix
 from tqdm import tqdm
 from utils import timer
 
@@ -91,12 +90,9 @@ def run_inference(config: InferenceJobConfig) -> Path:
         output_model_name = config.inference_server.model
         model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
-        if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
-            logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")
-            model_client = HuggingFaceModelClient(config)
-            output_model_name = config.hf_pipeline.model
-        else:
-            raise ValueError("Unsupported model type.")
+        logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
+        model_client = HuggingFaceModelClient(config)
+        output_model_name = config.hf_pipeline.model
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 

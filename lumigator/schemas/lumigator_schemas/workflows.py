@@ -21,6 +21,7 @@ class WorkflowCreateRequest(BaseModel):
     description: str = ""
     experiment_id: str | None = None
     model: str
+    provider: str
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     base_url: str | None = None

@@ -77,7 +77,7 @@ def test_invalid_hf_config(json_config_minimal):
     with pytest.raises(ValidationError):
         InferenceJobConfig.model_validate(invalid_task)
 
-    invalid_model_repo_id = json_config_minimal["pipeline"]["model_uri"] = "hf://foo"
+    invalid_model_repo_id = json_config_minimal["pipeline"]["model_name_or_path"] = "foo"
     with pytest.raises(ValidationError):
         InferenceJobConfig.model_validate(invalid_model_repo_id)
 

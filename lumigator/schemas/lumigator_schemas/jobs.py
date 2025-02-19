@@ -75,6 +75,7 @@ class JobEvalConfig(BaseModel):
 class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
+    provider: str
     task: str | None = "summarization"
     accelerator: str | None = "auto"
     revision: str | None = "main"

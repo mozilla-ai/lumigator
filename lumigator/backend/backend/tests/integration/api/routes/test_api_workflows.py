@@ -73,6 +73,7 @@ def test_upload_data_launch_job(
         "job_config": {
             "job_type": JobType.INFERENCE,
             "model": TEST_CAUSAL_MODEL,
+            "provider": "hf",
             "output_field": "predictions",
             "store_to_dataset": True,
         },
@@ -106,6 +107,7 @@ def test_upload_data_launch_job(
             "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_CAUSAL_MODEL,
+            "provider": "hf",
         },
     }
 
@@ -250,6 +252,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
                 "name": workflow_name,
                 "description": "Test workflow for inf and eval",
                 "model": TEST_CAUSAL_MODEL,
+                "provider": "hf",
                 "dataset": str(dataset_id),
                 "experiment_id": experiment_id,
                 "max_samples": 1,

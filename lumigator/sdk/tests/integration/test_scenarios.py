@@ -23,7 +23,7 @@ from lumigator_sdk.strict_schemas import (
     WorkflowCreateRequest,
 )
 
-TEST_CAUSAL_MODEL = "hf://hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 
 
 def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
@@ -131,6 +131,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     infer_job_config = JobInferenceConfig(
         # FIXME make a const
         model=TEST_CAUSAL_MODEL,
+        provider="hf",
         output_field="predictions",
         store_to_dataset=True,
     )
@@ -271,7 +272,8 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_1",
         description="Test workflow for inf and eval",
-        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf-internal-testing/tiny-random-LlamaForCausalLM",
+        provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
         max_samples=1,
@@ -296,7 +298,8 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_2",
         description="Test workflow for inf and eval",
-        model="hf://hf-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf-internal-testing/tiny-random-LlamaForCausalLM",
+        provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
         max_samples=1,

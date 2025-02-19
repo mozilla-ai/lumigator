@@ -21,7 +21,7 @@ from s3fs import S3FileSystem
 
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
-from backend.tracking.tracking_interface import TrackingClient, TrackingClientManager
+from backend.tracking.tracking_interface import TrackingClient
 
 
 class MLflowTrackingClient(TrackingClient):
@@ -126,7 +126,12 @@ class MLflowTrackingClient(TrackingClient):
 
     def get_experiment(self, experiment_id: str):
         """Get an experiment and all its workflows."""
-        experiment = self._client.get_experiment(experiment_id)
+        try:
+            experiment = self._client.get_experiment(experiment_id)
+        except MlflowException as e:
+            # if the experiment doesn't exist, return None
+            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+                return None
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -395,11 +400,14 @@ class MLflowTrackingClient(TrackingClient):
         raise NotImplementedError
 
 
-class MLflowClientManager(TrackingClientManager):
+class MLflowClientManager:
     """Connection manager for MLflow client."""
 
+    def __init__(self, tracking_uri: str):
+        self._tracking_uri = tracking_uri
+
     @contextlib.contextmanager
-    def connect(self) -> Generator[MLflowTrackingClient, None, None]:
+    def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
         tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
         try:

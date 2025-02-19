@@ -17,7 +17,7 @@ class ModelConfig(BaseModel):
 
 
 class EvaluationConfig(BaseModel):
-    metrics: list[str] = Field(default=["rouge", "meteor", "bertscore"])
+    metrics: list[str] = Field(default=["rouge", "meteor", "bertscore", "bleu"])
     max_samples: int = 0
     return_input_data: bool = False
     return_predictions: bool = False
@@ -47,6 +47,11 @@ class Meteor(BaseModel):
     meteor_mean: float
 
 
+class Bleu(BaseModel):
+    bleu: list[float]
+    bleu_mean: float
+
+
 class Rouge(BaseModel):
     rouge1: list[float]
     rouge2: list[float]
@@ -62,6 +67,7 @@ class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
+    bleu: Bleu | None = None
 
 
 class EvalJobArtifacts(BaseModel):

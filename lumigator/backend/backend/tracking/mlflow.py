@@ -1,4 +1,5 @@
 import contextlib
+import http
 import json
 from collections.abc import Generator
 from datetime import datetime
@@ -8,6 +9,7 @@ from uuid import UUID
 
 import boto3
 import loguru
+import mlflow
 import requests
 from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -210,9 +212,15 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
-        workflow = self._client.get_run(workflow_id)
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except mlflow.exceptions.MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
         if workflow.info.lifecycle_stage == "deleted":
             return None
         # similar to the get_experiment method, but for a single workflow,

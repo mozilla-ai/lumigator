@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <!-- <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/backend" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/backend/backend/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/jobs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/schemas" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/sdk" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/sdk/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/lumigator/backend/backend.egg-info" />
+      <excludeFolder
+  url="file://$MODULE_DIR$/lumigator/backend/backend/tests/integration/api/routes/${HOME}/.cache" />
+      <excludeFolder
+  url="file://$MODULE_DIR$/lumigator/backend/backend/tests/unit/services/${HOME}/.cache" />
+      <excludeFolder url="file://$MODULE_DIR$/lumigator/backend/lumigator_backend.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/lumigator/frontend/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/lumigator/schemas/.venv" />
+    </content>
+    <orderEntry type="jdk" jdkName="Python 3.11 (lumigator)" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="backend" />
+    <orderEntry type="module" module-name="sdk" />
+  </component> -->
+  <!-- <component name="PyDocumentationSettings">
+    <option name="format" value="PLAIN" />
+    <option name="myDocStringFormat" value="Plain" />
+  </component> -->
+  <!-- <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/lumigator/backend/backend" />
+        <option value="$MODULE_DIR$/lumigator/schemas/lumigator_schemas" />
+        <option value="$MODULE_DIR$/lumigator/sdk/lumigator_sdk" />
+      </list>
+    </option>
+  </component> -->
+  <!-- <component name="TestRunnerService">
+    <option name="PROJECT_TEST_RUNNER" value="py.test" />
+  </component> -->
+</module>

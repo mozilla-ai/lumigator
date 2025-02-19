@@ -10,7 +10,7 @@
       <excludeFolder url="file://$MODULE_DIR$/lumigator/backend/backend/tests/integration/api/routes/${HOME}/.cache" />
       <excludeFolder url="file://$MODULE_DIR$/lumigator/backend/backend/tests/unit/services/${HOME}/.cache" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 virtualenv at lumigator/backend/.venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 virtualenv at ~/src/lumigator/lumigator/backend/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

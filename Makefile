@@ -212,8 +212,6 @@ test-backend-integration:
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
-	EVALUATOR_LITE_PIP_REQS=../jobs/evaluator_lite/requirements.txt \
-	EVALUATOR_LITE_WORK_DIR=../jobs/evaluator_lite \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
@@ -232,7 +230,7 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/jobs/evaluator_lite; \
+	cd lumigator/jobs/evaluator; \
 	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
 
 test-jobs-inference-unit:

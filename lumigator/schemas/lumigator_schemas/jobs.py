@@ -17,8 +17,7 @@ class LowercaseEnum(str, Enum):
 
 class JobType(LowercaseEnum):
     INFERENCE = "inference"
-    EVALUATION = "evaluate"
-    EVALUATION_LITE = "eval_lite"
+    EVALUATION = "evaluator"
     ANNOTATION = "annotate"
 
 
@@ -70,15 +69,6 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    model: str
-    model_url: str | None = None
-    system_prompt: str | None = None
-    skip_inference: bool = False
-    metrics: list[str] = ["meteor", "rouge", "bertscore"]
-
-
-class JobEvalLiteConfig(BaseModel):
-    job_type: Literal[JobType.EVALUATION_LITE] = JobType.EVALUATION_LITE
     metrics: list[str] = ["meteor", "rouge", "bertscore"]
 
 
@@ -115,14 +105,12 @@ class JobAnnotateConfig(BaseModel):
     store_to_dataset: bool = False
 
 
-JobSpecificConfig = JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig | JobAnnotateConfig
+JobSpecificConfig = JobEvalConfig | JobInferenceConfig | JobAnnotateConfig
 """
 Job configuration dealing exclusively with the Ray jobs
 """
 # JobSpecificConfigVar = TypeVar('JobSpecificConfig', bound=JobSpecificConfig)
-JobSpecificConfigVar = TypeVar(
-    "JobSpecificConfig", JobEvalConfig, JobEvalLiteConfig, JobInferenceConfig, JobAnnotateConfig
-)
+JobSpecificConfigVar = TypeVar("JobSpecificConfig", JobEvalConfig, JobInferenceConfig, JobAnnotateConfig)
 
 
 class JobCreate(BaseModel):
@@ -139,12 +127,8 @@ class JobAnnotateCreate(JobCreate):
     job_config: JobAnnotateConfig
 
 
-class JobEvaluateCreate(JobCreate):
+class JobEvalCreate(JobCreate):
     job_config: JobEvalConfig
-
-
-class JobEvalLiteCreate(JobCreate):
-    job_config: JobEvalLiteConfig
 
 
 class JobInferenceCreate(JobCreate):

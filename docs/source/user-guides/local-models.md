@@ -58,7 +58,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 
    INFERENCE_NAME="Llamafile mistral-7b-instruct-v0.2"
    INFERENCE_DESC="Test inference with mistral-7b-instruct-v0.2"
-   INFERENCE_MODEL="llamafile://mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
+   INFERENCE_MODEL="llamafile://mistralai/mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
    INFERENCE_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
@@ -67,11 +67,14 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
    -d '{
       "name": "'"$INFERENCE_NAME"'",
       "description": "'"$INFERENCE_DESC"'",
-      "model": "'"$INFERENCE_MODEL"'",
       "dataset": "'"$INFERENCE_DATASET_ID"'",
       "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
-      "model_url": "'"$INFERENCE_MODEL_URL"'",
-      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      "job_config": {
+         "job_type": "'"inference"'",
+         "model": "'"$INFERENCE_MODEL"'",
+         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      }
    }'
    ```
 
@@ -116,11 +119,14 @@ You can then download the results following the steps described [below](#downloa
    -d '{
       "name": "'"$INFERENCE_NAME"'",
       "description": "'"$INFERENCE_DESC"'",
-      "model": "'"$INFERENCE_MODEL"'",
       "dataset": "'"$INFERENCE_DATASET_ID"'",
       "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
-      "model_url": "'"$INFERENCE_MODEL_URL"'",
-      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      "job_config": {
+         "job_type": "'"inference"'",
+         "model": "'"$INFERENCE_MODEL"'",
+         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      }
    }'
    ```
 
@@ -179,11 +185,14 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
    -d '{
       "name": "'"$INFERENCE_NAME"'",
       "description": "'"$INFERENCE_DESC"'",
-      "model": "'"$INFERENCE_MODEL"'",
       "dataset": "'"$INFERENCE_DATASET_ID"'",
       "max_samples": "'"$INFERENCE_MAX_SAMPLES"'",
-      "model_url": "'"$INFERENCE_MODEL_URL"'",
-      "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      "job_config": {
+         "job_type": "'"inference"'",
+         "model": "'"$INFERENCE_MODEL"'",
+         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
+      }
    }'
    ```
 

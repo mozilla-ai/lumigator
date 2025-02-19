@@ -1,7 +1,11 @@
 import json
+from http import HTTPStatus
 from pathlib import Path
+from urllib.parse import urljoin
+from uuid import UUID
 
 import loguru
+import requests
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobCreate,
@@ -20,6 +24,9 @@ from lumigator_schemas.workflows import (
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.job_exceptions import (
+    JobUpstreamError,
+)
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
     WorkflowValidationError,
@@ -52,6 +59,21 @@ class WorkflowService:
 
         # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
         self.TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+
+    def _stop_job(job_id: UUID):
+        resp = requests.post(urljoin(settings.RAY_JOBS_URL, f"{job_id}/stop"), timeout=5)  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
+            ) from None
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
 
     async def _run_inference_eval_pipeline(
         self,
@@ -87,7 +109,7 @@ class WorkflowService:
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
 
         # wait for the inference job to complete
-        status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=60 * 10)
+        status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=request.job_timeout)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Inference job {inference_job.id} failed")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
@@ -126,7 +148,7 @@ class WorkflowService:
         )
 
         # wait for the evaluation job to complete
-        status = await self._job_service.wait_for_job_complete(evaluation_job.id, max_wait_time_sec=60 * 10)
+        status = await self._job_service.wait_for_job_complete(evaluation_job.id, max_wait_time_sec=request.job_timeout)
         self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")

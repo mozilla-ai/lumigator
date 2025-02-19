@@ -1,7 +1,7 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, NonNegativeInt
 
 from lumigator_schemas.jobs import (
     JobResults,
@@ -28,6 +28,7 @@ class WorkflowCreateRequest(BaseModel):
     system_prompt: str | None = None
     inference_output_field: str = "predictions"
     config_template: str | None = None
+    job_timeout: NonNegativeInt = 60 * 10
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

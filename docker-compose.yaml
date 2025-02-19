@@ -11,7 +11,7 @@ services:
     volumes:
       - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
     environment:
-      HF_MODELS: "facebook/bart-large-cnn,FacebookAI/roberta-large" #ensure values are comma separated
+      - MODELS_CACHED
     profiles:
       - local
   minio:

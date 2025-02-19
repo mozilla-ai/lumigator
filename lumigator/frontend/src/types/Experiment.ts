@@ -34,5 +34,5 @@ export type EvaluationJobResults = {
   model: string
   predictions?: string
   rouge: Rouge
-  summarization_time: number
+  inference_time: number
 }

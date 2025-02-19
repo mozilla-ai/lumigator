@@ -6,22 +6,12 @@ from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru
 import requests
-from evaluator.schemas import DatasetConfig as ELDatasetConfig
-from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
-from inference.schemas import DatasetConfig as IDatasetConfig
-from inference.schemas import (
-    GenerationConfig,
-    HuggingFacePipelineConfig,
-    InferenceJobConfig,
-    InferenceServerConfig,
-)
-from inference.schemas import JobConfig as InferJobConfig
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -43,6 +33,8 @@ from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
 
+import jobs.evaluator
+import jobs.inference
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
@@ -54,6 +46,12 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
 )
 from backend.settings import settings
+
+# ADD YOUR JOB IMPORT HERE #
+job_settings = {}
+job_settings[JobType.EVALUATION] = jobs.evaluatorevaluator.JOB_INTERFACE
+job_settings[JobType.INFERENCE] = jobs.inference.JOB_INTERFACE
+############################
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
@@ -135,97 +133,9 @@ class JobDefinition(ABC):
         self.config_model = config_model
 
 
-class JobDefinitionInference(JobDefinition):
-    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        job_config = InferenceJobConfig(
-            name=f"{request.name}/{record_id}",
-            dataset=IDatasetConfig(path=dataset_path),
-            job=InferJobConfig(
-                max_samples=request.max_samples,
-                storage_path=storage_path,
-                # TODO Should be unnecessary, check
-                output_field=request.job_config.output_field or "predictions",
-            ),
-            system_prompt=self.resolve_system_prompt(
-                request.job_config.task_definition, request.job_config.system_prompt
-            ),
-        )
-        if request.job_config.provider == "hf":
-            # Custom logic: if provider is hf, we run the hf model inside the ray job
-            job_config.hf_pipeline = HuggingFacePipelineConfig(
-                model_name_or_path=request.job_config.model,
-                task=request.job_config.task_definition.task,
-                accelerator=request.job_config.accelerator,
-                revision=request.job_config.revision,
-                use_fast=request.job_config.use_fast,
-                trust_remote_code=request.job_config.trust_remote_code,
-                torch_dtype=request.job_config.torch_dtype,
-            )
-        else:
-            # It will be a pass through to LiteLLM
-            job_config.inference_server = InferenceServerConfig(
-                base_url=request.job_config.base_url if request.job_config.base_url else None,
-                model=request.job_config.model,
-                provider=request.job_config.provider,
-                max_retries=3,
-            )
-        job_config.generation_config = GenerationConfig(
-            max_new_tokens=request.job_config.max_new_tokens,
-            frequency_penalty=request.job_config.frequency_penalty,
-            temperature=request.job_config.temperature,
-            top_p=request.job_config.top_p,
-        )
-        return job_config
-
-    def store_as_dataset(self) -> bool:
-        return True
-
-    def resolve_system_prompt(self, task_definition: TaskDefinition, system_prompt: str | None) -> str:
-        validate_system_prompt(task_definition.task, system_prompt)
-        return system_prompt or get_default_system_prompt(task_definition)
-
-
-class JobDefinitionEvaluation(JobDefinition):
-    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        job_config = EvalJobConfig(
-            name=f"{request.name}/{record_id}",
-            dataset=ELDatasetConfig(path=dataset_path),
-            evaluation=EvaluationConfig(
-                metrics=request.job_config.metrics,
-                max_samples=request.max_samples,
-                return_input_data=True,
-                return_predictions=True,
-                storage_path=storage_path,
-            ),
-        )
-        return job_config
-
-    def store_as_dataset(self) -> bool:
-        return False
-
-
 class JobService:
     # set storage path
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
-
-    job_settings = {
-        JobType.INFERENCE: JobDefinitionInference(
-            command=settings.INFERENCE_COMMAND,
-            pip_reqs=settings.INFERENCE_PIP_REQS,
-            work_dir=settings.INFERENCE_WORK_DIR,
-            ray_worker_gpus_fraction=settings.RAY_WORKER_GPUS_FRACTION,
-            ray_worker_gpus=settings.RAY_WORKER_GPUS,
-            config_model=InferenceJobConfig,
-        ),
-        JobType.EVALUATION: JobDefinitionEvaluation(
-            command=settings.EVALUATOR_COMMAND,
-            pip_reqs=settings.EVALUATOR_PIP_REQS,
-            work_dir=settings.EVALUATOR_WORK_DIR,
-            ray_worker_gpus_fraction=settings.RAY_WORKER_GPUS_FRACTION,
-            ray_worker_gpus=settings.RAY_WORKER_GPUS,
-            config_model=EvalJobConfig,
-        ),
-    }
 
     NON_TERMINAL_STATUS = [
         JobStatus.CREATED.value,

@@ -213,7 +213,7 @@ test-backend-unit:
 	RAY_DASHBOARD_PORT=8265 \
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
-	PYTHONPATH=../jobs:$$PYTHONPATH \
+	PYTHONPATH=..:$$PYTHONPATH \
 	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 

@@ -121,7 +121,7 @@ def json_data_dataset(resources_dir) -> Path:
 
 @pytest.fixture(
     scope="session",
-    params=["job-all-annotation.json", "job-all-eval-lite.json", "job-all-inference.json"],
+    params=["job-all-annotation.json", "job-all-eval.json", "job-all-inference.json"],
 )
 def json_data_job_all(resources_dir, request) -> Path:
     return resources_dir / request.param
@@ -131,7 +131,7 @@ def json_data_job_all(resources_dir, request) -> Path:
     scope="session",
     params=[
         "job-minimal-annotation.json",
-        "job-minimal-eval-lite.json",
+        "job-minimal-eval.json",
         "job-minimal-inference.json",
     ],
 )
@@ -141,7 +141,7 @@ def json_data_job_minimal(resources_dir, request) -> Path:
 
 @pytest.fixture(
     scope="session",
-    params=["job-extra-annotation.json", "job-extra-eval-lite.json", "job-extra-inference.json"],
+    params=["job-extra-annotation.json", "job-extra-eval.json", "job-extra-inference.json"],
 )
 def json_data_job_extra(resources_dir, request) -> Path:
     return resources_dir / request.param

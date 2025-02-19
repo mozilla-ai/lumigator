@@ -10,11 +10,8 @@ from uuid import UUID
 
 import loguru
 import requests
-from evaluator_lite.schemas import DatasetConfig as ELDatasetConfig
-
-# TODO: the evaluator_lite import will need to be renamed to evaluator
-#   once the new experiments API is merged
-from evaluator_lite.schemas import EvalJobConfig, EvaluationConfig
+from evaluator.schemas import DatasetConfig as ELDatasetConfig
+from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
@@ -30,7 +27,6 @@ from lumigator_schemas.jobs import (
     JobConfig,
     JobCreate,
     JobEvalConfig,
-    JobEvalLiteConfig,
     JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
@@ -58,7 +54,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
-JobSpecificRestrictedConfig = type[JobEvalConfig | JobEvalLiteConfig | JobInferenceConfig]
+JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
 class JobService:
@@ -77,13 +73,6 @@ class JobService:
             "command": settings.EVALUATOR_COMMAND,
             "pip": settings.EVALUATOR_PIP_REQS,
             "work_dir": settings.EVALUATOR_WORK_DIR,
-            "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
-            "ray_worker_gpus": settings.RAY_WORKER_GPUS,
-        },
-        JobType.EVALUATION_LITE: {
-            "command": settings.EVALUATOR_LITE_COMMAND,
-            "pip": settings.EVALUATOR_LITE_PIP_REQS,
-            "work_dir": settings.EVALUATOR_LITE_WORK_DIR,
             "ray_worker_gpus_fraction": settings.RAY_WORKER_GPUS_FRACTION,
             "ray_worker_gpus": settings.RAY_WORKER_GPUS,
         },
@@ -365,7 +354,7 @@ class JobService:
     def _validate_config(self, job_type: str, config_template: str, config_params: dict):
         if job_type == JobType.INFERENCE:
             InferenceJobConfig.model_validate_json(config_template.format(**config_params))
-        elif job_type == JobType.EVALUATION_LITE:
+        elif job_type == JobType.EVALUATION:
             EvalJobConfig.model_validate_json(config_template.format(**config_params))
         else:
             loguru.logger.info(f"Validation for job type {job_type} not yet supported.")
@@ -431,7 +420,7 @@ class JobService:
                     temperature=request.job_config.temperature,
                     top_p=request.job_config.top_p,
                 )
-            case "llamafile://mistralai/Mistral-7B-Instruct-v0.2":
+            case "llamafile://mistralai/mistral-7b-instruct-v0.2":
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
@@ -445,21 +434,33 @@ class JobService:
                     top_p=request.job_config.top_p,
                 )
             case _:
-                job_config.hf_pipeline = HfPipelineConfig(
-                    model_uri=request.job_config.model,
-                    task=request.job_config.task,
-                    accelerator=request.job_config.accelerator,
-                    revision=request.job_config.revision,
-                    use_fast=request.job_config.use_fast,
-                    trust_remote_code=request.job_config.trust_remote_code,
-                    torch_dtype=request.job_config.torch_dtype,
-                    max_new_tokens=500,
-                )
+                if request.job_config.model_url and request.job_config.model_url.startswith("http://"):
+                    job_config.inference_server = InferenceServerConfig(
+                        base_url=self._set_model_type(request),
+                        engine=request.job_config.model,
+                        system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                        max_retries=3,
+                    )
+                    job_config.params = SamplingParameters(
+                        max_tokens=request.job_config.max_tokens,
+                        frequency_penalty=request.job_config.frequency_penalty,
+                        temperature=request.job_config.temperature,
+                        top_p=request.job_config.top_p,
+                    )
+                else:
+                    job_config.hf_pipeline = HfPipelineConfig(
+                        model_uri=request.job_config.model,
+                        task=request.job_config.task,
+                        accelerator=request.job_config.accelerator,
+                        revision=request.job_config.revision,
+                        use_fast=request.job_config.use_fast,
+                        trust_remote_code=request.job_config.trust_remote_code,
+                        torch_dtype=request.job_config.torch_dtype,
+                        max_new_tokens=500,
+                    )
         return job_config
 
-    def generate_evaluation_lite_job_config(
-        self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str
-    ):
+    def generate_evaluation_job_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=ELDatasetConfig(path=dataset_path),
@@ -498,10 +499,8 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         if job_type == JobType.INFERENCE:
             job_config = self.generate_inference_job_config(request, record.id, dataset_s3_path, self.storage_path)
-        elif job_type == JobType.EVALUATION_LITE:
-            job_config = self.generate_evaluation_lite_job_config(
-                request, record.id, dataset_s3_path, self.storage_path
-            )
+        elif job_type == JobType.EVALUATION:
+            job_config = self.generate_evaluation_job_config(request, record.id, dataset_s3_path, self.storage_path)
         else:
             # This should not happen since the job_type's are type checked
             raise Exception("Unknown job type")

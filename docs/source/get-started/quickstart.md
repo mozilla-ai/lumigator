@@ -4,6 +4,9 @@ Now that you have a local deployment of Lumigator, you can start using it. In th
 we will show you how to upload a dataset and create a simple evaluation job. Finally, we'll show you
 how to retrieve the results of the evaluation job.
 
+WARNING: This documentation is in progress and may not be functional,
+see https://github.com/mozilla-ai/lumigator/issues/905 to track the issue.
+
 ## Upload a Dataset
 
 The Lumigator backend provides an API endpoint for uploading datasets and running evaluation jobs.

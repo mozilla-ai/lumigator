@@ -11,6 +11,7 @@ class EvaluationMetrics:
             "rouge": self._rouge,
             "meteor": self._meteor,
             "bertscore": self._bertscore,
+            "bleu": self._bleu,
         }
 
         # chosen metrics are the intersection between the provided and the supported ones
@@ -50,6 +51,24 @@ class EvaluationMetrics:
 
         # calculate mean
         evals["meteor_mean"] = np.mean(evals["meteor"])
+
+        return evals
+
+    def _bleu(self, pred, ref):
+        ev = evaluate.load("bleu")
+
+        # initialize dictionary with metric name
+        evals = {"bleu": []}
+
+        # run sample-wise evals
+        for p, r in zip(pred, ref):
+            # assumption that there is only one reference per prediction
+            # TODO: check how to support multiple references
+            result = ev.compute(predictions=[p], references=[[r]])
+            evals["bleu"].append(result["bleu"])
+
+        # calculate mean
+        evals["bleu_mean"] = np.mean(evals["bleu"])
 
         return evals
 

@@ -1,9 +1,9 @@
 import datetime as dt
 from enum import Enum
-from typing import Any
+from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LowercaseEnum(str, Enum):
@@ -17,8 +17,7 @@ class LowercaseEnum(str, Enum):
 
 class JobType(LowercaseEnum):
     INFERENCE = "inference"
-    EVALUATION = "evaluate"
-    EVALUATION_LITE = "eval_lite"
+    EVALUATION = "evaluator"
     ANNOTATION = "annotate"
 
 
@@ -48,6 +47,9 @@ class JobLogsResponse(BaseModel):
     logs: str | None = None
 
 
+# Check Ray items actually used and copy
+# those from the schema
+# ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
 class JobSubmissionResponse(BaseModel):
     type: str | None = None
     submission_id: str | None = None
@@ -65,35 +67,14 @@ class JobSubmissionResponse(BaseModel):
     driver_exit_code: int | None = None
 
 
-class JobEvalCreate(BaseModel):
-    name: str
-    description: str = ""
+class JobEvalConfig(BaseModel):
+    job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
+    metrics: list[str] = ["meteor", "rouge", "bertscore"]
+
+
+class JobInferenceConfig(BaseModel):
+    job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
-    model_url: str | None = None
-    system_prompt: str | None = None
-    config_template: str | None = None
-    skip_inference: bool = False
-
-
-# TODO: this has to be renamed to JobEvalCreate and the code above
-#       has to be removed when we deprecate evaluator
-class JobEvalLiteCreate(BaseModel):
-    name: str
-    description: str = ""
-    model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
-    config_template: str | None = None
-
-
-class JobInferenceCreate(BaseModel):
-    name: str
-    description: str = ""
-    model: str
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
     task: str | None = "summarization"
     accelerator: str | None = "auto"
     revision: str | None = "main"
@@ -101,24 +82,57 @@ class JobInferenceCreate(BaseModel):
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
     model_url: str | None = None
-    system_prompt: str | None = None
+    system_prompt: str | None = Field(
+        title="System Prompt",
+        default=None,
+        examples=[
+            "You are an advanced AI trained to summarize documents accurately and concisely. "
+            "Your goal is to extract key information while maintaining clarity and coherence."
+        ],
+    )
     output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
-    config_template: str | None = None
     store_to_dataset: bool = False
     max_new_tokens: int = 500
 
 
-class JobAnnotateCreate(BaseModel):
+class JobAnnotateConfig(BaseModel):
+    job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
+    task: str | None = "summarization"
+    store_to_dataset: bool = False
+
+
+JobSpecificConfig = JobEvalConfig | JobInferenceConfig | JobAnnotateConfig
+"""
+Job configuration dealing exclusively with the Ray jobs
+"""
+# JobSpecificConfigVar = TypeVar('JobSpecificConfig', bound=JobSpecificConfig)
+JobSpecificConfigVar = TypeVar("JobSpecificConfig", JobEvalConfig, JobInferenceConfig, JobAnnotateConfig)
+
+
+class JobCreate(BaseModel):
+    """Job configuration dealing exclusively with backend job handling"""
+
     name: str
     description: str = ""
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    task: str | None = "summarization"
-    store_to_dataset: bool = False
+    job_config: JobSpecificConfig = Field(discriminator="job_type")
+
+
+class JobAnnotateCreate(JobCreate):
+    job_config: JobAnnotateConfig
+
+
+class JobEvalCreate(JobCreate):
+    job_config: JobEvalConfig
+
+
+class JobInferenceCreate(JobCreate):
+    job_config: JobInferenceConfig
 
 
 class JobResponse(BaseModel, from_attributes=True):
@@ -147,6 +161,19 @@ class JobResults(BaseModel):
     parameters: list[dict[str, Any]] | None = None
     metric_url: str
     artifact_url: str
+
+
+class JobResultObject(BaseModel):
+    """This is a very loose definition of what data
+    should be stored in the output settings.S3_JOB_RESULTS_FILENAME.
+    As long as a job result file only has the fields defined here,
+    it should be accepted by the backend.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    metrics: dict | None = {}
+    parameters: dict | None = {}
+    artifacts: dict | None = {}
 
 
 class Job(JobResponse, JobSubmissionResponse):

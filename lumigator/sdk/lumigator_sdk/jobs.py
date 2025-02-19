@@ -7,12 +7,14 @@ import time
 from http import HTTPMethod
 from uuid import UUID
 
+from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateCreate,
-    JobEvalCreate,
-    JobInferenceCreate,
+    JobAnnotateConfig,
+    JobCreate,
+    JobEvalConfig,
+    JobInferenceConfig,
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
@@ -20,9 +22,18 @@ from lumigator_schemas.jobs import (
 )
 
 from lumigator_sdk.client import ApiClient
-from lumigator_sdk.strict_schemas import JobAnnotateCreate as JobAnnotateCreateStrict
-from lumigator_sdk.strict_schemas import JobEvalCreate as JobEvalCreateStrict
-from lumigator_sdk.strict_schemas import JobInferenceCreate as JobInferenceCreateStrict
+from lumigator_sdk.strict_schemas import (
+    JobAnnotateConfig as JobAnnotateConfigStrict,
+)
+from lumigator_sdk.strict_schemas import (
+    JobCreate as JobCreateStrict,
+)
+from lumigator_sdk.strict_schemas import (
+    JobEvalConfig as JobEvalConfigStrict,
+)
+from lumigator_sdk.strict_schemas import (
+    JobInferenceConfig as JobInferenceConfigStrict,
+)
 
 
 class Jobs:
@@ -39,7 +50,7 @@ class Jobs:
         """
         self.client = c
 
-    def get_jobs(self) -> ListingResponse[Job]:
+    def get_jobs(self, skip=0, limit=None) -> ListingResponse[Job]:
         """Return information on all jobs.
 
         .. admonition:: Example
@@ -55,6 +66,25 @@ class Jobs:
             ListingResponse[JobResponse]: All existing jobs.
         """
         response = self.client.get_response(self.JOBS_ROUTE)
+
+        return ListingResponse[Job](**response.json())
+
+    def get_jobs_per_type(self, job_type: JobType, skip=0, limit=None) -> ListingResponse[Job]:
+        """Return information on jobs of a specific type.
+
+        .. admonition:: Example
+
+            .. code-block:: python
+
+                from sdk.lumigator import LumigatorClient
+
+                lm_client = LumigatorClient("http://localhost:8000")
+                lm_client.jobs.get_jobs_per_type(JobType.EVALUATION)
+
+        Returns:
+            ListingResponse[JobResponse]: All existing jobs.
+        """
+        response = self.client.get_response(f"{self.JOBS_ROUTE}?job_types={job_type.value}")
 
         return ListingResponse[Job](**response.json())
 
@@ -78,6 +108,27 @@ class Jobs:
         response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}")
 
         return Job(**(response.json()))
+
+    def get_job_dataset(self, id: UUID) -> DatasetResponse:
+        """Return the dataset created by a specific job.
+
+        .. admonition:: Example
+
+            .. code-block:: python
+
+                from sdk.lumigator import LumigatorClient
+
+                lm_client = LumigatorClient("http://localhost:8000")
+                lm_client.jobs.get_job_dataset(job_id)
+
+        Args:
+            id (UUID): the ID of the job to retrieve
+        Returns:
+            JobResponse: The job information for the provided ID.
+        """
+        response = self.client.get_response(f"{self.JOBS_ROUTE}/{id}/dataset")
+
+        return DatasetResponse(**(response.json()))
 
     def wait_for_job(self, id: UUID, retries: int = 180, poll_wait: int = 5) -> JobResponse:
         """Wait for a job to succeed and return latest retrieved information.
@@ -112,14 +163,9 @@ class Jobs:
                 raise Exception(f"Job {id} stopped")
             elif jobinfo["status"] == "SUCCEEDED":
                 return jobinfo
-        raise Exception(
-            f"Job {id} did not complete in the polling "
-            f"time (retries: {retries}, poll_wait: {poll_wait})"
-        )
+        raise Exception(f"Job {id} did not complete in the polling time (retries: {retries}, poll_wait: {poll_wait})")
 
-    def create_job(
-        self, type: JobType, request: JobEvalCreate | JobInferenceCreate | JobAnnotateCreate
-    ) -> JobResponse:
+    def create_job(self, request: JobCreate) -> JobResponse:
         """Create a new job.
 
         .. admonition:: Example
@@ -127,30 +173,28 @@ class Jobs:
             .. code-block:: python
 
                 from sdk.lumigator import LumigatorClient
-                from lumigator_schemas.jobs import JobType, JobEvalCreate
+                from lumigator_schemas.jobs import JobCreate, JobEvalConfig
 
                 lm_client = LumigatorClient("http://localhost:8000")
-                lm_client.jobs.create_job(JobType.EVALUATION, JobEvalCreate(...))
+                lm_client.jobs.create_job(JobCreate(JobEvalConfig))
 
         Args:
-            type(JobType): The kind of job to create. It can be either
-                ANNOTATION, EVALUATION, EVALUATION_LITE, or INFERENCE.
-            request(JobEvalCreate): The job's configuration.
+            request(JobCreate): The job's configuration. Its job_type
+                can be ANNOTATION, EVALUATION, or INFERENCE.
 
         Returns:
             JobResponse: The information for the newly created job.
         """
-        if type == JobType.EVALUATION or type == JobType.EVALUATION_LITE:
-            JobEvalCreateStrict.model_validate(JobEvalCreate.model_dump(request))
-        elif type == JobType.INFERENCE:
-            JobInferenceCreateStrict.model_validate(JobInferenceCreate.model_dump(request))
-        elif type == JobType.ANNOTATION:
-            JobAnnotateCreateStrict.model_validate(JobAnnotateCreate.model_dump(request))
-        else:
-            raise ValueError(f"Invalid job type: {type}")
+        JobCreateStrict.model_validate(JobCreate.model_dump(request))
+        if request.job_config.job_type == JobType.ANNOTATION:
+            JobAnnotateConfigStrict.model_validate(JobAnnotateConfig.model_dump(request.job_config))
+        elif request.job_config.job_type == JobType.EVALUATION:
+            JobEvalConfigStrict.model_validate(JobEvalConfig.model_dump(request.job_config))
+        elif request.job_config.job_type == JobType.INFERENCE:
+            JobInferenceConfigStrict.model_validate(JobInferenceConfig.model_dump(request.job_config))
 
         response = self.client.get_response(
-            f"{self.JOBS_ROUTE}/{type.value}/",
+            f"{self.JOBS_ROUTE}/{request.job_config.job_type.value}/",
             method=HTTPMethod.POST,
             data=request.model_dump_json(),
         )

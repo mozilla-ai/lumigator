@@ -11,6 +11,4 @@ api_router.include_router(datasets.router, prefix="/datasets", tags=[Tags.DATASE
 api_router.include_router(jobs.router, prefix="/jobs", tags=[Tags.JOBS])
 api_router.include_router(experiments.router, prefix="/experiments", tags=[Tags.EXPERIMENTS])
 api_router.include_router(models.router, prefix="/models", tags=[Tags.MODELS])
-api_router.include_router(
-    workflows.router, prefix="/workflows", tags=[Tags.WORKFLOWS], include_in_schema=False
-)
+api_router.include_router(workflows.router, prefix="/workflows", tags=[Tags.WORKFLOWS])

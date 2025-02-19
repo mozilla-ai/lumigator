@@ -60,11 +60,7 @@ class APIModelClient(BaseModelClient):
         prompt: str,
     ) -> tuple[str, str]:
         current_retry_attempt = 1
-        max_retries = (
-            1
-            if config.inference_server.max_retries is None
-            else config.inference_server.max_retries
-        )
+        max_retries = 1 if config.inference_server.max_retries is None else config.inference_server.max_retries
         while current_retry_attempt <= max_retries:
             try:
                 response = self._chat_completion(self._config, self._client, prompt, self._system)
@@ -119,6 +115,31 @@ class OpenAIModelClient(APIModelClient):
         )
 
 
+class DeepSeekModelClient(APIModelClient):
+    def __init__(self, base_url: str, config: InferenceJobConfig):
+        super().__init__(config)
+        self._client = OpenAI(base_url=base_url, api_key=os.environ["DEEPSEEK_API_KEY"])
+
+    def _chat_completion(
+        self,
+        config: InferenceJobConfig,
+        client: OpenAI,
+        prompt: str,
+        system: str = "You are a helpful assisant.",
+    ) -> Completion:
+        """Connects to a remote OpenAI-API-compatible endpoint
+        and returns a chat completion holding the model's response.
+        """
+        return client.chat.completions.create(
+            model=self._engine,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+            max_tokens=config.params.max_tokens,
+            frequency_penalty=config.params.frequency_penalty,
+            temperature=config.params.temperature,
+            top_p=config.params.top_p,
+        )
+
+
 class MistralModelClient(APIModelClient):
     """Model client for models served via Mistral API.
     - The base_url is fixed
@@ -151,6 +172,9 @@ class MistralModelClient(APIModelClient):
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
+        logger.info(f"System prompt: {config.system_prompt}")
+        self._system = config.system_prompt
+        self._task = config.hf_pipeline.task
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         self._set_tokenizer_max_length()
 
@@ -159,8 +183,10 @@ class HuggingFaceModelClient(BaseModelClient):
         Checks various possible max_length parameters which varies on model architecture.
         """
         config = self._pipeline.model.config
-        logger.info(f"Selected HF model's tokenizer has maximum number of input tokens: \
-                    {self._pipeline.tokenizer.model_max_length}")
+        logger.info(
+            f"Selected HF model's tokenizer has maximum number of input tokens: \
+                    {self._pipeline.tokenizer.model_max_length}"
+        )
         # If suitable model_max_length is already available, don't override it
         if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
             return
@@ -184,12 +210,12 @@ class HuggingFaceModelClient(BaseModelClient):
         for param in plausible_max_length_params:
             if hasattr(config, param):
                 value = getattr(config, param)
-                if (
-                    isinstance(value, int) and value < VERY_LARGE_INTEGER
-                ):  # Sanity check for reasonable values
+                if isinstance(value, int) and value < VERY_LARGE_INTEGER:  # Sanity check for reasonable values
                     self._pipeline.tokenizer.model_max_length = value
-                    logger.info(f"Setting the maximum length of input tokens to {value} \
-                                based on the config.{param} attribute.")
+                    logger.info(
+                        f"Setting the maximum length of input tokens to {value} \
+                                based on the config.{param} attribute."
+                    )
                     return
 
         # If no suitable parameter is found, warn the user and continue with the HF default
@@ -199,10 +225,24 @@ class HuggingFaceModelClient(BaseModelClient):
         )
 
     def predict(self, prompt):
-        prediction = self._pipeline(prompt)[0]
+        # When using a text-generation model, the pipeline returns a dictionary with a single key,
+        # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
+        # role and content of a message. For example:
+        # [{'role': 'system', 'content': 'You are a helpful assistant.'},
+        #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
+        # We want to return the content of the last message in the list, which is the model's
+        # response to the prompt.
+        if self._task == "text-generation":
+            messages = [
+                {"role": "system", "content": self._system},
+                {"role": "user", "content": prompt},
+            ]
+            generation = self._pipeline(messages)[0]
+            return generation["generated_text"][-1]["content"]
 
-        # The result is a dictionary with a single key, which name depends on the task
-        # (e.g., 'summary_text' for summarization)
-        # Get the name of the key and return its value
-        result_key = list(prediction.keys())[0]
-        return prediction[result_key]
+        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
+        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
+        # Get the name of the key and return its value.
+        if self._task == "summarization":
+            generation = self._pipeline(prompt)[0]
+            return generation["summary_text"]

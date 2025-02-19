@@ -2,7 +2,7 @@ from collections.abc import Generator
 from typing import Annotated
 
 import boto3
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -16,7 +16,7 @@ from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
-from backend.tracking import tracking_client_manager
+from backend.tracking import TrackingClientManager, tracking_client_manager
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -27,12 +27,12 @@ def get_db_session() -> Generator[Session, None, None]:
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
 
 
-def get_tracking_client() -> Generator[Session, None, None]:
+def get_tracking_client() -> Generator[TrackingClientManager, None, None]:
     with tracking_client_manager.connect() as client:
         yield client
 
 
-TrackingClientDep = Annotated[Session, Depends(get_tracking_client)]
+TrackingClientDep = Annotated[TrackingClientManager, Depends(get_tracking_client)]
 
 
 def get_s3_client() -> Generator[S3Client, None, None]:
@@ -59,11 +59,13 @@ def get_dataset_service(
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 
 
-def get_job_service(session: DBSessionDep, dataset_service: DatasetServiceDep) -> JobService:
+def get_job_service(
+    session: DBSessionDep, dataset_service: DatasetServiceDep, background_tasks: BackgroundTasks
+) -> JobService:
     job_repo = JobRepository(session)
     result_repo = JobResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return JobService(job_repo, result_repo, ray_client, dataset_service)
+    return JobService(job_repo, result_repo, ray_client, dataset_service, background_tasks)
 
 
 JobServiceDep = Annotated[JobService, Depends(get_job_service)]
@@ -87,9 +89,10 @@ def get_workflow_service(
     tracking_client: TrackingClientDep,
     job_service: JobServiceDep,
     dataset_service: DatasetServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> WorkflowService:
     job_repo = JobRepository(session)
-    return WorkflowService(job_repo, job_service, dataset_service, tracking_client=tracking_client)
+    return WorkflowService(job_repo, job_service, dataset_service, background_tasks, tracking_client=tracking_client)
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]

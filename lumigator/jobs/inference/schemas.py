@@ -14,7 +14,7 @@ class DatasetConfig(BaseModel):
 class JobConfig(BaseModel):
     max_samples: int
     storage_path: str
-    output_field: str | None = None
+    output_field: str | None = "predictions"
     enable_tqdm: bool | None = None
     model_config = ConfigDict(extra="forbid")
 
@@ -52,6 +52,7 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
+    system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     params: SamplingParameters | None = None
     hf_pipeline: HfPipelineConfig | None = None
@@ -63,3 +64,12 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
+    inference_time: float
+
+
+class JobOutput(BaseModel):
+    # Nothing to put in metrics yet
+    # but eventually we will have metrics like tok/s, latency, average output length, etc.
+    metrics: None
+    artifacts: InferenceJobOutput
+    parameters: InferenceJobConfig

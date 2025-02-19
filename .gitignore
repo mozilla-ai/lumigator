@@ -175,6 +175,8 @@ cython_debug/
 *.db
 *.db-journal
 
-# env diff files
-.env.diff
-.env.diff.new
+# Config: User supplied overrides
+user.conf
+
+# Config: Temporary build directory
+build/

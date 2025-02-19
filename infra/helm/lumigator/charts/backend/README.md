@@ -24,7 +24,7 @@ If the Mistral and/or the OpenAI API is used, there are two ways to provide it t
 | fullnameOverride | `""` | - |
 | image.pullPolicy | `"IfNotPresent"` | The Kubernetes [imagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/#updating-images) value |
 | image.repository | `"mzdotai/lumigator"` | Repository where the Lumigator image is located |
-| image.tag | `"v0.1.0-alpha"` | The Lumigator Docker image tag |
+| image.tag | `"v0.1.1-alpha"` | The Lumigator Docker image tag |
 | imagePullSecrets | `[]` | Configuration for [imagePullSecrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) so that you can use a private registry for your image |
 | nameOverride | `""` | - |
 | podSecurityContext | `{}` | Security settings applied to the pod |

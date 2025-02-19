@@ -5,7 +5,13 @@ from pathlib import Path
 from lumigator_schemas.jobs import JobType
 from lumigator_sdk.health import Health
 from lumigator_sdk.jobs import Jobs
-from lumigator_sdk.strict_schemas import JobEvalCreate, JobInferenceCreate
+from lumigator_sdk.strict_schemas import (
+    DatasetDownloadResponse,
+    JobAnnotateConfig,
+    JobCreate,
+    JobEvalConfig,
+    JobInferenceConfig,
+)
 from pydantic import ValidationError
 from pytest import raises
 from requests import Response
@@ -14,53 +20,51 @@ from tests.helpers import load_json
 
 
 def test_create_job_ok_all(lumi_client, json_data_job_response, json_data_job_all, request_mock):
-    request_mock.post(
-        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.EVALUATION.value}/",
-        status_code=HTTPStatus.OK,
-        json=load_json(json_data_job_response),
-    )
-
     job_json = load_json(json_data_job_all)
-    job_ret = lumi_client.jobs.create_job(
-        JobType.EVALUATION, JobEvalCreate.model_validate(job_json)
+    path = job_json["job_config"]["job_type"]
+
+    request_mock.post(
+        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{path}/",
+        status_code=HTTPStatus.OK,
+        json=load_json(json_data_job_response),
     )
+
+    job_ret = lumi_client.jobs.create_job(JobCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
     assert job_ret.status == "created"
 
 
-def test_create_job_ok_minimal(
-    lumi_client, json_data_job_response, json_data_job_minimal, request_mock
-):
-    request_mock.post(
-        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.INFERENCE.value}/",
-        status_code=HTTPStatus.OK,
-        json=load_json(json_data_job_response),
-    )
-
+def test_create_job_ok_minimal(lumi_client, json_data_job_response, json_data_job_minimal, request_mock):
     job_json = load_json(json_data_job_minimal)
-    job_ret = lumi_client.jobs.create_job(
-        JobType.INFERENCE, JobInferenceCreate.model_validate(job_json)
+    path = job_json["job_config"]["job_type"]
+
+    request_mock.post(
+        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{path}/",
+        status_code=HTTPStatus.OK,
+        json=load_json(json_data_job_response),
     )
+
+    job_ret = lumi_client.jobs.create_job(JobCreate.model_validate(job_json))
     assert job_ret is not None
     assert str(job_ret.id) == "daab39ac-be9f-4de9-87c0-c4c94b297a97"
     assert job_ret.name == "test-job-001"
     assert job_ret.status == "created"
 
 
-def test_create_job_ok_extra(
-    lumi_client, json_data_job_response, json_data_job_extra, request_mock
-):
+def test_create_job_ok_extra(lumi_client, json_data_job_response, json_data_job_extra, request_mock):
+    job_json = load_json(json_data_job_extra)
+    path = job_json["job_config"]["job_type"]
+
     request_mock.post(
-        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{JobType.INFERENCE.value}/",
+        url=lumi_client.client._api_url + f"/{Jobs.JOBS_ROUTE}/{path}/",
         status_code=HTTPStatus.OK,
         json=load_json(json_data_job_response),
     )
 
-    job_json = load_json(json_data_job_extra)
     with raises(ValidationError):
-        lumi_client.jobs.create_job(JobType.INFERENCE, JobInferenceCreate.model_validate(job_json))
+        lumi_client.jobs.create_job(JobCreate.model_validate(job_json))
 
 
 def test_get_jobs_ok(lumi_client, json_data_jobs, request_mock):

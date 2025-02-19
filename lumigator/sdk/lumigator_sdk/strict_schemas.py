@@ -1,16 +1,16 @@
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetResponse
 from lumigator_schemas.experiments import (
-    ExperimentIdCreate,
-    ExperimentResponse,
+    ExperimentCreate,
+    GetExperimentResponse,
 )
 from lumigator_schemas.extras import HealthResponse, ListingResponse
 from lumigator_schemas.jobs import (
     Job,
-    JobAnnotateCreate,
-    JobConfig,
-    JobEvalCreate,
+    JobAnnotateConfig,
+    JobCreate,
+    JobEvalConfig,
     JobEvent,
-    JobInferenceCreate,
+    JobInferenceConfig,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -29,11 +29,11 @@ class DatasetResponse(DatasetResponse, from_attributes=True):
     model_config = ConfigDict(extra="forbid")
 
 
-class ExperimentIdCreate(ExperimentIdCreate):
+class ExperimentCreate(ExperimentCreate):
     model_config = ConfigDict(extra="forbid")
 
 
-class ExperimentResponse(ExperimentResponse, from_attributes=True):
+class GetExperimentResponse(GetExperimentResponse, from_attributes=True):
     model_config = ConfigDict(extra="forbid")
 
 
@@ -49,10 +49,6 @@ class Job(Job):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobConfig(JobConfig):
-    model_config = ConfigDict(extra="forbid")
-
-
 class JobEvent(JobEvent):
     model_config = ConfigDict(extra="forbid")
 
@@ -65,15 +61,19 @@ class JobSubmissionResponse(JobSubmissionResponse):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobEvalCreate(JobEvalCreate):
+class JobCreate(JobCreate):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobInferenceCreate(JobInferenceCreate):
+class JobInferenceConfig(JobInferenceConfig):
     model_config = ConfigDict(extra="forbid")
 
 
-class JobAnnotateCreate(JobAnnotateCreate):
+class JobEvalConfig(JobEvalConfig):
+    model_config = ConfigDict(extra="forbid")
+
+
+class JobAnnotateConfig(JobAnnotateConfig):
     model_config = ConfigDict(extra="forbid")
 
 

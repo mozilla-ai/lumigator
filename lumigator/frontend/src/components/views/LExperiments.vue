@@ -42,7 +42,10 @@
       :position="showLogs ? 'bottom' : 'full'"
       @l-drawer-closed="resetDrawerContent()"
     >
-      <l-experiment-results v-if="showExpResults" :results="selectedExperimentResults" />
+      <l-experiment-results
+        v-if="showExpResults && selectedExperimentResults.length"
+        :results="selectedExperimentResults"
+      />
       <l-job-results
         v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"

@@ -28,31 +28,31 @@
           <template #body="slotProps">
             <div>
               <Tag
-                v-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.SUCCEEDED"
+                v-if="retrieveStatus(slotProps.data) === WorkflowStatus.SUCCEEDED"
                 severity="success"
                 rounded
-                :value="retrieveStatus(slotProps.data.id)"
+                :value="retrieveStatus(slotProps.data)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.FAILED"
+                v-else-if="retrieveStatus(slotProps.data) === WorkflowStatus.FAILED"
                 severity="danger"
                 rounded
-                :value="retrieveStatus(slotProps.data.id)"
+                :value="retrieveStatus(slotProps.data)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
-                v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.INCOMPLETE"
+                v-else-if="retrieveStatus(slotProps.data) === WorkflowStatus.INCOMPLETE"
                 severity="info"
                 rounded
-                :value="retrieveStatus(slotProps.data.id)"
+                :value="retrieveStatus(slotProps.data)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
               <Tag
                 v-else
                 severity="warn"
                 rounded
-                :value="retrieveStatus(slotProps.data.id)"
+                :value="retrieveStatus(slotProps.data)"
                 :pt="{ root: 'l-experiment-table__tag' }"
               />
             </div>
@@ -111,6 +111,7 @@ const { experiments } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
 const focusedItem = ref()
 const expandedRows = ref([])
+const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
 const style = computed(() => {
   return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
@@ -149,26 +150,77 @@ function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
 }
 
 // aggregates the experiment's status based on its workflows statuses
-function retrieveStatus(experimentId: string) {
-  const experiment = experiments.value.find((exp) => exp.id === experimentId)
-  if (!experiment) {
-    return
-  }
-
+function retrieveStatus(experiment: Experiment): WorkflowStatus {
   const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
   const uniqueStatuses = new Set(workflowStatuses)
-  if (uniqueStatuses.size === 1) {
-    experiment.status = [...uniqueStatuses][0]
+
+  if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
+    return WorkflowStatus.RUNNING
+  } else if (
+    uniqueStatuses.has(WorkflowStatus.FAILED) &&
+    uniqueStatuses.has(WorkflowStatus.SUCCEEDED)
+  ) {
+    return WorkflowStatus.INCOMPLETE
+  } else {
+    // if none of its workflows are running, or if some failed and others succeeded, then it probably means they all have the same status so just return it
     return [...uniqueStatuses][0]
   }
-  if (uniqueStatuses.has(WorkflowStatus.RUNNING)) {
-    experiment.status = WorkflowStatus.RUNNING
-    return WorkflowStatus.RUNNING
+}
+
+/**
+ * The retrieved IDs will determine which experiment is still Running
+ * @returns {string[]} IDs of stored experiments that have not completed
+ */
+function getIncompleteExperiments(): Experiment[] {
+  return experiments.value.filter(
+    (experiment: Experiment) => !completedStatus.includes(experiment.status),
+  )
+}
+
+/**
+ *
+ * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
+ */
+async function updateExperimentStatus(experiment: Experiment): Promise<void> {
+  try {
+    const incompleteWorkflows = experiment.workflows.filter(
+      (workflow) => !completedStatus.includes(workflow.status),
+    )
+
+    const incompleteWorkflowDetails = await Promise.all(
+      incompleteWorkflows.map((workflow) => workflowsService.fetchWorkflowDetails(workflow.id)),
+    )
+
+    incompleteWorkflowDetails.forEach((workflow) => {
+      const existingWorkflow = experiment.workflows.find((w) => w.id === workflow.id)
+      if (existingWorkflow) {
+        existingWorkflow.status = workflow.status
+      }
+    })
+
+    const status = incompleteWorkflowDetails.every((workflow) =>
+      completedStatus.includes(workflow.status),
+    )
+      ? WorkflowStatus.SUCCEEDED
+      : retrieveStatus(experiment)
+
+    // const e = experiments.value.find((exp) => exp.id === experiment.id)
+    // if (e) {
+    // e.status = status
+    experiment.status = status
+    // }
+  } catch (error) {
+    console.error(`Failed to update status for exp ${experiment} ${error}`)
   }
-  if (uniqueStatuses.has(WorkflowStatus.FAILED) && uniqueStatuses.has(WorkflowStatus.SUCCEEDED)) {
-    experiment.status = WorkflowStatus.INCOMPLETE
-    return WorkflowStatus.INCOMPLETE
-  }
+}
+
+/**
+ * Updates the status for stored experiments that are not completed
+ */
+async function updateStatusForIncompleteExperiments() {
+  await Promise.all(
+    getIncompleteExperiments().map((experiment) => updateExperimentStatus(experiment)),
+  )
 }
 
 // Throttle ensures the function is invoked at most once every defined period.
@@ -178,7 +230,7 @@ async function throttledUpdateAllWorkflows() {
   } // Skip if throttle is active
 
   isThrottled.value = true
-  await experimentStore.updateStatusForIncompleteExperiments()
+  await updateStatusForIncompleteExperiments()
   setTimeout(() => {
     isThrottled.value = false // Release throttle after delay
   }, 5000) // 5 seconds throttle
@@ -188,7 +240,7 @@ async function throttledUpdateAllWorkflows() {
 // updates the status of each experiment
 let pollingId: number | undefined
 onMounted(async () => {
-  await experimentStore.updateStatusForIncompleteExperiments()
+  await updateStatusForIncompleteExperiments()
   pollingId = setInterval(async () => {
     await throttledUpdateAllWorkflows()
   }, 1000)
@@ -205,7 +257,7 @@ watch(showSlidingPanel, (newValue) => {
 watch(
   () => props.tableData.length,
   async () => {
-    await experimentStore.updateStatusForIncompleteExperiments()
+    await updateStatusForIncompleteExperiments()
   },
 )
 </script>

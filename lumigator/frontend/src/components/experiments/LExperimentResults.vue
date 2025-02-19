@@ -80,7 +80,9 @@
           <span class="p-datatable-column-title">model size </span>
         </template>
         <template #body="slotProps">
-          {{ slotProps.data.model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2') }}
+          {{
+            slotProps.data.model.info?.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2')
+          }}
         </template>
       </Column>
       <Column field="model.info.parameter_count" sortable>
@@ -89,7 +91,7 @@
         </template>
         <template #body="slotProps">
           {{
-            slotProps.data.model.info.parameter_count.replace(
+            slotProps.data.model.info?.parameter_count.replace(
               /(\d+(?:\.\d+)?)([a-zA-Z]+)/g,
               '$1 $2',
             )
@@ -114,7 +116,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted, toRefs } from 'vue'
+import { computed, ref, onUnmounted, toRefs, type ComputedRef } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/experiments/LJobResults.vue'
@@ -190,17 +192,21 @@ const tooltips = ref({
   },
 })
 
-const tableData = computed(() => {
+const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = computed(() => {
   const data = results.value.map((result) => ({
     ...result,
-    model: models.value.find((model: Model) => model.name === result.model),
+    model: models.value.find(
+      (model: Model) => model.uri === result.model || model.name === result.model,
+    )!,
   }))
+
+  console.log('data', data)
 
   return data
 })
 
 onUnmounted(() => {
-  results.value = []
+  // results.value = []
 })
 </script>
 

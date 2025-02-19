@@ -9,13 +9,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick, type Ref } from 'vue'
+import { ref, watch, computed, nextTick, type Ref, toRefs } from 'vue'
 
 const props = defineProps<{ logs: string[] }>()
 
+const { logs } = toRefs(props)
+
 const logContainer: Ref<HTMLElement | undefined> = ref()
 
-const logsLength = computed(() => props.logs.length)
+const logsLength = computed(() => logs.value.length)
 
 const scrollToBottom = async () => {
   if (logContainer.value) {

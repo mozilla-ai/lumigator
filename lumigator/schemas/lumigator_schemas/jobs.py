@@ -76,6 +76,7 @@ class JobEvalConfig(BaseModel):
 class TaskType(str, Enum):
     SUMMARIZATION = "summarization"
     TRANSLATION = "translation"
+    TEXT_GENERATION = "text-generation"
 
 
 class TaskValidator(ABC):
@@ -88,7 +89,30 @@ class TaskValidator(ABC):
         pass
 
 
-class TranslationValidator(TaskValidator):
+class TextGenerationValidator(TaskValidator):
+    # Common validation for text generation tasks
+    DEFAULT_PROMPT: str = "You are a helpful AI assistant."
+
+    def validate(self, config):
+        pass
+
+    def set_default_prompt(self, config):
+        if config.system_prompt is None:
+            config.system_prompt = self.DEFAULT_PROMPT
+
+
+class SummarizationValidator(TextGenerationValidator):
+    DEFAULT_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
+
+    def validate(self, config):
+        if config.source_language or config.target_language:
+            raise ValueError(
+                f"Fields source_language and target_language should not be provided when task={TaskType.SUMMARIZATION}"
+                f"but got source_language={config.source_language} and target_language={config.target_language}"
+            )
+
+
+class TranslationValidator(TextGenerationValidator):
     def validate(self, config):
         if not config.source_language or not config.target_language:
             raise ValueError(
@@ -99,21 +123,6 @@ class TranslationValidator(TaskValidator):
     def set_default_prompt(self, config):
         if config.system_prompt is None:
             config.system_prompt = f"translate {config.source_language} to {config.target_language}:"
-
-
-class SummarizationValidator(TaskValidator):
-    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
-
-    def validate(self, config):
-        if config.source_language or config.target_language:
-            raise ValueError(
-                f"Fields source_language and target_language should not be provided when task={TaskType.SUMMARIZATION}"
-                f"but got source_language={config.source_language} and target_language={config.target_language}"
-            )
-
-    def set_default_prompt(self, config):
-        if config.system_prompt is None:
-            config.system_prompt = self.DEFAULT_SUMMARIZER_PROMPT
 
 
 class JobInferenceConfig(BaseModel):
@@ -149,6 +158,7 @@ class JobInferenceConfig(BaseModel):
         validators = {
             TaskType.TRANSLATION: TranslationValidator(),
             TaskType.SUMMARIZATION: SummarizationValidator(),
+            TaskType.TEXT_GENERATION: TextGenerationValidator(),
         }
         validator = validators.get(self.task)
         validator.validate(self)

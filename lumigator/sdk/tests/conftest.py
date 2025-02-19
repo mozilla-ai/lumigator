@@ -7,6 +7,8 @@ from typing import BinaryIO
 
 import pytest
 import requests_mock
+from lumigator_schemas.extras import ListingResponse
+from lumigator_schemas.models import ModelsResponse
 from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
 
@@ -158,8 +160,29 @@ def json_data_job_response(resources_dir) -> Path:
 
 
 @pytest.fixture(scope="session")
-def json_data_models(resources_dir) -> Path:
-    return resources_dir / "models.json"
+def json_data_models() -> ListingResponse[ModelsResponse]:
+    """Returns a fake response for the models endpoint,
+    to allow for SDK testing of the models endpoint.
+    """
+    model = {
+        "name": "facebook/bart-large-cnn",
+        "uri": "hf://facebook/bart-large-cnn",
+        "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
+        "tasks": [
+            {
+                "summarization": {
+                    "max_length": 142,
+                    "min_length": 56,
+                    "length_penalty": 2.0,
+                    "early_stopping": True,
+                    "no_repeat_ngram_size": 3,
+                    "num_beams": 4,
+                }
+            }
+        ],
+        "website_url": "https://huggingface.co/facebook/bart-large-cnn",
+    }
+    return ListingResponse[ModelsResponse].model_validate({"total": 1, "items": [model]}).model_dump()
 
 
 @pytest.fixture(scope="function")

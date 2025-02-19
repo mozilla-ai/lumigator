@@ -345,11 +345,6 @@ def resources_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
-def json_data_models(resources_dir) -> Path:
-    return resources_dir / "models.json"
-
-
-@pytest.fixture(scope="session")
 def json_ray_version(resources_dir) -> Path:
     return resources_dir / "ray_version.json"
 

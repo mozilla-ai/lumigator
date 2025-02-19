@@ -229,7 +229,7 @@ class JobService:
 
         loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
-    def _validate_results(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
+    def _validate_results(self, job_id: UUID, s3: S3FileSystem):
         """Handles the evaluation result for a given job.
 
         Args:

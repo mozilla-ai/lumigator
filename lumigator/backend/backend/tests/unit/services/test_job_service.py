@@ -71,11 +71,11 @@ def test_set_explicit_inference_job_params(job_record, job_service):
             "http://localhost:8000/v1/chat/completions",
         ),
         # openai model (from API)
-        ("gpt-4-turbo", None, settings.OAI_API_URL),
+        ("gpt-4-turbo", "https://api.openai.com/v1", settings.OAI_API_URL),
         # mistral model (from API)
-        ("mistral/open-mistral-7b", None, settings.MISTRAL_API_URL),
+        ("mistral/open-mistral-7b", "https://api.mistral.ai/v1", settings.MISTRAL_API_URL),
         # deepseek model (from API)
-        ("deepseek/deepseek-chat", None, settings.DEEPSEEK_API_URL),
+        ("deepseek/deepseek-chat", "https://api.deepseek.com/v1", settings.DEEPSEEK_API_URL),
     ],
 )
 def test_set_model(job_service, model, input_base_url, returned_base_url):
@@ -89,7 +89,7 @@ def test_set_model(job_service, model, input_base_url, returned_base_url):
         ),
         dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
     )
-    base_url = request.base_url
+    base_url = request.job_config.base_url
     assert base_url == returned_base_url
 
 

@@ -240,8 +240,6 @@ class MLflowTrackingClient(TrackingClient):
         # sort the jobs by created_at, with the oldest last
         all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
 
-        loguru.logger.critical(f"{workflow_id} ==> {workflow.info.status}")
-        loguru.logger.critical(f"{workflow_id} ==> {workflow.data.tags.get('status')}")
         workflow_details = WorkflowDetailsResponse(
             id=workflow_id,
             experiment_id=workflow.info.experiment_id,

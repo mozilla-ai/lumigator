@@ -46,9 +46,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJob(job))
-    jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJob(job))
   }
 
   const hasRunningInferenceJob = computed(() => {
@@ -75,7 +72,9 @@ export const useDatasetStore = defineStore('datasets', () => {
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
-    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
+    return inferenceJobs.value
+      .filter((job) => !completedStatus.includes(job.status))
+      .map((job) => job.id)
   }
 
   /**
@@ -109,9 +108,9 @@ export const useDatasetStore = defineStore('datasets', () => {
 
   function startPollingForAnnotationJobStatus(jobId: string) {
     isPollingForJobStatus.value = true
-    jobStatusInterval = setInterval(() => {
-      updateJobStatus(jobId).then(() => {
-        const job = jobs.value.find((job) => job.id === jobId)
+    jobStatusInterval = setInterval(async () => {
+      await updateJobStatus(jobId).then(() => {
+        const job = inferenceJobs.value.find((job) => job.id === jobId)
         if (job && completedStatus.includes(job.status)) {
           stopPollingForAnnotationJobStatus() // Stop polling when the job is complete
         }
@@ -138,7 +137,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (inferenceJob) {
         inferenceJob.status = status
       }
-      const job = jobs.value.find((job) => job.id === id)
+      const job = inferenceJobs.value.find((job) => job.id === id)
       if (job) {
         job.status = status
       }
@@ -157,6 +156,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     setSelectedDataset,
     fetchAllJobs,
     updateStatusForIncompleteJobs,
+    stopPollingForAnnotationJobStatus,
     startGroundTruthGeneration,
     parseJob,
   }

@@ -10,7 +10,7 @@ export type Artifacts = {
   model: string
   predictions: string[]
 
-  summarization_time: number
+  inference_time: number
   evaluation_time: number
 }
 

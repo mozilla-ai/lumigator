@@ -38,7 +38,7 @@ export function transformJobResults(objectData: WorkflowResults): EvaluationJobR
         rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
         rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
       },
-      summarization_time: objectData.artifacts.summarization_time,
+      inference_time: objectData.artifacts.inference_time,
     } as unknown as EvaluationJobResults
   })
   return transformedArray

@@ -385,7 +385,7 @@ class JobService:
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
                     # FIXME Inferences may not always be summarizations!
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    system_prompt=request.job_config.system_prompt,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -398,7 +398,7 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    system_prompt=request.job_config.system_prompt,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -411,7 +411,7 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    system_prompt=request.job_config.system_prompt,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -424,7 +424,7 @@ class JobService:
                 job_config.inference_server = InferenceServerConfig(
                     base_url=self._set_model_type(request),
                     engine=request.job_config.model,
-                    system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                    system_prompt=request.job_config.system_prompt,
                     max_retries=3,
                 )
                 job_config.params = SamplingParameters(
@@ -438,7 +438,7 @@ class JobService:
                     job_config.inference_server = InferenceServerConfig(
                         base_url=self._set_model_type(request),
                         engine=request.job_config.model,
-                        system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                        system_prompt=request.job_config.system_prompt,
                         max_retries=3,
                     )
                     job_config.params = SamplingParameters(

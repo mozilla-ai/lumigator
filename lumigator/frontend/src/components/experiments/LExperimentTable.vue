@@ -95,18 +95,19 @@ import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
+import { workflowsService } from '@/sdk/workflowsService'
 const props = defineProps({
   tableData: {
     type: Array as PropType<Experiment[]>,
     required: true,
   },
 })
-const emit = defineEmits(['l-experiment-selected'])
+const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected'])
 
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
-const { experiments, selectedWorkflow } = storeToRefs(experimentStore)
+const { experiments } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
 const focusedItem = ref()
 const expandedRows = ref([])
@@ -131,7 +132,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
     return
   }
   // user selected an experiment, clear selected job
-  selectedWorkflow.value = undefined
+  emit('l-workflow-selected', undefined)
   emit('l-experiment-selected', event.data)
 }
 
@@ -140,8 +141,8 @@ function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
   if (workflow.jobs) {
-    experimentStore.fetchWorkflowDetails(workflow.id)
-    selectedWorkflow.value = workflow
+    workflowsService.fetchWorkflowDetails(workflow.id)
+    emit('l-workflow-selected', workflow)
   }
   // select the experiment that job belongs to
   emit('l-experiment-selected', experiment)

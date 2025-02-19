@@ -14,6 +14,7 @@
       <l-experiment-table
         :table-data="experiments"
         @l-experiment-selected="onSelectExperiment($event)"
+        @l-workflow-selected="onSelectWorkflow($event)"
       />
     </div>
     <Teleport to=".sliding-panel">
@@ -23,6 +24,8 @@
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment"
+          :selectedExperiment="selectedExperiment"
+          :selectedWorkflow="selectedWorkflow"
           title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
@@ -39,9 +42,9 @@
       :position="showLogs ? 'bottom' : 'full'"
       @l-drawer-closed="resetDrawerContent()"
     >
-      <l-experiment-results v-if="showExpResults" />
+      <l-experiment-results v-if="showExpResults" :results="selectedExperimentResults" />
       <l-job-results
-        v-if="selectedWorkflowResults && showJobResults && selectedWorkflowResults.length"
+        v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"
       />
       <l-experiment-logs :logs="workflowLogs" v-if="showLogs" />
@@ -50,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch, ref, computed } from 'vue'
+import { onMounted, watch, ref, computed, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
@@ -65,16 +68,29 @@ import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
-import type { Experiment } from '@/types/Experiment'
-import type { Workflow } from '@/types/Workflow'
+import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import { workflowsService } from '@/sdk/workflowsService'
+import type { WorkflowResults } from '@/types/Metrics'
+import { experimentsService } from '@/sdk/experimentsService'
+import { downloadContent } from '@/helpers/downloadContent'
+import axios from 'axios'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedWorkflow, selectedWorkflowResults, workflowLogs } =
-  storeToRefs(experimentStore)
+const { experiments } = storeToRefs(experimentStore)
+
+const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
+const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+
+const selectedExperiment = ref<Experiment | undefined>()
+const selectedWorkflow = ref<Workflow | undefined>()
+const workflowLogs: Ref<string[]> = ref([])
+const isPolling = ref(false)
+let experimentInterval: number | undefined = undefined
 
 const showDrawer = ref(false)
 const experimentsDrawer = ref()
@@ -96,24 +112,92 @@ const onCreateExperiment = () => {
 }
 
 const onSelectExperiment = (experiment: Experiment) => {
-  experimentStore.loadExperimentDetails(experiment.id)
+  selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
+
   showSlidingPanel.value = true
 }
 
-const onShowExperimentResults = (experiment: Experiment) => {
-  experimentStore.fetchExperimentResults(experiment)
+const onSelectWorkflow = (workflow: Workflow) => {
+  selectedWorkflow.value = workflow
+}
+
+const onShowExperimentResults = async (experiment: Experiment) => {
+  for (const workflow of experiment.workflows) {
+    if (workflow.artifacts_download_url) {
+      const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
+
+      const modelRow = {
+        model: data.artifacts.model,
+        meteor: data.metrics.meteor,
+        bertscore: data.metrics.bertscore,
+        rouge: data.metrics.rouge,
+        runTime: undefined, //getJobRuntime(results.id),
+        jobResults: transformJobResults(data),
+      }
+      selectedExperimentResults.value.push(modelRow)
+    }
+  }
+
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = (workflow: Workflow) => {
-  experimentStore.fetchWorkflowResults(workflow)
+const onShowJobResults = async (workflow: Workflow) => {
+  const results = await workflowsService.fetchWorkflowResults(workflow)
+  if (results) {
+    selectedWorkflow.value = workflow
+    selectedWorkflowResults.value = transformJobResults(results)
+  }
   showDrawer.value = true
   showJobResults.value = true
 }
 
-const onDownloadResults = (workflow: Workflow | Experiment) => {
-  experimentStore.fetchExperimentResultsFile(workflow.id)
+/**
+ * Transforms results data into a format which accommodates the UI
+ *
+ * @param {Object} objectData .
+ * @returns {Array} Transformed results array.
+ */
+function transformJobResults(objectData: WorkflowResults): EvaluationJobResults[] {
+  const transformedArray = objectData.artifacts.examples.map((example, index: number) => {
+    return {
+      example,
+      bertscore: {
+        f1: objectData.metrics.bertscore?.f1?.[index] ?? 0,
+        f1_mean: objectData.metrics.bertscore?.f1_mean ?? 0,
+        hashcode: objectData.metrics.bertscore?.hashcode ?? 0,
+        precision: objectData.metrics.bertscore?.precision?.[index] ?? 0,
+        precision_mean: objectData.metrics.bertscore?.precision_mean ?? 0,
+        recall: objectData.metrics.bertscore?.recall?.[index] ?? 0,
+        recall_mean: objectData.metrics.bertscore?.recall_mean ?? 0,
+      },
+      evaluation_time: objectData.artifacts.evaluation_time ?? 0,
+      ground_truth: objectData.artifacts.ground_truth?.[index],
+      meteor: {
+        meteor: objectData.metrics.meteor?.meteor?.[index] ?? 0,
+        meteor_mean: objectData.metrics.meteor?.meteor_mean ?? 0,
+      },
+      model: objectData.artifacts.model,
+      predictions: objectData.artifacts.predictions?.[index],
+      rouge: {
+        rouge1: objectData.metrics.rouge?.rouge1?.[index] ?? 0,
+        rouge1_mean: objectData.metrics.rouge?.rouge1_mean ?? 0,
+        rouge2: objectData.metrics.rouge?.rouge2?.[index] ?? 0,
+        rouge2_mean: objectData.metrics.rouge?.rouge2_mean ?? 0,
+        rougeL: objectData.metrics.rouge?.rougeL?.[index] ?? 0,
+        rougeL_mean: objectData.metrics.rouge?.rougeL_mean ?? 0,
+        rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
+        rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
+      },
+      summarization_time: objectData.artifacts.summarization_time,
+    } as unknown as EvaluationJobResults
+  })
+  return transformedArray
+}
+
+const onDownloadResults = async (workflow: Workflow | Experiment) => {
+  const blob = await experimentsService.downloadResults(workflow.id)
+  downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
 }
 
 const onShowLogs = () => {
@@ -129,6 +213,84 @@ const onDismissForm = () => {
 const onCloseDetails = () => {
   showSlidingPanel.value = false
 }
+
+async function retrieveWorkflowLogs() {
+  if (selectedWorkflow.value) {
+    const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
+    const logs = splitByEscapeCharacter(logsData.logs)
+
+    logs.forEach((log: string) => {
+      const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
+      if (workflowLogs.value.length === 0 || lastEntry !== log) {
+        workflowLogs.value.push(log)
+      }
+    })
+  }
+}
+
+function splitByEscapeCharacter(input: string) {
+  const result = input.split('\n')
+  return result
+}
+
+function startPollingForWorkflowLogs() {
+  workflowLogs.value = []
+  if (!isPolling.value) {
+    isPolling.value = true
+    retrieveWorkflowLogs()
+    // Poll every 3 seconds
+    experimentInterval = setInterval(retrieveWorkflowLogs, 3000)
+  }
+}
+
+function stopPollingForWorkflowLogs() {
+  if (isPolling.value) {
+    isPolling.value = false
+    clearInterval(experimentInterval)
+    experimentInterval = undefined
+  }
+}
+
+// function getJobRuntime(jobId: string) {
+//   const job = jobs.value.find((job) => job.id === jobId)
+//   return job ? job.runTime : undefined
+// }
+
+watch(
+  selectedExperiment,
+  (newValue) => {
+    if (newValue?.workflows.some((workflow) => workflow.status === WorkflowStatus.RUNNING)) {
+      startPollingForWorkflowLogs()
+      return
+    } else if (isPolling.value) {
+      stopPollingForWorkflowLogs()
+    }
+  },
+  { deep: true },
+)
+
+watch(
+  selectedWorkflow,
+  (newValue) => {
+    workflowLogs.value = []
+    if (newValue) {
+      // switch to the experiment the job belongs
+      const found = experiments.value.find((experiment: Experiment) => {
+        return experiment.workflows.some((workflow) => workflow.id === newValue.id)
+      })
+      selectedExperiment.value = found
+
+      retrieveWorkflowLogs()
+    }
+    if (newValue?.status === WorkflowStatus.RUNNING) {
+      startPollingForWorkflowLogs()
+      return
+    } else if (isPolling.value) {
+      stopPollingForWorkflowLogs()
+    }
+  },
+  { deep: true },
+)
 
 const resetDrawerContent = () => {
   selectedWorkflowResults.value = []

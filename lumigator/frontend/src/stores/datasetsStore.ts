@@ -56,7 +56,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   })
 
   /**
-   *
+   * TODO: move to a helper file, this shouldn't be in the store
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
@@ -69,6 +69,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
+  /* TODO: Move all below functions into `Datasets` component where the state can be shared across InferenceJobsTable and DatasetDetails */
   /**
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed

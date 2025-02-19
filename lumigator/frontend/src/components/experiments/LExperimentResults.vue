@@ -114,20 +114,24 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onUnmounted } from 'vue'
-import { useExperimentStore } from '@/stores/experimentsStore'
+import { computed, ref, onUnmounted, toRefs } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { Model } from '@/types/Model'
+import type { ExperimentResults } from '@/types/Experiment'
 
-const experimentStore = useExperimentStore()
 const modelStore = useModelStore()
-const { selectedExperimentResults } = storeToRefs(experimentStore)
 const { models } = storeToRefs(modelStore)
 const expandedRows = ref([])
+
+const props = defineProps<{
+  results: ExperimentResults[]
+}>()
+
+const { results } = toRefs(props)
 
 const tooltipColorsConfig = ref({
   root: {
@@ -187,16 +191,16 @@ const tooltips = ref({
 })
 
 const tableData = computed(() => {
-  const data = selectedExperimentResults.value.map((results) => ({
-    ...results,
-    model: models.value.find((model: Model) => model.name === results.model),
+  const data = results.value.map((result) => ({
+    ...result,
+    model: models.value.find((model: Model) => model.name === result.model),
   }))
 
   return data
 })
 
 onUnmounted(() => {
-  selectedExperimentResults.value = []
+  results.value = []
 })
 </script>
 

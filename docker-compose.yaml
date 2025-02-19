@@ -108,7 +108,7 @@ services:
           sleep infinity
     shm_size: 2g
     volumes:
-      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+      - ${HF_HOME}:/home/ray/.cache/huggingface
       - ray-pip-cache:/tmp/ray_pip_cache
     deploy:
       resources:
@@ -124,7 +124,6 @@ services:
       - OPENAI_API_KEY
       - DEEPSEEK_API_KEY
       - HF_TOKEN
-      - HF_HOME
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION

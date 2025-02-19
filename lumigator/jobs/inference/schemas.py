@@ -20,7 +20,7 @@ class JobConfig(BaseModel):
 
 
 class InferenceServerConfig(BaseModel):
-    base_url: str | None
+    base_url: str | None = None
     model: str
     provider: str
     system_prompt: str | None

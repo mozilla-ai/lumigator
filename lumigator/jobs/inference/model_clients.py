@@ -2,7 +2,7 @@ import re
 from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
-from litellm import ModelResponse, completion
+from litellm import completion
 from loguru import logger
 from transformers import pipeline
 from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
@@ -53,7 +53,7 @@ class LiteLLMModelClient(BaseModelClient):
     def predict(
         self,
         prompt: str,
-    ) -> ModelResponse:
+    ) -> str:
         response = completion(
             model=self.config.inference_server.model,
             messages=[
@@ -71,7 +71,7 @@ class LiteLLMModelClient(BaseModelClient):
         # Eventually we can add this to the response object as well.
         cost = response._hidden_params["response_cost"]
         logger.info(f"Response cost: {cost}")
-        return response
+        return response.choices[0].message.content
 
 
 class HuggingFaceModelClient(BaseModelClient):

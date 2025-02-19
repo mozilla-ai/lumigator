@@ -435,7 +435,7 @@ class JobService:
 
         # ...and use directly Job*Config(request.job.config.model_dump_json())
         job_config_args = {
-            "--config": job_config.model_dump_json(),
+            "--config": job_config.model_dump_json(exclude_unset=True, exclude_none=True),
         }
 
         # Prepare the job configuration that will be sent to submit the ray job.

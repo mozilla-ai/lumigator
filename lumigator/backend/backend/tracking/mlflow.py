@@ -9,7 +9,6 @@ from uuid import UUID
 
 import boto3
 import loguru
-import mlflow
 import requests
 from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -126,14 +125,15 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str):
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
         except MlflowException as e:
-            # if the experiment doesn't exist, return None
-            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
+            raise e
+
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -216,7 +216,7 @@ class MLflowTrackingClient(TrackingClient):
         """Get a workflow and all its jobs."""
         try:
             workflow = self._client.get_run(workflow_id)
-        except mlflow.exceptions.MlflowException as e:
+        except MlflowException as e:
             if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
             raise e

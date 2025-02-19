@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, onUnmounted, type PropType } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, type PropType, onBeforeMount, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -193,7 +193,7 @@ onMounted(async () => {
   }, 1000)
 }) // Check every second, throttled to execute every 5 seconds
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   clearInterval(pollingId)
 })
 

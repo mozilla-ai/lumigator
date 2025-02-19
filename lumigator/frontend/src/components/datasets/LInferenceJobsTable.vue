@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
@@ -130,6 +130,10 @@ watch(hasRunningInferenceJob, async (newValue) => {
     emit('l-inference-finished')
     datasetStore.fetchDatasets()
   }
+})
+
+onBeforeUnmount(() => {
+  clearInterval(pollingId)
 })
 </script>
 

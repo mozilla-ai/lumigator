@@ -138,6 +138,7 @@ async function triggerExperiment() {
     modelSelection.value.selectedModels,
   )
   if (workflows.length) {
+    // refetch after creating an experiment to update the table
     await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()

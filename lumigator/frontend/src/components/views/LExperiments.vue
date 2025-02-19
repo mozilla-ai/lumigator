@@ -44,7 +44,7 @@
         v-if="selectedWorkflowResults && showJobResults && selectedWorkflowResults.length"
         :results="selectedWorkflowResults"
       />
-      <l-experiment-logs :logType="'workflow'" v-if="showLogs" />
+      <l-experiment-logs :logs="workflowLogs" v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -73,7 +73,7 @@ const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedWorkflow, selectedWorkflowResults } =
+const { experiments, selectedExperiment, selectedWorkflow, selectedWorkflowResults, workflowLogs } =
   storeToRefs(experimentStore)
 
 const showDrawer = ref(false)
@@ -122,7 +122,7 @@ const onShowLogs = () => {
 }
 
 const onDismissForm = () => {
-  selectedDataset.value = undefined
+  datasetStore.setSelectedDataset(undefined)
   showSlidingPanel.value = false
 }
 

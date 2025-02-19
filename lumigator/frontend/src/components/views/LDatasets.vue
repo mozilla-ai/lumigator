@@ -55,6 +55,7 @@
       <l-job-details
         v-if="showSlidingPanel && selectedJob"
         title="Job Details"
+        :selectedJob="selectedJob"
         @l-close-details="onCloseJobDetails"
         @l-show-logs="onShowLogs"
       />
@@ -66,13 +67,13 @@
       :position="'bottom'"
       @l-drawer-closed="showLogs = false"
     >
-      <l-experiment-logs v-if="showLogs" :logType="'job'" />
+      <l-experiment-logs v-if="showLogs" :logs="jobLogs" />
     </l-experiments-drawer>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
@@ -97,10 +98,17 @@ import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
 import LJobDetails from '../datasets/LJobDetails.vue'
 import type { Job } from '@/types/Job'
+import { jobsService } from '@/sdk/jobsService'
+import { WorkflowStatus } from '@/types/Workflow'
+import { datasetsService } from '@/sdk/datasetsService'
+import { getAxiosError } from '@/helpers/getAxiosError'
+import type { AxiosError } from 'axios'
+import { downloadContent } from '@/helpers/downloadContent'
 
 const datasetStore = useDatasetStore()
-const { datasets, selectedDataset, selectedJob, inferenceJobs, hasRunningInferenceJob } =
+const { datasets, selectedDataset, inferenceJobs, hasRunningInferenceJob } =
   storeToRefs(datasetStore)
+const selectedJob: Ref<Job | undefined> = ref()
 const { showSlidingPanel } = useSlidePanel()
 const toast = useToast()
 const datasetInput = ref()
@@ -109,6 +117,9 @@ const router = useRouter()
 const currentTab = ref('0')
 const showLogs = ref(false)
 const refDatasetTable = ref()
+const jobLogs: Ref<string[]> = ref([])
+const isPollingForJobLogs = ref(false)
+let jobLogsInterval: number | undefined = undefined
 
 onMounted(async () => {
   await datasetStore.fetchDatasets()
@@ -150,9 +161,65 @@ function deleteConfirmation(dataset: Dataset) {
   })
 }
 
-function onDownloadDataset(dataset: Dataset) {
-  selectedDataset.value = dataset
-  datasetStore.downloadDatasetFile()
+function startPollingForAnnotationJobLogs() {
+  jobLogs.value = []
+  if (!isPollingForJobLogs.value) {
+    isPollingForJobLogs.value = true
+    retrieveJobLogs()
+    // Poll every 3 seconds
+    jobLogsInterval = setInterval(retrieveJobLogs, 3000)
+  }
+}
+
+async function retrieveJobLogs() {
+  if (selectedJob.value) {
+    const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
+    const logs = splitByEscapeCharacter(logsData.logs)
+    logs.forEach((log: string) => {
+      const lastEntry = jobLogs.value[jobLogs.value.length - 1]
+      if (jobLogs.value.length === 0 || lastEntry !== log) {
+        jobLogs.value.push(log)
+      }
+    })
+  }
+}
+
+function splitByEscapeCharacter(input: string) {
+  const result = input.split('\n')
+  return result
+}
+
+// start/stop polling for selected job (if its running) as the user clicks through them
+watch(
+  selectedJob,
+  (newValue) => {
+    jobLogs.value = []
+    if (newValue) {
+      retrieveJobLogs()
+    }
+    if (newValue?.status === WorkflowStatus.RUNNING) {
+      startPollingForAnnotationJobLogs()
+    } else if (isPollingForJobLogs.value) {
+      stopPollingForAnnotationJobLogs()
+    }
+  },
+  { deep: true },
+)
+
+function stopPollingForAnnotationJobLogs() {
+  if (isPollingForJobLogs.value) {
+    isPollingForJobLogs.value = false
+    clearInterval(jobLogsInterval)
+    jobLogsInterval = undefined
+  }
+}
+
+async function onDownloadDataset(dataset: Dataset) {
+  datasetStore.setSelectedDataset(dataset)
+  if (selectedDataset.value) {
+    const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
+    downloadContent(blob, selectedDataset.value?.filename)
+  }
 }
 
 const onDatasetAdded = () => {
@@ -168,34 +235,76 @@ const reloadDatasetTable = () => {
   }, 1500)
 }
 
-const onDatasetUpload = (datasetFile: File) => {
-  datasetStore.uploadDataset(datasetFile)
+const onDatasetUpload = async (datasetFile: File) => {
+  if (!datasetFile) {
+    return
+  }
+  // Create a new FormData object and append the selected file and the required format
+  const formData = new FormData()
+  formData.append('dataset', datasetFile) // Attach the file
+  formData.append('format', 'job') // Specification @localhost:8000/docs
+  try {
+    await datasetsService.postDataset(formData)
+  } catch (error) {
+    const errorMessage = getAxiosError(error as Error | AxiosError)
+    toast.add({
+      severity: 'error',
+      summary: `${errorMessage}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  }
+
+  // refetch datasets after create
+  datasetStore.fetchDatasets()
 }
 
-const onDeleteDataset = (datasetID: string) => {
-  datasetStore.deleteDataset(datasetID)
+const onDeleteDataset = async (datasetID: string) => {
+  if (!datasetID) {
+    return
+  }
+  if (selectedDataset.value?.id === datasetID) {
+    datasetStore.setSelectedDataset(undefined)
+  }
+  await datasetsService.deleteDataset(datasetID)
+
+  // refetch datasets after removing to update the table
+  await datasetStore.fetchDatasets()
+}
+
+async function fetchDatasetDetails(datasetID: string) {
+  try {
+    selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID)
+  } catch {
+    selectedDataset.value = undefined
+  }
 }
 
 const onDatasetSelected = (dataset: Dataset) => {
   selectedJob.value = undefined
-  datasetStore.fetchDatasetDetails(dataset.id)
+  fetchDatasetDetails(dataset.id)
   showSlidingPanel.value = true
 }
 
 const onClearSelection = () => {
-  datasetStore.resetSelection()
+  datasetStore.setSelectedDataset(undefined)
 }
 
 const onExperimentDataset = (dataset: Dataset) => {
   router.push('experiments')
-  selectedDataset.value = dataset
-  datasetStore.fetchDatasetDetails(dataset.id)
+  datasetStore.setSelectedDataset(dataset)
+  fetchDatasetDetails(dataset.id)
 }
 
 const onInferenceJobSelected = (job: Job) => {
-  selectedDataset.value = undefined
-  datasetStore.fetchJob(job.id)
+  datasetStore.setSelectedDataset(undefined)
+  fetchJob(job.id)
   showSlidingPanel.value = true
+}
+
+async function fetchJob(id: string) {
+  const jobData = await jobsService.fetchJob(id)
+  selectedJob.value = datasetStore.parseJob(jobData)
 }
 
 const onCloseJobDetails = () => {

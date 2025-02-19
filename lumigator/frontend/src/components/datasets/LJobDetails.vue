@@ -16,13 +16,13 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">Title</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem?.name }}
+          {{ selectedJob.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">description</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem?.description }}
+          {{ selectedJob.description }}
         </div>
       </div>
       <div class="l-experiment-details__content-item row">
@@ -59,7 +59,7 @@
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
         >
-          {{ selectedJob?.id }}
+          {{ selectedJob.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
@@ -67,16 +67,16 @@
           ></i>
         </div>
       </div>
-      <div class="l-experiment-details__content-item" v-if="focusedItem">
+      <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem.dataset.name }}
+          {{ selectedJob.dataset.name }}
         </div>
       </div>
-      <div class="l-experiment-details__content-item" v-if="focusedItem">
+      <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">
-          {{ focusedItem?.type }} - {{ focusedItem?.metadata.job_type }}
+          {{ selectedJob.type }} - {{ selectedJob.metadata.job_type }}
         </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
@@ -88,13 +88,13 @@
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">created</div>
         <div class="l-experiment-details__content-field">
-          {{ formatDate(focusedItem!.created_at) }}
+          {{ formatDate(selectedJob.created_at) }}
         </div>
       </div>
       <!-- TODO: double check with design since this cant be shown now that we can lazily add workflows -->
       <!-- <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">run time</div>
-        <div class="l-experiment-details__content-field">{{ focusedItemRunTime }}</div>
+        <div class="l-experiment-details__content-field">{{ selectedJobRunTime }}</div>
       </div> -->
       <div class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">top-p</div>
@@ -127,7 +127,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, type ComputedRef } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import Button from 'primevue/button'
@@ -145,14 +145,14 @@ const emit = defineEmits([
   'l-download-results',
 ])
 
-defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-})
+const props = defineProps<{
+  title: string
+  selectedJob: Job
+}>()
+const { selectedJob } = toRefs(props)
+
 const datasetStore = useDatasetStore()
-const { jobs, selectedJob, inferenceJobs } = storeToRefs(datasetStore)
+const { inferenceJobs } = storeToRefs(datasetStore)
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
@@ -163,24 +163,15 @@ const copyToClipboard = async (longString: string) => {
   await navigator.clipboard.writeText(longString)
 }
 
-const isJobFocused = computed(() => Boolean(selectedJob.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
+const isJobFocused = computed(() => Boolean(selectedJob))
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
-  return selectedJob.value?.status
+  return selectedJob.value.status
 })
 
 const isInference = computed(() => {
-  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
-})
-
-const focusedItem: ComputedRef<Job | undefined> = computed(() => {
-  if (selectedJob.value) {
-    return selectedJob.value
-  }
-  const selected = jobs.value.find((job) => job.id === selectedJob.value?.id)
-  return selected ? selected : selectedJob.value
+  return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value.id)
 })
 
 const tagSeverity = computed(() => {
@@ -199,19 +190,19 @@ const tagSeverity = computed(() => {
 
 // const focusedItemRunTime = computed(() => {
 //   if (isJobFocused.value) {
-//     return selectedJob.value?.runTime ? selectedJob.value?.runTime : '-'
+//     return selectedJob.value.runTime ? selectedJob.value.runTime : '-'
 //   }
 
 //   if (
 //     currentItemStatus.value !== WorkflowStatus.RUNNING &&
 //     currentItemStatus.value !== WorkflowStatus.PENDING
 //   ) {
-//     const endTimes = selectedJob.value?.workflows.map((workflow) => workflow.end_time) || []
+//     const endTimes = selectedJob.value.workflows.map((workflow) => workflow.end_time) || []
 //     const lastEndTime = endTimes.reduce((latest, current) => {
 //       return new Date(latest) > new Date(current) ? latest : current
 //     })
-//     if (lastEndTime && selectedJob.value) {
-//       return calculateDuration(selectedJob.value?.created_at, lastEndTime)
+//     if (lastEndTime && selectedJob) {
+//       return calculateDuration(selectedJob.value.created_at, lastEndTime)
 //     }
 //   }
 //   return '-'
@@ -219,10 +210,10 @@ const tagSeverity = computed(() => {
 
 const showResults = () => {
   if (isJobFocused.value) {
-    emit('l-job-results', selectedJob.value)
+    emit('l-job-results', selectedJob)
     return
   }
-  emit('l-experiment-results', selectedJob.value)
+  emit('l-experiment-results', selectedJob)
 }
 </script>
 

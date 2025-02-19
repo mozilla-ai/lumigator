@@ -172,7 +172,7 @@ defineProps({
   },
 })
 const experimentStore = useExperimentStore()
-const { experiments, selectedExperiment, selectedWorkflow } = storeToRefs(experimentStore)
+const { selectedExperiment, selectedWorkflow } = storeToRefs(experimentStore)
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
@@ -184,31 +184,22 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
   if (isWorkflowFocused.value) {
     return selectedWorkflow.value?.status
+  } else {
+    return selectedExperiment.value?.status
   }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
-  )
-  return selected ? selected.status : selectedExperiment.value?.status
 })
-
-// const isInference = computed(() => {
-//   return isWorkflowFocused.value && inferenceJobs.value.some((job) => job.id === selectedWorkflow.value?.id)
-// })
 
 const focusedItem: ComputedRef<Workflow | Experiment | undefined> = computed(() => {
   if (selectedWorkflow.value) {
     return selectedWorkflow.value
+  } else {
+    return selectedExperiment.value
   }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
-  )
-  return selected ? selected : selectedExperiment.value
 })
 
 const tagSeverity = computed(() => {
@@ -225,26 +216,6 @@ const tagSeverity = computed(() => {
   }
 })
 
-// const focusedItemRunTime = computed(() => {
-//   if (isWorkflowFocused.value) {
-//     return selectedWorkflow.value?.runTime ? selectedWorkflow.value?.runTime : '-'
-//   }
-
-//   if (
-//     currentItemStatus.value !== WorkflowStatus.RUNNING &&
-//     currentItemStatus.value !== WorkflowStatus.PENDING
-//   ) {
-//     const endTimes = selectedExperiment.value?.workflows.map((workflow) => workflow.end_time) || []
-//     const lastEndTime = endTimes.reduce((latest, current) => {
-//       return new Date(latest) > new Date(current) ? latest : current
-//     })
-//     if (lastEndTime && selectedExperiment.value) {
-//       return calculateDuration(selectedExperiment.value?.created_at, lastEndTime)
-//     }
-//   }
-//   return '-'
-// })
-
 const showResults = () => {
   if (isWorkflowFocused.value) {
     emit('l-job-results', selectedWorkflow.value)
@@ -256,10 +227,6 @@ const showResults = () => {
 function isExperiment(item: Experiment | Workflow): item is Experiment {
   return 'workflows' in item
 }
-
-// function _isJob(item: Experiment | Job): item is Job {
-//   return 'entrypoint' in item
-// }
 </script>
 
 <style lang="scss">

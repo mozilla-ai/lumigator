@@ -20,7 +20,7 @@ from lumigator_schemas.jobs import (
     JobResultResponse,
     JobType,
 )
-from lumigator_szchemas.extras import ListingResponse
+from lumigator_schemas.extras import ListingResponse
 from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
 from starlette.responses import Response

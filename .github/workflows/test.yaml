@@ -12,4 +12,5 @@ jobs:
     # You need to use the INSTALLATION_NAME from the previous step
     runs-on: cw-runner
     steps:
+    - run: sleep(60)
     - run: echo "🎉 This job uses runner scale set runners!"

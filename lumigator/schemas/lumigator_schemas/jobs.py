@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class LowercaseEnum(str, Enum):
@@ -72,10 +72,17 @@ class JobEvalConfig(BaseModel):
     metrics: list[str] = ["meteor", "rouge", "bertscore"]
 
 
+class TaskType(str, Enum):
+    SUMMARIZATION = "summarization"
+    TRANSLATION = "translation"
+
+
 class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
-    task: str | None = "summarization"
+    task: TaskType = Field(default=TaskType.SUMMARIZATION)
+    source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
+    target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
     accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
@@ -97,6 +104,16 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
+
+    @model_validator(mode="after")
+    def validate_translation_fields(self):
+        if self.task == TaskType.TRANSLATION:
+            if not self.source_language or not self.target_language:
+                raise ValueError("Both source and target languages must be provided for translation tasks")
+        elif self.task == TaskType.SUMMARIZATION:
+            if self.source_language is not None or self.target_language is not None:
+                raise ValueError("Language fields should not be set for summarization tasks")
+        return self
 
 
 class JobAnnotateConfig(BaseModel):

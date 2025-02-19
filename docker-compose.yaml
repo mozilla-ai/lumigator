@@ -9,7 +9,9 @@ services:
     platform: linux/${ARCH}
     command: /bin/true
     volumes:
-      - huggingface_cache_vol:/home/ray/.cache/huggingface
+      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+    environment:
+      HF_MODELS: "facebook/bart-large-cnn,FacebookAI/roberta-large" #ensure values are comma separated
     profiles:
       - local
   minio:
@@ -106,7 +108,7 @@ services:
           sleep infinity
     shm_size: 2g
     volumes:
-      - huggingface_cache_vol:/home/ray/.cache/huggingface
+      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
       - ray-pip-cache:/tmp/ray_pip_cache
     deploy:
       resources:
@@ -252,9 +254,6 @@ volumes:
       labels:
         ai.mozilla.product_name: lumigator
     redis-data:
-      labels:
-        ai.mozilla.product_name: lumigator
-    huggingface_cache_vol:
       labels:
         ai.mozilla.product_name: lumigator
     ray-pip-cache:

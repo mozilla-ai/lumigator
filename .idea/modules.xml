@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/lumigator/backend/.idea/backend.iml" filepath="$PROJECT_DIR$/lumigator/backend/.idea/backend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lumigator/schemas/.idea/schemas.iml" filepath="$PROJECT_DIR$/lumigator/schemas/.idea/schemas.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lumigator/sdk/.idea/sdk.iml" filepath="$PROJECT_DIR$/lumigator/sdk/.idea/sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lumigator/jobs/.idea/jobs.iml" filepath="$PROJECT_DIR$/lumigator/jobs/.idea/jobs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lumigator/frontend/.idea/frontend.iml" filepath="$PROJECT_DIR$/lumigator/frontend/.idea/frontend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/docs/.idea/docs.iml" filepath="$PROJECT_DIR$/docs/.idea/docs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/backend.iml" filepath="$PROJECT_DIR$/.idea/backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/schemas.iml" filepath="$PROJECT_DIR$/.idea/schemas.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/sdk.iml" filepath="$PROJECT_DIR$/.idea/sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/jobs.iml" filepath="$PROJECT_DIR$/lumigator/jobs/.idea/jobs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/frontend.iml" filepath="$PROJECT_DIR$/lumigator/frontend/.idea/frontend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/docs.iml" filepath="$PROJECT_DIR$/.idea/docs.iml" />
     </modules>
   </component>
 </project>

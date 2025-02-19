@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lumigator_schemas/tests" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/.venv" />
+    <content url="file://$MODULE_DIR$/lumigator/schemas">
+      <sourceFolder url="file://$MODULE_DIR$/lumigator/schemas" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 virtualenv at ~/src/lumigator/lumigator/schemas/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

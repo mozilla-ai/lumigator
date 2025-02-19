@@ -167,6 +167,7 @@ cython_debug/
 **/.idea/*
 !**/.idea/*.iml
 !**/.idea/modules.xml
+!**/.idea/misc.xml
 
 # Ruff
 .ruff_cache

@@ -36,7 +36,7 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-def _test_upload_data_launch_job(
+def test_upload_data_launch_job(
     local_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,
@@ -139,7 +139,7 @@ def _test_upload_data_launch_job(
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
-def _test_upload_data_no_gt_launch_annotation(
+def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
     local_client: TestClient,
     unnanotated_dataset,
@@ -353,10 +353,7 @@ def test_experiment_non_existing(local_client: TestClient, dependency_overrides_
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/new/{non_existing_id}")
     assert response.status_code == 404
-    assert (
-        response.json()["detail"] == "Not Found"
-
-    )
+    assert response.json()["detail"] == "Not Found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):

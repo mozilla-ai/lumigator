@@ -164,7 +164,6 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isJobFocused = computed(() => Boolean(selectedJob.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
@@ -178,9 +177,9 @@ const isInference = computed(() => {
 const focusedItem: ComputedRef<Job | undefined> = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
+  } else {
+    return undefined
   }
-  const selected = jobs.value.find((job) => job.id === selectedJob.value?.id)
-  return selected ? selected : selectedJob.value
 })
 
 const tagSeverity = computed(() => {

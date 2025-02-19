@@ -25,7 +25,9 @@ export const useDatasetStore = defineStore('datasets', () => {
   const jobs: Ref<Job[]> = ref([])
   const inferenceJobs: Ref<Job[]> = ref([])
   const jobLogs: Ref<string[]> = ref([])
-  const isPolling = ref(false)
+  const isPollingForJobStatus = ref(false)
+  let jobStatusInterval: number | undefined = undefined
+  const isPollingForJobLogs = ref(false)
   let jobLogsInterval: number | undefined = undefined
 
   const toast = useToast()
@@ -55,9 +57,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
       .map((job) => parseJob(job))
-    jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJob(job))
   }
 
   /**
@@ -79,7 +78,9 @@ export const useDatasetStore = defineStore('datasets', () => {
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
-    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
+    return inferenceJobs.value
+      .filter((job) => !completedStatus.includes(job.status))
+      .map((job) => job.id)
   }
 
   async function fetchJob(id: string) {
@@ -100,44 +101,36 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
-  function startPolling() {
+  function startPollingForAnnotationJobLogs() {
     jobLogs.value = []
-    if (!isPolling.value) {
-      isPolling.value = true
+    if (!isPollingForJobLogs.value) {
+      isPollingForJobLogs.value = true
       retrieveJobLogs()
       // Poll every 3 seconds
       jobLogsInterval = setInterval(retrieveJobLogs, 3000)
     }
   }
 
+  // start/stop polling for selected job (if its running) as the user clicks through them
   watch(
     selectedJob,
     (newValue) => {
       jobLogs.value = []
       if (newValue) {
-        // const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
-        // if (isEvaluationJob) {
-        // switch to the experiment the job belongs
-        // const selectedExperimentId = experiments.value.find(experiment => {
-        //   return experiment.workflows.some(workflow => workflow.id === newValue.id)
-        // })
-        // selectedExperiment.value = experiments.value.find((exp) => exp.id === newValue.id)
-        // }
         retrieveJobLogs()
       }
       if (newValue?.status === WorkflowStatus.RUNNING) {
-        startPolling()
-        return
-      } else if (isPolling.value) {
-        stopPolling()
+        startPollingForAnnotationJobLogs()
+      } else if (isPollingForJobLogs.value) {
+        stopPollingForAnnotationJobLogs()
       }
     },
     { deep: true },
   )
 
-  function stopPolling() {
-    if (isPolling.value) {
-      isPolling.value = false
+  function stopPollingForAnnotationJobLogs() {
+    if (isPollingForJobLogs.value) {
+      isPollingForJobLogs.value = false
       clearInterval(jobLogsInterval)
       jobLogsInterval = undefined
     }
@@ -167,7 +160,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (jobResponse) {
         // Start polling to monitor the job status
         await updateJobStatus(jobResponse.id) // Ensure initial update
-        startPollingForAnnotationJob(jobResponse.id) // Add polling for ground truth job
+        startPollingForAnnotationJobStatus(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
       return
@@ -177,18 +170,25 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
-  function startPollingForAnnotationJob(jobId: string) {
-    isPolling.value = true
-    jobLogsInterval = setInterval(() => {
-      updateJobStatus(jobId).then(() => {
-        const job = jobs.value.find((job) => job.id === jobId)
+  function startPollingForAnnotationJobStatus(jobId: string) {
+    isPollingForJobStatus.value = true
+    jobStatusInterval = setInterval(async () => {
+      await updateJobStatus(jobId).then(() => {
+        const job = inferenceJobs.value.find((job) => job.id === jobId)
         if (job && completedStatus.includes(job.status)) {
-          stopPolling() // Stop polling when the job is complete
+          stopPollingForAnnotationJobStatus() // Stop polling when the job is complete
         }
       })
     }, 3000) // Poll every 3 seconds
   }
 
+  function stopPollingForAnnotationJobStatus() {
+    if (isPollingForJobStatus.value) {
+      isPollingForJobStatus.value = false
+      clearInterval(jobStatusInterval)
+      jobStatusInterval = undefined
+    }
+  }
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
@@ -201,7 +201,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (inferenceJob) {
         inferenceJob.status = status
       }
-      const job = jobs.value.find((job) => job.id === id)
+      const job = inferenceJobs.value.find((job) => job.id === id)
       if (job) {
         job.status = status
       }
@@ -244,18 +244,6 @@ export const useDatasetStore = defineStore('datasets', () => {
     await fetchDatasets()
   }
 
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
-
   async function deleteDataset(id: string) {
     if (!id) {
       return
@@ -293,6 +281,7 @@ export const useDatasetStore = defineStore('datasets', () => {
     fetchAllJobs,
     updateStatusForIncompleteJobs,
     fetchJob,
+    stopPollingForAnnotationJobStatus,
     // fetchJobResults,
     startGroundTruthGeneration,
     parseJob,

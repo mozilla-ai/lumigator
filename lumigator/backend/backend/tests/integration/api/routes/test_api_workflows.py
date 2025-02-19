@@ -226,7 +226,7 @@ def check_dataset_count_after_upload(local_client: TestClient, initial_count):
 def create_experiment(local_client: TestClient, dataset_id: UUID):
     """Create an experiment."""
     experiment = local_client.post(
-        "/experiments/new/",
+        "/experiments/",
         headers=POST_HEADER,
         json={
             "name": "test_create_exp_workflow_check_results",
@@ -261,9 +261,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
 
 def validate_experiment_results(local_client: TestClient, experiment_id, workflow_details):
     """Validate experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(
-        local_client.get(f"/experiments/new/{experiment_id}").json()
-    )
+    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
     assert workflow_details.experiment_id == experiment_results.id
     assert len(experiment_results.workflows) == 1
     assert workflow_details.model_dump(exclude={"artifacts_download_url"}) == experiment_results.workflows[
@@ -275,9 +273,7 @@ def validate_updated_experiment_results(
     local_client: TestClient, experiment_id, workflow_1_details, workflow_2_details
 ):
     """Validate updated experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(
-        local_client.get(f"/experiments/new/{experiment_id}").json()
-    )
+    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
     assert len(experiment_results.workflows) == 2
     assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
@@ -299,13 +295,13 @@ def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
 
 def delete_experiment_and_validate(local_client: TestClient, experiment_id):
     """Delete the experiment and ensure associated workflows are also deleted."""
-    local_client.delete(f"/experiments/new/{experiment_id}")
-    response = local_client.get(f"/experiments/new/{experiment_id}")
+    local_client.delete(f"/experiments/{experiment_id}")
+    response = local_client.get(f"/experiments/{experiment_id}")
     assert response.status_code == 404
 
 
 def list_experiments(local_client: TestClient):
-    response = local_client.get("/experiments/new/all").json()
+    response = local_client.get("/experiments/").json()
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
@@ -353,7 +349,7 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
     non_existing_id = "71aaf905-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/experiments/new/{non_existing_id}")
+    response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 

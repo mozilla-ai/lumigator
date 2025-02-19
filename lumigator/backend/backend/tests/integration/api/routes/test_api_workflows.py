@@ -312,7 +312,7 @@ def check_artifacts_times(artifacts_url):
     ).json()
     logger.critical(artifacts)
     assert "evaluation_time" in artifacts["artifacts"]
-    assert "summarization_time" in artifacts["artifacts"]
+    assert "inference_time" in artifacts["artifacts"]
 
 
 @pytest.mark.integration

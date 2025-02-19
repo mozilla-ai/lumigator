@@ -76,7 +76,8 @@ def create_annotation_job(
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """
     inference_job_create_config_dict = job_create_request.job_config.dict()
-    inference_job_create_config_dict["model"] = "hf://facebook/bart-large-cnn"
+    inference_job_create_config_dict["model"] = "facebook/bart-large-cnn"
+    inference_job_create_config_dict["provider"] = "hf"
     inference_job_create_config_dict["output_field"] = "ground_truth"
     inference_job_create_config_dict["store_to_dataset"] = True
     inference_job_create_config_dict["job_type"] = JobType.INFERENCE

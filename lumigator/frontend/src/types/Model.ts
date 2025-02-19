@@ -6,10 +6,12 @@ export type Model = {
     model_size: string
     tensor_type: string
   }
-  name: string
+  display_name: string
   requirements: Array<string>
   tasks: Array<Task>
-  uri: string
+  model: string
+  provider: string
+  base_url: string
   website_url: string
 }
 

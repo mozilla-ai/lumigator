@@ -129,7 +129,9 @@ export const useExperimentStore = defineStore('experiments', () => {
         workflowsService.createWorkflow({
           ...experimentData,
           experiment_id: experimentId,
-          model: model.uri,
+          model: model.model,
+          provider: model.provider,
+          base_url: model.base_url,
         }),
       ),
     )

@@ -16,7 +16,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
-from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -73,6 +73,7 @@ def test_upload_data_launch_job(
         "job_config": {
             "job_type": JobType.INFERENCE,
             "model": TEST_CAUSAL_MODEL,
+            "provider": "hf",
             "output_field": "predictions",
             "store_to_dataset": True,
         },
@@ -106,6 +107,7 @@ def test_upload_data_launch_job(
             "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_CAUSAL_MODEL,
+            "provider": "hf",
         },
     }
 
@@ -250,6 +252,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
                 "name": workflow_name,
                 "description": "Test workflow for inf and eval",
                 "model": TEST_CAUSAL_MODEL,
+                "provider": "hf",
                 "dataset": str(dataset_id),
                 "experiment_id": experiment_id,
                 "max_samples": 1,
@@ -362,15 +365,14 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
 
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
-    workflow_status = JobStatus.PENDING
     for _ in range(1, 300):
         time.sleep(1)
         workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())
         workflow_status = workflow_details.status
-        if workflow_status in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        if workflow_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
             logger.info(f"Workflow status: {workflow_status}")
             break
-    if workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+    if workflow_status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
         raise Exception(f"Stopped, job remains in {workflow_status} status")
 
     return workflow_details

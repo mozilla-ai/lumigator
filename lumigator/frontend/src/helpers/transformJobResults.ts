@@ -1,5 +1,5 @@
-import type { EvaluationJobResults } from "@/types/Experiment"
-import type { WorkflowResults } from "@/types/Metrics"
+import type { EvaluationJobResults } from '@/types/Experiment'
+import type { WorkflowResults } from '@/types/Metrics'
 
 /**
  * Transforms results data into a format which accommodates the UI

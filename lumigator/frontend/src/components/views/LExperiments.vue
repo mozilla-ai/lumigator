@@ -74,11 +74,10 @@ import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
 import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import { workflowsService } from '@/sdk/workflowsService'
-import type { WorkflowResults } from '@/types/Metrics'
 import { experimentsService } from '@/sdk/experimentsService'
 import { downloadContent } from '@/helpers/downloadContent'
-import axios from 'axios'
-import { getExperimentResults, transformJobResults } from '@/helpers/getExperimentResults'
+import { getExperimentResults } from '@/helpers/getExperimentResults'
+import { transformJobResults } from '@/helpers/transformJobResults'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()

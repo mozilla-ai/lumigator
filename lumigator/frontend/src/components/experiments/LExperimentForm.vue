@@ -100,8 +100,6 @@ import {
   experimentsService,
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
-import type { Model } from '@/types/Model'
-import { workflowsService } from '@/sdk/workflowsService'
 
 const emit = defineEmits(['l-close-form'])
 

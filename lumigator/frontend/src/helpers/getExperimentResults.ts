@@ -1,6 +1,7 @@
-import type { EvaluationJobResults, Experiment } from '@/types/Experiment'
+import type { Experiment } from '@/types/Experiment'
 import type { WorkflowResults } from '@/types/Metrics'
 import axios from 'axios'
+import { transformJobResults } from './transformJobResults'
 
 export async function getExperimentResults(experiment: Experiment) {
   const results = []

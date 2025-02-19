@@ -16,7 +16,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
-from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse
+from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -365,15 +365,14 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
 
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
-    workflow_status = JobStatus.PENDING
     for _ in range(1, 300):
         time.sleep(1)
         workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())
         workflow_status = workflow_details.status
-        if workflow_status in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+        if workflow_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
             logger.info(f"Workflow status: {workflow_status}")
             break
-    if workflow_status not in [JobStatus.SUCCEEDED, JobStatus.FAILED]:
+    if workflow_status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
         raise Exception(f"Stopped, job remains in {workflow_status} status")
 
     return workflow_details

@@ -82,8 +82,7 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     runs-on: ubuntu-latest
-    env:
-      CI: true
+    container: mcr.microsoft.com/playwright:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -96,17 +95,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: lumigator/frontend
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright browsers if not cached
-        run: npx playwright install --with-deps
 
       - name: Run tests
         run: npm run test:e2e

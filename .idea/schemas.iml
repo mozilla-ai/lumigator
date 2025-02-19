@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$/lumigator/schemas">
       <sourceFolder url="file://$MODULE_DIR$/lumigator/schemas" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 virtualenv at ~/src/lumigator/lumigator/schemas/.venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 virtualenv at lumigator/schemas/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

@@ -133,8 +133,6 @@ function handleRowClick(event: DataTableRowClickEvent) {
     // preventing experiment selection on row expansion
     return
   }
-  // user selected an experiment, clear selected job
-  emit('l-workflow-selected', undefined)
   emit('l-experiment-selected', event.data)
 }
 

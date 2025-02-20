@@ -5,7 +5,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from lumigator_schemas.tasks import SummarizationValidator, TaskType, TextGenerationValidator, TranslationValidator
+from lumigator_schemas.tasks import TaskType
+
+DEFAULT_SUMMARIZATION_PROMPT = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
 
 class LowercaseEnum(str, Enum):
@@ -105,15 +107,23 @@ class JobInferenceConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_and_set_defaults(self):
-        validators = {
-            TaskType.TRANSLATION: TranslationValidator(),
-            TaskType.SUMMARIZATION: SummarizationValidator(),
-            TaskType.TEXT_GENERATION: TextGenerationValidator(),
-        }
-        validator = validators.get(self.task)
-        validator.validate(self)
-        validator.set_default_prompt(self)
+        # Text generation for causal models can mean anything
+        # So we need to ensure the user provides a system prompt
+        if self.task == TaskType.TEXT_GENERATION and self.system_prompt is None:
+            raise ValueError("system_prompt must be provided when task='text-generation'")
+
+        # Set default system prompt if not provided
+        if self.system_prompt is None:
+            self.system_prompt = self._get_default_prompt()
+
         return self
+
+    def _get_default_prompt(self) -> str:
+        match self.task:
+            case TaskType.SUMMARIZATION:
+                return DEFAULT_SUMMARIZATION_PROMPT
+            case TaskType.TRANSLATION:
+                return f"translate {self.source_language} to {self.target_language}:"
 
 
 class JobAnnotateConfig(BaseModel):

@@ -212,7 +212,7 @@ You can download and view the results of the inference job with the following sc
 
 source common_variables.sh
 
-JOB_ID=e36d91cb-d642-4d70-9ae2-dcc94a745fb4 #$(curl -s "$BACKEND_URL/api/v1/jobs/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
+JOB_ID=$(curl -s "$BACKEND_URL/api/v1/jobs/" | grep -o '"id":"[^"]*"' | head -n1 | cut -d'"' -f4)
 
 echo "Looking for $JOB_ID results..."
 DOWNLOAD_RESPONSE=$(curl -s $BACKEND_URL/api/v1/jobs/$JOB_ID/result/download)

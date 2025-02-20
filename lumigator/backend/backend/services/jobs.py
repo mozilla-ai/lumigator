@@ -431,7 +431,7 @@ class JobService:
         except json.JSONDecodeError as e:
             raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
 
-    async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
+    async def wait_for_job_complete(self, job_id, max_wait_time_sec):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
@@ -448,7 +448,7 @@ class JobService:
         # Wait for the job to complete
         elapsed_time = 0
         while job_status not in self.TERMINAL_STATUS:
-            if max_wait_time_sec and elapsed_time >= max_wait_time_sec:
+            if elapsed_time >= max_wait_time_sec:
                 loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
                 break
             await asyncio.sleep(5)

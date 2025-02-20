@@ -254,6 +254,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
                 "dataset": str(dataset_id),
                 "experiment_id": experiment_id,
                 "max_samples": 1,
+                "job_timeout": 1,
             },
         ).json()
     )

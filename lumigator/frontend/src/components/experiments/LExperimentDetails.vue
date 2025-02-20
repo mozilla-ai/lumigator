@@ -171,7 +171,7 @@ const emit = defineEmits([
   'l-job-results',
   'l-show-logs',
   'l-download-results',
-  'delete-experiment-clicked',
+  'delete-button-clicked',
 ])
 
 const props = defineProps<{
@@ -195,7 +195,7 @@ const copyToClipboard = async (longString: string) => {
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
 
 function handleDeleteButtonClicked(e: MouseEvent) {
-  emit('delete-experiment-clicked', selectedWorkflow.value || selectedExperiment.value)
+  emit('delete-button-clicked', selectedWorkflow.value || selectedExperiment.value)
 }
 
 // TODO: this needs refactor when the backend provides experiment id

@@ -32,7 +32,7 @@
           @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
-          @delete-experiment-clicked="handleDeleteExperimentClicked"
+          @delete-button-clicked="handleDeleteSelectedItemClicked"
         />
       </transition>
     </Teleport>
@@ -166,13 +166,12 @@ const onCloseDetails = () => {
 const toast = useToast()
 const confirm = useConfirm()
 
-async function handleDeleteExperimentClicked(_experimentOrWorkflow: Experiment | Workflow) {
+async function handleDeleteSelectedItemClicked() {
   const experimentOrWorkflow = selectedWorkflow.value || selectedExperiment.value
   if (!experimentOrWorkflow) {
     return
   }
 
-  const isExperiment = selectedExperiment.value !== undefined
   const isWorkflow = selectedWorkflow.value !== undefined
 
   confirm.require({
@@ -191,7 +190,6 @@ async function handleDeleteExperimentClicked(_experimentOrWorkflow: Experiment |
     },
     accept: async () => {
       if (isWorkflow) {
-
         await workflowsService.deleteWorkflow(experimentOrWorkflow.id)
         toast.add({
           severity: 'secondary',

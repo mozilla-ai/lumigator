@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
+          sudo apt-get install make
 
       - name: Spinning up containers for the tests
         run: |

@@ -11,9 +11,7 @@ from backend.api.http_headers import HttpHeaders
 from backend.services.exceptions.dataset_exceptions import DatasetUpstreamError
 
 
-def test_upload_delete(
-    app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes
-):
+def test_upload_delete(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
     upload_filename = "dataset.csv"
 
     # Create
@@ -57,9 +55,7 @@ def test_dataset_delete_error(app_client: TestClient, dependency_overrides_fakes
         assert data["detail"] == f"Upstream error with s3: {msg}"
 
 
-def test_presigned_download(
-    app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes
-):
+def test_presigned_download(app_client: TestClient, valid_experiment_dataset: str, dependency_overrides_fakes):
     upload_filename = "dataset.csv"
 
     # Create

@@ -34,10 +34,17 @@ from backend.main import create_app
 from backend.records.jobs import JobRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+<<<<<<< HEAD
 from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobDefinitionInference, JobService
 from backend.services.secrets import SecretService
+=======
+from backend.repositories.keys import KeyRepository
+from backend.services.datasets import DatasetService
+from backend.services.jobs import JobService
+from backend.services.keys import KeyService
+>>>>>>> 12da5aae (Add keys infrastructure)
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 

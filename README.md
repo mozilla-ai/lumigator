@@ -112,9 +112,8 @@ quick walkthrough.
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider’s S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See the
-[operational guides](https://mozilla-ai.github.io/lumigator/operations-guide/kubernetes.html) in the
-documentation for more deployment options.
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. Ref to the operational guides in the
+[docs](https://mozilla-ai.github.io/lumigator/) for more deployment options.
 
 If you want to permanently set any of the environment variables above, you can  add them to your rc file (e.g. `~/.bashrc`, `~/.zshrc`) or directly to the
 `.env` file that is automatically created after the first execution of lumigator.

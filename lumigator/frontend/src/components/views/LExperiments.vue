@@ -190,7 +190,14 @@ async function handleDeleteSelectedItemClicked() {
     },
     accept: async () => {
       if (isWorkflow) {
-        await workflowsService.deleteWorkflow(experimentOrWorkflow.id)
+        const relatedExperiment = experiments.value.find((exp) =>
+          exp.workflows.some((w) => w.id === experimentOrWorkflow.id),
+        )
+        if (relatedExperiment && relatedExperiment.workflows.length === 1) {
+          await experimentsService.deleteExperiment(relatedExperiment.id)
+        } else {
+          await workflowsService.deleteWorkflow(experimentOrWorkflow.id)
+        }
         toast.add({
           severity: 'secondary',
           summary: `Workflow removed`,

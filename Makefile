@@ -231,7 +231,7 @@ test-backend-integration:
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
-	PYTHONPATH=../jobs:$$PYTHONPATH \
+	PYTHONPATH=..:$$PYTHONPATH \
 	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
 

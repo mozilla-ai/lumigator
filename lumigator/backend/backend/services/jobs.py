@@ -9,6 +9,10 @@ from typing import Any
 from urllib.parse import urljoin
 from uuid import UUID
 
+import evaluator
+import evaluator.interface
+import inference
+import inference.interface
 import loguru
 import requests
 from fastapi import BackgroundTasks, UploadFile
@@ -27,14 +31,10 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
-from lumigator_schemas.tasks import TaskDefinition, get_default_system_prompt, validate_system_prompt
-from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
 
-import jobs.evaluator
-import jobs.inference
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
 from backend.repositories.jobs import JobRepository, JobResultRepository
@@ -49,8 +49,8 @@ from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
 job_settings = {}
-job_settings[JobType.EVALUATION] = jobs.evaluator.JOB_INTERFACE
-job_settings[JobType.INFERENCE] = jobs.inference.JOB_INTERFACE
+job_settings[JobType.EVALUATION] = evaluator.interface.JOB_INTERFACE
+job_settings[JobType.INFERENCE] = inference.interface.JOB_INTERFACE
 ############################
 
 DEFAULT_SKIP = 0

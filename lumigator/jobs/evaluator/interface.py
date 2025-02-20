@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from lumigator_schemas import JobCreate
+from evaluator.schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
+from lumigator_schemas.jobs import JobCreate
 
-from .schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
+from backend.services.job_interface import JobInterface
 
 
-class JobInterfaceEvalLite:
+class JobInterfaceEvalLite(JobInterface):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",

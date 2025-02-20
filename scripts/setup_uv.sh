@@ -50,7 +50,7 @@ if [ "$PATH_PRESENT" -eq 0 ]; then
     export PATH="$LOCAL_BIN:$PATH"
     echo -e "\033[1;33mTo use uv from the command line, add the following line to your profile:\033[0m"
     echo ""
-    echo "    export PATH=\"$LOCAL_BIN:\$PATH\""
+    white "    export PATH=\"$LOCAL_BIN:\$PATH\""
     echo ""
     yellow "Depending on your installation directory, you may be able to use generic shell environment variables:"
     echo ""

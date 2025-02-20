@@ -104,7 +104,8 @@ def test_invalid_text_generation(job_service):
             description="Test run to verify that system prompt is set.",
             job_config=JobInferenceConfig(
                 job_type=JobType.INFERENCE,
-                model="hf://microsoft/Phi-3.5-mini-instruct",
+                model="microsoft/Phi-3.5-mini-instruct",
+                provider="hf",
                 task="text-generation",
                 # system_prompt is intentionally omitted
             ),

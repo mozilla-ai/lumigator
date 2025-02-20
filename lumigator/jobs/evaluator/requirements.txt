@@ -2,6 +2,7 @@ absl-py==2.1.0
 bert_score==0.3.13
 click>=8.1.7
 datasets==2.20.0
+deepeval==2.4.0
 evaluate==0.4.3
 loguru==0.7.2
 nltk==3.8.1

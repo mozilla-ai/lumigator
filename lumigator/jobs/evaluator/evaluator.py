@@ -51,9 +51,11 @@ def save_outputs(config: EvalJobConfig, eval_results: JobOutput) -> Path:
 
 
 @timer
-def run_eval_metrics(predictions: list, ground_truth: list, evaluation_metrics: list) -> EvalJobMetrics:
+def run_eval_metrics(
+    llm_inputs: list, predictions: list, ground_truth: list, evaluation_metrics: list
+) -> EvalJobMetrics:
     em = EvaluationMetrics(evaluation_metrics)
-    evaluation_results = em.run_all(predictions, ground_truth)
+    evaluation_results = em.run_all(llm_inputs, predictions, ground_truth)
     return EvalJobMetrics.model_validate(evaluation_results)
 
 
@@ -64,16 +66,19 @@ def run_eval(config: EvalJobConfig) -> Path:
     dataset = load_from_disk(config.dataset.path)
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
 
+    # Check for required fields
+    # If any of the G-Eval metrics are in config.evaluation.metrics,
+    # then we should require the "examples" field to be present too.
+    # Otherwise, "predictions" and "ground_truth" are enough
+
     # Limit dataset length if max_samples is specified
     if max_samples < 1 or max_samples > len(dataset):
         logger.info(f"max_samples ({max_samples}) resized to dataset size ({len(dataset)})")
         max_samples = len(dataset)
     dataset = dataset.select(range(max_samples))
 
-    logger.info(dataset)
-
     metric_results, evaluation_time = run_eval_metrics(
-        dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+        dataset["examples"], dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
     )
 
     # add input data to results dict

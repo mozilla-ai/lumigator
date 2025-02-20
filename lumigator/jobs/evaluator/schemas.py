@@ -63,11 +63,22 @@ class Rouge(BaseModel):
     rougeLsum_mean: float  # noqa: N815
 
 
+class GEval(BaseModel):
+    score: float
+    reason: str
+
+
+class GEvalConsistency(BaseModel):
+    consistency: list[GEval]
+    consistency_mean: float
+
+
 class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
+    g_eval_consistency: GEvalConsistency | None = None
 
 
 class EvalJobArtifacts(BaseModel):

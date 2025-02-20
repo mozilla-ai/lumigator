@@ -30,4 +30,5 @@ if ! diff -u docs/source/specs/openapi.json fetched_openapi.json; then
   exit 1
 fi
 echo "OpenAPI documentation is up to date."
+rm fetched_openapi.json
 exit 0

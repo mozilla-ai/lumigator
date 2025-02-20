@@ -82,7 +82,9 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.50.1-noble
+      options: --user 1001
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

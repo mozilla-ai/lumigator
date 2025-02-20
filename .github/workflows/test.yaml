@@ -12,6 +12,44 @@ jobs:
     # You need to use the INSTALLATION_NAME from the previous step
     runs-on: cw-runner
     steps:
-    - run: sleep 60s
-      shell: bash
-    - run: echo "🎉 This job uses runner scale set runners!"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        run: |
+          export RAY_WORKER_GPUS=1
+          export RAY_WORKER_GPUS_FRACTION=1.0
+          export GPU_COUNT=1
+          make start-lumigator-build
+
+      - name: Run backend integration tests
+        run: make test-backend-integration
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/

@@ -206,9 +206,9 @@ test-backend-integration:
 	RAY_DASHBOARD_PORT=8265 \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
-	RAY_WORKER_GPUS="0.0" \
-	RAY_WORKER_GPUS_FRACTION="0.0" \
-	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \

@@ -138,12 +138,11 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
+async function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
   if (workflow.jobs) {
-    workflowsService.fetchWorkflowDetails(workflow.id)
     emit('l-workflow-selected', workflow)
   }
   // select the experiment that job belongs to
@@ -175,9 +174,11 @@ async function updateExperimentStatus(experiment: Experiment): Promise<void> {
     )
 
     incompleteWorkflowDetails.forEach((workflow) => {
+      // TODO: immutability would be nice
       const existingWorkflow = experiment.workflows.find((w) => w.id === workflow.id)
       if (existingWorkflow) {
         existingWorkflow.status = workflow.status
+        existingWorkflow.artifacts_download_url = workflow.artifacts_download_url
       }
     })
 

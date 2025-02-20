@@ -68,7 +68,7 @@ fi
 export PATH="$LOCAL_BIN:$PATH"
 
 # ######################################
-# Configure Virtual Environments for UV:
+# Configure Virtual Environments for UV
 # ######################################
 
 # Store the original directory

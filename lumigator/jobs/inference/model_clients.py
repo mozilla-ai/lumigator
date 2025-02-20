@@ -1,12 +1,9 @@
-import os
 import re
 from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
+from litellm import completion
 from loguru import logger
-from mistralai.client import MistralClient
-from openai import OpenAI, OpenAIError
-from openai.types import Completion
 from transformers import pipeline
 from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
@@ -35,146 +32,50 @@ class BaseModelClient:
         pass
 
 
-class APIModelClient(BaseModelClient):
-    """General model client for APIs."""
-
-    def __init__(self, config: InferenceJobConfig):
-        self._config = config
-        self._engine = strip_path_prefix(config.inference_server.engine)
-        self._system = config.inference_server.system_prompt
-
-    @abstractmethod
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: OpenAI | MistralClient,
-        prompt: str,
-        system: str,
-    ) -> Completion:
-        """Connects to the API and returns a chat completion holding the model's response."""
-        pass
-
-    def _get_response_with_retries(
-        self,
-        config: InferenceJobConfig,
-        prompt: str,
-    ) -> tuple[str, str]:
-        current_retry_attempt = 1
-        max_retries = 1 if config.inference_server.max_retries is None else config.inference_server.max_retries
-        while current_retry_attempt <= max_retries:
-            try:
-                response = self._chat_completion(self._config, self._client, prompt, self._system)
-                break
-            except OpenAIError as e:
-                logger.warning(f"{e.message}: Retrying ({current_retry_attempt}/{max_retries})")
-                current_retry_attempt += 1
-                if current_retry_attempt > max_retries:
-                    raise e
-        return response
-
-    def predict(self, prompt):
-        response = self._get_response_with_retries(self._config, prompt)
-
-        return response.choices[0].message.content
-
-
-class OpenAIModelClient(APIModelClient):
+class LiteLLMModelClient(BaseModelClient):
     """Model client for models served via openai-compatible API.
     For OpenAI models:
     - The base_url is fixed
-    - Choose an engine name (see https://platform.openai.com/docs/models)
+    - Choose an model name (see https://platform.openai.com/docs/models)
     - Customize the system prompt if needed
 
     For compatible models:
     - Works with local/remote vLLM-served models and llamafiles
-    - Provide base_url and engine
+    - Provide base_url and model
     - Customize the system prompt if needed
     """
 
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = OpenAI(base_url=base_url)
+    def __init__(self, config: InferenceJobConfig):
+        self.config = config
+        self.system = "You are a helpful assisant., please summarize the given input."
+        logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
-    def _chat_completion(
+    def predict(
         self,
-        config: InferenceJobConfig,
-        client: OpenAI,
         prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a remote OpenAI-API-compatible endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat.completions.create(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            frequency_penalty=config.params.frequency_penalty,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
+    ) -> str:
+        response = completion(
+            model=self.config.inference_server.model,
+            messages=[
+                {"role": "system", "content": self.system},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=self.config.params.max_tokens,
+            frequency_penalty=self.config.params.frequency_penalty,
+            temperature=self.config.params.temperature,
+            top_p=self.config.params.top_p,
+            drop_params=True,
+            api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
-
-
-class DeepSeekModelClient(APIModelClient):
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = OpenAI(base_url=base_url, api_key=os.environ["DEEPSEEK_API_KEY"])
-
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: OpenAI,
-        prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a remote OpenAI-API-compatible endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat.completions.create(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            frequency_penalty=config.params.frequency_penalty,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
-        )
-
-
-class MistralModelClient(APIModelClient):
-    """Model client for models served via Mistral API.
-    - The base_url is fixed
-    - Choose an engine name (see https://docs.mistral.ai/getting-started/models/)
-    - Customize the system prompt if needed
-    """
-
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
-
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: MistralClient,
-        prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a Mistral endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
-        )
+        # LiteLLM gives us the cost of each API which is nice.
+        # Eventually we can add this to the response object as well.
+        cost = response._hidden_params["response_cost"]
+        logger.info(f"Response cost: {cost}")
+        return response.choices[0].message.content
 
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
-        logger.info(f"System prompt: {config.system_prompt}")
-        self._system = config.system_prompt
-        self._task = config.hf_pipeline.task
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         self._set_tokenizer_max_length()
 
@@ -225,24 +126,10 @@ class HuggingFaceModelClient(BaseModelClient):
         )
 
     def predict(self, prompt):
-        # When using a text-generation model, the pipeline returns a dictionary with a single key,
-        # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
-        # role and content of a message. For example:
-        # [{'role': 'system', 'content': 'You are a helpful assistant.'},
-        #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
-        # We want to return the content of the last message in the list, which is the model's
-        # response to the prompt.
-        if self._task == "text-generation":
-            messages = [
-                {"role": "system", "content": self._system},
-                {"role": "user", "content": prompt},
-            ]
-            generation = self._pipeline(messages)[0]
-            return generation["generated_text"][-1]["content"]
+        prediction = self._pipeline(prompt)[0]
 
-        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
-        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
-        # Get the name of the key and return its value.
-        if self._task == "summarization":
-            generation = self._pipeline(prompt)[0]
-            return generation["summary_text"]
+        # The result is a dictionary with a single key, which name depends on the task
+        # (e.g., 'summary_text' for summarization)
+        # Get the name of the key and return its value
+        result_key = list(prediction.keys())[0]
+        return prediction[result_key]

@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
@@ -119,17 +119,30 @@ async function throttledUpdateAllJobs() {
 // This is a temporary solution until 'jobs/' endpoint
 // updates the status of each job
 let pollingId: number | undefined
-watch(hasRunningInferenceJob, async (newValue) => {
-  if (newValue) {
-    await datasetStore.updateStatusForIncompleteJobs()
-    pollingId = setInterval(async () => {
-      await throttledUpdateAllJobs()
-    }, 1000)
-  } else {
-    clearInterval(pollingId)
-    emit('l-inference-finished')
-    datasetStore.fetchDatasets()
-  }
+watch(
+  hasRunningInferenceJob,
+  async (newValue) => {
+    if (newValue) {
+      await datasetStore.updateStatusForIncompleteJobs()
+      pollingId = setInterval(async () => {
+        await throttledUpdateAllJobs()
+      }, 1000)
+    } else {
+      if (pollingId) {
+        clearInterval(pollingId)
+        emit('l-inference-finished')
+        datasetStore.fetchDatasets()
+      }
+    }
+  },
+  {
+    immediate: true,
+  },
+)
+
+onBeforeUnmount(() => {
+  clearInterval(pollingId)
+  datasetStore.stopPollingForAnnotationJobStatus()
 })
 </script>
 

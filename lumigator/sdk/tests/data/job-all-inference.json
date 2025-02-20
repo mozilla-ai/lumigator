@@ -6,6 +6,7 @@
   "job_config": {
     "job_type": "inference",
     "model": "some_model",
+    "provider": "some_provider",
     "model_url": "https://huggingface.co/facebook/bart-large-cnn",
     "system_prompt": "some prompt",
     "task": "summarization",

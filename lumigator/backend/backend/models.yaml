@@ -1,5 +1,6 @@
-- name: facebook/bart-large-cnn
-  uri: hf://facebook/bart-large-cnn
+- display_name: facebook/bart-large-cnn
+  model: facebook/bart-large-cnn
+  provider: hf
   website_url: https://huggingface.co/facebook/bart-large-cnn
   description: BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.
   info:
@@ -15,8 +16,9 @@
         no_repeat_ngram_size: 3
         num_beams: 4
 
-- name: Falconsai/text_summarization
-  uri: hf://Falconsai/text_summarization
+- display_name: Falconsai/text_summarization
+  model: Falconsai/text_summarization
+  provider: hf
   website_url: https://huggingface.co/Falconsai/text_summarization
   description: A fine-tuned variant of the T5 transformer model, designed for the task of text summarization.
   info:
@@ -32,8 +34,9 @@
         no_repeat_ngram_size: 3
         num_beams: 4
 
-- name: gpt-4o-mini
-  uri: oai://gpt-4o-mini
+- display_name: gpt-4o-mini
+  model: gpt-4o-mini
+  provider: openai
   website_url: https://platform.openai.com/docs/models#gpt-4o-mini
   description: OpenAI's GPT-4o-mini model.
   requirements:
@@ -41,8 +44,9 @@
   tasks:
     - summarization:
 
-- name: gpt-4o
-  uri: oai://gpt-4o
+- display_name: gpt-4o
+  model: gpt-4o
+  provider: openai
   website_url: https://platform.openai.com/docs/models#gpt-4o
   description: OpenAI's GPT-4o model.
   requirements:
@@ -50,19 +54,42 @@
   tasks:
     - summarization:
 
-- name: open-mistral-7b
-  uri: mistral://open-mistral-7b
-  website_url: https://mistral.ai/technology/#models
-  description: Mistral's 7B model.
+- display_name: deepseek-R1
+  model: deepseek-reasoner
+  provider: deepseek
+  website_url: https://deepseek.ai/
+  description: DeepSeek's R1 model, hosted by deepseek
   requirements:
     - api_key
   tasks:
     - summarization:
 
-- name: mistralai/Mistral-7B-Instruct-v0.2
-  uri: llamafile://mistralai/Mistral-7B-Instruct-v0.2
+- display_name: deepseek-V3
+  model: deepseek-chat
+  provider: deepseek
+  website_url: https://deepseek.ai/
+  description: DeepSeek's V3 model, hosted by deepseek
+  requirements:
+    - api_key
+  tasks:
+    - summarization:
+
+- display_name: open-mistral-7b
+  model: open-mistral-7b
+  provider: mistral
   website_url: https://mistral.ai/technology/#models
-  description: A llamafile package of Mistral's 7B Instruct model.
+  description: Mistral's 7B model, hosted by mistral
+  requirements:
+    - api_key
+  tasks:
+    - summarization:
+
+- display_name: Llamafile/Mistral-7B-Instruct-v0.2
+  model: mistralai/Mistral-7B-Instruct-v0.2
+  provider: openai
+  base_url: http://localhost:8080/v1
+  website_url: https://huggingface.co/Mozilla/Mistral-7B-Instruct-v0.2-llamafile
+  description: A llamafile package of Mistral's 7B Instruct model. Assumes that llamafile is running on the same system where the Ray cluster is located.
   info:
     parameter_count: 7.24B
     tensor_type: BF16

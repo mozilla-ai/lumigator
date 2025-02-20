@@ -159,6 +159,13 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
+setup:
+	@command -v uv >/dev/null 2>&1 || { \
+		echo "uv not found. Installing..."; \
+		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+		export PATH="$(HOME)/.local/bin:$(PATH)"; \
+	}
+	@scripts/setup_venvs.sh;
 
 # SDK tests
 # We have both unit and integration tests for the SDK.

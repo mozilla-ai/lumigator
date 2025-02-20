@@ -12,7 +12,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 
 ## What You'll Need
 
-- A running instance of [Lumigator](../get-started/installation.md).
+- A running instance of [Lumigator](../get-started/quickstart.md).
 
 ## Procedure
 

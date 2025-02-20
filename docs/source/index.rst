@@ -8,11 +8,11 @@ Lumigator is an open-source platform built by Mozilla.ai for guiding users throu
 selecting the right language model for their needs.
 
 Currently, we support evaluating summarization
-tasks using sequence-to-sequence models, like BART and BERT, and causal architectures, like GPT and
+tasks using sequence-to-sequence models, like BART, and causal architectures, like
 Mistral.
 
 These models can either be loaded and run by Lumigator
-(if they are models stored in `Huggingface Hub <https://huggingface.co/models>`_), or the models can be reached through any OpenAIAPI
+(if they are models stored in `Huggingface Hub <https://huggingface.co/models>`_), or the models can be reached through any OpenAI
 compatible interface (for example, llamafile or OpenAI GPT models). Lumigator will soon
 support additional tasks such as translation  (See `#628 <https://github.com/mozilla-ai/lumigator/issues/628>`_).
 

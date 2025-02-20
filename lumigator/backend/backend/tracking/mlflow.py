@@ -1,4 +1,5 @@
 import contextlib
+import http
 import json
 from collections.abc import Generator
 from datetime import datetime
@@ -124,14 +125,15 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str):
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
         except MlflowException as e:
-            # if the experiment doesn't exist, return None
-            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
+            raise e
+
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -210,9 +212,15 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
-        workflow = self._client.get_run(workflow_id)
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
         if workflow.info.lifecycle_stage == "deleted":
             return None
         # similar to the get_experiment method, but for a single workflow,

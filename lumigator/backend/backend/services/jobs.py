@@ -5,7 +5,7 @@ from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 from uuid import UUID
 
 import loguru

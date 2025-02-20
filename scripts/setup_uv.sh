@@ -48,20 +48,14 @@ done
 if [ "$PATH_PRESENT" -eq 0 ]; then
     red "PATH does not contain '$LOCAL_BIN' (installation directory). Adding temporarily..."
     export PATH="$LOCAL_BIN:$PATH"
-    echo -e "\033[1;33mTo use uv from the command line, add the following line to your profile:\033[0m"
-    echo ""
-    white "    export PATH=\"$LOCAL_BIN:\$PATH\""
-    echo ""
-    yellow "Depending on your installation directory, you may be able to use generic shell environment variables:"
-    echo ""
-    white "    export PATH=\"\$HOME/.local/bin:\$PATH\""
-    echo ""
 fi
 
 # Install uv if not found
+UV_INSTALL_REQUIRED=0
 if ! command -v uv >/dev/null 2>&1; then
     red "uv not found. Installing..."
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh
+    UV_INSTALL_REQUIRED=1
 fi
 
 # Now, run the setup for virtual environments
@@ -101,8 +95,21 @@ done
 # Sync root deps
 uv sync && uv sync --dev
 
-green "Package manager 'uv' has been installed at '$LOCAL_BIN'."
-yellow "You may need to add this location to your PATH in your profile."
+if [ "$PATH_PRESENT" -eq 0 ]; then
+    yellow "The PATH was temporaily updated to include '$LOCAL_BIN'"
+    yellow "To make this change permanent, add the following line to your shell profile:"
+    echo ""
+    white "    export PATH=\"$LOCAL_BIN:\$PATH\""
+    echo ""
+    yellow "Depending on your installation directory, you may be able to use generic shell environment variables:"
+    echo ""
+    white "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo ""
+fi
+
+if [ "$UV_INSTALL_REQUIRED" -eq 1 ]; then
+    green "Package manager 'uv' has been installed at '$LOCAL_BIN'."
+fi
 
 green "Virtual environments created at the following locations:"
 for venv in "${venv_locations[@]}"; do

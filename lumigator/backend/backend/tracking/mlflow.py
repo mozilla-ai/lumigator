@@ -13,6 +13,7 @@ import requests
 from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
+from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
@@ -32,7 +33,7 @@ class MLflowTrackingClient(TrackingClient):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
     def create_experiment(
-        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+        self, name: str, description: str, task: TaskType, dataset: UUID, max_samples: int
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
@@ -40,7 +41,7 @@ class MLflowTrackingClient(TrackingClient):
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
-            self._client.set_experiment_tag(experiment_id, "task", task)
+            self._client.set_experiment_tag(experiment_id, "task", task.value)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -54,7 +55,7 @@ class MLflowTrackingClient(TrackingClient):
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
-                self._client.set_experiment_tag(experiment_id, "task", task)
+                self._client.set_experiment_tag(experiment_id, "task", task.value)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
                 self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")

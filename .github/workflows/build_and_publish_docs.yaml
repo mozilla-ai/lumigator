@@ -15,6 +15,28 @@ permissions:
   id-token: write
 
 jobs:
+  check-openapi:
+    name: Check OpenAPI Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Start Lumigator Docker Compose stack
+        run: make start-lumigator-build
+
+      - name: Check the OpenAPI spec
+        run: make check-openapi-docs
+
+      - name: Stop Lumigator Docker Compose stack
+        run: make stop-lumigator
+
   build-docs:
     name: Docs - Build and publish
     runs-on: ubuntu-latest

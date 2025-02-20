@@ -8,7 +8,6 @@ from lumigator_schemas.jobs import (
 )
 
 from backend.services.exceptions.job_exceptions import JobValidationError
-from backend.services.jobs import _set_model_type
 from backend.settings import settings
 
 

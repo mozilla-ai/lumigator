@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import json
+from abc import ABC, abstractmethod
 from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -65,7 +66,26 @@ JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 # to put this. The jobs should ideally have no dependency towards the backend.
 
 
-class JobInterface:
+class JobDefinition(ABC):
+    """Abstract base class for jobs.
+
+    Attributes:
+    ----------
+    command : str
+        The command to execute the job.
+    pip_reqs : str, optional
+        Path to a requirements file specifying dependencies (default: None).
+    work_dir : str, optional
+        Working directory for the job (default: None).
+    ray_worker_gpus_fraction : float
+        Fraction of a GPU allocated per Ray worker.
+    ray_worker_gpus : float
+        Number of GPUs allocated per Ray worker.
+    config_model : BaseModel
+        Pydantic model representing job-specific configuration.
+
+    """
+
     command: str
     pip_reqs: str | None
     work_dir: str | None
@@ -74,10 +94,35 @@ class JobInterface:
     config_model: BaseModel
 
     # This should end up not being necessary, since we'd expose the whole job config
+    @abstractmethod
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str) -> BaseModel:
+        """Generates
+
+        Parameters
+        ----------
+        request : JobCreate
+            Non-job-specific parameters for job creation
+        record_id : UUID
+            Job ID assigned to the job
+        dataset_path : str
+            S3 path for the input dataset
+        storage_path : str
+            S3 where the backend will store the results from the job
+
+        Returns:
+        -------
+        generate_config : BaseModel
+            A job-specific pydantic model that will be sent to the Ray job instance
+        """
         pass
 
+    @abstractmethod
     def store_as_dataset(self) -> bool:
+        """Returns:
+        -------
+        store_as_dataset : bool
+            Whether the results should be stored in an S3 path
+        """
         pass
 
     def __init__(self, command, pip_reqs, work_dir, ray_worker_gpus_fraction, ray_worker_gpus, config_model):
@@ -89,7 +134,7 @@ class JobInterface:
         self.config_model = config_model
 
 
-class JobInterfaceInference(JobInterface):
+class JobDefinitionInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
             raise JobValidationError("System prompt is required for text generation tasks.") from None
@@ -136,7 +181,7 @@ class JobInterfaceInference(JobInterface):
         return True
 
 
-class JobInterfaceEvalLite(JobInterface):
+class JobDefinitionEvaluation(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
@@ -160,7 +205,7 @@ class JobService:
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
     job_settings = {
-        JobType.INFERENCE: JobInterfaceInference(
+        JobType.INFERENCE: JobDefinitionInference(
             command=settings.INFERENCE_COMMAND,
             pip_reqs=settings.INFERENCE_PIP_REQS,
             work_dir=settings.INFERENCE_WORK_DIR,
@@ -168,7 +213,7 @@ class JobService:
             ray_worker_gpus=settings.RAY_WORKER_GPUS,
             config_model=InferenceJobConfig,
         ),
-        JobType.EVALUATION: JobInterfaceEvalLite(
+        JobType.EVALUATION: JobDefinitionEvaluation(
             command=settings.EVALUATOR_COMMAND,
             pip_reqs=settings.EVALUATOR_PIP_REQS,
             work_dir=settings.EVALUATOR_WORK_DIR,
@@ -509,7 +554,6 @@ class JobService:
         # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        # if job_type == JobType.INFERENCE and request.job_config.store_to_dataset:
         if job_settings.store_as_dataset():
             self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
 

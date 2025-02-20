@@ -14,12 +14,11 @@ from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
-from mlflow.exceptions import MlflowException, RestException
+from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
 
-from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
 from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
@@ -248,7 +247,7 @@ class MLflowTrackingClient(TrackingClient):
             parameters=self._compile_parameters(all_job_ids),
         )
         # Currently, only compile the result json artifact if the workflow has succeeded
-        if workflow_details.status != WorkflowStatus.SUCCEEDED.value:
+        if workflow_details.status != WorkflowStatus.SUCCEEDED:
             return workflow_details
         # now we need to combine all of the files that were output into a single json.
         # look through every job associated with this workflow and get the results
@@ -301,7 +300,7 @@ class MLflowTrackingClient(TrackingClient):
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise JobNotFoundError(ray_job_id, "Ray job logs not found")
+            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
         elif resp.status_code != HTTPStatus.OK:
             loguru.logger.error(
                 f"Unexpected status code getting job logs: {resp.status_code}, \
@@ -355,7 +354,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(workflow.data.tags.get("status")).value,
+            status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 

@@ -54,8 +54,10 @@ class LiteLLMModelClient(BaseModelClient):
         self,
         prompt: str,
     ) -> str:
+        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
+        logger.info(f"Sending request to {litellm_model}")
         response = completion(
-            model=self.config.inference_server.model,
+            model=litellm_model,
             messages=[
                 {"role": "system", "content": self.system},
                 {"role": "user", "content": prompt},

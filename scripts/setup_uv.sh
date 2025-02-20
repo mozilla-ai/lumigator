@@ -2,8 +2,6 @@
 
 set -e  # Exit on error
 
-#!/bin/bash
-
 # ###############
 # Colorful output
 # ###############

@@ -120,4 +120,5 @@ export const experimentsService = {
   fetchExperimentResults,
   downloadResults,
   createExperiment,
+  deleteExperiment,
 }

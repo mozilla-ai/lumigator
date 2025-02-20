@@ -160,25 +160,7 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
 setup:
-	@export LOCAL_BIN="$(HOME)/.local/bin"; \
-	mkdir -p "$$LOCAL_BIN"; \
-	PATH_PRESENT=0; \
-	for p in $$(echo $$PATH | tr ':' '\n'); do \
-		[ "$$p" = "$$LOCAL_BIN" ] && PATH_PRESENT=1; \
-	done; \
-	if [ "$$PATH_PRESENT" -eq 0 ]; then \
-		echo "PATH does not contain '$$LOCAL_BIN'. Adding temporarily..."; \
-		PATH="$$LOCAL_BIN:$$PATH"; \
-		echo "NOTE: To make this change permanent, add the following line to your shell profile:"; \
-		echo ""; \
-		echo '    export PATH="$$HOME/.local/bin:$$PATH"'; \
-		echo ""; \
-	fi && \
-	command -v uv >/dev/null 2>&1 || { \
-		echo "uv not found. Installing..."; \
-		curl -LsSf https://astral.sh/uv/install.sh | sh; \
-	} && \
-	PATH="$$LOCAL_BIN:$$PATH" scripts/setup_venvs.sh;
+	@scripts/setup_uv.sh;
 
 # SDK tests
 # We have both unit and integration tests for the SDK.

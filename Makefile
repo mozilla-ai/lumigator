@@ -160,12 +160,7 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
 setup:
-	@command -v uv >/dev/null 2>&1 || { \
-		echo "uv not found. Installing..."; \
-		curl -LsSf https://astral.sh/uv/install.sh | sh; \
-		export PATH="$(HOME)/.local/bin:$(PATH)"; \
-	}
-	@scripts/setup_venvs.sh;
+	@scripts/setup_uv.sh;
 
 # This target is used to update the OpenAPI docs for use in the sphinx docs.
 # Lumigator must be running on localhost

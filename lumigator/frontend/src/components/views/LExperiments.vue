@@ -116,7 +116,7 @@ const onCreateExperiment = () => {
 
 const onSelectExperiment = (experiment: Experiment) => {
   selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
-
+  selectedWorkflow.value = undefined
   showSlidingPanel.value = true
 }
 

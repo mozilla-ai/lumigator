@@ -86,7 +86,7 @@ class ApiClient:
         data=None,
         files=None,
         json_data=None,
-        verbose: bool = True,
+        verbose: bool = False,
     ) -> requests.Response:
         """Make a request to the specified endpoint.
 

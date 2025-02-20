@@ -9,7 +9,8 @@
     },
     "inference_server": {
         "base_url": "http://localhost:8080/v1",
-        "engine": "llamafile://mistralai/Mistral-7B-Instruct-v0.2",
+        "model": "mistral/Mistral-7B-Instruct-v0.2",
+        "provider": "openai",
         "system_prompt": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",
         "max_retries": 3
     },

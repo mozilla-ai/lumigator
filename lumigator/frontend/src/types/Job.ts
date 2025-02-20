@@ -1,6 +1,6 @@
 import type { WorkflowStatus } from './Workflow'
 
-export type JobDetails = {
+export type Job = {
   type: string
   submission_id: string
   driver_info?: unknown

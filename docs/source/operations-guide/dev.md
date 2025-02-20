@@ -5,6 +5,23 @@ This is useful for testing changes to the backend codebase during development or
 issues. Reading this guide is a must if you are planning to contribute to the Lumigator backend
 codebase.
 
+## Requirements
+
+[`uv` Python package manager](https://github.com/astral-sh/uv?tab=readme-ov-file#installation).
+
+## Virtual Environments and Dependencies
+
+Once you have cloned the repository, you will need to create virtual environments and sync dependencies with `uv`.
+
+This can be done automatically using:
+
+```console
+user@host:~/lumigator$ make setup
+```
+
+This will ensure `uv` is installed, and create virtual environments for all `uv` managed projects and synchronize
+the dependencies.
+
 ## Backend Setup
 
 You can deploy and develop Lumigator locally using Docker Compose. Start by running the following

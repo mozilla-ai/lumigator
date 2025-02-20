@@ -58,7 +58,7 @@ import Column from 'primevue/column'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { PropType } from 'vue'
-// import type { JobDetails } from '@/types/JobDetails'
+// import type { Job } from '@/types/Job'
 // const experimentStore = useExperimentStore()
 // const { jobs } = storeToRefs(experimentStore)
 defineProps({

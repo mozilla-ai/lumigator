@@ -9,14 +9,15 @@ import type { EvaluationJobResults, ExperimentResults } from '@/types/Experiment
 import { downloadContent } from '@/helpers/downloadContent'
 import type { Model } from '@/types/Model'
 import { workflowsService } from '@/sdk/workflowsService'
-import type { ExperimentNew } from '@/types/ExperimentNew'
-import { WorkflowStatus, type Workflow, type WorkflowResults } from '@/types/Workflow'
+import type { Experiment } from '@/types/Experiment'
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import axios from 'axios'
+import type { WorkflowResults } from '@/types/Metrics'
 
 export const useExperimentStore = defineStore('experiments', () => {
-  const experiments: Ref<ExperimentNew[]> = ref([])
+  const experiments: Ref<Experiment[]> = ref([])
 
-  const selectedExperiment: Ref<ExperimentNew | undefined> = ref()
+  const selectedExperiment: Ref<Experiment | undefined> = ref()
   const selectedWorkflow: Ref<Workflow | undefined> = ref()
   const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
 
@@ -37,7 +38,7 @@ export const useExperimentStore = defineStore('experiments', () => {
   }
 
   // aggregates the experiment's status based on its workflows statuses
-  function retrieveStatus(experiment: ExperimentNew): WorkflowStatus {
+  function retrieveStatus(experiment: Experiment): WorkflowStatus {
     const workflowStatuses = experiment.workflows.map((workflow) => workflow.status)
     const uniqueStatuses = new Set(workflowStatuses)
 
@@ -58,7 +59,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
-  function getIncompleteExperiments(): ExperimentNew[] {
+  function getIncompleteExperiments(): Experiment[] {
     return experiments.value.filter((experiment) => !completedStatus.includes(experiment.status))
   }
 
@@ -66,7 +67,7 @@ export const useExperimentStore = defineStore('experiments', () => {
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
    */
-  async function updateExperimentStatus(experiment: ExperimentNew): Promise<void> {
+  async function updateExperimentStatus(experiment: Experiment): Promise<void> {
     try {
       const incompleteWorkflows = experiment.workflows.filter(
         (workflow) => !completedStatus.includes(workflow.status),
@@ -128,7 +129,9 @@ export const useExperimentStore = defineStore('experiments', () => {
         workflowsService.createWorkflow({
           ...experimentData,
           experiment_id: experimentId,
-          model: model.uri,
+          model: model.model,
+          provider: model.provider,
+          base_url: model.base_url,
         }),
       ),
     )
@@ -143,12 +146,10 @@ export const useExperimentStore = defineStore('experiments', () => {
     downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
   }
 
-  async function fetchExperimentResults(experiment: ExperimentNew) {
+  async function fetchExperimentResults(experiment: Experiment) {
     for (const workflow of experiment.workflows) {
-      //   console.log({experiment, workflow})
       if (workflow.artifacts_download_url) {
         const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
-        console.log(data)
 
         const modelRow = {
           model: data.artifacts.model,
@@ -163,17 +164,6 @@ export const useExperimentStore = defineStore('experiments', () => {
     }
   }
 
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
   async function fetchWorkflowResults(workflow: Workflow) {
     const results = await workflowsService.fetchWorkflowResults(workflow)
     if (results) {
@@ -223,7 +213,7 @@ export const useExperimentStore = defineStore('experiments', () => {
           rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index] ?? 0,
           rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean ?? 0,
         },
-        summarization_time: objectData.artifacts.summarization_time,
+        inference_time: objectData.artifacts.inference_time,
       } as unknown as EvaluationJobResults
     })
     return transformedArray
@@ -233,7 +223,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     if (selectedWorkflow.value) {
       const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
       const logs = splitByEscapeCharacter(logsData.logs)
-      console.log({ logs })
+
       logs.forEach((log: string) => {
         const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
         if (workflowLogs.value.length === 0 || lastEntry !== log) {

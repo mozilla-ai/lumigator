@@ -1,4 +1,5 @@
 import contextlib
+import http
 import json
 from collections.abc import Generator
 from datetime import datetime
@@ -124,14 +125,15 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str):
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
         except MlflowException as e:
-            # if the experiment doesn't exist, return None
-            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
+            raise e
+
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -195,7 +197,7 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id=experiment_id,
             tags={
                 "mlflow.runName": name,
-                "status": WorkflowStatus.CREATED,
+                "status": WorkflowStatus.CREATED.value,
                 "description": description,
                 "model": model,
             },
@@ -210,9 +212,15 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
-        workflow = self._client.get_run(workflow_id)
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
         if workflow.info.lifecycle_stage == "deleted":
             return None
         # similar to the get_experiment method, but for a single workflow,
@@ -232,7 +240,7 @@ class MLflowTrackingClient(TrackingClient):
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
+            status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
             metrics=self._compile_metrics(all_job_ids),
@@ -284,7 +292,7 @@ class MLflowTrackingClient(TrackingClient):
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update the status of a workflow."""
-        self._client.set_tag(workflow_id, "status", status)
+        self._client.set_tag(workflow_id, "status", status.value)
 
     def _get_ray_job_logs(self, ray_job_id: str):
         """Get the logs for a Ray job."""
@@ -352,7 +360,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
-            status=WorkflowStatus(WorkflowStatus[workflow.data.tags.get("status").split(".")[1]]),
+            status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 

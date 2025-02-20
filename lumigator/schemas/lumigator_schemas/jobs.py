@@ -135,15 +135,17 @@ class TranslationValidator(TaskValidator):
 class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
+    provider: str
     task: TaskType = Field(default=TaskType.SUMMARIZATION)
     source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
     target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
+    task: str | None = "summarization"
     accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
-    model_url: str | None = None
+    base_url: str | None = None
     system_prompt: str | None = Field(
         title="System Prompt",
         default=None,

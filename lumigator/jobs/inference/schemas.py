@@ -15,13 +15,14 @@ class JobConfig(BaseModel):
     max_samples: int
     storage_path: str
     output_field: str | None = "predictions"
-    enable_tqdm: bool | None = None
+    enable_tqdm: bool = True
     model_config = ConfigDict(extra="forbid")
 
 
 class InferenceServerConfig(BaseModel):
-    base_url: str
-    engine: str
+    base_url: str | None = None
+    model: str
+    provider: str
     system_prompt: str | None
     max_retries: int
     model_config = ConfigDict(extra="forbid")
@@ -36,7 +37,7 @@ class SamplingParameters(BaseModel):
 
 
 class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
-    model_uri: str
+    model_name_or_path: str
     revision: str
     use_fast: bool
     trust_remote_code: bool
@@ -64,7 +65,7 @@ class InferenceJobOutput(BaseModel):
     examples: list
     ground_truth: list | None = None
     model: str
-    summarization_time: float
+    inference_time: float
 
 
 class JobOutput(BaseModel):

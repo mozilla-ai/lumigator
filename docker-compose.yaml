@@ -7,9 +7,8 @@ services:
       context: .
       dockerfile: cache/Dockerfile.model-inference
     platform: linux/${ARCH}
-    command: /bin/true
     volumes:
-      - ${HOME}/.cache/huggingface:/home/ray/.cache/huggingface
+      - ${HF_HOME}:/home/ray/.cache/huggingface
     environment:
       - MODELS_CACHED
     profiles:

@@ -35,7 +35,7 @@ class GenerationConfig(BaseModel):
     TODO: Should we use that instead?
     """
 
-    max_new_tokens: int | None
+    max_new_tokens: int
     frequency_penalty: float
     temperature: float
     top_p: float

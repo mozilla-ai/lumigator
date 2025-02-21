@@ -86,6 +86,13 @@ def _validate_task(task: str) -> None:
 SupportedTask = Annotated[str, AfterValidator(lambda x: _validate_task(x))]
 
 
+class Accelerator(str, Enum):
+    AUTO = "auto"
+    CPU = "cpu"
+    CUDA = "cuda"
+    MPS = "mps"
+
+
 class JobConfig(BaseJobConfig):
     max_samples: int = -1  # set to all samples by default
     storage_path: str
@@ -99,18 +106,11 @@ class InferenceServerConfig(BaseInferenceServerConfig):
 
 
 class GenerationConfig(BaseGenerationConfig):
-    max_new_tokens: int | None = 500
+    max_new_tokens: int = 500
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
     model_config = ConfigDict(extra="forbid")
-
-
-class Accelerator(str, Enum):
-    AUTO = "auto"
-    CPU = "cpu"
-    CUDA = "cuda"
-    MPS = "mps"
 
 
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):

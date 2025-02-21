@@ -92,7 +92,7 @@ class JobInferenceConfig(BaseModel):
         ],
     )
     output_field: str | None = "predictions"
-    max_new_tokens: int | None = None
+    max_new_tokens: int | None = 500
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0

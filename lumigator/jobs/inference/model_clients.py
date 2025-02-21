@@ -126,8 +126,9 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
             logger.warning(
                 f"Tokenizer max_length ({self._pipeline.tokenizer.model_max_length})"
                 f" and model max_position_embeddings ({max_pos_emb}) do not match."
-                " This could lead to unexpected behavior, make sure this is intended."
+                "Setting the tokenizer model_max_length to the model's max_position_embeddings."
             )
+            self._pipeline.tokenizer.model_max_length = max_pos_emb
         if self.config.generation_config.max_new_tokens:
             if self.config.generation_config.max_new_tokens > max_pos_emb:
                 raise ValueError(
@@ -141,7 +142,6 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
                 f"Setting max_length to the max supported length by the model by its position embeddings: {max_pos_emb}"
             )
             self.config.generation_config.max_new_tokens = max_pos_emb
-            self.tokenizer.model_max_length = max_pos_emb
 
     def predict(self, prompt):
         if len(self.tokenizer(prompt, truncation=False)["input_ids"]) > self.tokenizer.model_max_length:

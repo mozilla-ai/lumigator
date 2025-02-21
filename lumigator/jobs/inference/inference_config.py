@@ -99,7 +99,7 @@ class InferenceServerConfig(BaseInferenceServerConfig):
 
 
 class GenerationConfig(BaseGenerationConfig):
-    max_new_tokens: int | None = None
+    max_new_tokens: int | None = 500
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0

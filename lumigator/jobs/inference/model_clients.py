@@ -93,7 +93,9 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
                 f"Model {hf_pipeline.model_name_or_path} is not a Seq2Seq model. "
                 "Only Seq2Seq models are supported for the summarization pipeline."
             ) from e
-        tokenizer = AutoTokenizer.from_pretrained(
+
+        # Store this so we can check if the input prompt is too long
+        self.tokenizer = AutoTokenizer.from_pretrained(
             hf_pipeline.model_name_or_path,
             use_fast=hf_pipeline.use_fast,
             trust_remote_code=hf_pipeline.trust_remote_code,
@@ -104,7 +106,7 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
         self._pipeline = pipeline(
             task=hf_pipeline.task,
             model=model,
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             revision=hf_pipeline.revision,
             device=hf_pipeline.device,
         )
@@ -141,6 +143,12 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
             self.config.generation_config.max_tokens = max_length
 
     def predict(self, prompt):
+        if len(self.tokenizer(prompt)["input_ids"]) > self.config.generation_config.max_tokens:
+            logger.warning(
+                f"Input prompt is too long and will be truncated. "
+                f"The model can only generate {self.config.generation_config.max_tokens} tokens."
+            )
+
         prediction = self._pipeline(
             prompt,
             truncation=True,

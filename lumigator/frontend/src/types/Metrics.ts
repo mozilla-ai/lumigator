@@ -40,7 +40,7 @@ export type Parameters = {
     output_field: string
     storage_path: string
   }
-  params: unknown
+  generation_config: unknown
 }
 
 export type HfPipeline = {

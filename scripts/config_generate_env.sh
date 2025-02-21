@@ -18,27 +18,36 @@ fi
 # ###########################################################
 TEMP_FILES=()
 
-# #########################
-# Merge configuration files
-# #########################
+# #######################################################
+# Merge configuration files - last (key/value) write wins
+# #######################################################
 merge_conf_files() {
     temp_file=$(mktemp)
     TEMP_FILES+=("$temp_file")
     keys_order=()
+    config_values=""
 
-    while IFS='=' read -r key value || [[ -n "$key" ]]; do
-        [[ -z "$key" || "$key" =~ ^#.*$ ]] && continue
-        # Remove existing key entry if found
-        sed -i '' "/^$key=/d" "$temp_file" 2>/dev/null || sed -i "/^$key=/d" "$temp_file"
-        # Append new value
-        echo "$key=$value" >> "$temp_file"
-        # Store key order if it's the first occurrence
-        grep -q "^$key=" <<< "${keys_order[*]}" || keys_order+=("$key")
-    done < <(cat "$@")
+    # Process each file in order (later files/params override earlier ones)
+    for file in "$@"; do
+        [[ -f "$file" ]] || continue  # Skip missing files
 
-    # Print keys in original order with latest values
+        while IFS='=' read -r key value || [[ -n "$key" ]]; do
+            [[ -z "$key" || "$key" =~ ^#.*$ ]] && continue  # Skip empty/comment lines
+
+            # If key is new, add to the order list
+            if ! grep -q "^$key=" <<< "$config_values"; then
+                keys_order+=("$key")
+            fi
+
+            # Overwrite value for key
+            config_values=$(echo "$config_values" | sed "/^$key=/d")
+            config_values+=$'\n'"$key=$value"
+        done < "$file"
+    done
+
+    # Print merged key-value pairs in original order
     for key in "${keys_order[@]}"; do
-        grep "^$key=" "$temp_file"
+        echo "$config_values" | awk -F= -v k="$key" '$1 == k { print $0 }'
     done
 }
 

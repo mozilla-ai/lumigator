@@ -149,6 +149,7 @@ services:
     ports:
       - 8000:8000
     environment:
+      - LUMIGATOR_SECRET_KEY # Symmetric key used for encryption/decryption of stored secret data
       - DEPLOYMENT_TYPE
       # The local file needs to be available through a mount,
       # if persistence is needed

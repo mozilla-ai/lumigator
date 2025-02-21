@@ -1,11 +1,11 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
 # Required binaries in order to correctly run the makefile, if any cannot be found the script will fail.
 # uv is only required for local-up (dev).
-REQUIRED_BINARIES := git docker
+REQUIRED_BINARIES := git docker openssl
 $(foreach bin,$(REQUIRED_BINARIES),\
   $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 
@@ -23,6 +23,10 @@ CONFIG_DEFAULT_FILE:="$(shell pwd)/.default.conf"
 CONFIG_USER_DIR:="${HOME}/.lumigator"
 # Path to user editable config file (will be generated if missing)
 CONFIG_OVERRIDE_FILE:="$(CONFIG_USER_DIR)/user.conf"
+# Location of the key to use for encryption.
+CONFIG_USER_KEY_FILE:="$(CONFIG_USER_DIR)/lumigator.key"
+# Env var name to hold encryption key
+CONFIG_USER_KEY_ENV_VAR=LUMIGATOR_SECRET_KEY
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -253,4 +257,8 @@ config-clean:
 
 # config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
 config-generate-env: config-clean config-generate-key
-	@scripts/config_generate_env.sh "$(CONFIG_BUILD_DIR)" "$(CONFIG_USER_DIR)" "$(CONFIG_DEFAULT_FILE)" "$(CONFIG_OVERRIDE_FILE)"
+	@scripts/config_generate_env.sh "$(CONFIG_BUILD_DIR)" "$(CONFIG_USER_KEY_FILE)" "$(CONFIG_USER_KEY_ENV_VAR)" "$(CONFIG_DEFAULT_FILE)" "$(CONFIG_OVERRIDE_FILE)"
+
+# config-generate-key: ensures that a (new or existing) user owned secret key exists to be passed to lumigator and used for encryption.
+config-generate-key:
+	@scripts/config_generate_key.sh $(CONFIG_USER_DIR) $(CONFIG_USER_KEY_FILE) $(CONFIG_USER_KEY_ENV_VAR);

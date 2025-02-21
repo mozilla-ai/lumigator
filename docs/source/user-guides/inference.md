@@ -4,6 +4,8 @@ This guide will walk you through the process of running an inference job using t
 a model downloaded from the Hugging Face Hub. The model will generate summaries for a given set of
 text data.
 
+This tutorial will show you how to perform inference as a single job. If you would like to do this as a part of an experiment and workflow (which includes evaluation of the results), see [the quickstart](../get-started/quickstart.md#using-lumigator).
+
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.

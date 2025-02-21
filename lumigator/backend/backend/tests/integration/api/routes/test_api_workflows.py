@@ -20,7 +20,7 @@ from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowRespons
 
 from backend.main import app
 from backend.tests.conftest import (
-    TEST_CAUSAL_MODEL,
+    TEST_SEQ2SEQ_MODEL,
     wait_for_job,
 )
 
@@ -72,7 +72,7 @@ def test_upload_data_launch_job(
         "max_samples": 10,
         "job_config": {
             "job_type": JobType.INFERENCE,
-            "model": TEST_CAUSAL_MODEL,
+            "model": TEST_SEQ2SEQ_MODEL,
             "provider": "hf",
             "output_field": "predictions",
             "store_to_dataset": True,
@@ -106,7 +106,7 @@ def test_upload_data_launch_job(
         "job_config": {
             "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
-            "model": TEST_CAUSAL_MODEL,
+            "model": TEST_SEQ2SEQ_MODEL,
             "provider": "hf",
         },
     }
@@ -251,7 +251,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
             json={
                 "name": workflow_name,
                 "description": "Test workflow for inf and eval",
-                "model": TEST_CAUSAL_MODEL,
+                "model": TEST_SEQ2SEQ_MODEL,
                 "provider": "hf",
                 "dataset": str(dataset_id),
                 "experiment_id": experiment_id,

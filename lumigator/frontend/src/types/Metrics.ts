@@ -44,8 +44,6 @@ export type Parameters = {
 }
 
 export type HfPipeline = {
-  accelerator: string
-  max_new_tokens: number
   model_uri: string
   revision: string
   task: string

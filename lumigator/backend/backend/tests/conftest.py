@@ -39,7 +39,7 @@ from backend.services.jobs import JobService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
-TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -442,12 +442,10 @@ def simple_infer_template():
         "hf_pipeline": {{
             "model_name_or_path": "{model_name_or_path}",
             "task": "{task}",
-            "accelerator": "{accelerator}",
             "revision": "{revision}",
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
             "torch_dtype": "{torch_dtype}",
-            "max_new_tokens": 500
         }},
         "job": {{
             "max_samples": {max_samples},

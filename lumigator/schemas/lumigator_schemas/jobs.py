@@ -77,7 +77,6 @@ class JobInferenceConfig(BaseModel):
     model: str
     provider: str
     task: str | None = "summarization"
-    accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
@@ -92,12 +91,11 @@ class JobInferenceConfig(BaseModel):
         ],
     )
     output_field: str | None = "predictions"
-    max_tokens: int = 1024
+    max_tokens: int | None = None
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
     store_to_dataset: bool = False
-    max_new_tokens: int = 500
 
 
 class JobAnnotateConfig(BaseModel):

@@ -1,18 +1,16 @@
-from enum import Enum
 from typing import Annotated
 
 import torch
 from huggingface_hub.utils import validate_repo_id
-from loguru import logger
-from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field
 from transformers.pipelines import check_task, get_supported_tasks
 
 from schemas import DatasetConfig
+from schemas import GenerationConfig as BaseGenerationConfig
 from schemas import HfPipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig
-from schemas import SamplingParameters as BaseSamplingParameters
 
 
 def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
@@ -86,13 +84,6 @@ def _validate_task(task: str) -> None:
 SupportedTask = Annotated[str, AfterValidator(lambda x: _validate_task(x))]
 
 
-class Accelerator(str, Enum):
-    AUTO = "auto"
-    CPU = "cpu"
-    CUDA = "cuda"
-    MPS = "mps"
-
-
 class JobConfig(BaseJobConfig):
     max_samples: int = -1  # set to all samples by default
     storage_path: str
@@ -105,8 +96,8 @@ class InferenceServerConfig(BaseInferenceServerConfig):
     max_retries: int = 3
 
 
-class SamplingParameters(BaseSamplingParameters):
-    max_tokens: int = 1024
+class GenerationConfig(BaseGenerationConfig):
+    max_tokens: int | None = None
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
@@ -120,45 +111,10 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: TorchDtype = "auto"
-    accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int = 500  #  Model can generate upto these many tokens
-
-    @computed_field
-    @property
-    def model(self) -> str:
-        """Returns the model name.
-
-        Returns:
-            str: The model name.
-        """
-        return self.model_name_or_path
-
-    @computed_field
-    @property
-    def device(self) -> torch.device:
-        """Returns the device to be used for inference.
-
-        Returns:
-            torch.device: The device to be used for inference.
-        """
-        if self.accelerator == Accelerator.AUTO:
-            if torch.cuda.is_available():
-                logger.info("CUDA is available. Using CUDA.")
-                return torch.device("cuda")
-
-            if torch.backends.mps.is_available():
-                logger.info("Metal Performance Shaders (MPS) is available. Using MPS.")
-                return torch.device("mps")  # Metal Performance Shaders (macOS)
-
-            logger.info("CUDA is not available. Using CPU.")
-            return torch.device("cpu")
-
-        logger.info(f"Using {self.accelerator}.")
-        return self.accelerator
 
 
-# FIXME It seems like _either_ params _or_ hf_pipeline
+# FIXME It seems like _either_ inference_server _or_ hf_pipeline
 # is needed; a subclass, generic or similar should be used
 # to model this situation
 class InferenceJobConfig(BaseInferenceJobConfig):
@@ -167,6 +123,6 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     job: JobConfig
     system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
-    params: SamplingParameters | None = None
+    generation_config: GenerationConfig | None = Field(default_factory=GenerationConfig)
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

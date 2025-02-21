@@ -28,7 +28,13 @@ class InferenceServerConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class SamplingParameters(BaseModel):
+class GenerationConfig(BaseModel):
+    """Custom and limited configuration for generation.
+    Sort of a subset of HF GenerationConfig
+    https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationConfig
+    TODO: Should we use that instead?
+    """
+
     max_tokens: int
     frequency_penalty: float
     temperature: float
@@ -42,9 +48,7 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     use_fast: bool
     trust_remote_code: bool
     torch_dtype: str
-    accelerator: str
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int
     truncation: bool = True
     task: str | None = None
 
@@ -55,7 +59,7 @@ class InferenceJobConfig(BaseModel):
     job: JobConfig
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
-    params: SamplingParameters | None = None
+    generation_config: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")
 

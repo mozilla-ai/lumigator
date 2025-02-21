@@ -204,7 +204,8 @@ test-backend-unit:
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
+	LUMIGATOR_SECRET_KEY=abcdefghijklmnopqrstuvwxyz123456 \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
 	cd lumigator/backend/; \
@@ -221,7 +222,8 @@ test-backend-integration:
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	LUMIGATOR_SECRET_KEY=abcdefghijklmnopqrstuvwxyz123456 \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)

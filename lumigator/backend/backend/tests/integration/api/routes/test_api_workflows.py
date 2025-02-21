@@ -384,10 +384,7 @@ def test_experiment_non_existing(local_client: TestClient, dependency_overrides_
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
     response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
-    assert (
-        response.json()["detail"]
-        == f"Experiment with ID {non_existing_id} not found: Experiment ID {non_existing_id} not found in mlflow"
-    )
+    assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
 def test_job_non_existing(local_client: TestClient, dependency_overrides_services):

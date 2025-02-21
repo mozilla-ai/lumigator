@@ -1,12 +1,12 @@
 from uuid import UUID
 
 from evaluator.schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
-from lumigator_schemas.jobs import JobCreate
+from lumigator_schemas.jobs import JobCreate, JobType
 
-from backend.services.job_interface import JobInterface
+from backend.services.job_interface import JobDefinition
 
 
-class JobInterfaceEvalLite(JobInterface):
+class JobInterfaceEvalLite(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
@@ -26,15 +26,17 @@ class JobInterfaceEvalLite(JobInterface):
 
 
 # Eval job details
-EVALUATOR_WORK_DIR = "../jobs/evaluate"
+# FIXME tweak paths in the backend
+EVALUATOR_WORK_DIR = "../jobs/evaluator"
 # FIXME maybe we can read the requirements file and tweak it in the backend
 # otherwise, we make another method in the job interface
-EVALUATOR_PIP_REQS = "requirements_cpu.txt"
+EVALUATOR_PIP_REQS = "../jobs/evaluator/requirements.txt"
 EVALUATOR_COMMAND = str = "python evaluator.py"
 
-JOB_INTERFACE = JobInterfaceEvalLite(
+JOB_DEFINITION: JobDefinition = JobInterfaceEvalLite(
     command=EVALUATOR_COMMAND,
     pip_reqs=EVALUATOR_PIP_REQS,
     work_dir=EVALUATOR_WORK_DIR,
     config_model=EvalJobConfig,
+    type=JobType.EVALUATION,
 )

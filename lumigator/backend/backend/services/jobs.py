@@ -1,7 +1,6 @@
 import asyncio
 import csv
 import json
-from abc import ABC, abstractmethod
 from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -10,9 +9,9 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 import evaluator
-import evaluator.interface
+import evaluator.definition
 import inference
-import inference.interface
+import inference.definition
 import loguru
 import requests
 from fastapi import BackgroundTasks, UploadFile
@@ -29,7 +28,6 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobResultResponse,
     JobStatus,
-    JobType,
 )
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -48,10 +46,12 @@ from backend.services.exceptions.job_exceptions import (
 from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
-job_settings = {}
-job_settings[JobType.EVALUATION] = evaluator.interface.JOB_INTERFACE
-job_settings[JobType.INFERENCE] = inference.interface.JOB_INTERFACE
 ############################
+job_modules = [evaluator, inference]
+############################
+job_settings_map = {
+    job_module.definition.JOB_DEFINITION.type: job_module.definition.JOB_DEFINITION for job_module in job_modules
+}
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
@@ -63,74 +63,6 @@ JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 # (resp. Eval)
 # For the moment, something will convert one into the other, and we'll decide where
 # to put this. The jobs should ideally have no dependency towards the backend.
-
-
-class JobDefinition(ABC):
-    """Abstract base class for jobs.
-
-    Attributes:
-    ----------
-    command : str
-        The command to execute the job.
-    pip_reqs : str, optional
-        Path to a requirements file specifying dependencies (default: None).
-    work_dir : str, optional
-        Working directory for the job (default: None).
-    ray_worker_gpus_fraction : float
-        Fraction of a GPU allocated per Ray worker.
-    ray_worker_gpus : float
-        Number of GPUs allocated per Ray worker.
-    config_model : BaseModel
-        Pydantic model representing job-specific configuration.
-
-    """
-
-    command: str
-    pip_reqs: str | None
-    work_dir: str | None
-    ray_worker_gpus_fraction: float
-    ray_worker_gpus: float
-    config_model: BaseModel
-
-    # This should end up not being necessary, since we'd expose the whole job config
-    @abstractmethod
-    def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str) -> BaseModel:
-        """Generates
-
-        Parameters
-        ----------
-        request : JobCreate
-            Non-job-specific parameters for job creation
-        record_id : UUID
-            Job ID assigned to the job
-        dataset_path : str
-            S3 path for the input dataset
-        storage_path : str
-            S3 where the backend will store the results from the job
-
-        Returns:
-        -------
-        generate_config : BaseModel
-            A job-specific pydantic model that will be sent to the Ray job instance
-        """
-        pass
-
-    @abstractmethod
-    def store_as_dataset(self) -> bool:
-        """Returns:
-        -------
-        store_as_dataset : bool
-            Whether the results should be stored in an S3 path
-        """
-        pass
-
-    def __init__(self, command, pip_reqs, work_dir, ray_worker_gpus_fraction, ray_worker_gpus, config_model):
-        self.command = command
-        self.pip_reqs = pip_reqs
-        self.work_dir = work_dir
-        self.ray_worker_gpus_fraction = ray_worker_gpus_fraction
-        self.ray_worker_gpus = ray_worker_gpus
-        self.config_model = config_model
 
 
 class JobService:
@@ -426,9 +358,9 @@ class JobService:
         # This includes both the command that is going to be executed and its
         # arguments defined in eval_config_args
         try:
-            job_settings = self.job_settings[job_type]
-        except KeyError as e:
-            raise JobTypeUnsupportedError("Unknown job type") from e
+            job_settings = job_settings_map[job_type]
+        except KeyError:
+            raise JobTypeUnsupportedError("Unknown job type") from None
 
         # Create a db record for the job
         # To find the experiment that a job belongs to,

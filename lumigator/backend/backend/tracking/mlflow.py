@@ -15,7 +15,7 @@ from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
-from mlflow.exceptions import MlflowException, RestException
+from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
@@ -253,7 +253,7 @@ class MLflowTrackingClient(TrackingClient):
             parameters=self._compile_parameters(all_job_ids),
         )
         # Currently, only compile the result json artifact if the workflow has succeeded
-        if workflow_details.status != WorkflowStatus.SUCCEEDED.value:
+        if workflow_details.status != WorkflowStatus.SUCCEEDED:
             return workflow_details
         # now we need to combine all of the files that were output into a single json.
         # look through every job associated with this workflow and get the results

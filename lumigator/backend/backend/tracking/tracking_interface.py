@@ -15,7 +15,14 @@ class TrackingClient(Protocol):
     """Interface for tracking clients."""
 
     def create_experiment(
-        self, name: str, description: str, task: TaskType, dataset: UUID, max_samples: int
+        self,
+        name: str,
+        description: str,
+        task: TaskType,
+        source_language: str,
+        target_language: str,
+        dataset: UUID,
+        max_samples: int,
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         ...

@@ -20,6 +20,9 @@ class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
     experiment_id: str | None = None
+    task: str
+    source_language: str | None = None
+    target_language: str | None = None
     model: str
     provider: str
     dataset: UUID

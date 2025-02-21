@@ -33,7 +33,14 @@ class MLflowTrackingClient(TrackingClient):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
     def create_experiment(
-        self, name: str, description: str, task: TaskType, dataset: UUID, max_samples: int
+        self,
+        name: str,
+        description: str,
+        task: TaskType,
+        source_language: str,
+        target_language: str,
+        dataset: UUID,
+        max_samples: int,
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
@@ -42,6 +49,8 @@ class MLflowTrackingClient(TrackingClient):
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
             self._client.set_experiment_tag(experiment_id, "task", task.value)
+            self._client.set_experiment_tag(experiment_id, "source_language", source_language)
+            self._client.set_experiment_tag(experiment_id, "target_language", target_language)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -56,6 +65,8 @@ class MLflowTrackingClient(TrackingClient):
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
                 self._client.set_experiment_tag(experiment_id, "task", task.value)
+                self._client.set_experiment_tag(experiment_id, "source_language", source_language)
+                self._client.set_experiment_tag(experiment_id, "target_language", target_language)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
                 self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")

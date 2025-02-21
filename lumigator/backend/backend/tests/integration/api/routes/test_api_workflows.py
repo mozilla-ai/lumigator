@@ -251,6 +251,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
             json={
                 "name": workflow_name,
                 "description": "Test workflow for inf and eval",
+                "task": "summarization",
                 "model": TEST_CAUSAL_MODEL,
                 "provider": "hf",
                 "dataset": str(dataset_id),

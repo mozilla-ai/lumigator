@@ -34,9 +34,6 @@ jobs:
       - name: Check the OpenAPI spec
         run: make check-openapi-docs
 
-      - name: Stop Lumigator Docker Compose stack
-        run: make stop-lumigator
-
   build-docs:
     name: Docs - Build and publish
     runs-on: ubuntu-latest

@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -16,11 +16,13 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
-CONFIG_BUILD_DIR=build
-# Default config prefixed with dot to hide from user
-CONFIG_DEFAULT=.default.conf
-# User editable config file (will be generated if missing)
-CONFIG_OVERRIDE=user.conf
+CONFIG_BUILD_DIR="$(shell pwd)/build"
+# Path to default config prefixed with dot to hide from user
+CONFIG_DEFAULT_FILE:="$(shell pwd)/.default.conf"
+# Directory for user specific configuration and keys
+CONFIG_USER_DIR:="${HOME}/.lumigator"
+# Path to user editable config file (will be generated if missing)
+CONFIG_OVERRIDE_FILE:="$(CONFIG_USER_DIR)/user.conf"
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -250,15 +252,5 @@ config-clean:
 	$(call remove_config_dir)
 
 # config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
-config-generate-env: config-clean
-	@mkdir -p $(CONFIG_BUILD_DIR)
-
-	@if [ -f $(CONFIG_OVERRIDE) ]; then \
-		echo "Found user configuration: '$(CONFIG_OVERRIDE)', overrides will be applied"; \
-		scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_OVERRIDE) > "$(CONFIG_BUILD_DIR)/.env"; \
-	else \
-		echo "No user configuration found, default will be used: '$(CONFIG_DEFAULT)'"; \
-		cp $(CONFIG_DEFAULT) "$(CONFIG_BUILD_DIR)/.env"; \
-	fi
-
-	@echo "Config file generated: '$(CONFIG_BUILD_DIR)/.env'";
+config-generate-env: config-clean config-generate-key
+	@scripts/config_generate_env.sh "$(CONFIG_BUILD_DIR)" "$(CONFIG_USER_DIR)" "$(CONFIG_DEFAULT_FILE)" "$(CONFIG_OVERRIDE_FILE)"

@@ -1,5 +1,21 @@
 #!/bin/bash
 
+set -e  # Exit on error
+
+# #######################
+# Source common functions
+# #######################
+COMMON_FILE="$(dirname "$0")/common.sh"
+if [ -f "$COMMON_FILE" ]; then
+    source "$COMMON_FILE"
+else
+    echo "Error: common.sh not found!" >&2
+    exit 1
+fi
+
+# #########################
+# Merge configuration files
+# #########################
 merge_conf_files() {
     temp_file=$(mktemp)
     keys_order=()
@@ -22,9 +38,31 @@ merge_conf_files() {
     rm "$temp_file"
 }
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-    echo "Usage: $0 <conf_file_default> [conf_file_override]"
+# Main script logic for handling .env generation
+generate_env() {
+    CONFIG_BUILD_DIR="$1"
+    CONFIG_DEFAULT_FILE="$2"
+    CONFIG_OVERRIDE_FILE="$3"
+
+    echo_white "Generating the .env file..."
+    mkdir -p "$CONFIG_BUILD_DIR"  # Ensure the build (output) directory exists
+
+    if [ -f "$CONFIG_OVERRIDE_FILE" ]; then
+        echo_green "Found user configuration: '$CONFIG_OVERRIDE_FILE', overrides will be applied"
+        merge_conf_files "$CONFIG_DEFAULT_FILE" "$CONFIG_OVERRIDE_FILE" > "$CONFIG_BUILD_DIR/.env"
+    else
+        echo_yellow "No user configuration found, default will be used: '$CONFIG_DEFAULT_FILE'"
+        cp "$CONFIG_DEFAULT_FILE" "$CONFIG_BUILD_DIR/.env"
+    fi
+
+    echo_green "Config file generated: '$CONFIG_BUILD_DIR/.env'"
+}
+
+# Ensure the script is being called with the correct number of arguments
+if [[ $# -lt 3 || $# -gt 4 ]]; then
+    echo "Usage: $0 <config_build_dir> <config_user_dir> <config_file_default> [config_file_override]"
     exit 1
 fi
 
-merge_conf_files "$@"
+# Call the function to generate the .env file
+generate_env "$1" "$2" "$3" "$4"

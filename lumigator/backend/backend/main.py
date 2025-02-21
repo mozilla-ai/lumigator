@@ -16,7 +16,7 @@ from backend.api.router import api_router
 from backend.api.routes.datasets import dataset_exception_mappings
 from backend.api.routes.experiments import experiment_exception_mappings
 from backend.api.routes.jobs import job_exception_mappings
-from backend.api.routes.keys import key_exception_mappings
+from backend.api.routes.secrets import secret_exception_mappings
 from backend.api.routes.workflows import workflow_exception_mappings
 from backend.api.tags import TAGS_METADATA
 from backend.services.exceptions.base_exceptions import ServiceError
@@ -98,7 +98,7 @@ def create_app() -> FastAPI:
         experiment_exception_mappings(),
         job_exception_mappings(),
         workflow_exception_mappings(),
-        key_exception_mappings(),
+        secret_exception_mappings(),
     ]
 
     # Add a handler for each error -> status mapping.

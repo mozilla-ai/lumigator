@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from pydantic import BaseModel, Field
 
 
@@ -13,3 +14,11 @@ class SecretGetRequest(BaseModel):
 
     name: str = Field(..., max_length=255, min_length=1)
     description: str
+=======
+from pydantic import BaseModel
+
+class Secret(BaseModel):
+    secret_name: str | None = None
+    secret_value: str | None = None
+    description: str = ""
+>>>>>>> 3b8469c6 (Rename keys to secrets)

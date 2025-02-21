@@ -70,13 +70,7 @@
             </span>
           </template>
         </Column>
-        <Menu
-          id="options_menu"
-          ref="optionsMenu"
-          :model="options"
-          :popup="true"
-        >
-    </Menu>
+        <Menu id="options_menu" ref="optionsMenu" :model="options" :popup="true"> </Menu>
         <template #expansion="slotProps">
           <div class="l-experiment-table__jobs-table-container">
             <l-jobs-table
@@ -146,7 +140,7 @@ const options = ref<MenuItem[]>([
   },
   {
     label: () => {
-      return 'Delete Experiment';
+      return 'Delete Experiment'
     },
     icon: 'pi pi-trash',
     style: 'color: red;',
@@ -154,14 +148,14 @@ const options = ref<MenuItem[]>([
     command: (e: MenuItemCommandEvent) => {
       emit('delete-option-clicked', focusedItem.value)
     },
-  }
+  },
 ])
 
 const style = computed(() => {
   return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
 })
 
-const toggleOptionsMenu = (event:MouseEvent, selectedItem: Workflow | Experiment) => {
+const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow | Experiment) => {
   focusedItem.value = selectedItem
   optionsMenu.value.toggle(event)
 }

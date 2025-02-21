@@ -1,6 +1,5 @@
 <template>
   <div class="l-experiment-details">
-
     <Button
       icon="pi pi-times"
       severity="secondary"
@@ -251,7 +250,7 @@ function isExperiment(item: Experiment | Workflow): item is Experiment {
   position: sticky;
   top: 0;
   padding: 1rem 0;
-  z-index: 100
+  z-index: 100;
 }
 
 .l-experiment-details__header-actions {

@@ -45,26 +45,19 @@
         </div>
       </template>
     </Column>
-            <Column header="options">
-          <template #body="slotProps">
-            <span
-              class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
-              style="pointer-events: all"
-              aria-haspopup="true"
-              aria-controls="optionsMenu"
-              @click.stop="toggleOptionsMenu($event, slotProps.data)"
-            >
-            </span>
-          </template>
-        </Column>
-        <Menu
-          id="options_menu"
-          ref="optionsMenu"
-          :model="options"
-          :popup="true"
+    <Column header="options">
+      <template #body="slotProps">
+        <span
+          class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
+          style="pointer-events: all"
+          aria-haspopup="true"
+          aria-controls="optionsMenu"
+          @click.stop="toggleOptionsMenu($event, slotProps.data)"
         >
-    </Menu>
-
+        </span>
+      </template>
+    </Column>
+    <Menu id="options_menu" ref="optionsMenu" :model="options" :popup="true"> </Menu>
   </DataTable>
 </template>
 
@@ -123,14 +116,13 @@ const options = ref<MenuItem[]>([
     command: (e: MenuItemCommandEvent) => {
       emit('delete-workflow-clicked', clickedItem.value)
     },
-  }
+  },
 ])
 
-const toggleOptionsMenu = (event:MouseEvent, selectedItem: Workflow) => {
+const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow) => {
   clickedItem.value = selectedItem
   optionsMenu.value.toggle(event, selectedItem)
 }
-
 
 function handleRowClick(event: DataTableRowClickEvent) {
   clickedItem.value = event.data

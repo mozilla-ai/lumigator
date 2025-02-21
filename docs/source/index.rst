@@ -40,13 +40,13 @@ datasets, experiments, workflows, and jobs.
 The backend also coordinates interaction with a Ray cluster and a database. The Ray cluster is used to run jobs, and
 the database is used to store metadata about the platform, jobs, and datasets.
 
-For more information about datasets, see :doc:`conceptual-guides/datasets`.
+For more information about datasets, see :doc:`api/datasets`.
 
-For more information about experiments, see :doc:`conceptual-guides/experiments`.
+For more information about experiments, see :doc:`api/experiments`.
 
-For more information about workflows, see :doc:`conceptual-guides/workflows`.
+For more information about workflows, see :doc:`api/workflows`.
 
-For more information about jobs, see :doc:`conceptual-guides/jobs`.
+For more information about jobs, see :doc:`api/jobs`.
 
 For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
 
@@ -82,10 +82,6 @@ For more information about the backend routes, see the rendered API specs in the
    :caption: Conceptual Guides
 
    conceptual-guides/architecture
-   conceptual-guides/datasets
-   conceptual-guides/experiments
-   conceptual-guides/workflows
-   conceptual-guides/jobs
 
 .. toctree::
    :maxdepth: 1

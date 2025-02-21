@@ -33,7 +33,7 @@ The `build` directory and the user defined config file are both marked in `.giti
 
 ## How should I set my own settings?
 
-User specific configuration can be stored in a file named `user.conf`, this file is configured in `.gitignore` and will never be commited to version control.
+User specific configuration can be stored in a file named `user.conf` in under `${HOME}/.lumigator`, this file is configured in `.gitignore` for safety, but should never appear in your repo directory.
 
 `user.conf` must be created manually when required, **only** add key/values for the settings you explicitly wish to change from the defaults.
 

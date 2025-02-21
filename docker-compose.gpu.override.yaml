@@ -9,6 +9,7 @@ services:
     gpus: all
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
   backend:
     environment:

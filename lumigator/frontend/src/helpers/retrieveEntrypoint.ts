@@ -1,4 +1,4 @@
-import type { JobDetails } from '@/types/JobDetails'
+import type { Job } from '@/types/Job'
 
 /**
  * Retrieves and normalizes the entrypoint configuration from a job object.
@@ -7,7 +7,7 @@ import type { JobDetails } from '@/types/JobDetails'
  * @param {string} job.entrypoint - The entrypoint stringified JSON provided from the API
  * @returns {Object|null} The parsed and normalized entrypoint configuration object, or null if invalid.
  */
-export function retrieveEntrypoint(job: JobDetails) {
+export function retrieveEntrypoint(job: Job) {
   if (!job || !job.entrypoint) {
     console.error('Invalid job data')
     return
@@ -48,12 +48,12 @@ export function retrieveEntrypoint(job: JobDetails) {
     let modelPath = ''
     if (jsonObject?.model?.path) {
       modelPath = jsonObject.model.path
-    } else if (jsonObject?.model?.inference?.engine) {
-      modelPath = jsonObject.model.inference.engine
-    } else if (jsonObject?.hf_pipeline?.model_uri) {
-      modelPath = jsonObject.hf_pipeline.model_uri
-    } else if (jsonObject?.inference_server?.engine) {
-      modelPath = jsonObject.inference_server.engine
+    } else if (jsonObject?.model?.inference?.model) {
+      modelPath = jsonObject.model.inference.model
+    } else if (jsonObject?.hf_pipeline?.model_name_or_path) {
+      modelPath = jsonObject.hf_pipeline.model_name_or_path
+    } else if (jsonObject?.inference_server?.model) {
+      modelPath = jsonObject.inference_server.model
     } else {
       throw new Error('Unable to parse model path from entrypoint config: ' + configString)
     }

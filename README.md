@@ -60,8 +60,8 @@ services networked together to make up all the components of the Lumigator appli
 > uses SQLite for this purpose.
 
 > [!NOTE]
-If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
-environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
+If you want to evaluate against LLM APIs like OpenAI/Mistral/Deepseek, you need to set the appropriate
+environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. Refer to the
 [troubleshooting section](https://mozilla-ai.github.io/lumigator/get-started/troubleshooting.html#tokens-api-keys-not-set)
 in our documentation for more details.
 
@@ -88,10 +88,11 @@ To start Lumigator locally, follow these steps:
     **Important: Continue the next steps in this same terminal.**
 
 
-1. If you intend to use Mistral API or OpenAI API, use that same terminal and run:
+1. If you intend to use Mistral API or OpenAI API or Deepseek API, use that same terminal and run:
     ```bash
     export MISTRAL_API_KEY=your_mistral_api_key
     export OPENAI_API_KEY=your_openai_api_key
+    export DEEPSEEK_API_KEY=your_deepseek_api_key
     ```
     **Important: Continue the next steps in this same terminal.**
 
@@ -112,9 +113,8 @@ quick walkthrough.
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider’s S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See the
-[operational guides](https://mozilla-ai.github.io/lumigator/operations-guide/kubernetes.html) in the
-documentation for more deployment options.
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. Ref to the operational guides in the
+[docs](https://mozilla-ai.github.io/lumigator/) for more deployment options.
 
 If you want to permanently set any of the environment variables above, you can  add them to your rc file (e.g. `~/.bashrc`, `~/.zshrc`) or directly to the
 `.env` file that is automatically created after the first execution of lumigator.

@@ -135,7 +135,7 @@ import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import type { JobDetails } from '@/types/JobDetails'
+import type { Job } from '@/types/Job'
 
 const emit = defineEmits([
   'l-close-details',
@@ -164,7 +164,6 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isJobFocused = computed(() => Boolean(selectedJob.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
 
 // TODO: this needs refactor when the backend provides experiment id
 const currentItemStatus = computed(() => {
@@ -175,12 +174,12 @@ const isInference = computed(() => {
   return isJobFocused.value && inferenceJobs.value.some((job) => job.id === selectedJob.value?.id)
 })
 
-const focusedItem: ComputedRef<JobDetails | undefined> = computed(() => {
+const focusedItem: ComputedRef<Job | undefined> = computed(() => {
   if (selectedJob.value) {
     return selectedJob.value
+  } else {
+    return undefined
   }
-  const selected = jobs.value.find((job) => job.id === selectedJob.value?.id)
-  return selected ? selected : selectedJob.value
 })
 
 const tagSeverity = computed(() => {

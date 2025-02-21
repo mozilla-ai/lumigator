@@ -1,45 +1,19 @@
-// import type { Model } from './Model'
-// import type { WorkflowStatus } from './Workflow'
+import type { Bertscore, Meteor, Rouge } from './Metrics'
+import type { Workflow, WorkflowStatus } from './Workflow'
 
-// export type Experiment = {
-//   id: string
-//   created: string
-//   dataset: string
-//   description: string
-//   name: string
-//   experimentStart: string
-//   jobs: Job[]
-//   useCase: string
-//   runTime: string
-//   samples?: number
-//   models: Model[]
-//   max_samples?: number
-//   status: WorkflowStatus
-// }
+export type Experiment = {
+  id: string
+  name: string
+  description: string
+  created_at: string
+  updated_at: string
+  workflows: Workflow[]
+  task: 'summarization'
+  dataset: string
+  max_samples: number
 
-// export type Job = {
-//   id: string
-//   status: WorkflowStatus
-//   metadata: Record<string, unknown>
-//   end_time: string
-//   model: Record<string, unknown>
-//   name: string
-//   experimentStart: string
-//   submission_id: string
-//   start_time: string
-//   description: string
-//   entrypoint: string
-// }
-
-export type Task = {
-  summarization: {
-    early_stopping: boolean
-    length_penalty: number
-    max_length: number
-    min_length: number
-    no_repeat_ngram_size: number
-    num_beats: number
-  } | null
+  // added by the frontend, TODO: refactor
+  status: WorkflowStatus
 }
 
 export type ExperimentResults = {
@@ -49,32 +23,6 @@ export type ExperimentResults = {
   rouge: Rouge
   runTime: string | undefined
   jobResults: EvaluationJobResults[]
-}
-
-export type Bertscore = {
-  f1: number[]
-  f1_mean: number
-  hashcode: number
-  precision: number[]
-  precision_mean: number
-  recall: number[]
-  recall_mean: number
-}
-
-export type Meteor = {
-  meteor: number[]
-  meteor_mean: number
-}
-
-export type Rouge = {
-  rouge1: number[]
-  rouge1_mean: number
-  rouge2: number[]
-  rouge2_mean: number
-  rougeL: number[]
-  rougeL_mean: number
-  rougeLsum: number[]
-  rougeLsum_mean: number
 }
 
 export type EvaluationJobResults = {

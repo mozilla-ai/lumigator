@@ -159,6 +159,8 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
+setup:
+	@scripts/setup_uv.sh;
 
 # SDK tests
 # We have both unit and integration tests for the SDK.

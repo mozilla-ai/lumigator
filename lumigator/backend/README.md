@@ -10,12 +10,20 @@ for the following components:
 
 ## Initialization
 
+This application uses `uv` as a package manager, you can follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/) to install it
+
 To initialize the dependencies and the virtual environment:
 
 ```bash
 uv sync && \
 uv sync --dev && \
 source .venv/bin/activate
+```
+
+You can instead, initialize virtual environments for **all** `uv` managed projects using:
+
+```console
+user@host:~/lumigator$ make setup
 ```
 
 ## Make usage

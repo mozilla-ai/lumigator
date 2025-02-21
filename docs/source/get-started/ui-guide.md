@@ -2,10 +2,10 @@
 Lumigator comes with a web-based UI that allows you to interact with the Lumigator API. It is designed to be easy to use and to provide a quick way to get started with Lumigator.
 
 ## Getting Started
-Follow the [installation guide](installation.md#local-deployment) to get Lumigator up and running. The UI can then be accessed by visiting [localhost](http://localhost) on your web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
+Follow the [quickstart](quickstart.md) to get Lumigator up and running. The UI can then be accessed by visiting [localhost](http://localhost) on your web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
 
 ## Upload a Dataset
-The main purpose of Lumigator is to help you select a model that works well for your particular data. It does this by evaluating multiple models on a sample of your data: your dataset.
+The main purpose of Lumigator is to help you select the model that works best for your particular data, amongst several available. It does this by evaluating multiple models on a sample of your data: your dataset.
 
 The first step is to upload your dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
 
@@ -22,7 +22,7 @@ Next we move on to the **Experiments** section. Start by clicking on the **Creat
 
 ![Experiments Page](../../assets/ui_guide_steps/experiments_page.png)
 
-This will open a sidebar where you would specify which use case and dataset, and further experiment details. The maximum samples field defines the number of rows from the dataset to be used for the experiment, on which Lumigator would run inference and evaluation to produce as results the [relevent metrics](quickstart.md#retrieve-the-results).
+This will open a sidebar where you would specify which use case and dataset, and further experiment details. The maximum samples field defines the number of rows from the dataset to be used for the experiment, on which Lumigator would run inference and evaluation to produce as results the [relevant metrics](quickstart.md#get-the-results).
 
 Below that, you have the option to select the models to be used for the experiment. Multiple models may be simultaneously selected.
 
@@ -30,7 +30,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-Reminder: In order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [installation guide](installation.md).
+Reminder: In order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [quickstart](quickstart.md).
 ```
 
 Finally click the **Run Experiment** button.

@@ -7,7 +7,7 @@ services:
     runtime: nvidia
     gpus: $GPU_COUNT
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_VISIBLE_DEVICES
 
   backend:
     environment:

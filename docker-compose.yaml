@@ -128,7 +128,7 @@ services:
   backend:
     labels:
       ai.mozilla.product_name: lumigator
-    image: mzdotai/lumigator:v0.1.1-alpha
+    image: mzdotai/lumigator:latest
     pull_policy: always
     build:
       context: .
@@ -189,7 +189,7 @@ services:
     labels:
       ai.mozilla.product_name: lumigator
     pull_policy: always
-    image: mzdotai/lumigator-frontend:v0.1.1-alpha
+    image: mzdotai/lumigator-frontend:latest
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"

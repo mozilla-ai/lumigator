@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, status
-from lumigator_schemas.secrets import Secret
+from lumigator_schemas.secrets import SecretGetRequest, SecretUploadRequest
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -17,22 +17,30 @@ def secret_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 @router.put(
     "/{secret_name}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_201_CREATED: {"description": "Dataset successfully uploaded"},
+        status.HTTP_201_CREATED: {"description": "Secret successfully created"},
+        status.HTTP_204_NO_CONTENT: {"description": "Secret successfully updated"},
     },
 )
 def upload_secret(
     service: SecretServiceDep,
-    secret: Secret,
-    secret_name: str,
+    secret_upload_request: SecretUploadRequest,
     request: Request,
     response: Response,
+    secret_name: str,
 ) -> None:
     """Uploads a secret for use in Lumigator.
 
     Lumigator uses different secrets for purposes such as external API calls.
     The user can upload new values for these secrets, but they cannot retrieve
-    them.
+    those values.
     """
-    service.upload_secret(secret, secret_name)
+    # Ensure we validate the secret name using our models.
+    SecretGetRequest(name=secret_name, **secret_upload_request.model_dump())
+
+    is_created = service.upload_secret(secret_name, secret_upload_request)
+    if is_created:
+        response.status_code = status.HTTP_201_CREATED
+    else:
+        response.status_code = status.HTTP_204_NO_CONTENT

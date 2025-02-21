@@ -258,10 +258,11 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     dataset_id = dataset_response.id
 
     # Create an experiment
+    task = "summarization"
     request = ExperimentCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
-        task="summarization",
+        task=task,
         dataset=dataset_id,
     )
     experiment_response = lumi_client_int.experiments.create_experiment(request)
@@ -272,6 +273,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_1",
         description="Test workflow for inf and eval",
+        task=task,
         model="hf-internal-testing/tiny-random-LlamaForCausalLM",
         provider="hf",
         dataset=str(dataset_id),
@@ -298,6 +300,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_2",
         description="Test workflow for inf and eval",
+        task=task,
         model="hf-internal-testing/tiny-random-LlamaForCausalLM",
         provider="hf",
         dataset=str(dataset_id),

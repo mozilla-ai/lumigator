@@ -71,7 +71,7 @@ generate_env() {
         USER_KEY_VALUE=$(tr -d '\n' < "$CONFIG_USER_KEY_FILE")  # Remove newlines
         echo "$CONFIG_USER_KEY_ENV_VAR=$USER_KEY_VALUE" > "$TEMP_USER_KEY_FILE"
     else
-        echo_red "Required user key file '$CONFIG_USER_KEY_FILE' not found. Exiting." >&2
+        echo_red "Error: Required user key file '$CONFIG_USER_KEY_FILE' not found. Exiting." >&2
         exit 1
     fi
 

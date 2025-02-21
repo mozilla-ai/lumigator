@@ -178,7 +178,7 @@ async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
 
   confirm.require({
     message: `${experimentOrWorkflow.name}`,
-    header: `Delete  ${isWorkflow ? 'Workflow' : 'Experiment'}?`,
+    header: `Delete  ${isWorkflow ? 'Model Run' : 'Experiment'}?`,
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancel',
     rejectProps: {

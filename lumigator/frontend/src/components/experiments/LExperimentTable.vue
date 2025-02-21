@@ -24,7 +24,7 @@
             {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
-        <Column field="status" header="status">
+        <Column field="status" header="status" :style="columnStyles.status">
           <template #body="slotProps">
             <div>
               <Tag
@@ -165,6 +165,7 @@ const columnStyles = computed(() => {
     expander: 'width: 4rem',
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
+    status: 'width: 24rem',
   }
 })
 
@@ -294,8 +295,8 @@ watch(
   place-content: center;
 
   &__options-trigger {
-    padding-left: $l-spacing-1;
-    margin-left: 10% !important;
+    // padding-left: $l-spacing-1;
+    // margin-left: 10% !important;
   }
 
   &__tag {

@@ -18,7 +18,7 @@
         {{ formatDate(slotProps.data.created_at) }}
       </template>
     </Column>
-    <Column field="status" header="status">
+    <Column field="status" header="status" :style="columnStyles.status">
       <template #body="slotProps">
         <div>
           <Tag
@@ -45,10 +45,10 @@
         </div>
       </template>
     </Column>
-    <Column header="options">
+    <Column field="options" header="options">
       <template #body="slotProps">
         <span
-          class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
+          class="pi pi-fw pi-ellipsis-h options-trigger"
           style="pointer-events: all"
           aria-haspopup="true"
           aria-controls="optionsMenu"
@@ -133,13 +133,20 @@ function handleRowClick(event: DataTableRowClickEvent) {
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
+
+.options-trigger {
+    // padding-left: -$l-spacing-1;
+}
+
 .l-job-table {
   $root: &;
   width: 100%;
   display: flex;
   place-content: center;
 
-  .p-datatable-table-container {
+  ::v-deep(.p-datatable-table-container) {
+    border: none;
+
     [class*='p-row-'] {
       background-color: $l-main-bg;
     }
@@ -151,25 +158,6 @@ function handleRowClick(event: DataTableRowClickEvent) {
     line-height: 1;
     font-weight: $l-font-weight-normal;
     text-transform: uppercase;
-  }
-}
-</style>
-
-<style lang="scss">
-@use '@/styles/variables' as *;
-
-.l-job-table {
-  $root: &;
-  width: 100%;
-  display: flex;
-  place-content: center;
-
-  .p-datatable-table-container {
-    border: none;
-  }
-
-  .p-datatable-table-container [class*='p-row-'] {
-    background-color: $l-main-bg;
   }
 }
 </style>

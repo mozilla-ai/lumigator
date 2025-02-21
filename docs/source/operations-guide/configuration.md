@@ -60,11 +60,13 @@ ${HOME}/.lumigator/lumigator.key`
 
 During deployment, when the `build/.env` file is generated, this key will be merged into the `.env` with the key name `LUMIGATOR_SECRET_KEY`.
 
-```{note}
 Due to the sensitive nature of the key, you cannot override the value for LUMIGATOR_SECRET_KEY that appears
 in the .env using user.conf.
 
-It will always be read from ${HOME}/.lumigator/lumigator.key, and must be present.
+It will be read from ${HOME}/.lumigator/lumigator.key, and must be present.
+
+```{note}
+Please ensure you have not exported LUMIGATOR_SECRET_KEY as this will conflict with the accurate value in the generated .env file.
 ```
 
 Once the key is generated, it should not be changed otherwise any data stored in Lumigator's databse will become unreadable.

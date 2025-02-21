@@ -55,12 +55,6 @@ generate_key() {
         echo_yellow "Fixing permissions for $KEY_FILE (current: $CURRENT_KEY_PERMS, expected: $EXPECTED_KEY_PERMS)"
         chmod "$EXPECTED_KEY_PERMS" "$KEY_FILE"
     fi
-
-    # Output instructions to set the environment variable
-    echo_green "Run the following command to set the key in your environment:"
-    echo ""
-    echo_white "    export $APP_ENV_VAR_NAME=\$(tr -d '\\\\n' < \"$KEY_FILE\")"
-    echo ""
 }
 
 

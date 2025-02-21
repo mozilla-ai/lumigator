@@ -48,7 +48,7 @@ generate_env() {
     CONFIG_USER_KEY_FILE="$2"
     CONFIG_USER_KEY_ENV_VAR="$3"
     CONFIG_DEFAULT_FILE="$4"
-    CONFIG_OVERRIDE_FILE="5"
+    CONFIG_OVERRIDE_FILE="$5"
 
     echo_white "Generating the .env file..."
     mkdir -p "$CONFIG_BUILD_DIR"  # Ensure the build (output) directory exists

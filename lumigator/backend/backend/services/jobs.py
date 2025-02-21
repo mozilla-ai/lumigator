@@ -347,6 +347,7 @@ class JobService:
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
+            system_prompt=request.job_config.system_prompt,
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job

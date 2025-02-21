@@ -16,15 +16,15 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
-CONFIG_BUILD_DIR="$(shell pwd)/build"
+CONFIG_BUILD_DIR=$(shell pwd)/build
 # Path to default config prefixed with dot to hide from user
-CONFIG_DEFAULT_FILE:="$(shell pwd)/.default.conf"
+CONFIG_DEFAULT_FILE:=$(shell pwd)/.default.conf
 # Directory for user specific configuration and keys
-CONFIG_USER_DIR:="${HOME}/.lumigator"
+CONFIG_USER_DIR:=${HOME}/.lumigator
 # Path to user editable config file (will be generated if missing)
-CONFIG_OVERRIDE_FILE:="$(CONFIG_USER_DIR)/user.conf"
+CONFIG_OVERRIDE_FILE:=$(CONFIG_USER_DIR)/user.conf
 # Location of the key to use for encryption.
-CONFIG_USER_KEY_FILE:="$(CONFIG_USER_DIR)/lumigator.key"
+CONFIG_USER_KEY_FILE:=$(CONFIG_USER_DIR)/lumigator.key
 # Env var name to hold encryption key
 CONFIG_USER_KEY_ENV_VAR=LUMIGATOR_SECRET_KEY
 

@@ -105,7 +105,9 @@ class WorkflowService:
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
 
         # wait for the inference job to complete
-        status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=request.job_timeout)
+        status = await self._job_service.wait_for_job_complete(
+            inference_job.id, max_wait_time_sec=request.job_timeout_sec
+        )
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Inference job {inference_job.id} failed")
             try:
@@ -148,7 +150,9 @@ class WorkflowService:
         )
 
         # wait for the evaluation job to complete
-        status = await self._job_service.wait_for_job_complete(evaluation_job.id, max_wait_time_sec=request.job_timeout)
+        status = await self._job_service.wait_for_job_complete(
+            evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
+        )
         self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")

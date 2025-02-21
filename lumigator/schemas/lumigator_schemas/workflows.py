@@ -28,7 +28,7 @@ class WorkflowCreateRequest(BaseModel):
     system_prompt: str | None = None
     inference_output_field: str = "predictions"
     config_template: str | None = None
-    job_timeout: NonNegativeInt = 60 * 10
+    job_timeout_sec: NonNegativeInt = 60 * 10
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

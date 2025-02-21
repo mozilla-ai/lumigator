@@ -15,6 +15,7 @@
         :table-data="experiments"
         @l-experiment-selected="onSelectExperiment($event)"
         @l-workflow-selected="onSelectWorkflow($event)"
+        @delete-option-clicked="handleDeleteButtonClicked"
       />
     </div>
     <Teleport to=".sliding-panel">
@@ -32,7 +33,7 @@
           @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
-          @delete-button-clicked="handleDeleteSelectedItemClicked"
+          @delete-button-clicked="handleDeleteButtonClicked"
         />
       </transition>
     </Teleport>
@@ -166,13 +167,14 @@ const onCloseDetails = () => {
 const toast = useToast()
 const confirm = useConfirm()
 
-async function handleDeleteSelectedItemClicked() {
-  const experimentOrWorkflow = selectedWorkflow.value || selectedExperiment.value
+async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
+  console.log({ selectedItem})
+  const experimentOrWorkflow = selectedItem || selectedWorkflow.value || selectedExperiment.value
   if (!experimentOrWorkflow) {
     return
   }
 
-  const isWorkflow = selectedWorkflow.value !== undefined
+  const isWorkflow = experimentOrWorkflow.hasOwnProperty('jobs')
 
   confirm.require({
     message: `${experimentOrWorkflow.name}`,

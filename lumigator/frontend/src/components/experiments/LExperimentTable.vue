@@ -59,21 +59,31 @@
           </template>
         </Column>
         <Column header="options">
-          <template #body>
+          <template #body="slotProps">
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
-              style="cursor: not-allowed; pointer-events: all"
+              style="pointer-events: all"
+              aria-haspopup="true"
               aria-controls="optionsMenu"
+              @click.stop="toggleOptionsMenu($event, slotProps.data)"
             >
             </span>
           </template>
         </Column>
+        <Menu
+          id="options_menu"
+          ref="optionsMenu"
+          :model="options"
+          :popup="true"
+        >
+    </Menu>
         <template #expansion="slotProps">
           <div class="l-experiment-table__jobs-table-container">
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
               @l-job-selected="onWorkflowSelected($event, slotProps.data)"
+              @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
             />
           </div>
         </template>
@@ -97,13 +107,15 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { workflowsService } from '@/sdk/workflowsService'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
+import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import { Menu } from 'primevue'
 const props = defineProps({
   tableData: {
     type: Array as PropType<Experiment[]>,
     required: true,
   },
 })
-const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected'])
+const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected', 'delete-option-clicked'])
 
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
@@ -114,9 +126,45 @@ const focusedItem = ref()
 const expandedRows = ref([])
 const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
+const optionsMenu = ref()
+const options = ref<MenuItem[]>([
+  {
+    label: 'View Results',
+    icon: 'pi pi-chart-bar',
+    disabled: false,
+    command: () => {
+      // emit('l-experiment-selected', focusedItem.value)
+    },
+  },
+  {
+    label: 'Download Results',
+    icon: 'pi pi-download',
+    disabled: false,
+    command: () => {
+      // emit('l-download-experiment', focusedItem.value)
+    },
+  },
+  {
+    label: () => {
+      return 'Delete Experiment';
+    },
+    icon: 'pi pi-trash',
+    style: 'color: red;',
+    disabled: false,
+    command: (e: MenuItemCommandEvent) => {
+      emit('delete-option-clicked', focusedItem.value)
+    },
+  }
+])
+
 const style = computed(() => {
   return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
 })
+
+const toggleOptionsMenu = (event:MouseEvent, selectedItem: Workflow | Experiment) => {
+  focusedItem.value = selectedItem
+  optionsMenu.value.toggle(event)
+}
 
 const columnStyles = computed(() => {
   return {

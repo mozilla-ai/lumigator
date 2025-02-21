@@ -1,23 +1,27 @@
 <template>
   <div class="l-experiment-details">
-    <div class="l-experiment-details__header" style="position: sticky; top: 0; z-index: 100">
+
+    <Button
+      icon="pi pi-times"
+      severity="secondary"
+      rounded
+      aria-label="Close"
+      class="l-experiment-details__close"
+      @click="emit('l-close-details')"
+    >
+    </Button>
+
+    <div class="l-experiment-details__header">
       <h3>{{ title }}</h3>
-      <Button
-        icon="pi pi-times"
-        severity="secondary"
-        rounded
-        aria-label="Close"
-        class="l-experiment-details__close"
-        @click="emit('l-close-details')"
-      >
-      </Button>
-      <Button
-        severity="secondary"
-        icon="pi pi-bin"
-        variant="text"
-        rounded
-        @click="handleDeleteButtonClicked"
-      ></Button>
+      <div class="l-experiment-details__header-actions">
+        <Button
+          severity="secondary"
+          icon="pi pi-bin"
+          variant="text"
+          rounded
+          @click="handleDeleteButtonClicked"
+        ></Button>
+      </div>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item">
@@ -241,6 +245,24 @@ function isExperiment(item: Experiment | Workflow): item is Experiment {
   return 'workflows' in item
 }
 </script>
+
+<style scoped>
+.l-experiment-details__header {
+  position: sticky;
+  top: 0;
+  padding: 1rem 0;
+  z-index: 100
+}
+
+.l-experiment-details__header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.l-experiment-details__close {
+  margin-left: auto;
+}
+</style>
 
 <style lang="scss">
 @use '@/styles/variables' as *;

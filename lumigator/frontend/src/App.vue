@@ -15,7 +15,7 @@
               style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
               iconClass="mode-icon"
               class="l-mode__selector"
-            />
+            ></Button>
           </div>
           <l-menu />
         </div>

@@ -45,7 +45,26 @@
         </div>
       </template>
     </Column>
-    <Column style="width: 6rem"></Column>
+            <Column header="options">
+          <template #body="slotProps">
+            <span
+              class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
+              style="pointer-events: all"
+              aria-haspopup="true"
+              aria-controls="optionsMenu"
+              @click.stop="toggleOptionsMenu($event, slotProps.data)"
+            >
+            </span>
+          </template>
+        </Column>
+        <Menu
+          id="options_menu"
+          ref="optionsMenu"
+          :model="options"
+          :popup="true"
+        >
+    </Menu>
+
   </DataTable>
 </template>
 
@@ -57,7 +76,9 @@ import Column from 'primevue/column'
 // import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { PropType } from 'vue'
+import { ref, type PropType } from 'vue'
+import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import { Menu } from 'primevue'
 // import type { Job } from '@/types/Job'
 // const experimentStore = useExperimentStore()
 // const { jobs } = storeToRefs(experimentStore)
@@ -72,11 +93,47 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['l-job-selected'])
-
+const emit = defineEmits(['l-job-selected', 'delete-workflow-clicked'])
+const clickedItem = ref<Workflow>()
 const shortenedModel = (path: string) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`)
 
+const optionsMenu = ref()
+const options = ref<MenuItem[]>([
+  {
+    label: 'View Results',
+    icon: 'pi pi-chart-bar',
+    disabled: false,
+    command: () => {
+      // emit('l-experiment-selected', focusedItem.value)
+    },
+  },
+  {
+    label: 'Download Results',
+    icon: 'pi pi-download',
+    disabled: false,
+    command: () => {
+      // emit('l-download-experiment', focusedItem.value)
+    },
+  },
+  {
+    label: 'Delete Model Run',
+    icon: 'pi pi-trash',
+    style: 'color: red;',
+    disabled: false,
+    command: (e: MenuItemCommandEvent) => {
+      emit('delete-workflow-clicked', clickedItem.value)
+    },
+  }
+])
+
+const toggleOptionsMenu = (event:MouseEvent, selectedItem: Workflow) => {
+  clickedItem.value = selectedItem
+  optionsMenu.value.toggle(event, selectedItem)
+}
+
+
 function handleRowClick(event: DataTableRowClickEvent) {
+  clickedItem.value = event.data
   emit('l-job-selected', event.data)
 }
 </script>

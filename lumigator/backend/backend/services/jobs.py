@@ -357,6 +357,7 @@ class JobService:
             job_config.hf_pipeline = HfPipelineConfig(
                 model_name_or_path=request.job_config.model,
                 task=request.job_config.task,
+                accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,
                 trust_remote_code=request.job_config.trust_remote_code,

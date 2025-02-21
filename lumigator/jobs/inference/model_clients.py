@@ -106,6 +106,7 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
             model=model,
             tokenizer=tokenizer,
             revision=hf_pipeline.revision,
+            device=hf_pipeline.device,
         )
         self._set_max_length()
         logger.info(f"HuggingFaceSeq2SeqPipeline initialized with config: {config}")

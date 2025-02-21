@@ -48,6 +48,7 @@ class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
     use_fast: bool
     trust_remote_code: bool
     torch_dtype: str
+    accelerator: str
     model_config = ConfigDict(extra="forbid")
     truncation: bool = True
     task: str | None = None

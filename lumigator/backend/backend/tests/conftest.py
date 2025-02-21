@@ -442,6 +442,7 @@ def simple_infer_template():
         "hf_pipeline": {{
             "model_name_or_path": "{model_name_or_path}",
             "task": "{task}",
+            "accelerator": "{accelerator}",
             "revision": "{revision}",
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",

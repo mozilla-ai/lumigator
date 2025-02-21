@@ -44,6 +44,7 @@ export type Parameters = {
 }
 
 export type HfPipeline = {
+  accelerator: string
   model_uri: string
   revision: string
   task: string

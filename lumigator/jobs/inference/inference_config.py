@@ -1,8 +1,10 @@
+from enum import Enum
 from typing import Annotated
 
 import torch
 from huggingface_hub.utils import validate_repo_id
-from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field
+from loguru import logger
+from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
 from transformers.pipelines import check_task, get_supported_tasks
 
 from schemas import DatasetConfig
@@ -104,6 +106,13 @@ class GenerationConfig(BaseGenerationConfig):
     model_config = ConfigDict(extra="forbid")
 
 
+class Accelerator(str, Enum):
+    AUTO = "auto"
+    CPU = "cpu"
+    CUDA = "cuda"
+    MPS = "mps"
+
+
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     model_name_or_path: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
     task: SupportedTask
@@ -111,7 +120,31 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: TorchDtype = "auto"
+    accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
+
+    @computed_field
+    @property
+    def device(self) -> torch.device:
+        """Returns the device to be used for inference.
+
+        Returns:
+            torch.device: The device to be used for inference.
+        """
+        if self.accelerator == Accelerator.AUTO:
+            if torch.cuda.is_available():
+                logger.info("CUDA is available. Using CUDA.")
+                return torch.device("cuda")
+
+            if torch.backends.mps.is_available():
+                logger.info("Metal Performance Shaders (MPS) is available. Using MPS.")
+                return torch.device("mps")  # Metal Performance Shaders (macOS)
+
+            logger.info("CUDA is not available. Using CPU.")
+            return torch.device("cpu")
+
+        logger.info(f"Using {self.accelerator}.")
+        return self.accelerator
 
 
 # FIXME It seems like _either_ inference_server _or_ hf_pipeline

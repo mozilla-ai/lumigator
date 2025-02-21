@@ -77,6 +77,7 @@ class JobInferenceConfig(BaseModel):
     model: str
     provider: str
     task: str | None = "summarization"
+    accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False

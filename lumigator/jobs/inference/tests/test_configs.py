@@ -84,3 +84,7 @@ def test_invalid_hf_config(json_config_minimal):
     invalid_torch_dtype = json_config_minimal["pipeline"]["torch_dtype"] = "foo"
     with pytest.raises(ValidationError):
         InferenceJobConfig.model_validate(invalid_torch_dtype)
+
+    invalid_accelerator = json_config_minimal["pipeline"]["accelerator"] = "foo"
+    with pytest.raises(ValidationError):
+        InferenceJobConfig.model_validate(invalid_accelerator)

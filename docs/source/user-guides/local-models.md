@@ -9,15 +9,11 @@ Before installation and setup, here are some recommended system requirements:
 * Storage: At least 10GB or more of free space
 * Processor: A relatively modern CPU with at least 4 cores
 
+This tutorial will show you how to perform inference as a single job. If you would like to do this as a part of an experiment and workflow (which includes evaluation of the results), see [the quickstart](../get-started/quickstart.md#using-lumigator).
+
 ## What You’ll Need
 
-1. A running instance of [Lumigator](../get-started/installation.md).
-
-   ```{note}
-   Before starting up the Lumigator application, you need to set a value for the `OPENAI_API_KEY` environment variable. This is because all the local model inference tools discussed here are based on OpenAI API compatible client. However, since we are going to run the models locally, this variable can be set to any placeholder value:
-      ```console
-      user@host:~/lumigator$ export OPENAI_API_KEY="abc123" # pragma: allowlist secret
-      ```
+1. A running instance of [Lumigator](../get-started/quickstart.md).
 
 2. A dataset for experimentation: you can upload the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
 
@@ -58,8 +54,9 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 
    INFERENCE_NAME="Llamafile mistral-7b-instruct-v0.2"
    INFERENCE_DESC="Test inference with mistral-7b-instruct-v0.2"
-   INFERENCE_MODEL="llamafile://mistralai/mistral-7b-instruct-v0.2" # Format llamafile://<model_name>
-   INFERENCE_MODEL_URL="http://localhost:8080/v1" # Llamafile runs on port 8080
+   INFERENCE_MODEL="mistralai/mistral-7b-instruct-v0.2" # The model we are using
+   INFERENCE_PROVIDER="openai" # The protocol/provider to use, which is the OpenAI API
+   INFERENCE_BASE_URL="http://localhost:8080/v1" # Llamafile runs on port 8080 so we will make our OpenAI calls to this endpoint
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
@@ -72,7 +69,8 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
       "job_config": {
          "job_type": "'"inference"'",
          "model": "'"$INFERENCE_MODEL"'",
-         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "provider": "'"$INFERENCE_PROVIDER"'",
+         "base_url": "'"$INFERENCE_BASE_URL"'",
          "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
       }
    }'
@@ -110,8 +108,9 @@ You can then download the results following the steps described [below](#downloa
 
    INFERENCE_NAME="Ollama Llama3.2"
    INFERENCE_DESC="Test inference with Ollama's Llama3.2"
-   INFERENCE_MODEL="ollama://llama3.2" # Format expected ollama://<model_name>, the model_name must be same as one used in the `ollama run <model_name>` command
-   INFERENCE_MODEL_URL="http://localhost:11434/v1" # Ollama runs on port 11434
+   INFERENCE_MODEL="llama3.2" # Format expected ollama://<model_name>, the model_name must be same as one used in the `ollama run <model_name>` command
+   INFERENCE_PROVIDER="openai" # The protocol/provider to use, which is the OpenAI API
+   INFERENCE_BASE_URL="http://localhost:11434/v1" # Ollama runs on port 11434
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
@@ -124,7 +123,8 @@ You can then download the results following the steps described [below](#downloa
       "job_config": {
          "job_type": "'"inference"'",
          "model": "'"$INFERENCE_MODEL"'",
-         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "provider": "'"$INFERENCE_PROVIDER"'",
+         "base_url": "'"$INFERENCE_BASE_URL"'",
          "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
       }
    }'
@@ -176,8 +176,9 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 
    INFERENCE_NAME="vLLM HuggingFaceTB/SmolLM2-360M-Instruct"
    INFERENCE_DESC="Test inference with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
-   INFERENCE_MODEL="vllm://HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
-   INFERENCE_MODEL_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
+   INFERENCE_MODEL="HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
+   INFERENCE_PROVIDER="hosted_vllm" # Provider as documented in LiteLLM https://docs.litellm.ai/docs/providers/vllm
+   INFERENCE_BASE_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
 
    curl -s "$BACKEND_URL/api/v1/jobs/inference/" \
    -H 'Accept: application/json' \
@@ -190,7 +191,8 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
       "job_config": {
          "job_type": "'"inference"'",
          "model": "'"$INFERENCE_MODEL"'",
-         "model_url": "'"$INFERENCE_MODEL_URL"'",
+         "provider": "'"$INFERENCE_PROVIDER"'",
+         "base_url": "'"$INFERENCE_BASE_URL"'",
          "system_prompt": "'"$INFERENCE_SYSTEM_PROMPT"'"
       }
    }'
@@ -215,11 +217,11 @@ JOB_ID=$(curl -s "$BACKEND_URL/api/v1/jobs/" | grep -o '"id":"[^"]*"' | head -n1
 echo "Looking for $JOB_ID results..."
 DOWNLOAD_RESPONSE=$(curl -s $BACKEND_URL/api/v1/jobs/$JOB_ID/result/download)
 DOWNLOAD_URL=$(echo $DOWNLOAD_RESPONSE | grep -o '"download_url":"[^"]*"' | sed 's/"download_url":"//;s/"//')
-
+RESULTS_FILE=${JOB_ID}_results.json
 echo "Downloading from $DOWNLOAD_URL..."
-   RESULTS_RESPONSE=$(curl -s $DOWNLOAD_URL -H 'Accept: application/json' -H 'Content-Type: application/json')
+   curl $DOWNLOAD_URL -o $RESULTS_FILE
 
-echo $RESULTS_RESPONSE | python -m json.tool
+cat $RESULTS_FILE | python -m json.tool
 ```
 
 And the last step is to execute the script:

@@ -15,7 +15,7 @@
         "max_retries": 3
     },
     "generation_config": {
-        "max_tokens": 1024,
+        "max_new_tokens": 1024,
         "frequency_penalty": 0.0,
         "temperature": 1.0,
         "top_p": 1.0

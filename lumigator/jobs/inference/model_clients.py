@@ -62,7 +62,7 @@ class LiteLLMModelClient(BaseModelClient):
                 {"role": "system", "content": self.system},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=self.config.generation_config.max_tokens,
+            max_new_tokens=self.config.generation_config.max_new_tokens,
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,
@@ -114,44 +114,46 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
         logger.info(f"HuggingFaceSeq2SeqPipeline initialized with config: {config}")
 
     def _set_max_length(self):
-        """Make sure that the model can actually support the max_tokens configured.
+        """Make sure that the model can actually support the max_new_tokens configured.
         For the Seq2Seq models, the max_length is the max_position_embeddings. That's because the input and output
         tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
         This isn't true if it's a CausalLM model, since the output token positions would be len(input) + len(output).
         """
-        max_length = self._pipeline.model.config.max_position_embeddings
+        max_pos_emb = self._pipeline.model.config.max_position_embeddings
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings
-        if self._pipeline.tokenizer.model_max_length != max_length:
+        if self._pipeline.tokenizer.model_max_length != max_pos_emb:
             logger.warning(
                 f"Tokenizer max_length ({self._pipeline.tokenizer.model_max_length})"
-                f" and model max_position_embeddings ({max_length}) do not match."
+                f" and model max_position_embeddings ({max_pos_emb}) do not match."
                 " This could lead to unexpected behavior, make sure this is intended."
             )
-        if self.config.generation_config.max_tokens:
-            if self.config.generation_config.max_tokens > max_length:
+        if self.config.generation_config.max_new_tokens:
+            if self.config.generation_config.max_new_tokens > max_pos_emb:
                 raise ValueError(
-                    f"Model can generate {max_length} tokens.Requested {self.config.generation_config.max_tokens}."
+                    f"Model can generate {max_pos_emb} tokens.Requested {self.config.generation_config.max_new_tokens}."
                 )
             else:
-                logger.info(f"Setting max_length to {self.config.generation_config.max_tokens}")
-                self.config.generation_config.max_tokens = self.config.generation_config.max_tokens
+                logger.info(f"Setting max_length to {self.config.generation_config.max_new_tokens}")
+                self.config.generation_config.max_new_tokens = self.config.generation_config.max_new_tokens
         else:
             logger.info(
-                f"Setting max_length to the max supported length by the model by its position embeddings: {max_length}"
+                f"Setting max_length to the max supported length by the model by its position embeddings: {max_pos_emb}"
             )
-            self.config.generation_config.max_tokens = max_length
+            self.config.generation_config.max_new_tokens = max_pos_emb
+            self.tokenizer.model_max_length = max_pos_emb
 
     def predict(self, prompt):
-        if len(self.tokenizer(prompt)["input_ids"]) > self.config.generation_config.max_tokens:
+        if len(self.tokenizer(prompt, truncation=False)["input_ids"]) > self.tokenizer.model_max_length:
             logger.warning(
                 f"Input prompt is too long and will be truncated. "
-                f"The model can only generate {self.config.generation_config.max_tokens} tokens."
+                f"The model can only support {self.tokenizer.model_max_length} tokens."
             )
 
         prediction = self._pipeline(
             prompt,
             truncation=True,
+            max_length=self.tokenizer.model_max_length,
             generation_config=HFGenerationConfig(**self.config.generation_config.model_dump()),
         )[0]
         # The result is a dictionary with a single key, which name depends on the task

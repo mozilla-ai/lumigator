@@ -4,7 +4,7 @@
   "submission_id": "e899341d-bada-4f3c-ae32-b87bf730f897",
   "driver_info": null,
   "status": "RUNNING",
-  "entrypoint": "python inference.py --config '{\n    \"name\": \"test_run_hugging_face/e899341d-bada-4f3c-ae32-b87bf730f897\",\n    \"model\": { \"path\": \"facebook/bart-large-cnn\" },\n    \"provider\": { \"path\": \"hf\" },\n    \"dataset\": { \"path\": \"s3://lumigator-storage/datasets/c404aa33-4c4c-4a59-845e-01e10ad22226/thunderbird_gt_bart.csv\" },\n    \"evaluation\": {\n        \"metrics\": [\"rouge\", \"meteor\", \"bertscore\"],\n        \"use_pipeline\": true,\n        \"max_samples\": 10,\n        \"return_input_data\": true,\n        \"return_predictions\": true,\n        \"storage_path\": \"s3://lumigator-storage/jobs/results/\"\n    }\n}'",
+  "entrypoint": "python inference.py --config '{\n    \"name\": \"test_run_hugging_face/e899341d-bada-4f3c-ae32-b87bf730f897\",\n    \"model\": { \"path\": \"hf-internal-testing/tiny-random-BARTForConditionalGeneration\" },\n    \"provider\": { \"path\": \"hf\" },\n    \"dataset\": { \"path\": \"s3://lumigator-storage/datasets/c404aa33-4c4c-4a59-845e-01e10ad22226/thunderbird_gt_bart.csv\" },\n    \"evaluation\": {\n        \"metrics\": [\"rouge\", \"meteor\", \"bertscore\"],\n        \"use_pipeline\": true,\n        \"max_samples\": 10,\n        \"return_input_data\": true,\n        \"return_predictions\": true,\n        \"storage_path\": \"s3://lumigator-storage/jobs/results/\"\n    }\n}'",
   "message": "Job is currently running.",
   "error_type": null,
   "start_time": 1730999068650,

@@ -8,7 +8,7 @@
   "type": "SUBMISSION",
   "submission_id": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
   "driver_info": null,
-  "entrypoint": "python inference.py --config '{\n    \"name\": \"test_run_hugging_face/92e0661e-4b1b-4d07-9668-7cbe58c52ca2\",\n    \"model\": { \"path\": \"facebook/bart-large-cnn\" },\n    \"provider\": { \"path\": \"hf\" },\n\"dataset\": { \"path\": \"s3://lumigator-storage/datasets/e9344b59-98b2-4814-b040-fb386e4f8701/dialogsum_exc.csv\" },\n    \"evaluation\": {\n        \"metrics\": [\"rouge\", \"meteor\", \"bertscore\"],\n        \"use_pipeline\": true,\n        \"max_samples\": 10,\n        \"return_input_data\": true,\n        \"return_predictions\": true,\n        \"storage_path\": \"s3://lumigator-storage/jobs/results/\"\n    }\n}'",
+  "entrypoint": "python inference.py --config '{\n    \"name\": \"test_run_hugging_face/92e0661e-4b1b-4d07-9668-7cbe58c52ca2\",\n    \"model\": { \"path\": \"hf-internal-testing/tiny-random-BARTForConditionalGeneration\" },\n    \"provider\": { \"path\": \"hf\" },\n\"dataset\": { \"path\": \"s3://lumigator-storage/datasets/e9344b59-98b2-4814-b040-fb386e4f8701/dialogsum_exc.csv\" },\n    \"evaluation\": {\n        \"metrics\": [\"rouge\", \"meteor\", \"bertscore\"],\n        \"use_pipeline\": true,\n        \"max_samples\": 10,\n        \"return_input_data\": true,\n        \"return_predictions\": true,\n        \"storage_path\": \"s3://lumigator-storage/jobs/results/\"\n    }\n}'",
   "message": "Job has not started yet. It may be waiting for resources (CPUs, GPUs, memory, custom resources) to become available. It may be waiting for the runtime environment to be set up.",
   "error_type": null,
   "start_time": "2024-11-08T15:52:08.961000Z",

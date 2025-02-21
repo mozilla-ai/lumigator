@@ -16,7 +16,11 @@ def test_set_null_inference_job_params(job_record, job_service):
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE,
+            model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
+            provider="hf",
+        ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -37,7 +41,11 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
         max_samples=10,
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE,
+            model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
+            provider="hf",
+        ),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -57,7 +65,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
     ["model", "provider", "input_base_url", "returned_base_url"],
     [
         # generic HF model loaded locally
-        ("facebook/bart-large-cnn", "hf", None, None),
+        ("hf-internal-testing/tiny-random-BARTForConditionalGeneration", "hf", None, None),
         # vLLM served model (with HF model name specified to be passed as "model")
         (
             "mistralai/Mistral-7B-Instruct-v0.3",

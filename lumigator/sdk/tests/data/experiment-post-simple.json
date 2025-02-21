@@ -1,7 +1,7 @@
 {
     "name": "experiment",
     "description": "test experiment",
-    "model": "facebook/bart-large-cnn",
+    "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
     "provider": "hf",
     "dataset": "daab39ac-be9f-4de9-87c0-c4c94b297a97"
 }

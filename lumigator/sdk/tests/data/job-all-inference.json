@@ -7,7 +7,7 @@
     "job_type": "inference",
     "model": "some_model",
     "provider": "some_provider",
-    "model_url": "https://huggingface.co/facebook/bart-large-cnn",
+    "model_url": "https://huggingface.co/hf-internal-testing/tiny-random-BARTForConditionalGeneration",
     "system_prompt": "some prompt",
     "task": "summarization",
     "accelerator": "auto",

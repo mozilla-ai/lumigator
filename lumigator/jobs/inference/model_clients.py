@@ -76,42 +76,49 @@ class LiteLLMModelClient(BaseModelClient):
         return response.choices[0].message.content
 
 
-class HuggingFaceSeq2SeqPipeline(BaseModelClient):
+class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self.config = config
         hf_pipeline = config.hf_pipeline
-        # The summarization pipeline is only supported for Seq2Seq models
-        # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
-        try:
-            model = AutoModelForSeq2SeqLM.from_pretrained(
+        self._task = hf_pipeline.task
+        if self._task == "summarization":
+            # The summarization pipeline is only supported for Seq2Seq models
+            # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
+            try:
+                model = AutoModelForSeq2SeqLM.from_pretrained(
+                    hf_pipeline.model_name_or_path,
+                    trust_remote_code=hf_pipeline.trust_remote_code,
+                    torch_dtype=hf_pipeline.torch_dtype,
+                )
+            except ValueError as e:
+                raise ValueError(
+                    f"Model {hf_pipeline.model_name_or_path} is not a Seq2Seq model. "
+                    "Only Seq2Seq models are supported for the summarization pipeline."
+                ) from e
+            logger.info(f"System prompt: {config.system_prompt}")
+            # Store this so we can check if the input prompt is too long
+            self.tokenizer = AutoTokenizer.from_pretrained(
                 hf_pipeline.model_name_or_path,
+                use_fast=hf_pipeline.use_fast,
                 trust_remote_code=hf_pipeline.trust_remote_code,
-                torch_dtype=hf_pipeline.torch_dtype,
             )
-        except ValueError as e:
-            raise ValueError(
-                f"Model {hf_pipeline.model_name_or_path} is not a Seq2Seq model. "
-                "Only Seq2Seq models are supported for the summarization pipeline."
-            ) from e
 
-        # Store this so we can check if the input prompt is too long
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            hf_pipeline.model_name_or_path,
-            use_fast=hf_pipeline.use_fast,
-            trust_remote_code=hf_pipeline.trust_remote_code,
-        )
-
-        # The reason I create the models and tokenizers separately is so that I can validate the model type
-        # before creating the pipeline. This way I can give a more helpful error message and stack trace
-        self._pipeline = pipeline(
-            task=hf_pipeline.task,
-            model=model,
-            tokenizer=self.tokenizer,
-            revision=hf_pipeline.revision,
-            device=hf_pipeline.device,
-        )
-        self._set_max_length()
-        logger.info(f"HuggingFaceSeq2SeqPipeline initialized with config: {config}")
+            # The reason I create the models and tokenizers separately is so that I can validate the model type
+            # before creating the pipeline. This way I can give a more helpful error message and stack trace
+            self._pipeline = pipeline(
+                task=hf_pipeline.task,
+                model=model,
+                tokenizer=self.tokenizer,
+                revision=hf_pipeline.revision,
+                device=hf_pipeline.device,
+            )
+            self._set_max_length()
+            logger.info(f"HuggingFaceModelClient initialized with config: {config}")
+        elif self._task == "text-generation":
+            self._system = config.system_prompt
+            self._pipeline = pipeline(**config.hf_pipeline.model_dump())
+        else:
+            raise ValueError(f"Unsupported task: {self._task}")
 
     def _set_max_length(self):
         """Make sure that the model can actually support the max_new_tokens configured.
@@ -131,12 +138,14 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
             self._pipeline.tokenizer.model_max_length = max_pos_emb
         if self.config.generation_config.max_new_tokens:
             if self.config.generation_config.max_new_tokens > max_pos_emb:
-                raise ValueError(
-                    f"Model can generate {max_pos_emb} tokens.Requested {self.config.generation_config.max_new_tokens}."
+                logger.warning(
+                    f"Model can generate {max_pos_emb} tokens."
+                    " Requested {self.config.generation_config.max_new_tokens}."
+                    " Setting max_length to {max_pos_emb}."
                 )
+                self.config.generation_config.max_new_tokens = max_pos_emb
             else:
                 logger.info(f"Setting max_length to {self.config.generation_config.max_new_tokens}")
-                self.config.generation_config.max_new_tokens = self.config.generation_config.max_new_tokens
         else:
             logger.info(
                 f"Setting max_length to the max supported length by the model by its position embeddings: {max_pos_emb}"
@@ -144,20 +153,36 @@ class HuggingFaceSeq2SeqPipeline(BaseModelClient):
             self.config.generation_config.max_new_tokens = max_pos_emb
 
     def predict(self, prompt):
-        if len(self.tokenizer(prompt, truncation=False)["input_ids"]) > self.tokenizer.model_max_length:
-            logger.warning(
-                f"Input prompt is too long and will be truncated. "
-                f"The model can only support {self.tokenizer.model_max_length} tokens."
-            )
+        # When using a text-generation model, the pipeline returns a dictionary with a single key,
+        # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
+        # role and content of a message. For example:
+        # [{'role': 'system', 'content': 'You are a helpful assistant.'},
+        #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
+        # We want to return the content of the last message in the list, which is the model's
+        # response to the prompt.
+        if self._task == "text-generation":
+            messages = [
+                {"role": "system", "content": self._system},
+                {"role": "user", "content": prompt},
+            ]
+            generation = self._pipeline(messages)[0]
+            return generation["generated_text"][-1]["content"]
 
-        prediction = self._pipeline(
-            prompt,
-            truncation=True,
-            max_length=self.tokenizer.model_max_length,
-            generation_config=HFGenerationConfig(**self.config.generation_config.model_dump()),
-        )[0]
-        # The result is a dictionary with a single key, which name depends on the task
-        # (e.g., 'summary_text' for summarization)
-        # Get the name of the key and return its value
-        result_key = list(prediction.keys())[0]
-        return prediction[result_key]
+        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
+        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
+        # Get the name of the key and return its value.
+        if self._task == "summarization":
+            if len(self.tokenizer(prompt, truncation=False)["input_ids"]) > self.tokenizer.model_max_length:
+                logger.warning(
+                    f"Input prompt is too long and will be truncated. "
+                    f"The model can only support {self.tokenizer.model_max_length} tokens."
+                )
+
+            prediction = self._pipeline(
+                prompt,
+                truncation=True,
+                max_length=self.tokenizer.model_max_length,
+                generation_config=HFGenerationConfig(**self.config.generation_config.model_dump()),
+            )[0]
+            print(prediction)
+            return prediction["summary_text"]

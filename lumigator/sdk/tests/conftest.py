@@ -165,8 +165,8 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
     to allow for SDK testing of the models endpoint.
     """
     model = {
-        "display_name": "facebook/bart-large-cnn",
-        "model": "facebook/bart-large-cnn",
+        "display_name": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
         "tasks": [
@@ -181,7 +181,7 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
                 }
             }
         ],
-        "website_url": "https://huggingface.co/facebook/bart-large-cnn",
+        "website_url": "https://huggingface.co/hf-internal-testing/tiny-random-BARTForConditionalGeneration",
     }
     return ListingResponse[ModelsResponse].model_validate({"total": 1, "items": [model]}).model_dump()
 

@@ -399,7 +399,7 @@ def create_job_config() -> JobConfig:
     conf_args = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "facebook/bart-large-cnn",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,

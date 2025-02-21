@@ -2,7 +2,7 @@
   "name": "full_eval_config",
   "dataset": { "path": "s3://lumigator-storage/datasets/deaddead-dead-dead-dead-deaddeaddead/dataset_name.csv" },
   "model": {
-    "path": "facebook/bart-large-cnn"
+    "path": "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
   },
   "provider": {
     "path": "hf"

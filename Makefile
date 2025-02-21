@@ -263,4 +263,4 @@ config-generate-env: config-clean config-generate-key
 
 # config-generate-key: ensures that a (new or existing) user owned secret key exists to be passed to lumigator and used for encryption.
 config-generate-key:
-	@scripts/config_generate_key.sh $(CONFIG_USER_DIR) $(CONFIG_USER_KEY_FILE) $(CONFIG_USER_KEY_ENV_VAR);
+	@scripts/config_generate_key.sh $(CONFIG_USER_DIR) $(CONFIG_USER_KEY_FILE)

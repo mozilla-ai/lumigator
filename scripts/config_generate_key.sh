@@ -17,7 +17,6 @@ fi
 generate_key() {
     APP_DIR="$1"
     KEY_FILE="$2"
-    APP_ENV_VAR_NAME="$3"
     EXPECTED_APP_DIR_PERMS=700  # Secure permissions for dir (owner-only access)
     EXPECTED_KEY_PERMS=600 # Secure permissions for file (owner-only access)
 
@@ -59,10 +58,10 @@ generate_key() {
 
 
 # Ensure the script is being called with the correct number of arguments
-if [[ $# -lt 3 || $# -gt 3 ]]; then
-    echo "Usage: $0 <config_user_dir> <config_user_key_file> <config_user_key_env_var>"
+if [[ $# -lt 2 || $# -gt 2 ]]; then
+    echo "Usage: $0 <config_user_dir> <config_user_key_file>"
     exit 1
 fi
 
 # Call the function to generate the key
-generate_key "$1" "$2" "$3"
+generate_key "$1" "$2"

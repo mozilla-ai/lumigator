@@ -104,7 +104,7 @@ def get_secret_service(
     session: DBSessionDep,
 ) -> SecretService:
     secret_repo = SecretRepository(session)
-    return SecretService(secret_repo)
+    return SecretService(settings.LUMIGATOR_SECRET_KEY, secret_repo)
 
 
 SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]

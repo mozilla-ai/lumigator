@@ -40,8 +40,6 @@ merge_conf_files() {
     for key in "${keys_order[@]}"; do
         grep "^$key=" "$temp_file"
     done
-
-    rm "$temp_file"
 }
 
 # Main script logic for handling .env generation

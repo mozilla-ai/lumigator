@@ -1,7 +1,9 @@
 import base64
 
 import pytest
-from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from lumigator_schemas.secrets import SecretUploadRequest
 
 from backend.repositories.secrets import SecretRepository
@@ -94,23 +96,36 @@ def test_encrypt_output_format(secret_service):
 
 
 @pytest.mark.parametrize(
-    "padded_plaintext",
+    "plaintext",
     [
-        "a" * 15,  # One less than block size
-        "a" * 16,  # Exactly one block
-        "a" * 17,  # One more than block size
+        "hello",  # Not a multiple of 16
+        "a" * 16,  # Exactly one AES block
+        "a" * 31,  # One less than two blocks
+        "a" * 32,  # Exactly two blocks
     ],
 )
-def test_encrypt_padding(padded_plaintext, secret_service):
-    """Ensure AES encryption correctly applies padding."""
-    encrypted = secret_service._encrypt(padded_plaintext)
+def test_encrypt_padding(plaintext, secret_service):
+    """Ensure AES encryption correctly applies PKCS7 padding."""
+    encrypted = secret_service._encrypt(plaintext)
     decoded = base64.b64decode(encrypted)
 
     # Extract IV and ciphertext
     ciphertext = decoded[16:]
 
-    # Ensure ciphertext is a multiple of block size
-    assert len(ciphertext) % algorithms.AES.block_size == 0
+    # Ensure ciphertext length is a multiple of AES block size
+    assert len(ciphertext) % 16 == 0
+
+    # Verify padding explicitly
+    cipher = Cipher(algorithms.AES(secret_service._secret_key), modes.CBC(decoded[:16]), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
+
+    # Check PKCS7 padding
+    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+    decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
+
+    # Ensure original plaintext is recovered
+    assert decrypted.decode() == plaintext
 
 
 def test_secret_upload_request(

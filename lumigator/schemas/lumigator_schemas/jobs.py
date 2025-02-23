@@ -99,7 +99,7 @@ class JobSubmissionResponse(RedactableBaseModel):
             return values
 
         parsed_entrypoint = cls.parse_entrypoint(entrypoint)
-        if parsed_entrypoint:
+        if parsed_entrypoint and cls.redactor is not None:
             values[cls._config_key] = cls.redactor.redact(parsed_entrypoint)
 
         return values
@@ -124,16 +124,16 @@ class JobSubmissionResponse(RedactableBaseModel):
             return None
 
     @staticmethod
-    def extract_model_path(json_object: dict[str, Any]) -> str | None:
+    def extract_model_name_or_path(json_object: dict[str, Any]) -> str | None:
         """Extract and normalize the model path from the given JSON object."""
-        model_path = (
+        model_name_or_path = (
             json_object.get("model", {}).get("path")
             or json_object.get("model", {}).get("inference", {}).get("model")
             or json_object.get("hf_pipeline", {}).get("model_name_or_path")
             or json_object.get("inference_server", {}).get("model")
         )
 
-        return model_path
+        return model_name_or_path
 
     @classmethod
     def parse_entrypoint(cls, entrypoint: str) -> dict[str, Any] | None:
@@ -159,7 +159,7 @@ class JobSubmissionResponse(RedactableBaseModel):
             raise ValueError(f"Unable to parse max_samples from entrypoint config: {json_object}")
 
         # Some jobs don't have models attached (e.g. evaluation).
-        model_path = cls.extract_model_path(json_object)
+        model_path = cls.extract_model_name_or_path(json_object)
 
         json_object.setdefault("model", {})["path"] = model_path
 

@@ -13,7 +13,7 @@ class RedactableBaseModel(BaseModel):
     """
 
     # Redactor should be assigned per model.
-    redactor: ClassVar[Redactor]
+    redactor: ClassVar[Redactor] = None
 
     @model_validator(mode="before")
     @classmethod

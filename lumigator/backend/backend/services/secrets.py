@@ -14,6 +14,8 @@ class SecretService:
     def __init__(self, secret_key: str, secret_repo: SecretRepository):
         if not isinstance(secret_key, str):
             raise TypeError(f"Expected secret_key to be a string, got {type(secret_key).__name__}")
+        if not isinstance(secret_repo, SecretRepository):
+            raise TypeError("Expected secret_repo to be an instance of SecretRepository") from None
 
         try:
             aes_key = base64.b64decode(secret_key)

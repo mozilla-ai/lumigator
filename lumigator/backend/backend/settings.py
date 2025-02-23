@@ -11,6 +11,7 @@ from sqlalchemy.engine import URL, make_url
 
 class BackendSettings(BaseSettings):
     # Backend
+    LUMIGATOR_SECRET_KEY: str  # Symmetric encryption key used for interacting with stored secrets
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE_HUMAN_READABLE: Final[str] = "50MB"
     MAX_DATASET_SIZE: ByteSize = MAX_DATASET_SIZE_HUMAN_READABLE

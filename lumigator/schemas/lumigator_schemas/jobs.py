@@ -128,9 +128,9 @@ class JobSubmissionResponse(RedactableBaseModel):
         """Extract and normalize the model path from the given JSON object."""
         model_path = (
             json_object.get("model", {}).get("path")
-            or json_object.get("model", {}).get("inference", {}).get("engine")
-            or json_object.get("hf_pipeline", {}).get("model_uri")
-            or json_object.get("inference_server", {}).get("engine")
+            or json_object.get("model", {}).get("inference", {}).get("model")
+            or json_object.get("hf_pipeline", {}).get("model_name_or_path")
+            or json_object.get("inference_server", {}).get("model")
         )
 
         return model_path

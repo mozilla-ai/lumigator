@@ -147,7 +147,7 @@ def test_secret_upload_request(
         assert len(secret_repository.list()) == 1
         # Verify the secret that was stored has the right values (and an encrypted secret)
         db_secret = secret_repository.list()[0]
-        assert db_secret.name == name
+        assert db_secret.name == name.lower()
         assert db_secret.value != original_value
         # Decrypt to ensure it is symmetrical
         assert secret_service._decrypt(db_secret.value) == original_value

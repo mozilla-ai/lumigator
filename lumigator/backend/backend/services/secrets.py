@@ -35,21 +35,18 @@ class SecretService:
     def upload_secret(self, name: str, secret_upload_request: SecretUploadRequest) -> bool:
         """Uploads a secret for the specified name.
 
-        @returns bool: indicating whether the secret is newly created (false if it already existed).
+        @param name: The name of the secret to be uploaded
+        @param secret_upload_request: The secret upload request containing the secret data
+        @returns bool: indicating whether the secret is newly created (false if it already existed)
         """
-        existing_secret = self._get_secret_by_name(name)
-
         # Encrypt the value
         secret_upload_request.value = self._encrypt(secret_upload_request.value)
+
+        # Save the secret via the repository
         secret_dict = secret_upload_request.model_dump()
         secret_dict["name"] = name
 
-        if existing_secret:
-            self._secret_repo.update(existing_secret.id, **secret_dict)
-        else:
-            self._secret_repo.create(**secret_dict)
-
-        return not bool(existing_secret)
+        return self._secret_repo.save_secret(name, secret_dict)
 
     # AES requires a 16-byte Initialization Vector (IV)
     @staticmethod

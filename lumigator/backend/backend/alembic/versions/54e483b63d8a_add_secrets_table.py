@@ -22,7 +22,7 @@ def upgrade() -> None:
     op.create_table(
         "secrets",
         sa.Column("id", sa.Uuid(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False, unique=True),
+        sa.Column("name", sa.String(), nullable=False, unique=True, index=True),
         sa.Column("value", sa.String(), nullable=False),
         sa.Column("description", sa.String(), nullable=False),
         sa.Column(
@@ -33,6 +33,8 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
+
+    op.execute("CREATE INDEX IF NOT EXISTS ix_secrets_name ON secrets(name COLLATE NOCASE);")
 
 
 def downgrade() -> None:

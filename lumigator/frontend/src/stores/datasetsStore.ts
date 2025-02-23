@@ -56,6 +56,9 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
+      // NOTE: 'temporary fix' to prevent showing inference jobs that weren't created by the UI
+      // to generate ground truth.
+      .filter((job) => job.name.startsWith("Ground truth for "))
       .map((job) => parseJob(job))
   }
 

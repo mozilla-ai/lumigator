@@ -22,8 +22,9 @@ def test_put_secret(
     response = app_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
     assert secret_repository.list() != []
+    assert len(secret_repository.list()) == 1
     db_secret = secret_repository.list()[0]
-    assert db_secret.name == new_secret_name
+    assert db_secret.name == new_secret_name.lower()
     assert db_secret.value != new_secret.value
     assert secret_service._decrypt(db_secret.value) == new_secret.value
     assert db_secret.description == new_secret.description
@@ -34,8 +35,9 @@ def test_put_secret(
     response = app_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert secret_repository.list() != []
+    assert len(secret_repository.list()) == 1
     db_secret = secret_repository.list()[0]
-    assert db_secret.name == new_secret_name
+    assert db_secret.name == new_secret_name.lower()
     assert db_secret.value != new_secret.value
     assert secret_service._decrypt(db_secret.value) == new_secret.value
     assert db_secret.description == new_secret.description

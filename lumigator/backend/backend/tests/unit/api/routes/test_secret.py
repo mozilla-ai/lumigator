@@ -25,7 +25,7 @@ def test_put_secret(
     db_secret = secret_repository.list()[0]
     assert db_secret.name == new_secret_name
     assert db_secret.value != new_secret.value
-    assert secret_service.decrypt(db_secret.value) == new_secret.value
+    assert secret_service._decrypt(db_secret.value) == new_secret.value
     assert db_secret.description == new_secret.description
 
     # Repeat now that it already exists to ensure we get the right status code response.
@@ -37,5 +37,5 @@ def test_put_secret(
     db_secret = secret_repository.list()[0]
     assert db_secret.name == new_secret_name
     assert db_secret.value != new_secret.value
-    assert secret_service.decrypt(db_secret.value) == new_secret.value
+    assert secret_service._decrypt(db_secret.value) == new_secret.value
     assert db_secret.description == new_secret.description

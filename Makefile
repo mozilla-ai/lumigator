@@ -168,6 +168,16 @@ clean-all: clean-docker-buildcache clean-docker-containers config-clean
 setup:
 	@scripts/setup_uv.sh;
 
+# This target is used to update the OpenAPI docs for use in the sphinx docs.
+# Lumigator must be running on localhost
+update-openapi-docs:
+	./scripts/update_openapi_docs.sh
+
+# This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
+# Lumigator must be running on localhost
+check-openapi-docs:
+	./scripts/check_openapi_docs.sh
+
 # SDK tests
 # We have both unit and integration tests for the SDK.
 # Integration tests require all containers to be up, so as a safety measure
@@ -204,7 +214,7 @@ test-backend-unit:
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	LUMIGATOR_SECRET_KEY=abcdefghijklmnopqrstuvwxyz123456 \
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
@@ -222,7 +232,7 @@ test-backend-integration:
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	LUMIGATOR_SECRET_KEY=abcdefghijklmnopqrstuvwxyz123456 \
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
 
 test-backend-integration-containers:

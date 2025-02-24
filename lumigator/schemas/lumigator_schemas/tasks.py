@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field
 
 
 class TaskType(str, Enum):
@@ -12,6 +15,25 @@ class TaskType(str, Enum):
     SUMMARIZATION = "summarization"
     TRANSLATION = "translation"
     TEXT_GENERATION = "text-generation"
+
+
+class TranslationDefinition(BaseModel):
+    task_type: Literal[TaskType.TRANSLATION]
+    source_language: str = Field(..., examples=["en", "English"])
+    target_language: str = Field(..., examples=["de", "German"])
+
+
+class SummarizationDefinition(BaseModel):
+    task_type: Literal[TaskType.SUMMARIZATION]
+
+
+class TextGenerationDefinition(BaseModel):
+    task_type: Literal[TaskType.TEXT_GENERATION]
+
+
+TaskDefinition = Annotated[
+    TranslationDefinition | SummarizationDefinition | TextGenerationDefinition, Field(discriminator="task_type")
+]
 
 
 class TaskValidator(ABC):

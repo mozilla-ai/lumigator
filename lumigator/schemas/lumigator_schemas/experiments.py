@@ -1,9 +1,9 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, model_validator
 
-from lumigator_schemas.tasks import TaskType, TextGenerationValidator, TranslationValidator
+from lumigator_schemas.tasks import TaskDefinition, TaskType, TextGenerationValidator, TranslationValidator
 from lumigator_schemas.workflows import WorkflowDetailsResponse
 
 
@@ -12,9 +12,7 @@ class ExperimentCreate(BaseModel):
     description: str = ""
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
-    source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
-    target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
+    task_definition: TaskDefinition
 
     @model_validator(mode="after")
     def validate_and_set_defaults(self):

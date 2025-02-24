@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Any, ClassVar
 
 from pydantic import BaseModel, model_validator
@@ -5,20 +6,23 @@ from pydantic import BaseModel, model_validator
 from lumigator_schemas.redactor import Redactor
 
 
-class RedactableBaseModel(BaseModel):
-    """Redactable base model represents a base model that can have its values redacted.
+class RedactableBaseModel(BaseModel, ABC):
+    """Redactable base model represents a base model that can have its values redacted before model validation.
 
-    It wraps the underlying ``BaseModel``, to enable redaction a model must be assigned a
-     ``Redactor`` before validation occurs.
+    To enable redaction a model must be assigned a ``Redactor`` before validation occurs.
+
+    Subclasses are free to override `redact` to apply custom redaction logic. If overridden,
+    it is recommended to call `super().redact(values)` to apply the base redaction functionality.
     """
 
     # Redactor should be assigned per model.
     redactor: ClassVar[Redactor] = None
 
+    @abstractmethod
     @model_validator(mode="before")
     @classmethod
-    def parse(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """When a ``Redactor`` is configured, redacts values if keys match the specified
+    def redact(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """When a ``Redactor`` is configured, redacts string values when keys match the specified
         sensitive patterns configured on the ``Redactor``.
 
         Called by the Pydantic framework before a model is created.

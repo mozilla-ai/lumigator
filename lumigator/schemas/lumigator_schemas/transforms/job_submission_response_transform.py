@@ -16,8 +16,8 @@ def transform_job_submission_response(redactor: Redactor, input_data: dict) -> d
         return input_data
 
     parsed_entrypoint = _parse_entrypoint(entrypoint)
-    if parsed_entrypoint and redactor is not None:
-        input_data["config"] = redactor.redact(parsed_entrypoint)
+    if parsed_entrypoint:
+        input_data["config"] = parsed_entrypoint
 
     return input_data
 

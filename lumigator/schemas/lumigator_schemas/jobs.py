@@ -78,7 +78,7 @@ class JobSubmissionResponse(RedactableBaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def parse(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def transform(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Pre-processes and validates the 'entrypoint' configuration before model validation.
 
         This method uses Pydantic's 'model_validator' hook to parse the 'entrypoint'

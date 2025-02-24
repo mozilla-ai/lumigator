@@ -50,12 +50,13 @@ For more information about jobs, see :doc:`api/jobs`.
 
 For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
 
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
+
 .. toctree::
    :maxdepth: 1
    :caption: Get Started
 
    get-started/quickstart
-   get-started/development-guide
    get-started/ui-guide
    get-started/suggested-models
    get-started/troubleshooting
@@ -67,7 +68,7 @@ For more information about the backend routes, see the rendered API specs in the
    operations-guide/configuration
    operations-guide/kubernetes-installation
    operations-guide/alembic
-   operations-guide/dev
+   operations-guide/local-development
    operations-guide/configure-S3
 
 .. toctree::

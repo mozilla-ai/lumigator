@@ -10,9 +10,9 @@ from uuid import UUID
 import boto3
 import loguru
 import requests
-from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
+from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
@@ -20,6 +20,7 @@ from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -32,7 +33,7 @@ class MLflowTrackingClient(TrackingClient):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
     def create_experiment(
-        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+        self, name: str, description: str, task: TaskType, dataset: UUID, max_samples: int
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
@@ -40,7 +41,7 @@ class MLflowTrackingClient(TrackingClient):
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
-            self._client.set_experiment_tag(experiment_id, "task", task)
+            self._client.set_experiment_tag(experiment_id, "task", task.value)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -54,7 +55,7 @@ class MLflowTrackingClient(TrackingClient):
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
-                self._client.set_experiment_tag(experiment_id, "task", task)
+                self._client.set_experiment_tag(experiment_id, "task", task.value)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
                 self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -300,19 +301,13 @@ class MLflowTrackingClient(TrackingClient):
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Job logs for ID: {ray_job_id} not found",
-            )
+            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
         elif resp.status_code != HTTPStatus.OK:
             loguru.logger.error(
                 f"Unexpected status code getting job logs: {resp.status_code}, \
                     error: {resp.text or ''}"
             )
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error getting job logs for ID: {ray_job_id}",
-            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
 
         try:
             metadata = json.loads(resp.text)
@@ -320,7 +315,7 @@ class MLflowTrackingClient(TrackingClient):
         except json.JSONDecodeError as e:
             loguru.logger.error(f"JSON decode error: {e}")
             loguru.logger.error(f"Response text: {resp.text}")
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""

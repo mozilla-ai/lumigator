@@ -3,9 +3,9 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
-from lumigator_schemas.tasks import SummarizationValidator, TaskType, TextGenerationValidator, TranslationValidator
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
 
 
 class LowercaseEnum(str, Enum):
@@ -78,23 +78,13 @@ class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
-    source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
-    target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
     base_url: str | None = None
-    system_prompt: str | None = Field(
-        title="System Prompt",
-        default=None,
-        examples=[
-            "You are an advanced AI trained to summarize documents accurately and concisely. "
-            "Your goal is to extract key information while maintaining clarity and coherence."
-        ],
-    )
     output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
@@ -102,18 +92,6 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
-
-    @model_validator(mode="after")
-    def validate_and_set_defaults(self):
-        validators = {
-            TaskType.TRANSLATION: TranslationValidator(),
-            TaskType.SUMMARIZATION: SummarizationValidator(),
-            TaskType.TEXT_GENERATION: TextGenerationValidator(),
-        }
-        validator = validators.get(self.task)
-        validator.validate(self)
-        validator.set_default_prompt(self)
-        return self
 
 
 class JobAnnotateConfig(BaseModel):

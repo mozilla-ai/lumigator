@@ -144,13 +144,13 @@ class JobDefinitionInference(JobDefinition):
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
-            system_prompt=request.job_config.system_prompt,
+            system_prompt=request.job_config.task_definition.system_prompt,
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task,
+                task=request.job_config.task_definition.task,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,
@@ -164,7 +164,7 @@ class JobDefinitionInference(JobDefinition):
                 base_url=request.job_config.base_url if request.job_config.base_url else None,
                 model=request.job_config.model,
                 provider=request.job_config.provider,
-                system_prompt=request.job_config.system_prompt,
+                system_prompt=request.job_config.task_definition.system_prompt,
                 max_retries=3,
             )
             job_config.params = SamplingParameters(

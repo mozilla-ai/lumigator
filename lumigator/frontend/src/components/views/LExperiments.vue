@@ -112,7 +112,11 @@ const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperime
 
 const getDrawerHeader = () => {
   const isWorkflowResults = selectedWorkflowResults && showJobResults.value
-  return showLogs.value ? 'Logs' : isWorkflowResults ? `Model Run: ${selectedWorkflow.value?.model}`: `Experiment: ${selectedExperiment.value?.name}`
+  return showLogs.value
+    ? 'Logs'
+    : isWorkflowResults
+      ? `Model Run: ${selectedWorkflow.value?.model}`
+      : `Experiment: ${selectedExperiment.value?.name}`
 }
 
 const onCreateExperiment = () => {
@@ -181,7 +185,9 @@ async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
   const isWorkflow = experimentOrWorkflow.hasOwnProperty('jobs')
 
   confirm.require({
-    message: isWorkflow ?`This will permanently delete this model run from your experiment.` :`This will permanently delete the experiment and all its model runs.`,
+    message: isWorkflow
+      ? `This will permanently delete this model run from your experiment.`
+      : `This will permanently delete the experiment and all its model runs.`,
     header: `Delete  ${isWorkflow ? 'Model Run' : 'Experiment'}?`,
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancel',

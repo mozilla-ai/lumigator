@@ -111,7 +111,13 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected', 'delete-option-clicked', 'view-experiment-results-clicked', 'view-workflow-results-clicked'])
+const emit = defineEmits([
+  'l-experiment-selected',
+  'l-workflow-selected',
+  'delete-option-clicked',
+  'view-experiment-results-clicked',
+  'view-workflow-results-clicked',
+])
 
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
@@ -171,7 +177,7 @@ const columnStyles = computed(() => {
     expander: 'width: 4rem',
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
-    status: 'width: 24rem',
+    status: 'width: 12rem',
   }
 })
 

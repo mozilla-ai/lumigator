@@ -86,7 +86,11 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['l-job-selected', 'delete-workflow-clicked', 'view-workflow-results-clicked'])
+const emit = defineEmits([
+  'l-job-selected',
+  'delete-workflow-clicked',
+  'view-workflow-results-clicked',
+])
 const clickedItem = ref<Workflow>()
 const shortenedModel = (path: string) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`)
 
@@ -97,7 +101,7 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-external-link',
     disabled: false,
     visible: () => {
-      return (clickedItem.value?.status === WorkflowStatus.SUCCEEDED) || false
+      return clickedItem.value?.status === WorkflowStatus.SUCCEEDED || false
     },
     command: () => {
       emit('view-workflow-results-clicked', clickedItem.value)
@@ -137,9 +141,8 @@ function handleRowClick(event: DataTableRowClickEvent) {
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
-
 .options-trigger {
-    // padding-left: -$l-spacing-1;
+  // padding-left: -$l-spacing-1;
 }
 
 .l-job-table {

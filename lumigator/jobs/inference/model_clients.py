@@ -78,6 +78,9 @@ class LiteLLMModelClient(BaseModelClient):
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
+        logger.info(f"System prompt: {config.system_prompt}")
+        self._system = config.system_prompt
+        self._task = config.hf_pipeline.task
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         self._set_tokenizer_max_length()
 
@@ -128,10 +131,24 @@ class HuggingFaceModelClient(BaseModelClient):
         )
 
     def predict(self, prompt):
-        prediction = self._pipeline(prompt)[0]
+        # When using a text-generation model, the pipeline returns a dictionary with a single key,
+        # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
+        # role and content of a message. For example:
+        # [{'role': 'system', 'content': 'You are a helpful assistant.'},
+        #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
+        # We want to return the content of the last message in the list, which is the model's
+        # response to the prompt.
+        if self._task == "text-generation":
+            messages = [
+                {"role": "system", "content": self._system},
+                {"role": "user", "content": prompt},
+            ]
+            generation = self._pipeline(messages)[0]
+            return generation["generated_text"][-1]["content"]
 
-        # The result is a dictionary with a single key, which name depends on the task
-        # (e.g., 'summary_text' for summarization)
-        # Get the name of the key and return its value
-        result_key = list(prediction.keys())[0]
-        return prediction[result_key]
+        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
+        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
+        # Get the name of the key and return its value.
+        if self._task == "summarization":
+            generation = self._pipeline(prompt)[0]
+            return generation["summary_text"]

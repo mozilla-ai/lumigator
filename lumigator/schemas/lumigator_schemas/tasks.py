@@ -3,6 +3,12 @@ from enum import Enum
 
 
 class TaskType(str, Enum):
+    """TaskType refers to the different usecases supported.
+    We use the same terminology as the HuggingFace library and support a subset of the tasks.
+    Refer: https://huggingface.co/tasks
+    When using HF models, the task type is used to determine the pipeline to use.
+    """
+
     SUMMARIZATION = "summarization"
     TRANSLATION = "translation"
     TEXT_GENERATION = "text-generation"

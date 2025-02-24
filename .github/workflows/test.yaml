@@ -21,8 +21,10 @@ jobs:
       - name: Install python
         run: uv python install
 
-      - name: Install make
-        run: sudo apt-get install make -y
+      - name: Instalar make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make
 
       - name: Create HF cache
         run: |
@@ -33,7 +35,6 @@ jobs:
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
-          sudo apt-get install make
 
       - run: echo "Hello, world!"
 

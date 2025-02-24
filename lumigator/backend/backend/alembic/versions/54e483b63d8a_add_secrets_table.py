@@ -34,8 +34,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    op.execute("CREATE INDEX IF NOT EXISTS ix_secrets_name ON secrets(name COLLATE NOCASE);")
-
 
 def downgrade() -> None:
     op.drop_table("secrets")

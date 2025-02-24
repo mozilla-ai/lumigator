@@ -21,6 +21,9 @@ jobs:
       - name: Install python
         run: uv python install
 
+      - name: Install make
+        run: sudo apt-get install make -y
+
       - name: Create HF cache
         run: |
           mkdir -p ${HOME}/.cache/huggingface

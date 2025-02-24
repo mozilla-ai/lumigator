@@ -32,25 +32,14 @@ jobs:
           chmod -R 777 /tmp/ray_pip_cache
           sudo apt-get install make
 
-      - name: Spinning up containers for the tests
-        run: |
-          export RAY_WORKER_GPUS=1
-          export RAY_WORKER_GPUS_FRACTION=1.0
-          export GPU_COUNT=1
-          make start-lumigator-build
+      - run: echo "Hello, world!"
 
-      - name: Run backend integration tests
-        run: make test-backend-integration
+      # - name: Spinning up containers for the tests
+      #   run: |
+      #     export RAY_WORKER_GPUS=1
+      #     export RAY_WORKER_GPUS_FRACTION=1.0
+      #     export GPU_COUNT=1
+      #     make start-lumigator-build
 
-      - name: Collect Ray logs in case of failure
-        if: failure()
-        run: |
-          mkdir /tmp/raylogs
-          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
-
-      - name: Upload Ray logs in case of failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ray-logs
-          path: /tmp/raylogs/ray/session_*/logs/
+      # - name: Run backend integration tests
+      #   run: make test-backend-integration

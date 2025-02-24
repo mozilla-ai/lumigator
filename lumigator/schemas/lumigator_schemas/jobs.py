@@ -91,7 +91,7 @@ class JobSubmissionResponse(RedactableBaseModel):
         :returns (dict[str, Any]): The updated values dictionary, with the processed and
             potentially redacted 'entrypoint' configuration assigned to the `config` field.
         """
-        transformed_values = transform_job_submission_response(cls.redactor, values)
+        transformed_values = transform_job_submission_response(values)
         return transformed_values
 
 

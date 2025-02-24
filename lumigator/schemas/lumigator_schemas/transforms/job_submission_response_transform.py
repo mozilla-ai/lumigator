@@ -6,10 +6,8 @@ from json import JSONDecodeError
 from shlex import split
 from typing import Any
 
-from lumigator_schemas.redactor import Redactor
 
-
-def transform_job_submission_response(redactor: Redactor, input_data: dict) -> dict:
+def transform_job_submission_response(input_data: dict) -> dict:
     entrypoint = input_data.get("entrypoint", None)
 
     if not isinstance(entrypoint, str):

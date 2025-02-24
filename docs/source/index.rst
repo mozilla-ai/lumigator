@@ -48,6 +48,8 @@ For more information about workflows, see :doc:`conceptual-guides/workflows`.
 
 For more information about jobs, see :doc:`conceptual-guides/jobs`.
 
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
+
 .. toctree::
    :maxdepth: 1
    :caption: Get Started
@@ -78,7 +80,7 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    :maxdepth: 2
    :caption: Conceptual Guides
 
-   conceptual-guides/endpoints
+   conceptual-guides/architecture
    conceptual-guides/datasets
    conceptual-guides/experiments
    conceptual-guides/workflows
@@ -90,3 +92,8 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
 
    reference/sdk
    reference/schemas
+
+.. toctree::
+   :caption: API Specifications
+
+   api/index

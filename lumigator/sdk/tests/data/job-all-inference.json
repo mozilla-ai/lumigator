@@ -9,7 +9,9 @@
     "provider": "some_provider",
     "model_url": "https://huggingface.co/facebook/bart-large-cnn",
     "system_prompt": "some prompt",
-    "task": "summarization",
+    "task_definition": {
+      "task": "summarization"
+    },
     "accelerator": "auto",
     "revision": "main",
     "use_fast": true,

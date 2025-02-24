@@ -54,6 +54,7 @@ merge_conf_files() {
     done
 }
 
+
 # Main script logic for handling .env generation
 generate_env() {
     CONFIG_BUILD_DIR="$1"

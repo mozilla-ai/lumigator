@@ -7,13 +7,11 @@ export type Job = {
   status: WorkflowStatus
   config: {
     name: string
-    dataset?: {
+    max_samples: number
+    model_name_or_path?: string
+    dataset: {
       id: string
       name: string
-    }
-    max_samples?: number
-    model?: {
-      path: string
     }
   }
   message: string

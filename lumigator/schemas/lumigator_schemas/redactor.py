@@ -14,11 +14,10 @@ class Redactor:
 
     def redact(self, data: dict[str, Any]) -> dict[str, Any]:
         """Recursively traverses the supplied dictionary redacting sensitive
-            values based on matching patterns with the key.
+        string values based on matching patterns with the key.
 
-        @:param data: Dictionary data to redact
-        @:return dict: The input data with sensitive values redacted
-        @:rtype dict: Redacted data
+        :param data: Dictionary data to redact
+        :return dict: The input data with sensitive values redacted
         """
 
         def redact_value(key: str, value: Any) -> Any:

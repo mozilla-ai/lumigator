@@ -1,46 +1,112 @@
 # Quickstart
 
-Now that you have a local deployment of Lumigator, you can start using it. In this quickstart guide,
-we will show you how to upload a dataset and create a simple evaluation job. Finally, we'll show you
-how to retrieve the results of the evaluation job.
+You can deploy Lumigator either locally or into a distributed environment [using Kubernetes](../operations-guide/kubernetes-installation.md).
+In this quickstart guide, we'll start Lumigator locally and evaluate a model on a dataset that we upload.
+Looking to develop Lumigator? If so, you'll be interested in the [local development guide](../operations-guide/local-development.md) for details of running in development mode.
 
-WARNING: This documentation is in progress and may not be functional,
-see https://github.com/mozilla-ai/lumigator/issues/905 to track the issue.
+If you hit any issues running the quickstart, we want to hear about it! You can submit an issue [here](https://github.com/mozilla-ai/lumigator/issues).
 
-## Upload a Dataset
+## Prerequisites
 
-The Lumigator backend provides an API endpoint for uploading datasets and running evaluation jobs.
-To view the available endpoints, navigate to the API documentation page at
-[`http://localhost:8000/docs`](http://localhost:8000/docs).
+Lumigator is currently supported on Linux and Mac. Windows is not yet tested, but we welcome contributions, see  {{ '[Contributing Guide](https://github.com/mozilla-ai/lumigator/blob/{}/CONTRIBUTING.md)'.format(commit_id) }}.
 
-There are a few ways to interact with the API;
+Before you start, make sure you have the following:
 
-1. Test the endpoints via the OpenAPI documentation page at `http://localhost:8000/docs`
-1. cURL commands.
-1. The Lumigator Python SDK.
+- A working installation of [Docker](https://docs.docker.com/engine/install/)
+    - On Mac, Docker Desktop >= 4.37, and `docker-compose` >= 2.31.
+    - On Linux, please also complete the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
+- The directory `$HOME/.cache/huggingface/` must exist and be readable and writeable. Lumigator uses this directory for accessing cached huggingface hub models.
+- If you want to evaluate against hosted LLM APIs like the platforms provided by OpenAI, Mistral, or Deepseek, you need to set the appropriate environment variables before running Lumigator: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. They can either be set in the terminal you use to run the `start-lumigator` command, or they can be set in the .env file that lumigator automatically creates for you the first time you run it. Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
+- If your system has an NVIDIA GPU, you need to have [installed the NVIDIA Container Toolkit following their instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). After that, open a terminal and run:
+    ```bash
+    export RAY_WORKER_GPUS=1
+    export RAY_WORKER_GPUS_FRACTION=1.0
+    export GPU_COUNT=1
+    ```
+    **Important: Run the next deployment steps in this same terminal, or thes env vars must be set in your shell configuration**
 
-We'll focus on the last two.
+## Local Deployment
+
+Lumigator is run locally using `docker-compose`. In order to deploy the latest release of Lumigator:
+
+1. Clone the Lumigator repository:
+
+    ```console
+    user@host:~$ git clone git@github.com:mozilla-ai/lumigator.git
+    ```
+
+1. Change to the Lumigator directory:
+
+    ```console
+    user@host:~$ cd lumigator
+    ```
+
+1. Run the `start-lumigator` make target:
+
+    ```console
+    user@host:~/lumigator$ make start-lumigator
+    ```
+
+This will run all of the components needed for Lumigator.
+
+This creates multiple container services networked together to make up all the components of the Lumigator application:
+
+- `minio`: Local storage for datasets that mimics S3-API compatible functionality.
+- `backend`: Lumigator’s FastAPI REST API. Access the Swagger HTTP Docs at http://localhost:8O00/docs
+- `ray`: A Ray cluster for submitting several types of jobs. Access the Ray dashboard at http://localhost:8265
+- `mlflow`: Used to track experiments and metrics, accessible at  http://localhost:8001
+- `frontend`: Lumigator's Web UI, accessible at http://localhost:80
+
+###  Verify
+
+To verify that Lumigator is running, open a browser and navigate to `http://localhost:8000`. You
+should receive the following JSON response:
+
+```json
+{"Hello": "Lumigator!🐊"}
+```
+
+## Using Lumigator
+
+Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }}.
+
+We will show how to do this using either cURL or the Lumigator SDK. See [the UI guide](ui-guide.md) for information about how to use the UI.
+
+The steps are as follows:
+
+1. Upload the dialogsum dataset to Lumigator
+1. Create an experiment, which is a container for running the workflow for each model
+1. Run the summarization workflow for the model
+1. Retrieve the results of the workflow
+
+### Upload a Dataset
 
 To upload a dataset, you need to send a POST request to the `/datasets` endpoint. The request should
-include the dataset file. Here is an example:
+include the dataset file.
+
+To run this example, first `cd` to the `lumigator` directory. then run
 
 ::::{tab-set}
 
 :::{tab-item} cURL
 :sync: tab1
 ```console
+user@host:~/lumigator$ export DATASET_PATH=lumigator/sample_data/dialogsum_exc.csv
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
   -H 'Accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
-  -F 'dataset=@'"path/to/dataset.csv"';type=text/csv' \
-  -F 'format=experiment' | jq
+  -F 'dataset=@'$DATASET_PATH';type=text/csv' \
+  -F 'format=job' | jq
 {
-  "id": "dd15bbaa-8d6f-44ae-a995-b3b78f4ea6fb",
-  "filename": "dataset.csv",
-  "format": "experiment",
-  "size": 180528,
+  "id": "9ac42307-e0e5-4635-a9ce-48acdb451742",
+  "filename": "dialogsum_exc.csv",
+  "format": "job",
+  "size": 3603,
   "ground_truth": true,
-  "created_at": "2024-10-30T12:10:18"
+  "run_id": null,
+  "generated": false,
+  "generated_by": null,
+  "created_at": "2025-02-19T20:00:01"
 }
 ```
 :::
@@ -51,10 +117,10 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_schemas.datasets import DatasetFormat
 
-dataset_path = 'path/to/dataset.csv'
-lm_client = LumigatorClient('localhost:8000')
+dataset_path = 'lumigator/sample_data/dialogsum_exc.csv'
+client = LumigatorClient('localhost:8000')
 
-response = lm_client.datasets.create_dataset(
+response = client.datasets.create_dataset(
     open(dataset_path, 'rb'),
     DatasetFormat.JOB
 )
@@ -79,33 +145,35 @@ checking that the uploaded dataset is in the list:
 :sync: tab1
 ```console
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[] | .filename'
-dataset.csv
+dialogsum_exc.csv
 ```
 :::
 
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-datasets = lm_client.datasets.get_datasets()
+datasets = client.datasets.get_datasets()
 print(datasets.items[-1].filename)
 ```
 :::
 
 ::::
 
-## Create an Evaluation Job
+## Create an Experiment
 
-Now that you have uploaded a dataset, you can create an evaluation job. To this end, you need to
-send a POST request to the `/jobs/evaluate` endpoint. The request should include the following
+Now that you have uploaded a dataset, you can create an experiment. An experiment is a container for running evaluations of models with the dataset. To this end, you need to
+send a POST request to the `/experiments` endpoint. The request should include the following
 required fields:
 
-- A name for the evaluation job.
-- A short description for tracking purposes.
-- The name of the model you want to evaluate.
-- The ID of the dataset you want to use for evaluation.
-- The maximum number of examples to use for evaluation.
+- A name for the experiment job.
+- A short description.
+- The ID of the dataset you want to use for evaluations.
 
-Here is an example of how to create an evaluation job:
+Here is an example of how to create an experiment:
+
+```{note}
+the steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset
+```
 
 ::::{tab-set}
 
@@ -114,40 +182,35 @@ Here is an example of how to create an evaluation job:
 
 Set the following variables:
 ```console
-user@host:~/lumigator$ export EVAL_NAME="test_run_hugging_face" \
-       EVAL_DESC="Test run for Huggingface model" \
-       EVAL_MODEL="facebook/bart-large-cnn" \
-       EVAL_MODEL_PROVIDER="hf" \
-       EVAL_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
-       EVAL_MAX_SAMPLES="10"
+user@host:~/lumigator$ export EXP_NAME="DialogSum Summarization" \
+       EXP_DESC="See which model best summarizes Dialogues " \
+       EXP_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
 ```
 
 Define the JSON string:
 ```console
 user@host:~/lumigator$ export JSON_STRING=$(jq -n \
-        --arg name "$EVAL_NAME" \
-        --arg desc "$EVAL_DESC" \
-        --arg model "$EVAL_MODEL" \
-        --arg provider "$EVAL_PROVIDER" \
-        --arg dataset_id "$EVAL_DATASET" \
-        --arg max_samples "$EVAL_MAX_SAMPLES" \
-        '{name: $name, description: $desc, model: $model, provider: $provider, dataset: $dataset_id, max_samples: $max_samples}'
-)
+        --arg name "$EXP_NAME" \
+        --arg desc "$EXP_DESC" \
+        --arg dataset_id "$EXP_DATASET" \
+        '{name: $name, description: $desc, dataset: $dataset_id}')
 ```
 
-Create the evaluation job:
+Create the experiment:
 ```console
-user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/evaluate/ \
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
   -H 'Accept: application/json' \
   -H 'Content-Type: application/json' \
   -d "$JSON_STRING" | jq
 {
-  "id": "3f15667d-d2e7-459b-9c22-3da2d236b406",
-  "name": "test_run_hugging_face",
-  "description": "Test run for Huggingface model",
-  "status": "created",
-  "created_at": "2024-10-31T09:07:43",
-  "updated_at": null
+  "id": "1",
+  "name": "DialogSum Summarization",
+  "description": "See which model best summarizes Dialogues ",
+  "created_at": "2025-02-19T20:11:55.492000",
+  "task": "summarization",
+  "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
+  "updated_at": null,
+  "workflows": null
 }
 ```
 
@@ -156,110 +219,152 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/evaluate/ \
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-from lumigator_schemas.jobs import JobType, JobEvalCreate
+from lumigator_schemas.experiments import ExperimentCreate
 
 dataset_id = datasets.items[-1].id
-
-models = ['facebook/bart-large-cnn',]
-
-# set this value to limit the evaluation to the first max_samples items (0=all)
-max_samples = 10
-# team_name is a way to group jobs together under the same namespace, feel free to customize it
-team_name = "lumigator_enthusiasts"
-
-responses = []
-for model in models:
-    job_args = JobEvalCreate(
-        name=team_name,
-        description="Test",
-        model=model,
-        provider="hf",
-        dataset=str(dataset_id),
-        max_samples=max_samples
-    )
-    # descr = f"Testing {model} summarization model on {dataset_name}"
-    responses.append(lm_client.jobs.create_job(JobType.EVALUATION, job_args))
+request = ExperimentCreate(
+    name="DialogSum Summarization",
+    description="See which model best summarizes Dialogues",
+    dataset=dataset_id
+)
+experiment_response = client.experiments.create_experiment(request)
+experiment_id = experiment_response.id
+print(f"Experiment created and has ID: {experiment_id}")
 ```
 :::
 
 ::::
 
-## Track the Evaluation Job
+## Trigger the workflows
 
-You can track the status of the evaluation job by sending a GET request to the `/jobs/{job_id}`
-endpoint, or by using th Lumigator Python SDK. Here is an example of how to track the evaluation
-job:
+Now it's time to evaluate a model! Let's trigger workflows to evaluate GPT-4o. This process can be repeated for as many models as you would like to evaluate in the experiment.
+
+
+```{note}
+the steps assume you only have created a single experiment. If you have multiple experiments, replace the `"$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"` code with the ID of the experiment you want
+```
 
 ::::{tab-set}
 
 :::{tab-item} cURL
 :sync: tab1
 
-Get the job's submission ID:
-
+Set the following variables:
 ```console
-user@host:~/lumigator$ export SUBMISSION_ID=$(curl -s http://localhost:8000/api/v1/health/jobs/ | jq -r 'sort_by(.start_time) | reverse | .[0] | .submission_id')
+user@host:~/lumigator$ export WORKFLOW_NAME="OpenAI 4o" \
+       WORKFLOW_DESC="Summarize with 4o" \
+       WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
+       EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
 ```
 
-Track the job:
-
+Define the JSON string:
 ```console
-user@host:~/lumigator$ curl -s "http://localhost:8000/api/v1/health/jobs/$SUBMISSION_ID" \
-  -H 'Accept: application/json' | jq
+user@host:~/lumigator$ export JSON_STRING=$(jq -n \
+        --arg name "$WORKFLOW_NAME" \
+        --arg model "gpt-4o" \
+        --arg provider "openai" \
+        --arg desc "$WORKFLOW_DESC" \
+        --arg dataset_id "$WORKFLOW_DATASET" \
+        --arg exp_id "$EXPERIMENT_ID" \
+        '{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id}')
+```
+
+Trigger the workflow:
+```console
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d "$JSON_STRING" | jq
 {
-  "type": "SUBMISSION",
-  "job_id": null,
-  "submission_id": "5195c9a5-938d-475e-b0fc-cf866492909d",
-  "driver_info": null,
-  "status": "SUCCEEDED",
-  ...
+  "id": "ffa38f72fe7e4b06a60de5bf797c31d6",
+  "experiment_id": "1",
+  "model": "gpt-4o",
+  "name": "OpenAI 4o",
+  "description": "Summarize with 4o",
+  "status": "created",
+  "created_at": "2025-02-19T20:30:33.713000",
+  "updated_at": null
 }
-```
 
 :::
 
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-from pprint import pprint
-job_id = responses[0].id
-
-job = lm_client.jobs.wait_for_job(job_id)  # Create the coroutine object
-pprint(job)
+from lumigator_schemas.workflows import WorkflowCreateRequest
+# Now let's run the same thing, but with o3-mini
+request = WorkflowCreateRequest(
+    name="OpenAI 4o",
+    description="Summarize with 4o",
+    model="gpt-4o",
+    provider="openai",
+    dataset=dataset_id,
+    experiment_id=experiment_id
+)
+client.workflows.create_workflow(request).model_dump()
 ```
 :::
 
 ::::
 
-## Retrieve the Results
+##  Get the results
 
-Once the evaluation job is complete, you can retrieve the results by sending a GET request to the
-`/jobs/{job_id}/result/download` endpoint, or by using the Lumigator Python SDK. This will return a
-URI that you can use to download the results. Here is an example of how to retrieve the results:
+Now that the workflow has been triggered we can get the experiment, which will give us all the details about the containing workflows. When the workflows are completed, this call will give you back all of the information about the evaluation, to let you compare results and review performance.
 
 ::::{tab-set}
 
 :::{tab-item} cURL
 :sync: tab1
 
+Set the following variables:
 ```console
-user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/jobs/$SUBMISSION_ID/result/download \
-  -H 'accept: application/json' | jq
-{
-  "id": "5195c9a5-938d-475e-b0fc-cf866492909d",
-  "download_url": "http://localhost:9000/lumigator-storage/jobs/results/lumigator_enthusiasts/5195c9a5-938d-475e-b0fc-cf866492909d/results.json?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=test%2F20241031%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20241031T104126Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0309fe4825bc2358180c607a4a4ad4e8d36946133574d8b9416df228ce62944e"
-}
+user@host:~/lumigator$ export EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
 ```
+
+Get the experiment!
+
+```console
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIMENT_ID | jq
+{
+  "id": "1",
+  "name": "DialogSum Summarization",
+  "description": "See which model best summarizes Dialogues ",
+  "created_at": "2025-02-19T20:11:55.492000",
+  "task": "summarization",
+  "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
+  "updated_at": "2025-02-19T20:11:55.492000",
+  "workflows": [
+    {
+      "id": "ffa38f72fe7e4b06a60de5bf797c31d6",
+      "experiment_id": "1",
+      "model": "gpt-4o",
+      "name": "OpenAI 4o",
+      "description": "Summarize with 4o",
+      "status": "succeeded",
+      "created_at": "2025-02-19T20:30:33.713000",
+      "updated_at": null,
+      "jobs": [...]
+      "metrics": {
+        "rouge1_mean": 0.224,
+        "rouge2_mean": 0.106,
+        "rougeL_mean": 0.195,
+        "rougeLsum_mean": 0.195,
+        "bertscore_f1_mean": 0.872,
+        "bertscore_precision_mean": 0.866,
+        "bertscore_recall_mean": 0.878,
+        "meteor_mean": 0.276
+      },
+    }
+  ]
+}
 
 :::
 
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-import requests
-
-eval_result = lm_client.jobs.get_job_download(job_id)
-response = requests.request(url=eval_result.download_url, method="GET")
+experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+print(experiment_details.model_dump_json())
 ```
 :::
 
@@ -279,13 +384,16 @@ different aspects:
   and model output and compares their cosine similarity
 
 ## Terminate Session
-In order to shut down Lumigator, you can stop the containers that were [started](../get-started/installation.md) using Docker Compose. This can be done by simply running the following command:
+In order to shut down Lumigator, you can stop the containers that were started using Docker Compose. This can be done by simply running the following command:
 ```console
 user@host:~/lumigator$ make stop-lumigator
 ```
 
 ## Next Steps
 
-Congratulations! You have successfully uploaded a dataset, created an evaluation job, and retrieved
-the results. In the next section, we will show you how to deploy Lumigator on a distributed
-environment.
+Congratulations! You have successfully uploaded a dataset, created an experiment, run a model evaluation in the experiment, and retrieved
+the results.
+
+For info about developing lumigator, see the [local development guide](../operations-guide/local-development.md).
+
+For information about deploying lumigator into a Kubernetes cluster, see [kubernetes installation](../operations-guide/kubernetes-installation.md).

@@ -1,11 +1,11 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
 # Required binaries in order to correctly run the makefile, if any cannot be found the script will fail.
 # uv is only required for local-up (dev).
-REQUIRED_BINARIES := git docker
+REQUIRED_BINARIES := git docker openssl
 $(foreach bin,$(REQUIRED_BINARIES),\
   $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 
@@ -16,11 +16,17 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
-CONFIG_BUILD_DIR=build
-# Default config prefixed with dot to hide from user
-CONFIG_DEFAULT=.default.conf
-# User editable config file (will be generated if missing)
-CONFIG_OVERRIDE=user.conf
+CONFIG_BUILD_DIR=$(shell pwd)/build
+# Path to default config prefixed with dot to hide from user
+CONFIG_DEFAULT_FILE:=$(shell pwd)/.default.conf
+# Directory for user specific configuration and keys
+CONFIG_USER_DIR:=${HOME}/.lumigator
+# Path to user editable config file (will be generated if missing)
+CONFIG_OVERRIDE_FILE:=$(CONFIG_USER_DIR)/user.conf
+# Location of the key to use for encryption.
+CONFIG_USER_KEY_FILE:=$(CONFIG_USER_DIR)/lumigator.key
+# Env var name to hold encryption key
+CONFIG_USER_KEY_ENV_VAR=LUMIGATOR_SECRET_KEY
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -160,12 +166,7 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
 setup:
-	@command -v uv >/dev/null 2>&1 || { \
-		echo "uv not found. Installing..."; \
-		curl -LsSf https://astral.sh/uv/install.sh | sh; \
-		export PATH="$(HOME)/.local/bin:$(PATH)"; \
-	}
-	@scripts/setup_venvs.sh;
+	@scripts/setup_uv.sh;
 
 # SDK tests
 # We have both unit and integration tests for the SDK.
@@ -203,7 +204,8 @@ test-backend-unit:
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
 	cd lumigator/backend/; \
@@ -220,7 +222,8 @@ test-backend-integration:
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -255,15 +258,9 @@ config-clean:
 	$(call remove_config_dir)
 
 # config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
-config-generate-env: config-clean
-	@mkdir -p $(CONFIG_BUILD_DIR)
+config-generate-env: config-clean config-generate-key
+	@scripts/config_generate_env.sh "$(CONFIG_BUILD_DIR)" "$(CONFIG_USER_KEY_FILE)" "$(CONFIG_USER_KEY_ENV_VAR)" "$(CONFIG_DEFAULT_FILE)" "$(CONFIG_OVERRIDE_FILE)"
 
-	@if [ -f $(CONFIG_OVERRIDE) ]; then \
-		echo "Found user configuration: '$(CONFIG_OVERRIDE)', overrides will be applied"; \
-		scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_OVERRIDE) > "$(CONFIG_BUILD_DIR)/.env"; \
-	else \
-		echo "No user configuration found, default will be used: '$(CONFIG_DEFAULT)'"; \
-		cp $(CONFIG_DEFAULT) "$(CONFIG_BUILD_DIR)/.env"; \
-	fi
-
-	@echo "Config file generated: '$(CONFIG_BUILD_DIR)/.env'";
+# config-generate-key: ensures that a (new or existing) user owned secret key exists to be passed to lumigator and used for encryption.
+config-generate-key:
+	@scripts/config_generate_key.sh $(CONFIG_USER_DIR) $(CONFIG_USER_KEY_FILE)

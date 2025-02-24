@@ -172,7 +172,7 @@ class WorkflowService:
         """Get a workflow."""
         tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
         if tracking_server_workflow is None:
-            raise WorkflowNotFoundError(workflow_id)
+            raise WorkflowNotFoundError(workflow_id) from None
         return tracking_server_workflow
 
     def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:

@@ -1,4 +1,5 @@
 import contextlib
+import http
 import json
 from collections.abc import Generator
 from datetime import datetime
@@ -9,7 +10,6 @@ from uuid import UUID
 import boto3
 import loguru
 import requests
-from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
@@ -19,6 +19,7 @@ from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -124,14 +125,15 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str):
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
         except MlflowException as e:
-            # if the experiment doesn't exist, return None
-            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
+            raise e
+
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -210,9 +212,15 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
-        workflow = self._client.get_run(workflow_id)
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
         if workflow.info.lifecycle_stage == "deleted":
             return None
         # similar to the get_experiment method, but for a single workflow,
@@ -292,19 +300,13 @@ class MLflowTrackingClient(TrackingClient):
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Job logs for ID: {ray_job_id} not found",
-            )
+            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
         elif resp.status_code != HTTPStatus.OK:
             loguru.logger.error(
                 f"Unexpected status code getting job logs: {resp.status_code}, \
                     error: {resp.text or ''}"
             )
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error getting job logs for ID: {ray_job_id}",
-            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
 
         try:
             metadata = json.loads(resp.text)
@@ -312,7 +314,7 @@ class MLflowTrackingClient(TrackingClient):
         except json.JSONDecodeError as e:
             loguru.logger.error(f"JSON decode error: {e}")
             loguru.logger.error(f"Response text: {resp.text}")
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""

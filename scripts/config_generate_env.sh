@@ -31,25 +31,29 @@ merge_conf_files() {
     for file in "$@"; do
         [[ -f "$file" ]] || continue  # Skip missing files
 
-        while IFS='=' read -r key value || [[ -n "$key" ]]; do
-            [[ -z "$key" || "$key" =~ ^#.*$ ]] && continue  # Skip empty/comment lines
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue  # Skip empty/comment lines
+
+            key="${line%%=*}"  # Extract key (before first '=')
+            value="${line#*=}"  # Extract value (after first '=')
 
             # If key is new, add to the order list
             if ! grep -q "^$key=" <<< "$config_values"; then
                 keys_order+=("$key")
             fi
 
-            # Overwrite value for key
-            config_values=$(echo "$config_values" | sed "/^$key=/d")
+            # Overwrite key-value pair
+            config_values=$(printf "%s\n" "$config_values" | grep -v "^$key=")
             config_values+=$'\n'"$key=$value"
         done < "$file"
     done
 
     # Print merged key-value pairs in original order
     for key in "${keys_order[@]}"; do
-        echo "$config_values" | awk -F= -v k="$key" '$1 == k { print $0 }'
+        grep "^$key=" <<< "$config_values"
     done
 }
+
 
 # Main script logic for handling .env generation
 generate_env() {

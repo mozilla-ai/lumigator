@@ -1,11 +1,7 @@
 import json
-from http import HTTPStatus
 from pathlib import Path
-from urllib.parse import urljoin
-from uuid import UUID
 
 import loguru
-import requests
 from fastapi import BackgroundTasks
 from lumigator_schemas.jobs import (
     JobCreate,
@@ -60,17 +56,6 @@ class WorkflowService:
         # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
         self.TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
 
-    # Maybe move to the job service?
-    def _stop_job(self, job_id: UUID):
-        resp = requests.post(urljoin(settings.RAY_JOBS_URL, f"{job_id}/stop"), timeout=5)  # 5 seconds
-        if resp.status_code == HTTPStatus.NOT_FOUND:
-            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
-        elif resp.status_code != HTTPStatus.OK:
-            raise JobUpstreamError(
-                "ray",
-                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
-            ) from None
-
     async def _run_inference_eval_pipeline(
         self,
         workflow: WorkflowResponse,
@@ -111,11 +96,12 @@ class WorkflowService:
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Inference job {inference_job.id} failed")
             try:
-                self._stop_job(inference_job.id)
+                self._job_service._stop_job(inference_job.id)
             except JobUpstreamError:
                 loguru.logger.error(f"Failed to stop infer job {inference_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
-            raise Exception(f"Inference job {inference_job.id} failed")
+            # raise Exception(f"Inference job {inference_job.id} failed")
+            return
 
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
@@ -157,7 +143,7 @@ class WorkflowService:
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
             try:
-                self._stop_job(evaluation_job.id)
+                self._job_service._stop_job(evaluation_job.id)
             except JobUpstreamError:
                 loguru.logger.error(f"Failed to stop eval job {evaluation_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)

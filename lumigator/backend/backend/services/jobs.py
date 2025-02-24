@@ -56,6 +56,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
+DEFAULT_POST_INFER_JOB_TIMEOUT_SEC = 10 * 60
 JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
@@ -265,6 +266,20 @@ class JobService:
 
         return record
 
+    def _stop_job(self, job_id: UUID):
+        """Stops an existing job in Ray by ID.
+
+        :param job_id: The ID of the job to stop
+        """
+        resp = requests.post(urljoin(settings.RAY_JOBS_URL, f"{job_id}/stop"), timeout=5)  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
+            ) from None
+
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
         """Updates an existing job record in the repository (database) by ID.
 
@@ -460,7 +475,7 @@ class JobService:
 
         return job_status
 
-    async def handle_inference_job(self, job_id: UUID, request: JobCreate):
+    async def handle_inference_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
         """Long term we maybe want to move logic about how to handle a specific job
         to be separate from the job service. However, for now, we will keep it here.
         This function can be attached to the jobs that run inference so that the results will
@@ -469,7 +484,7 @@ class JobService:
         """
         loguru.logger.info("Handling inference job result")
 
-        await self.wait_for_job_complete(job_id)
+        await self.wait_for_job_complete(job_id, max_wait_time_sec)
         self._add_dataset_to_db(
             job_id,
             request,
@@ -552,7 +567,13 @@ class JobService:
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
         if job_settings.store_as_dataset():
-            self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
+            self.add_background_task(
+                self._background_tasks,
+                self.handle_inference_job,
+                record.id,
+                request,
+                DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,
+            )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)

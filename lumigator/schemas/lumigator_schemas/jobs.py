@@ -29,6 +29,7 @@ class JobStatus(LowercaseEnum):
     RUNNING = "running"
     FAILED = "failed"
     SUCCEEDED = "succeeded"
+    STOPPED = "stopped"
 
 
 class JobConfig(BaseModel):

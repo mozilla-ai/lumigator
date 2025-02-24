@@ -34,8 +34,10 @@ from backend.main import create_app
 from backend.records.jobs import JobRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
@@ -377,6 +379,21 @@ def result_repository(db_session):
 def dataset_service(db_session, fake_s3_client, fake_s3fs):
     dataset_repo = DatasetRepository(db_session)
     return DatasetService(dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs)
+
+
+@pytest.fixture(scope="function")
+def secret_repository(db_session):
+    return SecretRepository(db_session)
+
+
+@pytest.fixture(scope="session")
+def secret_key() -> str:
+    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+
+
+@pytest.fixture(scope="function")
+def secret_service(db_session, secret_repository, secret_key):
+    return SecretService(secret_key=secret_key, secret_repo=secret_repository)
 
 
 @pytest.fixture(scope="function")

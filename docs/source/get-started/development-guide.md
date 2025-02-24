@@ -1,3 +1,0 @@
-# Developing Lumigator
-
-🚧 Under Construction 🚧

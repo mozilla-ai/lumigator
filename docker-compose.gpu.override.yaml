@@ -6,10 +6,16 @@ services:
     # https://docs.ray.io/en/releases-2.30.0/cluster/cli.html#ray-start for more info about the command
     runtime: nvidia
     privileged: true
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-      - LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+      - LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}
 
   backend:
     environment:

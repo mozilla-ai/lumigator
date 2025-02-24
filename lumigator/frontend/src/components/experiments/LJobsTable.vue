@@ -99,9 +99,8 @@ const options = ref<MenuItem[]>([
   {
     label: 'View Results',
     icon: 'pi pi-external-link',
-    disabled: false,
-    visible: () => {
-      return clickedItem.value?.status === WorkflowStatus.SUCCEEDED || false
+    disabled: () => {
+      return Boolean(clickedItem.value?.status !== WorkflowStatus.SUCCEEDED)
     },
     command: () => {
       emit('view-workflow-results-clicked', clickedItem.value)

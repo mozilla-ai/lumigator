@@ -133,9 +133,8 @@ const options = ref<MenuItem[]>([
   {
     label: 'View Results',
     icon: 'pi pi-external-link',
-    disabled: false,
-    visible: () => {
-      return focusedItem.value.status === WorkflowStatus.SUCCEEDED
+    disabled: () => {
+      return focusedItem.value.status !== WorkflowStatus.SUCCEEDED
     },
     command: () => {
       emit('view-experiment-results-clicked', focusedItem.value)

@@ -2,7 +2,7 @@
 
 You can deploy Lumigator either locally or into a distributed environment [using Kubernetes](../operations-guide/kubernetes-installation.md).
 In this quickstart guide, we'll start Lumigator locally and evaluate a model on a dataset that we upload.
-Looking to develop Lumigator? If so, you'll be interested in the [development guide](development-guide.md) for details of running in development mode.
+Looking to develop Lumigator? If so, you'll be interested in the [local development guide](../operations-guide/local-development.md) for details of running in development mode.
 
 If you hit any issues running the quickstart, we want to hear about it! You can submit an issue [here](https://github.com/mozilla-ai/lumigator/issues).
 
@@ -394,6 +394,6 @@ user@host:~/lumigator$ make stop-lumigator
 Congratulations! You have successfully uploaded a dataset, created an experiment, run a model evaluation in the experiment, and retrieved
 the results.
 
-For info about developing lumigator, see the [development guide](development-guide.md).
+For info about developing lumigator, see the [local development guide](../operations-guide/local-development.md).
 
 For information about deploying lumigator into a Kubernetes cluster, see [kubernetes installation](../operations-guide/kubernetes-installation.md).

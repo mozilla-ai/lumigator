@@ -114,7 +114,6 @@ If you do have human experts who were able to go through the input data from ste
 
 ```
 examples,ground_truth
-"examples,ground_truth
 "Patient A: 58-year-old male with persistent cough and chest pain for 3 months. CT scan revealed a lung mass. Biopsy and immunohistochemistry confirmed non-small cell lung cancer. Treatment: Surgical resection followed by chemotherapy.","58M, lung cancer diagnosed via CT and biopsy, treated with surgery and chemo."
 "Patient B: 42-year-old female with recurring headaches and vision changes. MRI showed a pituitary tumor. Endocrine tests and fine-needle aspiration confirmed a prolactinoma. Treatment: Dopamine agonist medication.","42F, prolactinoma found through MRI and hormone tests, managed with medication."
 "Patient C: 67-year-old male with fatigue and unexplained weight loss. Blood tests revealed abnormal white blood cell count. Bone marrow biopsy and flow cytometry diagnosed chronic lymphocytic leukemia. Treatment: Watch and wait approach with regular monitoring.","67M, CLL detected by blood work and bone marrow biopsy, under observation."

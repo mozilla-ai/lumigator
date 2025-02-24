@@ -168,6 +168,16 @@ clean-all: clean-docker-buildcache clean-docker-containers config-clean
 setup:
 	@scripts/setup_uv.sh;
 
+# This target is used to update the OpenAPI docs for use in the sphinx docs.
+# Lumigator must be running on localhost
+update-openapi-docs:
+	./scripts/update_openapi_docs.sh
+
+# This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
+# Lumigator must be running on localhost
+check-openapi-docs:
+	./scripts/check_openapi_docs.sh
+
 # SDK tests
 # We have both unit and integration tests for the SDK.
 # Integration tests require all containers to be up, so as a safety measure

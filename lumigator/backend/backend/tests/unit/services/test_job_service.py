@@ -101,65 +101,96 @@ def test_invalid_text_generation(job_service):
     with pytest.raises(ValidationError) as excinfo:
         JobCreate(
             name="test_text_generation_run",
-            description="Test run to verify that system prompt is set.",
+            description="Test missing system prompt for text generation",
             job_config=JobInferenceConfig(
                 job_type=JobType.INFERENCE,
-                model="microsoft/Phi-3.5-mini-instruct",
+                model="microsoft/Phi-3-mini-instruct",
                 provider="hf",
-                task="text-generation",
-                # system_prompt is intentionally omitted
+                task_definition={
+                    "task": TaskType.TEXT_GENERATION
+                    # Intentionally missing system_prompt
+                },
             ),
             dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
         )
 
-    assert "system_prompt must be provided for text generation tasks." in str(excinfo.value)
+    # Verify the exact error structure from Pydantic
+    assert "Field required" in str(excinfo.value)
+    assert "system_prompt" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
     "task, source_language, target_language, should_pass, error_msg",
     [
-        (TaskType.SUMMARIZATION, None, None, True, None),  # Valid case for summarization
+        # Valid summarization case - no language fields
+        (TaskType.SUMMARIZATION, None, None, True, None),
+        # Invalid summarization cases - language fields in task definition
         (
             TaskType.SUMMARIZATION,
             "en",
             None,
             False,
-            "Fields source_language and target_language should not be provided",
+            "Extra inputs are not permitted",
         ),
         (
             TaskType.SUMMARIZATION,
             None,
             "fr",
             False,
-            "Fields source_language and target_language should not be provided",
+            "Extra inputs are not permitted",
         ),
-        (TaskType.TRANSLATION, "en", "fr", True, None),  # Valid case for translation
-        (TaskType.TRANSLATION, None, None, False, "Both source_language and target_language must be provided"),
-        (TaskType.TRANSLATION, "en", None, False, "Both source_language and target_language must be provided"),
-        (TaskType.TRANSLATION, None, "fr", False, "Both source_language and target_language must be provided"),
+        # Valid translation case - both languages provided
+        (TaskType.TRANSLATION, "en", "fr", True, None),
+        # Invalid translation cases - missing language fields
+        (
+            TaskType.TRANSLATION,
+            None,
+            None,
+            False,
+            "Field required",
+        ),
+        (
+            TaskType.TRANSLATION,
+            "en",
+            None,
+            False,
+            "Field required",
+        ),
+        (
+            TaskType.TRANSLATION,
+            None,
+            "fr",
+            False,
+            "Field required",
+        ),
     ],
 )
 def test_inference_config_task_language_pair(task, source_language, target_language, should_pass, error_msg):
+    # Base config structure
     config = {
         "job_type": JobType.INFERENCE,
         "model": "gpt-4-turbo",
         "provider": "openai",
-        "task": task,
+        "task_definition": {"task": task},
     }
-    if source_language is not None:
-        config["source_language"] = source_language
-    if target_language is not None:
-        config["target_language"] = target_language
 
-    # Create dynamic name and description
-    name = f"test_{task.value}_{'pass' if should_pass else 'fail'}"
+    # Add language fields to task_definition if provided
+    task_def = config["task_definition"]
+    if source_language is not None:
+        task_def["source_language"] = source_language
+    if target_language is not None:
+        task_def["target_language"] = target_language
+
+    # Test naming
+    name = f"test_{task.value}_{'valid' if should_pass else 'invalid'}"
     description = (
-        f"Test {task.value} task with "
-        f"source_lang={'None' if source_language is None else source_language} and "
-        f"target_language={'None' if target_language is None else target_language}"
+        f"Testing {task.value} task with "
+        f"source_lang={source_language or 'None'} "
+        f"target_lang={target_language or 'None'}"
     )
 
     if should_pass:
+        # Valid case should create successfully
         JobCreate(
             name=name,
             description=description,
@@ -167,11 +198,13 @@ def test_inference_config_task_language_pair(task, source_language, target_langu
             dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
         )
     else:
-        with pytest.raises(ValidationError) as excinfo:
+        # Invalid case should raise ValidationError
+        with pytest.raises(ValidationError) as exc_info:
             JobCreate(
                 name=name,
                 description=description,
                 job_config=JobInferenceConfig(**config),
                 dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
             )
-        assert error_msg in str(excinfo.value)
+        # Verify expected error message
+        assert error_msg in str(exc_info.value)

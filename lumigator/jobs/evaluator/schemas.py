@@ -63,14 +63,24 @@ class Rouge(BaseModel):
     rougeLsum_mean: float  # noqa: N815
 
 
-class GEval(BaseModel):
+class GEvalMetric(BaseModel):
+    """A single result from a G-Eval evaluation (a score + an explanation)."""
+
     score: float
     reason: str
 
 
-class GEvalConsistency(BaseModel):
-    consistency: list[GEval]
+class GEvalSummarizationMetrics(BaseModel):
+    """The following metric names and their respective prompts are defined in `g_eval_prompts.json`."""
+
+    coherence: list[GEvalMetric]
+    coherence_mean: float
+    consistency: list[GEvalMetric]
     consistency_mean: float
+    fluency: list[GEvalMetric]
+    fluency_mean: float
+    relevance: list[GEvalMetric]
+    relevance_mean: float
 
 
 class EvalJobMetrics(BaseModel):
@@ -78,7 +88,7 @@ class EvalJobMetrics(BaseModel):
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
-    g_eval_consistency: GEvalConsistency | None = None
+    g_eval_summarization: GEvalSummarizationMetrics | None = None
 
 
 class EvalJobArtifacts(BaseModel):

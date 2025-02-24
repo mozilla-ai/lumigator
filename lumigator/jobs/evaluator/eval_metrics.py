@@ -1,4 +1,7 @@
+import functools
+import json
 from enum import Enum
+from pathlib import Path
 
 import evaluate
 import numpy as np
@@ -7,6 +10,9 @@ from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 from loguru import logger
 
 from schemas import EvalJobMetrics
+
+G_EVAL_PROMPTS = "g_eval_prompts.json"
+MEASURE_RETRIES = 3
 
 
 class EvaluationFields(Enum):
@@ -28,8 +34,10 @@ class EvaluationMetrics:
             "meteor": {"method": self._meteor, "requires": [EvaluationFields.GROUND_TRUTH]},
             "bertscore": {"method": self._bertscore, "requires": [EvaluationFields.GROUND_TRUTH]},
             "bleu": {"method": self._bleu, "requires": [EvaluationFields.GROUND_TRUTH]},
-            "g_eval_consistency": {
-                "method": self._g_eval_consistency,
+            "g_eval_summarization": {
+                # the available tasks in g_eval are the ones we have defined
+                # criteria / evaluation steps for inside `g_eval_prompts.json`
+                "method": functools.partial(self._g_eval, task="summarization"),
                 "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.LLM_INPUT],
             },
         }
@@ -97,7 +105,7 @@ class EvaluationMetrics:
         BERTScore leverages the pre-trained contextual embeddings from BERT
         and matches words in candidate and reference sentences by cosine similarity.
 
-        It uses two lists of strings of type Any (in our case, mostly strings) for comparsion
+        It uses two lists of strings of type Any (in our case, mostly strings) for comparison
 
         predictions = ["hello world", "general kenobi"]
         references = ["goodnight moon", "the sun is shining"]
@@ -114,39 +122,75 @@ class EvaluationMetrics:
 
         return evals
 
-    def _g_eval_consistency(self, llm_inputs: list, pred: list, ref: list) -> dict:
-        correctness_metric = GEval(
-            name="Consistency",
-            # # NOTE: you can only provide either criteria or evaluation_steps, and not both
-            # criteria="The factual alignment between the summary and the summarized source. "
-            # "A factually consistent summary contains only statements that are entailed by the source document. "
-            # "Annotators were also asked to penalize summaries that contained hallucinated facts.",
-            evaluation_steps=[
-                "Read the source document carefully and identify the main facts and details it presents",
-                "Read the summary and compare it to the source document."
-                "Check if the summary contains any factual errors that are not supported by the source document",
-                "Assign a score for consistency based on the Evaluation Criteria",
-            ],
-            evaluation_params=[
-                LLMTestCaseParams.INPUT,
-                LLMTestCaseParams.ACTUAL_OUTPUT,
-                LLMTestCaseParams.EXPECTED_OUTPUT,
-            ],
-        )
+    def _g_eval_measure_with_retry(self, metric, test_case, max_retries=3):
+        """Calls metric.measure with retry logic and returns the score and reason.
 
-        # initialize dictionary with metric name
-        evals = {"consistency": []}
+        Args:
+            metric: The metric object with measure method and score/reason properties
+            test_case: The test case to measure
+            max_retries: Maximum number of retry attempts
 
-        # run sample-wise evals (as default implementation only returns mean value)
-        for p, r, e in zip(pred, ref, llm_inputs):
-            test_case = LLMTestCase(input=e, expected_output=r, actual_output=p)
+        Returns:
+            dict: Dictionary with score and reason
+
+        Raises:
+            ValueError: If all retry attempts fail
+        """
+        for attempt in range(1, max_retries + 1):
             try:
-                correctness_metric.measure(test_case)
+                metric.measure(test_case)
+                return {"score": metric.score, "reason": metric.reason}
             except ValueError as e:
-                logger.error(f"Caught ValueError: {e}")
-            evals["consistency"].append({"score": correctness_metric.score, "reason": correctness_metric.reason})
+                logger.warning(f"Attempt {attempt}/{max_retries} failed: {str(e)}")
+                if attempt == max_retries:
+                    raise e
 
-        evals["consistency_mean"] = np.mean([x["score"] for x in evals["consistency"]])
+        raise ValueError("All retry attempts failed")
+
+    def _g_eval(self, llm_inputs: list, pred: list, ref: list, task: str) -> dict:
+        """Runs the deepeval implementation of the G-Eval LLM-as-judge evaluation.
+
+        The GEval class takes some evaluation criteria or steps provided as prompts
+        to an LLM and applies them to evaluate a given model's predictions given
+        the original inputs and expected outputs (ground truth). The default
+        implementation uses GPT4, but can be adapted to support any other model.
+
+        See: https://github.com/nlpyang/geval (G-Eval)
+        See: https://docs.confident-ai.com/docs/metrics-llm-evals (deepeval)
+        """
+        # Load task-dependent criteria / evaluation steps
+        with Path(G_EVAL_PROMPTS).open() as f:
+            prompt_templates = json.load(f)
+
+        evals = {}
+        for metric_name in prompt_templates[task]:
+            metric = GEval(
+                name=metric_name,
+                # NOTE: deepeval allows you to provide either criteria or evaluation_steps, and not both.
+                #       In this first iteration we pick evaluation_steps
+                evaluation_steps=prompt_templates[task][metric_name]["evaluation_steps"],
+                evaluation_params=[
+                    LLMTestCaseParams.INPUT,
+                    LLMTestCaseParams.ACTUAL_OUTPUT,
+                    LLMTestCaseParams.EXPECTED_OUTPUT,
+                ],
+            )
+
+            evals_for_metric = []
+            # iterate on all samples
+            for p, r, e in zip(pred, ref, llm_inputs):
+                test_case = LLMTestCase(input=e, expected_output=r, actual_output=p)
+
+                try:
+                    result = self._g_eval_measure_with_retry(metric, test_case, max_retries=MEASURE_RETRIES)
+                    evals_for_metric.append(result)
+                except ValueError as e:
+                    # Handle the failure case
+                    logger.error(f"G-Eval measurement failed after {MEASURE_RETRIES} attempts: {e}")
+                    raise e
+
+            evals[metric_name] = evals_for_metric
+            evals[f"{metric_name}_mean"] = np.mean([x["score"] for x in evals_for_metric])
 
         return evals
 

@@ -92,7 +92,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
     elif config.hf_pipeline:
         logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
         model_client = HuggingFaceModelClient(config)
-        output_model_name = config.hf_pipeline.model
+        output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 

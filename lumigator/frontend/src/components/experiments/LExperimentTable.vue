@@ -77,6 +77,7 @@
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
               @l-job-selected="onWorkflowSelected($event, slotProps.data)"
+              @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
               @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
             />
           </div>
@@ -109,7 +110,8 @@ const props = defineProps({
     required: true,
   },
 })
-const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected', 'delete-option-clicked'])
+
+const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected', 'delete-option-clicked', 'view-experiment-results-clicked', 'view-workflow-results-clicked'])
 
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
@@ -124,16 +126,20 @@ const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
     label: 'View Results',
-    icon: 'pi pi-chart-bar',
+    icon: 'pi pi-external-link',
     disabled: false,
+    visible: () => {
+      return focusedItem.value.status === WorkflowStatus.SUCCEEDED
+    },
     command: () => {
-      // emit('l-experiment-selected', focusedItem.value)
+      emit('view-experiment-results-clicked', focusedItem.value)
     },
   },
   {
     label: 'Download Results',
     icon: 'pi pi-download',
     disabled: false,
+    visible: false,
     command: () => {
       // emit('l-download-experiment', focusedItem.value)
     },
@@ -143,7 +149,7 @@ const options = ref<MenuItem[]>([
       return 'Delete Experiment'
     },
     icon: 'pi pi-trash',
-    style: 'color: red;',
+    style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
     disabled: false,
     command: (e: MenuItemCommandEvent) => {
       emit('delete-option-clicked', focusedItem.value)
@@ -293,11 +299,6 @@ watch(
   width: 100%;
   display: flex;
   place-content: center;
-
-  &__options-trigger {
-    // padding-left: $l-spacing-1;
-    // margin-left: 10% !important;
-  }
 
   &__tag {
     color: $l-grey-100;

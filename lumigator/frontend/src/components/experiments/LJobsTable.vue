@@ -86,7 +86,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['l-job-selected', 'delete-workflow-clicked'])
+const emit = defineEmits(['l-job-selected', 'delete-workflow-clicked', 'view-workflow-results-clicked'])
 const clickedItem = ref<Workflow>()
 const shortenedModel = (path: string) => (path.length <= 30 ? path : `${path.slice(0, 30)}...`)
 
@@ -94,15 +94,19 @@ const optionsMenu = ref()
 const options = ref<MenuItem[]>([
   {
     label: 'View Results',
-    icon: 'pi pi-chart-bar',
+    icon: 'pi pi-external-link',
     disabled: false,
+    visible: () => {
+      return (clickedItem.value?.status === WorkflowStatus.SUCCEEDED) || false
+    },
     command: () => {
-      // emit('l-experiment-selected', focusedItem.value)
+      emit('view-workflow-results-clicked', clickedItem.value)
     },
   },
   {
     label: 'Download Results',
     icon: 'pi pi-download',
+    visible: false,
     disabled: false,
     command: () => {
       // emit('l-download-experiment', focusedItem.value)
@@ -111,7 +115,7 @@ const options = ref<MenuItem[]>([
   {
     label: 'Delete Model Run',
     icon: 'pi pi-trash',
-    style: 'color: red;',
+    style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
     disabled: false,
     command: (e: MenuItemCommandEvent) => {
       emit('delete-workflow-clicked', clickedItem.value)

@@ -17,6 +17,18 @@
   &-item {
     cursor: pointer;
 
+    &-content {
+      color: unset !important;
+    }
+
+    &-link {
+      color: unset !important;
+    }
+
+    &-label {
+      color: unset !important;
+    }
+
     :hover {
       background-color: variables.$l-menu-bg;
     }

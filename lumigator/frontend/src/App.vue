@@ -192,10 +192,6 @@ onMounted(async () => {
     margin-right: 0;
   }
 }
-</style>
-
-<style lang="scss">
-@use '@/styles/variables' as *;
 
 .toaster-content {
   width: 100%;

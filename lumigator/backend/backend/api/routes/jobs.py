@@ -146,7 +146,7 @@ def list_jobs(
 
     results = list[Job]()
 
-    # Configure redaction
+    # Enable redaction
     JobSubmissionResponse.redactor = redactor
 
     # Merge Ray jobs into the repositories jobs
@@ -186,6 +186,7 @@ def get_job(
     ray_job: RayJobDetails
     ray_job = _get_ray_job(job_id)
 
+    # Enable redaction
     JobSubmissionResponse.redactor = redactor
 
     # Combine both types of response.

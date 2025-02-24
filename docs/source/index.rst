@@ -53,7 +53,6 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    :caption: Get Started
 
    get-started/quickstart
-   get-started/development-guide
    get-started/ui-guide
    get-started/suggested-models
    get-started/troubleshooting
@@ -65,7 +64,7 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    operations-guide/configuration
    operations-guide/kubernetes-installation
    operations-guide/alembic
-   operations-guide/dev
+   operations-guide/local-development
    operations-guide/configure-S3
 
 .. toctree::

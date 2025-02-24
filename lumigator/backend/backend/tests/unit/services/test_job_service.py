@@ -10,7 +10,6 @@ from lumigator_schemas.tasks import TaskType
 from pydantic import ValidationError
 
 from backend.services.exceptions.job_exceptions import JobValidationError
-from backend.services.jobs import JobService
 from backend.settings import settings
 
 
@@ -28,7 +27,7 @@ def test_set_null_inference_job_params(job_record, job_service):
         return_value="s3://bucket/path/to/dataset",
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
-        job_config = job_service.generate_inference_job_config(
+        job_config = job_service.job_settings[JobType.INFERENCE].generate_config(
             request, request.dataset, dataset_s3_path, job_service.storage_path
         )
         assert job_config.job.max_samples == -1
@@ -49,7 +48,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         return_value="s3://bucket/path/to/dataset",
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
-        job_config = job_service.generate_inference_job_config(
+        job_config = job_service.job_settings[JobType.INFERENCE].generate_config(
             request, request.dataset, dataset_s3_path, job_service.storage_path
         )
         assert job_config.job.max_samples == 10

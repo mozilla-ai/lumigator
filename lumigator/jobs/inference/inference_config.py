@@ -8,7 +8,7 @@ from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, compute
 from transformers.pipelines import check_task, get_supported_tasks
 
 from schemas import DatasetConfig
-from schemas import HfPipelineConfig as BaseHfPipelineConfig
+from schemas import HuggingFacePipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig

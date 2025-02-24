@@ -169,12 +169,12 @@ class JobDefinitionInference(JobDefinition):
                 system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
                 max_retries=3,
             )
-            job_config.params = SamplingParameters(
-                max_tokens=request.job_config.max_tokens,
-                frequency_penalty=request.job_config.frequency_penalty,
-                temperature=request.job_config.temperature,
-                top_p=request.job_config.top_p,
-            )
+        job_config.params = SamplingParameters(
+            max_tokens=request.job_config.max_tokens,
+            frequency_penalty=request.job_config.frequency_penalty,
+            temperature=request.job_config.temperature,
+            top_p=request.job_config.top_p,
+        )
         return job_config
 
     def store_as_dataset(self) -> bool:

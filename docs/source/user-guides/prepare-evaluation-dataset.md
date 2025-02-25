@@ -15,13 +15,9 @@ Lumigator expects a CSV file containing different columns depending on the use c
 
 Your CSV should contain `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/dialogsum_exc.csv ).
 
-* Translation use case
+**Translation use case**
 
-Here you will have a source language (that you translate from) and a target language (that you translate to).
-
-Your CSV should still contain `examples` (in the source language) and `ground_truth` (the ideal translation to the target language).
-
-In the column names below, please ensure you replace the placeholders `$SRC_LAN` and `$TAR_LAN` with [ISO 639 2-character language codes](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
+In preparation.
 
 ## Content
 
@@ -41,7 +37,7 @@ At the end of this step, which may take anywhere between minutes and months (dep
 
 #### How many do you need?
 
-Unfortunately, there is no clear-cut answer to this. Not as many as if you were training or fine-tuning a model, but remember: the more examples, the more likely it is that a model score was not a fluke.
+Unfortunately, there is no clear-cut answer to this. Not as many as if you were training or fine-tuning a model, but remember: the more examples (and the higher quality they are), the more likely it is that a model score was not a fluke.
 
 #### Example output
 
@@ -49,24 +45,6 @@ Ideally you will end up with a text file or a spreadsheet with dozens (or hundre
 
 ```
     Patient A: 58-year-old male with persistent cough and chest pain for 3 months. CT scan revealed a lung mass. Biopsy and immunohistochemistry confirmed non-small cell lung cancer. Treatment: Surgical resection followed by chemotherapy.
-
-    Patient B: 42-year-old female with recurring headaches and vision changes. MRI showed a pituitary tumor. Endocrine tests and fine-needle aspiration confirmed a prolactinoma. Treatment: Dopamine agonist medication.
-
-    Patient C: 67-year-old male with fatigue and unexplained weight loss. Blood tests revealed abnormal white blood cell count. Bone marrow biopsy and flow cytometry diagnosed chronic lymphocytic leukemia. Treatment: Watch and wait approach with regular monitoring.
-
-    Patient D: 35-year-old female with abdominal pain and bloating. Ultrasound showed ovarian masses. Surgical biopsy and histopathology confirmed ovarian endometriosis. Treatment: Laparoscopic excision of endometrial tissue.
-
-    Patient E: 50-year-old male with difficulty swallowing. Endoscopy revealed esophageal lesions. Biopsy and immunohistochemistry diagnosed Barrett's esophagus with high-grade dysplasia. Treatment: Endoscopic mucosal resection and radiofrequency ablation.
-
-    Patient F: 29-year-old female with skin rashes and joint pain. Blood tests showed positive ANA. Skin biopsy and immunofluorescence confirmed systemic lupus erythematosus. Treatment: Hydroxychloroquine and low-dose corticosteroids.
-
-    Patient G: 72-year-old male with memory loss and confusion. PET scan showed reduced glucose metabolism in specific brain regions. Cerebrospinal fluid analysis and genetic testing diagnosed Alzheimer's disease. Treatment: Cholinesterase inhibitors and memantine.
-
-    Patient H: 45-year-old female with breast lump. Mammogram and ultrasound revealed suspicious mass. Core needle biopsy and HER2/hormone receptor testing diagnosed HER2-positive breast cancer. Treatment: Lumpectomy, radiation, and targeted therapy.
-
-    Patient I: 60-year-old male with rectal bleeding. Colonoscopy showed colorectal polyps. Polypectomy and histopathological examination diagnosed adenomatous polyps with high-grade dysplasia. Treatment: Endoscopic mucosal resection and regular surveillance colonoscopies.
-
-    Patient J: 38-year-old female with thyroid nodule. Ultrasound-guided fine-needle aspiration and cytology were inconclusive. Surgical biopsy and frozen section analysis during surgery diagnosed papillary thyroid carcinoma. Treatment: Total thyroidectomy followed by radioactive iodine therapy.
 
     Patient K: 38-year-old woman presented with a thyroid mass. Initial diagnostic attempts using ultrasound-directed thin-needle sampling and cell examination yielded ambiguous results. Definitive diagnosis of papillary thyroid cancer was achieved through surgical tissue extraction and rapid intraoperative pathological assessment. The patient underwent complete removal of the thyroid gland, followed by treatment with radioiodine.
 

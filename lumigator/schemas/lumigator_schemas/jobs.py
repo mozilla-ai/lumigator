@@ -3,14 +3,12 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field
 
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
     TaskType,
-    get_default_system_prompt,
-    validate_system_prompt,
 )
 
 
@@ -98,13 +96,16 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
-    system_prompt: str | None = None
-
-    @computed_field
-    @property
-    def resolved_system_prompt(self) -> str:
-        validate_system_prompt(self.task_definition.task, self.system_prompt)
-        return self.system_prompt or get_default_system_prompt(self.task_definition)
+    system_prompt: str | None = Field(
+        title="System Prompt",
+        description="System prompt to use for the model inference."
+        "If not provided, a task-specific default prompt will be used.",
+        default=None,
+        examples=[
+            "You are an advanced AI trained to summarize documents accurately and concisely. "
+            "Your goal is to extract key information while maintaining clarity and coherence."
+        ],
+    )
 
 
 class JobAnnotateConfig(BaseModel):

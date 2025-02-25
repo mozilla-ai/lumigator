@@ -155,6 +155,8 @@ def list_jobs(
             ray_job_info = found_job.dict()
             lm_info = job.model_dump()
             merged = {**ray_job_info, **lm_info}
+            # drop the job_id column since it's not used by the Job pydantic class
+            merged.pop("job_id", None)
             results.append(Job(**merged))
 
     return ListingResponse[Job](

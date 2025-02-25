@@ -84,6 +84,7 @@ For more information about the backend routes, see the rendered API specs in the
    :caption: Conceptual Guides
 
    conceptual-guides/architecture
+   conceptual-guides/datasets
 
 .. toctree::
    :maxdepth: 1

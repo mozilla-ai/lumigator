@@ -103,3 +103,11 @@ Generated Secret name for OpenAI
 {{- $_ := set . "Consts" (dict)  -}}
 {{- $_ := set .Consts "openaiSecretKey" "OPENAI_API_KEY" -}}
 {{- end -}}
+
+{{- define "lumigator.ray-address" -}}
+{{- if .Values.rayAddress }}
+{{- .Values.rayAddress }}
+{{- else }}
+{{- include "ray-cluster.fullname" (index .Subcharts "ray-cluster") }}-head-svc
+{{- end }}
+{{- end -}}

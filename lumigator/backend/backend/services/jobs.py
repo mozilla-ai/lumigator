@@ -16,10 +16,10 @@ from evaluator.schemas import EvalJobConfig, EvaluationConfig
 from fastapi import BackgroundTasks, UploadFile
 from inference.schemas import DatasetConfig as IDatasetConfig
 from inference.schemas import (
+    GenerationConfig,
     HuggingFacePipelineConfig,
     InferenceJobConfig,
     InferenceServerConfig,
-    SamplingParameters,
 )
 from inference.schemas import JobConfig as InferJobConfig
 from lumigator_schemas.datasets import DatasetFormat
@@ -167,7 +167,7 @@ class JobDefinitionInference(JobDefinition):
                 system_prompt=request.job_config.task_definition.system_prompt,
                 max_retries=3,
             )
-        job_config.params = SamplingParameters(
+        job_config.generation_config = GenerationConfig(
             max_tokens=request.job_config.max_tokens,
             frequency_penalty=request.job_config.frequency_penalty,
             temperature=request.job_config.temperature,

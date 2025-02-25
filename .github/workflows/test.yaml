@@ -49,4 +49,4 @@ jobs:
           make start-lumigator-ci
 
       - name: Run backend integration tests
-        run: make test-backend-integration
+        run: make test-backend-integration-ci

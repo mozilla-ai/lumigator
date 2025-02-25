@@ -218,6 +218,21 @@ test-backend-integration:
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
+test-backend-integration-ci:
+	cd lumigator/backend/; \
+	docker container list --all; \
+	RAY_DASHBOARD_PORT=8265 \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
 	$(call run_with_containers, test-backend-integration)

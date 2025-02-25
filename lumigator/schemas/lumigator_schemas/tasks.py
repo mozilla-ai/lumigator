@@ -18,7 +18,7 @@ class TaskType(str, Enum):
 
 class SummarizationTaskDefinition(BaseModel):
     task: Literal[TaskType.SUMMARIZATION] = TaskType.SUMMARIZATION
-    system_prompt: str | None = Field(
+    system_prompt: str = Field(
         default="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",  # noqa: E501
         description="System prompt for summarization tasks",
     )

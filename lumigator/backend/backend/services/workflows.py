@@ -64,10 +64,15 @@ class WorkflowService:
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
-        task_definition = SummarizationTaskDefinition(
-            task=TaskType.SUMMARIZATION,
-            system_prompt=request.system_prompt if request.system_prompt else None,
-        )
+        if not request.system_prompt:
+            task_definition = SummarizationTaskDefinition(
+                task=TaskType.SUMMARIZATION,
+            )
+        else:
+            task_definition = SummarizationTaskDefinition(
+                task=TaskType.SUMMARIZATION,
+                system_prompt=request.system_prompt,
+            )
         job_infer_config = JobInferenceConfig(
             model=request.model,
             provider=request.provider,

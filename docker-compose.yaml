@@ -24,6 +24,7 @@ services:
       - minio-data:/data
     profiles:
       - local
+      - ci
 
   minio-admin:
     labels:
@@ -45,6 +46,7 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+      - ci
 
   redis:
     labels:
@@ -60,6 +62,8 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
+    profiles:
+      - local
 
   ray:
     labels:
@@ -213,9 +217,9 @@ services:
       ai.mozilla.product_name: lumigator
     image: ghcr.io/mlflow/mlflow:v2.20.1
     environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_DEFAULT_REGION
+      - MLFLOW_AWS_ACCESS_KEY_ID
+      - MLFLOW_AWS_SECRET_ACCESS_KEY
+      - MLFLOW_AWS_DEFAULT_REGION
       - MLFLOW_TRACKING_URI
       - MLFLOW_DATABASE_URL
       - MLFLOW_S3_ROOT_PATH

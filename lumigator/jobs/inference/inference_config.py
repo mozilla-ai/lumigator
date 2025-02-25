@@ -106,7 +106,7 @@ class InferenceServerConfig(BaseInferenceServerConfig):
 
 
 class GenerationConfig(BaseGenerationConfig):
-    max_tokens: int = 1024
+    max_new_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
@@ -122,7 +122,6 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     torch_dtype: TorchDtype = "auto"
     accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int = 500  #  Model can generate upto these many tokens
 
     @computed_field
     @property

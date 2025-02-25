@@ -8,11 +8,11 @@ from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, compute
 from transformers.pipelines import check_task, get_supported_tasks
 
 from schemas import DatasetConfig
+from schemas import GenerationConfig as BaseGenerationConfig
 from schemas import HuggingFacePipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig
-from schemas import SamplingParameters as BaseSamplingParameters
 
 
 def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
@@ -105,8 +105,8 @@ class InferenceServerConfig(BaseInferenceServerConfig):
     max_retries: int = 3
 
 
-class SamplingParameters(BaseSamplingParameters):
-    max_tokens: int = 1024
+class GenerationConfig(BaseGenerationConfig):
+    max_new_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
@@ -122,7 +122,6 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     torch_dtype: TorchDtype = "auto"
     accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int = 500  #  Model can generate upto these many tokens
 
     @computed_field
     @property
@@ -158,7 +157,7 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
         return self.accelerator
 
 
-# FIXME It seems like _either_ params _or_ hf_pipeline
+# FIXME It seems like _either_ inference_server _or_ hf_pipeline
 # is needed; a subclass, generic or similar should be used
 # to model this situation
 class InferenceJobConfig(BaseInferenceJobConfig):
@@ -167,6 +166,6 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     job: JobConfig
     system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
-    params: SamplingParameters | None = None
+    generation_config: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

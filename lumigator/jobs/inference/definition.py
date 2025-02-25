@@ -24,7 +24,7 @@ DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text su
 class JobInterfaceInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         # TODO Move to a custom validator in the schema
-        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
+        if request.job_config.task_definition.task.value == "text-generation" and not request.job_config.system_prompt:
             raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
@@ -40,7 +40,7 @@ class JobInterfaceInference(JobDefinition):
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task,
+                task=request.job_config.task_definition.task,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,

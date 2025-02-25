@@ -9,7 +9,7 @@ from uuid import UUID
 
 import boto3
 import evaluator
-import evaluator.interface
+import evaluator.definition
 import fsspec
 import pytest
 import requests_mock
@@ -433,8 +433,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=evaluator.interface.JOB_INTERFACE.type,
-        command=evaluator.interface.JOB_INTERFACE.command,
+        job_type=evaluator.definition.JOB_DEFINITION.type,
+        command=evaluator.definition.JOB_DEFINITION.command,
         args=conf_args,
     )
 

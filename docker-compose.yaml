@@ -229,6 +229,7 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+      - ci
 
 volumes:
     minio-data:

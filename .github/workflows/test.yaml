@@ -46,7 +46,7 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
           export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
           export S3_BUCKET=${{ secrets.CW_S3_BUCKET }}
-          make start-lumigator-build
+          make start-lumigator-ci
 
       - name: Run backend integration tests
         run: make test-backend-integration

@@ -111,7 +111,7 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 const getDrawerHeader = () => {
-  const isWorkflowResults = selectedWorkflowResults && showJobResults.value
+  const isWorkflowResults = selectedWorkflowResults.value && showJobResults.value
   return showLogs.value
     ? 'Logs'
     : isWorkflowResults

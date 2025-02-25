@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test'
 import path from 'path'
-import fs from 'fs'
 
 // get the sample dataset absolute file path
 const currentDir = path.dirname(new URL(import.meta.url).pathname)
@@ -11,7 +10,7 @@ test('successfully uploads a dataset', async ({ page }) => {
 
   // find & click the provide dataset button and capture the system file chooser dialog
   const fileChooserPromise = page.waitForEvent('filechooser')
-  const button = await page.getByRole('button', { name: 'Provide Dataset' })
+  const button = page.getByRole('button', { name: 'Provide Dataset' })
   await button.click()
   const fileChooser = await fileChooserPromise
 
@@ -19,7 +18,7 @@ test('successfully uploads a dataset', async ({ page }) => {
   await fileChooser.setFiles(sampleDatasetFilePath)
 
   // click the upload button from the confirmation modal
-  const uploadButton = await page.getByRole('button', { name: 'Upload' })
+  const uploadButton = page.getByRole('button', { name: 'Upload' })
   await uploadButton.click()
 
   // wait for the api requests to upload the file and refetch the datasets

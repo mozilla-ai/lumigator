@@ -76,26 +76,6 @@ For example, continuing with the example above, notice how similar the last 3 ex
 Your outcome, in that case, would be the list as above, minus Patient L.
 
 
-### What to consider while you are curating?
-
-* Is your data representative of your domain in production?
-    * Are typical lengths of text covered?
-    Consider seeing the distribution of the texts you collected in step #1:
-    * Is there good coverage of the vocabulary in your data? (E.g. does a percentage of your users employ very distinct abbreaviations the rest do not use?)
-    * Is there any seasonality in your data?
-    For example, in the patient information example above: could that group of people who use a specific vocabulary only come in during internships in the Summer? Were you collecting examples from those dates?
-    * Are all your users represented in your data?
-    Beware of only choosing samples from one or two of your users. You could find that the model you select fails miserably when, in production, it needs to work for everyone.
-* Are there enough samples? See the comment above.
-* Are you selecting examples of all difficulties?
-Be careful not to only choose examples that are either easy or hard to summarize, you want examples of all types.
-* Could you be cheating?
-If your data was involved in the training or fine-tuning of any of the models you are evaluating, do make sure only new, unseen data is present in the evaluation dataset.
-Following the exam analogy, allowing samples to be shared between training and evaluation is similar to slipping a student a list of right answers before the exam (learn more about data leakage here).
-* Do you have quality ground truth?
-
-
-
 ### 3. Annotate (optional in Lumigator, but very strongly encouraged)
 
 Feel free to start with the format you feel most comfortable with. At the end of this final step, you will need to
@@ -115,6 +95,7 @@ examples,ground_truth
 "Patient K: 38-year-old woman presented with a thyroid mass. Initial diagnostic attempts using ultrasound-directed thin-needle sampling and cell examination yielded ambiguous results. Definitive diagnosis of papillary thyroid cancer was achieved through surgical tissue extraction and rapid intraoperative pathological assessment. The patient underwent complete removal of the thyroid gland, followed by treatment with radioiodine.","38F, thyroid cancer confirmed through surgical biopsy, treated with thyroidectomy and radioiodine."
 ```
 
+
 ## Validate your dataset file
 
 Now that you have a dataset (let's assume it's `my_dataset.csv`), let's upload it to Lumigator and check everything is fine.
@@ -122,11 +103,11 @@ Now that you have a dataset (let's assume it's `my_dataset.csv`), let's upload i
 You can do this via the [UI](../get-started/ui-guide.md) or, as below, via the SDK.
 
 
-## What You'll Need
+### What You'll Need
 
 - A running instance of [Lumigator](../get-started/quickstart.md).
 
-## Procedure
+#### Procedure
 
 1. Install the Lumigator SDK:
 
@@ -175,14 +156,64 @@ You can do this via the [UI](../get-started/ui-guide.md) or, as below, via the S
     user@host:~/lumigator$ uv run python upload_dataset.py
     ```
 
-## Verify
 
-You should see a confirmation like:
+#### But I was already using HuggingFace Datasets...
+
+Excellent. Below is an example of how to turn a huggingface dataset into one that is compatible with Lumigator.
+
+```python
+
+  from datasets import load_dataset
+  from lumigator_schemas.datasets import DatasetFormat
+  from lumigator_sdk.lumigator import LumigatorClient
+
+  # First, grab the dataset off huggingface: https://huggingface.co/datasets/YuanPJ/summ_screen
+  ds = load_dataset("YuanPJ/summ_screen", "fd")["test"]
+
+  # Now let's prepare it for Lumigator upload. We need to rename some columns and delete the rest
+  # rename the column "input" to "text" and "output" to "ground_truth". This is what Lumigator expects
+  ds = ds.rename_column("Transcript", "examples")
+  ds = ds.rename_column("Recap", "ground_truth")
+
+  # remove all columns except "text" and "ground_truth"
+  columns_list = ds.column_names
+  columns_list.remove("examples")
+  columns_list.remove("ground_truth")
+  ds = ds.remove_columns(columns_list)
+
+  # convert ds to a csv and make it a string so we can upload it with the Lumigator API
+  DS_OUTPUT = "summ_screen.csv"
+  ds.to_csv(DS_OUTPUT)
+
+  # Time to connect up to the Lumigator client!
+  LUMI_HOST = "localhost:8000"
+  client = LumigatorClient(api_host=LUMI_HOST)
+
+  # Upload that file that we created earlier
+  with Path.open(DS_OUTPUT) as file:
+      data = file.read()
+  dataset_response = client.datasets.create_dataset(dataset=data, format=DatasetFormat.JOB)
+
+  # Check the dataset was correctly added
+  url = f"http://{HOST}:{LUMIGATOR_PORT}/api/v1/datasets/{dataset.id}"
+  response = requests.get(url=url)
+
+  if response.status_code != 200:
+      raise Exception(f"Failed to retrieve dataset: {response.text}")
+  else:
+      print("Dataset looking good!")
+      results = response.json()
+```
+
+#### Verify
+
+Regardless of the method, you should see a confirmation like:
 
 ```console
 Dataset looking good!
 {'id': '67a2a5eb-9b1e-4c53-b133-bd7685e7d389', 'filename': 'my_dataset.csv', 'format': 'job', 'size': 3992, 'ground_truth': True, 'run_id': None, 'generated': False, 'generated_by': None, 'created_at': '2025-02-24T16:11:36'}
 ```
+
 
 ## Next Steps
 

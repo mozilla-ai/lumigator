@@ -1,12 +1,13 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from lumigator_schemas.jobs import (
     JobResults,
     LowercaseEnum,
 )
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
 
 
 class WorkflowStatus(LowercaseEnum):
@@ -20,9 +21,7 @@ class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
     experiment_id: str | None = None
-    task: str
-    source_language: str | None = None
-    target_language: str | None = None
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model: str
     provider: str
     dataset: UUID

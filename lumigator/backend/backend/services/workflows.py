@@ -64,7 +64,7 @@ class WorkflowService:
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
-            task=request.task_definition,
+            task_definition=request.task_definition,
             model=request.model,
             provider=request.provider,
             base_url=request.base_url,

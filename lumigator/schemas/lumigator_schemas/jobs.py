@@ -94,6 +94,7 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
+    system_prompt: str | None = None
 
     @model_validator(mode="after")
     def validate_and_set_defaults(self):

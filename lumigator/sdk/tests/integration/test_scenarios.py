@@ -11,7 +11,6 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
-from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import (
@@ -263,7 +262,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = ExperimentCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
-        task_definition=TaskDefinition(task),
+        task_definition={"task": task},
         dataset=dataset_id,
     )
     experiment_response = lumi_client_int.experiments.create_experiment(request)

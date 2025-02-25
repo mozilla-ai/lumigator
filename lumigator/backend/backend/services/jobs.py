@@ -484,12 +484,15 @@ class JobService:
         """
         loguru.logger.info("Handling inference job result")
 
-        await self.wait_for_job_complete(job_id, max_wait_time_sec)
-        self._add_dataset_to_db(
-            job_id,
-            request,
-            self._dataset_service.s3_filesystem,
-        )
+        job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
+        if job_status == JobStatus.SUCCEEDED.value:
+            self._add_dataset_to_db(
+                job_id,
+                request,
+                self._dataset_service.s3_filesystem,
+            )
+        else:
+            loguru.logger.warning(f"Job {job_id} failed, results not stored in DB")
 
     def add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
         """Adds a background task to the background tasks queue."""

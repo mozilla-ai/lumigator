@@ -65,8 +65,7 @@ Let's imagine you are building an app that summarizes patient history. After thi
 
 ```
 
-Notice at this point we do not know what an ideal summary of this would be.
-
+In this step, we are not adding ground truth, that is, we will not add what an ideal summary of each of those examples is.
 
 ### 2. Curate
 

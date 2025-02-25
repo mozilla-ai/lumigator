@@ -32,6 +32,7 @@ class JobStatus(LowercaseEnum):
 
 
 class JobConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     job_id: UUID
     job_type: JobType
     command: str
@@ -39,6 +40,7 @@ class JobConfig(BaseModel):
 
 
 class JobEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     job_id: UUID
     job_type: JobType
     status: JobStatus
@@ -46,6 +48,7 @@ class JobEvent(BaseModel):
 
 
 class JobLogsResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     logs: str | None = None
 
 
@@ -53,6 +56,7 @@ class JobLogsResponse(BaseModel):
 # those from the schema
 # ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
 class JobSubmissionResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     type: str | None = None
     submission_id: str | None = None
     driver_info: str | None = None
@@ -70,6 +74,7 @@ class JobSubmissionResponse(BaseModel):
 
 
 class JobEvalConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
     metrics: list[str] = ["meteor", "rouge", "bertscore", "bleu"]
 
@@ -95,6 +100,7 @@ class JobInferenceConfig(BaseModel):
 
 
 class JobAnnotateConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     task: TaskType = Field(default=TaskType.SUMMARIZATION)
     store_to_dataset: bool = False
@@ -111,6 +117,7 @@ JobSpecificConfigVar = TypeVar("JobSpecificConfig", JobEvalConfig, JobInferenceC
 class JobCreate(BaseModel):
     """Job configuration dealing exclusively with backend job handling"""
 
+    model_config = ConfigDict(extra="forbid")
     name: str
     description: str = ""
     dataset: UUID
@@ -119,18 +126,22 @@ class JobCreate(BaseModel):
 
 
 class JobAnnotateCreate(JobCreate):
+    model_config = ConfigDict(extra="forbid")
     job_config: JobAnnotateConfig
 
 
 class JobEvalCreate(JobCreate):
+    model_config = ConfigDict(extra="forbid")
     job_config: JobEvalConfig
 
 
 class JobInferenceCreate(JobCreate):
+    model_config = ConfigDict(extra="forbid")
     job_config: JobInferenceConfig
 
 
 class JobResponse(BaseModel, from_attributes=True):
+    model_config = ConfigDict(extra="forbid")
     id: UUID
     name: str
     description: str
@@ -141,16 +152,19 @@ class JobResponse(BaseModel, from_attributes=True):
 
 
 class JobResultResponse(BaseModel, from_attributes=True):
+    model_config = ConfigDict(extra="forbid")
     id: UUID
     job_id: UUID
 
 
 class JobResultDownloadResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: UUID
     download_url: str
 
 
 class JobResults(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: UUID
     metrics: list[dict[str, Any]] | None = None
     parameters: list[dict[str, Any]] | None = None

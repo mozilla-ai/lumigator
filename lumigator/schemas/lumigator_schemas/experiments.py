@@ -1,13 +1,14 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse
 
 
 class ExperimentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     name: str
     description: str = ""
     dataset: UUID
@@ -16,6 +17,7 @@ class ExperimentCreate(BaseModel):
 
 
 class GetExperimentResponse(BaseModel, from_attributes=True):
+    model_config = ConfigDict(extra="forbid")
     id: str
     name: str
     description: str

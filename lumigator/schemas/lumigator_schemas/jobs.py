@@ -98,11 +98,11 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
-    user_provided_system_prompt: str | None = None
+    system_prompt: str | None = None
 
     @computed_field
     @property
-    def system_prompt(self) -> str:
+    def resolved_system_prompt(self) -> str:
         validate_system_prompt(self.task_definition.task, self.system_prompt)
         return self.system_prompt or get_default_system_prompt(self.task_definition)
 

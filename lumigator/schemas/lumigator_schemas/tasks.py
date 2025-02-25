@@ -46,8 +46,8 @@ SYSTEM_PROMPT_DEFAULTS = {
 }
 
 
-def validate_system_prompt(task_type: TaskType, system_prompt: str | None) -> None:
-    if task_type == TaskType.TEXT_GENERATION and not system_prompt:
+def validate_system_prompt(task: TaskType, system_prompt: str | None) -> None:
+    if task == TaskType.TEXT_GENERATION and not system_prompt:
         raise ValueError(
             f"system_prompt required for task=`{TaskType.TEXT_GENERATION.value}`, Received: {system_prompt}"
         )

@@ -183,7 +183,7 @@ class JobDefinitionInference(JobDefinition):
         return True
 
     def resolve_system_prompt(self, task_definition: TaskDefinition, system_prompt: str | None) -> str:
-        validate_system_prompt(task_definition.task)
+        validate_system_prompt(task_definition.task, system_prompt)
         return system_prompt or get_default_system_prompt(task_definition)
 
 

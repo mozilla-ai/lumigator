@@ -157,7 +157,7 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
         return self.accelerator
 
 
-# FIXME It seems like _either_ params _or_ hf_pipeline
+# FIXME It seems like _either_ inference_server _or_ hf_pipeline
 # is needed; a subclass, generic or similar should be used
 # to model this situation
 class InferenceJobConfig(BaseInferenceJobConfig):
@@ -166,6 +166,6 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     job: JobConfig
     system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
-    params: GenerationConfig | None = None
+    generation_config: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

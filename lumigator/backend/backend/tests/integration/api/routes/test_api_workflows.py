@@ -9,6 +9,7 @@ from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
+    Job,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -126,11 +127,11 @@ def test_upload_data_launch_job(
     assert get_ds_after.total == get_ds_before.total + 1
 
     get_all_jobs = local_client.get("/jobs")
-    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
+    assert (ListingResponse[Job].model_validate(get_all_jobs.json())).total == 2
     get_jobs_infer = local_client.get("/jobs?job_types=inference")
-    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
+    assert (ListingResponse[Job].model_validate(get_jobs_infer.json())).total == 1
     get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
-    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
+    assert (ListingResponse[Job].model_validate(get_jobs_eval.json())).total == 1
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])

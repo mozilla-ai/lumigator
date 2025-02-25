@@ -103,12 +103,7 @@ def test_upload_data_launch_job(
         "description": "Test run for Huggingface model",
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
-        "job_config": {
-            "job_type": JobType.EVALUATION,
-            "metrics": ["rouge", "meteor"],
-            "model": TEST_CAUSAL_MODEL,
-            "provider": "hf",
-        },
+        "job_config": {"job_type": JobType.EVALUATION, "metrics": ["rouge", "meteor"]},
     }
 
     create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
@@ -161,10 +156,7 @@ def test_upload_data_no_gt_launch_annotation(
         "description": "Test run for Huggingface model",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
-        "job_config": {
-            "job_type": JobType.ANNOTATION,
-            "task": "summarization",
-        },
+        "job_config": {"job_type": JobType.ANNOTATION},
     }
     create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201

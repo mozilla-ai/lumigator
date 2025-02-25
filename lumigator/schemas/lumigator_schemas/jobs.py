@@ -75,6 +75,7 @@ class JobEvalConfig(BaseModel):
 
 
 class JobInferenceConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str

@@ -47,7 +47,7 @@ class LiteLLMModelClient(BaseModelClient):
 
     def __init__(self, config: InferenceJobConfig):
         self.config = config
-        self.system_prompt = self.config.inference_server.system_prompt
+        self.system_prompt = self.config.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     def predict(

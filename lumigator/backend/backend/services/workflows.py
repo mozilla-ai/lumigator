@@ -11,6 +11,7 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobStatus,
 )
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskType
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -68,7 +69,10 @@ class WorkflowService:
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            system_prompt=request.system_prompt,
+            task_definition=SummarizationTaskDefinition(
+                task=TaskType.SUMMARIZATION,
+                system_prompt=request.system_prompt,
+            ),
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )

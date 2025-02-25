@@ -84,7 +84,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 You can then download the results following the steps described [below](#download-inference-results)
 
 ## Ollama
-[Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://docs.openwebui.com/).
+[Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://github.com/open-webui/open-webui/).
 
 ### Procedure
 
@@ -176,7 +176,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 
    INFERENCE_NAME="vLLM HuggingFaceTB/SmolLM2-360M-Instruct"
    INFERENCE_DESC="Test inference with vLLM's HuggingFaceTB/SmolLM2-360M-Instruct"
-   INFERENCE_MODEL="HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container
+   INFERENCE_MODEL="HuggingFaceTB/SmolLM2-360M-Instruct" # Format expected vllm://<model_name>, the model_name must be same as one when running the docker container #pragma: allowlist secret
    INFERENCE_PROVIDER="hosted_vllm" # Provider as documented in LiteLLM https://docs.litellm.ai/docs/providers/vllm
    INFERENCE_BASE_URL="http://localhost:8090/v1" # vLLM setup to run on port 8090
 

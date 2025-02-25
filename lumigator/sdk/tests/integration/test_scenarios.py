@@ -152,7 +152,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     assert eval_jobs_after is not None
     assert eval_jobs_after.total - eval_jobs_before.total == 0
 
-    infer_job_status = lumi_client_int.jobs.wait_for_job(job_infer_creation_result.id, retries=11, poll_wait=30)
+    infer_job_status = lumi_client_int.jobs.wait_for_job(job_infer_creation_result.id, retries=66, poll_wait=5)
     logger.info(infer_job_status)
 
     download_info = lumi_client_int.jobs.get_job_download(job_infer_creation_result.id)
@@ -179,7 +179,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     assert job_eval_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    eval_job_status = lumi_client_int.jobs.wait_for_job(job_eval_creation_result.id, retries=11, poll_wait=30)
+    eval_job_status = lumi_client_int.jobs.wait_for_job(job_eval_creation_result.id, retries=66, poll_wait=5)
     logger.info(eval_job_status)
 
     datasets = lumi_client_int.datasets.get_datasets()
@@ -217,7 +217,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    annotate_job_config = JobAnnotateConfig(task="summarization")
+    annotate_job_config = JobAnnotateConfig()
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",
@@ -231,7 +231,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     assert annotate_job_creation_result is not None
     assert lumi_client_int.jobs.get_jobs() is not None
 
-    job_status = lumi_client_int.jobs.wait_for_job(annotate_job_creation_result.id, retries=11, poll_wait=30)
+    job_status = lumi_client_int.jobs.wait_for_job(annotate_job_creation_result.id, retries=66, poll_wait=5)
     logger.info(job_status)
 
     download_info = lumi_client_int.jobs.get_job_download(annotate_job_creation_result.id)

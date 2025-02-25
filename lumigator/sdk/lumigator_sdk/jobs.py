@@ -18,6 +18,7 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
+    JobStatus,
     JobType,
 )
 
@@ -151,19 +152,26 @@ class Jobs:
             JobResponse: the most recently job information for the ID, when the
               job has finished
         """
+        succeeded = False
+        timed_out = True
         for _ in range(1, retries):
-            response = self.client.get_ray_job_response(f"{id}")
-            jobinfo = response.json()
-            if jobinfo["status"] == "PENDING" or jobinfo["status"] == "RUNNING":
-                time.sleep(poll_wait)
-                continue
-            elif jobinfo["status"] == "FAILED":
-                raise Exception(f"Job {id} failed")
-            elif jobinfo["status"] == "STOPPED":
-                raise Exception(f"Job {id} stopped")
-            elif jobinfo["status"] == "SUCCEEDED":
-                return jobinfo
-        raise Exception(f"Job {id} did not complete in the polling time (retries: {retries}, poll_wait: {poll_wait})")
+            get_job_response = self.get_job(id)
+            assert get_job_response.status_code == 200
+            get_job_response_model = Job.model_validate(get_job_response.json())
+            if get_job_response_model.status == JobStatus.SUCCEEDED.value:
+                succeeded = True
+                timed_out = False
+                break
+            if get_job_response_model.status == JobStatus.FAILED.value:
+                succeeded = False
+                timed_out = False
+                break
+            time.sleep(poll_wait)
+        if timed_out:
+            raise Exception(
+                f"Job {id} did not complete in the polling time (retries: {retries}, poll_wait: {poll_wait})"
+            )
+        return succeeded
 
     def create_job(self, request: JobCreate) -> JobResponse:
         """Create a new job.

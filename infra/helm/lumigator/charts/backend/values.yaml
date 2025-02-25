@@ -8,8 +8,8 @@ AWSSecretKey: ""
 s3EndpointURL: "" # URL of the S3 endpoint. Change this if using a different provider.
 AWSEndpointURL: "" # URL of the AWS endpoint. Typically matches the S3EndpointURL.
 
-rayAddress: ""
-rayPort: "" # Port to connect to the Ray service. Usually 8265.
+rayAddress: "" # Defaults to included Ray service
+rayPort: "8265" # Port to connect to the Ray service.
 rayWorkerGPUs: ""
 
 serviceAccountName: ""

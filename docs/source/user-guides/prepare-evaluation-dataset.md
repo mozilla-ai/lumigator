@@ -116,13 +116,7 @@ You can do this via the [UI](../get-started/ui-guide.md) or, as below, via the S
     user@host:~/lumigator$ uv pip install -e lumigator/sdk
     ```
 
-1. Create a new Python file:
-
-    ```console
-    user@host:~/lumigator$ touch upload_dataset.py
-    ```
-
-1. Add the following code to `upload_dataset.py`:
+1. Add the following code to a new Python file, `upload_dataset.py`:
 
     ```python
     import json

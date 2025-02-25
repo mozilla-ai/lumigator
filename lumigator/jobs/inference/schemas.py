@@ -36,7 +36,7 @@ class SamplingParameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class HfPipelineConfig(BaseModel, arbitrary_types_allowed=True):
+class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
     revision: str
     use_fast: bool
@@ -56,7 +56,7 @@ class InferenceJobConfig(BaseModel):
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     params: SamplingParameters | None = None
-    hf_pipeline: HfPipelineConfig | None = None
+    hf_pipeline: HuggingFacePipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")
 
 

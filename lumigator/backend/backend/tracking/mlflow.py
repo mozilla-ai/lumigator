@@ -10,7 +10,6 @@ from uuid import UUID
 import boto3
 import loguru
 import requests
-from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.tasks import TaskDefinition
@@ -21,6 +20,7 @@ from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -306,19 +306,13 @@ class MLflowTrackingClient(TrackingClient):
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Job logs for ID: {ray_job_id} not found",
-            )
+            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
         elif resp.status_code != HTTPStatus.OK:
             loguru.logger.error(
                 f"Unexpected status code getting job logs: {resp.status_code}, \
                     error: {resp.text or ''}"
             )
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error getting job logs for ID: {ray_job_id}",
-            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
 
         try:
             metadata = json.loads(resp.text)
@@ -326,7 +320,7 @@ class MLflowTrackingClient(TrackingClient):
         except json.JSONDecodeError as e:
             loguru.logger.error(f"JSON decode error: {e}")
             loguru.logger.error(f"Response text: {resp.text}")
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""

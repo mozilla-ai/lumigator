@@ -1,8 +1,7 @@
-from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class TaskType(str, Enum):
@@ -17,44 +16,37 @@ class TaskType(str, Enum):
     TEXT_GENERATION = "text-generation"
 
 
-class TranslationDefinition(BaseModel):
-    task: Literal[TaskType.TRANSLATION] = TaskType.TRANSLATION
-    source_language: str = Field(description="Source language for translation", examples=["en", "English"])
-    target_language: str = Field(description="Target language for translation", examples=["de", "German"])
-
-
-class SummarizationDefinition(BaseModel):
+class SummarizationTaskDefinition(BaseModel):
     task: Literal[TaskType.SUMMARIZATION] = TaskType.SUMMARIZATION
+    system_prompt: str = Field(
+        default="You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",  # noqa: E501
+        description="System prompt for summarization tasks",
+    )
+    model_config = ConfigDict(extra="forbid")
 
 
-class TextGenerationDefinition(BaseModel):
+class TranslationTaskDefinition(BaseModel):
+    task: Literal[TaskType.TRANSLATION] = TaskType.TRANSLATION
+    system_prompt: str | None = Field(
+        default=None, description="System prompt for translation tasks", examples=["translate English to German"]
+    )
+    source_language: str = Field(examples=["en", "English"])
+    target_language: str = Field(examples=["de", "German"])
+    model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="after")
+    def set_translation_prompt(self):
+        if not self.system_prompt:
+            self.system_prompt = f"translate {self.source_language} to {self.target_language}:"
+        return self
+
+
+class TextGenerationTaskDefinition(BaseModel):
     task: Literal[TaskType.TEXT_GENERATION] = TaskType.TEXT_GENERATION
+    system_prompt: str = Field(description="System prompt needs to be set by the user for for text-generation tasks")
+    model_config = ConfigDict(extra="forbid")
 
 
 TaskDefinition = Annotated[
-    TranslationDefinition | SummarizationDefinition | TextGenerationDefinition, Field(discriminator="task")
+    SummarizationTaskDefinition | TranslationTaskDefinition | TextGenerationTaskDefinition, Field(discriminator="task")
 ]
-
-
-class TaskValidator(ABC):
-    @abstractmethod
-    def validate(self, config):
-        pass
-
-
-class TextGenerationValidator(TaskValidator):
-    def validate(self, config):
-        if config.source_language or config.target_language:
-            raise ValueError(
-                f"Fields source_language and target_language should not be provided when task={TaskType.SUMMARIZATION}"
-                f"but got source_language={config.source_language} and target_language={config.target_language}"
-            )
-
-
-class TranslationValidator(TaskValidator):
-    def validate(self, config):
-        if not config.source_language or not config.target_language:
-            raise ValueError(
-                f"Both source_language and target_language must be provided when task='{TaskType.TRANSLATION},"
-                f"but got source_language={config.source_language} and target_language={config.target_language}"
-            )

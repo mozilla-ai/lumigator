@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from lumigator_schemas.tasks import SummarizationDefinition, TaskDefinition, TaskType
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
 
 DEFAULT_SUMMARIZATION_PROMPT = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
@@ -73,30 +73,20 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["meteor", "rouge", "bertscore"]
+    metrics: list[str] = ["meteor", "rouge", "bertscore", "bleu"]
 
 
 class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
-    task_definition: TaskDefinition = Field(default=SummarizationDefinition(task=TaskType.SUMMARIZATION))
-    source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
-    target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
     base_url: str | None = None
-    system_prompt: str | None = Field(
-        title="System Prompt",
-        default=None,
-        examples=[
-            "You are an advanced AI trained to summarize documents accurately and concisely. "
-            "Your goal is to extract key information while maintaining clarity and coherence."
-        ],
-    )
     output_field: str | None = "predictions"
     max_tokens: int = 1024
     frequency_penalty: float = 0.0

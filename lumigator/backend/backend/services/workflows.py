@@ -157,6 +157,7 @@ class WorkflowService:
                     "bertscore_precision_mean": round(eval_output.metrics["bertscore"]["precision_mean"], 3),
                     "bertscore_recall_mean": round(eval_output.metrics["bertscore"]["recall_mean"], 3),
                     "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
+                    "bleu_mean": round(eval_output.metrics["bleu"]["bleu_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.

@@ -40,20 +40,23 @@ datasets, experiments, workflows, and jobs.
 The backend also coordinates interaction with a Ray cluster and a database. The Ray cluster is used to run jobs, and
 the database is used to store metadata about the platform, jobs, and datasets.
 
-For more information about datasets, see :doc:`conceptual-guides/datasets`.
+For more information about datasets, see :doc:`api/datasets`.
 
-For more information about experiments, see :doc:`conceptual-guides/experiments`.
+For more information about experiments, see :doc:`api/experiments`.
 
-For more information about workflows, see :doc:`conceptual-guides/workflows`.
+For more information about workflows, see :doc:`api/workflows`.
 
-For more information about jobs, see :doc:`conceptual-guides/jobs`.
+For more information about jobs, see :doc:`api/jobs`.
+
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
+
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
 
 .. toctree::
    :maxdepth: 1
    :caption: Get Started
 
    get-started/quickstart
-   get-started/development-guide
    get-started/ui-guide
    get-started/suggested-models
    get-started/troubleshooting
@@ -65,7 +68,7 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    operations-guide/configuration
    operations-guide/kubernetes-installation
    operations-guide/alembic
-   operations-guide/dev
+   operations-guide/local-development
    operations-guide/configure-S3
 
 .. toctree::
@@ -79,11 +82,7 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
    :maxdepth: 2
    :caption: Conceptual Guides
 
-   conceptual-guides/endpoints
-   conceptual-guides/datasets
-   conceptual-guides/experiments
-   conceptual-guides/workflows
-   conceptual-guides/jobs
+   conceptual-guides/architecture
 
 .. toctree::
    :maxdepth: 1
@@ -91,3 +90,8 @@ For more information about jobs, see :doc:`conceptual-guides/jobs`.
 
    reference/sdk
    reference/schemas
+
+.. toctree::
+   :caption: API Specifications
+
+   api/index

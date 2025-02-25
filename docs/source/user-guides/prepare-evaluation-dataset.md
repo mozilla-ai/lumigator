@@ -1,6 +1,6 @@
 # Preparing your own evaluation dataset
 
-If you need more information about what this is and why, check this page first.
+If you need more information about what an evaluation dataset is and why it's important, check [this page](../conceptual-guides/datasets.md) first.
 
 This guide will walk you through the process of preparing your own evaluation dataset
 for Lumigator to help see the differences in performance of multiple Language Models for your own use case, rather than a generic benchmark.

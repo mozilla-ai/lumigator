@@ -156,8 +156,7 @@ class Jobs:
         timed_out = True
         for _ in range(1, retries):
             get_job_response = self.get_job(id)
-            assert get_job_response.status_code == 200
-            get_job_response_model = Job.model_validate(get_job_response.json())
+            get_job_response_model = Job.model_validate(get_job_response.model_dump())
             if get_job_response_model.status == JobStatus.SUCCEEDED.value:
                 succeeded = True
                 timed_out = False

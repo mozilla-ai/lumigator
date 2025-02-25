@@ -19,7 +19,7 @@ Your CSV should contain `examples` and `ground_truth`. See an example [here](../
 
 Here you will have a source language (that you translate from) and a target language (that you translate to).
 
-Your CSV should contain `examples_$SRC_LAN` and `ground_truth_$TAR_LAN`.
+Your CSV should still contain `examples` (in the source language) and `ground_truth` (the ideal translation to the target language).
 
 In the column names below, please ensure you replace the placeholders `$SRC_LAN` and `$TAR_LAN` with [ISO 639 2-character language codes](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
 

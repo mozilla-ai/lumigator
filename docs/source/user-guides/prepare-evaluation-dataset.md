@@ -13,11 +13,11 @@ Lumigator expects a CSV file containing different columns depending on the use c
 
 **Summarization use case**
 
-Your CSV should contain `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/dialogsum_exc.csv ).
+Your CSV should at least contain columns named `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/dialogsum_exc.csv ).
 
 **Translation use case**
 
-In preparation.
+Use case under development.
 
 ## Content
 
@@ -45,6 +45,8 @@ Ideally you will end up with a text file or a spreadsheet with dozens (or hundre
 
 ```
     Patient A: 58-year-old male with persistent cough and chest pain for 3 months. CT scan revealed a lung mass. Biopsy and immunohistochemistry confirmed non-small cell lung cancer. Treatment: Surgical resection followed by chemotherapy.
+
+    Patient J: 38-year-old female with thyroid nodule. Ultrasound-guided fine-needle aspiration and cytology were inconclusive. Surgical biopsy and frozen section analysis during surgery diagnosed papillary thyroid carcinoma. Treatment: Total thyroidectomy followed by radioactive iodine therapy.
 
     Patient K: 38-year-old woman presented with a thyroid mass. Initial diagnostic attempts using ultrasound-directed thin-needle sampling and cell examination yielded ambiguous results. Definitive diagnosis of papillary thyroid cancer was achieved through surgical tissue extraction and rapid intraoperative pathological assessment. The patient underwent complete removal of the thyroid gland, followed by treatment with radioiodine.
 
@@ -93,14 +95,6 @@ If you do have human experts who were able to go through the input data from ste
 ```
 examples,ground_truth
 "Patient A: 58-year-old male with persistent cough and chest pain for 3 months. CT scan revealed a lung mass. Biopsy and immunohistochemistry confirmed non-small cell lung cancer. Treatment: Surgical resection followed by chemotherapy.","58M, lung cancer diagnosed via CT and biopsy, treated with surgery and chemo."
-"Patient B: 42-year-old female with recurring headaches and vision changes. MRI showed a pituitary tumor. Endocrine tests and fine-needle aspiration confirmed a prolactinoma. Treatment: Dopamine agonist medication.","42F, prolactinoma found through MRI and hormone tests, managed with medication."
-"Patient C: 67-year-old male with fatigue and unexplained weight loss. Blood tests revealed abnormal white blood cell count. Bone marrow biopsy and flow cytometry diagnosed chronic lymphocytic leukemia. Treatment: Watch and wait approach with regular monitoring.","67M, CLL detected by blood work and bone marrow biopsy, under observation."
-"Patient D: 35-year-old female with abdominal pain and bloating. Ultrasound showed ovarian masses. Surgical biopsy and histopathology confirmed ovarian endometriosis. Treatment: Laparoscopic excision of endometrial tissue.","35F, ovarian endometriosis found via ultrasound and biopsy, treated surgically."
-"Patient E: 50-year-old male with difficulty swallowing. Endoscopy revealed esophageal lesions. Biopsy and immunohistochemistry diagnosed Barrett's esophagus with high-grade dysplasia. Treatment: Endoscopic mucosal resection and radiofrequency ablation.","50M, Barrett's esophagus with dysplasia detected by endoscopy and biopsy, treated endoscopically."
-"Patient F: 29-year-old female with skin rashes and joint pain. Blood tests showed positive ANA. Skin biopsy and immunofluorescence confirmed systemic lupus erythematosus. Treatment: Hydroxychloroquine and low-dose corticosteroids.","29F, lupus diagnosed through blood tests and skin biopsy, treated with immunosuppressants."
-"Patient G: 72-year-old male with memory loss and confusion. PET scan showed reduced glucose metabolism in specific brain regions. Cerebrospinal fluid analysis and genetic testing diagnosed Alzheimer's disease. Treatment: Cholinesterase inhibitors and memantine.","72M, Alzheimer's identified by PET scan and CSF analysis, managed with medication."
-"Patient H: 45-year-old female with breast lump. Mammogram and ultrasound revealed suspicious mass. Core needle biopsy and HER2/hormone receptor testing diagnosed HER2-positive breast cancer. Treatment: Lumpectomy, radiation, and targeted therapy.","45F, HER2+ breast cancer found through imaging and biopsy, treated with surgery, radiation, and targeted drugs."
-"Patient I: 60-year-old male with rectal bleeding. Colonoscopy showed colorectal polyps. Polypectomy and histopathological examination diagnosed adenomatous polyps with high-grade dysplasia. Treatment: Endoscopic mucosal resection and regular surveillance colonoscopies.","60M, high-risk colon polyps detected by colonoscopy and biopsy, treated with endoscopic removal and monitoring."
 "Patient J: 38-year-old female with thyroid nodule. Ultrasound-guided fine-needle aspiration and cytology were inconclusive. Surgical biopsy and frozen section analysis during surgery diagnosed papillary thyroid carcinoma. Treatment: Total thyroidectomy followed by radioactive iodine therapy.","38F, thyroid cancer confirmed through surgical biopsy, treated with thyroidectomy and radioiodine."
 "Patient K: 38-year-old woman presented with a thyroid mass. Initial diagnostic attempts using ultrasound-directed thin-needle sampling and cell examination yielded ambiguous results. Definitive diagnosis of papillary thyroid cancer was achieved through surgical tissue extraction and rapid intraoperative pathological assessment. The patient underwent complete removal of the thyroid gland, followed by treatment with radioiodine.","38F, thyroid cancer confirmed through surgical biopsy, treated with thyroidectomy and radioiodine."
 ```

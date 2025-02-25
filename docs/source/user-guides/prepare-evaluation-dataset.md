@@ -78,7 +78,8 @@ Your outcome, in that case, would be the list as above, minus Patient L.
 
 ### 3. Annotate (optional in Lumigator, but very strongly encouraged)
 
-Feel free to start with the format you feel most comfortable with. At the end of this final step, you will need to
+Regardless of the format you have been collecting your data in (spreadsheet, JSON, JSONL, HuggingFace datasets...), at the end of this final step, you will need to export to CSV.
+
 Ground truth (i.e. the ideal output of the task for each example, as imagined by a human expert) is crucial to evaluate a Language Model. Lumigator allows you to upload a dataset with only the `examples` column and later annotate the dataset with a high-quality Language Model, but nobody has vetted that Language Model for your use case: we cannot guarantee it knows as much about your business as you do.
 
 If you do have human experts who were able to go through the input data from step #2 and add their annotations, you should end up with a file with the same list of examples, plus the annotation after a comma.

@@ -52,7 +52,7 @@
           style="pointer-events: all"
           aria-haspopup="true"
           aria-controls="optionsMenu"
-          @click.stop="toggleOptionsMenu($event, slotProps.data)"
+          @click="toggleOptionsMenu($event, slotProps.data)"
         >
         </span>
       </template>

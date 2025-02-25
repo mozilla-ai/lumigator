@@ -65,7 +65,7 @@
               style="pointer-events: all"
               aria-haspopup="true"
               aria-controls="optionsMenu"
-              @click.stop="toggleOptionsMenu($event, slotProps.data)"
+              @click="toggleOptionsMenu($event, slotProps.data)"
             >
             </span>
           </template>
@@ -134,7 +134,7 @@ const options = ref<MenuItem[]>([
     label: 'View Results',
     icon: 'pi pi-external-link',
     disabled: () => {
-      return focusedItem.value.status !== WorkflowStatus.SUCCEEDED
+      return focusedItem.value?.status !== WorkflowStatus.SUCCEEDED
     },
     command: () => {
       emit('view-experiment-results-clicked', focusedItem.value)

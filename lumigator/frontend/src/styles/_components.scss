@@ -237,3 +237,8 @@
   cursor: not-allowed !important;
   pointer-events: all !important;
 }
+
+// hides the "X" button from confirm popup
+.p-confirmdialog .p-dialog-close-button {
+  display: none;
+}

@@ -7,10 +7,9 @@
     "job_type": "inference",
     "model": "some_model",
     "provider": "some_provider",
-    "model_url": "https://huggingface.co/facebook/bart-large-cnn",
-    "system_prompt": "some prompt",
     "task_definition": {
-      "task": "summarization"
+      "task": "summarization",
+      "system_prompt": "some prompt"
     },
     "accelerator": "auto",
     "revision": "main",

@@ -36,3 +36,25 @@ class TextGenerationTaskDefinition(BaseModel):
 TaskDefinition = Annotated[
     SummarizationTaskDefinition | TranslationTaskDefinition | TextGenerationTaskDefinition, Field(discriminator="task")
 ]
+
+
+SYSTEM_PROMPT_DEFAULTS = {
+    TaskType.SUMMARIZATION: "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",  # noqa: E501
+    TaskType.TRANSLATION: lambda task_definition: (
+        f"translate {task_definition.source_language} to {task_definition.target_language}:"
+    ),
+}
+
+
+def validate_system_prompt(task_type: TaskType, system_prompt: str | None) -> None:
+    if task_type == TaskType.TEXT_GENERATION and not system_prompt:
+        raise ValueError(
+            f"system_prompt required for task=`{TaskType.TEXT_GENERATION.value}`, Received: {system_prompt}"
+        )
+
+
+def get_default_system_prompt(task_definition: TaskDefinition) -> str:
+    generator = SYSTEM_PROMPT_DEFAULTS.get(task_definition.task)
+    if not generator:
+        raise ValueError(f"No default system_prompt defined for {task_definition.task.value}")
+    return generator(task_definition) if callable(generator) else generator

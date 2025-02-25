@@ -3,11 +3,15 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
-
-DEFAULT_SUMMARIZATION_PROMPT = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
+from lumigator_schemas.tasks import (
+    SummarizationTaskDefinition,
+    TaskDefinition,
+    TaskType,
+    get_default_system_prompt,
+    validate_system_prompt,
+)
 
 
 class LowercaseEnum(str, Enum):
@@ -94,27 +98,13 @@ class JobInferenceConfig(BaseModel):
     top_p: float = 1.0
     store_to_dataset: bool = False
     max_new_tokens: int = 500
-    system_prompt: str | None = None
+    user_provided_system_prompt: str | None = None
 
-    @model_validator(mode="after")
-    def validate_and_set_defaults(self):
-        # Text generation for causal models can mean anything
-        # So we need to ensure the user provides a system prompt
-        if self.task_definition.task == TaskType.TEXT_GENERATION and self.system_prompt is None:
-            raise ValueError("system_prompt must be provided when task='text-generation'")
-
-        # Set default system prompt if not provided
-        if self.system_prompt is None:
-            self.system_prompt = self._get_default_prompt()
-
-        return self
-
-    def _get_default_prompt(self) -> str:
-        match self.task_definition.task:
-            case TaskType.SUMMARIZATION:
-                return DEFAULT_SUMMARIZATION_PROMPT
-            case TaskType.TRANSLATION:
-                return f"translate {self.task_definition.source_language} to {self.task_definition.target_language}:"
+    @computed_field
+    @property
+    def system_prompt(self) -> str:
+        validate_system_prompt(self.task_definition.task, self.system_prompt)
+        return self.system_prompt or get_default_system_prompt(self.task_definition)
 
 
 class JobAnnotateConfig(BaseModel):

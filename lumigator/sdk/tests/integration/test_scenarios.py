@@ -218,7 +218,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    annotate_job_config = JobAnnotateConfig(task_definition=TaskType.SUMMARIZATION, model=TEST_SEQ2SEQ_MODEL)
+    annotate_job_config = JobAnnotateConfig(task_definition={"task": TaskType.SUMMARIZATION}, model=TEST_SEQ2SEQ_MODEL)
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",

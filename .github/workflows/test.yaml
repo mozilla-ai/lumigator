@@ -41,11 +41,11 @@ jobs:
           export RAY_WORKER_GPUS=1
           export RAY_WORKER_GPUS_FRACTION=1.0
           export GPU_COUNT=1
-          export RAY_HEAD_NODE_HOST=${secret.CW_RAY_HEAD_NODE_HOST}
-          export AWS_ACCESS_KEY_ID=${secret.CW_AWS_ACCESS_KEY_ID}
-          export AWS_SECRET_ACCESS_KEY=${secret.CW_AWS_SECRET_ACCESS_KEY}
-          export AWS_ENDPOINT_URL=${secret.CW_AWS_ENDPOINT_URL}
-          export S3_BUCKET=${secret.CW_S3_BUCKET}
+          export RAY_HEAD_NODE_HOST=${{ secrets.CW_RAY_HEAD_NODE_HOST }}
+          export AWS_ACCESS_KEY_ID=${{ secrets.CW_AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
+          export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
+          export S3_BUCKET=${{ secrets.CW_S3_BUCKET }}
           make start-lumigator-build
 
       - name: Run backend integration tests

@@ -12,7 +12,7 @@ export async function fetchDatasetInfo(id: string): Promise<Dataset> {
 }
 
 export async function postDataset(formData: FormData): Promise<Dataset> {
-  const response = await lumigatorApiAxiosInstance.post('datasets/', formData, {
+  const response = await lumigatorApiAxiosInstance.post('datasets', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

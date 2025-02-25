@@ -23,7 +23,8 @@
       label="Provide Dataset"
       class="l-dataset-empty__action-btn"
       @click="emit('l-add-dataset')"
-    />
+    >
+    </Button>
     <p class="l-dataset-empty__note">
       Your dataset should be a CSV file and include the following columns:
       <span class="l-dataset-empty__note-item">examples</span>,

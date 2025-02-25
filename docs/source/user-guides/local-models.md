@@ -84,7 +84,7 @@ You have a choice of choosing one among the below-mentioned local LLM tools. We 
 You can then download the results following the steps described [below](#download-inference-results)
 
 ## Ollama
-[Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://docs.openwebui.com/).
+[Ollama](https://github.com/ollama/ollama) provides a simplified way to download, manage, and interact with various open-source LLMs either from the command line or with [web UI](https://github.com/open-webui/open-webui).
 
 ### Procedure
 

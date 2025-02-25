@@ -5,7 +5,6 @@
   "max_samples": 5,
   "job_config": {
     "job_type": "evaluator",
-    "metrics": ["meteor", "rouge", "bertscore"],
-    "model": "some_model"
+    "metrics": ["meteor", "rouge", "bertscore"]
   }
 }

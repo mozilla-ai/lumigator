@@ -21,6 +21,7 @@ class GetExperimentResponse(BaseModel, from_attributes=True):
     id: str
     name: str
     description: str
+    max_samples: int
     created_at: datetime.datetime
     task: TaskType
     dataset: UUID

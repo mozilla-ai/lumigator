@@ -64,15 +64,21 @@ class WorkflowService:
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
+        if request.system_prompt:
+            task_definition = SummarizationTaskDefinition(
+                task=TaskType.SUMMARIZATION,
+                system_prompt=request.system_prompt,
+            )
+        else:
+            task_definition = SummarizationTaskDefinition(
+                task=TaskType.SUMMARIZATION,
+            )
         job_infer_config = JobInferenceConfig(
             model=request.model,
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            task_definition=SummarizationTaskDefinition(
-                task=TaskType.SUMMARIZATION,
-                system_prompt=request.system_prompt,
-            ),
+            task_definition=task_definition,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )

@@ -5,7 +5,6 @@
   "dataset": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
   "extra": "data",
   "job_config": {
-    "job_type": "evaluator",
-    "model": "some_model"
+    "job_type": "evaluator"
   }
 }

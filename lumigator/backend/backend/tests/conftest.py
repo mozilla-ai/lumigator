@@ -17,8 +17,8 @@ from fsspec.implementations.memory import MemoryFileSystem
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
+    Job,
     JobConfig,
-    JobResponse,
     JobStatus,
     JobType,
 )
@@ -81,7 +81,7 @@ def wait_for_job(client, job_id: UUID) -> bool:
     for _ in range(1, MAX_POLLS):
         get_job_response = client.get(f"/jobs/{job_id}")
         assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
+        get_job_response_model = Job.model_validate(get_job_response.json())
         if get_job_response_model.status == JobStatus.SUCCEEDED.value:
             succeeded = True
             timed_out = False

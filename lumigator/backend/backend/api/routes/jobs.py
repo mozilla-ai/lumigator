@@ -184,6 +184,8 @@ def get_job(
     ray_info = ray_job.dict()
     lm_info = job.model_dump()
     merged = {**ray_info, **lm_info}
+    # drop the job_id column since it's not used by the Job pydantic class
+    merged.pop("job_id", None)
     return Job(**merged)
 
 

@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
 
 
 class LowercaseEnum(str, Enum):
@@ -102,7 +102,6 @@ class JobInferenceConfig(BaseModel):
 class JobAnnotateConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
     store_to_dataset: bool = False
 
 

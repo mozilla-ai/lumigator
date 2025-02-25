@@ -397,8 +397,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add tools directory to path
-        run: echo ${PWD}/tools >> $GITHUB_PATH
+      - name: Add scripts directory to path
+        run: echo ${PWD}/scripts >> $GITHUB_PATH
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3

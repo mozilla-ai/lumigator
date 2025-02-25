@@ -51,7 +51,6 @@ from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
     JobUpstreamError,
-    JobValidationError,
 )
 from backend.settings import settings
 
@@ -136,8 +135,6 @@ class JobDefinition(ABC):
 
 class JobDefinitionInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        if request.job_config.task == "text-generation" and not request.job_config.system_prompt:
-            raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=IDatasetConfig(path=dataset_path),
@@ -147,12 +144,13 @@ class JobDefinitionInference(JobDefinition):
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
+            system_prompt=request.job_config.task_definition.system_prompt,
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task,
+                task=request.job_config.task_definition.task,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,
@@ -166,15 +164,15 @@ class JobDefinitionInference(JobDefinition):
                 base_url=request.job_config.base_url if request.job_config.base_url else None,
                 model=request.job_config.model,
                 provider=request.job_config.provider,
-                system_prompt=request.job_config.system_prompt or settings.DEFAULT_SUMMARIZER_PROMPT,
+                system_prompt=request.job_config.task_definition.system_prompt,
                 max_retries=3,
             )
-            job_config.params = SamplingParameters(
-                max_tokens=request.job_config.max_tokens,
-                frequency_penalty=request.job_config.frequency_penalty,
-                temperature=request.job_config.temperature,
-                top_p=request.job_config.top_p,
-            )
+        job_config.params = SamplingParameters(
+            max_tokens=request.job_config.max_tokens,
+            frequency_penalty=request.job_config.frequency_penalty,
+            temperature=request.job_config.temperature,
+            top_p=request.job_config.top_p,
+        )
         return job_config
 
     def store_as_dataset(self) -> bool:

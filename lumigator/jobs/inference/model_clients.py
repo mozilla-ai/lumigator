@@ -47,7 +47,7 @@ class LiteLLMModelClient(BaseModelClient):
 
     def __init__(self, config: InferenceJobConfig):
         self.config = config
-        self.system = "You are a helpful assisant., please summarize the given input."
+        self.system_prompt = self.config.inference_server.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     def predict(
@@ -59,13 +59,13 @@ class LiteLLMModelClient(BaseModelClient):
         response = completion(
             model=litellm_model,
             messages=[
-                {"role": "system", "content": self.system},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=self.config.params.max_tokens,
-            frequency_penalty=self.config.params.frequency_penalty,
-            temperature=self.config.params.temperature,
-            top_p=self.config.params.top_p,
+            max_tokens=self.config.generation_config.max_tokens,
+            frequency_penalty=self.config.generation_config.frequency_penalty,
+            temperature=self.config.generation_config.temperature,
+            top_p=self.config.generation_config.top_p,
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )

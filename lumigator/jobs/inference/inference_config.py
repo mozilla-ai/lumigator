@@ -8,11 +8,11 @@ from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, compute
 from transformers.pipelines import check_task, get_supported_tasks
 
 from schemas import DatasetConfig
-from schemas import HfPipelineConfig as BaseHfPipelineConfig
+from schemas import GenerationConfig as BaseGenerationConfig
+from schemas import HuggingFacePipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig
-from schemas import SamplingParameters as BaseSamplingParameters
 
 
 def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
@@ -105,7 +105,7 @@ class InferenceServerConfig(BaseInferenceServerConfig):
     max_retries: int = 3
 
 
-class SamplingParameters(BaseSamplingParameters):
+class GenerationConfig(BaseGenerationConfig):
     max_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
@@ -167,6 +167,6 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     job: JobConfig
     system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
-    params: SamplingParameters | None = None
+    params: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

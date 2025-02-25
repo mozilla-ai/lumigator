@@ -11,6 +11,7 @@ from sqlalchemy.engine import URL, make_url
 
 class BackendSettings(BaseSettings):
     # Backend
+    LUMIGATOR_SECRET_KEY: str  # Symmetric encryption key used for interacting with stored secrets
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE_HUMAN_READABLE: Final[str] = "50MB"
     MAX_DATASET_SIZE: ByteSize = MAX_DATASET_SIZE_HUMAN_READABLE
@@ -58,7 +59,6 @@ class BackendSettings(BaseSettings):
     OAI_API_URL: str = "https://api.openai.com/v1"
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
-    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
     # Eval job details
     EVALUATOR_WORK_DIR: str | None = None

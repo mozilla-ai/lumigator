@@ -3,15 +3,15 @@
 If you need more information about what an evaluation dataset is and why it's important, check [this page](../conceptual-guides/datasets.md) first.
 
 This guide will walk you through the process of preparing your own evaluation dataset
-for Lumigator to help see the differences in performance of multiple Language Models for your own use case, rather than a generic benchmark.
+for Lumigator so you can compare the performance of multiple Language Models on your own use case, rather than on a generic benchmark.
 
-This guide will cover the format Lumigator expects, what to focus on when collecting appropriate content and, lastly, how to upload and check your resulting file is valid.
+This guide will cover the format Lumigator expects, what to focus on when collecting appropriate content and, lastly, how to upload and check that your resulting file is valid.
 
 ## Format
 
 Lumigator expects a CSV file containing different columns depending on the use case. Currently:
 
-* Summarization use case
+**Summarization use case**
 
 Your CSV should contain `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/dialogsum_exc.csv ).
 
@@ -37,7 +37,7 @@ Ensure you are legally allowed and have collected consent from your users to col
 ```
 
 
-At the end of this step, that depending on your workflow may take anywhere between minutes and months, you should have a list of as many examples as possible of at least original texts from your domain.
+At the end of this step, which may take anywhere between minutes and months (depending on your workflow), you should have a list of as many examples as possible of at least original texts from your domain.
 
 #### How many do you need?
 
@@ -107,7 +107,7 @@ Following the exam analogy, allowing samples to be shared between training and e
 
 ### 3. Annotate (optional in Lumigator, but very strongly encouraged)
 
-Ground truth (i.e. the ideal output of the task for each example, as imagined by a human expert) is crucial to evaluate an LLM. Lumigator allows you to upload a dataset with only the input column and later annotate the dataset with a high-quality Language Model, but nobody has vetted that LLM for your use case: we cannot guarantee it knows as much about your business as you do.
+Ground truth (i.e. the ideal output of the task for each example, as imagined by a human expert) is crucial to evaluate a Language Model. Lumigator allows you to upload a dataset with only the `examples` column and later annotate the dataset with a high-quality Language Model, but nobody has vetted that Language Model for your use case: we cannot guarantee it knows as much about your business as you do.
 
 If you do have human experts who were able to go through the input data from step #2 and add their annotations, you should end up with a file with the same list of examples, plus the annotation after a comma. Such as the following content:
 
@@ -131,7 +131,7 @@ examples,ground_truth
 
 Now that you have a dataset (let's assume it's `my_dataset.csv`), let's upload it to Lumigator and check everything is fine.
 
-You can do this via the UI or, as below, via the SDK.
+You can do this via the [UI](../get-started/ui-guide.md) or, as below, via the SDK.
 
 
 ## What You'll Need

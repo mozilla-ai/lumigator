@@ -25,15 +25,22 @@ To prepare the samples that will actually be part of your dataset, you must coll
 
 ### 1. Collect
 
-If you already have a system running, whether it already uses Language Models to summarize or not, automatically save examples that go into that system If there are humans or a high-quality process that already summarizes or translates these examples, collect those output summaries together with the input text.
+At worst, you will have to collect examples of input text manually.
 
+At best, you already have a baseline system running; this could be first version of your application that may or may not be using a Language Model to do the task at hand (e.g. summarize), but it's already interfacing with users.
+
+If it's already receiving input (i.e. examples) from users, you can automatically save them under the column `examples`.
 
 ```{note}
 Ensure you are legally allowed and have collected consent from your users to collect this data.
 ```
 
+At the end of this step, which may take anywhere between minutes and months (depending on your workflow), you should have a list of as many `examples` as possible of at least original texts from your domain.
 
-At the end of this step, which may take anywhere between minutes and months (depending on your workflow), you should have a list of as many examples as possible of at least original texts from your domain.
+For example, you can save them into a spreadsheet (if the process is manual) or a JSON file (if the process is automatic).
+
+This will make exporting it to the CSV format that Lumigator currently supports less error-prone.
+
 
 #### How many do you need?
 
@@ -41,7 +48,11 @@ Unfortunately, there is no clear-cut answer to this. Not as many as if you were 
 
 #### Example output
 
-Ideally you will end up with a text file or a spreadsheet with dozens (or hundreds or thousands) of examples. Let's imagine you are building an app that summarizes patient history. Your examples might look like:
+Feel free to collect your data into the format you are most comfortable with during your usual work. Bear in mind at the end you will have to export to CSV, but we do not encourage manually editing CSVs.
+
+People manually collecting data may choose a spreadsheet, although if your workflow allows it, we encourage using JSON, JSONL, Pandas dataframes or HuggingFace datasets to automatically collect your data in.
+
+Let's imagine you are building an app that summarizes patient history. After this collection step, your content may be dozens (or hundreds or thousands) of examples, such as:
 
 ```
     Patient A: 58-year-old male with persistent cough and chest pain for 3 months. CT scan revealed a lung mass. Biopsy and immunohistochemistry confirmed non-small cell lung cancer. Treatment: Surgical resection followed by chemotherapy.
@@ -59,11 +70,11 @@ Notice at this point we do not know what an ideal summary of this would be.
 
 ### 2. Curate
 
-This is the most time-intensive phase. Summon all your domain knowledge: which of those examples are basically the same as others? A few slightly paraphrased examples will help expose models, but if your whole dataset is built over 1000 ways of saying the same thing, the evaluation may not be the best.
+This is the most time-intensive phase. Summon all your domain knowledge: which of those examples are basically the same as others? A few slightly paraphrased examples will help expose models that are too literal and have little robustness to synonyms, but if your whole dataset is built over 1000 ways of saying the same thing, the evaluation may not be the most meaningful.
 
-For example, continuing with the example above, notice how similar the last 3 examples are. You might decide that only 1 is representative enough. You might also want to leave Patient J and K, since it may be good to check that the model also understands longer form writing, as in Patient K.
+For example, continuing with the example above, notice how similar the last 3 examples (Patients J, K and L) are. You might decide that only 1 is representative enough. Alternatively, you might want to leave Patients J and K, since it may be good to check that the model also understands longer form writing.
 
-Your outcome then would be the list as above, minus Patient L.
+Your outcome, in that case, would be the list as above, minus Patient L.
 
 
 ### What to consider while you are curating?
@@ -85,12 +96,18 @@ Following the exam analogy, allowing samples to be shared between training and e
 * Do you have quality ground truth?
 
 
+
 ### 3. Annotate (optional in Lumigator, but very strongly encouraged)
 
+Feel free to start with the format you feel most comfortable with. At the end of this final step, you will need to
 Ground truth (i.e. the ideal output of the task for each example, as imagined by a human expert) is crucial to evaluate a Language Model. Lumigator allows you to upload a dataset with only the `examples` column and later annotate the dataset with a high-quality Language Model, but nobody has vetted that Language Model for your use case: we cannot guarantee it knows as much about your business as you do.
 
-If you do have human experts who were able to go through the input data from step #2 and add their annotations, you should end up with a file with the same list of examples, plus the annotation after a comma. Such as the following content:
+If you do have human experts who were able to go through the input data from step #2 and add their annotations, you should end up with a file with the same list of examples, plus the annotation after a comma.
 
+
+#### Example output
+
+After exporting to CSV, this is what the end file should look like.
 
 ```
 examples,ground_truth

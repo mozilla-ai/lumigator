@@ -210,6 +210,15 @@ class JobService:
             ray_worker_gpus=settings.RAY_WORKER_GPUS,
             config_model=InferenceJobConfig,
         ),
+        # Same as INFERENCE
+        JobType.ANNOTATION: JobDefinitionInference(
+            command=settings.INFERENCE_COMMAND,
+            pip_reqs=settings.INFERENCE_PIP_REQS,
+            work_dir=settings.INFERENCE_WORK_DIR,
+            ray_worker_gpus_fraction=settings.RAY_WORKER_GPUS_FRACTION,
+            ray_worker_gpus=settings.RAY_WORKER_GPUS,
+            config_model=InferenceJobConfig,
+        ),
         JobType.EVALUATION: JobDefinitionEvaluation(
             command=settings.EVALUATOR_COMMAND,
             pip_reqs=settings.EVALUATOR_PIP_REQS,

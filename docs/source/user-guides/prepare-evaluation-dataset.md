@@ -129,25 +129,16 @@ You can do this via the [UI](../get-started/ui-guide.md) or, as below, via the S
     from lumigator_schemas import datasets
     from lumigator_sdk.lumigator import LumigatorClient
 
-    HOST = "localhost"
-    LUMIGATOR_PORT = 8000
-
     # Instantiate the Lumigator client
-    lm_client = LumigatorClient(f"{HOST}:{LUMIGATOR_PORT}")
+    lm_client = LumigatorClient("localhost:8000")
 
     # Upload the dataset
     dataset_path = "my_dataset.csv"
     dataset = lm_client.datasets.create_dataset(dataset=open(dataset_path, "rb"), format=datasets.DatasetFormat.JOB)
 
     # Check the dataset was correctly added
-    url = f"http://{HOST}:{LUMIGATOR_PORT}/api/v1/datasets/{dataset.id}"
-    response = requests.get(url=url)
+    print(lm_client.datasets.get_dataset(dataset.id))
 
-    if response.status_code != 200:
-        raise Exception(f"Failed to retrieve dataset: {response.text}")
-    else:
-        print("Dataset looking good!")
-        results = response.json()
     ```
 
 1. Run the script:
@@ -186,8 +177,8 @@ Excellent. Below is an example of how to turn a huggingface dataset into one tha
   ds.to_csv(DS_OUTPUT)
 
   # Time to connect up to the Lumigator client!
-  LUMI_HOST = "localhost:8000"
-  client = LumigatorClient(api_host=LUMI_HOST)
+  HOST = "localhost:8000"
+  client = LumigatorClient(api_host=HOST)
 
   # Upload that file that we created earlier
   with Path.open(DS_OUTPUT) as file:
@@ -195,23 +186,16 @@ Excellent. Below is an example of how to turn a huggingface dataset into one tha
   dataset_response = client.datasets.create_dataset(dataset=data, format=DatasetFormat.JOB)
 
   # Check the dataset was correctly added
-  url = f"http://{HOST}:{LUMIGATOR_PORT}/api/v1/datasets/{dataset.id}"
-  response = requests.get(url=url)
+  print(lm_client.datasets.get_dataset(dataset.id))
 
-  if response.status_code != 200:
-      raise Exception(f"Failed to retrieve dataset: {response.text}")
-  else:
-      print("Dataset looking good!")
-      results = response.json()
 ```
 
 #### Verify
 
-Regardless of the method, you should see a confirmation like:
+Regardless of the method, you should see a confirmation that looks like:
 
 ```console
-Dataset looking good!
-{'id': '67a2a5eb-9b1e-4c53-b133-bd7685e7d389', 'filename': 'my_dataset.csv', 'format': 'job', 'size': 3992, 'ground_truth': True, 'run_id': None, 'generated': False, 'generated_by': None, 'created_at': '2025-02-24T16:11:36'}
+id=UUID('421f6d8a-0e9c-45c9-bb3b-8a3badf01235') filename='my_dataset.csv' format=<DatasetFormat.JOB: 'job'> size=3992 ground_truth=True run_id=None generated=False generated_by=None created_at=datetime.datetime(2025, 2, 25, 17, 57, 55)
 ```
 
 

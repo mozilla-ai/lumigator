@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import SummarizationDefinition, TaskDefinition, TaskType
 
 DEFAULT_SUMMARIZATION_PROMPT = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
@@ -80,7 +80,7 @@ class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
+    task_definition: TaskDefinition = Field(default=SummarizationDefinition(task=TaskType.SUMMARIZATION))
     source_language: str | None = Field(None, description="Source language for translation", examples=["en", "English"])
     target_language: str | None = Field(None, description="Target language for translation", examples=["de", "German"])
     accelerator: str | None = "auto"
@@ -109,7 +109,7 @@ class JobInferenceConfig(BaseModel):
     def validate_and_set_defaults(self):
         # Text generation for causal models can mean anything
         # So we need to ensure the user provides a system prompt
-        if self.task == TaskType.TEXT_GENERATION and self.system_prompt is None:
+        if self.task_definition.task == TaskType.TEXT_GENERATION and self.system_prompt is None:
             raise ValueError("system_prompt must be provided when task='text-generation'")
 
         # Set default system prompt if not provided
@@ -119,11 +119,11 @@ class JobInferenceConfig(BaseModel):
         return self
 
     def _get_default_prompt(self) -> str:
-        match self.task:
+        match self.task_definition.task:
             case TaskType.SUMMARIZATION:
                 return DEFAULT_SUMMARIZATION_PROMPT
             case TaskType.TRANSLATION:
-                return f"translate {self.source_language} to {self.target_language}:"
+                return f"translate {self.task_definition.source_language} to {self.task_definition.target_language}:"
 
 
 class JobAnnotateConfig(BaseModel):

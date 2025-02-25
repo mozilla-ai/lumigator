@@ -5,7 +5,7 @@ from uuid import UUID
 
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
 from backend.tracking.schemas import RunOutputs
@@ -18,9 +18,7 @@ class TrackingClient(Protocol):
         self,
         name: str,
         description: str,
-        task: TaskType,
-        source_language: str,
-        target_language: str,
+        task_definition: TaskDefinition,
         dataset: UUID,
         max_samples: int,
     ) -> GetExperimentResponse:

@@ -29,9 +29,7 @@ class ExperimentService:
         experiment = self._tracking_session.create_experiment(
             request.name,
             request.description,
-            request.task,
-            request.source_language,
-            request.target_language,
+            request.task_definition,
             request.dataset,
             request.max_samples,
         )

@@ -18,17 +18,17 @@ class TaskType(str, Enum):
 
 
 class TranslationDefinition(BaseModel):
-    task: Literal[TaskType.TRANSLATION]
-    source_language: str = Field(..., examples=["en", "English"])
-    target_language: str = Field(..., examples=["de", "German"])
+    task: Literal[TaskType.TRANSLATION] = TaskType.TRANSLATION
+    source_language: str = Field(description="Source language for translation", examples=["en", "English"])
+    target_language: str = Field(description="Target language for translation", examples=["de", "German"])
 
 
 class SummarizationDefinition(BaseModel):
-    task: Literal[TaskType.SUMMARIZATION]
+    task: Literal[TaskType.SUMMARIZATION] = TaskType.SUMMARIZATION
 
 
 class TextGenerationDefinition(BaseModel):
-    task: Literal[TaskType.TEXT_GENERATION]
+    task: Literal[TaskType.TEXT_GENERATION] = TaskType.TEXT_GENERATION
 
 
 TaskDefinition = Annotated[

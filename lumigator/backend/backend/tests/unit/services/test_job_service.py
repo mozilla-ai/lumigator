@@ -107,7 +107,7 @@ def test_invalid_text_generation(job_service):
                 job_type=JobType.INFERENCE,
                 model="microsoft/Phi-3.5-mini-instruct",
                 provider="hf",
-                task="text-generation",
+                task_definition={"task": "text-generation"},
                 # system_prompt is intentionally omitted
             ),
             dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",

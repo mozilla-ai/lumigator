@@ -233,7 +233,7 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
         json={
             "name": "test_create_exp_workflow_check_results",
             "description": "Test for an experiment with associated workflows",
-            "task": "summarization",
+            "task_definition": {"task": "summarization"},
             "dataset": str(dataset_id),
             "max_samples": 1,
         },
@@ -251,7 +251,7 @@ def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_n
             json={
                 "name": workflow_name,
                 "description": "Test workflow for inf and eval",
-                "task": "summarization",
+                "task_definitions": {"task": "summarization"},
                 "model": TEST_CAUSAL_MODEL,
                 "provider": "hf",
                 "dataset": str(dataset_id),

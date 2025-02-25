@@ -13,7 +13,7 @@ import requests
 from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
@@ -36,9 +36,7 @@ class MLflowTrackingClient(TrackingClient):
         self,
         name: str,
         description: str,
-        task: TaskType,
-        source_language: str,
-        target_language: str,
+        task_definition: TaskDefinition,
         dataset: UUID,
         max_samples: int,
     ) -> GetExperimentResponse:
@@ -48,9 +46,7 @@ class MLflowTrackingClient(TrackingClient):
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
-            self._client.set_experiment_tag(experiment_id, "task", task.value)
-            self._client.set_experiment_tag(experiment_id, "source_language", source_language)
-            self._client.set_experiment_tag(experiment_id, "target_language", target_language)
+            self._client.set_experiment_tag(experiment_id, "task", task_definition.task.value)
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -64,9 +60,7 @@ class MLflowTrackingClient(TrackingClient):
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
-                self._client.set_experiment_tag(experiment_id, "task", task.value)
-                self._client.set_experiment_tag(experiment_id, "source_language", source_language)
-                self._client.set_experiment_tag(experiment_id, "target_language", target_language)
+                self._client.set_experiment_tag(experiment_id, "task", task_definition.task.value)
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
                 self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -77,7 +71,7 @@ class MLflowTrackingClient(TrackingClient):
         return GetExperimentResponse(
             id=experiment_id,
             description=description,
-            task=task,
+            task=task_definition.task,
             name=name,
             dataset=dataset,
             max_samples=max_samples,

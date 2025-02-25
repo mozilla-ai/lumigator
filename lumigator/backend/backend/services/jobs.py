@@ -353,7 +353,7 @@ class JobService:
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HfPipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task,
+                task=request.job_config.task_definition.task.value,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,

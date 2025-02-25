@@ -13,14 +13,14 @@ from pydantic import ValidationError
             "en",
             None,
             False,
-            "should not be provided when task=TaskType.SUMMARIZATION",
+            "Fields source_language and target_language should not be provided",
         ),
         (
             TaskType.SUMMARIZATION,
             None,
             "fr",
             False,
-            "should not be provided when task=TaskType.SUMMARIZATION",
+            "Fields source_language and target_language should not be provided",
         ),
         (TaskType.TRANSLATION, "en", "fr", True, None),
         (
@@ -52,7 +52,7 @@ def test_experiment_create_task_validation(task, source_language, target_languag
         "name": "test-experiment",
         "description": "Validation test",
         "dataset": "d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
-        "task": task,
+        "task_definition": {"task": task, "source_language": source_language, "target_language": target_language},
     }
 
     # Add language fields if specified

@@ -64,7 +64,7 @@
         class="l-experiment-details__content-item"
         @click="copyToClipboard(selectedWorkflow.id)"
       >
-        <div class="l-experiment-details__content-label">job id</div>
+        <div class="l-experiment-details__content-label">Model Run id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
@@ -109,7 +109,7 @@
       <div v-if="isWorkflowFocused && selectedWorkflow" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedWorkflow.model as any).path }}
+          {{ selectedWorkflow.model }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

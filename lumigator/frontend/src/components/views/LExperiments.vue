@@ -14,6 +14,7 @@
       <l-experiment-table
         :table-data="experiments"
         @l-experiment-selected="onSelectExperiment($event)"
+        @l-workflow-selected="onSelectWorkflow($event)"
       />
     </div>
     <Teleport to=".sliding-panel">
@@ -23,6 +24,8 @@
       <transition name="transition-fade">
         <l-experiment-details
           v-if="selectedExperiment"
+          :selectedExperiment="selectedExperiment"
+          :selectedWorkflow="selectedWorkflow"
           title="Experiment Details"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowJobResults($event)"
@@ -39,18 +42,21 @@
       :position="showLogs ? 'bottom' : 'full'"
       @l-drawer-closed="resetDrawerContent()"
     >
-      <l-experiment-results v-if="showExpResults" />
+      <l-experiment-results
+        v-if="showExpResults && selectedExperimentResults.length"
+        :results="selectedExperimentResults"
+      />
       <l-job-results
-        v-if="selectedWorkflowResults && showJobResults && selectedWorkflowResults.length"
+        v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"
       />
-      <l-experiment-logs :logType="'workflow'" v-if="showLogs" />
+      <l-experiment-logs :logs="workflowLogs" v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch, ref, computed } from 'vue'
+import { onMounted, watch, ref, computed, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
@@ -65,16 +71,29 @@ import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
-import type { Experiment } from '@/types/Experiment'
-import type { Workflow } from '@/types/Workflow'
+import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
+import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import { workflowsService } from '@/sdk/workflowsService'
+import { experimentsService } from '@/sdk/experimentsService'
+import { downloadContent } from '@/helpers/downloadContent'
+import { getExperimentResults } from '@/helpers/getExperimentResults'
+import { transformJobResults } from '@/helpers/transformJobResults'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
-const { experiments, selectedExperiment, selectedWorkflow, selectedWorkflowResults } =
-  storeToRefs(experimentStore)
+const { experiments } = storeToRefs(experimentStore)
+
+const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
+const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+
+const selectedExperiment = ref<Experiment | undefined>()
+const selectedWorkflow = ref<Workflow | undefined>()
+const workflowLogs: Ref<string[]> = ref([])
+const isPolling = ref(false)
+let experimentInterval: number | undefined = undefined
 
 const showDrawer = ref(false)
 const experimentsDrawer = ref()
@@ -96,24 +115,34 @@ const onCreateExperiment = () => {
 }
 
 const onSelectExperiment = (experiment: Experiment) => {
-  experimentStore.loadExperimentDetails(experiment.id)
+  selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
+  selectedWorkflow.value = undefined
   showSlidingPanel.value = true
 }
 
-const onShowExperimentResults = (experiment: Experiment) => {
-  experimentStore.fetchExperimentResults(experiment)
+const onSelectWorkflow = async (workflow: Workflow) => {
+  selectedWorkflow.value = await workflowsService.fetchWorkflowDetails(workflow.id)
+}
+
+const onShowExperimentResults = async (experiment: Experiment) => {
+  selectedExperimentResults.value = await getExperimentResults(experiment)
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = (workflow: Workflow) => {
-  experimentStore.fetchWorkflowResults(workflow)
+const onShowJobResults = async (workflow: Workflow) => {
+  const results = await workflowsService.fetchWorkflowResults(workflow)
+  if (results) {
+    selectedWorkflow.value = workflow
+    selectedWorkflowResults.value = transformJobResults(results)
+  }
   showDrawer.value = true
   showJobResults.value = true
 }
 
-const onDownloadResults = (workflow: Workflow | Experiment) => {
-  experimentStore.fetchExperimentResultsFile(workflow.id)
+const onDownloadResults = async (workflow: Workflow | Experiment) => {
+  const blob = await experimentsService.downloadResults(workflow.id)
+  downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
 }
 
 const onShowLogs = () => {
@@ -122,13 +151,86 @@ const onShowLogs = () => {
 }
 
 const onDismissForm = () => {
-  selectedDataset.value = undefined
+  datasetStore.setSelectedDataset(undefined)
   showSlidingPanel.value = false
 }
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false
 }
+
+async function retrieveWorkflowLogs() {
+  if (selectedWorkflow.value) {
+    const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
+    const logs = logsData.logs.split('\n')
+
+    logs.forEach((log: string) => {
+      const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
+      if (workflowLogs.value.length === 0 || lastEntry !== log) {
+        workflowLogs.value.push(log)
+      }
+    })
+  }
+}
+
+function startPollingForWorkflowLogs() {
+  workflowLogs.value = []
+  if (!isPolling.value) {
+    isPolling.value = true
+    retrieveWorkflowLogs()
+    // Poll every 3 seconds
+    experimentInterval = setInterval(retrieveWorkflowLogs, 3000)
+  }
+}
+
+function stopPollingForWorkflowLogs() {
+  if (isPolling.value) {
+    isPolling.value = false
+    clearInterval(experimentInterval)
+    experimentInterval = undefined
+  }
+}
+
+// function getJobRuntime(jobId: string) {
+//   const job = jobs.value.find((job) => job.id === jobId)
+//   return job ? job.runTime : undefined
+// }
+
+watch(
+  selectedExperiment,
+  (newValue) => {
+    if (newValue?.workflows.some((workflow) => workflow.status === WorkflowStatus.RUNNING)) {
+      startPollingForWorkflowLogs()
+      return
+    } else if (isPolling.value) {
+      stopPollingForWorkflowLogs()
+    }
+  },
+  { deep: true },
+)
+
+watch(
+  selectedWorkflow,
+  (newValue) => {
+    workflowLogs.value = []
+    if (newValue) {
+      // switch to the experiment the job belongs
+      const found = experiments.value.find((experiment: Experiment) => {
+        return experiment.workflows.some((workflow) => workflow.id === newValue.id)
+      })
+      selectedExperiment.value = found
+
+      retrieveWorkflowLogs()
+    }
+    if (newValue?.status === WorkflowStatus.RUNNING) {
+      startPollingForWorkflowLogs()
+      return
+    } else if (isPolling.value) {
+      stopPollingForWorkflowLogs()
+    }
+  },
+  { deep: true },
+)
 
 const resetDrawerContent = () => {
   selectedWorkflowResults.value = []

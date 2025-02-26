@@ -11,13 +11,14 @@ from pydantic import ValidationError
 
 from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.settings import settings
+from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
 
 
 def test_set_null_inference_job_params(job_record, job_service):
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -38,7 +39,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
         max_samples=10,
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 

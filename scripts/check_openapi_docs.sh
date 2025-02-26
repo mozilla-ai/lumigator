@@ -24,8 +24,8 @@ done
 # Fetch OpenAPI JSON
 curl -sSf http://localhost:8000/openapi.json -o fetched_openapi.json
 
-# Compare OpenAPI JSON
-if ! diff -u docs/source/specs/openapi.json fetched_openapi.json; then
+# Compare normalized OpenAPI JSON (ignoring newline differences)
+if ! diff -u <(tr -d '\n' < docs/source/specs/openapi.json) <(tr -d '\n' < fetched_openapi.json); then
   echo "Error: The OpenAPI documentation is outdated. Please update the OpenAPI JSON file."
   exit 1
 fi

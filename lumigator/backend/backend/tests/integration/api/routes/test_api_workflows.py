@@ -18,6 +18,7 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from pydantic import PositiveInt
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -240,21 +241,28 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
     return experiment.json()["id"]
 
 
-def run_workflow(local_client: TestClient, dataset_id, experiment_id, workflow_name):
+def run_workflow(
+    local_client: TestClient, dataset_id, experiment_id, workflow_name, job_timeout_sec: PositiveInt | None = None
+):
     """Run a workflow for the experiment."""
+    workflow_payload = {
+        "name": workflow_name,
+        "description": "Test workflow for inf and eval",
+        "model": TEST_SEQ2SEQ_MODEL,
+        "provider": "hf",
+        "dataset": str(dataset_id),
+        "experiment_id": experiment_id,
+        "max_samples": 1,
+        # "job_timeout_sec": 1,
+    }
+    # The timeout cannot be 0
+    if job_timeout_sec:
+        workflow_payload["job_timeout_sec"] = job_timeout_sec
     workflow = WorkflowResponse.model_validate(
         local_client.post(
             "/workflows/",
             headers=POST_HEADER,
-            json={
-                "name": workflow_name,
-                "description": "Test workflow for inf and eval",
-                "model": TEST_SEQ2SEQ_MODEL,
-                "provider": "hf",
-                "dataset": str(dataset_id),
-                "experiment_id": experiment_id,
-                "max_samples": 1,
-            },
+            json=workflow_payload,
         ).json()
     )
     return workflow
@@ -345,6 +353,30 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)
+
+
+@pytest.mark.integration
+def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+    """This is the main integration test: it checks:
+    * The backend health status
+    * Uploading a dataset
+    * Creating an experiment
+    * Running workflows for the experiment (max 1 sec timeout)
+    * Check that the workflow is in failed state
+    * Check that the job is in stopped state
+    """
+    check_backend_health_status(local_client)
+    initial_count = check_initial_dataset_count(local_client)
+    dataset = upload_dataset(local_client, dialog_dataset)
+    check_dataset_count_after_upload(local_client, initial_count)
+    experiment_id = create_experiment(local_client, dataset.id)
+    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1", job_timeout_sec=1)
+    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+    assert workflow_1_details.status == WorkflowStatus.FAILED
+    for job_id in workflow_1_details.jobs:
+        response = local_client.get(f"/jobs/{job_id}")
+        assert response.status_code == 200
+        assert (JobResponse.model_validate(**response.json())).status.value == JobStatus.STOPPED
 
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):

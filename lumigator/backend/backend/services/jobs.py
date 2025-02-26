@@ -163,7 +163,6 @@ class JobDefinitionInference(JobDefinition):
                 base_url=request.job_config.base_url if request.job_config.base_url else None,
                 model=request.job_config.model,
                 provider=request.job_config.provider,
-                system_prompt=request.job_config.task_definition.system_prompt,
                 max_retries=3,
             )
         job_config.generation_config = GenerationConfig(

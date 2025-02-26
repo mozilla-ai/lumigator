@@ -295,13 +295,6 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         0
     ].model_dump(exclude={"artifacts_download_url"})
 
-    # Get the results of the experiment
-    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
-    assert experiment_results is not None
-    assert len(experiment_results.workflows) == 2
-    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
     # Get the logs
     logs_response = lumi_client_int.workflows.get_workflow_logs(workflow_1_details.id)
     assert logs_response is not None

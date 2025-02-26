@@ -78,23 +78,17 @@ class LiteLLMModelClient(BaseModelClient):
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self._config = config
-        self._system = config.system_prompt
+        self._system_prompt = config.system_prompt
+        logger.info(f"System prompt: {config.system_prompt}")
         self._task = config.hf_pipeline.task
         if self._task == "summarization":
             # The summarization pipeline is only supported for Seq2Seq models
             # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
-            try:
-                model = AutoModelForSeq2SeqLM.from_pretrained(
-                    config.hf_pipeline.model_name_or_path,
-                    trust_remote_code=config.hf_pipeline.trust_remote_code,
-                    torch_dtype=config.hf_pipeline.torch_dtype,
-                )
-            except ValueError as e:
-                raise ValueError(
-                    f"Model {config.hf_pipeline.model_name_or_path} is not a Seq2Seq model. "
-                    "Only Seq2Seq models are supported for the summarization pipeline."
-                ) from e
-            logger.info(f"System prompt: {config.system_prompt}")
+            model = AutoModelForSeq2SeqLM.from_pretrained(
+                config.hf_pipeline.model_name_or_path,
+                trust_remote_code=config.hf_pipeline.trust_remote_code,
+                torch_dtype=config.hf_pipeline.torch_dtype,
+            )
             # Store this so we can check if the input prompt is too long
             self.tokenizer = AutoTokenizer.from_pretrained(
                 config.hf_pipeline.model_name_or_path,
@@ -103,7 +97,7 @@ class HuggingFaceModelClient(BaseModelClient):
             )
 
             # The reason I create the models and tokenizers separately is so that I can validate the model type
-            # before creating the pipeline. This way I can give a more helpful error message and stack trace
+            # before creating the pipeline. This way I can give a more helpful error message
             self._pipeline = pipeline(
                 task=config.hf_pipeline.task,
                 model=model,
@@ -111,15 +105,14 @@ class HuggingFaceModelClient(BaseModelClient):
                 revision=config.hf_pipeline.revision,
                 device=config.hf_pipeline.device,
             )
-            self._set_max_length()
-            logger.info(f"HuggingFaceModelClient initialized with config: {config}")
+            self._set_seq2seq_max_length()
         elif self._task == "text-generation":
-            self._system = config.system_prompt
             self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         else:
             raise ValueError(f"Unsupported task: {self._task}")
+        logger.info(f"HuggingFaceModelClient initialized with config: {config}")
 
-    def _set_max_length(self):
+    def _set_seq2seq_max_length(self):
         """Make sure that the model can actually support the max_new_tokens configured.
         For the Seq2Seq models, the max_length is the max_position_embeddings. That's because the input and output
         tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
@@ -128,10 +121,10 @@ class HuggingFaceModelClient(BaseModelClient):
         max_pos_emb = self._pipeline.model.config.max_position_embeddings
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings
-        if self._pipeline.tokenizer.model_max_length != max_pos_emb:
+        if self._pipeline.tokenizer.model_max_length >= max_pos_emb:
             logger.warning(
-                f"Tokenizer max_length ({self._pipeline.tokenizer.model_max_length})"
-                f" and model max_position_embeddings ({max_pos_emb}) do not match."
+                f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
+                f" is bigger than the model's max_position_embeddings ({max_pos_emb})"
                 "Setting the tokenizer model_max_length to the model's max_position_embeddings."
             )
             self._pipeline.tokenizer.model_max_length = max_pos_emb
@@ -161,7 +154,7 @@ class HuggingFaceModelClient(BaseModelClient):
         # response to the prompt.
         if self._task == "text-generation":
             messages = [
-                {"role": "system", "content": self._system},
+                {"role": "system", "content": self._system_prompt},
                 {"role": "user", "content": prompt},
             ]
             generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]

@@ -53,7 +53,7 @@ spec:
       volumes:
         - name: nginx-conf
           configMap:
-            name: nginx-conf
+            name: {{ include "frontend.fullname" . }}-nginx-conf
             items:
               - key: default.conf.template
                 path: default.conf.template

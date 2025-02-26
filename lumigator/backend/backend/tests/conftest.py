@@ -41,7 +41,7 @@ from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
-TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -416,7 +416,7 @@ def create_job_config() -> JobConfig:
     conf_args = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "facebook/bart-large-cnn",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,

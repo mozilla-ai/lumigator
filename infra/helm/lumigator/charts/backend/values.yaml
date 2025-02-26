@@ -22,9 +22,9 @@ evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 
 image:
   repository: "mzdotai/lumigator"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.1.1-alpha"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""

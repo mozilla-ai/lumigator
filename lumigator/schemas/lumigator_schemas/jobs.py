@@ -93,14 +93,12 @@ class JobInferenceConfig(BaseModel):
     store_to_dataset: bool = False
 
 
-# Annotate is a special case of inference
-class JobAnnotateConfig(JobInferenceConfig):
+class JobAnnotateConfig(BaseModel):
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
-    store_to_dataset: bool = True
     model: str = "facebook/bart-large-cnn"
     provider: str = "hf"
-    output_field: str = "ground_truth"
+    store_to_dataset: bool = False
 
 
 JobSpecificConfig = JobEvalConfig | JobInferenceConfig | JobAnnotateConfig

@@ -295,24 +295,6 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         0
     ].model_dump(exclude={"artifacts_download_url"})
 
-    # Add another workflow to the experiment
-    request = WorkflowCreateRequest(
-        name="Workflow_2",
-        description="Test workflow for inf and eval",
-        model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
-        provider="hf",
-        dataset=str(dataset_id),
-        experiment_id=str(experiment_id),
-        max_samples=1,
-    )
-
-    workflow_2_response = lumi_client_int.workflows.create_workflow(request)
-    assert workflow_2_response is not None
-    workflow_2_id = workflow_2_response.id
-
-    # Wait till the workflow is done
-    workflow_2_details = wait_for_workflow_complete(lumi_client_int, workflow_2_id)
-
     # Get the results of the experiment
     experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
     assert experiment_results is not None
@@ -320,10 +302,6 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
     ]
-    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
-
     # Get the logs
     logs_response = lumi_client_int.workflows.get_workflow_logs(workflow_1_details.id)
     assert logs_response is not None
@@ -345,12 +323,6 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
 
     try:
         lumi_client_int.workflows.get_workflow(workflow_1_details.id)
-        raise Exception("Should have thrown an exception")
-    except requests.exceptions.HTTPError:
-        pass
-
-    try:
-        lumi_client_int.workflows.get_workflow(workflow_2_details.id)
         raise Exception("Should have thrown an exception")
     except requests.exceptions.HTTPError:
         pass

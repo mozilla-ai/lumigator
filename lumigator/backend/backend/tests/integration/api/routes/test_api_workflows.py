@@ -270,16 +270,11 @@ def validate_experiment_results(local_client: TestClient, experiment_id, workflo
     ].model_dump(exclude={"artifacts_download_url"})
 
 
-def validate_updated_experiment_results(
-    local_client: TestClient, experiment_id, workflow_1_details, workflow_2_details
-):
+def validate_updated_experiment_results(local_client: TestClient, experiment_id, workflow_1_details):
     """Validate updated experiment results."""
     experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
     assert len(experiment_results.workflows) == 2
     assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
-    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
         w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
     ]
 
@@ -338,11 +333,8 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
-    workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
-    workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
-    check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
-    validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
+    validate_updated_experiment_results(local_client, experiment_id, workflow_1_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)
 

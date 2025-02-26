@@ -86,12 +86,11 @@ class JobInferenceConfig(BaseModel):
     torch_dtype: str = "auto"
     base_url: str | None = None
     output_field: str | None = "predictions"
-    max_tokens: int = 1024
+    max_new_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
     store_to_dataset: bool = False
-    max_new_tokens: int = 500
 
 
 class JobAnnotateConfig(BaseModel):

@@ -86,9 +86,12 @@ def json_data_experiment_post_simple(resources_dir) -> Path:
     return resources_dir / "experiment-post-simple.json"
 
 
-@pytest.fixture(scope="session")
-def json_data_experiment_post_all(resources_dir) -> Path:
-    return resources_dir / "experiment-post-all.json"
+@pytest.fixture(
+    scope="session",
+    params=["experiment-post-all.json", "experiment-post-all-translation.json"],
+)
+def json_data_experiment_post_all(resources_dir, request) -> Path:
+    return resources_dir / request.param
 
 
 @pytest.fixture(scope="session")
@@ -123,7 +126,12 @@ def json_data_dataset(resources_dir) -> Path:
 
 @pytest.fixture(
     scope="session",
-    params=["job-all-annotation.json", "job-all-eval.json", "job-all-inference.json"],
+    params=[
+        "job-all-annotation.json",
+        "job-all-eval.json",
+        "job-all-inference.json",
+        "job-all-inference-translation.json",
+    ],
 )
 def json_data_job_all(resources_dir, request) -> Path:
     return resources_dir / request.param

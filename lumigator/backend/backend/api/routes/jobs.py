@@ -19,7 +19,6 @@ from lumigator_schemas.jobs import (
     JobResponse,
     JobResultDownloadResponse,
     JobResultResponse,
-    JobType,
 )
 from ray.job_submission import JobDetails as RayJobDetails
 from starlette.requests import Request
@@ -78,7 +77,6 @@ def create_annotation_job(
     inference_job_create_config_dict = job_create_request.job_config.model_dump()
     inference_job_create_config_dict["output_field"] = "ground_truth"
     inference_job_create_config_dict["store_to_dataset"] = True
-    inference_job_create_config_dict["job_type"] = JobType.INFERENCE
 
     inference_job_create_request_dict = job_create_request.model_dump()
     inference_job_create_request_dict["job_config"] = inference_job_create_config_dict

@@ -29,6 +29,8 @@ dev = [
     "ipykernel>=6.29.5",
     "litellm>=1.60.4",
     "loguru>=0.7.2",
+    "lumigator-schemas",
+    "lumigator-sdk",
     "mlflow>=2.20.0",
     "mypy-boto3-s3>=1.36.0",
     "pytest>=8.3.4",
@@ -39,3 +41,7 @@ dev = [
 
 [tool.uv.workspace]
 members = ["notebooks"]
+
+[tool.uv.sources]
+lumigator-sdk = { path = "lumigator/sdk" }
+lumigator-schemas = { path = "lumigator/schemas" }

@@ -30,9 +30,15 @@ export async function fetchWorkflowDetails(id: string): Promise<Workflow> {
   return response.data
 }
 
+export async function deleteWorkflow(id: string) {
+  const response = await lumigatorApiAxiosInstance.delete(`workflows/${id}`)
+  return response.data
+}
+
 export const workflowsService = {
   createWorkflow,
   fetchLogs,
   fetchWorkflowResults,
   fetchWorkflowDetails,
+  deleteWorkflow,
 }

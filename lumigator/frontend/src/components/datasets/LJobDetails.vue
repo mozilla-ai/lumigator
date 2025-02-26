@@ -152,7 +152,7 @@ defineProps({
   },
 })
 const datasetStore = useDatasetStore()
-const { jobs, selectedJob, inferenceJobs } = storeToRefs(datasetStore)
+const { selectedJob, inferenceJobs } = storeToRefs(datasetStore)
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {

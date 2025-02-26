@@ -120,8 +120,8 @@ const onSelectExperiment = (experiment: Experiment) => {
   showSlidingPanel.value = true
 }
 
-const onSelectWorkflow = (workflow: Workflow) => {
-  selectedWorkflow.value = workflow
+const onSelectWorkflow = async (workflow: Workflow) => {
+  selectedWorkflow.value = await workflowsService.fetchWorkflowDetails(workflow.id)
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {

@@ -77,12 +77,14 @@ For more information about the backend routes, see the rendered API specs in the
 
    user-guides/inference
    user-guides/local-models
+   user-guides/prepare-evaluation-dataset
 
 .. toctree::
    :maxdepth: 2
    :caption: Conceptual Guides
 
    conceptual-guides/architecture
+   conceptual-guides/datasets
 
 .. toctree::
    :maxdepth: 1

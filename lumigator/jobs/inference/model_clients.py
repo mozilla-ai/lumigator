@@ -62,10 +62,10 @@ class LiteLLMModelClient(BaseModelClient):
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=self.config.params.max_tokens,
-            frequency_penalty=self.config.params.frequency_penalty,
-            temperature=self.config.params.temperature,
-            top_p=self.config.params.top_p,
+            max_new_tokens=self.config.generation_config.max_new_tokens,
+            frequency_penalty=self.config.generation_config.frequency_penalty,
+            temperature=self.config.generation_config.temperature,
+            top_p=self.config.generation_config.top_p,
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
@@ -81,6 +81,7 @@ class HuggingFaceModelClient(BaseModelClient):
         logger.info(f"System prompt: {config.system_prompt}")
         self._system = config.system_prompt
         self._task = config.hf_pipeline.task
+        self._generation_config = config.generation_config
         self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         self._set_tokenizer_max_length()
 
@@ -143,12 +144,12 @@ class HuggingFaceModelClient(BaseModelClient):
                 {"role": "system", "content": self._system},
                 {"role": "user", "content": prompt},
             ]
-            generation = self._pipeline(messages)[0]
+            generation = self._pipeline(messages, max_new_tokens=self._generation_config.max_new_tokens)[0]
             return generation["generated_text"][-1]["content"]
 
         # If we're using a summarization model, the pipeline returns a dictionary with a single key.
         # The name of the key depends on the task (e.g., 'summary_text' for summarization).
         # Get the name of the key and return its value.
         if self._task == "summarization":
-            generation = self._pipeline(prompt)[0]
+            generation = self._pipeline(prompt, max_new_tokens=self._generation_config.max_new_tokens)[0]
             return generation["summary_text"]

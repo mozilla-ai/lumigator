@@ -15,6 +15,9 @@
         :table-data="experiments"
         @l-experiment-selected="onSelectExperiment($event)"
         @l-workflow-selected="onSelectWorkflow($event)"
+        @delete-option-clicked="handleDeleteButtonClicked"
+        @view-experiment-results-clicked="onShowExperimentResults($event)"
+        @view-workflow-results-clicked="onShowWorkflowResults($event)"
       />
     </div>
     <Teleport to=".sliding-panel">
@@ -22,16 +25,17 @@
         <l-experiment-form v-if="isFormVisible" @l-close-form="onDismissForm" />
       </transition>
       <transition name="transition-fade">
-        <l-experiment-details
+        <LExperimentDetails
           v-if="selectedExperiment"
           :selectedExperiment="selectedExperiment"
           :selectedWorkflow="selectedWorkflow"
-          title="Experiment Details"
+          :title="selectedWorkflow ? 'Model Run Details': 'Experiment Details'"
           @l-experiment-results="onShowExperimentResults($event)"
-          @l-job-results="onShowJobResults($event)"
+          @l-job-results="onShowWorkflowResults($event)"
           @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
           @l-close-details="onCloseDetails"
+          @delete-button-clicked="handleDeleteButtonClicked"
         />
       </transition>
     </Teleport>
@@ -78,6 +82,7 @@ import { experimentsService } from '@/sdk/experimentsService'
 import { downloadContent } from '@/helpers/downloadContent'
 import { getExperimentResults } from '@/helpers/getExperimentResults'
 import { transformJobResults } from '@/helpers/transformJobResults'
+import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -106,7 +111,12 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 const getDrawerHeader = () => {
-  return showLogs.value ? 'Logs' : selectedExperiment.value?.name
+  const isWorkflowResults = selectedWorkflowResults && showJobResults.value
+  return showLogs.value
+    ? 'Logs'
+    : isWorkflowResults
+      ? `Model Run: ${selectedWorkflow.value?.model}`
+      : `Experiment: ${selectedExperiment.value?.name}`
 }
 
 const onCreateExperiment = () => {
@@ -122,15 +132,18 @@ const onSelectExperiment = (experiment: Experiment) => {
 
 const onSelectWorkflow = async (workflow: Workflow) => {
   selectedWorkflow.value = await workflowsService.fetchWorkflowDetails(workflow.id)
+  selectedExperiment.value = undefined
+  showSlidingPanel.value = true
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {
   selectedExperimentResults.value = await getExperimentResults(experiment)
+  selectedExperiment.value = experiment
   showExpResults.value = true
   showDrawer.value = true
 }
 
-const onShowJobResults = async (workflow: Workflow) => {
+const onShowWorkflowResults = async (workflow: Workflow) => {
   const results = await workflowsService.fetchWorkflowResults(workflow)
   if (results) {
     selectedWorkflow.value = workflow
@@ -157,6 +170,76 @@ const onDismissForm = () => {
 
 const onCloseDetails = () => {
   showSlidingPanel.value = false
+}
+
+const toast = useToast()
+const confirm = useConfirm()
+
+async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
+  console.log({ selectedItem })
+  const experimentOrWorkflow = selectedItem || selectedWorkflow.value || selectedExperiment.value
+  if (!experimentOrWorkflow) {
+    return
+  }
+
+  const isWorkflow = experimentOrWorkflow.hasOwnProperty('jobs')
+
+  confirm.require({
+    message: isWorkflow
+      ? `This will permanently delete this model run from your experiment.`
+      : `This will permanently delete the experiment and all its model runs.`,
+    header: `Delete  ${isWorkflow ? 'Model Run' : 'Experiment'}?`,
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      // style: 'color: #fff; background-color: #363636; border: none; border-radius: 46px;',
+      outlined: true,
+    },
+    acceptProps: {
+      label: isWorkflow ? 'Delete Model Run' : 'Delete Experiment',
+      // style: 'color: #fff; background-color: #9F1A1C; border: none; border-radius: 46px; ',
+      severity: 'danger',
+    },
+    accept: async () => {
+      if (isWorkflow) {
+        const relatedExperiment = experiments.value.find((exp) =>
+          exp.workflows.some((w) => w.id === experimentOrWorkflow.id),
+        )
+        if (relatedExperiment && relatedExperiment.workflows.length === 1) {
+          await experimentsService.deleteExperiment(relatedExperiment.id)
+        } else {
+          await workflowsService.deleteWorkflow(experimentOrWorkflow.id)
+        }
+        toast.add({
+          severity: 'secondary',
+          summary: `MODEL RUN DELETED`,
+          messageicon: 'pi pi-trash',
+          detail: `${experimentOrWorkflow.name}`,
+          group: 'br',
+          life: 3000,
+        } as ToastMessageOptions & { messageicon: string })
+      } else {
+        await experimentsService.deleteExperiment(experimentOrWorkflow.id)
+        toast.add({
+          severity: 'secondary',
+          summary: `EXPERIMENT DELETED`,
+          messageicon: 'pi pi-trash',
+          detail: `${experimentOrWorkflow.name}`,
+          group: 'br',
+          life: 3000,
+        } as ToastMessageOptions & { messageicon: string })
+      }
+      showSlidingPanel.value = false
+      selectedExperiment.value = undefined
+      selectedWorkflow.value = undefined
+
+      // refetch experiments to remove it from the table
+      await experimentStore.fetchAllExperiments()
+    },
+    reject: () => {},
+  })
 }
 
 async function retrieveWorkflowLogs() {

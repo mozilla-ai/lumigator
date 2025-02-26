@@ -11,6 +11,7 @@ import requests
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import JobType
+from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_sdk.strict_schemas import (
@@ -23,7 +24,7 @@ from lumigator_sdk.strict_schemas import (
     WorkflowCreateRequest,
 )
 
-TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 
 
 def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
@@ -130,7 +131,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
 
     infer_job_config = JobInferenceConfig(
         # FIXME make a const
-        model=TEST_CAUSAL_MODEL,
+        model=TEST_SEQ2SEQ_MODEL,
         provider="hf",
         output_field="predictions",
         store_to_dataset=True,
@@ -274,7 +275,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         name="Workflow_1",
         description="Test workflow for inf and eval",
         task_definition={"task": task},
-        model="hf-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
@@ -301,7 +302,7 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
         name="Workflow_2",
         description="Test workflow for inf and eval",
         task_definition={"task": task},
-        model="hf-internal-testing/tiny-random-LlamaForCausalLM",
+        model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),

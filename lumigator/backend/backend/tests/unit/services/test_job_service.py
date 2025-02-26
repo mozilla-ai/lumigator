@@ -104,7 +104,7 @@ def test_invalid_text_generation(job_service, job_definition_fixture):
         # Create invalid request without system_prompt
         job_create_request = JobCreate(
             name="test_text_generation_run",
-            description="Test missing system prompt",
+            description="Test missing system prompt for text generation",
             job_config=JobInferenceConfig(
                 job_type=JobType.INFERENCE,
                 model="microsoft/Phi-3-mini-instruct",

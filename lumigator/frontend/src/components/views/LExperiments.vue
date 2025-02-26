@@ -29,7 +29,7 @@
           v-if="selectedExperiment"
           :selectedExperiment="selectedExperiment"
           :selectedWorkflow="selectedWorkflow"
-          :title="selectedWorkflow ? 'Model Run Details': 'Experiment Details'"
+          :title="selectedWorkflow ? 'Model Run Details' : 'Experiment Details'"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowWorkflowResults($event)"
           @l-download-results="onDownloadResults($event)"

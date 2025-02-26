@@ -15,34 +15,45 @@
     <div class="l-experiment-form__fields">
       <FloatLabel variant="in" size="small" class="l-experiment-form__field">
         <Select
-          v-model="experimentType"
+          v-model="useCase"
           inputId="use_case"
-          optionLabel="useCase"
-          :options="experimentTypeOptions"
+          :options="useCaseOptions"
+          optionLabel="label"
+          optionValue="value"
           variant="filled"
-          disabled
+          :disabled="false"
         >
         </Select>
-        <label for="use_case">Use case</label>
+        <label for="use_case">Use-case</label>
       </FloatLabel>
 
-      <p>
-        Summarization jobs are evaluated with ROUGE, METEOR, and BERT score, each focusing on
-        different aspects of prediction-ground truth similarity.
-        <a href="https://mozilla-ai.github.io/lumigator/" target="_blank"
-          >Learn more <span class="pi pi-arrow-up-right"></span>
-        </a>
-      </p>
       <FloatLabel variant="in" class="l-experiment-form__field">
         <Select
           v-model="dataset"
           inputId="dataset"
-          optionLabel="filename"
           :options="filteredDatasets"
+          optionLabel="filename"
           variant="filled"
           size="small"
         ></Select>
-        <label for="dataset">Select Dataset</label>
+        <label for="dataset">Dataset</label>
+      </FloatLabel>
+
+      <div v-if="useCase === 'translation'" class="languages l-experiment-form__field">
+        <FloatLabel variant="in" class="l-experiment-form__field--inline">
+          <InputText id="sourceLanguage" v-model="sourceLanguage" variant="filled" />
+          <label for="sourceLanguage">Source Language</label>
+        </FloatLabel>
+        <span>to</span>
+        <FloatLabel variant="in" class="l-experiment-form__field--inline">
+          <InputText id="targetLanguage" v-model="targetLanguage" variant="filled" />
+          <label for="targetLanguage">Target Language</label>
+        </FloatLabel>
+      </div>
+
+      <FloatLabel variant="in" class="l-experiment-form__field">
+        <InputText id="prompt" v-model="experimentPrompt" variant="filled" />
+        <label for="prompt">Experiment Prompt</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">
         <InputText id="title" v-model="experimentTitle" variant="filled" />
@@ -61,6 +72,10 @@
         <InputNumber id="max_samples" v-model="maxSamples" variant="filled" class="number-input" />
         <label for="max_samples">Maximum samples (optional)</label>
       </FloatLabel>
+      <p>
+        Limit how many rows of your dataset to use for this experiment. Useful for when working with
+        large datasets.
+      </p>
     </div>
     <div class="l-experiment-form__models-container">
       <h3>Model Selection</h3>
@@ -75,7 +90,7 @@
         label="Run experiment"
         class="l-page-header__action-btn"
         :disabled="isInvalid"
-        @click="triggerExperiment"
+        @click="handleRunExperimentClicked"
       ></Button>
     </div>
   </div>
@@ -107,14 +122,22 @@ const datasetStore = useDatasetStore()
 const experimentStore = useExperimentStore()
 const { datasets, selectedDataset } = storeToRefs(datasetStore)
 
-const experimentTypeOptions = ref([{ useCase: 'Summarization' }])
-const experimentType = experimentTypeOptions.value[0]
+const useCaseOptions = ref([
+  { label: 'Summarization', value: 'summarization' },
+  { label: 'Translation', value: 'translation' },
+])
+const useCase: Ref<'summarization' | 'translation'> = ref(
+  useCaseOptions.value[0].value as 'summarization' | 'translation',
+)
 const dataset: Ref<Dataset | undefined> = ref()
 const experimentTitle = ref('')
 const experimentDescription = ref('')
 const maxSamples = ref()
 const modelSelection = ref()
 const toast = useToast()
+const sourceLanguage = ref('')
+const targetLanguage = ref('')
+const experimentPrompt = ref('')
 
 const isInvalid = computed(
   () =>
@@ -128,14 +151,20 @@ const filteredDatasets = computed(() =>
   datasets.value.filter((dataset) => dataset.ground_truth === true),
 )
 
-async function triggerExperiment() {
+async function handleRunExperimentClicked() {
   const experimentPayload: createExperimentWithWorkflowsPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
     dataset: dataset.value!.id,
     max_samples: maxSamples.value ? maxSamples.value : 0,
     task: 'summarization',
+    // task: useCase.value,
+    // system_prompt: experimentPrompt.value,
   }
+  // if (useCase.value === 'translation') {
+  //   experimentPayload.source_language = sourceLanguage.value
+  //   experimentPayload.target_language = targetLanguage.value
+  // }
   const workflows = await experimentsService.createExperimentWithWorkflows(
     experimentPayload,
     modelSelection.value.selectedModels,
@@ -183,6 +212,12 @@ onMounted(async () => {
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
+.languages {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .l-experiment-form {
   $root: &;
   display: flex;
@@ -191,7 +226,7 @@ onMounted(async () => {
   p {
     font-size: $l-font-size-sm;
     color: $l-grey-100;
-    padding: 0 $l-spacing-sm $l-spacing-1 $l-spacing-sm;
+    margin-bottom: $l-spacing-1;
   }
 
   &__header,
@@ -240,6 +275,10 @@ onMounted(async () => {
     .number-input {
       background-color: $l-card-bg;
       width: 100%;
+    }
+
+    &--inline {
+      margin-bottom: 0;
     }
   }
 

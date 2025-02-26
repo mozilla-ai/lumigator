@@ -1,16 +1,26 @@
 <template>
   <div class="l-experiment-details">
-    <div class="l-experiment-details__header" style="position: sticky; top: 0; z-index: 100">
+    <Button
+      icon="pi pi-times"
+      severity="secondary"
+      rounded
+      aria-label="Close"
+      class="l-experiment-details__close"
+      @click="emit('l-close-details')"
+    >
+    </Button>
+
+    <div class="l-experiment-details__header">
       <h3>{{ title }}</h3>
-      <Button
-        icon="pi pi-times"
-        severity="secondary"
-        rounded
-        aria-label="Close"
-        class="l-experiment-details__close"
-        @click="emit('l-close-details')"
-      >
-      </Button>
+      <div class="l-experiment-details__header-actions">
+        <Button
+          severity="secondary"
+          icon="pi pi-bin"
+          variant="text"
+          rounded
+          @click="handleDeleteButtonClicked"
+        ></Button>
+      </div>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item">
@@ -54,7 +64,7 @@
         class="l-experiment-details__content-item"
         @click="copyToClipboard(selectedWorkflow.id)"
       >
-        <div class="l-experiment-details__content-label">job id</div>
+        <div class="l-experiment-details__content-label">Model Run id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
@@ -99,7 +109,7 @@
       <div v-if="isWorkflowFocused && selectedWorkflow" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedWorkflow.model as any).path }}
+          {{ selectedWorkflow.model }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -164,6 +174,7 @@ const emit = defineEmits([
   'l-job-results',
   'l-show-logs',
   'l-download-results',
+  'delete-button-clicked',
 ])
 
 const props = defineProps<{
@@ -185,6 +196,10 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
+
+function handleDeleteButtonClicked(e: MouseEvent) {
+  emit('delete-button-clicked', selectedWorkflow.value || selectedExperiment.value)
+}
 
 // TODO: this needs refactor when the backend provides experiment id
 const selectedItemStatus = computed(() => {
@@ -229,6 +244,24 @@ function isExperiment(item: Experiment | Workflow): item is Experiment {
   return 'workflows' in item
 }
 </script>
+
+<style scoped>
+.l-experiment-details__header {
+  position: sticky;
+  top: 0;
+  padding: 1rem 0;
+  z-index: 100;
+}
+
+.l-experiment-details__header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.l-experiment-details__close {
+  margin-left: auto;
+}
+</style>
 
 <style lang="scss">
 @use '@/styles/variables' as *;

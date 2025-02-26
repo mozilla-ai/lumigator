@@ -45,7 +45,7 @@
               class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
               aria-controls="optionsMenu"
               @click.stop="togglePopover($event, slotProps.data)"
-            />
+            ></span>
           </template>
         </Column>
       </DataTable>

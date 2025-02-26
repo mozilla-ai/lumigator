@@ -64,12 +64,11 @@ class WorkflowService:
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
-            task_definition=request.task_definition,
             model=request.model,
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            system_prompt=request.system_prompt,
+            task_definition=request.task_definition,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )

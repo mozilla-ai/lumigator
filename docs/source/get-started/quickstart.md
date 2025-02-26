@@ -380,7 +380,7 @@ different aspects:
   two texts.
 - [METEOR](https://aclanthology.org/W05-0909.pdf) - Looks at the harmonic mean of precision and
   recall.
-- [BERTScore](https://openreview.net/pdf?id=SkeHuCVFDr) - Generates embeddings of ground truth input
+- [BERTScore](https://arxiv.org/abs/1904.09675) - Generates embeddings of ground truth input
   and model output and compares their cosine similarity
 
 ## Terminate Session

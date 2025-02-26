@@ -41,7 +41,7 @@ TaskDefinition = Annotated[
 SYSTEM_PROMPT_DEFAULTS = {
     TaskType.SUMMARIZATION: "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",  # noqa: E501
     TaskType.TRANSLATION: lambda task_definition: (
-        f"translate {task_definition.source_language} to {task_definition.target_language}:"
+        f"translate {task_definition.source_language} to {task_definition.target_language}: "
     ),
 }
 

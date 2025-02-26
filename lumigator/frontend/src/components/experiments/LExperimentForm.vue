@@ -96,7 +96,10 @@ import LModelCards from '@/components/experiments/LModelCards.vue'
 import { useToast } from 'primevue/usetoast'
 import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
-import type { createExperimentWithWorkflowsPayload } from '@/sdk/experimentsService'
+import {
+  experimentsService,
+  type createExperimentWithWorkflowsPayload,
+} from '@/sdk/experimentsService'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -133,11 +136,12 @@ async function triggerExperiment() {
     max_samples: maxSamples.value ? maxSamples.value : 0,
     task: 'summarization',
   }
-  const workflows = await experimentStore.createExperimentWithWorkflows(
+  const workflows = await experimentsService.createExperimentWithWorkflows(
     experimentPayload,
     modelSelection.value.selectedModels,
   )
   if (workflows.length) {
+    // refetch after creating an experiment to update the table
     await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()

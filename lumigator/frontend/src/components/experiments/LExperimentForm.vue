@@ -52,7 +52,7 @@
       </div>
 
       <FloatLabel variant="in" class="l-experiment-form__field">
-        <InputText id="prompt" v-model="experimentPrompt" variant="filled" />
+        <InputText id="prompt" :model-value="experimentPrompt || defaultPrompt" @update:model-value="(value) => experimentPrompt = value || defaultPrompt" variant="filled" />
         <label for="prompt">Experiment Prompt</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">
@@ -138,6 +138,12 @@ const toast = useToast()
 const sourceLanguage = ref('')
 const targetLanguage = ref('')
 const experimentPrompt = ref('')
+const defaultPrompt = computed(() => {
+  if (useCase.value === 'summarization') {
+    return 'You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.'
+  }
+  return `translate ${sourceLanguage.value} to ${targetLanguage.value}:`
+})
 
 const isInvalid = computed(
   () =>

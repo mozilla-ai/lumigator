@@ -44,7 +44,13 @@
       </Tabs>
     </div>
     <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
-    <DatasetViewer  v-if="isDatasetViewerVisible" :title="`Dataset: ${selectedDataset?.filename}`" :data="datasetFileContent" :columns="datasetColumns" @close="isDatasetViewerVisible = false"/>
+    <DatasetViewer
+      v-if="isDatasetViewerVisible"
+      :title="`Dataset: ${selectedDataset?.filename}`"
+      :data="datasetFileContent"
+      :columns="datasetColumns"
+      @close="isDatasetViewerVisible = false"
+    />
     <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"

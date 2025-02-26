@@ -1,5 +1,10 @@
 <template>
-  <Drawer v-model:visible="isVisible" :header="title" :position="'full'" @hide="$emit('close', $event)">
+  <Drawer
+    v-model:visible="isVisible"
+    :header="title"
+    :position="'full'"
+    @hide="$emit('close', $event)"
+  >
     <DataTable
       :value="data"
       :reorderableColumns="true"
@@ -19,7 +24,7 @@
 
 <script lang="ts">
 import { Column, DataTable, Drawer, type DataTableProps } from 'primevue'
-import { computed, defineComponent, ref, type PropType } from 'vue'
+import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -44,7 +49,7 @@ export default defineComponent({
   },
   setup() {
     const isVisible = ref(true)
-    return {isVisible}
+    return { isVisible }
   },
 })
 </script>

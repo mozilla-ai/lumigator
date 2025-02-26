@@ -167,4 +167,6 @@ class HuggingFaceModelClient(BaseModelClient):
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]
+            if "</think>" in generation["summary_text"]:
+                generation["summary_text"] = generation["summary_text"].split("</think>")[1]
             return generation["summary_text"]

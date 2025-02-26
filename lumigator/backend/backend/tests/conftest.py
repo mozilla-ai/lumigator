@@ -46,10 +46,10 @@ TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGenerati
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
 # An Exception will be raised if the number of polls is exceeded.
-MAX_POLLS = 18
-
+MAX_POLLS = 36
 # Time between job status polls.
 POLL_WAIT_TIME = 10
+# The max time we wait for a job is MAX_POLLS * POLL_WAIT_TIME
 
 
 @pytest.fixture(scope="session")

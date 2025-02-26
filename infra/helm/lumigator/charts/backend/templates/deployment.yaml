@@ -81,5 +81,7 @@ spec:
               value: {{ .Values.inferenceWorkDir }}
             - name: MLFLOW_TRACKING_URI
               value: {{ include "lumigator.mlflow-address" .| quote }}
+            - name: LUMIGATOR_SECRET_KEY
+              value: {{ .Values.lumigatorSecretKey | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

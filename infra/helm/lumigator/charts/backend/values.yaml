@@ -23,6 +23,8 @@ evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 inferencePipReqs: "/mzai/lumigator/jobs/inference/requirements.txt"
 inferenceWorkDir: "/mzai/lumigator/jobs/inference"
 
+lumigatorSecretKey: ""
+
 image:
   repository: "mzdotai/lumigator"
   pullPolicy: Always

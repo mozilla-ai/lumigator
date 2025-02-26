@@ -2,7 +2,7 @@
   <div class="l-results-table">
     <DataTable
       class="gridlines"
-      :value="tableData"
+      :value="results"
       scrollable
       scrollHeight="90vh"
       tableStyle="min-width: 50rem;min-width:70vw"
@@ -93,12 +93,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, type Ref, type PropType } from 'vue'
+import { ref, type PropType } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { EvaluationJobResults } from '@/types/Experiment'
 
-const props = defineProps({
+defineProps({
   results: {
     type: Array as PropType<EvaluationJobResults[]>,
     required: true,
@@ -128,7 +128,6 @@ const tooltipColorsConfig = ref({
   },
 })
 
-const tableData: Ref<EvaluationJobResults[]> = ref([])
 const tooltips = ref({
   examples: {
     value: `Text which is passed as an input to the model, together
@@ -184,10 +183,6 @@ const tooltips = ref({
     class: 'metric-tooltip',
     pt: tooltipColorsConfig.value,
   },
-})
-
-onMounted(() => {
-  tableData.value = props.results
 })
 </script>
 

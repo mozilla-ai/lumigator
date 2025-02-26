@@ -37,6 +37,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.tasks import TaskDefinition, get_default_system_prompt, validate_system_prompt
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -145,7 +146,9 @@ class JobDefinitionInference(JobDefinition):
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
-            system_prompt=request.job_config.task_definition.system_prompt,
+            system_prompt=self.resolve_system_prompt(
+                request.job_config.task_definition, request.job_config.system_prompt
+            ),
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
@@ -176,6 +179,10 @@ class JobDefinitionInference(JobDefinition):
 
     def store_as_dataset(self) -> bool:
         return True
+
+    def resolve_system_prompt(self, task_definition: TaskDefinition, system_prompt: str | None) -> str:
+        validate_system_prompt(task_definition.task, system_prompt)
+        return system_prompt or get_default_system_prompt(task_definition)
 
 
 class JobDefinitionEvaluation(JobDefinition):

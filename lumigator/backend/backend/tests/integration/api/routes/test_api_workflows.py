@@ -232,7 +232,7 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
         json={
             "name": "test_create_exp_workflow_check_results",
             "description": "Test for an experiment with associated workflows",
-            "task": "summarization",
+            "task_definition": {"task": "summarization"},
             "dataset": str(dataset_id),
             "max_samples": 1,
         },
@@ -248,6 +248,7 @@ def run_workflow(
     workflow_payload = {
         "name": workflow_name,
         "description": "Test workflow for inf and eval",
+        "task_definitions": {"task": "summarization"},
         "model": TEST_SEQ2SEQ_MODEL,
         "provider": "hf",
         "dataset": str(dataset_id),

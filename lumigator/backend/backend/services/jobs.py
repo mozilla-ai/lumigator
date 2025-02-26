@@ -9,9 +9,7 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 import evaluator
-import evaluator.definition
 import inference
-import inference.definition
 import loguru
 import requests
 from fastapi import BackgroundTasks, UploadFile

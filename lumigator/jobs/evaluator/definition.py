@@ -6,7 +6,7 @@ from lumigator_schemas.jobs import JobCreate, JobType
 from backend.services.job_interface import JobDefinition
 
 
-class JobInterfaceEvalLite(JobDefinition):
+class JobInterfaceEvaluation(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
@@ -33,7 +33,7 @@ EVALUATOR_WORK_DIR = "../jobs/evaluator"
 EVALUATOR_PIP_REQS = "../jobs/evaluator/requirements.txt"
 EVALUATOR_COMMAND = str = "python evaluator.py"
 
-JOB_DEFINITION: JobDefinition = JobInterfaceEvalLite(
+JOB_DEFINITION: JobDefinition = JobInterfaceEvaluation(
     command=EVALUATOR_COMMAND,
     pip_reqs=EVALUATOR_PIP_REQS,
     work_dir=EVALUATOR_WORK_DIR,

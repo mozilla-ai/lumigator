@@ -24,7 +24,7 @@
             {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
-        <Column field="status" header="status">
+        <Column field="status" header="status" :style="columnStyles.status">
           <template #body="slotProps">
             <div>
               <Tag
@@ -59,21 +59,26 @@
           </template>
         </Column>
         <Column header="options">
-          <template #body>
+          <template #body="slotProps">
             <span
               class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
-              style="cursor: not-allowed; pointer-events: all"
+              style="pointer-events: all"
+              aria-haspopup="true"
               aria-controls="optionsMenu"
+              @click="toggleOptionsMenu($event, slotProps.data)"
             >
             </span>
           </template>
         </Column>
+        <Menu id="options_menu" ref="optionsMenu" :model="options" :popup="true"> </Menu>
         <template #expansion="slotProps">
           <div class="l-experiment-table__jobs-table-container">
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
               @l-job-selected="onWorkflowSelected($event, slotProps.data)"
+              @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
+              @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
             />
           </div>
         </template>
@@ -97,13 +102,22 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { workflowsService } from '@/sdk/workflowsService'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
+import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import { Menu } from 'primevue'
 const props = defineProps({
   tableData: {
     type: Array as PropType<Experiment[]>,
     required: true,
   },
 })
-const emit = defineEmits(['l-experiment-selected', 'l-workflow-selected'])
+
+const emit = defineEmits([
+  'l-experiment-selected',
+  'l-workflow-selected',
+  'delete-option-clicked',
+  'view-experiment-results-clicked',
+  'view-workflow-results-clicked',
+])
 
 const isThrottled = ref(false)
 const { showSlidingPanel } = useSlidePanel()
@@ -114,15 +128,55 @@ const focusedItem = ref()
 const expandedRows = ref([])
 const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
+const optionsMenu = ref()
+const options = ref<MenuItem[]>([
+  {
+    label: 'View Results',
+    icon: 'pi pi-external-link',
+    disabled: () => {
+      return focusedItem.value?.status !== WorkflowStatus.SUCCEEDED
+    },
+    command: () => {
+      emit('view-experiment-results-clicked', focusedItem.value)
+    },
+  },
+  {
+    label: 'Download Results',
+    icon: 'pi pi-download',
+    disabled: false,
+    visible: false,
+    command: () => {
+      // emit('l-download-experiment', focusedItem.value)
+    },
+  },
+  {
+    label: () => {
+      return 'Delete Experiment'
+    },
+    icon: 'pi pi-trash',
+    style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
+    disabled: false,
+    command: (e: MenuItemCommandEvent) => {
+      emit('delete-option-clicked', focusedItem.value)
+    },
+  },
+])
+
 const style = computed(() => {
   return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
 })
+
+const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow | Experiment) => {
+  focusedItem.value = selectedItem
+  optionsMenu.value.toggle(event)
+}
 
 const columnStyles = computed(() => {
   return {
     expander: 'width: 4rem',
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
+    status: 'width: 12rem',
   }
 })
 
@@ -143,8 +197,6 @@ async function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
   if (workflow.jobs) {
     emit('l-workflow-selected', workflow)
   }
-  // select the experiment that job belongs to
-  emit('l-experiment-selected', experiment)
 }
 
 /**
@@ -252,11 +304,6 @@ watch(
   width: 100%;
   display: flex;
   place-content: center;
-
-  &__options-trigger {
-    padding-left: $l-spacing-1;
-    margin-left: 10% !important;
-  }
 
   &__tag {
     color: $l-grey-100;

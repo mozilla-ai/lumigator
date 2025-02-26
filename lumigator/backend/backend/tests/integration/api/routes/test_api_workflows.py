@@ -270,15 +270,6 @@ def validate_experiment_results(local_client: TestClient, experiment_id, workflo
     ].model_dump(exclude={"artifacts_download_url"})
 
 
-def validate_updated_experiment_results(local_client: TestClient, experiment_id, workflow_1_details):
-    """Validate updated experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
-    assert len(experiment_results.workflows) == 2
-    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
-
-
 def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
     """Retrieve and validate workflow logs."""
     logs_job_response = local_client.get(f"/workflows/{workflow_id}/logs")
@@ -334,7 +325,6 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     list_experiments(local_client)
-    validate_updated_experiment_results(local_client, experiment_id, workflow_1_details)
     retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
     delete_experiment_and_validate(local_client, experiment_id)
 

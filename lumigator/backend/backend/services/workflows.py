@@ -11,7 +11,6 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobStatus,
 )
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskType
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -64,22 +63,12 @@ class WorkflowService:
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
-        if not request.system_prompt:
-            task_definition = SummarizationTaskDefinition(
-                task=TaskType.SUMMARIZATION,
-            )
-        else:
-            task_definition = SummarizationTaskDefinition(
-                task=TaskType.SUMMARIZATION,
-                system_prompt=request.system_prompt,
-            )
         job_infer_config = JobInferenceConfig(
-            task_definition=request.task_definition,
             model=request.model,
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            task_definition=task_definition,
+            task_definition=request.task_definition,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )

@@ -42,7 +42,7 @@ def upgrade() -> None:
         sa.Column("description", sa.String(), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("CREATED", "PENDING", "RUNNING", "FAILED", "SUCCEEDED", name="jobstatus"),
+            sa.Enum("CREATED", "PENDING", "RUNNING", "FAILED", "SUCCEEDED", "STOPPED", name="jobstatus"),
             nullable=False,
         ),
         sa.Column(

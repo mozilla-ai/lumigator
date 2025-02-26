@@ -229,7 +229,7 @@ class JobService:
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
     """list: A list of terminal job statuses."""
 
     def __init__(
@@ -592,7 +592,7 @@ class JobService:
         record = self._get_job_record(job_id)
         loguru.logger.info(f"Obtaining info for job {job_id}: {record.name}")
 
-        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+        if record.status.value in self.TERMINAL_STATUS:
             return JobResponse.model_validate(record)
 
         # get job status from ray

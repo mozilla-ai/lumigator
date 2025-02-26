@@ -90,6 +90,10 @@ def wait_for_job(client, job_id: UUID) -> bool:
             succeeded = False
             timed_out = False
             break
+        if get_job_response_model.status == JobStatus.STOPPED.value:
+            succeeded = False
+            timed_out = False
+            break
         time.sleep(POLL_WAIT_TIME)
     if timed_out:
         raise Exception("Job poll timed out")

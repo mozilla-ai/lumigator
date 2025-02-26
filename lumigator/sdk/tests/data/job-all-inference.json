@@ -18,7 +18,7 @@
     "trust_remote_code": false,
     "torch_dtype": "auto",
     "output_field": "predictions",
-    "max_tokens": 1024,
+    "max_new_tokens": 100,
     "frequency_penalty": 0.0,
     "temperature": 1.0,
     "top_p": 1.0,

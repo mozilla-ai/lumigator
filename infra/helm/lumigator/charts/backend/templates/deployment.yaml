@@ -51,7 +51,7 @@ spec:
             - name: SQLALCHEMY_DATABASE_URL
               value: "postgresql://postgres:$(POSTGRESQL_PASSWORD)@{{ .Release.Name }}-postgresql/postgres"
             - name: RAY_HEAD_NODE_HOST
-              value: {{ required "Missing Ray head node hostname" .Values.rayAddress | quote }}
+              value: {{ include "lumigator.ray-address" .| quote }}
             - name: RAY_DASHBOARD_PORT
               value: {{ required "Missing Ray dashboard node port" .Values.rayPort | quote }}
             - name: RAY_WORKER_GPUS

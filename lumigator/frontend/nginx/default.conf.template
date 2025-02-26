@@ -2,7 +2,7 @@ server {
     listen       80;
     listen  [::]:80;
     server_name  localhost;
-
+    client_max_body_size 50M;
     location /api {
         proxy_pass http://$LUMIGATOR_API_HOST:$LUMIGATOR_API_PORT; # This will use the API_SERVER environment variable
         proxy_http_version 1.1;

@@ -20,11 +20,16 @@ mistralAPIKey: ""
 evaluatorPipReqs: "/mzai/lumigator/jobs/evaluator/requirements.txt"
 evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 
+inferencePipReqs: "/mzai/lumigator/jobs/inference/requirements.txt"
+inferenceWorkDir: "/mzai/lumigator/jobs/inference"
+
+lumigatorSecretKey: ""
+
 image:
   repository: "mzdotai/lumigator"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.1.1-alpha"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -82,14 +87,14 @@ ray-cluster:
       #   cpu: "8"
       #   memory: "20G"
       #   nvidia.com/gpu: "1"
-    env:
-      # Set the following environment variables with the desired values to connect to your object storage
-      # env vars required by s3fs
-      - name: FSSPEC_S3_KEY
-        value: ""
-      - name: FSSPEC_S3_SECRET
-        value: ""
-      - name: FSSPEC_S3_ENDPOINT_URL
-        value: ""
+    #env:
+    # Set the following environment variables with the desired values to connect to your object storage
+    # env vars required by s3fs
+    # - name: FSSPEC_S3_KEY
+    #   value: ""
+    # - name: FSSPEC_S3_SECRET
+    #   value: ""
+    # - name: FSSPEC_S3_ENDPOINT_URL
+    #   value: ""
   worker:
     disabled: true

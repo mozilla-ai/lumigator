@@ -227,14 +227,14 @@ async function handleViewDatasetClicked(dataset: Dataset) {
   datasetStore.setSelectedDataset(dataset)
   const blob = await datasetsService.downloadDataset(dataset.id)
   const text = await blob.text()
-  console.log(text)
 
+  // parse csv string into an array of arrays
   const data = Papa.parse(text).data
-  console.log(data)
-
   const columns = data[0]
+
+  // transform parsed csv into DataTable props
   datasetColumns.value = columns
-  datasetFileContent.value = data.slice(1).map((row: string[]) => {
+  datasetFileContent.value = data.slice(1, data.length).map((row: string[]) => {
     return row.reduce((accum, value, index) => {
       return {
         ...accum,
@@ -242,6 +242,7 @@ async function handleViewDatasetClicked(dataset: Dataset) {
       }
     }, {})
   })
+
   isDatasetViewerVisible.value = true
 }
 

@@ -5,9 +5,23 @@
     :position="'full'"
     @hide="$emit('close', $event)"
   >
+    <template #header>
+      <h3>{{ title }}</h3>
+      <PrimeVueButton
+        type="button"
+        text
+        icon="pi pi-download"
+        rounded
+        severity="secondary"
+        style="margin-left: auto"
+        aria-label="download"
+        @click="handleDownloadClicked"
+      ></PrimeVueButton>
+    </template>
     <DataTable
       :value="data"
       :reorderableColumns="true"
+      ref="dataTable"
       removableSort
       scrollable
       scrollHeight="flex"
@@ -23,14 +37,16 @@
 </template>
 
 <script lang="ts">
-import { Column, DataTable, Drawer, type DataTableProps } from 'primevue'
+import { Button, Column, DataTable, Drawer, type DataTableProps } from 'primevue'
 import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
+  name: 'DatasetViewer',
   components: {
     DataTable,
     Drawer,
     Column,
+    PrimeVueButton: Button,
   },
   emits: ['close'],
   props: {
@@ -47,9 +63,14 @@ export default defineComponent({
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const isVisible = ref(true)
-    return { isVisible }
+    const dataTable = ref()
+
+    const handleDownloadClicked = () => {
+      dataTable.value.exportCSV()
+    }
+    return { isVisible, dataTable, handleDownloadClicked, ...props }
   },
 })
 </script>

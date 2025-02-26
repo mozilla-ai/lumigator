@@ -34,7 +34,7 @@ class GenerationConfig(BaseModel):
     https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationConfig
     """
 
-    max_tokens: int
+    max_new_tokens: int
     frequency_penalty: float
     temperature: float
     top_p: float
@@ -49,7 +49,6 @@ class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     torch_dtype: str
     accelerator: str
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int
     truncation: bool = True
     task: str | None = None
 

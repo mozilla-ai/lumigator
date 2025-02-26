@@ -156,7 +156,6 @@ class JobDefinitionInference(JobDefinition):
                 use_fast=request.job_config.use_fast,
                 trust_remote_code=request.job_config.trust_remote_code,
                 torch_dtype=request.job_config.torch_dtype,
-                max_new_tokens=500,
             )
         else:
             # It will be a pass through to LiteLLM
@@ -168,7 +167,7 @@ class JobDefinitionInference(JobDefinition):
                 max_retries=3,
             )
         job_config.generation_config = GenerationConfig(
-            max_tokens=request.job_config.max_tokens,
+            max_new_tokens=request.job_config.max_new_tokens,
             frequency_penalty=request.job_config.frequency_penalty,
             temperature=request.job_config.temperature,
             top_p=request.job_config.top_p,

@@ -1,8 +1,10 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 import type { Experiment } from '@/types/Experiment'
 import type { WorkflowResults } from '@/types/Metrics'
+import type { Model } from '@/types/Model'
 
 import type { CreateWorkflowPayload } from '@/types/Workflow'
+import { workflowsService } from './workflowsService'
 
 export async function fetchExperiments(): Promise<Experiment[]> {
   const response = await lumigatorApiAxiosInstance.get('/experiments')
@@ -83,10 +85,38 @@ export async function downloadResults(experiment_id: string) {
   return blob
 }
 
+/**
+ * Runs an experiment with multiple models.
+ * Each model triggers a respective evaluation job.
+ *
+ * @param {Object} experimentData - The data for the experiment to run.
+ * @returns {Promise<Array>} The results of the experiment.
+ */
+export async function createExperimentWithWorkflows(
+  experimentData: createExperimentWithWorkflowsPayload,
+  models: Model[],
+) {
+  // first we create an experiment as a container
+  const { id: experimentId } = await experimentsService.createExperiment(experimentData)
+
+  // then we create a workflow for each model to be attached to the experiment
+  return Promise.all(
+    models.map((model: Model) =>
+      workflowsService.createWorkflow({
+        ...experimentData,
+        experiment_id: experimentId,
+        model: model.model,
+        provider: model.provider,
+        base_url: model.base_url,
+      }),
+    ),
+  )
+}
+
 export const experimentsService = {
   fetchExperiments,
   fetchExperiment,
-  // triggerExperiment,
+  createExperimentWithWorkflows,
   fetchExperimentResults,
   downloadResults,
   createExperiment,

@@ -1,18 +1,18 @@
 <template>
   <Drawer
     v-model:visible="isVisible"
-    :header="title"
     :position="'full'"
     @hide="$emit('close', $event)"
   >
     <template #header>
-      <h3>{{ title }}</h3>
+      <slot name="title"></slot>
       <PrimeVueButton
         type="button"
-        text
         icon="pi pi-download"
+        label="Downlaod Dataset"
         rounded
         severity="secondary"
+        :variant="'text'"
         style="margin-left: auto"
         aria-label="download"
         @click="handleDownloadClicked"
@@ -22,22 +22,30 @@
       :value="data"
       :reorderableColumns="true"
       ref="dataTable"
-      removableSort
-      scrollable
+      :removableSort="true"
+      :scrollable="true"
       scrollHeight="flex"
-      :virtualScrollerOptions="{ itemSize: 46 }"
       :resizableColumns="false"
-      columnResizeMode="fit"
-      showGridlines
-      stripedRows
+      :columnResizeMode="'fit'"
+      :showGridlines="true"
+      :stripedRows="false"
+      :exportFilename="downloadFileName"
+      :editMode="isEditable ? 'cell' : undefined"
+      @cell-edit-complete="onCellEditComplete"
+      @cell-edit-cancel="onCellEditCancel"
     >
-      <Column v-for="col in columns" sortable :key="col" :field="col" :header="col"></Column>
+      <Column v-for="col in columns" sortable :key="col" :field="col" :header="col" :style="`width: ${1/columns.length * 100}%`">
+        <template #editor="{ data, field }">
+                        <Textarea v-model="data[field]" autoResize autofocus fluid></Textarea>
+                </template>
+
+      </Column>
     </DataTable>
   </Drawer>
 </template>
 
 <script lang="ts">
-import { Button, Column, DataTable, Drawer, type DataTableProps } from 'primevue'
+import { Button, Column, ContextMenu, DataTable, Drawer, Textarea, type DataTableCellEditCancelEvent, type DataTableCellEditCompleteEvent, type DataTableProps } from 'primevue'
 import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
@@ -47,9 +55,18 @@ export default defineComponent({
     Drawer,
     Column,
     PrimeVueButton: Button,
+    Textarea,
   },
   emits: ['close'],
   props: {
+    downloadFileName: {
+      type: String,
+      required: true,
+    },
+    isEditable: {
+      type: Boolean,
+      default: false,
+    },
     data: {
       type: Array as PropType<DataTableProps['value']>,
       required: true,
@@ -57,11 +74,7 @@ export default defineComponent({
     columns: {
       type: Array as PropType<string[]>,
       required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
+    }
   },
   setup(props) {
     const isVisible = ref(true)
@@ -70,7 +83,19 @@ export default defineComponent({
     const handleDownloadClicked = () => {
       dataTable.value.exportCSV()
     }
-    return { isVisible, dataTable, handleDownloadClicked, ...props }
+
+    const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {
+    let { data, newValue, field } = event;
+
+    data[field] = newValue
+  };
+
+  const onCellEditCancel = (event: DataTableCellEditCancelEvent) => {
+    // prevent esc key from closing the whole modal
+    event.originalEvent.stopPropagation()
+  };
+
+    return { isVisible, dataTable, handleDownloadClicked, onCellEditComplete, onCellEditCancel, ...props }
   },
 })
 </script>

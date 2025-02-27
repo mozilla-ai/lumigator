@@ -46,11 +46,16 @@
     <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
     <DatasetViewer
       v-if="isDatasetViewerVisible"
-      :title="`Dataset: ${selectedDataset?.filename}`"
+      :downloadFileName="selectedDataset?.filename.split('.')[0]"
       :data="datasetFileContent"
+      :isEditable="true"
       :columns="datasetColumns"
       @close="isDatasetViewerVisible = false"
-    />
+    >
+    <template #title>
+      <h3 style="font-weight: normal;"><span style="color: #888888;">Dataset:</span> {{selectedDataset?.filename}}</h3>
+    </template>
+    </DatasetViewer>
     <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"

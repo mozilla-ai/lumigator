@@ -9,12 +9,13 @@
         rounded
         severity="secondary"
         :variant="'text'"
-        style="margin-left: auto"
+        style="margin-left: auto; margin-right: 1.5rem;"
         aria-label="download"
         @click="handleDownloadClicked"
       ></PrimeVueButton>
     </template>
     <DataTable
+      class="gridlines"
       :value="data"
       :reorderableColumns="true"
       ref="dataTable"
@@ -118,4 +119,10 @@ export default defineComponent({
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+  /* make the sort icon smaller */
+  ::v-deep(.p-datatable-sort-icon) {
+    width: 10px;
+    height: 10px;
+  }
+</style>

@@ -4,7 +4,9 @@ from abc import abstractmethod
 from inference_config import InferenceJobConfig
 from litellm import completion
 from loguru import logger
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+
+from schemas import TaskType
 
 
 def strip_path_prefix(path: str) -> str:
@@ -82,7 +84,11 @@ class HuggingFaceModelClient(BaseModelClient):
         self._system_prompt = config.system_prompt
         logger.info(f"System prompt: {config.system_prompt}")
         self._task = config.hf_pipeline.task
-        if self._task == "summarization":
+        # Load the model configuration to check the architecture type
+        model_config = AutoConfig.from_pretrained(
+            config.hf_pipeline.model_name_or_path, trust_remote_code=config.hf_pipeline.trust_remote_code
+        )
+        if self._task == TaskType.SUMMARIZATION and model_config.is_encoder_decoder:
             # The summarization pipeline is only supported for Seq2Seq models
             # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
             model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -107,11 +113,9 @@ class HuggingFaceModelClient(BaseModelClient):
                 device=config.hf_pipeline.device,
             )
             self._set_seq2seq_max_length()
-        elif self._task == "text-generation":
-            self._pipeline = pipeline(**config.hf_pipeline.model_dump())
         else:
-            raise ValueError(f"Unsupported task: {self._task}")
-        logger.info(f"HuggingFaceModelClient initialized with config: {config}")
+            # CausalLM models supported for summarization, text-generation and translation tasks through system_prompt
+            self._pipeline = pipeline(**config.hf_pipeline.model_dump())
 
     def _set_seq2seq_max_length(self):
         """Make sure that the model can actually support the max_new_tokens configured.
@@ -153,7 +157,7 @@ class HuggingFaceModelClient(BaseModelClient):
         #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
         # We want to return the content of the last message in the list, which is the model's
         # response to the prompt.
-        if self._task == "text-generation":
+        if self._task in [TaskType.TEXT_GENERATION, TaskType.TRANSLATION]:
             messages = [
                 {"role": "system", "content": self._system_prompt},
                 {"role": "user", "content": prompt},
@@ -164,7 +168,7 @@ class HuggingFaceModelClient(BaseModelClient):
         # If we're using a summarization model, the pipeline returns a dictionary with a single key.
         # The name of the key depends on the task (e.g., 'summary_text' for summarization).
         # Get the name of the key and return its value.
-        if self._task == "summarization":
+        if self._task == TaskType.SUMMARIZATION:
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]

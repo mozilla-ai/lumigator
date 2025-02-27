@@ -54,7 +54,7 @@
       @close="isDatasetViewerVisible = false"
     >
       <template #title>
-        <h3 style="gap: 0.125rem; display: flex;">
+        <h3 style="gap: 0.125rem; display: flex">
           <span style="color: #888888">Dataset:</span> {{ selectedDataset?.filename }}
         </h3>
       </template>

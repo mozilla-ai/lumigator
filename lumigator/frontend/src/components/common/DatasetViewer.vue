@@ -1,7 +1,7 @@
 <template>
   <Drawer v-model:visible="isVisible" :position="'full'" @hide="$emit('close', $event)">
     <template #header>
-      <div class="title-slot"> <slot name="title"></slot></div>
+      <div class="title-slot"><slot name="title"></slot></div>
       <PrimeVueButton
         type="button"
         icon="pi pi-download"
@@ -32,7 +32,7 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
-    <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable ></Column>
+      <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
       <Column
         v-for="col in columns"
         sortable
@@ -128,7 +128,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '@/styles/mixins';
 
-
 /* make the sort icon smaller */
 ::v-deep(.p-datatable-sort-icon) {
   width: 10px;
@@ -143,6 +142,6 @@ export default defineComponent({
   @include mixins.caption;
   margin-left: auto;
   margin-right: 1.5rem;
-  gap:0.125rem;
+  gap: 0.125rem;
 }
 </style>

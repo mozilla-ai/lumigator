@@ -10,7 +10,7 @@ learning tasks and use cases in the future.
 
 To learn more about Lumigator's features and capabilities, see the
 [documentation](https://mozilla-ai.github.io/lumigator/), or get started with the
-` for a platform API walkthrough.
+[example notebook](/notebooks/walkthrough.ipynb) for a platform API walkthrough.
 
 > [!NOTE]
 > Lumigator is in the early stages of development. It is missing important features and
@@ -66,7 +66,7 @@ environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KE
 in our documentation for more details.
 
 > [!NOTE]
-To improve performance and ensure smooth execution, Lumigator will automatically pre-download two language models on the first run: `bart-large-cnn` and `roberta-large`. These models are stored in your local Hugging Face cache directory (by default: ${HOME}/.cache/huggingface).
+To improve performance and ensure smooth execution, Lumigator will automatically pre-download two language models on the first run: `bart-large-cnn` and `roberta-large`. These models are stored in your local Hugging Face cache directory (by default: `${HOME}/.cache/huggingface`).
 
     If you already have these models downloaded, Lumigator will detect them and skip re-downloading.
     The cache location can be modified in the [.default.conf](.default.conf) file by setting HF_HOME.

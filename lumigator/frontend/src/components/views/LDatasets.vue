@@ -48,7 +48,7 @@
       v-if="isDatasetViewerVisible"
       :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
       :data="datasetFileContent"
-      :isEditable="true"
+      :isEditable="false"
       :showRowNumber="true"
       :columns="datasetColumns"
       @close="isDatasetViewerVisible = false"

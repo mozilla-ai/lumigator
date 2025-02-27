@@ -1,0 +1,18 @@
+@mixin paragraph() {
+  font-family: Inter;
+  font-size: 0.875rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.3125rem; /* 150% */
+  letter-spacing: -0.00875rem;
+}
+
+
+@mixin caption {
+  font-family: Inter;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.0625rem; /* 141.667% */
+  letter-spacing: -0.0075rem;
+}

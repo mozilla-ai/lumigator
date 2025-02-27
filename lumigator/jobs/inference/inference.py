@@ -109,14 +109,15 @@ def run_inference(config: InferenceJobConfig) -> Path:
     predictions, inference_time = predict(dataset_iterable, model_client)
     predictions: list[PredictionResult] = predictions
     output[config.job.output_field] = [p.prediction for p in predictions]
-    output["prompt_tokens"] = [p.metrics.prompt_tokens for p in predictions]
-    output["total_tokens"] = [p.metrics.total_tokens for p in predictions]
-    output["completion_tokens"] = [p.metrics.completion_tokens for p in predictions]
+    output["inference_metrics"] = [p.metrics for p in predictions]
     output["model"] = output_model_name
     output["inference_time"] = inference_time
-    avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in predictions]) / len(predictions)
-    avg_total_tokens = sum([p.metrics.total_tokens for p in predictions]) / len(predictions)
-    avg_completion_tokens = sum([p.metrics.completion_tokens for p in predictions]) / len(predictions)
+    if all(p.metrics is not None for p in predictions):
+        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in predictions]) / len(predictions)
+        avg_total_tokens = sum([p.metrics.total_tokens for p in predictions]) / len(predictions)
+        avg_completion_tokens = sum([p.metrics.completion_tokens for p in predictions]) / len(predictions)
+    else:
+        avg_prompt_tokens = avg_total_tokens = avg_completion_tokens = None
 
     logger.info(output)
 

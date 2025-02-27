@@ -63,27 +63,25 @@ class InferenceJobConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class InferenceJobOutput(BaseModel):
-    predictions: list | None = None
-    examples: list
-    ground_truth: list | None = None
-    model: str
-    inference_time: float
-    prompt_tokens: list[float]
-    total_tokens: list[float]
-    completion_tokens: list[float]
-
-
 class InferenceMetrics(BaseModel):
     prompt_tokens: float
     total_tokens: float
     completion_tokens: float
 
 
+class InferenceJobOutput(BaseModel):
+    predictions: list | None = None
+    examples: list
+    ground_truth: list | None = None
+    model: str
+    inference_time: float
+    inference_metrics: list[InferenceMetrics] | None = None
+
+
 class PredictionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prediction: str
-    metrics: InferenceMetrics | None = None
+    metrics: InferenceMetrics = None
 
 
 class JobOutput(BaseModel):

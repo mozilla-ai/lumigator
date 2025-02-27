@@ -31,6 +31,7 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
+    <Column key="rowNumber" field="rowNumber" header="" sortable ></Column>
       <Column
         v-for="col in columns"
         sortable

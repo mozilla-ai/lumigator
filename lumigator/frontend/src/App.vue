@@ -15,7 +15,7 @@
               style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
               iconClass="mode-icon"
               class="l-mode__selector"
-            />
+            ></Button>
           </div>
           <l-menu />
         </div>
@@ -192,10 +192,6 @@ onMounted(async () => {
     margin-right: 0;
   }
 }
-</style>
-
-<style lang="scss">
-@use '@/styles/variables' as *;
 
 .toaster-content {
   width: 100%;

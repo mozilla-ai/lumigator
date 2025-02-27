@@ -5,7 +5,6 @@ from inference_config import InferenceJobConfig
 from litellm import completion
 from loguru import logger
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
-from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
 
 def strip_path_prefix(path: str) -> str:
@@ -120,22 +119,37 @@ class HuggingFaceModelClient(BaseModelClient):
         tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
         This isn't true if it's a CausalLM model, since the output token positions would be len(input) + len(output).
         """
-        max_pos_emb = getattr(self._pipeline.model.config, "max_position_embeddings", None)
         # 1. Setting input sequence max tokens
-        if max_pos_emb is None:
-            logger.info(
-                f"{self._config.hf_pipeline.model} model configuration does not have max_position_embeddings attribute.",  # noqa: E501
-                f" Using model.config.max_position_embeddings = tokenizer.model_max_length = {self._pipeline.tokenizer.model_max_length}",  # noqa: E501
+        # Taken from https://stackoverflow.com/a/78737021
+        # Different LLM model families use different names for the same field
+        plausible_max_length_params = [
+            "max_position_embeddings",
+            "n_positions",
+            "n_ctx",
+            "seq_len",
+            "seq_length",
+            "max_sequence_length",
+            "sliding_window",
+        ]
+        # Check which attribute a given model config object has
+        matched_params = [
+            getattr(self._pipeline.model.config, param)
+            for param in plausible_max_length_params
+            if param in dir(self._pipeline.model.config)
+        ]
+        # Grab the first one in the list; usually there's only 1 anyway
+        if len(matched_params):
+            max_pos_emb = matched_params[0]
+        else:
+            raise ValueError(
+                "No field corresponding to max_position_embeddings parameter found"
+                f" for {self._config.hf_pipeline.model_name_or_path}."
+                f" Checked alternative fields: {plausible_max_length_params}"
             )
-            max_pos_emb = self._pipeline.tokenizer.model_max_length
-            if self._pipeline.tokenizer.model_max_length >= VERY_LARGE_INTEGER:
-                logger.warning(
-                    f"Using default value of tokenizer.model_max_length = {self._pipeline.tokenizer.model_max_length} may throw IndexError"  # noqa: E501
-                )
 
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings
-        elif self._pipeline.tokenizer.model_max_length > max_pos_emb:
+        if self._pipeline.tokenizer.model_max_length > max_pos_emb:
             logger.warning(
                 f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
                 f" is bigger than the model's max_position_embeddings ({max_pos_emb})"

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse
 
 
@@ -12,7 +12,7 @@ class ExperimentCreate(BaseModel):
     description: str = ""
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
 
 
 class GetExperimentResponse(BaseModel, from_attributes=True):

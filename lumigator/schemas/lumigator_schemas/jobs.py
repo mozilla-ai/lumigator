@@ -5,7 +5,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from lumigator_schemas.tasks import (
+    SummarizationTaskDefinition,
+    TaskDefinition,
+    TaskType,
+)
 
 
 class LowercaseEnum(str, Enum):
@@ -29,6 +33,7 @@ class JobStatus(LowercaseEnum):
     RUNNING = "running"
     FAILED = "failed"
     SUCCEEDED = "succeeded"
+    STOPPED = "stopped"
 
 
 class JobConfig(BaseModel):
@@ -91,6 +96,16 @@ class JobInferenceConfig(BaseModel):
     temperature: float = 1.0
     top_p: float = 1.0
     store_to_dataset: bool = False
+    system_prompt: str | None = Field(
+        title="System Prompt",
+        description="System prompt to use for the model inference."
+        "If not provided, a task-specific default prompt will be used.",
+        default=None,
+        examples=[
+            "You are an advanced AI trained to summarize documents accurately and concisely. "
+            "Your goal is to extract key information while maintaining clarity and coherence."
+        ],
+    )
 
 
 class JobAnnotateConfig(BaseModel):

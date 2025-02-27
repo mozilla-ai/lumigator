@@ -37,6 +37,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.tasks import TaskDefinition, get_default_system_prompt, validate_system_prompt
 from pydantic import BaseModel
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -56,6 +57,7 @@ from backend.settings import settings
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
+DEFAULT_POST_INFER_JOB_TIMEOUT_SEC = 10 * 60
 JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
@@ -144,7 +146,9 @@ class JobDefinitionInference(JobDefinition):
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
-            system_prompt=request.job_config.task_definition.system_prompt,
+            system_prompt=self.resolve_system_prompt(
+                request.job_config.task_definition, request.job_config.system_prompt
+            ),
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
@@ -175,6 +179,10 @@ class JobDefinitionInference(JobDefinition):
 
     def store_as_dataset(self) -> bool:
         return True
+
+    def resolve_system_prompt(self, task_definition: TaskDefinition, system_prompt: str | None) -> str:
+        validate_system_prompt(task_definition.task, system_prompt)
+        return system_prompt or get_default_system_prompt(task_definition)
 
 
 class JobDefinitionEvaluation(JobDefinition):
@@ -227,7 +235,7 @@ class JobService:
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
+    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
     """list: A list of terminal job statuses."""
 
     def __init__(
@@ -263,6 +271,20 @@ class JobService:
             raise JobNotFoundError(job_id) from None
 
         return record
+
+    def _stop_job(self, job_id: UUID):
+        """Stops an existing job in Ray by ID.
+
+        :param job_id: The ID of the job to stop
+        """
+        resp = requests.post(urljoin(settings.RAY_JOBS_URL, f"{job_id}/stop"), timeout=5)  # 5 seconds
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+        elif resp.status_code != HTTPStatus.OK:
+            raise JobUpstreamError(
+                "ray",
+                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
+            ) from None
 
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
         """Updates an existing job record in the repository (database) by ID.
@@ -430,7 +452,7 @@ class JobService:
         except json.JSONDecodeError as e:
             raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
 
-    async def wait_for_job_complete(self, job_id, max_wait_time_sec=None):
+    async def wait_for_job_complete(self, job_id, max_wait_time_sec):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
@@ -447,7 +469,7 @@ class JobService:
         # Wait for the job to complete
         elapsed_time = 0
         while job_status not in self.TERMINAL_STATUS:
-            if max_wait_time_sec and elapsed_time >= max_wait_time_sec:
+            if elapsed_time >= max_wait_time_sec:
                 loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
                 break
             await asyncio.sleep(5)
@@ -459,7 +481,7 @@ class JobService:
 
         return job_status
 
-    async def handle_inference_job(self, job_id: UUID, request: JobCreate):
+    async def handle_inference_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
         """Long term we maybe want to move logic about how to handle a specific job
         to be separate from the job service. However, for now, we will keep it here.
         This function can be attached to the jobs that run inference so that the results will
@@ -468,12 +490,15 @@ class JobService:
         """
         loguru.logger.info("Handling inference job result")
 
-        await self.wait_for_job_complete(job_id)
-        self._add_dataset_to_db(
-            job_id,
-            request,
-            self._dataset_service.s3_filesystem,
-        )
+        job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
+        if job_status == JobStatus.SUCCEEDED.value:
+            self._add_dataset_to_db(
+                job_id,
+                request,
+                self._dataset_service.s3_filesystem,
+            )
+        else:
+            loguru.logger.warning(f"Job {job_id} failed, results not stored in DB")
 
     def add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
         """Adds a background task to the background tasks queue."""
@@ -551,7 +576,13 @@ class JobService:
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
         if job_settings.store_as_dataset():
-            self.add_background_task(self._background_tasks, self.handle_inference_job, record.id, request)
+            self.add_background_task(
+                self._background_tasks,
+                self.handle_inference_job,
+                record.id,
+                request,
+                DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,
+            )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
@@ -567,7 +598,7 @@ class JobService:
         record = self._get_job_record(job_id)
         loguru.logger.info(f"Obtaining info for job {job_id}: {record.name}")
 
-        if record.status == JobStatus.FAILED or record.status == JobStatus.SUCCEEDED:
+        if record.status.value in self.TERMINAL_STATUS:
             return JobResponse.model_validate(record)
 
         # get job status from ray

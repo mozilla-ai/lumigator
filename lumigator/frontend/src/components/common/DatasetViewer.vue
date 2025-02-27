@@ -9,7 +9,7 @@
         rounded
         severity="secondary"
         :variant="'text'"
-        style="margin-left: auto; margin-right: 1.5rem;"
+        style="margin-left: auto; margin-right: 1.5rem"
         aria-label="download"
         @click="handleDownloadClicked"
       ></PrimeVueButton>
@@ -120,9 +120,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  /* make the sort icon smaller */
-  ::v-deep(.p-datatable-sort-icon) {
-    width: 10px;
-    height: 10px;
-  }
+/* make the sort icon smaller */
+::v-deep(.p-datatable-sort-icon) {
+  width: 10px;
+  height: 10px;
+}
 </style>

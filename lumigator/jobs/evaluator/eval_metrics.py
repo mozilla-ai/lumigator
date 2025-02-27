@@ -163,34 +163,41 @@ class EvaluationMetrics:
             prompt_templates = json.load(f)
 
         evals = {}
-        for metric_name in prompt_templates[task]:
-            metric = GEval(
-                name=metric_name,
-                # NOTE: deepeval allows you to provide either criteria or evaluation_steps, and not both.
-                #       In this first iteration we pick evaluation_steps
-                evaluation_steps=prompt_templates[task][metric_name]["evaluation_steps"],
-                evaluation_params=[
-                    LLMTestCaseParams.INPUT,
-                    LLMTestCaseParams.ACTUAL_OUTPUT,
-                    LLMTestCaseParams.EXPECTED_OUTPUT,
-                ],
+        try:
+            for metric_name in prompt_templates[task]:
+                metric = GEval(
+                    name=metric_name,
+                    # NOTE: deepeval allows you to provide either criteria or evaluation_steps, and not both.
+                    #       In this first iteration we pick evaluation_steps
+                    evaluation_steps=prompt_templates[task][metric_name]["evaluation_steps"],
+                    evaluation_params=[
+                        LLMTestCaseParams.INPUT,
+                        LLMTestCaseParams.ACTUAL_OUTPUT,
+                        LLMTestCaseParams.EXPECTED_OUTPUT,
+                    ],
+                )
+
+                evals_for_metric = []
+                # iterate on all samples
+                for p, r, e in zip(pred, ref, examples):
+                    test_case = LLMTestCase(input=e, expected_output=r, actual_output=p)
+
+                    try:
+                        result = self._g_eval_measure_with_retry(metric, test_case, max_retries=MEASURE_RETRIES)
+                        evals_for_metric.append(result)
+                    except ValueError as e:
+                        # Handle the failure case
+                        logger.error(f"G-Eval measurement failed after {MEASURE_RETRIES} attempts: {e}")
+                        raise e
+
+                evals[metric_name] = evals_for_metric
+                evals[f"{metric_name}_mean"] = np.mean([x["score"] for x in evals_for_metric])
+        except KeyError as e:
+            logger.error(
+                f"You provided a wrong key ({e}) to access task-specific prompts. "
+                f"Check the `{G_EVAL_PROMPTS}` file to find allowed keys"
             )
-
-            evals_for_metric = []
-            # iterate on all samples
-            for p, r, e in zip(pred, ref, examples):
-                test_case = LLMTestCase(input=e, expected_output=r, actual_output=p)
-
-                try:
-                    result = self._g_eval_measure_with_retry(metric, test_case, max_retries=MEASURE_RETRIES)
-                    evals_for_metric.append(result)
-                except ValueError as e:
-                    # Handle the failure case
-                    logger.error(f"G-Eval measurement failed after {MEASURE_RETRIES} attempts: {e}")
-                    raise e
-
-            evals[metric_name] = evals_for_metric
-            evals[f"{metric_name}_mean"] = np.mean([x["score"] for x in evals_for_metric])
+            raise e
 
         return evals
 

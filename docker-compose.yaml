@@ -174,7 +174,6 @@ services:
       - RAY_WORKER_GPUS_FRACTION
       - LUMIGATOR_API_CORS_ALLOWED_ORIGINS
       - MLFLOW_TRACKING_URI
-      - PYTHONPATH=/mzai/lumigator/backend:/mzai/lumigator/jobs
     # NOTE: to keep AWS_ENDPOINT_URL as http://localhost:9000 both on the host system
     #       and inside containers, we map localhost to the host gateway IP.
     #       This currently works properly, but might be the cause of networking

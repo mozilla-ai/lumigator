@@ -2,15 +2,15 @@ from uuid import UUID
 
 from inference.schemas import (
     DatasetConfig,
+    GenerationConfig,
     HuggingFacePipelineConfig,
     InferenceJobConfig,
     InferenceServerConfig,
     JobConfig,
-    SamplingParameters,
 )
 from lumigator_schemas.jobs import JobCreate, JobType
+from lumigator_schemas.tasks import TaskDefinition, get_default_system_prompt, validate_system_prompt
 
-from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.services.job_interface import JobDefinition
 
 # Served models
@@ -21,11 +21,8 @@ DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
 DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
 
 
-class JobInterfaceInference(JobDefinition):
+class JobDefinitionInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
-        # TODO Move to a custom validator in the schema
-        if request.job_config.task_definition.task.value == "text-generation" and not request.job_config.system_prompt:
-            raise JobValidationError("System prompt is required for text generation tasks.") from None
         job_config = InferenceJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=DatasetConfig(path=dataset_path),
@@ -34,6 +31,9 @@ class JobInterfaceInference(JobDefinition):
                 storage_path=storage_path,
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
+            ),
+            system_prompt=self.resolve_system_prompt(
+                request.job_config.task_definition, request.job_config.system_prompt
             ),
         )
         if request.job_config.provider == "hf":
@@ -46,7 +46,6 @@ class JobInterfaceInference(JobDefinition):
                 use_fast=request.job_config.use_fast,
                 trust_remote_code=request.job_config.trust_remote_code,
                 torch_dtype=request.job_config.torch_dtype,
-                max_new_tokens=500,
             )
         else:
             # It will be a pass through to LiteLLM
@@ -54,11 +53,10 @@ class JobInterfaceInference(JobDefinition):
                 base_url=request.job_config.base_url if request.job_config.base_url else None,
                 model=request.job_config.model,
                 provider=request.job_config.provider,
-                system_prompt=request.job_config.system_prompt or DEFAULT_SUMMARIZER_PROMPT,
                 max_retries=3,
             )
-        job_config.params = SamplingParameters(
-            max_tokens=request.job_config.max_tokens,
+        job_config.generation_config = GenerationConfig(
+            max_new_tokens=request.job_config.max_new_tokens,
             frequency_penalty=request.job_config.frequency_penalty,
             temperature=request.job_config.temperature,
             top_p=request.job_config.top_p,
@@ -68,6 +66,10 @@ class JobInterfaceInference(JobDefinition):
     def store_as_dataset(self) -> bool:
         return True
 
+    def resolve_system_prompt(self, task_definition: TaskDefinition, system_prompt: str | None) -> str:
+        validate_system_prompt(task_definition.task, system_prompt)
+        return system_prompt or get_default_system_prompt(task_definition)
+
 
 # Inference job details
 # FIXME tweak paths in the backend
@@ -75,7 +77,7 @@ INFERENCE_WORK_DIR = "../jobs/inference"
 INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
 INFERENCE_COMMAND: str = "python inference.py"
 
-JOB_DEFINITION: JobDefinition = JobInterfaceInference(
+JOB_DEFINITION: JobDefinition = JobDefinitionInference(
     command=INFERENCE_COMMAND,
     pip_reqs=INFERENCE_PIP_REQS,
     work_dir=INFERENCE_WORK_DIR,

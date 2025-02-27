@@ -8,8 +8,13 @@ from typing import Any
 from urllib.parse import urljoin
 from uuid import UUID
 
-import evaluator
-import inference
+# ADD YOUR JOB IMPORT HERE #
+# Only the definition package
+############################
+import evaluator.definition
+import inference.definition
+
+############################
 import loguru
 import requests
 from fastapi import BackgroundTasks, UploadFile

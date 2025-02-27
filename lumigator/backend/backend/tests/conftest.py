@@ -9,20 +9,19 @@ from uuid import UUID
 
 import boto3
 import evaluator
-import evaluator.definition
 import fsspec
 import pytest
 import requests_mock
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
+from inference.definition import JobDefinitionInference
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
     JobConfig,
     JobResponse,
     JobStatus,
-    JobType,
 )
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
@@ -38,7 +37,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
-from backend.services.jobs import JobDefinitionInference, JobService
+from backend.services.jobs import JobService
 from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client

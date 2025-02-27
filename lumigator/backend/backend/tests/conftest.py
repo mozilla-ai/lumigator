@@ -8,12 +8,14 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import boto3
+import evaluator
 import fsspec
 import pytest
 import requests_mock
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
+from inference.definition import JobDefinitionInference
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
@@ -36,7 +38,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
-from backend.services.jobs import JobDefinitionInference, JobService
+from backend.services.jobs import JobService
 from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
@@ -431,8 +433,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=JobType.EVALUATION,
-        command=settings.EVALUATOR_COMMAND,
+        job_type=evaluator.definition.JOB_DEFINITION.type,
+        command=evaluator.definition.JOB_DEFINITION.command,
         args=conf_args,
     )
 
@@ -482,7 +484,6 @@ def job_definition_fixture():
         command=MagicMock(spec=str),
         pip_reqs=MagicMock(spec=list),
         work_dir=MagicMock(spec=str),
-        ray_worker_gpus_fraction=MagicMock(spec=float),
-        ray_worker_gpus=MagicMock(spec=int),
         config_model=MagicMock(spec=dict),
+        type=JobType.INFERENCE,
     )

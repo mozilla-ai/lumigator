@@ -2,17 +2,6 @@ name: lumigator
 
 services:
 
-  inference-model:
-    build:
-      context: .
-      dockerfile: cache/Dockerfile.model-inference
-    platform: linux/${ARCH}
-    volumes:
-      - ${HF_HOME}:/home/ray/.cache/huggingface
-    environment:
-      - MODELS_CACHED
-    profiles:
-      - local
   minio:
     labels:
       ai.mozilla.product_name: lumigator
@@ -79,8 +68,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      inference-model:
-        condition: service_completed_successfully
     ports:
       - "6379:6379"
       - "${RAY_DASHBOARD_PORT}:${RAY_DASHBOARD_PORT}"

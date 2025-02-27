@@ -73,6 +73,12 @@ To improve performance and ensure smooth execution, Lumigator will automatically
 
 Since this is a one-time setup, the first launch may take some time depending on your internet connection. Subsequent runs will be significantly faster.
 
+If you prefer not to download models automatically, you can disable this behavior by setting:
+
+`ENABLE_FIRST_TIME_CACHE=false`
+
+in the [.default.conf](.default.conf) file.
+
 To start Lumigator locally, follow these steps:
 
 1. Clone the Lumigator repository:

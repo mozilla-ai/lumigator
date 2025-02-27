@@ -39,7 +39,7 @@
         :style="`width: ${(1 / columns.length) * 100}%`"
       >
         <template #editor="{ data, field }">
-          <Textarea v-model="data[field]" autoResize autofocus fluid></Textarea>
+          <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
         </template>
       </Column>
     </DataTable>
@@ -50,7 +50,6 @@
 import {
   Button,
   Column,
-  ContextMenu,
   DataTable,
   Drawer,
   Textarea,
@@ -67,7 +66,7 @@ export default defineComponent({
     Drawer,
     Column,
     PrimeVueButton: Button,
-    Textarea,
+    PrimeVueTextarea: Textarea,
   },
   emits: ['close'],
   props: {
@@ -97,7 +96,7 @@ export default defineComponent({
     }
 
     const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {
-      let { data, newValue, field } = event
+      const { data, newValue, field } = event
 
       data[field] = newValue
     }

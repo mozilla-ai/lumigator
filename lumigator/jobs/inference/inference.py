@@ -116,17 +116,17 @@ def run_inference(config: InferenceJobConfig) -> Path:
         avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in predictions]) / len(predictions)
         avg_total_tokens = sum([p.metrics.total_tokens for p in predictions]) / len(predictions)
         avg_completion_tokens = sum([p.metrics.completion_tokens for p in predictions]) / len(predictions)
-    else:
-        avg_prompt_tokens = avg_total_tokens = avg_completion_tokens = None
-
-    logger.info(output)
-
-    results = JobOutput(
-        metrics=InferenceMetrics(
+        metrics = InferenceMetrics(
             prompt_tokens=avg_prompt_tokens,
             total_tokens=avg_total_tokens,
             completion_tokens=avg_completion_tokens,
-        ),
+        )
+    else:
+        metrics = None
+    logger.info(output)
+
+    results = JobOutput(
+        metrics=metrics,
         parameters=config,
         artifacts=InferenceJobOutput.model_validate(output),
     )

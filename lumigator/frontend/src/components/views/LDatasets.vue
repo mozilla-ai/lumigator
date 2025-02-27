@@ -177,7 +177,7 @@ async function retrieveJobLogs() {
     const logs = logsData.logs.split('\n')
     logs.forEach((log: string) => {
       const lastEntry = jobLogs.value[jobLogs.value.length - 1]
-      if (jobLogs.value.length === 0 || lastEntry !== log) {
+      if (log && (jobLogs.value.length === 0 || lastEntry !== log)) {
         jobLogs.value.push(log)
       }
     })

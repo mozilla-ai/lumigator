@@ -2,9 +2,11 @@ import re
 from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
-from litellm import completion
+from litellm import Usage, completion
 from loguru import logger
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+
+from schemas import InferenceMetrics, PredictionResult
 
 
 def strip_path_prefix(path: str) -> str:
@@ -26,7 +28,7 @@ class BaseModelClient:
         pass
 
     @abstractmethod
-    def predict(self, prompt: str) -> str:
+    def predict(self, prompt: str) -> PredictionResult:
         """Given a prompt, return a prediction."""
         pass
 
@@ -47,15 +49,14 @@ class LiteLLMModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self.config = config
         self.system_prompt = self.config.system_prompt
-        logger.info(f"LiteLLMModelClient initialized with config: {config}")
+        logger.info(f"LiteLLMModelClient initialized with config: \n{config.model_dump()}")
 
     def predict(
         self,
         prompt: str,
-    ) -> str:
+    ) -> PredictionResult:
         litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
         logger.info(f"Sending request to {litellm_model}")
-        logger.info(f"Config: {self.config}")
         response = completion(
             model=litellm_model,
             messages=[
@@ -66,14 +67,25 @@ class LiteLLMModelClient(BaseModelClient):
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,
-            drop_params=True,
+            drop_params=False,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
         # LiteLLM gives us the cost of each API which is nice.
         # Eventually we can add this to the response object as well.
         cost = response._hidden_params["response_cost"]
         logger.info(f"Response cost: {cost}")
-        return response.choices[0].message.content
+        usage: Usage = response["usage"]
+        if usage:
+            logger.info(f"Usage: {usage}")
+
+        return PredictionResult(
+            prediction=response.choices[0].message.content,
+            metrics=InferenceMetrics(
+                prompt_tokens=usage.prompt_tokens,
+                total_tokens=usage.total_tokens,
+                completion_tokens=usage.completion_tokens,
+            ),
+        )
 
 
 class HuggingFaceModelClient(BaseModelClient):
@@ -145,7 +157,7 @@ class HuggingFaceModelClient(BaseModelClient):
             )
             self._config.generation_config.max_new_tokens = max_pos_emb
 
-    def predict(self, prompt):
+    def predict(self, prompt) -> PredictionResult:
         # When using a text-generation model, the pipeline returns a dictionary with a single key,
         # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
         # role and content of a message. For example:
@@ -159,13 +171,16 @@ class HuggingFaceModelClient(BaseModelClient):
                 {"role": "user", "content": prompt},
             ]
             generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
-            return generation["generated_text"][-1]["content"]
+            prediction = generation["generated_text"][-1]["content"]
 
         # If we're using a summarization model, the pipeline returns a dictionary with a single key.
         # The name of the key depends on the task (e.g., 'summary_text' for summarization).
         # Get the name of the key and return its value.
-        if self._task == "summarization":
+        elif self._task == "summarization":
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]
-            return generation["summary_text"]
+            prediction = generation["summary_text"]
+        else:
+            raise ValueError(f"Unsupported task: {self._task}")
+        return PredictionResult(prediction=prediction)

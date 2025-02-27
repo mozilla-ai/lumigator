@@ -60,7 +60,7 @@ import {
 import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
-  name: 'DatasetViewer',
+  name: 'TableView',
   components: {
     DataTable,
     Drawer,
@@ -68,7 +68,7 @@ export default defineComponent({
     PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
   },
-  emits: ['close'],
+  emits: ['close', 'open'],
   props: {
     downloadFileName: {
       type: String,

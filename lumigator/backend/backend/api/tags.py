@@ -8,6 +8,7 @@ class Tags(str, Enum):
     EXPERIMENTS = "experiments"
     WORKFLOWS = "workflows"
     MODELS = "models"
+    SETTINGS = "settings"
 
 
 TAGS_METADATA = [
@@ -34,6 +35,10 @@ TAGS_METADATA = [
     {
         "name": Tags.MODELS,
         "description": "Return a list of suggested models for a given task.",
+    },
+    {
+        "name": Tags.SETTINGS,
+        "description": "Manage settings.",
     },
 ]
 """Metadata to associate with route tags in the OpenAPI documentation.

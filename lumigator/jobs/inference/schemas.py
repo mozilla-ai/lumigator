@@ -69,15 +69,15 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    prompt_tokens: list[int]
-    total_tokens: list[int]
-    completion_tokens: list[int]
+    prompt_tokens: list[float]
+    total_tokens: list[float]
+    completion_tokens: list[float]
 
 
 class InferenceMetrics(BaseModel):
-    prompt_tokens: int
-    total_tokens: int
-    completion_tokens: int
+    prompt_tokens: float
+    total_tokens: float
+    completion_tokens: float
 
 
 class PredictionResult(BaseModel):

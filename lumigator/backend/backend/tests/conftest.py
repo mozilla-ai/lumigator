@@ -22,6 +22,7 @@ from lumigator_schemas.jobs import (
     JobConfig,
     JobResponse,
     JobStatus,
+    JobType,
 )
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
@@ -483,7 +484,6 @@ def job_definition_fixture():
         command=MagicMock(spec=str),
         pip_reqs=MagicMock(spec=list),
         work_dir=MagicMock(spec=str),
-        ray_worker_gpus_fraction=MagicMock(spec=float),
-        ray_worker_gpus=MagicMock(spec=int),
         config_model=MagicMock(spec=dict),
+        type=JobType.INFERENCE,
     )

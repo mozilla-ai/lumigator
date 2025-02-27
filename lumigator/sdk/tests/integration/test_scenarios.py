@@ -25,6 +25,7 @@ from lumigator_sdk.strict_schemas import (
 )
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
+TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 
 
 def test_sdk_healthcheck_ok(lumi_client_int: LumigatorClient):
@@ -251,19 +252,32 @@ def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UU
     return workflow_details
 
 
-def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dialog_data):
+@pytest.mark.parametrize(
+    "dataset_name, task_definition, model",
+    [
+        ("dialog_data", {"task": "summarization"}, TEST_SEQ2SEQ_MODEL),
+        (
+            "mock_translation_data",
+            {"task": "translation", "source_language": "en", "target_language": "de"},
+            TEST_CAUSAL_MODEL,
+        ),
+    ],
+)
+def test_create_exp_workflow_check_results(
+    lumi_client_int: LumigatorClient, dataset_name: str, task_definition: dict, model: str, request
+):
     """Test creating an experiment with associated workflows and checking results."""
     # Upload a dataset
-    dataset_response = lumi_client_int.datasets.create_dataset(dataset=dialog_data, format=DatasetFormat.JOB)
+    dataset = request.getfixturevalue(dataset_name)
+    dataset_response = lumi_client_int.datasets.create_dataset(dataset=dataset, format=DatasetFormat.JOB)
     assert dataset_response is not None
     dataset_id = dataset_response.id
 
     # Create an experiment
-    task = "summarization"
     request = ExperimentCreate(
         name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
-        task_definition={"task": task},
+        task_definition=task_definition,
         dataset=dataset_id,
     )
     experiment_response = lumi_client_int.experiments.create_experiment(request)
@@ -274,8 +288,8 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_1",
         description="Test workflow for inf and eval",
-        task_definition={"task": task},
-        model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
+        task_definition=task_definition,
+        model=model,
         provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
@@ -301,14 +315,13 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
     request = WorkflowCreateRequest(
         name="Workflow_2",
         description="Test workflow for inf and eval",
-        task_definition={"task": task},
-        model="hf-internal-testing/tiny-random-BARTForConditionalGeneration",
+        task_definition=task_definition,
+        model=model,
         provider="hf",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
         max_samples=1,
     )
-
     workflow_2_response = lumi_client_int.workflows.create_workflow(request)
     assert workflow_2_response is not None
     workflow_2_id = workflow_2_response.id
@@ -339,7 +352,8 @@ def test_create_exp_workflow_check_results(lumi_client_int: LumigatorClient, dia
 
     # Delete the experiment
     lumi_client_int.experiments.delete_experiment(experiment_id)
-    #  shoudl throw exeption: lumi_client_int.experiments.get_experiment(experiment_id)
+
+    # Should throw exception: lumi_client_int.experiments.get_experiment(experiment_id)
     try:
         lumi_client_int.experiments.get_experiment(experiment_id)
         raise Exception("Should have thrown an exception")

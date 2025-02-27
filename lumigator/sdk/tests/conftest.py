@@ -220,6 +220,12 @@ def long_sequences_data_unannotated(common_resources_dir):
         yield file
 
 
+@pytest.fixture(scope="function")
+def mock_translation_data(common_resources_dir):
+    with Path.open(common_resources_dir / "sample_translation_en_de.csv") as file:
+        yield file
+
+
 @pytest.fixture(scope="session")
 def simple_eval_template():
     return """{{

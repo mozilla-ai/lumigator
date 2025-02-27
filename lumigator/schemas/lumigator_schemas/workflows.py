@@ -1,13 +1,14 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 
 from lumigator_schemas.jobs import (
     GenerationConfig,
     JobResults,
     LowercaseEnum,
 )
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
 
 
 class WorkflowStatus(LowercaseEnum):
@@ -21,6 +22,7 @@ class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
     experiment_id: str | None = None
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model: str
     provider: str
     dataset: UUID
@@ -29,7 +31,7 @@ class WorkflowCreateRequest(BaseModel):
     system_prompt: str | None = None
     inference_output_field: str = "predictions"
     config_template: str | None = None
-    generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
+    job_timeout_sec: PositiveInt = 60 * 60
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

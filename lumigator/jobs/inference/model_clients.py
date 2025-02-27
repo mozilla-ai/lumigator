@@ -55,13 +55,14 @@ class LiteLLMModelClient(BaseModelClient):
     ) -> str:
         litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
         logger.info(f"Sending request to {litellm_model}")
+        logger.info(f"Config: {self.config}")
         response = completion(
             model=litellm_model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ],
-            max_new_tokens=self.config.generation_config.max_new_tokens,
+            max_tokens=self.config.generation_config.max_new_tokens,
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,

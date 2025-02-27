@@ -8,12 +8,14 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import boto3
+import evaluator
 import fsspec
 import pytest
 import requests_mock
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
+from inference.definition import JobDefinitionInference
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
@@ -34,12 +36,14 @@ from backend.main import create_app
 from backend.records.jobs import JobRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
-TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -85,6 +89,10 @@ def wait_for_job(client, job_id: UUID) -> bool:
             timed_out = False
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.STOPPED.value:
             succeeded = False
             timed_out = False
             break
@@ -380,6 +388,21 @@ def dataset_service(db_session, fake_s3_client, fake_s3fs):
 
 
 @pytest.fixture(scope="function")
+def secret_repository(db_session):
+    return SecretRepository(db_session)
+
+
+@pytest.fixture(scope="session")
+def secret_key() -> str:
+    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+
+
+@pytest.fixture(scope="function")
+def secret_service(db_session, secret_repository, secret_key):
+    return SecretService(secret_key=secret_key, secret_repo=secret_repository)
+
+
+@pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
 
@@ -399,7 +422,7 @@ def create_job_config() -> JobConfig:
     conf_args = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "facebook/bart-large-cnn",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,
@@ -410,8 +433,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=JobType.EVALUATION,
-        command=settings.EVALUATOR_COMMAND,
+        job_type=evaluator.definition.JOB_DEFINITION.type,
+        command=evaluator.definition.JOB_DEFINITION.command,
         args=conf_args,
     )
 
@@ -446,11 +469,21 @@ def simple_infer_template():
             "revision": "{revision}",
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
-            "torch_dtype": "{torch_dtype}",
-            "max_new_tokens": 500
+            "torch_dtype": "{torch_dtype}"
         }},
         "job": {{
             "max_samples": {max_samples},
             "storage_path": "{storage_path}"
         }}
     }}"""
+
+
+@pytest.fixture
+def job_definition_fixture():
+    return JobDefinitionInference(
+        command=MagicMock(spec=str),
+        pip_reqs=MagicMock(spec=list),
+        work_dir=MagicMock(spec=str),
+        config_model=MagicMock(spec=dict),
+        type=JobType.INFERENCE,
+    )

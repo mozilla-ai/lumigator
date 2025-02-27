@@ -141,7 +141,7 @@ services:
   backend:
     labels:
       ai.mozilla.product_name: lumigator
-    image: mzdotai/lumigator:v0.1.1-alpha
+    image: mzdotai/lumigator:latest
     pull_policy: always
     build:
       context: .
@@ -162,6 +162,7 @@ services:
     ports:
       - 8000:8000
     environment:
+      - LUMIGATOR_SECRET_KEY # Symmetric key used for encryption/decryption of stored secret data
       - DEPLOYMENT_TYPE
       # The local file needs to be available through a mount,
       # if persistence is needed
@@ -201,7 +202,7 @@ services:
     labels:
       ai.mozilla.product_name: lumigator
     pull_policy: always
-    image: mzdotai/lumigator-frontend:v0.1.1-alpha
+    image: mzdotai/lumigator-frontend:latest
     build:
       context: .
       dockerfile: "./lumigator/frontend/Dockerfile"
@@ -223,7 +224,7 @@ services:
   mlflow:
     labels:
       ai.mozilla.product_name: lumigator
-    image: ghcr.io/mlflow/mlflow:v2.20.1
+    image: ghcr.io/mlflow/mlflow:v2.20.3
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY

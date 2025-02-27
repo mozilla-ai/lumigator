@@ -5,6 +5,12 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from lumigator_schemas.tasks import (
+    SummarizationTaskDefinition,
+    TaskDefinition,
+    TaskType,
+)
+
 
 class LowercaseEnum(str, Enum):
     """Can be used to ensure that values for enums are returned in lowercase."""
@@ -27,6 +33,7 @@ class JobStatus(LowercaseEnum):
     RUNNING = "running"
     FAILED = "failed"
     SUCCEEDED = "succeeded"
+    STOPPED = "stopped"
 
 
 class JobConfig(BaseModel):
@@ -69,40 +76,41 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["meteor", "rouge", "bertscore"]
+    metrics: list[str] = ["meteor", "rouge", "bertscore", "bleu"]
 
 
 class JobInferenceConfig(BaseModel):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
-    task: str | None = "summarization"
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     accelerator: str | None = "auto"
     revision: str | None = "main"
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: str = "auto"
     base_url: str | None = None
+    output_field: str | None = "predictions"
+    max_new_tokens: int = 1024
+    frequency_penalty: float = 0.0
+    temperature: float = 1.0
+    top_p: float = 1.0
+    store_to_dataset: bool = False
     system_prompt: str | None = Field(
         title="System Prompt",
+        description="System prompt to use for the model inference."
+        "If not provided, a task-specific default prompt will be used.",
         default=None,
         examples=[
             "You are an advanced AI trained to summarize documents accurately and concisely. "
             "Your goal is to extract key information while maintaining clarity and coherence."
         ],
     )
-    output_field: str | None = "predictions"
-    max_tokens: int = 1024
-    frequency_penalty: float = 0.0
-    temperature: float = 1.0
-    top_p: float = 1.0
-    store_to_dataset: bool = False
-    max_new_tokens: int = 500
 
 
 class JobAnnotateConfig(BaseModel):
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
-    task: str | None = "summarization"
+    task: TaskType = Field(default=TaskType.SUMMARIZATION)
     store_to_dataset: bool = False
 
 

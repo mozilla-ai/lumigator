@@ -75,7 +75,7 @@ def create_annotation_job(
     reference model should be used to generate annotations.
     See more: https://blog.mozilla.ai/lets-build-an-app-for-evaluating-llms/
     """
-    inference_job_create_config_dict = job_create_request.job_config.dict()
+    inference_job_create_config_dict = job_create_request.job_config.model_dump()
     inference_job_create_config_dict["model"] = "facebook/bart-large-cnn"
     inference_job_create_config_dict["provider"] = "hf"
     inference_job_create_config_dict["output_field"] = "ground_truth"

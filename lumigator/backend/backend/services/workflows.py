@@ -20,6 +20,9 @@ from lumigator_schemas.workflows import (
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.job_exceptions import (
+    JobUpstreamError,
+)
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
     WorkflowValidationError,
@@ -68,7 +71,7 @@ class WorkflowService:
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            system_prompt=request.system_prompt,
+            task_definition=request.task_definition,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )
@@ -87,11 +90,18 @@ class WorkflowService:
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
 
         # wait for the inference job to complete
-        status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=60 * 10)
+        status = await self._job_service.wait_for_job_complete(
+            inference_job.id, max_wait_time_sec=request.job_timeout_sec
+        )
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Inference job {inference_job.id} failed")
+            try:
+                self._job_service._stop_job(inference_job.id)
+            except JobUpstreamError:
+                loguru.logger.error(f"Failed to stop infer job {inference_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
-            raise Exception(f"Inference job {inference_job.id} failed")
+            # raise Exception(f"Inference job {inference_job.id} failed")
+            return
 
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
@@ -126,10 +136,16 @@ class WorkflowService:
         )
 
         # wait for the evaluation job to complete
-        status = await self._job_service.wait_for_job_complete(evaluation_job.id, max_wait_time_sec=60 * 10)
+        status = await self._job_service.wait_for_job_complete(
+            evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
+        )
         self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
         if status != JobStatus.SUCCEEDED:
             loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
+            try:
+                self._job_service._stop_job(evaluation_job.id)
+            except JobUpstreamError:
+                loguru.logger.error(f"Failed to stop eval job {evaluation_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
         try:
             loguru.logger.info("Handling evaluation result")
@@ -156,6 +172,7 @@ class WorkflowService:
                     "bertscore_precision_mean": round(eval_output.metrics["bertscore"]["precision_mean"], 3),
                     "bertscore_recall_mean": round(eval_output.metrics["bertscore"]["recall_mean"], 3),
                     "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
+                    "bleu_mean": round(eval_output.metrics["bleu"]["bleu_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.

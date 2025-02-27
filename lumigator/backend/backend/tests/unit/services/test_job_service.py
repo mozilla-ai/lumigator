@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from uuid import UUID
 
 import pytest
 from lumigator_schemas.jobs import (
@@ -6,17 +7,20 @@ from lumigator_schemas.jobs import (
     JobInferenceConfig,
     JobType,
 )
+from lumigator_schemas.tasks import TaskType
+from pydantic import ValidationError
 
 from backend.services.exceptions.job_exceptions import JobValidationError
-from backend.services.jobs import JobService
+from backend.services.jobs import job_settings_map
 from backend.settings import settings
+from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
 
 
 def test_set_null_inference_job_params(job_record, job_service):
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -26,7 +30,7 @@ def test_set_null_inference_job_params(job_record, job_service):
         return_value="s3://bucket/path/to/dataset",
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
-        job_config = job_service.generate_inference_job_config(
+        job_config = job_settings_map[JobType.INFERENCE].generate_config(
             request, request.dataset, dataset_s3_path, job_service.storage_path
         )
         assert job_config.job.max_samples == -1
@@ -37,7 +41,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
         max_samples=10,
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model="facebook/bart-large-cnn", provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -47,7 +51,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         return_value="s3://bucket/path/to/dataset",
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
-        job_config = job_service.generate_inference_job_config(
+        job_config = job_settings_map[JobType.INFERENCE].generate_config(
             request, request.dataset, dataset_s3_path, job_service.storage_path
         )
         assert job_config.job.max_samples == 10
@@ -96,18 +100,29 @@ def test_set_model(job_service, model, provider, input_base_url, returned_base_u
     assert base_url == returned_base_url
 
 
-def test_invalid_text_generation(job_service):
-    request = JobCreate(
-        name="test_text_generation_run",
-        description="Test run to verify that system prompt is set.",
-        job_config=JobInferenceConfig(
-            job_type=JobType.INFERENCE, model="microsoft/Phi-3.5-mini-instruct", provider="hf", task="text-generation"
-        ),
-        dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
-    )
-    with patch(
-        "backend.services.datasets.DatasetService.get_dataset_s3_path",
-        return_value="s3://bucket/path/to/dataset",
-    ):
-        with pytest.raises(JobValidationError):
-            job_service.create_job(request=request)
+def test_invalid_text_generation(job_service, job_definition_fixture):
+    with pytest.raises(ValueError) as excinfo:
+        # Create invalid request without system_prompt
+        job_create_request = JobCreate(
+            name="test_text_generation_run",
+            description="Test missing system prompt for text generation",
+            job_config=JobInferenceConfig(
+                job_type=JobType.INFERENCE,
+                model="microsoft/Phi-3-mini-instruct",
+                provider="hf",
+                task_definition={"task": TaskType.TEXT_GENERATION},
+                # system_prompt left out intentionally
+            ),
+            dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
+        )
+
+        job_definition_fixture.generate_config(
+            job_create_request,
+            record_id=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
+            dataset_path="s3://lumigator-storage/datasets/d34dd34d-d34d-d34d-d34d-d34dd34dd34d/test.csv",
+            storage_path="s3://lumigator-storage/jobs/results/",
+        )
+
+    # Verify exact error message
+    assert "system_prompt required for task=`text-generation`" in str(excinfo.value)
+    assert "Received: None" in str(excinfo.value)

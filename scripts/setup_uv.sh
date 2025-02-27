@@ -2,25 +2,16 @@
 
 set -e  # Exit on error
 
-# ###############
-# Colorful output
-# ###############
-
-red() {
-    echo -e "\033[1;31m$1\033[0m"
-}
-
-yellow() {
-    echo -e "\033[1;33m$1\033[0m"
-}
-
-green() {
-    echo -e "\033[1;32m$1\033[0m"
-}
-
-white() {
-    echo -e "\033[1;37m$1\033[0m"
-}
+# #######################
+# Source common functions
+# #######################
+COMMON_FILE="$(dirname "$0")/common.sh"
+if [ -f "$COMMON_FILE" ]; then
+    source "$COMMON_FILE"
+else
+    echo "Error: common.sh not found!" >&2
+    exit 1
+fi
 
 # ##########
 # Install UV
@@ -44,20 +35,17 @@ done
 
 # If not in PATH, add it temporarily and suggest making it permanent
 if [ "$PATH_PRESENT" -eq 0 ]; then
-    red "PATH does not contain '$LOCAL_BIN' (installation directory). Adding temporarily..."
+    echo_red "PATH does not contain '$LOCAL_BIN' (installation directory). Adding temporarily..."
     export PATH="$LOCAL_BIN:$PATH"
 fi
 
 # Install uv if not found
 UV_INSTALL_REQUIRED=0
 if ! command -v uv >/dev/null 2>&1; then
-    red "uv not found. Installing..."
+    echo_red "uv not found. Installing..."
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh
     UV_INSTALL_REQUIRED=1
 fi
-
-# Now, run the setup for virtual environments
-export PATH="$LOCAL_BIN:$PATH"
 
 # ######################################
 # Configure Virtual Environments for UV
@@ -94,22 +82,22 @@ done
 uv sync && uv sync --dev
 
 if [ "$PATH_PRESENT" -eq 0 ]; then
-    yellow "The PATH was temporaily updated to include '$LOCAL_BIN'"
-    yellow "To make this change permanent, add the following line to your shell profile:"
+    echo_yellow "The PATH was temporaily updated to include '$LOCAL_BIN'"
+    echo_yellow "To make this change permanent, add the following line to your shell profile:"
     echo ""
-    white "    export PATH=\"$LOCAL_BIN:\$PATH\""
+    echo_white "    export PATH=\"$LOCAL_BIN:\$PATH\""
     echo ""
-    yellow "Depending on your installation directory, you may be able to use generic shell environment variables:"
+    echo_yellow "Depending on your installation directory, you may be able to use generic shell environment variables:"
     echo ""
-    white "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo_white "    export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""
 fi
 
 if [ "$UV_INSTALL_REQUIRED" -eq 1 ]; then
-    green "Package manager 'uv' has been installed at '$LOCAL_BIN'."
+    echo_green "Package manager 'uv' has been installed at '$LOCAL_BIN'."
 fi
 
-green "Virtual environments created at the following locations:"
+echo_green "Virtual environments created at the following locations:"
 for venv in "${venv_locations[@]}"; do
-    white "    $venv"
+    echo_white "    $venv"
 done

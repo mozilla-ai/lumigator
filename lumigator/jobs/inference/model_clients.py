@@ -139,7 +139,7 @@ class HuggingFaceModelClient(BaseModelClient):
             logger.warning(
                 f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
                 f" is bigger than the model's max_position_embeddings ({max_pos_emb})"
-                "Setting the tokenizer model_max_length to the model's max_position_embeddings."
+                " Setting the tokenizer model_max_length to the model's max_position_embeddings."
             )
             self._pipeline.tokenizer.model_max_length = max_pos_emb
 

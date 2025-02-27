@@ -109,6 +109,7 @@ services:
       - MISTRAL_API_KEY
       - OPENAI_API_KEY
       - DEEPSEEK_API_KEY
+      - XAI_API_KEY
       - HF_TOKEN
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY

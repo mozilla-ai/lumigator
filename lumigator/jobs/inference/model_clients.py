@@ -85,10 +85,10 @@ class HuggingFaceModelClient(BaseModelClient):
         logger.info(f"System prompt: {config.system_prompt}")
         self._task = config.hf_pipeline.task
         # Load the model configuration to check the architecture type
-        model_config = AutoConfig.from_pretrained(
+        self.hf_model_config = AutoConfig.from_pretrained(
             config.hf_pipeline.model_name_or_path, trust_remote_code=config.hf_pipeline.trust_remote_code
         )
-        if self._task == TaskType.SUMMARIZATION and model_config.is_encoder_decoder:
+        if self._task == TaskType.SUMMARIZATION and self.hf_model_config.is_encoder_decoder:
             # The summarization pipeline is only supported for Seq2Seq models
             # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
             model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -114,7 +114,9 @@ class HuggingFaceModelClient(BaseModelClient):
             )
             self._set_seq2seq_max_length()
         else:
-            # CausalLM models supported for summarization, text-generation and translation tasks through system_prompt
+            # CausalLM models supported for summarization and translation tasks through system_prompt
+            # HF pipeline task overwritten to 'text-generation' since these causalLMs are not task-specific models
+            self._task = config.hf_pipeline.task = TaskType.TEXT_GENERATION
             self._pipeline = pipeline(**config.hf_pipeline.model_dump())
 
     def _set_seq2seq_max_length(self):
@@ -150,6 +152,18 @@ class HuggingFaceModelClient(BaseModelClient):
             self._config.generation_config.max_new_tokens = max_pos_emb
 
     def predict(self, prompt):
+        # Case-1: Seq2seq model
+        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
+        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
+        # Get the name of the key and return its value.
+        if self._task == TaskType.SUMMARIZATION and self.hf_model_config.is_encoder_decoder:
+            generation = self._pipeline(
+                prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
+            )[0]
+            return generation["summary_text"]
+
+        # Case-2: CausalLM model: can be used for text-generation/summarization
+        # or translation tasks with right system_prompt
         # When using a text-generation model, the pipeline returns a dictionary with a single key,
         # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
         # role and content of a message. For example:
@@ -157,19 +171,9 @@ class HuggingFaceModelClient(BaseModelClient):
         #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
         # We want to return the content of the last message in the list, which is the model's
         # response to the prompt.
-        if self._task in [TaskType.TEXT_GENERATION, TaskType.TRANSLATION]:
-            messages = [
-                {"role": "system", "content": self._system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
-            return generation["generated_text"][-1]["content"]
-
-        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
-        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
-        # Get the name of the key and return its value.
-        if self._task == TaskType.SUMMARIZATION:
-            generation = self._pipeline(
-                prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
-            )[0]
-            return generation["summary_text"]
+        messages = [
+            {"role": "system", "content": self._system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
+        return generation["generated_text"][-1]["content"]

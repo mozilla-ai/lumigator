@@ -49,7 +49,7 @@ class LiteLLMModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
         self.config = config
         self.system_prompt = self.config.system_prompt
-        logger.info(f"LiteLLMModelClient initialized with config: \n{config.model_dump()}")
+        logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     def predict(
         self,
@@ -67,7 +67,7 @@ class LiteLLMModelClient(BaseModelClient):
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,
-            drop_params=False,
+            drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
         # LiteLLM gives us the cost of each API which is nice.

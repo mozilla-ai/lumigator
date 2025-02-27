@@ -1,15 +1,11 @@
 <template>
-  <Drawer
-    v-model:visible="isVisible"
-    :position="'full'"
-    @hide="$emit('close', $event)"
-  >
+  <Drawer v-model:visible="isVisible" :position="'full'" @hide="$emit('close', $event)">
     <template #header>
       <slot name="title"></slot>
       <PrimeVueButton
         type="button"
         icon="pi pi-download"
-        label="Downlaod Dataset"
+        label="Downlaod"
         rounded
         severity="secondary"
         :variant="'text'"
@@ -34,18 +30,34 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
-      <Column v-for="col in columns" sortable :key="col" :field="col" :header="col" :style="`width: ${1/columns.length * 100}%`">
+      <Column
+        v-for="col in columns"
+        sortable
+        :key="col"
+        :field="col"
+        :header="col"
+        :style="`width: ${(1 / columns.length) * 100}%`"
+      >
         <template #editor="{ data, field }">
-                        <Textarea v-model="data[field]" autoResize autofocus fluid></Textarea>
-                </template>
-
+          <Textarea v-model="data[field]" autoResize autofocus fluid></Textarea>
+        </template>
       </Column>
     </DataTable>
   </Drawer>
 </template>
 
 <script lang="ts">
-import { Button, Column, ContextMenu, DataTable, Drawer, Textarea, type DataTableCellEditCancelEvent, type DataTableCellEditCompleteEvent, type DataTableProps } from 'primevue'
+import {
+  Button,
+  Column,
+  ContextMenu,
+  DataTable,
+  Drawer,
+  Textarea,
+  type DataTableCellEditCancelEvent,
+  type DataTableCellEditCompleteEvent,
+  type DataTableProps,
+} from 'primevue'
 import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
@@ -74,7 +86,7 @@ export default defineComponent({
     columns: {
       type: Array as PropType<string[]>,
       required: true,
-    }
+    },
   },
   setup(props) {
     const isVisible = ref(true)
@@ -85,17 +97,24 @@ export default defineComponent({
     }
 
     const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {
-    let { data, newValue, field } = event;
+      let { data, newValue, field } = event
 
-    data[field] = newValue
-  };
+      data[field] = newValue
+    }
 
-  const onCellEditCancel = (event: DataTableCellEditCancelEvent) => {
-    // prevent esc key from closing the whole modal
-    event.originalEvent.stopPropagation()
-  };
+    const onCellEditCancel = (event: DataTableCellEditCancelEvent) => {
+      // prevent esc key from closing the whole modal
+      event.originalEvent.stopPropagation()
+    }
 
-    return { isVisible, dataTable, handleDownloadClicked, onCellEditComplete, onCellEditCancel, ...props }
+    return {
+      isVisible,
+      dataTable,
+      handleDownloadClicked,
+      onCellEditComplete,
+      onCellEditCancel,
+      ...props,
+    }
   },
 })
 </script>

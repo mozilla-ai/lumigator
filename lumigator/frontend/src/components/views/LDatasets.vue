@@ -52,9 +52,11 @@
       :columns="datasetColumns"
       @close="isDatasetViewerVisible = false"
     >
-    <template #title>
-      <h3 style="font-weight: normal;"><span style="color: #888888;">Dataset:</span> {{selectedDataset?.filename}}</h3>
-    </template>
+      <template #title>
+        <h3 style="font-weight: normal">
+          <span style="color: #888888">Dataset:</span> {{ selectedDataset?.filename }}
+        </h3>
+      </template>
     </DatasetViewer>
     <Teleport to=".sliding-panel">
       <l-dataset-details

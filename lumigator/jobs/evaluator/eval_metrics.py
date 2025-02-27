@@ -20,7 +20,7 @@ class EvaluationFields(Enum):
 
     PREDICTION = "pred"
     GROUND_TRUTH = "ref"
-    LLM_INPUT = "example"
+    EXAMPLE = "example"
 
 
 class EvaluationMetrics:
@@ -38,7 +38,7 @@ class EvaluationMetrics:
                 # the available tasks in g_eval are the ones we have defined
                 # criteria / evaluation steps for inside `g_eval_prompts.json`
                 "method": functools.partial(self._g_eval, task="summarization"),
-                "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.LLM_INPUT],
+                "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.EXAMPLE],
             },
         }
 
@@ -122,7 +122,7 @@ class EvaluationMetrics:
 
         return evals
 
-    def _g_eval_measure_with_retry(self, metric, test_case, max_retries=3):
+    def _g_eval_measure_with_retry(self, metric, test_case, max_retries=MEASURE_RETRIES):
         """Calls metric.measure with retry logic and returns the score and reason.
 
         Args:
@@ -147,7 +147,7 @@ class EvaluationMetrics:
 
         raise ValueError("All retry attempts failed")
 
-    def _g_eval(self, llm_inputs: list, pred: list, ref: list, task: str) -> dict:
+    def _g_eval(self, examples: list, pred: list, ref: list, task: str) -> dict:
         """Runs the deepeval implementation of the G-Eval LLM-as-judge evaluation.
 
         The GEval class takes some evaluation criteria or steps provided as prompts
@@ -178,7 +178,7 @@ class EvaluationMetrics:
 
             evals_for_metric = []
             # iterate on all samples
-            for p, r, e in zip(pred, ref, llm_inputs):
+            for p, r, e in zip(pred, ref, examples):
                 test_case = LLMTestCase(input=e, expected_output=r, actual_output=p)
 
                 try:
@@ -194,12 +194,12 @@ class EvaluationMetrics:
 
         return evals
 
-    def run_all(self, llm_inputs: list, pred: list, ref: list) -> EvalJobMetrics:
+    def run_all(self, examples: list, pred: list, ref: list) -> EvalJobMetrics:
         results = {}
 
         for metric in self._chosen_metrics:
-            if EvaluationFields.LLM_INPUT in self._supported_metrics[metric]["requires"]:
-                results[metric] = self._supported_metrics[metric]["method"](llm_inputs, pred, ref)
+            if EvaluationFields.EXAMPLE in self._supported_metrics[metric]["requires"]:
+                results[metric] = self._supported_metrics[metric]["method"](examples, pred, ref)
             else:
                 results[metric] = self._supported_metrics[metric]["method"](pred, ref)
 

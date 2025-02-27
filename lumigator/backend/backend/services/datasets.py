@@ -102,9 +102,7 @@ def dataset_has_gt(filename: str) -> bool:
 
 
 class DatasetService:
-    def __init__(
-        self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem
-    ):
+    def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem):
         self.dataset_repo = dataset_repo
         self.s3_client = s3_client
         self.s3_filesystem = s3_filesystem
@@ -145,9 +143,7 @@ class DatasetService:
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
             # Deprecated!!!
-            dataset_hf.save_to_disk(
-                dataset_path, storage_options=self.s3_filesystem.storage_options
-            )
+            dataset_hf.save_to_disk(dataset_path, storage_options=self.s3_filesystem.storage_options)
 
             # Use the converted HF format files to rebuild the CSV and store it as 'dataset.csv'.
             dataset_hf.to_csv(temp.name, index=False)
@@ -285,16 +281,12 @@ class DatasetService:
                 f"Cleaning up DB by removing ID. {e}"
             )
         except Exception as e:
-            raise DatasetUpstreamError(
-                "s3", f"error attempting to delete dataset {dataset_id} from S3", e
-            ) from e
+            raise DatasetUpstreamError("s3", f"error attempting to delete dataset {dataset_id} from S3", e) from e
 
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)
 
-    def get_dataset_download(
-        self, dataset_id: UUID, extension: str | None = None
-    ) -> DatasetDownloadResponse:
+    def get_dataset_download(self, dataset_id: UUID, extension: str | None = None) -> DatasetDownloadResponse:
         """Generate pre-signed download URLs for dataset files.
 
         When supplied, only URLs for files that match the specified extension are returned.
@@ -315,14 +307,10 @@ class DatasetService:
 
         try:
             # Call list_objects_v2 to get all objects whose key names start with `dataset_key`
-            s3_response = self.s3_client.list_objects_v2(
-                Bucket=settings.S3_BUCKET, Prefix=dataset_key
-            )
+            s3_response = self.s3_client.list_objects_v2(Bucket=settings.S3_BUCKET, Prefix=dataset_key)
 
             if s3_response.get("KeyCount") == 0:
-                raise DatasetNotFoundError(
-                    dataset_id, f"No S3 files found with prefix '{dataset_key}'"
-                ) from None
+                raise DatasetNotFoundError(dataset_id, f"No S3 files found with prefix '{dataset_key}'") from None
 
             download_urls = []
             for s3_object in s3_response["Contents"]:

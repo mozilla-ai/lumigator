@@ -1,15 +1,16 @@
 <template>
   <Drawer v-model:visible="isVisible" :position="'full'" @hide="$emit('close', $event)">
     <template #header>
-      <slot name="title"></slot>
+      <div class="title-slot"> <slot name="title"></slot></div>
       <PrimeVueButton
         type="button"
         icon="pi pi-download"
+        size="small"
         label="Downlaod"
         rounded
         severity="secondary"
         :variant="'text'"
-        style="margin-left: auto; margin-right: 1.5rem"
+        class="table-download-button"
         aria-label="download"
         @click="handleDownloadClicked"
       ></PrimeVueButton>
@@ -31,7 +32,7 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
-    <Column key="rowNumber" field="rowNumber" header="" sortable ></Column>
+    <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable ></Column>
       <Column
         v-for="col in columns"
         sortable
@@ -72,6 +73,10 @@ export default defineComponent({
   },
   emits: ['close'],
   props: {
+    showRowNumber: {
+      type: Boolean,
+      default: false,
+    },
     downloadFileName: {
       type: String,
       required: true,
@@ -120,10 +125,24 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@use '@/styles/mixins';
+
+
 /* make the sort icon smaller */
 ::v-deep(.p-datatable-sort-icon) {
   width: 10px;
   height: 10px;
+}
+
+.title-slot {
+  @include mixins.paragraph;
+}
+
+.table-download-button {
+  @include mixins.caption;
+  margin-left: auto;
+  margin-right: 1.5rem;
+  gap:0.125rem;
 }
 </style>

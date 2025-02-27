@@ -6,5 +6,6 @@
 @include meta.load-css('lumigator-theme');
 @include meta.load-css('components');
 @include meta.load-css('typography');
+@include meta.load-css('mixins');
 @include meta.load-css('transitions');
 @include meta.load-css('icons');

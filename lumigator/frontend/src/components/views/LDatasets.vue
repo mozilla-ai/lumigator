@@ -49,11 +49,12 @@
       :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
       :data="datasetFileContent"
       :isEditable="true"
+      :showRowNumber="true"
       :columns="datasetColumns"
       @close="isDatasetViewerVisible = false"
     >
       <template #title>
-        <h3 style="font-weight: normal">
+        <h3 style="gap: 0.125rem; display: flex;">
           <span style="color: #888888">Dataset:</span> {{ selectedDataset?.filename }}
         </h3>
       </template>

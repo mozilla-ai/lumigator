@@ -46,7 +46,7 @@
     <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
     <DatasetViewer
       v-if="isDatasetViewerVisible"
-      :downloadFileName="selectedDataset?.filename.split('.')[0]"
+      :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
       :data="datasetFileContent"
       :isEditable="true"
       :columns="datasetColumns"

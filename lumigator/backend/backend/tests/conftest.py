@@ -36,7 +36,7 @@ from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
 from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
-from backend.services.jobs import JobService
+from backend.services.jobs import JobDefinitionInference, JobService
 from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
@@ -87,6 +87,10 @@ def wait_for_job(client, job_id: UUID) -> bool:
             timed_out = False
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.STOPPED.value:
             succeeded = False
             timed_out = False
             break
@@ -470,3 +474,15 @@ def simple_infer_template():
             "storage_path": "{storage_path}"
         }}
     }}"""
+
+
+@pytest.fixture
+def job_definition_fixture():
+    return JobDefinitionInference(
+        command=MagicMock(spec=str),
+        pip_reqs=MagicMock(spec=list),
+        work_dir=MagicMock(spec=str),
+        ray_worker_gpus_fraction=MagicMock(spec=float),
+        ray_worker_gpus=MagicMock(spec=int),
+        config_model=MagicMock(spec=dict),
+    )

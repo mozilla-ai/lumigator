@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-conf
+  name: {{ include "frontend.fullname" . }}-nginx-conf
 data:
   default.conf.template: |
     server {

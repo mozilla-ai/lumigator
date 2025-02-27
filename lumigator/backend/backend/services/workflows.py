@@ -112,9 +112,16 @@ class WorkflowService:
             self._dataset_service.s3_filesystem,
         )
         # log the job to the tracking client
+        result_key = str(
+            Path(settings.S3_JOB_RESULTS_PREFIX)
+            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
+        )
+        with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            inf_output = JobResultObject.model_validate(json.loads(f.read()))
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
         inference_job_output = RunOutputs(
             parameters={"inference_output_s3_path": inf_path},
+            metrics=inf_output.metrics,
             ray_job_id=str(inference_job.id),
         )
         self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)

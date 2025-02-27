@@ -13,11 +13,11 @@ from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelC
 from tqdm import tqdm
 from utils import timer
 
-from schemas import InferenceJobOutput, JobOutput
+from schemas import InferenceJobOutput, InferenceMetrics, JobOutput, PredictionResult
 
 
 @timer
-def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
+def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list[PredictionResult]:
     predictions = []
 
     for sample_txt in dataset_iterable:
@@ -106,13 +106,27 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    output[config.job.output_field], inference_time = predict(dataset_iterable, model_client)
+    predictions, inference_time = predict(dataset_iterable, model_client)
+    predictions: list[PredictionResult] = predictions
+    output[config.job.output_field] = [p.prediction for p in predictions]
+    output["inference_metrics"] = [p.metrics for p in predictions]
     output["model"] = output_model_name
     output["inference_time"] = inference_time
+    if all(p.metrics is not None for p in predictions):
+        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in predictions]) / len(predictions)
+        avg_total_tokens = sum([p.metrics.total_tokens for p in predictions]) / len(predictions)
+        avg_completion_tokens = sum([p.metrics.completion_tokens for p in predictions]) / len(predictions)
+        metrics = InferenceMetrics(
+            prompt_tokens=avg_prompt_tokens,
+            total_tokens=avg_total_tokens,
+            completion_tokens=avg_completion_tokens,
+        )
+    else:
+        metrics = None
     logger.info(output)
 
     results = JobOutput(
-        metrics=None,
+        metrics=metrics,
         parameters=config,
         artifacts=InferenceJobOutput.model_validate(output),
     )

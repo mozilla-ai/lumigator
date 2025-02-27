@@ -5,6 +5,7 @@ from inference_config import InferenceJobConfig
 from litellm import completion
 from loguru import logger
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
 
 def strip_path_prefix(path: str) -> str:
@@ -119,16 +120,32 @@ class HuggingFaceModelClient(BaseModelClient):
         tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
         This isn't true if it's a CausalLM model, since the output token positions would be len(input) + len(output).
         """
-        max_pos_emb = self._pipeline.model.config.max_position_embeddings
+        max_pos_emb = getattr(self._pipeline.model.config, "max_position_embeddings", None)
+        # 1. Setting input sequence max tokens
+        if max_pos_emb is None:
+            logger.info(
+                f"{self._config.hf_pipeline.model} model configuration does not have max_position_embeddings attribute.",  # noqa: E501
+                f" Using model.config.max_position_embeddings = tokenizer.model_max_length = {self._pipeline.tokenizer.model_max_length}",  # noqa: E501
+            )
+            max_pos_emb = self._pipeline.tokenizer.model_max_length
+            if self._pipeline.tokenizer.model_max_length >= VERY_LARGE_INTEGER:
+                logger.warning(
+                    f"Using default value of tokenizer.model_max_length = {self._pipeline.tokenizer.model_max_length} may throw IndexError"  # noqa: E501
+                )
+
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings
-        if self._pipeline.tokenizer.model_max_length >= max_pos_emb:
+        elif self._pipeline.tokenizer.model_max_length > max_pos_emb:
             logger.warning(
                 f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
                 f" is bigger than the model's max_position_embeddings ({max_pos_emb})"
                 "Setting the tokenizer model_max_length to the model's max_position_embeddings."
             )
             self._pipeline.tokenizer.model_max_length = max_pos_emb
+
+        # 2. Setting output sequence generation max tokens
+        # If the user has set a max_new_tokens to be generated
+        # we need to make sure it's not bigger than the model's max_position_embeddings
         if self._config.generation_config.max_new_tokens:
             if self._config.generation_config.max_new_tokens > max_pos_emb:
                 logger.warning(

@@ -14,7 +14,7 @@
           <!-- header actions here -->
         </div>
       </template>
-      <slot />
+      <slot></slot>
     </Drawer>
   </div>
 </template>

@@ -84,6 +84,7 @@ const emit = defineEmits([
   'l-dataset-selected',
   'l-experiment',
   'l-download-dataset',
+  'view-dataset-clicked',
 ])
 
 const { showSlidingPanel } = useSlidePanel()
@@ -105,6 +106,13 @@ const options = ref<MenuItem[]>([
   },
   {
     separator: true,
+  },
+  {
+    label: 'View',
+    icon: 'pi pi-external-link',
+    command: () => {
+      emit('view-dataset-clicked', focusedItem.value)
+    },
   },
   {
     label: 'Download',

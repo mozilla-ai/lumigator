@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse
 
 
@@ -20,7 +20,7 @@ class GetExperimentResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     created_at: datetime.datetime
-    task: TaskType
+    task_definition: TaskDefinition
     dataset: UUID
     updated_at: datetime.datetime | None = None
     workflows: list[WorkflowDetailsResponse] | None = None

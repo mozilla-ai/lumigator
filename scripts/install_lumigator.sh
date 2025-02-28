@@ -40,7 +40,7 @@ check_docker_running() {
 }
 
 check_compose_installed() {
-  docker compose version >/dev/null 2>&1 && return 0  
+  docker compose version >/dev/null 2>&1 && return 0
   return 1
 }
 
@@ -155,7 +155,7 @@ install_docker_linux_root() {
   fi
   curl -fsSL "https://download.docker.com/linux/$DISTRO/gpg" | sudo gpg --dearmor -o "$GPG_KEY"
   sudo chmod a+r "$GPG_KEY"
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=$GPG_KEY] https://download.docker.com/linux/$DISTRO $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=$GPG_KEY] https://download.docker.com/linux/$DISTRO $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
   sudo apt-get update -y
   sudo apt-get install -y ca-certificates curl gnupg lsb-release
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
@@ -166,10 +166,16 @@ install_docker_linux_root() {
 }
 
 detect_docker_mode() {
-  if systemctl is-active --quiet docker; then
-    echo "root"
-  elif systemctl --user is-active --quiet docker; then
-    echo "rootless"
+  if [ "$OS_TYPE" = "macos" ]; then
+    echo "desktop" # Indicate Docker Desktop mode; no service management needed
+  elif [ "$OS_TYPE" = "linux" ]; then
+    if systemctl is-active --quiet docker 2>/dev/null; then
+      echo "root"
+    elif systemctl --user is-active --quiet docker 2>/dev/null; then
+      echo "rootless"
+    else
+      echo "unknown"
+    fi
   else
     echo "unknown"
   fi
@@ -181,10 +187,10 @@ configure_docker_host() {
     log "Configuring DOCKER_HOST for rootless mode..."
     export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
     if ! grep -q "DOCKER_HOST=unix://" ~/.bashrc; then
-      echo "export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >> ~/.bashrc
+      echo "export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >>~/.bashrc
     fi
     if ! grep -q "DOCKER_HOST=unix://" ~/.profile; then
-      echo "export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >> ~/.profile
+      echo "export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >>~/.profile
     fi
     log "DOCKER_HOST set to: $DOCKER_HOST"
   elif [ "$DOCKER_MODE" = "root" ]; then
@@ -245,7 +251,10 @@ install_docker_linux_rootless() {
     log "Warning: $XDG_RUNTIME_DIR not writable. Using $USER_HOME/run instead."
     XDG_RUNTIME_DIR="$USER_HOME/run"
     DOCKER_SOCK="$XDG_RUNTIME_DIR/docker.sock"
-    mkdir -p "$XDG_RUNTIME_DIR" || { log "Error: Cannot create $XDG_RUNTIME_DIR"; exit 1; }
+    mkdir -p "$XDG_RUNTIME_DIR" || {
+      log "Error: Cannot create $XDG_RUNTIME_DIR"
+      exit 1
+    }
   fi
 
   log "Cleaning up existing Docker files..."
@@ -255,19 +264,37 @@ install_docker_linux_rootless() {
   mkdir -p "$DOCKER_ROOTLESS_DIR" "$BIN_DIR" "$USER_HOME/.local/share/docker" "$CLI_PLUGINS_DIR"
 
   log "Downloading Docker $DOCKER_VERSION..."
-  curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" -o "$DOCKER_ROOTLESS_DIR/docker.tgz" || { log "Error: Failed to download Docker"; exit 1; }
-  tar -xzf "$DOCKER_ROOTLESS_DIR/docker.tgz" -C "$BIN_DIR" --strip-components=1 || { log "Error: Failed to extract Docker"; exit 1; }
+  curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" -o "$DOCKER_ROOTLESS_DIR/docker.tgz" || {
+    log "Error: Failed to download Docker"
+    exit 1
+  }
+  tar -xzf "$DOCKER_ROOTLESS_DIR/docker.tgz" -C "$BIN_DIR" --strip-components=1 || {
+    log "Error: Failed to extract Docker"
+    exit 1
+  }
 
   log "Downloading rootless extras for Docker $DOCKER_VERSION..."
-  curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-rootless-extras-${DOCKER_VERSION}.tgz" -o "$DOCKER_ROOTLESS_DIR/docker-rootless.tgz" || { log "Error: Failed to download rootless extras"; exit 1; }
-  tar -xzf "$DOCKER_ROOTLESS_DIR/docker-rootless.tgz" -C "$BIN_DIR" --strip-components=1 || { log "Error: Failed to extract rootless extras"; exit 1; }
+  curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-rootless-extras-${DOCKER_VERSION}.tgz" -o "$DOCKER_ROOTLESS_DIR/docker-rootless.tgz" || {
+    log "Error: Failed to download rootless extras"
+    exit 1
+  }
+  tar -xzf "$DOCKER_ROOTLESS_DIR/docker-rootless.tgz" -C "$BIN_DIR" --strip-components=1 || {
+    log "Error: Failed to extract rootless extras"
+    exit 1
+  }
 
   log "Downloading slirp4netns $SLIRP4NETNS_VERSION..."
-  curl -fsSL "https://github.com/rootless-containers/slirp4netns/releases/download/v${SLIRP4NETNS_VERSION}/slirp4netns-x86_64" -o "$BIN_DIR/slirp4netns" || { log "Error: Failed to download slirp4netns"; exit 1; }
+  curl -fsSL "https://github.com/rootless-containers/slirp4netns/releases/download/v${SLIRP4NETNS_VERSION}/slirp4netns-x86_64" -o "$BIN_DIR/slirp4netns" || {
+    log "Error: Failed to download slirp4netns"
+    exit 1
+  }
   chmod +x "$BIN_DIR/slirp4netns"
 
   log "Downloading Docker Compose $COMPOSE_VERSION..."
-  curl -fsSL "$COMPOSE_URL" -o "$CLI_PLUGINS_DIR/docker-compose" || { log "Error: Failed to download Compose"; exit 1; }
+  curl -fsSL "$COMPOSE_URL" -o "$CLI_PLUGINS_DIR/docker-compose" || {
+    log "Error: Failed to download Compose"
+    exit 1
+  }
   chmod +x "$CLI_PLUGINS_DIR/docker-compose"
 
   for bin in docker dockerd containerd runc containerd-shim-runc-v2 dockerd-rootless.sh rootlesskit; do
@@ -280,15 +307,15 @@ install_docker_linux_rootless() {
   done
 
   log "Setting environment variables..."
-  echo "export PATH=$BIN_DIR:\$PATH" > "$USER_HOME/.bashrc.docker"
-  echo "export DOCKER_HOST=unix://$DOCKER_SOCK" >> "$USER_HOME/.bashrc.docker"
-  grep -q ".bashrc.docker" "$USER_HOME/.bashrc" || echo ". $USER_HOME/.bashrc.docker" >> "$USER_HOME/.bashrc"
+  echo "export PATH=$BIN_DIR:\$PATH" >"$USER_HOME/.bashrc.docker"
+  echo "export DOCKER_HOST=unix://$DOCKER_SOCK" >>"$USER_HOME/.bashrc.docker"
+  grep -q ".bashrc.docker" "$USER_HOME/.bashrc" || echo ". $USER_HOME/.bashrc.docker" >>"$USER_HOME/.bashrc"
   . "$USER_HOME/.bashrc.docker"
 
   log "Setting up systemd user service..."
   mkdir -p "$USER_HOME/.config/systemd/user"
 
-  cat << EOF > "$USER_HOME/.config/systemd/user/docker.service"
+  cat <<EOF >"$USER_HOME/.config/systemd/user/docker.service"
 [Unit]
 Description=Docker Rootless Daemon
 After=network.target
@@ -308,7 +335,7 @@ EOF
   systemctl --user enable docker.service
   systemctl --user start docker.service
 
-  # Docker startup 
+  # Docker startup
   log "Waiting for Docker to start..."
   for i in {1..10}; do
     if docker info >/dev/null 2>&1; then
@@ -377,7 +404,7 @@ install_docker_and_compose() {
       esac
     fi
     configure_docker_host
-  ;;
+    ;;
   *)
     log "Unsupported OS: $OS_TYPE"
     exit 1
@@ -402,9 +429,18 @@ install_project() {
   mkdir -p "$LUMIGATOR_TARGET_DIR"
 
   log "Downloading Lumigator ${LUMIGATOR_REPO_TAG}${LUMIGATOR_VERSION}..."
-  curl -L -o "lumigator.zip" "${LUMIGATOR_REPO_URL}/archive/${LUMIGATOR_REPO_TAG}${LUMIGATOR_VERSION}.zip" || { log "Error: Failed to download Lumigator"; exit 1; }
-  unzip lumigator.zip >/dev/null || { log "Error: Failed to unzip Lumigator"; exit 1; }
-  mv lumigator-${LUMIGATOR_VERSION}/* "$LUMIGATOR_TARGET_DIR" || { log "Error: Failed to move Lumigator files"; exit 1; }
+  curl -L -o "lumigator.zip" "${LUMIGATOR_REPO_URL}/archive/${LUMIGATOR_REPO_TAG}${LUMIGATOR_VERSION}.zip" || {
+    log "Error: Failed to download Lumigator"
+    exit 1
+  }
+  unzip lumigator.zip >/dev/null || {
+    log "Error: Failed to unzip Lumigator"
+    exit 1
+  }
+  mv lumigator-${LUMIGATOR_VERSION}/* "$LUMIGATOR_TARGET_DIR" || {
+    log "Error: Failed to move Lumigator files"
+    exit 1
+  }
   mv lumigator-${LUMIGATOR_VERSION}/.* "$LUMIGATOR_TARGET_DIR" 2>/dev/null || true
   rmdir lumigator-${LUMIGATOR_VERSION}
   rm lumigator.zip
@@ -429,35 +465,53 @@ main() {
   LUMIGATOR_REPO_URL="https://github.com/mozilla-ai/lumigator"
   LUMIGATOR_REPO_TAG="refs/tags/v"
   LUMIGATOR_VERSION="0.1.0-alpha"
-  LUMIGATOR_URL="http://localhost:80"  
+  LUMIGATOR_URL="http://localhost:80"
 
   while [ "$#" -gt 0 ]; do
     case $1 in
-    -d | --directory) LUMIGATOR_ROOT_DIR="$2"; shift ;;
+    -d | --directory)
+      LUMIGATOR_ROOT_DIR="$2"
+      shift
+      ;;
     -o | --overwrite) OVERWRITE_LUMIGATOR=true ;;
-    -m | --main) LUMIGATOR_REPO_TAG="refs/heads/"; LUMIGATOR_VERSION="main" ;;
+    -m | --main)
+      LUMIGATOR_REPO_TAG="refs/heads/"
+      LUMIGATOR_VERSION="main"
+      ;;
     -h | --help) show_help ;;
-    *) log "Unknown parameter: $1"; show_help ;;
+    *)
+      log "Unknown parameter: $1"
+      show_help
+      ;;
     esac
     shift
   done
 
   log "Starting Lumigator setup..."
   for tool in curl unzip make; do
-    type "$tool" >/dev/null 2>&1 || { log "Error: $tool required."; exit 1; }
+    type "$tool" >/dev/null 2>&1 || {
+      log "Error: $tool required."
+      exit 1
+    }
   done
 
   install_docker_and_compose
   install_project
 
-  cd "$LUMIGATOR_TARGET_DIR" || { log "Error: Cannot access $LUMIGATOR_TARGET_DIR"; exit 1; }
+  cd "$LUMIGATOR_TARGET_DIR" || {
+    log "Error: Cannot access $LUMIGATOR_TARGET_DIR"
+    exit 1
+  }
   if [ -f "Makefile" ]; then
     DOCKER_MODE=$(detect_docker_mode)
     if [ "$DOCKER_MODE" = "rootless" ]; then
       export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
     fi
     log "Starting Lumigator..."
-    make start-lumigator || { log "Failed to start Lumigator."; exit 1; }
+    make start-lumigator || {
+      log "Failed to start Lumigator."
+      exit 1
+    }
   else
     log "Makefile not found in $LUMIGATOR_TARGET_DIR"
     exit 1

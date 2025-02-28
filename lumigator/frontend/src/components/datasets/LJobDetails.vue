@@ -70,19 +70,19 @@
       <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob.dataset.name }}
+          {{ selectedJob.config.dataset.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob.type }} - {{ selectedJob.metadata.job_type }}
+          {{ selectedJob.config.hf_pipeline.task }} - {{ selectedJob.metadata.job_type }}
         </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob?.config.model_name_or_path }}
+          {{ selectedJob.config.model_name_or_path }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

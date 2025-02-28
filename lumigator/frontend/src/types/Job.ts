@@ -9,9 +9,26 @@ export type Job = {
     name: string
     max_samples: number
     model_name_or_path?: string
+    system_prompt: string
     dataset: {
       id: string
       name: string
+    }
+    hf_pipeline: {
+      model_name_or_path: string
+      revision: string
+      use_fast: boolean
+      trust_remote_code: boolean
+      torch_dtype: string
+      accelerator: string
+      truncation: boolean
+      task: string
+    }
+    generation_config: {
+      max_new_tokens: number
+      frequency_penalty: number
+      temperature: number
+      top_p: number
     }
   }
   message: string

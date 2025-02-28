@@ -49,6 +49,7 @@
       :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
       :data="datasetFileContent"
       :isEditable="false"
+      :isSearchEnabled="true"
       :showRowNumber="true"
       :columns="datasetColumns"
       @close="isDatasetViewerVisible = false"

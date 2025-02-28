@@ -34,7 +34,7 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
-      <template #header>
+      <template #header v-if="isSearchEnabled">
         <div>
           <IconField>
             <InputIcon>
@@ -93,6 +93,10 @@ export default defineComponent({
   },
   emits: ['close'],
   props: {
+    isSearchEnabled: {
+      type: Boolean,
+      default: true,
+    },
     showRowNumber: {
       type: Boolean,
       default: false,

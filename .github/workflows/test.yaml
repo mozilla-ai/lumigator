@@ -1,0 +1,61 @@
+name: Actions Runner Controller Demo
+on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
+  workflow_dispatch:
+
+jobs:
+  Explore-GitHub-Actions:
+    # You need to use the INSTALLATION_NAME from the previous step
+    runs-on: cw-runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Instalar make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        run: |
+          export RAY_WORKER_GPUS=1
+          export RAY_WORKER_GPUS_FRACTION=1.0
+          export GPU_COUNT=1
+          export RAY_HEAD_NODE_HOST=${{ secrets.CW_RAY_HEAD_NODE_HOST }}
+          export AWS_ACCESS_KEY_ID=${{ secrets.CW_AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
+          export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
+          export S3_BUCKET=${{ secrets.CW_S3_BUCKET }}
+          make start-lumigator-ci
+
+      - name: Run backend integration tests
+        run: |
+          export RAY_WORKER_GPUS=1
+          export RAY_WORKER_GPUS_FRACTION=1.0
+          export GPU_COUNT=1
+          export RAY_HEAD_NODE_HOST=${{ secrets.CW_RAY_HEAD_NODE_HOST }}
+          export AWS_ACCESS_KEY_ID=${{ secrets.CW_AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
+          export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
+          export S3_BUCKET=${{ secrets.CW_S3_BUCKET }}
+          make test-backend-integration-ci

@@ -138,6 +138,9 @@ start-lumigator: config-generate-env
 start-lumigator-build: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
+start-lumigator-ci: config-generate-env
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile ci $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
@@ -225,9 +228,26 @@ test-backend-integration:
 	RAY_DASHBOARD_PORT=8265 \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
-	RAY_WORKER_GPUS="0.0" \
-	RAY_WORKER_GPUS_FRACTION="0.0" \
-	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+
+test-backend-integration-ci:
+	cd lumigator/backend/; \
+	docker container list --all; \
+	S3_BUCKET=$(S3_BUCKET) \
+	RAY_HEAD_NODE_HOST=$(RAY_HEAD_NODE_HOST) \
+	RAY_DASHBOARD_PORT=8265 \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \

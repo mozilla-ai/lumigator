@@ -1,6 +1,6 @@
 <template>
   <div class="l-experiment-logs">
-    <div ref="logContainer" class="l-experiment-logs__container">
+    <div ref="logContainer" class="l-experiment-logs__container" @scroll.passive="onScroll">
       <div v-for="(log, index) in logs" :key="index" class="l-experiment-logs__container-log-entry">
         {{ log }}
       </div>
@@ -18,15 +18,28 @@ const { logs } = toRefs(props)
 const logContainer: Ref<HTMLElement | undefined> = ref()
 
 const logsLength = computed(() => logs.value.length)
+const isAutoScrollEnabled = ref(true)
 
 const scrollToBottom = async () => {
-  if (logContainer.value) {
+  if (logContainer.value && isAutoScrollEnabled.value) {
+    // wait for view to update the DOM with new logs
     await nextTick()
+
     logContainer.value.scrollTop = logContainer.value.scrollHeight
   }
 }
 
-watch(logsLength, () => scrollToBottom())
+const onScroll = () => {
+  if (logContainer.value) {
+    const { scrollTop, scrollHeight, clientHeight } = logContainer.value
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 5
+
+    // resume autoscrolling only if at the bottom
+    isAutoScrollEnabled.value = isAtBottom
+  }
+}
+
+watch(logsLength, scrollToBottom)
 </script>
 
 <style scoped lang="scss">

@@ -23,7 +23,6 @@ class InferenceServerConfig(BaseModel):
     base_url: str | None = None
     model: str
     provider: str
-    system_prompt: str | None
     max_retries: int
     model_config = ConfigDict(extra="forbid")
 

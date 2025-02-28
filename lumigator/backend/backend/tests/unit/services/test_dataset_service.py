@@ -11,9 +11,7 @@ def test_delete_dataset_file_not_found(db_session, fake_s3_client, fake_s3fs):
     filename = "dataset.csv"
     format = "job"
     dataset_repo = DatasetRepository(db_session)
-    dataset_record = dataset_repo.create(
-        filename=filename, format=format, size=123, ground_truth=True
-    )
+    dataset_record = dataset_repo.create(filename=filename, format=format, size=123, ground_truth=True)
     assert dataset_record is not None
     assert dataset_record.filename == filename
     assert dataset_record.format == format
@@ -44,9 +42,7 @@ def test_upload_dataset(db_session, fake_s3_client, fake_s3fs, valid_upload_file
         ("    ", 4),
     ],
 )
-def test_dataset_download_with_extensions(
-    db_session, fake_s3_client, fake_s3fs, valid_upload_file, extension, total
-):
+def test_dataset_download_with_extensions(db_session, fake_s3_client, fake_s3fs, valid_upload_file, extension, total):
     dataset_service = DatasetService(DatasetRepository(db_session), fake_s3_client, fake_s3fs)
     upload_response = dataset_service.upload_dataset(valid_upload_file, DatasetFormat.JOB)
 
@@ -58,10 +54,7 @@ def test_dataset_download_with_extensions(
     assert isinstance(download_response.id, UUID)
     # 4 files total (HF dataset: 1 x arrow file + 2 x json) + 1 CSV.
     assert len(download_response.download_urls) == total
-    assert (
-        sum(1 for x in download_response.download_urls if x.endswith(extension.strip().lower()))
-        == total
-    )
+    assert sum(1 for x in download_response.download_urls if x.endswith(extension.strip().lower())) == total
 
 
 @pytest.mark.parametrize(
@@ -74,9 +67,7 @@ def test_dataset_download_with_extensions(
         ("dialogsum_mini_all_gt_is_whitespace.csv", False),
     ],
 )
-def test_dataset_has_ground_truth(
-    common_resources_sample_data_dir, dataset_filename, expected_ground_truth
-):
+def test_dataset_has_ground_truth(common_resources_sample_data_dir, dataset_filename, expected_ground_truth):
     filename = str(common_resources_sample_data_dir / dataset_filename)
     has_gt = dataset_has_gt(filename)
     assert has_gt == expected_ground_truth

@@ -11,9 +11,11 @@ from sqlalchemy.orm import Session
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
 from backend.tracking import TrackingClientManager, tracking_client_manager
@@ -96,3 +98,13 @@ def get_workflow_service(
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+def get_secret_service(
+    session: DBSessionDep,
+) -> SecretService:
+    secret_repo = SecretRepository(session)
+    return SecretService(settings.LUMIGATOR_SECRET_KEY, secret_repo)
+
+
+SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]

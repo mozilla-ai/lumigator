@@ -80,7 +80,11 @@ class LiteLLMModelClient(BaseModelClient):
         prediction = response.choices[0].message.content
         print(response.choices[0].message)
         # LiteLLM will give us the reasoning if the API gives it back in its own field
-        reasoning = response.choices[0].message.reasoning_content
+        # When talking to llamafile, the reasoning_content key is not present
+        if "reasoning_content" in response.choices[0].message.provider_specific_fields:
+            reasoning = response.choices[0].message.reasoning_content
+        else:
+            reasoning = None
         if reasoning:
             reasoning_tokens = response["usage"]["completion_tokens_details"].reasoning_tokens
         else:

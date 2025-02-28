@@ -60,6 +60,7 @@ class EvaluationMetrics:
             logger.warning(f"Unsupported metrics: {self._unsupported_metrics}")
 
     def _rouge(self, pred: list, ref: list):
+        logger.info("Running ROUGE evaluation")
         ev = evaluate.load("rouge")
 
         # compute with use_aggregator = False to get individual scores
@@ -72,6 +73,7 @@ class EvaluationMetrics:
         return evals
 
     def _meteor(self, pred: list, ref: list):
+        logger.info("Running METEOR evaluation")
         ev = evaluate.load("meteor")
 
         # initialize dictionary with metric name
@@ -87,6 +89,7 @@ class EvaluationMetrics:
         return evals
 
     def _bleu(self, pred, ref):
+        logger.info("Running BLEU evaluation")
         ev = evaluate.load("bleu")
 
         # initialize dictionary with metric name
@@ -115,6 +118,7 @@ class EvaluationMetrics:
         references = ["goodnight moon", "the sun is shining"]
         results = bertscore.compute(predictions=predictions)
         """
+        logger.info("Running BERTScore evaluation")
         ev = evaluate.load("bertscore")
 
         # calculate evals (the default is not to aggregate them)
@@ -162,6 +166,7 @@ class EvaluationMetrics:
         See: https://github.com/nlpyang/geval (G-Eval)
         See: https://docs.confident-ai.com/docs/metrics-llm-evals (deepeval)
         """
+        logger.info(f"Running G-Eval evaluation for task: {task}")
         # Load task-dependent criteria / evaluation steps
         with Path(G_EVAL_PROMPTS).open() as f:
             prompt_templates = json.load(f)
@@ -207,6 +212,7 @@ class EvaluationMetrics:
 
     def _token_length(self, pred: list, ref: list):
         """Computes the token length of the reference text."""
+        logger.info("Computing token length")
         # Rough estimate of token length
         # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
         ref_lengths = [int(len(r.split()) / 0.75) for r in ref]

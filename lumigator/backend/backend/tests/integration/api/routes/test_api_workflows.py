@@ -22,6 +22,7 @@ from pydantic import PositiveInt
 
 from backend.main import app
 from backend.tests.conftest import (
+    TEST_CAUSAL_MODEL,
     TEST_SEQ2SEQ_MODEL,
     wait_for_job,
 )
@@ -204,12 +205,12 @@ def check_initial_dataset_count(local_client: TestClient):
     return ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
 
-def upload_dataset(local_client: TestClient, dialog_dataset):
+def upload_dataset(local_client: TestClient, dataset):
     """Upload a dataset."""
     create_response = local_client.post(
         "/datasets/",
         data={},
-        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+        files={"dataset": dataset, "format": (None, DatasetFormat.JOB.value)},
     )
     assert create_response.status_code == 201
     return DatasetResponse.model_validate(create_response.json())
@@ -224,7 +225,7 @@ def check_dataset_count_after_upload(local_client: TestClient, initial_count):
     return get_ds_after
 
 
-def create_experiment(local_client: TestClient, dataset_id: UUID):
+def create_experiment(local_client: TestClient, dataset_id: UUID, task_definition: dict):
     """Create an experiment."""
     experiment = local_client.post(
         "/experiments/",
@@ -232,7 +233,7 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
         json={
             "name": "test_create_exp_workflow_check_results",
             "description": "Test for an experiment with associated workflows",
-            "task_definition": {"task": "summarization"},
+            "task_definition": task_definition,
             "dataset": str(dataset_id),
             "max_samples": 1,
         },
@@ -242,14 +243,20 @@ def create_experiment(local_client: TestClient, dataset_id: UUID):
 
 
 def run_workflow(
-    local_client: TestClient, dataset_id, experiment_id, workflow_name, job_timeout_sec: PositiveInt | None = None
+    local_client: TestClient,
+    dataset_id,
+    experiment_id,
+    workflow_name,
+    task_definition: dict,
+    model: str,
+    job_timeout_sec: PositiveInt | None = None,
 ):
     """Run a workflow for the experiment."""
     workflow_payload = {
         "name": workflow_name,
         "description": "Test workflow for inf and eval",
-        "task_definitions": {"task": "summarization"},
-        "model": TEST_SEQ2SEQ_MODEL,
+        "task_definitions": task_definition,
+        "model": model,
         "provider": "hf",
         "dataset": str(dataset_id),
         "experiment_id": experiment_id,
@@ -325,7 +332,25 @@ def check_artifacts_times(artifacts_url):
 
 
 @pytest.mark.integration
-def test_full_experiment_launch(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+@pytest.mark.parametrize(
+    "dataset_name, task_definition, model",
+    [
+        ("dialog_dataset", {"task": "summarization"}, TEST_SEQ2SEQ_MODEL),
+        (
+            "mock_translation_dataset",
+            {"task": "translation", "source_language": "en", "target_language": "de"},
+            TEST_CAUSAL_MODEL,
+        ),
+    ],
+)
+def test_full_experiment_launch(
+    local_client: TestClient,
+    dataset_name: str,
+    task_definition: dict,
+    model: str,
+    request,
+    dependency_overrides_services,
+):
     """This is the main integration test: it checks:
     * The backend health status
     * Uploading a dataset
@@ -338,16 +363,18 @@ def test_full_experiment_launch(local_client: TestClient, dialog_dataset, depend
     * Retrieving and validating workflow logs
     * Deleting the experiment and ensuring associated workflows are also deleted
     """
+    dataset = request.getfixturevalue(dataset_name)
+
     check_backend_health_status(local_client)
     initial_count = check_initial_dataset_count(local_client)
-    dataset = upload_dataset(local_client, dialog_dataset)
+    dataset = upload_dataset(local_client, dataset)
     check_dataset_count_after_upload(local_client, initial_count)
-    experiment_id = create_experiment(local_client, dataset.id)
-    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1")
+    experiment_id = create_experiment(local_client, dataset.id, task_definition)
+    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1", task_definition, model)
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
-    workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2")
+    workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2", task_definition, model)
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
     check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
@@ -366,12 +393,23 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
     * Check that the workflow is in failed state
     * Check that the job is in stopped state
     """
+    # Hardcoded values for summarization
+    task_definition = {"task": "summarization"}
+
     check_backend_health_status(local_client)
     initial_count = check_initial_dataset_count(local_client)
     dataset = upload_dataset(local_client, dialog_dataset)
     check_dataset_count_after_upload(local_client, initial_count)
-    experiment_id = create_experiment(local_client, dataset.id)
-    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1", job_timeout_sec=1)
+    experiment_id = create_experiment(local_client, dataset.id, task_definition)
+    workflow_1 = run_workflow(
+        local_client,
+        dataset.id,
+        experiment_id,
+        "Workflow_1",
+        task_definition=task_definition,
+        model=TEST_SEQ2SEQ_MODEL,
+        job_timeout_sec=1,
+    )
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     assert workflow_1_details.status == WorkflowStatus.FAILED
     for job_id in workflow_1_details.jobs:
@@ -381,7 +419,7 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
 
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
-    non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
+    non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165s812"
     response = local_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"

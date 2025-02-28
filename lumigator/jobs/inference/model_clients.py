@@ -55,13 +55,14 @@ class LiteLLMModelClient(BaseModelClient):
     ) -> str:
         litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
         logger.info(f"Sending request to {litellm_model}")
+        logger.info(f"Config: {self.config}")
         response = completion(
             model=litellm_model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ],
-            max_new_tokens=self.config.generation_config.max_new_tokens,
+            max_tokens=self.config.generation_config.max_new_tokens,
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,
@@ -118,16 +119,47 @@ class HuggingFaceModelClient(BaseModelClient):
         tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
         This isn't true if it's a CausalLM model, since the output token positions would be len(input) + len(output).
         """
-        max_pos_emb = self._pipeline.model.config.max_position_embeddings
+        # 1. Setting input sequence max tokens
+        # Taken from https://stackoverflow.com/a/78737021
+        # Different LLM model families use different names for the same field
+        plausible_max_length_params = [
+            "max_position_embeddings",
+            "n_positions",
+            "n_ctx",
+            "seq_len",
+            "seq_length",
+            "max_sequence_length",
+            "sliding_window",
+        ]
+        # Check which attribute a given model config object has
+        matched_params = [
+            getattr(self._pipeline.model.config, param)
+            for param in plausible_max_length_params
+            if param in dir(self._pipeline.model.config)
+        ]
+        # Grab the first one in the list; usually there's only 1 anyway
+        if len(matched_params):
+            max_pos_emb = matched_params[0]
+        else:
+            raise ValueError(
+                "No field corresponding to max_position_embeddings parameter found"
+                f" for {self._config.hf_pipeline.model_name_or_path}."
+                f" Checked alternative fields: {plausible_max_length_params}"
+            )
+
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings
-        if self._pipeline.tokenizer.model_max_length >= max_pos_emb:
+        if self._pipeline.tokenizer.model_max_length > max_pos_emb:
             logger.warning(
                 f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
                 f" is bigger than the model's max_position_embeddings ({max_pos_emb})"
-                "Setting the tokenizer model_max_length to the model's max_position_embeddings."
+                " Setting the tokenizer model_max_length to the model's max_position_embeddings."
             )
             self._pipeline.tokenizer.model_max_length = max_pos_emb
+
+        # 2. Setting output sequence generation max tokens
+        # If the user has set a max_new_tokens to be generated
+        # we need to make sure it's not bigger than the model's max_position_embeddings
         if self._config.generation_config.max_new_tokens:
             if self._config.generation_config.max_new_tokens > max_pos_emb:
                 logger.warning(

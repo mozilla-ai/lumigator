@@ -90,11 +90,13 @@ jobs:
       - name: Run ${{ matrix.test }} integration tests
         run: make test-${{ matrix.test }}-integration
 
-      - name: Collect Ray logs in case of failure
+      - name: Collect logs in case of failure
         if: failure()
         run: |
           mkdir /tmp/raylogs
+          mkdir /tmp/backendlogs
           docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+          docker logs lumigator-backend-1 > /tmp/backendlogs/backend.log
 
       - name: Upload Ray logs in case of failure
         if: failure()
@@ -102,6 +104,13 @@ jobs:
         with:
           name: ray-logs
           path: /tmp/raylogs/ray/session_*/logs/
+
+      - name: Upload backend logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-logs
+          path: /tmp/backendlogs/backend.log
 
   integration-tests-postgres:
     name: Integration tests (PostgreSQL)

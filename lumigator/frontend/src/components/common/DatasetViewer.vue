@@ -28,10 +28,23 @@
       :showGridlines="true"
       :stripedRows="false"
       :exportFilename="downloadFileName"
+      :globalFilterFields="columns"
+      v-model:filters="filters"
       :editMode="isEditable ? 'cell' : undefined"
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
+      <template #header>
+        <div>
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search"></i>
+            </InputIcon>
+            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+          </IconField>
+        </div>
+      </template>
+      <template #empty> No items found. </template>
       <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
       <Column
         v-for="col in columns"
@@ -55,11 +68,15 @@ import {
   Column,
   DataTable,
   Drawer,
+  IconField,
+  InputIcon,
+  InputText,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
   type DataTableProps,
 } from 'primevue'
+import { FilterMatchMode } from '@primevue/core/api'
 import { defineComponent, ref, type PropType } from 'vue'
 
 export default defineComponent({
@@ -70,6 +87,9 @@ export default defineComponent({
     Column,
     PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
+    IconField,
+    InputIcon,
+    InputText,
   },
   emits: ['close'],
   props: {
@@ -97,7 +117,9 @@ export default defineComponent({
   setup(props) {
     const isVisible = ref(true)
     const dataTable = ref()
-
+    const filters = ref({
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    })
     const handleDownloadClicked = () => {
       dataTable.value.exportCSV()
     }
@@ -119,6 +141,7 @@ export default defineComponent({
       handleDownloadClicked,
       onCellEditComplete,
       onCellEditCancel,
+      filters,
       ...props,
     }
   },

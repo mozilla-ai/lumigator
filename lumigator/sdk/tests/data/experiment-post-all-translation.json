@@ -1,0 +1,11 @@
+{
+    "name": "translation experiment",
+    "description": "test translation experiment",
+    "dataset": "daab39ac-be9f-4de9-87c0-c4c94b297a97",
+    "max_samples": 1000,
+    "task_definition": {
+        "task": "translation",
+        "source_language": "en",
+        "target_language": "fr"
+      }
+}

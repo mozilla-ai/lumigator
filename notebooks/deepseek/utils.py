@@ -1,5 +1,8 @@
+from collections import defaultdict
 from time import sleep
 
+import pandas as pd
+import requests
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.workflows import WorkflowStatus
 from lumigator_sdk.lumigator import LumigatorClient
@@ -72,3 +75,66 @@ def extract_arch(model_name):
         return "Qwen"
     else:
         return "Other"
+
+
+def compile_and_display_results(client: LumigatorClient, experiment: GetExperimentResponse):
+    workflow_details = {}
+    for workflow in experiment.workflows:
+        if workflow.status == WorkflowStatus.SUCCEEDED:
+            response = requests.get(workflow.artifacts_download_url)
+            result = response.json()
+            workflow_details[workflow.name] = result
+        else:
+            print(f"Workflow {workflow.id} failed: deleting the workflow.")
+            client.workflows.delete_workflow(workflow.id)
+    # First, let's deduplicate and organize the results
+    model_results = defaultdict(dict)
+
+    # Process results and remove duplicates
+    for workflow in experiment.workflows:
+        model_name = workflow.name
+        for metric, value in workflow.metrics.items():
+            if "token" in metric:
+                model_results[model_name][metric] = round(value)
+            else:
+                model_results[model_name][metric] = value * 100
+
+    # Convert to DataFrame for better visualization
+    results_df = pd.DataFrame.from_dict(model_results, orient="index")
+
+    # Add columns for sorting
+    results_df["size"] = results_df.index.map(extract_size)
+    results_df["architecture"] = results_df.index.map(extract_arch)
+
+    # Sort by architecture and then by descending size
+    results_df = results_df.sort_values(by=["fluency_mean"], ascending=[False])
+
+    # Select just the most relevant metrics for display
+    display_metrics = [
+        "ref_token_length_mean",
+        "avg_reasoning_tokens",
+        "pred_token_length_mean",
+        "rouge1_mean",
+        "rouge2_mean",
+        "rougeL_mean",
+        "coherence_mean",
+        "fluency_mean",
+        "relevance_mean",
+    ]
+    display_df = results_df[display_metrics].copy()
+    display_df.columns = [
+        "# Ref Tok",
+        "# Reas Tok",
+        "# Answer Tokens",
+        "ROUGE-1",
+        "ROUGE-2",
+        "ROUGE-L",
+        "G-EVAL Coherence",
+        "G-EVAL Fluency",
+        "G-EVAL Relevance",
+    ]
+
+    # Display as formatted table
+    styled_df = display_df.style.format("{:.0f}").background_gradient(cmap="Greens")
+
+    return workflow_details, styled_df

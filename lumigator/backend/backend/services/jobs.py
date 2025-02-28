@@ -46,6 +46,7 @@ from backend.services.exceptions.job_exceptions import (
     JobTypeUnsupportedError,
     JobUpstreamError,
 )
+from backend.services.secrets import SecretService
 from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
@@ -89,12 +90,14 @@ class JobService:
         result_repo: JobResultRepository,
         ray_client: JobSubmissionClient,
         dataset_service: DatasetService,
+        secret_service: SecretService,
         background_tasks: BackgroundTasks,
     ):
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+        self._secret_service = secret_service
         self._background_tasks = background_tasks
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
@@ -393,6 +396,16 @@ class JobService:
         # build runtime ENV for workers
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
         settings.inherit_ray_env(runtime_env_vars)
+
+        # include requested api_keys from the secrets repository
+        # otherwise log a warning
+        loguru.logger.critical(f"requested keys: {request.api_keys}")
+        for key in request.api_keys:
+            value = self._secret_service.get_decrypted_secret_value(key)
+            if value:
+                runtime_env_vars[key] = value
+            else:
+                loguru.logger.warning(f"Requested key {key} not found")
 
         runtime_env = {
             "pip": job_settings.pip_reqs,

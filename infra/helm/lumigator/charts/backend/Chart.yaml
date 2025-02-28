@@ -38,3 +38,8 @@ dependencies:
     repository: "https://ray-project.github.io/kuberay-helm/"
     version: "1.2.2"
     condition: ray-cluster.enabled
+
+  - name: mlflow
+    repository: "https://community-charts.github.io/helm-charts"
+    version: "0.13.1"
+    condition: mlflow.enabled

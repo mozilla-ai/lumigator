@@ -11,8 +11,15 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.models import ModelsResponse
 from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
+from urllib3 import Retry
 
 LUMI_HOST = "localhost:8000"
+
+TEST_RETRY = Retry(
+    connect=10,
+    backoff_factor=1,
+    backoff_max=60,
+)
 
 
 @pytest.fixture(scope="function")
@@ -33,7 +40,7 @@ def lumi_client(request_mock) -> LumigatorClient:
 
 @pytest.fixture(scope="function")
 def lumi_client_int() -> LumigatorClient:
-    return LumigatorClient(LUMI_HOST)
+    return LumigatorClient(LUMI_HOST, retry_conf=TEST_RETRY)
 
 
 @pytest.fixture(scope="session")

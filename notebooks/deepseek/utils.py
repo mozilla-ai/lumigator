@@ -21,7 +21,7 @@ def wait_for_all_workflows(lumi_client_int: LumigatorClient, experiment_id: str)
     return experiment_details
 
 
-def create_deepseek_config(
+def create_evaluation_config(
     model_name,
     ip_address,
     port=8000,

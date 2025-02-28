@@ -183,6 +183,8 @@ class WorkflowService:
                     "consistency_mean": round(eval_output.metrics["g_eval_summarization"]["consistency_mean"], 3),
                     "fluency_mean": round(eval_output.metrics["g_eval_summarization"]["fluency_mean"], 3),
                     "relevance_mean": round(eval_output.metrics["g_eval_summarization"]["relevance_mean"], 3),
+                    "ref_token_length_mean": round(eval_output.metrics["token_length"]["ref_token_length_mean"], 3),
+                    "pred_token_length_mean": round(eval_output.metrics["token_length"]["pred_token_length_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.

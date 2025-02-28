@@ -78,14 +78,33 @@ class LiteLLMModelClient(BaseModelClient):
         if usage:
             logger.info(f"Usage: {usage}")
         prediction = response.choices[0].message.content
-        if "</think>" in prediction:
-            prediction = prediction.split("</think>")[1]
+        print(response.choices[0].message)
+        # LiteLLM will give us the reasoning if the API gives it back in its own field
+        reasoning = response.choices[0].message.reasoning_content
+        if reasoning:
+            reasoning_tokens = response["usage"]["completion_tokens_details"].reasoning_tokens
+        else:
+            reasoning_tokens = 0
+        # In some cases (aka vLLM deployments of DeepSeek R1) the reasoning is in the completion itself
+        # APIs are still catching up to adding "reasoning" as a separate field
+        # since it involves post processing model output
+        if not reasoning and "</think>" in prediction:
+            logger.info("Reasoning found in completion")
+            reasoning = prediction.split("</think>")[0].strip()
+            prediction = prediction.split("</think>")[1].strip()
+            # Rough estimate of reasoning tokens
+            # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
+            reasoning_tokens = int(len(reasoning.split()) / 0.75)
+
         return PredictionResult(
-            prediction=response.choices[0].message.content,
+            prediction=prediction,
+            reasoning=reasoning,
             metrics=InferenceMetrics(
                 prompt_tokens=usage.prompt_tokens,
                 total_tokens=usage.total_tokens,
                 completion_tokens=usage.completion_tokens,
+                reasoning_tokens=reasoning_tokens,
+                answer_tokens=usage.completion_tokens - reasoning_tokens,
             ),
         )
 
@@ -182,8 +201,6 @@ class HuggingFaceModelClient(BaseModelClient):
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]
-            if "</think>" in generation["summary_text"]:
-                generation["summary_text"] = generation["summary_text"].split("</think>")[1]
             prediction = generation["summary_text"]
         else:
             raise ValueError(f"Unsupported task: {self._task}")

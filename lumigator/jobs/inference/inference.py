@@ -13,7 +13,7 @@ from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelC
 from tqdm import tqdm
 from utils import timer
 
-from schemas import InferenceJobOutput, InferenceMetrics, JobOutput, PredictionResult
+from schemas import AverageInferenceMetrics, InferenceJobOutput, JobOutput, PredictionResult
 
 
 @timer
@@ -106,29 +106,35 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    predictions, inference_time = predict(dataset_iterable, model_client)
-    predictions: list[PredictionResult] = predictions
-    output[config.job.output_field] = [p.prediction for p in predictions]
-    output["inference_metrics"] = [p.metrics for p in predictions]
+    prediction_results, inference_time = predict(dataset_iterable, model_client)
+    prediction_results: list[PredictionResult] = prediction_results
+    output[config.job.output_field] = [p.prediction for p in prediction_results]
+    output["reasoning"] = [p.reasoning for p in prediction_results]
+    output["inference_metrics"] = [p.metrics for p in prediction_results]
     output["model"] = output_model_name
     output["inference_time"] = inference_time
-    if all(p.metrics is not None for p in predictions):
-        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in predictions]) / len(predictions)
-        avg_total_tokens = sum([p.metrics.total_tokens for p in predictions]) / len(predictions)
-        avg_completion_tokens = sum([p.metrics.completion_tokens for p in predictions]) / len(predictions)
-        metrics = InferenceMetrics(
-            prompt_tokens=avg_prompt_tokens,
-            total_tokens=avg_total_tokens,
-            completion_tokens=avg_completion_tokens,
+
+    artifacts = InferenceJobOutput.model_validate(output)
+    if all(p.metrics is not None for p in prediction_results):
+        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in prediction_results]) / len(prediction_results)
+        avg_total_tokens = sum([p.metrics.total_tokens for p in prediction_results]) / len(prediction_results)
+        avg_completion_tokens = sum([p.metrics.completion_tokens for p in prediction_results]) / len(prediction_results)
+        avg_reasoning_tokens = sum([p.metrics.reasoning_tokens for p in prediction_results]) / len(prediction_results)
+        avg_answer_tokens = sum([p.metrics.answer_tokens for p in prediction_results]) / len(prediction_results)
+        metrics = AverageInferenceMetrics(
+            avg_prompt_tokens=avg_prompt_tokens,
+            avg_total_tokens=avg_total_tokens,
+            avg_completion_tokens=avg_completion_tokens,
+            avg_reasoning_tokens=avg_reasoning_tokens,
+            avg_answer_tokens=avg_answer_tokens,
         )
     else:
         metrics = None
-    logger.info(output)
 
     results = JobOutput(
         metrics=metrics,
         parameters=config,
-        artifacts=InferenceJobOutput.model_validate(output),
+        artifacts=artifacts,
     )
 
     output_path = save_outputs(config, results)

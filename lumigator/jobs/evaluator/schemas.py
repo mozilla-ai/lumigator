@@ -17,7 +17,7 @@ class ModelConfig(BaseModel):
 
 
 class EvaluationConfig(BaseModel):
-    metrics: list[str] = Field(default=["rouge", "meteor", "g_eval_summarization", "bleu"])
+    metrics: list[str] = Field(default=["rouge", "meteor", "g_eval_summarization", "token_length"])
     max_samples: int = 0
     return_input_data: bool = False
     return_predictions: bool = False
@@ -83,12 +83,20 @@ class GEvalSummarizationMetrics(BaseModel):
     relevance_mean: float
 
 
+class TokenLength(BaseModel):
+    ref_token_length: list[int]
+    pred_token_length: list[int]
+    ref_token_length_mean: float
+    pred_token_length_mean: float
+
+
 class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
     g_eval_summarization: GEvalSummarizationMetrics | None = None
+    token_length: TokenLength | None = None
 
 
 class EvalJobArtifacts(BaseModel):

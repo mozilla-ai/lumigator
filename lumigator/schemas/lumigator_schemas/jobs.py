@@ -76,7 +76,7 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["rouge", "meteor", "g_eval_summarization", "bleu"]
+    metrics: list[str] = ["rouge", "meteor", "g_eval_summarization", "token_length", "bleu"]
 
 
 class GenerationConfig(BaseModel):

@@ -64,13 +64,26 @@ class InferenceJobConfig(BaseModel):
 
 
 class InferenceMetrics(BaseModel):
-    prompt_tokens: float
-    total_tokens: float
-    completion_tokens: float
+    model_config = ConfigDict(extra="forbid")
+    prompt_tokens: int
+    total_tokens: int
+    completion_tokens: int
+    reasoning_tokens: int | None = None
+    answer_tokens: int | None = None
+
+
+class AverageInferenceMetrics(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    avg_prompt_tokens: float
+    avg_total_tokens: float
+    avg_completion_tokens: float
+    avg_reasoning_tokens: float | None = None
+    avg_answer_tokens: float | None = None
 
 
 class InferenceJobOutput(BaseModel):
     predictions: list | None = None
+    reasoning: list | None = None
     examples: list
     ground_truth: list | None = None
     model: str
@@ -81,12 +94,11 @@ class InferenceJobOutput(BaseModel):
 class PredictionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prediction: str
+    reasoning: str | None = None
     metrics: InferenceMetrics = None
 
 
 class JobOutput(BaseModel):
-    # Nothing to put in metrics yet
-    # but eventually we will have metrics like tok/s, latency, average output length, etc.
-    metrics: InferenceMetrics | None = None
+    metrics: AverageInferenceMetrics | None = None
     artifacts: InferenceJobOutput
     parameters: InferenceJobConfig

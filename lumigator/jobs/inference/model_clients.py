@@ -77,7 +77,9 @@ class LiteLLMModelClient(BaseModelClient):
         usage: Usage = response["usage"]
         if usage:
             logger.info(f"Usage: {usage}")
-
+        prediction = response.choices[0].message.content
+        if "</think>" in prediction:
+            prediction = prediction.split("</think>")[1]
         return PredictionResult(
             prediction=response.choices[0].message.content,
             metrics=InferenceMetrics(

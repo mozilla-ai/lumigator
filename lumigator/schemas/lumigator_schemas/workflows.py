@@ -31,6 +31,7 @@ class WorkflowCreateRequest(BaseModel):
     system_prompt: str | None = None
     inference_output_field: str = "predictions"
     config_template: str | None = None
+    generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
     job_timeout_sec: PositiveInt = 60 * 60
 
 

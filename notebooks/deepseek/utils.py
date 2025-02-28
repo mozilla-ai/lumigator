@@ -24,6 +24,7 @@ def wait_for_all_workflows(lumi_client_int: LumigatorClient, experiment_id: str)
 def create_deepseek_config(
     model_name,
     ip_address,
+    port=8000,
     custom_desc=None,
     provider="openai",
 ):
@@ -41,6 +42,33 @@ def create_deepseek_config(
     else:
         config["description"] = f"The  deployment of {model_name}"
 
-    config["base_url"] = f"http://{ip_address}:8000/v1"
+    config["base_url"] = f"http://{ip_address}:{port}/v1"
 
     return config
+
+
+# Sort for readability - order by model architecture and size
+def extract_size(model_name):
+    if "70B" in model_name:
+        return 70
+    elif "32B" in model_name:
+        return 32
+    elif "14B" in model_name:
+        return 14
+    elif "8B" in model_name:
+        return 8
+    elif "7B" in model_name:
+        return 7
+    elif "1.5B" in model_name:
+        return 1.5
+    else:
+        return 0
+
+
+def extract_arch(model_name):
+    if "Llama" in model_name:
+        return "Llama"
+    elif "Qwen" in model_name:
+        return "Qwen"
+    else:
+        return "Other"

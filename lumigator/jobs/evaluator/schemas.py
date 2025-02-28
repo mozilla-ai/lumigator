@@ -17,7 +17,7 @@ class ModelConfig(BaseModel):
 
 
 class EvaluationConfig(BaseModel):
-    metrics: list[str] = Field(default=["rouge", "meteor", "bertscore", "bleu"])
+    metrics: list[str] = Field(default=["rouge", "meteor", "g_eval_summarization", "bleu"])
     max_samples: int = 0
     return_input_data: bool = False
     return_predictions: bool = False

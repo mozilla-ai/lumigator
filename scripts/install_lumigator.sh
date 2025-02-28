@@ -504,7 +504,7 @@ main() {
   }
   if [ -f "Makefile" ]; then
     DOCKER_MODE=$(detect_docker_mode)
-    if [ "$DOCKER_MODE" = "rootless" ]; then
+    if [ "$DOCKER_MODE" = "rootless" ] && [ "$OS_TYPE" = "linux" ]; then
       export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
     fi
     log "Starting Lumigator..."

@@ -4,6 +4,7 @@ litellm==1.60.6
 loguru==0.7.2
 pydantic>=2.10.0
 python-box==7.2.0
+requests-mock==1.12.1
 s3fs==2024.5.0
 sentencepiece==0.2.0
 torch==2.5.1

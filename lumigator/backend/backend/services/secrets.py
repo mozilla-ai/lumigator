@@ -2,6 +2,7 @@ import base64
 import binascii
 import os
 
+import loguru
 from cryptography.exceptions import InvalidKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
@@ -42,6 +43,7 @@ class SecretService:
         :return: boolean value indicating whether the secret is newly created (false if it already existed)
         """
         # Encrypt the value
+        loguru.logger.critical(f"uploading: {name} -> {secret_upload_request}")
         try:
             secret_upload_request.value = self._encrypt(secret_upload_request.value)
         except (TypeError, ValueError) as e:
@@ -50,6 +52,7 @@ class SecretService:
         # Save the secret via the repository
         secret_dict = secret_upload_request.model_dump()
         secret_dict["name"] = name
+        loguru.logger.critical(f"uploading (encoded): {name} -> {secret_dict}")
 
         return self._secret_repo.save_secret(name, secret_dict)
 
@@ -66,6 +69,7 @@ class SecretService:
             record = self._secret_repo.get_secret_by_name(name)
             if record is None:
                 return None
+            return self._decrypt(record.value)
         except ValueError as e:
             raise SecretDecryptionError(name) from e
 

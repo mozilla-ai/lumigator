@@ -171,4 +171,11 @@ export default defineComponent({
   margin-right: 1.5rem;
   gap: 0.125rem;
 }
+
+// global css overrides the cursor to be pointer, reset it back
+:deep(.p-datatable-table-container) {
+  [class*='p-row-'] {
+    cursor: unset;
+  }
+}
 </style>

@@ -24,6 +24,11 @@
             {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
+        <Column field="useCase" :style="columnStyles.useCase" header="use-case">
+          <template #body="slotProps">
+            <span style="text-transform: capitalize">{{ slotProps.data.task }}</span>
+          </template>
+        </Column>
         <Column field="status" header="status" :style="columnStyles.status">
           <template #body="slotProps">
             <div>
@@ -76,7 +81,7 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
-              @l-job-selected="onWorkflowSelected($event, slotProps.data)"
+              @l-job-selected="onWorkflowSelected($event)"
               @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
               @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
             />
@@ -102,7 +107,7 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { workflowsService } from '@/sdk/workflowsService'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
-import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import type { MenuItem } from 'primevue/menuitem'
 import { Menu } from 'primevue'
 const props = defineProps({
   tableData: {
@@ -156,7 +161,7 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-trash',
     style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
     disabled: false,
-    command: (e: MenuItemCommandEvent) => {
+    command: () => {
       emit('delete-option-clicked', focusedItem.value)
     },
   },
@@ -177,6 +182,7 @@ const columnStyles = computed(() => {
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
     status: 'width: 12rem',
+    useCase: '',
   }
 })
 
@@ -190,7 +196,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-async function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
+async function onWorkflowSelected(workflow: Workflow) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)

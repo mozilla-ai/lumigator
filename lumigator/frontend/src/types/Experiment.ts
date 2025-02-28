@@ -8,7 +8,7 @@ export type Experiment = {
   created_at: string
   updated_at: string
   workflows: Workflow[]
-  task: 'summarization'
+  task: 'summarization' | 'translation'
   dataset: string
   max_samples: number
 

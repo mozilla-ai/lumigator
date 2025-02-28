@@ -24,7 +24,7 @@ export async function deleteExperiment(id: string) {
 export type CreateExperimentPayload = {
   name: string
   description: string
-  task: 'summarization'
+  task: 'summarization' | 'translation'
 }
 
 // experiment_id and model are set by the inner function

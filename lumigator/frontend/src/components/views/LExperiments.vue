@@ -247,12 +247,7 @@ async function retrieveWorkflowLogs() {
     const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
     const logs = logsData.logs.split('\n')
 
-    logs.forEach((log: string) => {
-      const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
-      if (log && (workflowLogs.value.length === 0 || lastEntry !== log)) {
-        workflowLogs.value.push(log)
-      }
-    })
+    workflowLogs.value = logs
   }
 }
 

@@ -2,7 +2,6 @@ from uuid import UUID
 
 from inference.schemas import (
     DatasetConfig,
-    GenerationConfig,
     HuggingFacePipelineConfig,
     InferenceJobConfig,
     InferenceServerConfig,
@@ -55,12 +54,7 @@ class JobDefinitionInference(JobDefinition):
                 provider=request.job_config.provider,
                 max_retries=3,
             )
-        job_config.generation_config = GenerationConfig(
-            max_new_tokens=request.job_config.max_new_tokens,
-            frequency_penalty=request.job_config.frequency_penalty,
-            temperature=request.job_config.temperature,
-            top_p=request.job_config.top_p,
-        )
+        job_config.generation_config = request.job_config.generation_config
         return job_config
 
     def store_as_dataset(self) -> bool:

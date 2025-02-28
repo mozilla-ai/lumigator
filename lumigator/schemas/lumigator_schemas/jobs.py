@@ -76,7 +76,20 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
+    metrics: list[str] = ["rouge", "meteor", "g_eval_summarization", "token_length", "bleu"]
+
+
+class GenerationConfig(BaseModel):
+    """Custom and limited configuration for generation.
+    Sort of a subset of HF GenerationConfig
+    https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationConfig
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    max_new_tokens: int = 1024
+    frequency_penalty: float = 0.0
+    temperature: float = 1.0
+    top_p: float = 1.0
 
 
 class JobInferenceConfig(BaseModel):
@@ -91,10 +104,7 @@ class JobInferenceConfig(BaseModel):
     torch_dtype: str = "auto"
     base_url: str | None = None
     output_field: str | None = "predictions"
-    max_new_tokens: int = 1024
-    frequency_penalty: float = 0.0
-    temperature: float = 1.0
-    top_p: float = 1.0
+    generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
     store_to_dataset: bool = False
     system_prompt: str | None = Field(
         title="System Prompt",

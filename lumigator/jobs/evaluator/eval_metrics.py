@@ -40,6 +40,10 @@ class EvaluationMetrics:
                 "method": functools.partial(self._g_eval, task="summarization"),
                 "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.EXAMPLE],
             },
+            "token_length": {
+                "method": self._token_length,
+                "requires": [EvaluationFields.GROUND_TRUTH],
+            },
         }
 
         # chosen metrics are the intersection between the provided and the supported ones
@@ -200,6 +204,21 @@ class EvaluationMetrics:
             raise e
 
         return evals
+
+    def _token_length(self, pred: list, ref: list):
+        """Computes the token length of the reference text."""
+        # Rough estimate of token length
+        # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
+        ref_lengths = [int(len(r.split()) / 0.75) for r in ref]
+        avg_ref_length = np.mean(ref_lengths)
+        pred_lengths = [int(len(p.split()) / 0.75) for p in pred]
+        avg_pred_length = np.mean(pred_lengths)
+        return {
+            "ref_token_length": ref_lengths,
+            "ref_token_length_mean": avg_ref_length,
+            "pred_token_length": pred_lengths,
+            "pred_token_length_mean": avg_pred_length,
+        }
 
     def run_all(self, examples: list, pred: list, ref: list) -> EvalJobMetrics:
         results = {}

@@ -74,12 +74,14 @@ class WorkflowService:
             task_definition=request.task_definition,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
+            generation_config=request.generation_config,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
             dataset=request.dataset,
             max_samples=request.max_samples,
             job_config=job_infer_config,
+            generation_config=request.generation_config,
         )
 
         # submit inference job first
@@ -111,9 +113,16 @@ class WorkflowService:
             self._dataset_service.s3_filesystem,
         )
         # log the job to the tracking client
+        result_key = str(
+            Path(settings.S3_JOB_RESULTS_PREFIX)
+            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
+        )
+        with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            inf_output = JobResultObject.model_validate(json.loads(f.read()))
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
         inference_job_output = RunOutputs(
             parameters={"inference_output_s3_path": inf_path},
+            metrics=inf_output.metrics,
             ray_job_id=str(inference_job.id),
         )
         self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)
@@ -161,18 +170,21 @@ class WorkflowService:
             # we'll make that improvement later
             # Get the dataset from the S3 bucket
             result_key = self._job_service._get_results_s3_key(evaluation_job.id)
-
+            loguru.logger.info(f"METRICS {eval_output.metrics}")
             outputs = RunOutputs(
                 metrics={
                     "rouge1_mean": round(eval_output.metrics["rouge"]["rouge1_mean"], 3),
                     "rouge2_mean": round(eval_output.metrics["rouge"]["rouge2_mean"], 3),
                     "rougeL_mean": round(eval_output.metrics["rouge"]["rougeL_mean"], 3),
                     "rougeLsum_mean": round(eval_output.metrics["rouge"]["rougeLsum_mean"], 3),
-                    "bertscore_f1_mean": round(eval_output.metrics["bertscore"]["f1_mean"], 3),
-                    "bertscore_precision_mean": round(eval_output.metrics["bertscore"]["precision_mean"], 3),
-                    "bertscore_recall_mean": round(eval_output.metrics["bertscore"]["recall_mean"], 3),
                     "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
                     "bleu_mean": round(eval_output.metrics["bleu"]["bleu_mean"], 3),
+                    "coherence_mean": round(eval_output.metrics["g_eval_summarization"]["coherence_mean"], 3),
+                    "consistency_mean": round(eval_output.metrics["g_eval_summarization"]["consistency_mean"], 3),
+                    "fluency_mean": round(eval_output.metrics["g_eval_summarization"]["fluency_mean"], 3),
+                    "relevance_mean": round(eval_output.metrics["g_eval_summarization"]["relevance_mean"], 3),
+                    "ref_token_length_mean": round(eval_output.metrics["token_length"]["ref_token_length_mean"], 3),
+                    "pred_token_length_mean": round(eval_output.metrics["token_length"]["pred_token_length_mean"], 3),
                 },
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.

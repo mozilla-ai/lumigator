@@ -237,7 +237,7 @@ async function handleViewDatasetClicked(dataset: Dataset) {
   const text = await blob.text()
 
   // parse csv string into an array of arrays
-  const data = Papa.parse(text).data
+  const data = Papa.parse(text, {skipEmptyLines: true }).data
   const columns: string[] = data[0]
 
   // transform parsed csv into DataTable props

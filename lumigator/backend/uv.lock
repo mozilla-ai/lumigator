@@ -1254,11 +1254,15 @@ name = "lumigator-schemas"
 version = "0.1.1a0"
 source = { editable = "../schemas" }
 dependencies = [
+    { name = "backend" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.10.0" }]
+requires-dist = [
+    { name = "backend", editable = "." },
+    { name = "pydantic", specifier = ">=2.10.0" },
+]
 
 [[package]]
 name = "mako"

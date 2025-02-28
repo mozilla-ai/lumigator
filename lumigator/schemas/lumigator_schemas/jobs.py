@@ -76,7 +76,7 @@ class JobSubmissionResponse(BaseModel):
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["meteor", "rouge", "bertscore", "bleu"]
+    metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
 
 
 class JobInferenceConfig(BaseModel):

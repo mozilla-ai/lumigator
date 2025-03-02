@@ -70,7 +70,7 @@
       <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob.config.dataset.name }}
+          {{ selectedJob.config.dataset?.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item" v-if="selectedJob">

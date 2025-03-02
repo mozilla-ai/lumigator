@@ -109,6 +109,8 @@ def get_secret_service(
 
 
 SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]
+
+
 def get_redactor() -> Redactor:
     return Redactor(settings.sensitive_patterns)
 

@@ -5,7 +5,6 @@ import { datasetsService } from '@/sdk/datasetsService'
 import type { Dataset } from '@/types/Dataset'
 import { jobsService } from '@/sdk/jobsService'
 import type { Job } from '@/types/Job'
-import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { WorkflowStatus } from '@/types/Workflow'
 import { calculateDuration } from '@/helpers/calculateDuration'
 
@@ -63,8 +62,6 @@ export const useDatasetStore = defineStore('datasets', () => {
   function parseJob(job: Job) {
     return {
       ...job,
-      entrypoint: undefined,
-      ...retrieveEntrypoint(job),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }

@@ -33,6 +33,8 @@ class WorkflowCreateRequest(BaseModel):
     config_template: str | None = None
     generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
     job_timeout_sec: PositiveInt = 60 * 60
+    # Eventually metrics should be managed by the experiment level https://github.com/mozilla-ai/lumigator/issues/1105
+    metrics: list[str] | None = None
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

@@ -107,19 +107,20 @@ def compile_and_display_results(client: LumigatorClient, experiment: GetExperime
     results_df["architecture"] = results_df.index.map(extract_arch)
 
     # Sort by architecture and then by descending size
-    results_df = results_df.sort_values(by=["fluency_mean"], ascending=[False])
+    results_df = results_df.sort_values(by=["g_eval_summarization_fluency_mean"], ascending=[False])
 
     # Select just the most relevant metrics for display
     display_metrics = [
-        "ref_token_length_mean",
+        "token_length_ref_token_length_mean",
         "avg_reasoning_tokens",
-        "pred_token_length_mean",
-        "rouge1_mean",
-        "rouge2_mean",
-        "rougeL_mean",
-        "coherence_mean",
-        "fluency_mean",
-        "relevance_mean",
+        "token_length_pred_token_length_mean",
+        "rouge_rouge1_mean",
+        "rouge_rouge2_mean",
+        "rouge_rougeL_mean",
+        "g_eval_summarization_coherence_mean",
+        "g_eval_summarization_consistency_mean",
+        "g_eval_summarization_fluency_mean",
+        "g_eval_summarization_relevance_mean",
     ]
     display_df = results_df[display_metrics].copy()
     display_df.columns = [
@@ -130,11 +131,22 @@ def compile_and_display_results(client: LumigatorClient, experiment: GetExperime
         "ROUGE-2",
         "ROUGE-L",
         "G-EVAL Coherence",
+        "G-EVAL Consistency",
         "G-EVAL Fluency",
         "G-EVAL Relevance",
     ]
 
     # Display as formatted table
-    styled_df = display_df.style.format("{:.0f}").background_gradient(cmap="Greens")
+    styled_df = display_df.style.format("{:.1f}").background_gradient(cmap="Greens")
 
     return workflow_details, styled_df
+
+
+def get_finished_workflows(lumi_client_int: LumigatorClient, experiment_id: str):
+    experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+    finished_workflows = []
+    for workflow in experiment_details.workflows:
+        if workflow.status == WorkflowStatus.SUCCEEDED:
+            finished_workflows.append(workflow)
+    experiment_details.workflows = finished_workflows
+    return experiment_details

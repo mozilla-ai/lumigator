@@ -132,12 +132,19 @@ class WorkflowService:
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
+        if request.metrics:
+            job_config = JobEvalConfig(
+                metrics=request.metrics,
+            )
+        else:
+            job_config = JobEvalConfig()
+
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
             max_samples=request.max_samples,
-            job_config=JobEvalConfig(),
+            job_config=job_config,
         )
 
         # submit the job
@@ -172,21 +179,23 @@ class WorkflowService:
             # Get the dataset from the S3 bucket
             result_key = self._job_service._get_results_s3_key(evaluation_job.id)
             loguru.logger.info(f"METRICS {eval_output.metrics}")
+
+            def prepare_metrics(eval_output: JobResultObject):
+                formatted_metrics = {}
+                for metric_name, metric_value in eval_output.metrics.items():
+                    if isinstance(metric_value, dict):
+                        for sub_metric_name, sub_metric_value in metric_value.items():
+                            # only interested in mean, so we only look it items that are not lists
+                            if not isinstance(sub_metric_value, list) and sub_metric_value is not None:
+                                formatted_metrics[f"{metric_name}_{sub_metric_name}"] = sub_metric_value
+                    elif not isinstance(metric_value, list) and metric_value is not None:
+                        formatted_metrics[metric_name] = metric_value
+                return formatted_metrics
+
+            formatted_metrics = prepare_metrics(eval_output)
+
             outputs = RunOutputs(
-                metrics={
-                    "rouge1_mean": round(eval_output.metrics["rouge"]["rouge1_mean"], 3),
-                    "rouge2_mean": round(eval_output.metrics["rouge"]["rouge2_mean"], 3),
-                    "rougeL_mean": round(eval_output.metrics["rouge"]["rougeL_mean"], 3),
-                    "rougeLsum_mean": round(eval_output.metrics["rouge"]["rougeLsum_mean"], 3),
-                    "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
-                    "bleu_mean": round(eval_output.metrics["bleu"]["bleu_mean"], 3),
-                    "coherence_mean": round(eval_output.metrics["g_eval_summarization"]["coherence_mean"], 3),
-                    "consistency_mean": round(eval_output.metrics["g_eval_summarization"]["consistency_mean"], 3),
-                    "fluency_mean": round(eval_output.metrics["g_eval_summarization"]["fluency_mean"], 3),
-                    "relevance_mean": round(eval_output.metrics["g_eval_summarization"]["relevance_mean"], 3),
-                    "ref_token_length_mean": round(eval_output.metrics["token_length"]["ref_token_length_mean"], 3),
-                    "pred_token_length_mean": round(eval_output.metrics["token_length"]["pred_token_length_mean"], 3),
-                },
+                metrics=formatted_metrics,
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
@@ -230,11 +239,11 @@ class WorkflowService:
 
         return workflow
 
-    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+    def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
         workflow = self.get_workflow(workflow_id)
-        if workflow.status == WorkflowStatus.RUNNING:
+        if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
         return self._tracking_client.delete_workflow(workflow_id)
 

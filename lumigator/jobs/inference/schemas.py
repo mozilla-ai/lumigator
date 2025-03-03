@@ -3,12 +3,20 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
+from enum import Enum
+
 from pydantic import BaseModel, ConfigDict
 
 
 class DatasetConfig(BaseModel):
     path: str
     model_config = ConfigDict(extra="forbid")
+
+
+class TaskType(str, Enum):
+    SUMMARIZATION = "summarization"
+    TRANSLATION = "translation"
+    TEXT_GENERATION = "text-generation"
 
 
 class JobConfig(BaseModel):
@@ -42,6 +50,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
+    task: TaskType
     revision: str
     use_fast: bool
     trust_remote_code: bool
@@ -49,7 +58,6 @@ class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     accelerator: str
     model_config = ConfigDict(extra="forbid")
     truncation: bool = True
-    task: str | None = None
 
 
 class InferenceJobConfig(BaseModel):

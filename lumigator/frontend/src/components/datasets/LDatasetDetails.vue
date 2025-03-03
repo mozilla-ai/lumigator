@@ -74,6 +74,16 @@
       </div>
       <div class="l-dataset-details__actions">
         <Button
+          rounded
+          severity="secondary"
+          size="small"
+          icon="pi pi-microchip"
+          label="View Dataset"
+          class="l-dataset-empty__action-btn"
+          @click="emit('view-dataset-clicked', selectedDataset)"
+        ></Button>
+
+        <Button
           v-if="selectedDataset?.ground_truth"
           rounded
           severity="secondary"
@@ -128,6 +138,7 @@ const emit = defineEmits([
   'l-download-dataset',
   'l-details-closed',
   'l-experiment',
+  'view-dataset-clicked',
 ])
 
 const copyToClipboard = async (longString: string) => {
@@ -222,6 +233,7 @@ async function handleGenerateGroundTruth() {
     padding: $l-spacing-1 0;
     display: flex;
     justify-content: center;
+    gap: $l-spacing-1;
   }
 }
 </style>

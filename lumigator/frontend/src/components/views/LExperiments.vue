@@ -29,7 +29,7 @@
           v-if="selectedExperiment"
           :selectedExperiment="selectedExperiment"
           :selectedWorkflow="selectedWorkflow"
-          :title="selectedWorkflow ? 'Model Run Details': 'Experiment Details'"
+          :title="selectedWorkflow ? 'Model Run Details' : 'Experiment Details'"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowWorkflowResults($event)"
           @l-download-results="onDownloadResults($event)"
@@ -111,7 +111,7 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 const getDrawerHeader = () => {
-  const isWorkflowResults = selectedWorkflowResults && showJobResults.value
+  const isWorkflowResults = selectedWorkflowResults.value && showJobResults.value
   return showLogs.value
     ? 'Logs'
     : isWorkflowResults
@@ -247,12 +247,7 @@ async function retrieveWorkflowLogs() {
     const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
     const logs = logsData.logs.split('\n')
 
-    logs.forEach((log: string) => {
-      const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
-      if (workflowLogs.value.length === 0 || lastEntry !== log) {
-        workflowLogs.value.push(log)
-      }
-    })
+    workflowLogs.value = logs
   }
 }
 

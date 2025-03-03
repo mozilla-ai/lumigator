@@ -1,0 +1,36 @@
+{
+    "summarization": {
+        "coherence": {
+            "criteria": "The collective quality of all sentences. We align this dimension with the DUC quality question of structure and coherence whereby \"the summary should be well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to a coherent body of information about a topic.\"",
+            "evaluation_steps": [
+                "Read the source document carefully and identify the main topic and key points.",
+                "Read the summary and compare it to the source document. Check if the summary covers the main topic and key points of the source document, and if it presents them in a clear and logical order.",
+                "Assign a score for coherence based on the Evaluation Criteria."
+            ]
+        },
+        "consistency": {
+            "criteria": "The factual alignment between the summary and the summarized source. A factually consistent summary contains only statements that are entailed by the source document. Annotators were also asked to penalize summaries that contained hallucinated facts.",
+            "evaluation_steps": [
+                "Read the source document carefully and identify the main facts and details it presents.",
+                "Read the summary and compare it to the source document. Check if the summary contains any factual errors that are not supported by the source document.",
+                "Assign a score for consistency based on the Evaluation Criteria."
+            ]
+        },
+        "fluency": {
+            "criteria": "The quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.",
+            "evaluation_steps": [
+                "Read the summary and identify whether it contains any errors in terms of grammar, spelling, punctuation, word choice, and sentence structure.",
+                "Assign a score for fluency based on the Evaluation Criteria and the following rubric: Poor [0-3]: the summary has many errors that make it hard to understand or sound unnatural. Fair [4-7]: the summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible. Good [8-10]: the summary has few or no errors and is easy to read and follow."
+            ]
+        },
+        "relevance": {
+            "criteria": "Selection of important content from the source. The summary should include only important information from the source document. Annotators were instructed to penalize summaries which contained redundancies and excess information.",
+            "evaluation_steps": [
+                "Read the summary and the source document carefully.",
+                "Compare the summary to the source document and identify the main points of the source document.",
+                "Assess how well the summary covers the main points of the source document, and how much irrelevant or redundant information it contains.",
+                "Assign a score for relevance based on the Evaluation Criteria."
+            ]
+        }
+    }
+}

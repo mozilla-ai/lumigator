@@ -16,7 +16,7 @@
           <Tab value="0">All Datasets</Tab>
           <Tab value="1">
             <div :class="{ 'is-running': hasRunningInferenceJob }">
-              <span>Groundtruth Jobs</span>
+              <span>Ground Truth Jobs</span>
             </div>
           </Tab>
         </TabList>

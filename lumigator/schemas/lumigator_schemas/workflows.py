@@ -1,7 +1,7 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, FieldValidationInfo, PositiveInt, field_validator
+from pydantic import BaseModel, Field, PositiveInt, ValidationInfo, field_validator
 
 from lumigator_schemas.jobs import (
     JobResults,
@@ -33,7 +33,7 @@ class WorkflowCreateRequest(BaseModel):
     job_timeout_sec: PositiveInt = 60 * 10
 
     @field_validator("system_prompt")
-    def validate_system_prompt(cls, system_prompt: str | None, info: FieldValidationInfo) -> str | None:
+    def validate_system_prompt(cls, system_prompt: str | None, info: ValidationInfo) -> str | None:
         task_definition = info.data.get("task_definition")
         if task_definition.task == TaskType.TEXT_GENERATION and not system_prompt:
             raise ValueError(

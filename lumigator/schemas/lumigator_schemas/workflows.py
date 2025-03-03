@@ -48,6 +48,7 @@ class WorkflowResponse(BaseModel, from_attributes=True):
     model: str
     name: str
     description: str
+    system_prompt: str
     status: WorkflowStatus
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None

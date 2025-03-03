@@ -45,7 +45,9 @@ class TrackingClient(Protocol):
         """Count all experiments."""
         ...
 
-    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         ...
 

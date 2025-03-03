@@ -209,6 +209,7 @@ class WorkflowService:
             description=request.description,
             name=request.name,
             model=request.model,
+            system_prompt=request.system_prompt,
             # input is WorkflowCreate, we need to split the configs and generate one
             # JobInferenceCreate and one JobEvalCreate
         )

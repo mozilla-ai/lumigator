@@ -93,11 +93,6 @@ To start Lumigator locally, follow these steps:
     cd lumigator
     ```
 
-> [!NOTE]
-Since Lumigator is in active development, we always pull the latest images for the frontend and backend in our Docker Compose setup. If you are looking for a stable release, please check out the latest Git tag on our [Releases](https://github.com/mozilla-ai/lumigator/releases) page.
-**Important: You cannot simply change the images in the docker-compose file. Ensure that your working directory matches the Git tag you are using to maintain compatibility.
-
-
 1. If your system has an NVIDIA GPU, you have an additional pre-requirement: [install the NVIDIA Container Toolkit following their instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). After that, open a terminal and run:
     ```bash
     export RAY_WORKER_GPUS=1
@@ -147,6 +142,10 @@ To stop the containers you started using Docker Compose, simply run the followin
 ```bash
 make stop-lumigator
 ```
+
+> [!NOTE]
+Since Lumigator is in active development, we always pull the latest images for the frontend and backend in our Docker Compose setup. If you are looking for a stable release, please check out the latest Git tag on our [Releases](https://github.com/mozilla-ai/lumigator/releases) page.
+**Important: You cannot simply change the images in the docker-compose file. Ensure that your working directory matches the Git tag you are using to maintain compatibility.
 
 ## Kubernetes Installation
 

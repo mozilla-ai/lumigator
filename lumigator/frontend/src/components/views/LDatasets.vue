@@ -198,12 +198,7 @@ async function retrieveJobLogs() {
   if (selectedJob.value) {
     const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
     const logs = logsData.logs.split('\n')
-    logs.forEach((log: string) => {
-      const lastEntry = jobLogs.value[jobLogs.value.length - 1]
-      if (jobLogs.value.length === 0 || lastEntry !== log) {
-        jobLogs.value.push(log)
-      }
-    })
+    jobLogs.value = logs
   }
 }
 

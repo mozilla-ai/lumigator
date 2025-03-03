@@ -187,21 +187,21 @@ def extra_column_dataset() -> str:
 
 @pytest.fixture(scope="function")
 def dialog_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
+    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
 def dialog_empty_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_empty_gt.csv"
+    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_mini_empty_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
 def dialog_no_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_no_gt.csv"
+    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 

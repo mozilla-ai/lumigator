@@ -195,20 +195,20 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
 
 @pytest.fixture(scope="function")
 def dialog_data(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
+    with Path.open(common_resources_dir / "summarization" / "dialogsum_exc.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def dialog_data_unannotated(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_mini_no_gt.csv") as file:
+    with Path.open(common_resources_dir / "summarization" / "dialogsum_mini_no_gt.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
 def long_sequences_data_unannotated(common_resources_dir):
     # Dataset with long sequences
-    with Path.open(common_resources_dir / "mock_long_sequences_no_gt.csv") as file:
+    with Path.open(common_resources_dir / "summarization" / "mock_long_sequences_no_gt.csv") as file:
         yield file
 
 

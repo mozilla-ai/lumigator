@@ -1,13 +1,13 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, PositiveInt, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, PositiveInt
 
 from lumigator_schemas.jobs import (
     JobResults,
     LowercaseEnum,
 )
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType, get_default_system_prompt
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, get_default_system_prompt
 
 
 class WorkflowStatus(LowercaseEnum):
@@ -31,15 +31,6 @@ class WorkflowCreateRequest(BaseModel):
     inference_output_field: str = "predictions"
     config_template: str | None = None
     job_timeout_sec: PositiveInt = 60 * 10
-
-    @field_validator("system_prompt")
-    def validate_system_prompt(cls, system_prompt: str | None, info: ValidationInfo) -> str | None:
-        task_definition = info.data.get("task_definition")
-        if task_definition.task == TaskType.TEXT_GENERATION and not system_prompt:
-            raise ValueError(
-                f"system_prompt required for task=`{TaskType.TEXT_GENERATION.value}`, Received: {system_prompt}"
-            )
-        return system_prompt
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

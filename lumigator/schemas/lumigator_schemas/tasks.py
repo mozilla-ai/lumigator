@@ -49,5 +49,8 @@ SYSTEM_PROMPT_DEFAULTS = {
 def get_default_system_prompt(task_definition: TaskDefinition) -> str:
     generator = SYSTEM_PROMPT_DEFAULTS.get(task_definition.task)
     if not generator:
-        raise ValueError(f"No default system_prompt defined for {task_definition.task.value}")
+        raise ValueError(
+            f"Default system_prompt not available for {task_definition.task.value}. "
+            "It must be provided explicitly by the user."
+        )
     return generator(task_definition) if callable(generator) else generator

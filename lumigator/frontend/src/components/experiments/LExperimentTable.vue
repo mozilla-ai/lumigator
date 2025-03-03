@@ -240,7 +240,7 @@ async function updateExperimentStatus(experiment: Experiment): Promise<void> {
       }
     })
 
-    const status = incompleteWorkflowDetails.every((workflow) =>
+    const status = incompleteWorkflowDetails.length && incompleteWorkflowDetails.every((workflow) =>
       completedStatus.includes(workflow.status),
     )
       ? incompleteWorkflowDetails[0].status

@@ -50,7 +50,7 @@
         v-if="showExpResults && selectedExperimentResults.length"
         :results="selectedExperimentResults"
       />
-      <l-job-results
+      <WorkflowResults
         v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"
       />
@@ -72,7 +72,6 @@ import LExperimentForm from '@/components/experiments/LExperimentForm.vue'
 import LExperimentDetails from '@/components/experiments/LExperimentDetails.vue'
 import LExperimentsDrawer from '@/components/experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
-import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
 import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
@@ -83,6 +82,7 @@ import { downloadContent } from '@/helpers/downloadContent'
 import { getExperimentResults } from '@/helpers/getExperimentResults'
 import { transformJobResults } from '@/helpers/transformJobResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
+import WorkflowResults from '../experiments/WorkflowResults.vue'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()

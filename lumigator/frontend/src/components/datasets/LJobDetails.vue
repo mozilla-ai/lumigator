@@ -70,7 +70,7 @@
       <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">dataset</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob.dataset.name }}
+          {{ selectedJob.config.dataset?.name }}
         </div>
       </div>
       <div class="l-experiment-details__content-item" v-if="selectedJob">
@@ -82,7 +82,7 @@
       <div v-if="isJobFocused" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedJob as any)?.model.path }}
+          {{ selectedJob.config.model_name_or_path }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">

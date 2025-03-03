@@ -3,6 +3,7 @@ from typing import Annotated
 
 import boto3
 from fastapi import BackgroundTasks, Depends
+from lumigator_schemas.redactor import Redactor
 from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -108,3 +109,10 @@ def get_secret_service(
 
 
 SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]
+
+
+def get_redactor() -> Redactor:
+    return Redactor(settings.sensitive_patterns)
+
+
+RedactorDep = Annotated[Redactor, Depends(get_redactor)]

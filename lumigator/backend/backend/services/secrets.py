@@ -61,6 +61,7 @@ class SecretService:
         :param name: The name of the secret to be uploaded
         :param secret_upload_request: The secret upload request containing the secret data
         :return: boolean value indicating whether the secret is newly created (false if it already existed)
+        :raises SecretEncryptionError: raised if there are issues during encryption
         """
         # Encrypt the value
         try:

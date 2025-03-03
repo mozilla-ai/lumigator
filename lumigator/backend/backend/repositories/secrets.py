@@ -14,25 +14,9 @@ class SecretRepository(BaseRepository[SecretRecord]):
         """Retrieve secret by name (case-insensitive)."""
         return self.session.query(SecretRecord).filter(SecretRecord._name == name.lower()).first()
 
-    def _create_secret(self, secret_data: dict) -> SecretRecord:
-        """Create a new secret."""
-        secret = SecretRecord(**secret_data)
-        self.session.add(secret)
-        self.session.commit()
-
-        return secret
-
-    def _update_secret(self, secret_id: UUID, secret_data: dict) -> SecretRecord | None:
-        """Update an existing secret."""
-        secret = self.session.query(SecretRecord).filter(SecretRecord.id == secret_id).first()
-        if not secret:
-            return None
-
-        for key, value in secret_data.items():
-            setattr(secret, key, value)
-        self.session.commit()
-
-        return secret
+    def list_secrets(self) -> list[SecretRecord]:
+        """List all secrets."""
+        return self.list()
 
     def save_secret(self, name: str, secret_data: dict) -> bool:
         """Save a secret (create or update) to the database.
@@ -53,3 +37,23 @@ class SecretRepository(BaseRepository[SecretRecord]):
         else:
             self._create_secret(secret_data)
             return True
+
+    def _create_secret(self, secret_data: dict) -> SecretRecord:
+        """Create a new secret."""
+        secret = SecretRecord(**secret_data)
+        self.session.add(secret)
+        self.session.commit()
+
+        return secret
+
+    def _update_secret(self, secret_id: UUID, secret_data: dict) -> SecretRecord | None:
+        """Update an existing secret."""
+        secret: SecretRecord | None = self.session.query(SecretRecord).filter(SecretRecord.id == secret_id).first()
+        if not secret:
+            return None
+
+        for key, value in secret_data.items():
+            setattr(secret, key, value)
+        self.session.commit()
+
+        return secret

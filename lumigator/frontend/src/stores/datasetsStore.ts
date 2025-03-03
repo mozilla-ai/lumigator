@@ -5,7 +5,6 @@ import { datasetsService } from '@/sdk/datasetsService'
 import type { Dataset } from '@/types/Dataset'
 import { jobsService } from '@/sdk/jobsService'
 import type { Job } from '@/types/Job'
-import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
 import { WorkflowStatus } from '@/types/Workflow'
 import { calculateDuration } from '@/helpers/calculateDuration'
 
@@ -47,7 +46,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       .filter((job) => job.metadata.job_type === 'inference')
       // NOTE: 'temporary fix' to prevent showing inference jobs that weren't created by the UI
       // to generate ground truth.
-      .filter((job) => job.name.startsWith("Ground truth for "))
+      .filter((job) => job.name.startsWith('Ground truth for '))
       .map((job) => parseJob(job))
   }
 
@@ -63,8 +62,6 @@ export const useDatasetStore = defineStore('datasets', () => {
   function parseJob(job: Job) {
     return {
       ...job,
-      entrypoint: undefined,
-      ...retrieveEntrypoint(job),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }

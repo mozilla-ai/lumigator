@@ -134,7 +134,7 @@ const options = ref<MenuItem[]>([
     label: 'View Results',
     icon: 'pi pi-external-link',
     disabled: () => {
-      return focusedItem.value?.status !== WorkflowStatus.SUCCEEDED
+      return Boolean(focusedItem.value?.status !== WorkflowStatus.SUCCEEDED)
     },
     command: () => {
       emit('view-experiment-results-clicked', focusedItem.value)
@@ -167,6 +167,7 @@ const style = computed(() => {
 })
 
 const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow | Experiment) => {
+  event.stopPropagation()
   focusedItem.value = selectedItem
   optionsMenu.value.toggle(event)
 }

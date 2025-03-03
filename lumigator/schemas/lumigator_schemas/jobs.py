@@ -88,8 +88,8 @@ class GenerationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     max_new_tokens: int = 1024
     frequency_penalty: float = 0.0
-    temperature: float = 1.0
-    top_p: float = 1.0
+    temperature: float = 0.5
+    top_p: float = 0.5
 
 
 class JobInferenceConfig(BaseModel):

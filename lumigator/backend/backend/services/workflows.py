@@ -56,6 +56,19 @@ class WorkflowService:
         # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
         self.TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
 
+    def _prepare_metrics(self, eval_output: JobResultObject) -> dict:
+        """Flatten the metrics dictionary to a single level so that it can be stored in RunOutputs."""
+        formatted_metrics = {}
+        for metric_name, metric_value in eval_output.metrics.items():
+            if isinstance(metric_value, dict):
+                for sub_metric_name, sub_metric_value in metric_value.items():
+                    # only interested in mean, so we only look it items that are not lists
+                    if not isinstance(sub_metric_value, list) and sub_metric_value is not None:
+                        formatted_metrics[f"{metric_name}_{sub_metric_name}"] = sub_metric_value
+            elif not isinstance(metric_value, list) and metric_value is not None:
+                formatted_metrics[metric_name] = metric_value
+        return formatted_metrics
+
     async def _run_inference_eval_pipeline(
         self,
         workflow: WorkflowResponse,
@@ -82,7 +95,6 @@ class WorkflowService:
             dataset=request.dataset,
             max_samples=request.max_samples,
             job_config=job_infer_config,
-            generation_config=request.generation_config,
         )
 
         # submit inference job first
@@ -180,19 +192,7 @@ class WorkflowService:
             result_key = self._job_service._get_results_s3_key(evaluation_job.id)
             loguru.logger.info(f"METRICS {eval_output.metrics}")
 
-            def prepare_metrics(eval_output: JobResultObject):
-                formatted_metrics = {}
-                for metric_name, metric_value in eval_output.metrics.items():
-                    if isinstance(metric_value, dict):
-                        for sub_metric_name, sub_metric_value in metric_value.items():
-                            # only interested in mean, so we only look it items that are not lists
-                            if not isinstance(sub_metric_value, list) and sub_metric_value is not None:
-                                formatted_metrics[f"{metric_name}_{sub_metric_name}"] = sub_metric_value
-                    elif not isinstance(metric_value, list) and metric_value is not None:
-                        formatted_metrics[metric_name] = metric_value
-                return formatted_metrics
-
-            formatted_metrics = prepare_metrics(eval_output)
+            formatted_metrics = self._prepare_metrics(eval_output)
 
             outputs = RunOutputs(
                 metrics=formatted_metrics,

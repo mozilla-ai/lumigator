@@ -19,6 +19,12 @@ def secret_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     }
 
 
+@router.get("/")
+def list_secrets(service: SecretServiceDep) -> list[SecretGetRequest]:
+    """Lists all API configured secret names (and descriptions) stored in Lumigator."""
+    return service.list_secrets()
+
+
 @router.put(
     "/{secret_name}",
     status_code=status.HTTP_201_CREATED,

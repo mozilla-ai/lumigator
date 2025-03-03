@@ -4,6 +4,8 @@
     "name": "experiment",
     "description": "test experiment",
     "created_at": "2024-10-01T19:01:45.080000Z",
-    "task": "summarization",
+    "task_definition": {
+        "task": "summarization"
+      },
     "updated_at": null
 }

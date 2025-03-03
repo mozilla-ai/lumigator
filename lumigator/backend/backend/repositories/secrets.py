@@ -10,6 +10,18 @@ class SecretRepository(BaseRepository[SecretRecord]):
     def __init__(self, session: Session):
         super().__init__(SecretRecord, session)
 
+    def delete_secret(self, name: str) -> bool:
+        """Delete a secret identified by its name.
+
+        :param name: The name of the secret to be deleted
+        :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found, or not deleted.
+        """
+        secret = self.get_secret_by_name(name)
+        if not secret:
+            return False
+
+        return bool(self.delete(secret.id))
+
     def get_secret_by_name(self, name: str) -> SecretRecord | None:
         """Retrieve secret by name (case-insensitive)."""
         return self.session.query(SecretRecord).filter(SecretRecord._name == name.lower()).first()

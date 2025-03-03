@@ -8,12 +8,14 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import boto3
+import evaluator
 import fsspec
 import pytest
 import requests_mock
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
+from inference.definition import JobDefinitionInference
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
@@ -41,7 +43,7 @@ from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
-TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -87,6 +89,10 @@ def wait_for_job(client, job_id: UUID) -> bool:
             timed_out = False
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.STOPPED.value:
             succeeded = False
             timed_out = False
             break
@@ -416,7 +422,7 @@ def create_job_config() -> JobConfig:
     conf_args = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "facebook/bart-large-cnn",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,
@@ -427,8 +433,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=JobType.EVALUATION,
-        command=settings.EVALUATOR_COMMAND,
+        job_type=evaluator.definition.JOB_DEFINITION.type,
+        command=evaluator.definition.JOB_DEFINITION.command,
         args=conf_args,
     )
 
@@ -470,3 +476,14 @@ def simple_infer_template():
             "storage_path": "{storage_path}"
         }}
     }}"""
+
+
+@pytest.fixture
+def job_definition_fixture():
+    return JobDefinitionInference(
+        command=MagicMock(spec=str),
+        pip_reqs=MagicMock(spec=list),
+        work_dir=MagicMock(spec=str),
+        config_model=MagicMock(spec=dict),
+        type=JobType.INFERENCE,
+    )

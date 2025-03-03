@@ -111,3 +111,11 @@ Generated Secret name for OpenAI
 {{- include "ray-cluster.fullname" (index .Subcharts "ray-cluster") }}-head-svc
 {{- end }}
 {{- end -}}
+
+{{- define "lumigator.mlflow-address" -}}
+{{- if .Values.mlFlowAddress }}
+{{- .Values.mlFlowAddress }}
+{{- else }}
+{{- include "mlflow.fullname" (index .Subcharts "mlflow") }}
+{{- end }}
+{{- end -}}

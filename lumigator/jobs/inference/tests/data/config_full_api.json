@@ -11,7 +11,6 @@
         "base_url": "http://localhost:8080/v1",
         "model": "mistral/Mistral-7B-Instruct-v0.2",
         "provider": "openai",
-        "system_prompt": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",
         "max_retries": 3
     },
     "generation_config": {
@@ -19,5 +18,6 @@
         "frequency_penalty": 0.0,
         "temperature": 1.0,
         "top_p": 1.0
-    }
+    },
+    "system_prompt": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
 }

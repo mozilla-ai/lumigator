@@ -3,9 +3,16 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from lumigator_schemas.redactable_base_model import RedactableBaseModel
+from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
+
+from lumigator_schemas.tasks import (
+    SummarizationTaskDefinition,
+    TaskDefinition,
+    TaskType,
+)
 
 
 class LowercaseEnum(str, Enum):
@@ -29,6 +36,7 @@ class JobStatus(LowercaseEnum):
     RUNNING = "running"
     FAILED = "failed"
     SUCCEEDED = "succeeded"
+    STOPPED = "stopped"
 
 
 class JobConfig(BaseModel):
@@ -52,12 +60,12 @@ class JobLogsResponse(BaseModel):
 # Check Ray items actually used and copy
 # those from the schema
 # ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
-class JobSubmissionResponse(BaseModel):
+class JobSubmissionResponse(RedactableBaseModel):
     type: str | None = None
     submission_id: str | None = None
     driver_info: str | None = None
     status: str | None = None
-    entrypoint: str | None = None
+    config: dict | None = Field(default_factory=dict)
     message: str | None = None
     error_type: str | None = None
     start_time: dt.datetime | None = None
@@ -68,10 +76,28 @@ class JobSubmissionResponse(BaseModel):
     driver_node_id: str | None = None
     driver_exit_code: int | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def transform(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """Pre-processes and validates the 'entrypoint' configuration before model validation.
+
+        This method uses Pydantic's 'model_validator' hook to parse the 'entrypoint'
+        configuration, and where appropriate, redact sensitive information. It then
+        assigns the processed configuration to the `config` field of the model
+        (`JobSubmissionResponse`) before model validation occurs.
+
+        :param values: The dictionary of field values to be processed.
+            It contains the model data, including the 'entrypoint' configuration.
+        :returns (dict[str, Any]): The updated values dictionary, with the processed and
+            potentially redacted 'entrypoint' configuration assigned to the `config` field.
+        """
+        transformed_values = transform_job_submission_response(values)
+        return transformed_values
+
 
 class JobEvalConfig(BaseModel):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    metrics: list[str] = ["meteor", "rouge", "bertscore", "bleu"]
+    metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
 
 
 class JobInferenceConfig(BaseModel):
@@ -91,6 +117,16 @@ class JobInferenceConfig(BaseModel):
     temperature: float = 1.0
     top_p: float = 1.0
     store_to_dataset: bool = False
+    system_prompt: str | None = Field(
+        title="System Prompt",
+        description="System prompt to use for the model inference."
+        "If not provided, a task-specific default prompt will be used.",
+        default=None,
+        examples=[
+            "You are an advanced AI trained to summarize documents accurately and concisely. "
+            "Your goal is to extract key information while maintaining clarity and coherence."
+        ],
+    )
 
 
 class JobAnnotateConfig(BaseModel):

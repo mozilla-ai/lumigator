@@ -133,6 +133,7 @@ const options = ref<MenuItem[]>([
 
 const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow) => {
   clickedItem.value = selectedItem
+  event.stopPropagation()
   optionsMenu.value.toggle(event, selectedItem)
 }
 

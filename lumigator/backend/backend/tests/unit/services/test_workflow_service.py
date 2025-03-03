@@ -34,7 +34,7 @@ def test_default_system_prompt_for_summarization():
         description="Test default system prompt for summarization",
         model=TEST_SEQ2SEQ_MODEL,
         provider="hf",
-        task_definition={"task": "summarization"},  # JSON-style dictionary
+        task_definition={"task": "summarization"},
         # system_prompt is intentionally not provided
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
     )
@@ -55,7 +55,7 @@ def test_default_system_prompt_for_translation():
             "task": "translation",
             "source_language": "English",
             "target_language": "Spanish",
-        },  # JSON-style dictionary with language parameters
+        },
         # system_prompt is intentionally not provided
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
     )
@@ -73,7 +73,7 @@ def test_custom_system_prompt_overrides_default():
         description="Test custom system prompt overrides default",
         model=TEST_SEQ2SEQ_MODEL,
         provider="hf",
-        task_definition={"task": "summarization"},  # JSON-style dictionary
+        task_definition={"task": "summarization"},
         system_prompt=custom_prompt,  # Provide a custom system prompt
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
     )

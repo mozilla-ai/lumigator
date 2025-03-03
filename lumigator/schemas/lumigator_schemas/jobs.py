@@ -6,13 +6,12 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from lumigator_schemas.redactable_base_model import RedactableBaseModel
-from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
-
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
     TaskType,
 )
+from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
 
 class LowercaseEnum(str, Enum):
@@ -88,7 +87,7 @@ class JobSubmissionResponse(RedactableBaseModel):
 
         :param values: The dictionary of field values to be processed.
             It contains the model data, including the 'entrypoint' configuration.
-        :returns (dict[str, Any]): The updated values dictionary, with the processed and
+        :return: The updated values dictionary, with the processed and
             potentially redacted 'entrypoint' configuration assigned to the `config` field.
         """
         transformed_values = transform_job_submission_response(values)

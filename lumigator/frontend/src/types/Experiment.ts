@@ -36,3 +36,25 @@ export type EvaluationJobResults = {
   rouge: Rouge
   inference_time: number
 }
+
+export type CreateExperimentPayload = {
+  name: string
+  description: string
+  dataset: string
+  max_samples: number
+  task_definition: SummarizationTaskDefinition | TranslationTaskDefinition
+}
+
+export interface TaskDefinition {
+  task: 'summarization' | 'translation'
+}
+
+export interface SummarizationTaskDefinition extends TaskDefinition {
+  task: 'summarization'
+}
+
+export interface TranslationTaskDefinition extends TaskDefinition {
+  task: 'translation'
+  source_language: string
+  target_language: string
+}

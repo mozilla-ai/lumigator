@@ -19,8 +19,8 @@
       </template>
     </Column>
     <Column field="useCase" :style="columnStyles.useCase" header="use-case">
-      <template #body="slotProps">
-        <span style="text-transform: capitalize">{{ slotProps.data.task }}</span>
+      <template #body>
+        <span style="text-transform: capitalize">{{ useCase }}</span>
       </template>
     </Column>
     <Column field="status" header="status" :style="columnStyles.status">
@@ -87,6 +87,10 @@ defineProps({
   },
   columnStyles: {
     type: Object,
+    required: true,
+  },
+  useCase: {
+    type: String,
     required: true,
   },
 })

@@ -1,3 +1,5 @@
+import type { SummarizationTaskDefinition, TranslationTaskDefinition } from './Experiment'
+
 export type Workflow = {
   id: string
   experiment_id: string
@@ -55,4 +57,5 @@ export type CreateWorkflowPayload = {
   system_prompt?: string
   inference_output_field?: string
   config_template?: string
+  task_definition: SummarizationTaskDefinition | TranslationTaskDefinition
 }

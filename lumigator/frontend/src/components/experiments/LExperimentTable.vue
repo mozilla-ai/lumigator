@@ -81,6 +81,7 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
+              :useCase="slotProps.data.task"
               @l-job-selected="onWorkflowSelected($event)"
               @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
               @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
@@ -183,7 +184,7 @@ const columnStyles = computed(() => {
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
     status: 'width: 12rem',
-    useCase: '',
+    useCase: 'width: 8rem',
   }
 })
 
@@ -242,7 +243,7 @@ async function updateExperimentStatus(experiment: Experiment): Promise<void> {
     const status = incompleteWorkflowDetails.every((workflow) =>
       completedStatus.includes(workflow.status),
     )
-      ? WorkflowStatus.SUCCEEDED
+      ? incompleteWorkflowDetails[0].status
       : retrieveStatus(experiment)
 
     // const e = experiments.value.find((exp) => exp.id === experiment.id)

@@ -52,7 +52,12 @@
       </div>
 
       <FloatLabel variant="in" class="l-experiment-form__field">
-        <InputText id="prompt" :model-value="experimentPrompt || defaultPrompt" @update:model-value="(value) => experimentPrompt = value || defaultPrompt" variant="filled" />
+        <InputText
+          id="prompt"
+          :model-value="experimentPrompt || defaultPrompt"
+          @update:model-value="(value) => (experimentPrompt = value || defaultPrompt)"
+          variant="filled"
+        />
         <label for="prompt">Experiment Prompt</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">
@@ -158,19 +163,25 @@ const filteredDatasets = computed(() =>
 )
 
 async function handleRunExperimentClicked() {
+  const taskDefinition =
+    useCase.value === 'translation'
+      ? {
+          task: useCase.value,
+          source_language: sourceLanguage.value,
+          target_language: targetLanguage.value,
+        }
+      : { task: useCase.value }
+
+  console.log('prompt', experimentPrompt.value)
   const experimentPayload: createExperimentWithWorkflowsPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,
     dataset: dataset.value!.id,
-    max_samples: maxSamples.value ? maxSamples.value : 0,
-    task: 'summarization',
-    // task: useCase.value,
-    // system_prompt: experimentPrompt.value,
+    max_samples: maxSamples.value ? maxSamples.value : -1,
+    task_definition: taskDefinition,
+    system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
-  // if (useCase.value === 'translation') {
-  //   experimentPayload.source_language = sourceLanguage.value
-  //   experimentPayload.target_language = targetLanguage.value
-  // }
+
   const workflows = await experimentsService.createExperimentWithWorkflows(
     experimentPayload,
     modelSelection.value.selectedModels,

@@ -75,6 +75,7 @@ class WorkflowService:
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
             generation_config=request.generation_config,
+            system_prompt=request.system_prompt,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",

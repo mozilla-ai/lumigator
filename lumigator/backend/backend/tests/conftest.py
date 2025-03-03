@@ -69,6 +69,11 @@ def common_resources_sample_data_dir(common_resources_dir) -> Path:
     return common_resources_dir / "sample_data"
 
 
+@pytest.fixture
+def common_resources_sample_data_dir_summarization(common_resources_sample_data_dir) -> Path:
+    return common_resources_sample_data_dir / "summarization"
+
+
 def format_dataset(data: list[list[str]]) -> str:
     """Format a list of tabular data as a CSV string."""
     buffer = io.StringIO()
@@ -187,21 +192,21 @@ def extra_column_dataset() -> str:
 
 @pytest.fixture(scope="function")
 def dialog_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_exc.csv"
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
 def dialog_empty_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_mini_empty_gt.csv"
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_empty_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
 def dialog_no_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "summarization" / "dialogsum_mini_no_gt.csv"
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 

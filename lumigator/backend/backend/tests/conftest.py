@@ -44,6 +44,7 @@ from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
+TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -59,7 +60,7 @@ def background_tasks() -> BackgroundTasks:
     return BackgroundTasks()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
 
@@ -185,9 +186,16 @@ def extra_column_dataset() -> str:
     return format_dataset(data)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def dialog_dataset(common_resources_dir):
     filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
+    with Path(filename).open("rb") as f:
+        yield f
+
+
+@pytest.fixture(scope="session")
+def mock_translation_dataset(common_resources_dir):
+    filename = common_resources_dir / "sample_data" / "sample_translation_en_de.csv"
     with Path(filename).open("rb") as f:
         yield f
 

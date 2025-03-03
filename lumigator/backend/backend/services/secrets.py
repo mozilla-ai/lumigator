@@ -31,8 +31,29 @@ class SecretService:
         self._secret_key = aes_key
         self._secret_repo = secret_repo
 
-    def _get_secret_by_name(self, name: str) -> SecretGetRequest | None:
-        return self._secret_repo.get_secret_by_name(name)
+    def get_decrypted_secret_value(self, name: str) -> str | None:
+        """Gets a decrypted value for the secret specified by name.
+
+        NOTE: Decrypted secrets must be treated carefully and never exposed to the end user.
+
+        :param name: The name of the secret to be decrypted
+        :return: The decrypted secret or None if no secret was found
+        :raises SecretDecryptionError: raised if there are issues during decryption
+        """
+        try:
+            record = self._secret_repo.get_secret_by_name(name)
+            if record is None:
+                return None
+        except ValueError as e:
+            raise SecretDecryptionError(name) from e
+
+    def list_secrets(self) -> list[SecretGetRequest]:
+        """Lists all API configured secrets stored in Lumigator.
+
+        :return: A list of ``SecretGetRequest`` (secret name and description) objects
+        """
+        records = self._secret_repo.list_secrets()
+        return [SecretGetRequest.model_validate(record) for record in records]
 
     def upload_secret(self, name: str, secret_upload_request: SecretUploadRequest) -> bool:
         """Uploads a secret for the specified name.
@@ -53,26 +74,8 @@ class SecretService:
 
         return self._secret_repo.save_secret(name, secret_dict)
 
-    def get_decrypted_secret_value(self, name: str) -> str | None:
-        """Gets a decrypted value for the secret specified by name.
-
-        NOTE: Decrypted secrets must be treated carefully and never exposed to the end user.
-
-        :param name: The name of the secret to be decrypted
-        :return: The decrypted secret or None if no secret was found
-        :raises SecretDecryptionError: raised if there are issues during decryption
-        """
-        try:
-            record = self._secret_repo.get_secret_by_name(name)
-            if record is None:
-                return None
-        except ValueError as e:
-            raise SecretDecryptionError(name) from e
-
-    # AES requires a 16-byte Initialization Vector (IV)
-    @staticmethod
-    def generate_iv():
-        return os.urandom(16)
+    def _get_secret_by_name(self, name: str) -> SecretGetRequest | None:
+        return self._secret_repo.get_secret_by_name(name)
 
     def _encrypt(self, plaintext: str) -> str:
         """Encrypts a plaintext string using AES in CBC mode with PKCS7 padding.
@@ -134,8 +137,13 @@ class SecretService:
 
             return decrypted.decode()
 
-        except (base64.binascii.Error, ValueError) as e:
+        except (binascii.Error, ValueError) as e:
             raise ValueError("Failed to decode the encrypted text") from e
         except Exception as e:
             # Catch any cryptography or padding related issues
             raise ValueError("Decryption failed") from e
+
+    # AES requires a 16-byte Initialization Vector (IV)
+    @staticmethod
+    def generate_iv():
+        return os.urandom(16)

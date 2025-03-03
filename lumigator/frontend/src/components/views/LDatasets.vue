@@ -30,6 +30,7 @@
               @l-experiment="onExperimentDataset($event)"
               @l-download-dataset="onDownloadDataset($event)"
               @l-delete-dataset="deleteConfirmation($event)"
+              @view-dataset-clicked="handleViewDatasetClicked"
             />
           </TabPanel>
           <TabPanel value="1">
@@ -43,6 +44,22 @@
       </Tabs>
     </div>
     <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
+    <DatasetViewer
+      v-if="isDatasetViewerVisible"
+      :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
+      :data="datasetFileContent"
+      :isEditable="false"
+      :isSearchEnabled="true"
+      :showRowNumber="true"
+      :columns="datasetColumns"
+      @close="isDatasetViewerVisible = false"
+    >
+      <template #title>
+        <h3 style="gap: 0.125rem; display: flex">
+          <span style="color: #888888">Dataset:</span> {{ selectedDataset?.filename }}
+        </h3>
+      </template>
+    </DatasetViewer>
     <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"
@@ -51,6 +68,7 @@
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="deleteConfirmation($event)"
         @l-download-dataset="onDownloadDataset($event)"
+        @view-dataset-clicked="handleViewDatasetClicked"
       />
       <l-job-details
         v-if="showSlidingPanel && selectedJob"
@@ -104,6 +122,8 @@ import { datasetsService } from '@/sdk/datasetsService'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import type { AxiosError } from 'axios'
 import { downloadContent } from '@/helpers/downloadContent'
+import Papa from 'papaparse'
+import DatasetViewer from '../common/DatasetViewer.vue'
 
 const datasetStore = useDatasetStore()
 const { datasets, selectedDataset, inferenceJobs, hasRunningInferenceJob } =
@@ -120,6 +140,9 @@ const refDatasetTable = ref()
 const jobLogs: Ref<string[]> = ref([])
 const isPollingForJobLogs = ref(false)
 let jobLogsInterval: number | undefined = undefined
+const datasetFileContent = ref()
+const datasetColumns = ref()
+const isDatasetViewerVisible = ref(false)
 
 onMounted(async () => {
   await datasetStore.fetchDatasets()
@@ -202,6 +225,30 @@ function stopPollingForAnnotationJobLogs() {
     clearInterval(jobLogsInterval)
     jobLogsInterval = undefined
   }
+}
+
+async function handleViewDatasetClicked(dataset: Dataset) {
+  datasetStore.setSelectedDataset(dataset)
+  const blob = await datasetsService.downloadDataset(dataset.id)
+  const text = await blob.text()
+
+  // parse csv string into an array of arrays
+  const data = Papa.parse(text, { skipEmptyLines: true }).data
+  const columns: string[] = data[0]
+
+  // transform parsed csv into DataTable props
+  datasetColumns.value = columns
+  datasetFileContent.value = data.slice(1, data.length).map((row: string[], rowIndex: number) => {
+    return row.reduce((accum, value, index) => {
+      return {
+        ...accum,
+        [columns[index]]: value,
+        rowNumber: rowIndex + 1,
+      }
+    }, {})
+  })
+
+  isDatasetViewerVisible.value = true
 }
 
 async function onDownloadDataset(dataset: Dataset) {

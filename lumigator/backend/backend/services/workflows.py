@@ -72,6 +72,7 @@ class WorkflowService:
             base_url=request.base_url,
             output_field=request.inference_output_field,
             task_definition=request.task_definition,
+            system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )

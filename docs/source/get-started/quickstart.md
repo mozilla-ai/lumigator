@@ -172,7 +172,7 @@ required fields:
 Here is an example of how to create an experiment:
 
 ```{note}
-the steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset
+The steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset
 ```
 
 ::::{tab-set}
@@ -207,7 +207,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
   "name": "DialogSum Summarization",
   "description": "See which model best summarizes Dialogues ",
   "created_at": "2025-02-19T20:11:55.492000",
-  "task": "summarization",
+  "task_definition": {
+    "task": "summarization"
+  },
   "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
   "updated_at": null,
   "workflows": null
@@ -330,7 +332,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
   "name": "DialogSum Summarization",
   "description": "See which model best summarizes Dialogues ",
   "created_at": "2025-02-19T20:11:55.492000",
-  "task": "summarization",
+  "task_definition": {
+    "task": "summarization"
+  },
   "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
   "updated_at": "2025-02-19T20:11:55.492000",
   "workflows": [

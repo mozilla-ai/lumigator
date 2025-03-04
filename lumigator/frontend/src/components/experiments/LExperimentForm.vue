@@ -40,13 +40,29 @@
       </FloatLabel>
 
       <div v-if="useCase === 'translation'" class="languages l-experiment-form__field">
-        <FloatLabel variant="in" class="l-experiment-form__field--inline">
-          <InputText id="sourceLanguage" v-model="sourceLanguage" variant="filled" />
+        <FloatLabel variant="in" class="l-experiment-form__field l-experiment-form__field--inline">
+          <Select
+            id="sourceLanguage"
+            v-model="sourceLanguage"
+            variant="filled"
+            inputId="source_language"
+            :options="sourceLanguageOptions"
+            optionLabel="label"
+            optionValue="value"
+          ></Select>
           <label for="sourceLanguage">Source Language</label>
         </FloatLabel>
         <span>to</span>
-        <FloatLabel variant="in" class="l-experiment-form__field--inline">
-          <InputText id="targetLanguage" v-model="targetLanguage" variant="filled" />
+        <FloatLabel variant="in" class="l-experiment-form__field l-experiment-form__field--inline">
+          <Select
+            id="targetLanguage"
+            v-model="targetLanguage"
+            variant="filled"
+            inputId="target_language"
+            :options="targetLanguageOptions"
+            optionLabel="label"
+            optionValue="value"
+          ></Select>
           <label for="targetLanguage">Target Language</label>
         </FloatLabel>
       </div>
@@ -131,6 +147,38 @@ const useCaseOptions = ref([
   { label: 'Summarization', value: 'summarization' },
   { label: 'Translation', value: 'translation' },
 ])
+
+const languageOptions = ref([
+  {
+    label: 'English',
+    value: 'en',
+  },
+  {
+    label: 'French',
+    value: 'fr',
+  },
+  {
+    label: 'German',
+    value: 'de',
+  },
+  {
+    label: 'Spanish',
+    value: 'es',
+  },
+  {
+    label: 'Arabic',
+    value: 'ar',
+  },
+])
+
+const sourceLanguageOptions = computed(() =>
+  languageOptions.value.filter((language) => language.value !== targetLanguage.value),
+)
+
+const targetLanguageOptions = computed(() =>
+  languageOptions.value.filter((language) => language.value !== sourceLanguage.value),
+)
+
 const useCase: Ref<'summarization' | 'translation'> = ref(
   useCaseOptions.value[0].value as 'summarization' | 'translation',
 )
@@ -295,6 +343,7 @@ onMounted(async () => {
     }
 
     &--inline {
+      flex: 1;
       margin-bottom: 0;
     }
   }

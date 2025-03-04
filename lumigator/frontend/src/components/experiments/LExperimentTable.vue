@@ -240,11 +240,11 @@ async function updateExperimentStatus(experiment: Experiment): Promise<void> {
       }
     })
 
-    const status = incompleteWorkflowDetails.length && incompleteWorkflowDetails.every((workflow) =>
-      completedStatus.includes(workflow.status),
-    )
-      ? incompleteWorkflowDetails[0].status
-      : retrieveStatus(experiment)
+    const status =
+      incompleteWorkflowDetails.length &&
+      incompleteWorkflowDetails.every((workflow) => completedStatus.includes(workflow.status))
+        ? incompleteWorkflowDetails[0].status
+        : retrieveStatus(experiment)
 
     // const e = experiments.value.find((exp) => exp.id === experiment.id)
     // if (e) {

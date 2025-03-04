@@ -399,7 +399,6 @@ class JobService:
 
         # include requested api_keys from the secrets repository
         # otherwise log a warning
-        loguru.logger.critical(f"requested keys: {request.api_keys}")
         for key in request.api_keys:
             value = self._secret_service.get_decrypted_secret_value(key)
             if value:

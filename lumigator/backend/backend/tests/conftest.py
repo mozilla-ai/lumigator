@@ -426,8 +426,8 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service, background_tasks):
-    return JobService(job_repository, result_repository, None, dataset_service, background_tasks)
+def job_service(db_session, job_repository, result_repository, dataset_service, secret_service, background_tasks):
+    return JobService(job_repository, result_repository, None, dataset_service, secret_service, background_tasks)
 
 
 @pytest.fixture(scope="function")

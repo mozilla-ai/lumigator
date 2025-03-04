@@ -495,7 +495,6 @@ def _test_launch_job_with_secret(
         ),
     )
     infer_payload = infer_model.model_dump(mode="json")
-    logger.critical(f"sending: {infer_payload}")
     create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     if create_inference_job_response.status_code >= 400:
         logger.error(f"error: {create_inference_job_response.text}")

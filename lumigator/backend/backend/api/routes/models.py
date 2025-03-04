@@ -37,7 +37,7 @@ def _filter_models_by_tasks(models: list, requested_tasks: list[str]) -> list:
 
 @router.get("/")
 def get_suggested_models(
-    task: list[str] | None = Query(default=None, description="Filter models by task types"),
+    tasks: list[str] | None = Query(default=None, description="Filter models by task types"),
 ) -> ListingResponse[ModelsResponse]:
     """Get a list of suggested models for the given tasks.
 
@@ -56,9 +56,9 @@ def get_suggested_models(
     filtered_data = data
 
     # If tasks are specified, validate and filter
-    if task:
+    if tasks:
         # Check if all requested tasks are supported
-        unsupported_tasks = [t for t in task if t not in supported_tasks]
+        unsupported_tasks = [t for t in tasks if t not in supported_tasks]
         if unsupported_tasks:
             raise HTTPException(
                 status_code=400,
@@ -66,7 +66,7 @@ def get_suggested_models(
             )
 
         # Filter models by the requested tasks
-        filtered_data = _filter_models_by_tasks(data, task)
+        filtered_data = _filter_models_by_tasks(data, tasks)
 
     return_data = {
         "total": len(filtered_data),

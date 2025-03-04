@@ -8,7 +8,7 @@ from backend.api.routes.models import _filter_models_by_tasks, _get_supported_ta
 
 
 def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs_data: dict):
-    response = app_client.get("/models/?task=summarization")
+    response = app_client.get("/models/?tasks=summarization")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
@@ -20,7 +20,7 @@ def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs
 
 
 def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_specs_data: dict):
-    response = app_client.get("/models/?task=summarization&task=translation")
+    response = app_client.get("/models/?tasks=summarization&tasks=translation")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
@@ -42,7 +42,7 @@ def test_get_suggested_models_no_task_specified(app_client: TestClient, model_sp
 
 
 def test_get_suggested_models_invalid_task(app_client: TestClient, model_specs_data: dict):
-    response = app_client.get("/models/?task=invalid_task")
+    response = app_client.get("/models/?tasks=invalid_task")
     assert response.status_code == 400
 
     supported_tasks = _get_supported_tasks(model_specs_data)

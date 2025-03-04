@@ -1,10 +1,9 @@
-import json
-from pathlib import Path
+from unittest.mock import patch
 
-import loguru
-from fastapi import status
+import pytest
+from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
-from lumigator_schemas.secrets import SecretUploadRequest
+from lumigator_schemas.secrets import SecretGetRequest, SecretUploadRequest
 
 from backend.repositories.secrets import SecretRepository
 from backend.services.secrets import SecretService
@@ -41,3 +40,34 @@ def test_put_secret(
     assert db_secret.value != new_secret.value
     assert secret_service._decrypt(db_secret.value) == new_secret.value
     assert db_secret.description == new_secret.description
+
+
+@pytest.mark.parametrize(
+    "mock_return_value",
+    [
+        [],
+        [SecretGetRequest(name="secret_api_key", description="test desc")],
+        [
+            SecretGetRequest(name="secret_1_api_key", description="test desc 1"),
+            SecretGetRequest(name="secret_2_api_key", description="test desc 2"),
+        ],
+    ],
+)
+def test_api_list_secrets(
+    app: FastAPI,
+    app_client: TestClient,
+    mock_return_value,
+):
+    expected_pairs = {(secret.name.lower(), secret.description) for secret in mock_return_value}
+
+    with patch.object(SecretService, "list_secrets", return_value=mock_return_value):
+        response = app_client.get("/settings/secrets")
+        assert response.status_code == status.HTTP_200_OK
+
+        json_response = response.json()
+        assert isinstance(json_response, list)
+        assert len(json_response) == len(expected_pairs)
+
+        actual_pairs = {(secret.get("name", "").lower(), secret.get("description", "")) for secret in json_response}
+
+        assert actual_pairs == expected_pairs

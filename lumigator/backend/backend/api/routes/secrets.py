@@ -7,12 +7,28 @@ from starlette.responses import Response
 
 from backend.api.deps import SecretServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
+from backend.services.exceptions.secret_exceptions import SecretDecryptionError, SecretEncryptionError
 
 router = APIRouter()
 
 
 def secret_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
-    return {}
+    return {
+        SecretDecryptionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        SecretEncryptionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+    }
+
+
+@router.get("/")
+def list_secrets(service: SecretServiceDep) -> list[SecretGetRequest]:
+    """Lists all API configured secret names (and descriptions) stored in Lumigator."""
+    return service.list_secrets()
+
+
+@router.delete("/{secret_name}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_secret(service: SecretServiceDep, secret_name: str) -> None:
+    """Deletes a secret identified by its name."""
+    service.delete_secret(secret_name)
 
 
 @router.put(

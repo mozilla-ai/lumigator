@@ -67,7 +67,9 @@ def test_dataset_download_with_extensions(db_session, fake_s3_client, fake_s3fs,
         ("dialogsum_mini_all_gt_is_whitespace.csv", False),
     ],
 )
-def test_dataset_has_ground_truth(common_resources_sample_data_dir, dataset_filename, expected_ground_truth):
-    filename = str(common_resources_sample_data_dir / dataset_filename)
+def test_dataset_has_ground_truth(
+    common_resources_sample_data_dir_summarization, dataset_filename, expected_ground_truth
+):
+    filename = str(common_resources_sample_data_dir_summarization / dataset_filename)
     has_gt = dataset_has_gt(filename)
     assert has_gt == expected_ground_truth

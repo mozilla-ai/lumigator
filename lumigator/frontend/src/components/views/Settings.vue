@@ -23,8 +23,8 @@
             })
           "
           label="Save"
-        />
-        <Button @click="deleteSecret('mistral_api_key')" label="Delete" />
+        ></Button>
+        <Button @click="deleteSecret('mistral_api_key')" label="Delete"></Button>
       </div>
     </div>
     <div class="">
@@ -46,8 +46,8 @@
             })
           "
           label="Save"
-        />
-        <Button @click="deleteSecret('openai_api_key')" label="Delete" />
+        ></Button>
+        <Button @click="deleteSecret('openai_api_key')" label="Delete"></Button>
       </div>
     </div>
     <div class="">
@@ -55,6 +55,7 @@
       <div>
         <InputText
           id="huggingface_api_key"
+          :disabled="huggingFaceApiKey === magicStars"
           v-model="huggingFaceApiKey"
           aria-describedby="Hugging Face API Key"
           placeholder="Hugging Face API Key"
@@ -68,8 +69,9 @@
             })
           "
           label="Save"
-        />
-        <Button @click="deleteSecret('huggingface_api_key')" label="Delete" />
+        >
+        </Button>
+        <Button @click="deleteSecret('huggingface_api_key')" label="Delete"></Button>
       </div>
     </div>
     <div class="">
@@ -77,6 +79,7 @@
       <div>
         <InputText
           id="deepseek_api_key"
+          :disabled="deepSeekApiKey === magicStars"
           v-model="deepSeekApiKey"
           aria-describedby="DeepSeek Face API Key"
           placeholder="DeepSeek Face API Key"
@@ -90,8 +93,8 @@
             })
           "
           label="Save"
-        />
-        <Button @click="deleteSecret('deepseek_api_key')" label="Delete" />
+        ></Button>
+        <Button @click="deleteSecret('deepseek_api_key')" label="Delete"></Button>
       </div>
     </div>
   </div>
@@ -128,21 +131,28 @@ onMounted(async () => {
 })
 
 const fetchSecrets = async () => {
-  secrets.value = await settingsService.fetchSecrets()
-  myMap.forEach((value, key) => {
-    const secret = secrets.value.find((s) => s.name == key)
-    value.value = secret ? magicStars : ''
+  const secrets = await settingsService.fetchSecrets()
+  myMap.forEach((ref, secretKey) => {
+    const secret = secrets.find((secret) => secret.name == secretKey)
+    ref.value = secret ? magicStars : ''
   })
 }
 
 const deleteSecret = async (key: string) => {
   await settingsService.deleteSecret(key)
-  fetchSecrets()
+  const correspondingSecretKeyRef = myMap.get(key)
+  if (correspondingSecretKeyRef) {
+    correspondingSecretKeyRef.value = ''
+  }
 }
 
 const uploadSecret = async (secret: SecretUploadPayload) => {
   await settingsService.uploadSecret(secret)
-  fetchSecrets()
+  const correspondingSecretKeyRef = myMap.get(secret.name)
+  if (correspondingSecretKeyRef) {
+    correspondingSecretKeyRef.value = magicStars
+  }
+
 }
 
 // TODO: How to stop the user accidentally saving over a legit secret with *********?

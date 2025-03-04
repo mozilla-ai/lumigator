@@ -31,27 +31,13 @@ class SecretService:
         self._secret_key = aes_key
         self._secret_repo = secret_repo
 
-    def _get_secret_by_name(self, name: str) -> SecretGetRequest | None:
-        return self._secret_repo.get_secret_by_name(name)
+    def delete_secret(self, name: str) -> bool:
+        """Deletes a secret identified by its name.
 
-    def upload_secret(self, name: str, secret_upload_request: SecretUploadRequest) -> bool:
-        """Uploads a secret for the specified name.
-
-        :param name: The name of the secret to be uploaded
-        :param secret_upload_request: The secret upload request containing the secret data
-        :return: boolean value indicating whether the secret is newly created (false if it already existed)
+        :param name: The name of the secret to be deleted
+        :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found, or not deleted.
         """
-        # Encrypt the value
-        try:
-            secret_upload_request.value = self._encrypt(secret_upload_request.value)
-        except (TypeError, ValueError) as e:
-            raise SecretEncryptionError(name) from e
-
-        # Save the secret via the repository
-        secret_dict = secret_upload_request.model_dump()
-        secret_dict["name"] = name
-
-        return self._secret_repo.save_secret(name, secret_dict)
+        return self._secret_repo.delete_secret(name)
 
     def get_decrypted_secret_value(self, name: str) -> str | None:
         """Gets a decrypted value for the secret specified by name.
@@ -69,10 +55,36 @@ class SecretService:
         except ValueError as e:
             raise SecretDecryptionError(name) from e
 
-    # AES requires a 16-byte Initialization Vector (IV)
-    @staticmethod
-    def generate_iv():
-        return os.urandom(16)
+    def list_secrets(self) -> list[SecretGetRequest]:
+        """Lists all API configured secrets stored in Lumigator.
+
+        :return: A list of ``SecretGetRequest`` (secret name and description) objects
+        """
+        records = self._secret_repo.list_secrets()
+        return [SecretGetRequest.model_validate(record) for record in records]
+
+    def upload_secret(self, name: str, secret_upload_request: SecretUploadRequest) -> bool:
+        """Uploads a secret for the specified name.
+
+        :param name: The name of the secret to be uploaded
+        :param secret_upload_request: The secret upload request containing the secret data
+        :return: boolean value indicating whether the secret is newly created (false if it already existed)
+        :raises SecretEncryptionError: raised if there are issues during encryption
+        """
+        # Encrypt the value
+        try:
+            secret_upload_request.value = self._encrypt(secret_upload_request.value)
+        except (TypeError, ValueError) as e:
+            raise SecretEncryptionError(name) from e
+
+        # Save the secret via the repository
+        secret_dict = secret_upload_request.model_dump()
+        secret_dict["name"] = name
+
+        return self._secret_repo.save_secret(name, secret_dict)
+
+    def _get_secret_by_name(self, name: str) -> SecretGetRequest | None:
+        return self._secret_repo.get_secret_by_name(name)
 
     def _encrypt(self, plaintext: str) -> str:
         """Encrypts a plaintext string using AES in CBC mode with PKCS7 padding.
@@ -134,8 +146,13 @@ class SecretService:
 
             return decrypted.decode()
 
-        except (base64.binascii.Error, ValueError) as e:
+        except (binascii.Error, ValueError) as e:
             raise ValueError("Failed to decode the encrypted text") from e
         except Exception as e:
             # Catch any cryptography or padding related issues
             raise ValueError("Decryption failed") from e
+
+    # AES requires a 16-byte Initialization Vector (IV)
+    @staticmethod
+    def generate_iv():
+        return os.urandom(16)

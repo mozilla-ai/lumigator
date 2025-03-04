@@ -4,7 +4,7 @@ import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from lumigator_schemas.secrets import SecretUploadRequest
+from lumigator_schemas.secrets import SecretGetRequest, SecretUploadRequest
 
 from backend.repositories.secrets import SecretRepository
 from backend.services.secrets import SecretService
@@ -163,3 +163,68 @@ def test_secret_upload_request(
     upload_and_assert(name, SecretUploadRequest(value="123456", description="test secret"), True)
     # Second time it's updated (we can change the value of the secret)
     upload_and_assert(name, SecretUploadRequest(value="abcdef", description="2nd desc"), False)
+
+
+def test_secret_list_with_value(secret_service: SecretService, secret_repository: SecretRepository):
+    """Ensure that we can list the name (and description) of configured secrets, but not their values."""
+    secret_1_name = "TEST_AI_API_KEY"  # pragma: allowlist secret
+    secret_1_desc = "test secret"  # pragma: allowlist secret
+
+    secret_2_name = "TEST_OTHER_API_KEY"  # pragma: allowlist secret
+    secret_2_desc = "very important secret"  # pragma: allowlist secret
+
+    # Ensure we have no secrets to start
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []
+
+    # Create a secret
+    secret_service.upload_secret(secret_1_name, SecretUploadRequest(value="123456", description=secret_1_desc))
+
+    # Check we have some data (1 secret)
+    assert len(secret_repository.list()) == 1
+
+    # List secrets and ensure we get the name and description
+    secrets = secret_service.list_secrets()
+    assert len(secrets) == 1
+    assert secrets[0].name == secret_1_name.lower()
+    assert secrets[0].description == secret_1_desc
+
+    # Create another secret
+    secret_service.upload_secret(secret_2_name, SecretUploadRequest(value="123456", description=secret_2_desc))
+
+    # List secrets and ensure we now have 2 and both names
+    secrets = secret_service.list_secrets()
+    assert len(secrets) == 2
+    secret_names = {secret.name.lower() for secret in secrets}
+    assert secret_1_name.lower() in secret_names
+    assert secret_2_name.lower() in secret_names
+
+
+def test_secret_delete(secret_service: SecretService, secret_repository: SecretRepository):
+    """Ensure that we can delete a secret by name."""
+    secret_name = "TEST_AI_API_KEY"  # pragma: allowlist secret
+
+    # Ensure we have no secrets to start
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []
+
+    # Create a secret
+    secret_service.upload_secret(secret_name, SecretUploadRequest(value="123456", description="test desc"))
+
+    # Check we have some data (1 secret)
+    assert len(secret_repository.list()) == 1
+    secrets = secret_service.list_secrets()
+    assert len(secrets) == 1
+    assert secrets[0].name == secret_name.lower()
+
+    # Delete the secret
+    res = secret_service.delete_secret(secret_name)
+    assert res is True
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []
+
+    # Delete the secret again (should return False)
+    res = secret_service.delete_secret(secret_name)
+    assert res is False
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []

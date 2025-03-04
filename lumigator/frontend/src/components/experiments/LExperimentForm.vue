@@ -68,12 +68,14 @@
       </div>
 
       <FloatLabel variant="in" class="l-experiment-form__field">
-        <InputText
+        <Textarea
           id="prompt"
           :model-value="experimentPrompt || defaultPrompt"
           @update:model-value="(value) => (experimentPrompt = value || defaultPrompt)"
+          autoResize
+          fluid
           variant="filled"
-        />
+        ></Textarea>
         <label for="prompt">Experiment Prompt</label>
       </FloatLabel>
       <FloatLabel variant="in" class="l-experiment-form__field">

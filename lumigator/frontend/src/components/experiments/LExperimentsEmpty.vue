@@ -39,7 +39,7 @@ const emit = defineEmits(['l-add-experiment'])
 .l-experiment-empty {
   $root: &;
   margin: auto;
-  max-width: 500px;
+  max-width: 560px;
 
   &__instructions {
     color: $l-grey-100;

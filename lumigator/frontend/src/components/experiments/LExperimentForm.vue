@@ -222,7 +222,6 @@ async function handleRunExperimentClicked() {
         }
       : { task: useCase.value }
 
-  console.log('prompt', experimentPrompt.value)
   const experimentPayload: createExperimentWithWorkflowsPayload = {
     name: experimentTitle.value,
     description: experimentDescription.value,

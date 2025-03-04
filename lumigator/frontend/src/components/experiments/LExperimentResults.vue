@@ -208,8 +208,6 @@ const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = comp
     )!,
   }))
 
-  console.log('data', data)
-
   return data
 })
 </script>

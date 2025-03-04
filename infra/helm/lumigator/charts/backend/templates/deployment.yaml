@@ -63,7 +63,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "lumigator.mistral-secret-ref" . }}
-                  key: {{ .Consts.mistralSecretKey }}
+                  key: MISTRAL_API_KEY
             {{- end }}
             {{- if or .Values.openaiAPIKey .Values.existingOpenaiAPISecret }}
             - name: OPENAI_API_KEY

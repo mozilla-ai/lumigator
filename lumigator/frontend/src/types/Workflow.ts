@@ -12,6 +12,7 @@ export type Workflow = {
   metrics?: Metrics
   parameters?: Record<string, unknown>
   artifacts_download_url?: string
+  system_prompt: string
   jobs?: JobResult[]
 }
 

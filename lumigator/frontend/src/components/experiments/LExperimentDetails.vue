@@ -109,20 +109,30 @@
         v-if="focusedItem && isExperiment(focusedItem)"
       >
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
+        <div class="l-experiment-details__content-field">
+          {{ focusedItem?.task_definition.task }}
+        </div>
       </div>
       <div
         class="l-experiment-details__content-item"
-        v-if="focusedItem && isExperiment(focusedItem) && focusedItem?.task === 'translation'"
+        v-if="
+          focusedItem &&
+          isExperiment(focusedItem) &&
+          focusedItem?.task_definition.task === 'translation'
+        "
       >
         <div class="l-experiment-details__content-label">language pair</div>
-        <!-- <div class="l-experiment-details__content-field">
-          {{ focusedItem?.sourceLanguage }} -> {{ focusedItem?.targetLanguage }}
-        </div> -->
+        <div class="l-experiment-details__content-field">
+          {{ focusedItem?.task_definition.source_language }} -->
+          {{ focusedItem?.task_definition.target_language }}
+        </div>
       </div>
-      <div class="l-experiment-details__content-item" v-if="focusedItem && isWorkflowFocused">
+      <div
+        class="l-experiment-details__content-item"
+        v-if="focusedItem && isWorkflowFocused && !isExperiment(focusedItem)"
+      >
         <div class="l-experiment-details__content-label">prompt</div>
-        <!-- <div class="l-experiment-details__content-field">{{ focusedItem?.system_prompt }}</div> -->
+        <div class="l-experiment-details__content-field">{{ focusedItem.system_prompt }}</div>
       </div>
       <div
         v-if="!isWorkflowFocused && selectedExperiment"

@@ -8,10 +8,9 @@ export type Experiment = {
   created_at: string
   updated_at: string
   workflows: Workflow[]
-  task: 'summarization' | 'translation'
   dataset: string
+  task_definition: SummarizationTaskDefinition | TranslationTaskDefinition
   max_samples: number
-
   // added by the frontend, TODO: refactor
   status: WorkflowStatus
 }

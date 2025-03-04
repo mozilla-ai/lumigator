@@ -72,6 +72,7 @@ class WorkflowService:
             base_url=request.base_url,
             output_field=request.inference_output_field,
             task_definition=request.task_definition,
+            system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )
@@ -208,6 +209,7 @@ class WorkflowService:
             description=request.description,
             name=request.name,
             model=request.model,
+            system_prompt=request.system_prompt,
             # input is WorkflowCreate, we need to split the configs and generate one
             # JobInferenceCreate and one JobEvalCreate
         )

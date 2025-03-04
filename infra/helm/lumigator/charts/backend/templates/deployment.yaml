@@ -80,7 +80,7 @@ spec:
             - name: INFERENCE_WORK_DIR
               value: {{ .Values.inferenceWorkDir }}
             - name: MLFLOW_TRACKING_URI
-              value: {{ include "lumigator.mlflow-address" .| quote }}
+              value: http://{{ include "lumigator.mlflow-address" .}}:80
             - name: LUMIGATOR_SECRET_KEY
               value: {{ .Values.lumigatorSecretKey | quote }}
           resources:

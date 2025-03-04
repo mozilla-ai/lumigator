@@ -65,9 +65,19 @@ def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def common_resources_sample_data_dir(common_resources_dir) -> Path:
     return common_resources_dir / "sample_data"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_summarization(common_resources_sample_data_dir) -> Path:
+    return common_resources_sample_data_dir / "summarization"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_translation(common_resources_sample_data_dir) -> Path:
+    return common_resources_sample_data_dir / "translation"
 
 
 def format_dataset(data: list[list[str]]) -> str:
@@ -187,29 +197,29 @@ def extra_column_dataset() -> str:
 
 
 @pytest.fixture(scope="session")
-def dialog_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
+def dialog_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_exc.csv"
+    with Path(filename).open("rb") as f:
+        yield f
+
+
+@pytest.fixture(scope="function")
+def dialog_empty_gt_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_empty_gt.csv"
+    with Path(filename).open("rb") as f:
+        yield f
+
+
+@pytest.fixture(scope="function")
+def dialog_no_gt_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_no_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="session")
-def mock_translation_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "sample_translation_en_de.csv"
-    with Path(filename).open("rb") as f:
-        yield f
-
-
-@pytest.fixture(scope="function")
-def dialog_empty_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_empty_gt.csv"
-    with Path(filename).open("rb") as f:
-        yield f
-
-
-@pytest.fixture(scope="function")
-def dialog_no_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_no_gt.csv"
+def mock_translation_dataset(common_resources_sample_data_dir_translation):
+    filename = common_resources_sample_data_dir_translation / "sample_translation_en_de.csv"
     with Path(filename).open("rb") as f:
         yield f
 

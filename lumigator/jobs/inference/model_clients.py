@@ -5,6 +5,7 @@ from inference_config import InferenceJobConfig
 from litellm import Usage, completion
 from loguru import logger
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+from utils import retry_with_backoff
 
 from schemas import InferenceMetrics, PredictionResult, TaskType
 
@@ -51,13 +52,10 @@ class LiteLLMModelClient(BaseModelClient):
         self.system_prompt = self.config.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
-    def predict(
-        self,
-        prompt: str,
-    ) -> PredictionResult:
-        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
-        logger.info(f"Sending request to {litellm_model}")
-        response = completion(
+    @retry_with_backoff(max_retries=3)
+    def _make_completion_request(self, litellm_model: str, prompt: str):
+        """Make a request to the LLM with proper error handling"""
+        return completion(
             model=litellm_model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
@@ -70,6 +68,15 @@ class LiteLLMModelClient(BaseModelClient):
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
+
+    def predict(
+        self,
+        prompt: str,
+    ) -> PredictionResult:
+        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
+        logger.info(f"Sending request to {litellm_model}")
+        response = self._make_completion_request(litellm_model, prompt)
+
         # LiteLLM gives us the cost of each API which is nice.
         # Eventually we can add this to the response object as well.
         cost = response._hidden_params["response_cost"]

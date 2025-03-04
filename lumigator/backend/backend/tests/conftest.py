@@ -12,6 +12,7 @@ import evaluator
 import fsspec
 import pytest
 import requests_mock
+import yaml
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
@@ -45,6 +46,7 @@ from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+MODELS_PATH = Path(__file__).resolve().parents[1] / "models.yaml"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -495,3 +497,11 @@ def job_definition_fixture():
         config_model=MagicMock(spec=dict),
         type=JobType.INFERENCE,
     )
+
+
+@pytest.fixture
+def model_specs_data():
+    """Fixture that loads and returns the YAML data."""
+    with Path(MODELS_PATH).open() as file:
+        model_specs = yaml.safe_load(file)
+    return model_specs

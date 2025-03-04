@@ -14,7 +14,7 @@ class SecretRepository(BaseRepository[SecretRecord]):
         """Delete a secret identified by its name.
 
         :param name: The name of the secret to be deleted
-        :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found, or not deleted.
+        :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found.
         """
         secret = self.get_secret_by_name(name)
         if not secret:

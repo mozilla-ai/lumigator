@@ -198,3 +198,33 @@ def test_secret_list_with_value(secret_service: SecretService, secret_repository
     secret_names = {secret.name.lower() for secret in secrets}
     assert secret_1_name.lower() in secret_names
     assert secret_2_name.lower() in secret_names
+
+
+def test_secret_delete(secret_service: SecretService, secret_repository: SecretRepository):
+    """Ensure that we can delete a secret by name."""
+    secret_name = "TEST_AI_API_KEY"  # pragma: allowlist secret
+
+    # Ensure we have no secrets to start
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []
+
+    # Create a secret
+    secret_service.upload_secret(secret_name, SecretUploadRequest(value="123456", description="test desc"))
+
+    # Check we have some data (1 secret)
+    assert len(secret_repository.list()) == 1
+    secrets = secret_service.list_secrets()
+    assert len(secrets) == 1
+    assert secrets[0].name == secret_name.lower()
+
+    # Delete the secret
+    res = secret_service.delete_secret(secret_name)
+    assert res is True
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []
+
+    # Delete the secret again (should return False)
+    res = secret_service.delete_secret(secret_name)
+    assert res is False
+    assert secret_repository.list() == []
+    assert secret_service.list_secrets() == []

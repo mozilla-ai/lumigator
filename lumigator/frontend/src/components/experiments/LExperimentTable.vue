@@ -26,7 +26,7 @@
         </Column>
         <Column field="useCase" :style="columnStyles.useCase" header="use-case">
           <template #body="slotProps">
-            <span style="text-transform: capitalize">{{ slotProps.data.task }}</span>
+            <span style="text-transform: capitalize">{{ slotProps.data.task_definition.task }}</span>
           </template>
         </Column>
         <Column field="status" header="status" :style="columnStyles.status">
@@ -81,7 +81,7 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
-              :useCase="slotProps.data.task"
+              :useCase="slotProps.data.task_definition.task"
               @l-job-selected="onWorkflowSelected($event)"
               @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
               @delete-workflow-clicked="$emit('delete-option-clicked', $event)"

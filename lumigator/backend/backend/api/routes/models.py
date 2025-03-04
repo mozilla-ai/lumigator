@@ -37,7 +37,7 @@ def _filter_models_by_tasks(models: list, requested_tasks: list[str]) -> list:
 
 @router.get("/")
 def get_suggested_models(
-    task: list[str] | None = Query(default=["summarization"], description="Filter models by task types"),
+    task: list[str] | None = Query(default=None, description="Filter models by task types"),
 ) -> ListingResponse[ModelsResponse]:
     """Get a list of suggested models for the given tasks.
 

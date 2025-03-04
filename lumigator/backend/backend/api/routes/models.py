@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.models import ModelsResponse
 
+DEFAULT_TASKS_QUERY = Query(default=None, description="Filter models by task types")
 MODELS_PATH = Path(__file__).resolve().parents[2] / "models.yaml"
 
 router = APIRouter()
@@ -37,7 +38,7 @@ def _filter_models_by_tasks(models: list, requested_tasks: list[str]) -> list:
 
 @router.get("/")
 def get_suggested_models(
-    tasks: list[str] | None = Query(default=None, description="Filter models by task types"),
+    tasks: list[str] | None = DEFAULT_TASKS_QUERY,
 ) -> ListingResponse[ModelsResponse]:
     """Get a list of suggested models for the given tasks.
 

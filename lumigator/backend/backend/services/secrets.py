@@ -31,6 +31,14 @@ class SecretService:
         self._secret_key = aes_key
         self._secret_repo = secret_repo
 
+    def delete_secret(self, name: str) -> bool:
+        """Deletes a secret identified by its name.
+
+        :param name: The name of the secret to be deleted
+        :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found, or not deleted.
+        """
+        return self._secret_repo.delete_secret(name)
+
     def get_decrypted_secret_value(self, name: str) -> str | None:
         """Gets a decrypted value for the secret specified by name.
 

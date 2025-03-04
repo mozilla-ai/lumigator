@@ -23,7 +23,7 @@ def test_workflow_request_requires_system_prompt_for_text_generation():
             dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
         )
 
-    # Verify exact error message from Pydantic validation
+    # Verify exact error message
     assert "Default system_prompt not available for text-generation" in str(excinfo.value)
 
 

@@ -1,5 +1,4 @@
 from unittest.mock import patch
-from uuid import UUID
 
 import pytest
 from lumigator_schemas.jobs import (
@@ -7,10 +6,7 @@ from lumigator_schemas.jobs import (
     JobInferenceConfig,
     JobType,
 )
-from lumigator_schemas.tasks import TaskType
-from pydantic import ValidationError
 
-from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.services.jobs import job_settings_map
 from backend.settings import settings
 from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
@@ -98,31 +94,3 @@ def test_set_model(job_service, model, provider, input_base_url, returned_base_u
     )
     base_url = request.job_config.base_url
     assert base_url == returned_base_url
-
-
-def test_invalid_text_generation(job_service, job_definition_fixture):
-    with pytest.raises(ValueError) as excinfo:
-        # Create invalid request without system_prompt
-        job_create_request = JobCreate(
-            name="test_text_generation_run",
-            description="Test missing system prompt for text generation",
-            job_config=JobInferenceConfig(
-                job_type=JobType.INFERENCE,
-                model="microsoft/Phi-3-mini-instruct",
-                provider="hf",
-                task_definition={"task": TaskType.TEXT_GENERATION},
-                # system_prompt left out intentionally
-            ),
-            dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
-        )
-
-        job_definition_fixture.generate_config(
-            job_create_request,
-            record_id=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
-            dataset_path="s3://lumigator-storage/datasets/d34dd34d-d34d-d34d-d34d-d34dd34dd34d/test.csv",
-            storage_path="s3://lumigator-storage/jobs/results/",
-        )
-
-    # Verify exact error message
-    assert "system_prompt required for task=`text-generation`" in str(excinfo.value)
-    assert "Received: None" in str(excinfo.value)

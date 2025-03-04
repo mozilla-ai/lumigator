@@ -226,7 +226,9 @@ class HuggingFaceModelClient(BaseModelClient):
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]
-            return generation["summary_text"]
+            return PredictionResult(
+                prediction=generation["summary_text"],
+            )
 
         # Case-2: CausalLM model: can be used for text-generation/summarization
         # or translation tasks with right system_prompt

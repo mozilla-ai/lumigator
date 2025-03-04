@@ -128,14 +128,16 @@ def run_inference(config: InferenceJobConfig) -> Path:
             avg_reasoning_tokens=avg_reasoning_tokens,
             avg_answer_tokens=avg_answer_tokens,
         )
+        results = JobOutput(
+            metrics=metrics,
+            parameters=config,
+            artifacts=artifacts,
+        )
     else:
-        metrics = None
-
-    results = JobOutput(
-        metrics=metrics,
-        parameters=config,
-        artifacts=artifacts,
-    )
+        results = JobOutput(
+            parameters=config,
+            artifacts=artifacts,
+        )
 
     output_path = save_outputs(config, results)
     return output_path

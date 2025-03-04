@@ -86,7 +86,7 @@ class AverageInferenceMetrics(BaseModel):
     avg_total_tokens: float
     avg_completion_tokens: float
     avg_reasoning_tokens: float | None = None
-    avg_answer_tokens: float | None = None
+    avg_answer_tokens: float = None
 
 
 class InferenceJobOutput(BaseModel):
@@ -96,7 +96,7 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    inference_metrics: list[InferenceMetrics] | None = None
+    inference_metrics: list[InferenceMetrics] | list[None] = None
 
 
 class PredictionResult(BaseModel):
@@ -107,6 +107,6 @@ class PredictionResult(BaseModel):
 
 
 class JobOutput(BaseModel):
-    metrics: AverageInferenceMetrics | None = None
+    metrics: AverageInferenceMetrics | None = {}
     artifacts: InferenceJobOutput
     parameters: InferenceJobConfig

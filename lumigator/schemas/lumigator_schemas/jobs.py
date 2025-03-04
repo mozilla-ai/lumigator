@@ -210,9 +210,9 @@ class JobResultObject(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    metrics: dict | None = {}
-    parameters: dict | None = {}
-    artifacts: dict | None = {}
+    metrics: dict = {}
+    parameters: dict = {}
+    artifacts: dict = {}
 
 
 class Job(JobResponse, JobSubmissionResponse):

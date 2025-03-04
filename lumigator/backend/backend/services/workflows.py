@@ -1,4 +1,5 @@
 import json
+import numbers
 from pathlib import Path
 
 import loguru
@@ -63,10 +64,10 @@ class WorkflowService:
             if isinstance(metric_value, dict):
                 for sub_metric_name, sub_metric_value in metric_value.items():
                     # only interested in mean, so we only look it items that are not lists
-                    if not isinstance(sub_metric_value, list) and sub_metric_value is not None:
-                        formatted_metrics[f"{metric_name}_{sub_metric_name}"] = sub_metric_value
-            elif not isinstance(metric_value, list) and metric_value is not None:
-                formatted_metrics[metric_name] = metric_value
+                    if isinstance(sub_metric_value, numbers.Number) and sub_metric_value is not None:
+                        formatted_metrics[f"{metric_name}_{sub_metric_name}"] = round(sub_metric_value, 3)
+            elif isinstance(metric_value, numbers.Number) and metric_value is not None:
+                formatted_metrics[metric_name] = round(metric_value, 3)
         return formatted_metrics
 
     async def _run_inference_eval_pipeline(

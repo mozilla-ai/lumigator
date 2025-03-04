@@ -16,15 +16,13 @@ class SecretRepository(BaseRepository[SecretRecord]):
         :param name: The name of the secret to be deleted
         :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found.
         """
-        secret = self.get_secret_by_name(name)
-        if not secret:
-            return False
-
-        return bool(self.delete(secret.id))
+        count = self.session.query(self.record_cls).where(self.record_cls._name == name.lower()).delete()
+        self.session.commit()
+        return bool(count)
 
     def get_secret_by_name(self, name: str) -> SecretRecord | None:
         """Retrieve secret by name (case-insensitive)."""
-        return self.session.query(SecretRecord).filter(SecretRecord._name == name.lower()).first()
+        return self.session.query(self.record_cls).filter(self.record_cls._name == name.lower()).first()
 
     def list_secrets(self) -> list[SecretRecord]:
         """List all secrets."""
@@ -60,7 +58,9 @@ class SecretRepository(BaseRepository[SecretRecord]):
 
     def _update_secret(self, secret_id: UUID, secret_data: dict) -> SecretRecord | None:
         """Update an existing secret."""
-        secret: SecretRecord | None = self.session.query(SecretRecord).filter(SecretRecord.id == secret_id).first()
+        secret: SecretRecord | None = (
+            self.session.query(self.record_cls).filter(self.record_cls.id == secret_id).first()
+        )
         if not secret:
             return None
 

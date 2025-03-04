@@ -50,7 +50,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     lm_client = LumigatorClient(f"{HOST}:{LUMIGATOR_PORT}")
 
     # Upload a dataset
-    dataset_path = "lumigator/sample_data/dialogsum_exc.csv"
+    dataset_path = "lumigator/sample_data/summarization/dialogsum_exc.csv"
     dataset = lm_client.datasets.create_dataset(
         dataset=open(dataset_path, 'rb'),
         format=datasets.DatasetFormat.JOB

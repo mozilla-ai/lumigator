@@ -3,7 +3,7 @@ import path from 'path'
 
 // get the sample dataset absolute file path
 const currentDir = path.dirname(new URL(import.meta.url).pathname)
-const sampleDatasetFilePath = path.resolve(currentDir, '../../sample_data/dialogsum_exc.csv')
+const sampleDatasetFilePath = path.resolve(currentDir, '../../sample_data/summarization/dialogsum_exc.csv')
 
 test('successfully uploads a dataset', async ({ page }) => {
   await page.goto('/')

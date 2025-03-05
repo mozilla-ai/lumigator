@@ -9,7 +9,7 @@
         <p class="api-keys-description">
           To use API-based models in Lumigator, add your API keys.
           <a
-            href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#get-the-results"
+            href="https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings"
             class="learn-more-link"
             rel="noopener"
             target="_blank"

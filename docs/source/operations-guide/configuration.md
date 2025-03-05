@@ -76,6 +76,8 @@ within the Lumigator repo is in the `buid/.env` file that is automatically remov
 
 ## Settings
 
+### Configuration file settings
+
 The following section documents the available settings:
 
 > [!Note]
@@ -95,9 +97,6 @@ The following section documents the available settings:
 | NVIDIA_VISIBLE_DEVICES             | string  | Defaults to 'all', specifies which NVIDIA devices should be visible to Ray                                                 |
 | GPU_COUNT                          | int     | The number of GPUs                                                                                                         |
 | HF_HOME                            | string  | The home directory for HuggingFace (used for caching)                                                                      |
-| HF_TOKEN                           | string  | Sensitive API token used to access gated models in HuggingFace                                                             |
-| MISTRAL_API_KEY                    | string  | Sensitive API key used to access Mistral                                                                                   |
-| OPENAI_API_KEY                     | string  | Sensitive API key used to access OpenAI                                                                                    |
 | MLFLOW_TRACKING_URI                | string  | The URL used to access MLFlow                                                                                              |
 | MLFLOW_DATABASE_URL                | string  | DB connection string/URL used for MLFlow                                                                                   |
 | MLFLOW_S3_ROOT_PATH                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                           |
@@ -109,5 +108,21 @@ The following section documents the available settings:
 | LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
 | INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
 | INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |
-| EVALUATOR_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation jobs                                          |
-| EVALUATOR_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job              |
+| EVALUATOR_PIP_REQS                 | string  | Path within the container to the requirements.txt file for evaluation jobs                                                 |
+| EVALUATOR_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job                     |
+
+### API settings
+
+Some settings can **only** be configured via the Lumigator API.
+
+Currently, these settings are the sensitive API keys that are used to access external services:
+
+* [DeepSeek](https://platform.deepseek.com/api_keys)
+* [HuggingFace](https://huggingface.co/settings/tokens)
+* [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
+* [OpenAI](https://platform.openai.com/api-keys)
+
+As these keys are secret, we don't allow them to be stored in Lumigator's configuration files.
+Instead, they must be added via the API, and are then encrypted and stored in Lumigator's database.
+
+You can use the API, SDK or UI to add these keys.

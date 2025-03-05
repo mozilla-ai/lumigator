@@ -28,8 +28,8 @@
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
-                :onFocus="() => handleFocus(apiKey)"
-                :onBlur="() => handleBlur(apiKey)"
+                @focus="handleFocus(apiKey)"
+                @blur="handleBlur(apiKey)"
                 autocomplete="off"
                 class="api-key-input"
                 fluid

@@ -24,7 +24,7 @@
           v-for="[apiKey, { reference, existsRemotely, title }] in apiKeyMap.entries()"
           :key="apiKey"
         >
-          <label class="api-key-label" for="mistral_api_key">{{ title }}</label>
+          <label class="api-key-label" :for="apiKey">{{ title }}</label>
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText

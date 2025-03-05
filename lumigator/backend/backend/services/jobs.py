@@ -184,7 +184,9 @@ class JobService:
 
         return bin_data
 
-    def _add_dataset_to_db(self, job_id: UUID, request: JobCreate, s3: S3FileSystem):
+    def _add_dataset_to_db(
+        self, job_id: UUID, request: JobCreate, s3: S3FileSystem, dataset_filename: str, is_gt_generated: bool = True
+    ):
         """Attempts to add the result of a job (generated dataset) as a new dataset in Lumigator.
 
         :param job_id: The ID of the job, used to identify the S3 path
@@ -216,11 +218,6 @@ class JobService:
         bin_data = self._results_to_binary_file(dataset_to_save, list(dataset_to_save.keys()))
         bin_data_size = len(bin_data.getvalue())
 
-        # Figure out the dataset filename
-        dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-annotated.csv"
-
         upload_file = UploadFile(
             file=bin_data,
             size=bin_data_size,
@@ -231,7 +228,7 @@ class JobService:
             upload_file,
             format=DatasetFormat.JOB,
             run_id=job_id,
-            generated=True,
+            generated=is_gt_generated,
             generated_by=results.artifacts["model"],
         )
 
@@ -326,7 +323,7 @@ class JobService:
 
         return job_status
 
-    async def handle_inference_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
+    async def handle_annotation_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
         """Long term we maybe want to move logic about how to handle a specific job
         to be separate from the job service. However, for now, we will keep it here.
         This function can be attached to the jobs that run inference so that the results will
@@ -335,13 +332,14 @@ class JobService:
         """
         loguru.logger.info("Handling inference job result")
 
+        # Figure out the dataset filename
+        dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
+        dataset_filename = Path(dataset_filename).stem
+        dataset_filename = f"{dataset_filename}-annotated.csv"
+
         job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
         if job_status == JobStatus.SUCCEEDED.value:
-            self._add_dataset_to_db(
-                job_id,
-                request,
-                self._dataset_service.s3_filesystem,
-            )
+            self._add_dataset_to_db(job_id, request, self._dataset_service.s3_filesystem, dataset_filename)
         else:
             loguru.logger.warning(f"Job {job_id} failed, results not stored in DB")
 
@@ -420,10 +418,10 @@ class JobService:
         # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        if job_settings.store_as_dataset():
+        if ("store_to_dataset" in request.job_config.model_dump()) and request.job_config.store_to_dataset:
             self.add_background_task(
                 self._background_tasks,
-                self.handle_inference_job,
+                self.handle_annotation_job,
                 record.id,
                 request,
                 DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,

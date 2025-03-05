@@ -80,8 +80,11 @@ Generated Secret name for Mistral
 {{- end }}
 
 {{- define "lumigator.mistral-default-secret" -}}
-{{- $_ := set . "Consts" (dict)  -}}
-{{- $_ := set .Consts "mistralSecretKey" "MISTRAL_API_KEY" -}}
+  {{ if .Values.existingMistralAPISecretKey }}
+    {{- $_ := set . "mistralSecretKey" .Values.existingMistralAPISecretKey }}
+  {{- else -}}
+    {{- $_ := set . "mistralSecretKey" "MISTRAL_API_KEY" -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
@@ -100,8 +103,11 @@ Generated Secret name for OpenAI
 {{- end }}
 
 {{- define "lumigator.openai-default-secret" -}}
-{{- $_ := set . "Consts" (dict)  -}}
-{{- $_ := set .Consts "openaiSecretKey" "OPENAI_API_KEY" -}}
+  {{ if .Values.existingOpenaiAPISecretKey }}
+    {{- $_ := set . "openaiSecretKey" .Values.existingOpenaiAPISecretKey }}
+  {{- else -}}
+    {{- $_ := set . "openaiSecretKey" "OPENAI_API_KEY" -}}
+  {{- end -}}
 {{- end -}}
 
 {{- define "lumigator.ray-address" -}}

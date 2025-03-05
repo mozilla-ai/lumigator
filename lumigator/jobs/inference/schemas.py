@@ -64,6 +64,7 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
+    api_key: str = ""
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None

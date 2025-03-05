@@ -1,26 +1,11 @@
 #!/bin/bash
-# cd to the root dir
-cd "$(dirname "$0")"/..
-# Timeout after 5 minutes (300 seconds)
-TIMEOUT=300
-START_TIME=$(date +%s)
 
-# Wait for the service to be ready
-until curl -sSf http://localhost:8000/openapi.json; do
-  echo "Waiting for service to be ready..."
-  sleep 5
-
-  CURRENT_TIME=$(date +%s)
-  ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
-
-  if [ $ELAPSED_TIME -ge $TIMEOUT ]; then
-    echo "Error: Service did not become ready within 5 minutes."
-    exit 1
-  fi
-done
-
-# Fetch OpenAPI JSON
-curl -sSf http://localhost:8000/openapi.json -o docs/source/specs/openapi.json
-
-echo "OpenAPI documentation has been updated."
-exit 0
+cd lumigator/backend/
+export S3_BUCKET=lumigator-storage
+export RAY_HEAD_NODE_HOST=localhost
+export RAY_DASHBOARD_PORT=8265
+export SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db
+export MLFLOW_TRACKING_URI=http://localhost:8001
+export PYTHONPATH=../jobs:$$PYTHONPATH
+export LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o=
+uv run python -m backend.openapi_spec ../../docs/source/specs/openapi.json

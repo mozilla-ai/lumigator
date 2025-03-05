@@ -73,10 +73,7 @@
                 class="delete-button button"
                 icon="pi pi-trash"
                 @click="deleteSecret('openai_api_key')"
-                v-if="
-                  getApiKeyRef('openai_api_key').value &&
-                  getApiKeyRef('openai_api_key').value !== maskedValue
-                "
+                v-if="isApiKeyRegistered('openai_api_key')"
               ></Button>
             </div>
             <Button
@@ -175,34 +172,43 @@ import { settingsService } from '@/sdk/settingsService'
 import type { SecretUploadPayload } from '@/types/Secret'
 import { InputText } from 'primevue'
 import Button from 'primevue/button'
-import { onMounted, ref, type Ref } from 'vue'
+import { isReactive, onMounted, ref, type Ref } from 'vue'
 
-// Placeholder for configured secrets where the actual value is hidden
+// Placeholder for configured secrets where the actual value is hidden.
 const maskedValue = '****************'
 
-// API key map is used to track API key names and their corresponding values
-// Map of API key names to their corresponding refs
-const apiKeyMap = new Map<string, Ref<string>>([
-  ['mistral_api_key', ref('')],
-  ['openai_api_key', ref('')],
-  ['huggingface_api_key', ref('')],
-  ['deepseek_api_key', ref('')],
+// API key map is used to track API key names to their corresponding ref and whether the setting exists remotely.
+const apiKeyMap = new Map<string, { reference: Ref<string>, existsRemotely: boolean }>([
+  ['mistral_api_key', { reference: ref(''), existsRemotely: false }],
+  ['openai_api_key', { reference: ref(''), existsRemotely: false }],
+  ['huggingface_api_key', { reference: ref(''), existsRemotely: false }],
+  ['deepseek_api_key', { reference: ref(''), existsRemotely: false }],
 ])
-
-// Return the Ref directly, defaulting to an empty ref if not found
-const getApiKeyRef = (key: string): Ref<string> => {
-  return apiKeyMap.get(key) ?? ref('')
-}
 
 onMounted(async () => {
   fetchSecrets()
 })
 
+// Return the Ref directly, defaulting to an empty ref if not found.
+const getApiKeyRef = (key: string): Ref<string> => {
+  return apiKeyMap.get(key)?.reference ?? ref('')
+}
+
+// Retrieve whether the API key exists remotely.
+const isApiKeyRegistered = (key: string): boolean => {
+  return apiKeyMap.get(key)?.existsRemotely ?? false
+}
+
+// Check if the API key is valid (e.g. it is some characters, but not the masked value).
+const isValidApiKey = (value: string): boolean => {
+  return value !== maskedValue && value.length > 0
+}
+
 const fetchSecrets = async () => {
   const secrets = await settingsService.fetchSecrets()
-  apiKeyMap.forEach((ref, secretKey) => {
-    const secret = secrets.find((secret) => secret.name == secretKey)
-    ref.value = secret ? maskedValue : ''
+  apiKeyMap.forEach((obj, secretKey) => {
+    obj.existsRemotely = secrets.some((secret) => secret.name == secretKey)
+    obj.reference.value = obj.existsRemotely ? maskedValue : ''
   })
 }
 
@@ -210,7 +216,8 @@ const deleteSecret = async (key: string) => {
   await settingsService.deleteSecret(key)
   const correspondingSecretKeyRef = apiKeyMap.get(key)
   if (correspondingSecretKeyRef) {
-    correspondingSecretKeyRef.value = ''
+    correspondingSecretKeyRef.reference.value = ''
+    correspondingSecretKeyRef.existsRemotely = false
   }
 }
 
@@ -218,11 +225,10 @@ const uploadSecret = async (secret: SecretUploadPayload) => {
   await settingsService.uploadSecret(secret)
   const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
   if (correspondingSecretKeyRef) {
-    correspondingSecretKeyRef.value = maskedValue
+    correspondingSecretKeyRef.reference.value = maskedValue
+    correspondingSecretKeyRef.existsRemotely = true
   }
 }
-
-// TODO: How to stop the user accidentally saving over a legit secret with *********?
 </script>
 
 <style scoped lang="scss">

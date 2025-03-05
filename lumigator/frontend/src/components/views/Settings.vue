@@ -37,10 +37,7 @@
                 class="delete-button button"
                 icon="pi pi-trash"
                 @click="deleteSecret('mistral_api_key')"
-                v-if="
-                  getApiKeyRef('mistral_api_key').value &&
-                  getApiKeyRef('mistral_api_key').value !== maskedValue
-                "
+                v-if="isApiKeyRegistered('mistral_api_key')"
               ></Button>
             </div>
             <Button
@@ -108,10 +105,7 @@
                 class="delete-button button"
                 icon="pi pi-trash"
                 @click="deleteSecret('huggingface_api_key')"
-                v-if="
-                  getApiKeyRef('huggingface_api_key').value &&
-                  getApiKeyRef('huggingface_api_key').value !== maskedValue
-                "
+                v-if="isApiKeyRegistered('huggingface_api_key')"
               ></Button>
             </div>
             <Button
@@ -146,10 +140,7 @@
                 class="delete-button button"
                 icon="pi pi-trash"
                 @click="deleteSecret('deepseek_api_key')"
-                v-if="
-                  getApiKeyRef('deepseek_api_key').value &&
-                  getApiKeyRef('deepseek_api_key').value !== maskedValue
-                "
+                v-if="isApiKeyRegistered('deepseek_api_key')"
               ></Button>
             </div>
             <Button

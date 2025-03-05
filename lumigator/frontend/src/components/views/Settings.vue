@@ -118,6 +118,7 @@ const fetchSecrets = async () => {
       detail: `${msg}`,
       messageicon: 'pi pi-exclamation-triangle',
       group: 'br',
+      life: 3000,
     } as ToastMessageOptions & { messageicon: string })
   }
 }
@@ -165,6 +166,7 @@ const deleteSecret = async (key: string, title: string) => {
           detail: `${msg}`,
           messageicon: 'pi pi-exclamation-triangle',
           group: 'br',
+          life: 3000,
         } as ToastMessageOptions & { messageicon: string })
       }
     },
@@ -201,6 +203,7 @@ const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
       detail: `${msg}`,
       messageicon: 'pi pi-exclamation-triangle',
       group: 'br',
+      life: 3000,
     } as ToastMessageOptions & { messageicon: string })
   }
 }

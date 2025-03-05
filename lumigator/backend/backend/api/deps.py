@@ -62,13 +62,24 @@ def get_dataset_service(
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 
 
+def get_secret_service(session: DBSessionDep) -> SecretService:
+    secret_repo = SecretRepository(session)
+    return SecretService(settings.LUMIGATOR_SECRET_KEY, secret_repo)
+
+
+SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]
+
+
 def get_job_service(
-    session: DBSessionDep, dataset_service: DatasetServiceDep, background_tasks: BackgroundTasks
+    session: DBSessionDep,
+    dataset_service: DatasetServiceDep,
+    secret_service: SecretServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> JobService:
     job_repo = JobRepository(session)
     result_repo = JobResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return JobService(job_repo, result_repo, ray_client, dataset_service, background_tasks)
+    return JobService(job_repo, result_repo, ray_client, dataset_service, secret_service, background_tasks)
 
 
 JobServiceDep = Annotated[JobService, Depends(get_job_service)]
@@ -99,18 +110,6 @@ def get_workflow_service(
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
-
-
-def get_secret_service(
-    session: DBSessionDep,
-) -> SecretService:
-    secret_repo = SecretRepository(session)
-    return SecretService(settings.LUMIGATOR_SECRET_KEY, secret_repo)
-
-
-SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]
-
-
 def get_redactor() -> Redactor:
     return Redactor(settings.sensitive_patterns)
 

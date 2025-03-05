@@ -116,6 +116,6 @@ Generated Secret name for OpenAI
 {{- if .Values.mlFlowAddress }}
 {{- .Values.mlFlowAddress }}
 {{- else }}
-{{- include "mlflow.fullname" (index .Subcharts "mlflow") }}
+{{- include "mlflow.v0.tracking.fullname" (index .Subcharts "mlflow") }}
 {{- end }}
 {{- end -}}

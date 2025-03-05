@@ -60,14 +60,14 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     name = "bart-summarization-run"
     model = "facebook/bart-large-cnn"
     provider = "hf"
-    task = "summarization"
+    task_definition = {"task": "summarization"}
 
     job_args = jobs.JobInferenceCreate(
         name=name,
         model=model,
         provider=provider,
         dataset=dataset.id,
-        task=task,
+        task_definition=task_definition,
     )
 
     job = lm_client.jobs.create_job(

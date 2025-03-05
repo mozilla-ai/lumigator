@@ -28,10 +28,10 @@ class SecretDecryptionError(ValidationError):
 class SecretNotFoundError(NotFoundError):
     """Raised when the specified secret is not found in the secrets repository."""
 
-    def __init__(self, resource_id, message: str = "", exc: Exception | None = None):
+    def __init__(self, resource_id: str, message: str | None = None, exc: Exception | None = None):
         """Creates a SecretNotFoundError
 
         :param resource_id: the name of the secret that was not found
         :param exc: optional exception
         """
-        super().__init__("Secret", str(resource_id), message, exc)
+        super().__init__("Secret", resource_id, message, exc)

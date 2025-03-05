@@ -24,7 +24,11 @@
           "
           label="Save"
         ></Button>
-        <Button @click="deleteSecret('mistral_api_key')" label="Delete"></Button>
+        <Button
+          @click="deleteSecret('mistral_api_key')"
+          label="Delete"
+          :disabled="getApiKeyRef('mistral_api_key').value !== maskedValue"
+        ></Button>
       </div>
     </div>
     <div class="">
@@ -47,7 +51,11 @@
           "
           label="Save"
         ></Button>
-        <Button @click="deleteSecret('openai_api_key')" label="Delete"></Button>
+        <Button
+          @click="deleteSecret('openai_api_key')"
+          label="Delete"
+          :disabled="getApiKeyRef('openai_api_key').value !== maskedValue"
+        ></Button>
       </div>
     </div>
     <div class="">
@@ -71,7 +79,11 @@
           label="Save"
         >
         </Button>
-        <Button @click="deleteSecret('huggingface_api_key')" label="Delete"></Button>
+        <Button
+          @click="deleteSecret('huggingface_api_key')"
+          label="Delete"
+          :disabled="getApiKeyRef('huggingface_api_key').value !== maskedValue"
+        ></Button>
       </div>
     </div>
     <div class="">
@@ -94,7 +106,11 @@
           "
           label="Save"
         ></Button>
-        <Button @click="deleteSecret('deepseek_api_key')" label="Delete"></Button>
+        <Button
+          @click="deleteSecret('deepseek_api_key')"
+          label="Delete"
+          :disabled="getApiKeyRef('deepseek_api_key').value !== maskedValue"
+        ></Button>
       </div>
     </div>
   </div>

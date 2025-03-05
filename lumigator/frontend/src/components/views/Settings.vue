@@ -7,8 +7,7 @@
       <div class="api-keys-header">
         <h4 class="api-keys-title">API Keys</h4>
         <p class="api-keys-description">
-          To help improve Lumigator, you can choose to share completely anonymized usage data. We do
-          not profile you or track your location or web activity.
+          To use API-based models in Lumigator, add your API keys.
           <a
             href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#get-the-results"
             class="learn-more-link"
@@ -25,10 +24,12 @@
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
+                :onFocus="() => handleFocus('mistral_api_key')"
+                :onBlur="() => handleBlur('mistral_api_key')"
+                autocomplete="off"
                 class="api-key-input"
                 fluid
                 id="mistral_api_key"
-                :disabled="getApiKeyRef('mistral_api_key').value === maskedValue"
                 v-model="getApiKeyRef('mistral_api_key').value"
                 aria-describedby="Mistral API Key"
                 placeholder="Mistral API Key"
@@ -59,10 +60,12 @@
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
+                :onFocus="() => handleFocus('openai_api_key')"
+                :onBlur="() => handleBlur('openai_api_key')"
+                autocomplete="off"
                 class="api-key-input"
                 fluid
                 id="openai_api_key"
-                :disabled="getApiKeyRef('openai_api_key').value === maskedValue"
                 v-model="getApiKeyRef('openai_api_key').value"
                 aria-describedby="OpenAI API Key"
                 placeholder="OpenAI API Key"
@@ -93,10 +96,12 @@
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
+                :onFocus="() => handleFocus('huggingface_api_key')"
+                :onBlur="() => handleBlur('huggingface_api_key')"
+                autocomplete="off"
                 class="api-key-input"
                 fluid
                 id="huggingface_api_key"
-                :disabled="getApiKeyRef('huggingface_api_key').value === maskedValue"
                 v-model="getApiKeyRef('huggingface_api_key').value"
                 aria-describedby="Hugging Face API Key"
                 placeholder="Hugging Face API Key"
@@ -128,10 +133,12 @@
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
+                :onFocus="() => handleFocus('deepseek_api_key')"
+                :onBlur="() => handleBlur('deepseek_api_key')"
+                autocomplete="off"
                 class="api-key-input"
                 fluid
                 id="deepseek_api_key"
-                :disabled="getApiKeyRef('deepseek_api_key').value === maskedValue"
                 v-model="getApiKeyRef('deepseek_api_key').value"
                 aria-describedby="DeepSeek Face API Key"
                 placeholder="DeepSeek Face API Key"
@@ -165,10 +172,14 @@
 <script setup lang="ts">
 import { settingsService } from '@/sdk/settingsService'
 import type { SecretUploadPayload } from '@/types/Secret'
-import { InputText } from 'primevue'
+import { InputText, type ToastMessageOptions } from 'primevue'
 import Button from 'primevue/button'
 import { onMounted, ref, type Ref } from 'vue'
+  import { useConfirm } from 'primevue/useconfirm'
+  import { useToast } from 'primevue/usetoast'
 
+const confirm = useConfirm()
+const toast = useToast()
 // Placeholder for configured secrets where the actual value is hidden.
 const maskedValue = '****************'
 
@@ -207,21 +218,75 @@ const fetchSecrets = async () => {
   })
 }
 
+
 const deleteSecret = async (key: string) => {
-  await settingsService.deleteSecret(key)
-  const correspondingSecretKeyRef = apiKeyMap.get(key)
-  if (correspondingSecretKeyRef) {
-    correspondingSecretKeyRef.reference.value = ''
-    correspondingSecretKeyRef.existsRemotely = false
-  }
+  confirm.require({
+    message: `Are you sure you want to delete '${key}'?`,
+    header: 'Delete  API key?',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Cancel',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger',
+    },
+    accept: async () => {
+      await settingsService.deleteSecret(key)
+
+      toast.add({
+        severity: 'success',
+        summary: `api key deleted`,
+        messageicon: 'pi pi-trash',
+        detail: key,
+        group: 'br',
+        life: 3000,
+      } as ToastMessageOptions & { messageicon: string })
+      const correspondingSecretKeyRef = apiKeyMap.get(key)
+      if (correspondingSecretKeyRef) {
+        correspondingSecretKeyRef.reference.value = ''
+        correspondingSecretKeyRef.existsRemotely = false
+      }
+    },
+    reject: () => {},
+  })
+
 }
 
 const uploadSecret = async (secret: SecretUploadPayload) => {
+
   await settingsService.uploadSecret(secret)
+
+  toast.add({
+        severity: 'success',
+        summary: `api key saved`,
+        messageicon: 'pi pi-save',
+        detail: secret.name,
+        group: 'br',
+        life: 3000,
+      } as ToastMessageOptions & { messageicon: string })
+
   const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
   if (correspondingSecretKeyRef) {
     correspondingSecretKeyRef.reference.value = maskedValue
     correspondingSecretKeyRef.existsRemotely = true
+  }
+}
+
+const handleFocus = (key: string) => {
+  const correspondingSecretKeyRef = apiKeyMap.get(key)
+  if (correspondingSecretKeyRef?.existsRemotely) {
+    correspondingSecretKeyRef.reference.value = ''
+  }
+}
+
+const handleBlur = (key: string) => {
+  const correspondingSecretKeyRef = apiKeyMap.get(key)
+  if (correspondingSecretKeyRef?.reference.value === '' && correspondingSecretKeyRef.existsRemotely) {
+    correspondingSecretKeyRef.reference.value = maskedValue
   }
 }
 </script>
@@ -239,7 +304,6 @@ const uploadSecret = async (secret: SecretUploadPayload) => {
 .settings-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 0.5rem;
   margin: 0 auto;
   text-align: left;
@@ -293,9 +357,11 @@ const uploadSecret = async (secret: SecretUploadPayload) => {
   gap: 1rem;
 }
 
+
 .save-button {
   border-radius: 2.875rem;
 }
+
 
 .save-button:disabled {
   background-color: variables.$l-grey-300;
@@ -309,13 +375,17 @@ const uploadSecret = async (secret: SecretUploadPayload) => {
   background-color: inherit;
   vertical-align: middle;
   border: none;
+
   right: 0;
-  top: 0;
   color: variables.$l-grey-100;
 }
 
-.delete-button:hover {
+.delete-button:hover, .delete-button:focus, .delete-button:focus-visible, .delete-button:active {
   background: none;
+  border: none;
+  outline: none;
+  // color: #E0C414;
+  color: red;
 }
 
 .api-key-input {

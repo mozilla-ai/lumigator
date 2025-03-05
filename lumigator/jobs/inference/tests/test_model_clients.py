@@ -5,29 +5,40 @@ from inference_config import InferenceJobConfig
 from litellm import APIError
 from model_clients import LiteLLMModelClient, PredictionResult
 
+# Constants
+SYSTEM_PROMPT = "You are a helpful assistant."
+DEFAULT_MAX_TOKENS = 100
+DEFAULT_FREQ_PENALTY = 0.0
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_TOP_P = 1.0
+PROVIDER = "openai"
+MODEL = "gpt-4o"
+BASE_URL = "https://api.openai.com/v1"
+TEST_PROMPT = "Test prompt"
+TEST_RESPONSE = "This is a test response."
+HIDDEN_PARAMS = {"response_cost": 0.001}
+
 
 class TestLiteLLMModelClient:
     @pytest.fixture
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing."""
         config = MagicMock(spec=InferenceJobConfig)
-
-        # Create nested mocks for the attributes
-        config.system_prompt = "You are a helpful assistant."
+        config.system_prompt = SYSTEM_PROMPT
 
         # Create generation_config as a separate mock
         generation_config = MagicMock()
-        generation_config.max_new_tokens = 100
-        generation_config.frequency_penalty = 0.0
-        generation_config.temperature = 0.7
-        generation_config.top_p = 1.0
+        generation_config.max_new_tokens = DEFAULT_MAX_TOKENS
+        generation_config.frequency_penalty = DEFAULT_FREQ_PENALTY
+        generation_config.temperature = DEFAULT_TEMPERATURE
+        generation_config.top_p = DEFAULT_TOP_P
         config.generation_config = generation_config
 
         # Create inference_server as a separate mock
         inference_server = MagicMock()
-        inference_server.provider = "openai"
-        inference_server.model = "gpt-3.5-turbo"
-        inference_server.base_url = "https://api.openai.com/v1"
+        inference_server.provider = PROVIDER
+        inference_server.model = MODEL
+        inference_server.base_url = BASE_URL
         config.inference_server = inference_server
 
         return config
@@ -37,33 +48,37 @@ class TestLiteLLMModelClient:
         """Create a LiteLLMModelClient instance for testing."""
         return LiteLLMModelClient(mock_config)
 
-    @patch("model_clients.completion")
-    def test_initialization(self, mock_completion, mock_config):
+    @pytest.fixture
+    def mock_standard_response(self):
+        """Create a standard mock response"""
+        mock_response = MagicMock()
+        mock_response._hidden_params = HIDDEN_PARAMS
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = TEST_RESPONSE
+        mock_response.choices[0].message.provider_specific_fields = {}
+        mock_response["usage"].prompt_tokens = 10
+        mock_response["usage"].completion_tokens = 5
+        mock_response["usage"].total_tokens = 15
+        return mock_response
+
+    def test_initialization(self, mock_config):
         """Test that the LiteLLMModelClient initializes correctly."""
         client = LiteLLMModelClient(mock_config)
         assert client.config == mock_config
         assert client.system_prompt == mock_config.system_prompt
 
     @patch("model_clients.completion")
-    def test_predict_standard_response(self, mock_completion, client):
+    def test_predict_standard_response(self, mock_completion, client, mock_standard_response):
         """Test that predict returns the correct PredictionResult for a standard response."""
         # Setup mock response
-        mock_response = MagicMock()
-        mock_response._hidden_params = {"response_cost": 0.001}
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "This is a test response."
-        mock_response.choices[0].message.provider_specific_fields = {}
-        mock_response["usage"].prompt_tokens = 10
-        mock_response["usage"].completion_tokens = 5
-        mock_response["usage"].total_tokens = 15
-        mock_completion.return_value = mock_response
+        mock_completion.return_value = mock_standard_response
 
         # Call function
-        result = client.predict("Test prompt")
+        result = client.predict(TEST_PROMPT)
 
         # Verify results
         assert isinstance(result, PredictionResult)
-        assert result.prediction == "This is a test response."
+        assert result.prediction == TEST_RESPONSE
         assert result.reasoning is None
         assert result.metrics.prompt_tokens == 10
         assert result.metrics.completion_tokens == 5
@@ -73,17 +88,17 @@ class TestLiteLLMModelClient:
 
         # Verify completion was called correctly
         mock_completion.assert_called_once_with(
-            model="openai/gpt-3.5-turbo",
+            model=f"{PROVIDER}/{MODEL}",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Test prompt"},
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": TEST_PROMPT},
             ],
-            max_tokens=100,
-            frequency_penalty=0.0,
-            temperature=0.7,
-            top_p=1.0,
+            max_tokens=DEFAULT_MAX_TOKENS,
+            frequency_penalty=DEFAULT_FREQ_PENALTY,
+            temperature=DEFAULT_TEMPERATURE,
+            top_p=DEFAULT_TOP_P,
             drop_params=True,
-            api_base="https://api.openai.com/v1",
+            api_base=BASE_URL,
         )
 
     @patch("model_clients.completion")
@@ -91,7 +106,7 @@ class TestLiteLLMModelClient:
         """Test that predict extracts reasoning from provider_specific_fields."""
         # Setup mock response
         mock_response = MagicMock()
-        mock_response._hidden_params = {"response_cost": 0.002}
+        mock_response._hidden_params = HIDDEN_PARAMS
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "Final answer"
         mock_response.choices[0].message.provider_specific_fields = {"reasoning_content": "This is the reasoning"}
@@ -101,9 +116,7 @@ class TestLiteLLMModelClient:
         mock_response["usage"].total_tokens = 35
         mock_response["usage"]["completion_tokens_details"].reasoning_tokens = 10
 
-        # This is the key part that needs to be fixed:
-        # Set up completion_tokens_details correctly with a MagicMock that will return
-        # the correct number when .reasoning_tokens is accessed
+        # Set up completion_tokens_details correctly
         completion_tokens_details = MagicMock()
         completion_tokens_details.reasoning_tokens = 10
         mock_response["usage"].completion_tokens_details = completion_tokens_details
@@ -124,7 +137,7 @@ class TestLiteLLMModelClient:
         """Test that predict extracts reasoning from text with </think> tag."""
         # Setup mock response with reasoning in the content
         mock_response = MagicMock()
-        mock_response._hidden_params = {"response_cost": 0.003}
+        mock_response._hidden_params = HIDDEN_PARAMS
         mock_response.choices = [MagicMock()]
         mock_response.choices[
             0
@@ -147,16 +160,21 @@ class TestLiteLLMModelClient:
     @patch("model_clients.completion")
     def test_retry_mechanism(self, mock_completion, client):
         """Test that the retry mechanism works when API calls fail."""
+        # Create API errors for the first two attempts
+        api_error = APIError(message="API Error", llm_provider=PROVIDER, model=MODEL, status_code=500)
+
+        # Configure success on third try
+        success_response = MagicMock()
+        success_response._hidden_params = HIDDEN_PARAMS
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success after retry"
+        success_response.choices[0].message.provider_specific_fields = {}
+        success_response["usage"].prompt_tokens = 5
+        success_response["usage"].completion_tokens = 3
+        success_response["usage"].total_tokens = 8
+
         # Make completion fail twice then succeed
-        mock_completion.side_effect = [
-            APIError(message="API Error", llm_provider="openai", model="gpt-3.5-turbo", status_code=500),
-            APIError(message="API Error", llm_provider="openai", model="gpt-3.5-turbo", status_code=500),
-            MagicMock(
-                _hidden_params={"response_cost": 0.001},
-                choices=[MagicMock(message=MagicMock(content="Success after retry", provider_specific_fields={}))],
-                **{"usage": MagicMock(prompt_tokens=5, completion_tokens=3, total_tokens=8)},
-            ),
-        ]
+        mock_completion.side_effect = [api_error, api_error, success_response]
 
         # Call function, should succeed after retries
         result = client.predict("Test retry")
@@ -175,7 +193,7 @@ class TestLiteLLMModelClient:
 
         # Setup mock response
         mock_response = MagicMock()
-        mock_response._hidden_params = {"response_cost": 0.0}
+        mock_response._hidden_params = HIDDEN_PARAMS
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "Response"
         mock_response.choices[0].message.provider_specific_fields = {}

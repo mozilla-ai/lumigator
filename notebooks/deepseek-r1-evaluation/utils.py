@@ -111,7 +111,7 @@ def compile_and_display_results(client: LumigatorClient, experiment: GetExperime
 
     # Select just the most relevant metrics for display
     # print the token_length_ref_token_length_mean col
-    print(f"Average tokens in reference summaries: {results_df['token_length_ref_token_length_mean'][0]}")
+    print(f"Average tokens in reference summaries: {results_df['token_length_ref_token_length_mean'].iloc[0]}")
     display_metrics = [
         "avg_reasoning_tokens",
         "token_length_pred_token_length_mean",
@@ -125,15 +125,15 @@ def compile_and_display_results(client: LumigatorClient, experiment: GetExperime
     ]
     display_df = results_df[display_metrics].copy()
     display_df.columns = [
-        "# Reas Tok",
-        "# Answer Tokens",
+        "Avg Reas Tok",
+        "Avg Answer Tok",
         "ROUGE-1",
         "ROUGE-2",
         "ROUGE-L",
-        "G-EVAL Coherence",
-        "G-EVAL Consistency",
-        "G-EVAL Fluency",
-        "G-EVAL Relevance",
+        "Coherence",
+        "Consistency",
+        "Fluency",
+        "Relevance",
     ]
 
     # Display as formatted table

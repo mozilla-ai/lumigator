@@ -30,7 +30,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from backend.api.deps import get_db_session, get_s3_client, get_s3_filesystem
+from backend.api.deps import get_db_session, get_job_service, get_s3_client, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.records.jobs import JobRecord
@@ -426,8 +426,16 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service, background_tasks):
-    return JobService(job_repository, result_repository, None, dataset_service, background_tasks)
+def job_service(db_session, job_repository, result_repository, dataset_service, secret_service, background_tasks):
+    return JobService(job_repository, result_repository, None, dataset_service, secret_service, background_tasks)
+
+
+@pytest.fixture(scope="function")
+def job_service_dependency_override(app: FastAPI, job_service) -> None:
+    def get_job_service_override():
+        yield job_service
+
+    app.dependency_overrides[get_job_service] = get_job_service_override
 
 
 @pytest.fixture(scope="function")

@@ -418,7 +418,7 @@ class JobService:
         # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        if ("store_to_dataset" in request.job_config.model_dump()) and request.job_config.store_to_dataset:
+        if getattr(request.job_config, "store_to_dataset", False):
             self.add_background_task(
                 self._background_tasks,
                 self.handle_annotation_job,

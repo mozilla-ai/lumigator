@@ -108,7 +108,7 @@ class WorkflowService:
         request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
         dataset_filename = request_dataset.filename
         dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-{request.model}-predictions.csv"
+        dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
 
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database

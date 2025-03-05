@@ -172,7 +172,7 @@ import { settingsService } from '@/sdk/settingsService'
 import type { SecretUploadPayload } from '@/types/Secret'
 import { InputText } from 'primevue'
 import Button from 'primevue/button'
-import { isReactive, onMounted, ref, type Ref } from 'vue'
+import { onMounted, ref, type Ref } from 'vue'
 
 // Placeholder for configured secrets where the actual value is hidden.
 const maskedValue = '****************'

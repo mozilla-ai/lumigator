@@ -111,11 +111,13 @@ import { onMounted, ref, type Ref } from 'vue'
 const maskedValue = '****************';
 
 // API key map is used to track API key names and their corresponding values
-const apiKeyMap = new Map<string, Ref<string>>()
-apiKeyMap.set('mistral_api_key', ref(''))
-apiKeyMap.set('openai_api_key', ref(''))
-apiKeyMap.set('huggingface_api_key', ref(''))
-apiKeyMap.set('deepseek_api_key', ref(''))
+// Map of API key names to their corresponding refs
+const apiKeyMap = new Map<string, Ref<string>>([
+  ['mistral_api_key', ref('')],
+  ['openai_api_key', ref('')],
+  ['huggingface_api_key', ref('')],
+  ['deepseek_api_key', ref('')],
+])
 
 // Return the Ref directly, defaulting to an empty ref if not found
 const getApiKeyRef = (key: string): Ref<string> => {

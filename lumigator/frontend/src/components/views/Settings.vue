@@ -41,7 +41,7 @@
               <Button
                 class="delete-button button"
                 icon="pi pi-trash"
-                @click="deleteSecret(apiKey)"
+                @click="deleteSecret(apiKey, title)"
                 v-if="existsRemotely"
               ></Button>
             </div>
@@ -52,7 +52,7 @@
                   name: apiKey,
                   description: `${title} API Key`,
                   value: reference.value,
-                })
+                }, title)
               "
               :disabled="!isValidApiKey(reference.value)"
               label="Save"
@@ -106,10 +106,10 @@ const fetchSecrets = async () => {
   })
 }
 
-const deleteSecret = async (key: string) => {
+const deleteSecret = async (key: string, title: string) => {
   confirm.require({
-    message: `Are you sure you want to delete '${key}'?`,
-    header: 'Delete  API key?',
+    header: 'Delete API key?',
+    message: `${title} API key`,
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancel',
     rejectProps: {
@@ -122,16 +122,19 @@ const deleteSecret = async (key: string) => {
       severity: 'danger',
     },
     accept: async () => {
+      // Delete the secret from the backend.
       await settingsService.deleteSecret(key)
 
       toast.add({
         severity: 'success',
-        summary: `api key deleted`,
+        summary: `${title} API key deleted`,
         messageicon: 'pi pi-trash',
         detail: key,
         group: 'br',
         life: 3000,
       } as ToastMessageOptions & { messageicon: string })
+
+      // Update the state of the reference.
       const correspondingSecretKeyRef = apiKeyMap.get(key)
       if (correspondingSecretKeyRef) {
         correspondingSecretKeyRef.reference.value = ''
@@ -142,18 +145,20 @@ const deleteSecret = async (key: string) => {
   })
 }
 
-const uploadSecret = async (secret: SecretUploadPayload) => {
+const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
+  // Upload the secret to the backend.
   await settingsService.uploadSecret(secret)
 
   toast.add({
     severity: 'success',
-    summary: `api key saved`,
+    summary: `${title} API key saved`,
     messageicon: 'pi pi-save',
     detail: secret.name,
     group: 'br',
     life: 3000,
   } as ToastMessageOptions & { messageicon: string })
 
+  // Update the state of the reference.
   const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
   if (correspondingSecretKeyRef) {
     correspondingSecretKeyRef.reference.value = maskedValue

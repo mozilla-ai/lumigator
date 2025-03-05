@@ -13,6 +13,7 @@ from lumigator_schemas.secrets import SecretUploadRequest
 from ray.job_submission import JobSubmissionClient
 
 from backend.ray_submit.submission import RayJobEntrypoint
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.jobs import job_settings_map
 from backend.settings import settings
 from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
@@ -127,3 +128,24 @@ def test_check_api_key_in_job_creation(
         side_effect=submit_ray_job_fixture_side_effect,
     ):
         job_service.create_job(request)
+
+
+def test_missing_api_key_in_job_creation(
+    job_service, secret_service, dataset_service, valid_upload_file, dependency_overrides_fakes
+):
+    key_name = "MISTRAL_KEY"
+
+    test_dataset = dataset_service.upload_dataset(valid_upload_file, DatasetFormat.JOB)
+    request = JobCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", api_key=""),
+        dataset=str(test_dataset.id),
+        secret_key_name=key_name,
+    )
+    with patch(
+        "backend.services.jobs.submit_ray_job",
+        return_value=None,
+    ):
+        with pytest.raises(SecretNotFoundError):
+            job_service.create_job(request)

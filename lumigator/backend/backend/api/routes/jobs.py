@@ -34,6 +34,7 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
     JobValidationError,
 )
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.settings import settings
 
 router = APIRouter()
@@ -47,6 +48,7 @@ def job_exception_mappings() -> dict[
         JobTypeUnsupportedError: status.HTTP_501_NOT_IMPLEMENTED,
         JobUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         JobValidationError: status.HTTP_400_BAD_REQUEST,
+        SecretNotFoundError: status.HTTP_400_BAD_REQUEST,
     }
 
 

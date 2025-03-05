@@ -86,7 +86,7 @@ const apiKeyMap = new Map<
   ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: 'Mistral' }],
   ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
   ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
-  ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'Deepseek' }],
+  ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'DeepSeek' }],
 ])
 
 onMounted(async () => {

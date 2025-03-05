@@ -19,151 +19,43 @@
       </div>
 
       <div class="api-keys">
-        <div class="api-key">
-          <label class="api-key-label" for="mistral_api_key">Mistral</label>
+        <div class="api-key" v-for="[apiKey, {reference, existsRemotely, title}] in apiKeyMap.entries()" :key="apiKey">
+          <label class="api-key-label" for="mistral_api_key">{{  title }}</label>
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
-                :onFocus="() => handleFocus('mistral_api_key')"
-                :onBlur="() => handleBlur('mistral_api_key')"
+                :onFocus="() => handleFocus(apiKey)"
+                :onBlur="() => handleBlur(apiKey)"
                 autocomplete="off"
                 class="api-key-input"
                 fluid
-                id="mistral_api_key"
-                v-model="getApiKeyRef('mistral_api_key').value"
-                aria-describedby="Mistral API Key"
-                placeholder="Mistral API Key"
+                :id="apiKey"
+                v-model="reference.value"
+                aria-describedby="api-key-label"
+                :placeholder="`${title} API Key`"
               />
               <Button
                 class="delete-button button"
                 icon="pi pi-trash"
-                @click="deleteSecret('mistral_api_key')"
-                v-if="isApiKeyRegistered('mistral_api_key')"
+                @click="deleteSecret(apiKey)"
+                v-if="existsRemotely"
               ></Button>
             </div>
             <Button
               class="save-button button"
               @click="
                 uploadSecret({
-                  name: 'mistral_api_key',
-                  description: 'Mistral API Key',
-                  value: getApiKeyRef('mistral_api_key').value,
+                  name: apiKey,
+                  description: `${ title } API Key`,
+                  value: reference.value,
                 })
               "
-              :disabled="!isValidApiKey(getApiKeyRef('mistral_api_key').value)"
+              :disabled="!isValidApiKey(reference.value)"
               label="Save"
             ></Button>
           </div>
         </div>
-        <div class="api-key">
-          <label class="api-key-label" for="openai_api_key">OPENAI</label>
-          <div class="api-key-field">
-            <div style="position: relative; display: flex; flex: 1">
-              <InputText
-                :onFocus="() => handleFocus('openai_api_key')"
-                :onBlur="() => handleBlur('openai_api_key')"
-                autocomplete="off"
-                class="api-key-input"
-                fluid
-                id="openai_api_key"
-                v-model="getApiKeyRef('openai_api_key').value"
-                aria-describedby="OpenAI API Key"
-                placeholder="OpenAI API Key"
-              />
-              <Button
-                class="delete-button button"
-                icon="pi pi-trash"
-                @click="deleteSecret('openai_api_key')"
-                v-if="isApiKeyRegistered('openai_api_key')"
-              ></Button>
-            </div>
-            <Button
-              class="save-button button"
-              @click="
-                uploadSecret({
-                  name: 'openai_api_key',
-                  description: 'OpenAI API Key',
-                  value: getApiKeyRef('openai_api_key').value,
-                })
-              "
-              :disabled="!isValidApiKey(getApiKeyRef('openai_api_key').value)"
-              label="Save"
-            ></Button>
-          </div>
-        </div>
-        <div class="api-key">
-          <label class="api-key-label" for="huggingface_api_key">Hugging Face</label>
-          <div class="api-key-field">
-            <div style="position: relative; display: flex; flex: 1">
-              <InputText
-                :onFocus="() => handleFocus('huggingface_api_key')"
-                :onBlur="() => handleBlur('huggingface_api_key')"
-                autocomplete="off"
-                class="api-key-input"
-                fluid
-                id="huggingface_api_key"
-                v-model="getApiKeyRef('huggingface_api_key').value"
-                aria-describedby="Hugging Face API Key"
-                placeholder="Hugging Face API Key"
-              />
-              <Button
-                class="delete-button button"
-                icon="pi pi-trash"
-                @click="deleteSecret('huggingface_api_key')"
-                v-if="isApiKeyRegistered('huggingface_api_key')"
-              ></Button>
-            </div>
-            <Button
-              class="save-button button"
-              @click="
-                uploadSecret({
-                  name: 'huggingface_api_key',
-                  description: 'Hugging Face API Key',
-                  value: getApiKeyRef('huggingface_api_key').value,
-                })
-              "
-              :disabled="!isValidApiKey(getApiKeyRef('huggingface_api_key').value)"
-              label="Save"
-            >
-            </Button>
-          </div>
-        </div>
-        <div class="api-key">
-          <label class="api-key-label" for="deepseek_api_key">DeepSeek</label>
-          <div class="api-key-field">
-            <div style="position: relative; display: flex; flex: 1">
-              <InputText
-                :onFocus="() => handleFocus('deepseek_api_key')"
-                :onBlur="() => handleBlur('deepseek_api_key')"
-                autocomplete="off"
-                class="api-key-input"
-                fluid
-                id="deepseek_api_key"
-                v-model="getApiKeyRef('deepseek_api_key').value"
-                aria-describedby="DeepSeek Face API Key"
-                placeholder="DeepSeek Face API Key"
-              />
-              <Button
-                class="delete-button button"
-                icon="pi pi-trash"
-                @click="deleteSecret('deepseek_api_key')"
-                v-if="isApiKeyRegistered('deepseek_api_key')"
-              ></Button>
-            </div>
-            <Button
-              class="save-button button"
-              @click="
-                uploadSecret({
-                  name: 'deepseek_api_key',
-                  description: 'DeepSeek Face API Key',
-                  value: getApiKeyRef('deepseek_api_key').value,
-                })
-              "
-              :disabled="!isValidApiKey(getApiKeyRef('deepseek_api_key').value)"
-              label="Save"
-            ></Button>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -184,11 +76,11 @@ const toast = useToast()
 const maskedValue = '****************'
 
 // API key map is used to track API key names to their corresponding ref and whether the setting exists remotely.
-const apiKeyMap = new Map<string, { reference: Ref<string>, existsRemotely: boolean }>([
-  ['mistral_api_key', { reference: ref(''), existsRemotely: false }],
-  ['openai_api_key', { reference: ref(''), existsRemotely: false }],
-  ['huggingface_api_key', { reference: ref(''), existsRemotely: false }],
-  ['deepseek_api_key', { reference: ref(''), existsRemotely: false }],
+const apiKeyMap = new Map<string, { reference: Ref<string>, existsRemotely: boolean, title: string }>([
+  ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: "Mistral" }],
+  ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
+  ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
+  ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'Deepseek' }],
 ])
 
 onMounted(async () => {

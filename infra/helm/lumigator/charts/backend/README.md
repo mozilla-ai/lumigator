@@ -29,8 +29,10 @@ If the Mistral and/or the OpenAI API is used, there are two ways to provide it t
 | nameOverride | `""` | - |
 | podSecurityContext | `{}` | Security settings applied to the pod |
 | existingMistralAPISecret | `` | Name of an existing Secret that contains the Mistral key |
+| existingMistralAPISecretKey | `` | Name of the key in the existing Secret that contains the Mistral key |
 | mistralAPIKey | `` | Mistral key to be added as a Secret |
 | existingOpenaiAPISecret | `` | Name of an existing Secret that contains the OpenAI key |
+| existingOpenaiAPISecretKey | `` | Name of the key in the existing Secret that contains the OpenAI key |
 | openaiAPIKey | `` | OpenAI key to be added as a Secret |
 | postgresDb | `""` | Name of the database |
 | postgresHost | `""` | URL of the database |

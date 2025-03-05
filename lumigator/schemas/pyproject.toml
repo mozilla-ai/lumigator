@@ -8,6 +8,11 @@ dependencies = [
     "pydantic>=2.10.0",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

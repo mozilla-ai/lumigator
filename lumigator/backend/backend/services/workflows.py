@@ -104,12 +104,20 @@ class WorkflowService:
             # raise Exception(f"Inference job {inference_job.id} failed")
             return
 
+        # Figure out the dataset filename
+        request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+        dataset_filename = request_dataset.filename
+        dataset_filename = Path(dataset_filename).stem
+        dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
+
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
         self._job_service._add_dataset_to_db(
             inference_job.id,
             job_infer_create,
             self._dataset_service.s3_filesystem,
+            dataset_filename,
+            request_dataset.generated,
         )
         # log the job to the tracking client
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"

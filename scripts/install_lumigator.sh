@@ -464,7 +464,7 @@ main() {
   LUMIGATOR_FOLDER_NAME="lumigator_code"
   LUMIGATOR_REPO_URL="https://github.com/mozilla-ai/lumigator"
   LUMIGATOR_REPO_TAG="refs/tags/v"
-  LUMIGATOR_VERSION="0.1.0-alpha"
+  LUMIGATOR_VERSION="0.1.2-alpha"
   LUMIGATOR_URL="http://localhost:80"
 
   while [ "$#" -gt 0 ]; do

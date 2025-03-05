@@ -172,7 +172,7 @@ required fields:
 Here is an example of how to create an experiment:
 
 ```{note}
-The steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset
+The steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, this command will use the latest one. If you want a different dataset, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset you'd like to use.
 ```
 
 ::::{tab-set}

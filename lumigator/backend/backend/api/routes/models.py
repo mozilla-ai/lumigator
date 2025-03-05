@@ -42,6 +42,8 @@ def get_suggested_models(
 ) -> ListingResponse[ModelsResponse]:
     """Get a list of suggested models for the given tasks.
 
+    Usage: GET api/v1/models/?tasks=summarization&tasks=translation
+
     Args:
         task (List[str], optional): The task names to filter by.
 

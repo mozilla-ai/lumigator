@@ -33,6 +33,7 @@ class WorkflowCreateRequest(BaseModel):
     )
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
+    batch_size: PositiveInt = 1
     base_url: str | None = None
     system_prompt: str | None = Field(default_factory=lambda data: get_default_system_prompt(data["task_definition"]))
     inference_output_field: str = "predictions"

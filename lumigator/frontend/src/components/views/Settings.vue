@@ -52,6 +52,7 @@
                   value: getApiKeyRef('mistral_api_key').value,
                 })
               "
+              :disabled="!isValidApiKey(getApiKeyRef('mistral_api_key').value)"
               label="Save"
             ></Button>
           </div>
@@ -85,6 +86,7 @@
                   value: getApiKeyRef('openai_api_key').value,
                 })
               "
+              :disabled="!isValidApiKey(getApiKeyRef('openai_api_key').value)"
               label="Save"
             ></Button>
           </div>
@@ -121,6 +123,7 @@
                   value: getApiKeyRef('huggingface_api_key').value,
                 })
               "
+              :disabled="!isValidApiKey(getApiKeyRef('huggingface_api_key').value)"
               label="Save"
             >
             </Button>
@@ -158,6 +161,7 @@
                   value: getApiKeyRef('deepseek_api_key').value,
                 })
               "
+              :disabled="!isValidApiKey(getApiKeyRef('deepseek_api_key').value)"
               label="Save"
             ></Button>
           </div>

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import loguru
 from sqlalchemy.orm import Session
 
 from backend.records.secrets import SecretRecord
@@ -28,31 +27,6 @@ class SecretRepository(BaseRepository[SecretRecord]):
     def list_secrets(self) -> list[SecretRecord]:
         """List all secrets."""
         return self.list()
-    
-    
-    def _create_secret(self, secret_data: dict) -> SecretRecord:
-        """Create a new secret."""
-        secret = SecretRecord(**secret_data)
-        self.session.add(secret)
-        self.session.commit()
-        loguru.logger.critical(f"DB _create_secret --> {[(r.name, r.value, r.description) for r in self.list()]}")
-
-        return secret
-
-    def _update_secret(self, secret_id: UUID, secret_data: dict) -> SecretRecord | None:
-        """Update an existing secret."""
-        secret = self.session.query(SecretRecord).filter(SecretRecord.id == secret_id).first()
-        if not secret:
-            return None
-
-        for key, value in secret_data.items():
-            setattr(secret, key, value)
-        self.session.commit()
-        loguru.logger.critical(
-            f"DB _update_secret --> {[(r.name, r._name, r.value, r.description) for r in self.list()]}"
-        )
-
-        return secret
 
     def save_secret(self, name: str, secret_data: dict) -> bool:
         """Save a secret (create or update) to the database.

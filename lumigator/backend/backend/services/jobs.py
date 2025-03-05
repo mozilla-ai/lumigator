@@ -46,6 +46,7 @@ from backend.services.exceptions.job_exceptions import (
     JobTypeUnsupportedError,
     JobUpstreamError,
 )
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.secrets import SecretService
 from backend.settings import settings
 
@@ -376,6 +377,15 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
+        # include requested api_keys from the secrets repository
+        # otherwise log a warning
+        if request.secret_key_name:
+            value = self._secret_service.get_decrypted_secret_value(request.secret_key_name)
+            if value:
+                job_config.api_key = value
+            else:
+                raise SecretNotFoundError(request.secret_key_name) from None
+
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
@@ -396,15 +406,6 @@ class JobService:
         # build runtime ENV for workers
         runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
         settings.inherit_ray_env(runtime_env_vars)
-
-        # include requested api_keys from the secrets repository
-        # otherwise log a warning
-        for key in request.api_keys:
-            value = self._secret_service.get_decrypted_secret_value(key)
-            if value:
-                runtime_env_vars[key] = value
-            else:
-                loguru.logger.warning(f"Requested key {key} not found")
 
         runtime_env = {
             "pip": job_settings.pip_reqs,

@@ -2,7 +2,6 @@ import base64
 import binascii
 import os
 
-import loguru
 from cryptography.exceptions import InvalidKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
@@ -39,7 +38,6 @@ class SecretService:
         :returns: ``True`` if the secret was deleted, ``False`` if the secret was not found, or not deleted.
         """
         return self._secret_repo.delete_secret(name)
-    
 
     def get_decrypted_secret_value(self, name: str) -> str | None:
         """Gets a decrypted value for the secret specified by name.

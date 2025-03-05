@@ -1,4 +1,4 @@
-from backend.services.exceptions.base_exceptions import ValidationError
+from backend.services.exceptions.base_exceptions import ServiceError, ValidationError
 
 
 class SecretEncryptionError(ValidationError):
@@ -23,3 +23,15 @@ class SecretDecryptionError(ValidationError):
         :param exc: optional exception
         """
         super().__init__(f"Error decrypting secret: {name}", exc)
+
+
+class SecretNotFoundError(ServiceError):
+    """Raised when the specified secret is not found in the secrets repository."""
+
+    def __init__(self, name: str, exc: Exception | None = None):
+        """Creates a SecretNotFoundError
+
+        :param name: the name of the secret that was not found
+        :param exc: optional exception
+        """
+        super().__init__(f"Error retrieving secret: {name}", exc)

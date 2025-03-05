@@ -148,7 +148,7 @@ class JobCreate(BaseModel):
     name: str
     description: str = ""
     dataset: UUID
-    api_keys: list[str] = []
+    secret_key_name: str = ""
     max_samples: int = -1  # set to all samples by default
     job_config: JobSpecificConfig = Field(discriminator="job_type")
 

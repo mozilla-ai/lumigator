@@ -71,14 +71,6 @@ JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
 class JobService:
-    # Maps a provider to the secret key required in a job for that provider.
-    PROVIDER_SECRET_MAP = {
-        "hf": "huggingface_api_key",
-        "openai": "openai_api_key",
-        "deepseek": "deepseek_api_key",
-        "mistral": "mistral_api_key",
-    }
-
     # set storage path
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
@@ -358,16 +350,6 @@ class JobService:
     def add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
         """Adds a background task to the background tasks queue."""
         background_tasks.add_task(task, *args)
-
-    @staticmethod
-    def resolve_required_secret(provider: str) -> str:
-        """Resolves the required secret key for a job, based on the specified provider.
-
-        :param provider: The provider for which the secret key is required.
-        :return: The required secret key, or an empty string if the provider cannot be resolved.
-        :rtype: str
-        """
-        return JobService.PROVIDER_SECRET_MAP.get(provider, "")
 
     def create_job(
         self,

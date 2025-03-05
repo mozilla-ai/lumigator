@@ -81,7 +81,7 @@ class WorkflowService:
             dataset=request.dataset,
             max_samples=request.max_samples,
             job_config=job_infer_config,
-            secret_key_name=JobService.resolve_required_secret(request.provider),
+            secret_key_name=f"{request.provider}_api_key",
         )
 
         # submit inference job first

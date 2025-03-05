@@ -83,14 +83,14 @@ const toast = useToast()
 // Placeholder for configured secrets where the actual value is hidden.
 const maskedValue = '****************'
 
-// API key map is used to track API key names to their corresponding ref and whether the setting exists remotely.
+// API key map is used to track API key names (based on the provider name) to their corresponding ref, title and whether the setting exists remotely.
 const apiKeyMap = new Map<
   string,
   { reference: Ref<string>; existsRemotely: boolean; title: string }
 >([
   ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: 'Mistral' }],
   ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
-  ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
+  ['hf_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
   ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'DeepSeek' }],
 ])
 

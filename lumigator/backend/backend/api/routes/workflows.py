@@ -10,7 +10,6 @@ from lumigator_schemas.workflows import (
 
 from backend.api.deps import WorkflowServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
-from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
     WorkflowValidationError,
@@ -23,7 +22,6 @@ def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     return {
         WorkflowNotFoundError: status.HTTP_404_NOT_FOUND,
         WorkflowValidationError: status.HTTP_400_BAD_REQUEST,
-        SecretNotFoundError: status.HTTP_400_BAD_REQUEST,
     }
 
 

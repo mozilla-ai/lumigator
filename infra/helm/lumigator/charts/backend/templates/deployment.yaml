@@ -1,4 +1,5 @@
 {{ include "lumigator.mistral-default-secret" . }}
+{{ include "lumigator.openai-default-secret" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

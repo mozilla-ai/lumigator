@@ -19,8 +19,12 @@
       </div>
 
       <div class="api-keys">
-        <div class="api-key" v-for="[apiKey, {reference, existsRemotely, title}] in apiKeyMap.entries()" :key="apiKey">
-          <label class="api-key-label" for="mistral_api_key">{{  title }}</label>
+        <div
+          class="api-key"
+          v-for="[apiKey, { reference, existsRemotely, title }] in apiKeyMap.entries()"
+          :key="apiKey"
+        >
+          <label class="api-key-label" for="mistral_api_key">{{ title }}</label>
           <div class="api-key-field">
             <div style="position: relative; display: flex; flex: 1">
               <InputText
@@ -46,7 +50,7 @@
               @click="
                 uploadSecret({
                   name: apiKey,
-                  description: `${ title } API Key`,
+                  description: `${title} API Key`,
                   value: reference.value,
                 })
               "
@@ -55,7 +59,6 @@
             ></Button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -67,8 +70,8 @@ import type { SecretUploadPayload } from '@/types/Secret'
 import { InputText, type ToastMessageOptions } from 'primevue'
 import Button from 'primevue/button'
 import { onMounted, ref, type Ref } from 'vue'
-  import { useConfirm } from 'primevue/useconfirm'
-  import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -76,8 +79,11 @@ const toast = useToast()
 const maskedValue = '****************'
 
 // API key map is used to track API key names to their corresponding ref and whether the setting exists remotely.
-const apiKeyMap = new Map<string, { reference: Ref<string>, existsRemotely: boolean, title: string }>([
-  ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: "Mistral" }],
+const apiKeyMap = new Map<
+  string,
+  { reference: Ref<string>; existsRemotely: boolean; title: string }
+>([
+  ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: 'Mistral' }],
   ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
   ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
   ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'Deepseek' }],
@@ -86,16 +92,6 @@ const apiKeyMap = new Map<string, { reference: Ref<string>, existsRemotely: bool
 onMounted(async () => {
   fetchSecrets()
 })
-
-// Return the Ref directly, defaulting to an empty ref if not found.
-const getApiKeyRef = (key: string): Ref<string> => {
-  return apiKeyMap.get(key)?.reference ?? ref('')
-}
-
-// Retrieve whether the API key exists remotely.
-const isApiKeyRegistered = (key: string): boolean => {
-  return apiKeyMap.get(key)?.existsRemotely ?? false
-}
 
 // Check if the API key is valid (e.g. it is some characters, but not the masked value).
 const isValidApiKey = (value: string): boolean => {
@@ -109,7 +105,6 @@ const fetchSecrets = async () => {
     obj.reference.value = obj.existsRemotely ? maskedValue : ''
   })
 }
-
 
 const deleteSecret = async (key: string) => {
   confirm.require({
@@ -145,21 +140,19 @@ const deleteSecret = async (key: string) => {
     },
     reject: () => {},
   })
-
 }
 
 const uploadSecret = async (secret: SecretUploadPayload) => {
-
   await settingsService.uploadSecret(secret)
 
   toast.add({
-        severity: 'success',
-        summary: `api key saved`,
-        messageicon: 'pi pi-save',
-        detail: secret.name,
-        group: 'br',
-        life: 3000,
-      } as ToastMessageOptions & { messageicon: string })
+    severity: 'success',
+    summary: `api key saved`,
+    messageicon: 'pi pi-save',
+    detail: secret.name,
+    group: 'br',
+    life: 3000,
+  } as ToastMessageOptions & { messageicon: string })
 
   const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
   if (correspondingSecretKeyRef) {
@@ -177,7 +170,10 @@ const handleFocus = (key: string) => {
 
 const handleBlur = (key: string) => {
   const correspondingSecretKeyRef = apiKeyMap.get(key)
-  if (correspondingSecretKeyRef?.reference.value === '' && correspondingSecretKeyRef.existsRemotely) {
+  if (
+    correspondingSecretKeyRef?.reference.value === '' &&
+    correspondingSecretKeyRef.existsRemotely
+  ) {
     correspondingSecretKeyRef.reference.value = maskedValue
   }
 }
@@ -249,11 +245,9 @@ const handleBlur = (key: string) => {
   gap: 1rem;
 }
 
-
 .save-button {
   border-radius: 2.875rem;
 }
-
 
 .save-button:disabled {
   background-color: variables.$l-grey-300;
@@ -272,7 +266,10 @@ const handleBlur = (key: string) => {
   color: variables.$l-grey-100;
 }
 
-.delete-button:hover, .delete-button:focus, .delete-button:focus-visible, .delete-button:active {
+.delete-button:hover,
+.delete-button:focus,
+.delete-button:focus-visible,
+.delete-button:active {
   background: none;
   border: none;
   outline: none;

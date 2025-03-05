@@ -1,14 +1,18 @@
 import time
+from http import HTTPStatus
 from uuid import UUID
 
 import pytest
 import requests
 from fastapi.testclient import TestClient
+from inference.schemas import GenerationConfig, InferenceJobConfig, InferenceServerConfig
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
+    JobInferenceConfig,
+    JobInferenceCreate,
     JobLogsResponse,
     JobResponse,
     JobResultDownloadResponse,
@@ -16,6 +20,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.secrets import SecretUploadRequest
 from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from pydantic import PositiveInt
@@ -445,3 +450,75 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
         raise Exception(f"Stopped, job remains in {workflow_status} status")
 
     return workflow_details
+
+
+def _test_launch_job_with_secret(
+    local_client: TestClient,
+    dialog_dataset,
+    dependency_overrides_services,
+):
+    logger.info("Running test...")
+    ko_secret = SecretUploadRequest(value="<WRONG SECRET HERE>", description="Mistral API key")
+    secret_name = "MISTRAL_API_KEY"  # pragma: allowlist secret
+    response = local_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
+    logger.info(f"Uploading KO key {secret_name}: {response}")
+    assert response.status_code == HTTPStatus.CREATED or response.status_code == HTTPStatus.NO_CONTENT
+
+    get_ds_response = local_client.get("/datasets/")
+    assert get_ds_response.status_code == 200
+    get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
+
+    create_response = local_client.post(
+        "/datasets/",
+        data={},
+        files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
+    )
+
+    assert create_response.status_code == 201
+
+    created_dataset = DatasetResponse.model_validate(create_response.json())
+
+    get_ds_before_response = local_client.get("/datasets/")
+    assert get_ds_before_response.status_code == 200
+    get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
+    assert get_ds_before.total == get_ds.total + 1
+
+    infer_model = JobInferenceCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        dataset=str(created_dataset.id),
+        max_samples=2,
+        api_keys=secret_name,
+        job_config=JobInferenceConfig(
+            model="open-mistral-7b",
+            provider="mistral",
+        ),
+    )
+    infer_payload = infer_model.model_dump(mode="json")
+    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+    if create_inference_job_response.status_code >= 400:
+        logger.error(f"error: {create_inference_job_response.text}")
+    assert create_inference_job_response.status_code == 201
+    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
+    assert not wait_for_job(local_client, create_inference_job_response_model.id)
+
+    ok_secret = SecretUploadRequest(value="<CORRECT SECRET HERE>", description="Mistral API key")
+    response = local_client.put(f"/settings/secrets/{secret_name}", json=ok_secret.model_dump())
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    infer_model = JobInferenceCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        dataset=str(created_dataset.id),
+        max_samples=2,
+        api_keys=[secret_name],
+        job_config=JobInferenceConfig(
+            model="open-mistral-7b",
+            provider="mistral",
+        ),
+    )
+    infer_payload = infer_model.model_dump(mode="json")
+    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+    assert create_inference_job_response.status_code == 201
+    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
+    assert wait_for_job(local_client, create_inference_job_response_model.id)

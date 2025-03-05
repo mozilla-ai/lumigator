@@ -72,6 +72,7 @@ import Button from 'primevue/button'
 import { onMounted, ref, type Ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import axios from 'axios'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -146,10 +147,11 @@ const deleteSecret = async (key: string, title: string) => {
 }
 
 const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
-  // Upload the secret to the backend.
-  await settingsService.uploadSecret(secret)
+  try {
+    // Upload the secret to the backend.
+    await settingsService.uploadSecret(secret)
 
-  toast.add({
+    toast.add({
     severity: 'success',
     summary: `${title} API key saved`,
     messageicon: 'pi pi-save',
@@ -158,12 +160,31 @@ const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
     life: 3000,
   } as ToastMessageOptions & { messageicon: string })
 
-  // Update the state of the reference.
-  const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
-  if (correspondingSecretKeyRef) {
-    correspondingSecretKeyRef.reference.value = maskedValue
-    correspondingSecretKeyRef.existsRemotely = true
+    // Update the state of the reference.
+    const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
+    if (correspondingSecretKeyRef) {
+      correspondingSecretKeyRef.reference.value = maskedValue
+      correspondingSecretKeyRef.existsRemotely = true
+    }
+  } catch (error) {
+    // Extract the error messages from the error object.
+    const msg = extractErrorMessages(error).join(', ')
+    toast.add({
+      severity: 'error',
+      summary: `Unable to save ${title} API key`,
+      detail: `${msg}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
   }
+}
+
+function extractErrorMessages(error: unknown): string[] {
+  if (axios.isAxiosError(error) && Array.isArray(error.response?.data?.detail)) {
+    return error.response.data.detail
+      .flatMap((item: { msg?: string }) => item.msg ? [item.msg] : []);
+  }
+  return [];
 }
 
 const handleFocus = (key: string) => {

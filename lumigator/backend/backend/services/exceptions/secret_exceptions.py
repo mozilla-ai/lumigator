@@ -32,6 +32,7 @@ class SecretNotFoundError(NotFoundError):
         """Creates a SecretNotFoundError
 
         :param resource_id: the name of the secret that was not found
+        :param message: optional error message
         :param exc: optional exception
         """
         super().__init__("Secret", resource_id, message, exc)

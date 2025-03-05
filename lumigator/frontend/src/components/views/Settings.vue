@@ -48,11 +48,14 @@
             <Button
               class="save-button button"
               @click="
-                uploadSecret({
-                  name: apiKey,
-                  description: `${title} API Key`,
-                  value: reference.value,
-                }, title)
+                uploadSecret(
+                  {
+                    name: apiKey,
+                    description: `${title} API Key`,
+                    value: reference.value,
+                  },
+                  title,
+                )
               "
               :disabled="!isValidApiKey(reference.value)"
               label="Save"
@@ -72,7 +75,8 @@ import Button from 'primevue/button'
 import { onMounted, ref, type Ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
+import { getAxiosError } from '@/helpers/getAxiosError'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -100,11 +104,22 @@ const isValidApiKey = (value: string): boolean => {
 }
 
 const fetchSecrets = async () => {
-  const secrets = await settingsService.fetchSecrets()
-  apiKeyMap.forEach((obj, secretKey) => {
-    obj.existsRemotely = secrets.some((secret) => secret.name == secretKey)
-    obj.reference.value = obj.existsRemotely ? maskedValue : ''
-  })
+  try {
+    const secrets = await settingsService.fetchSecrets()
+    apiKeyMap.forEach((obj, secretKey) => {
+      obj.existsRemotely = secrets.some((secret) => secret.name == secretKey)
+      obj.reference.value = obj.existsRemotely ? maskedValue : ''
+    })
+  } catch (error) {
+    const msg = extractErrorMessages(error).join(', ')
+    toast.add({
+      severity: 'error',
+      summary: 'Unable to fetch configured API keys',
+      detail: `${msg}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  }
 }
 
 const deleteSecret = async (key: string, title: string) => {
@@ -123,23 +138,34 @@ const deleteSecret = async (key: string, title: string) => {
       severity: 'danger',
     },
     accept: async () => {
-      // Delete the secret from the backend.
-      await settingsService.deleteSecret(key)
+      try {
+        // Delete the secret from the backend.
+        await settingsService.deleteSecret(key)
 
-      toast.add({
-        severity: 'success',
-        summary: `${title} API key deleted`,
-        messageicon: 'pi pi-trash',
-        detail: key,
-        group: 'br',
-        life: 3000,
-      } as ToastMessageOptions & { messageicon: string })
+        toast.add({
+          severity: 'success',
+          summary: `${title} API key deleted`,
+          messageicon: 'pi pi-trash',
+          detail: key,
+          group: 'br',
+          life: 3000,
+        } as ToastMessageOptions & { messageicon: string })
 
-      // Update the state of the reference.
-      const correspondingSecretKeyRef = apiKeyMap.get(key)
-      if (correspondingSecretKeyRef) {
-        correspondingSecretKeyRef.reference.value = ''
-        correspondingSecretKeyRef.existsRemotely = false
+        // Update the state of the reference.
+        const correspondingSecretKeyRef = apiKeyMap.get(key)
+        if (correspondingSecretKeyRef) {
+          correspondingSecretKeyRef.reference.value = ''
+          correspondingSecretKeyRef.existsRemotely = false
+        }
+      } catch (error) {
+        const msg = extractErrorMessages(error).join(', ')
+        toast.add({
+          severity: 'error',
+          summary: `Unable to delete ${title} API key`,
+          detail: `${msg}`,
+          messageicon: 'pi pi-exclamation-triangle',
+          group: 'br',
+        } as ToastMessageOptions & { messageicon: string })
       }
     },
     reject: () => {},
@@ -152,13 +178,13 @@ const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
     await settingsService.uploadSecret(secret)
 
     toast.add({
-    severity: 'success',
-    summary: `${title} API key saved`,
-    messageicon: 'pi pi-save',
-    detail: secret.name,
-    group: 'br',
-    life: 3000,
-  } as ToastMessageOptions & { messageicon: string })
+      severity: 'success',
+      summary: `${title} API key saved`,
+      messageicon: 'pi pi-save',
+      detail: secret.name,
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
 
     // Update the state of the reference.
     const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
@@ -180,11 +206,17 @@ const uploadSecret = async (secret: SecretUploadPayload, title: string) => {
 }
 
 function extractErrorMessages(error: unknown): string[] {
-  if (axios.isAxiosError(error) && Array.isArray(error.response?.data?.detail)) {
-    return error.response.data.detail
-      .flatMap((item: { msg?: string }) => item.msg ? [item.msg] : []);
+  if (
+    axios.isAxiosError(error) &&
+    error.response?.status === 422 &&
+    Array.isArray(error.response?.data?.detail)
+  ) {
+    return error.response.data.detail.flatMap((item: { msg?: string }) =>
+      item.msg ? [item.msg] : [],
+    )
+  } else {
+    return [getAxiosError(error as Error | AxiosError)]
   }
-  return [];
 }
 
 const handleFocus = (key: string) => {

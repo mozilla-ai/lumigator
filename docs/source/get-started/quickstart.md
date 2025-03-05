@@ -68,7 +68,7 @@ should receive the following JSON response:
 
 ## Using Lumigator
 
-Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv)'.format(commit_id) }}.
+Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }}.
 
 We will show how to do this using either cURL or the Lumigator SDK. See [the UI guide](ui-guide.md) for information about how to use the UI.
 
@@ -91,7 +91,7 @@ To run this example, first `cd` to the `lumigator` directory. then run
 :::{tab-item} cURL
 :sync: tab1
 ```console
-user@host:~/lumigator$ export DATASET_PATH=lumigator/sample_data/dialogsum_exc.csv
+user@host:~/lumigator$ export DATASET_PATH=lumigator/sample_data/summarization/dialogsum_exc.csv
 user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
   -H 'Accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
@@ -117,7 +117,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
 from lumigator_sdk.lumigator import LumigatorClient
 from lumigator_schemas.datasets import DatasetFormat
 
-dataset_path = 'lumigator/sample_data/dialogsum_exc.csv'
+dataset_path = 'lumigator/sample_data/summarization/dialogsum_exc.csv'
 client = LumigatorClient('localhost:8000')
 
 response = client.datasets.create_dataset(
@@ -132,7 +132,7 @@ response = client.datasets.create_dataset(
 ```{note}
 The dataset file should be in CSV format and contain a header row with the following columns:
 `examples`, `ground_truth`. The `ground_truth` column is optional since you can generate it using
-Lumigator. See {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/dialogsum_exc.csv#L4)'.format(commit_id) }}
+Lumigator. See {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv#L4)'.format(commit_id) }}
 for an example.
 ```
 
@@ -172,7 +172,7 @@ required fields:
 Here is an example of how to create an experiment:
 
 ```{note}
-the steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset
+The steps assume you only have uploaded a single dataset. If you have multiple datasets uploaded, this command will use the latest one. If you want a different dataset, replace the `"$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"` code with the ID of the dataset you'd like to use.
 ```
 
 ::::{tab-set}
@@ -207,7 +207,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
   "name": "DialogSum Summarization",
   "description": "See which model best summarizes Dialogues ",
   "created_at": "2025-02-19T20:11:55.492000",
-  "task": "summarization",
+  "task_definition": {
+    "task": "summarization"
+  },
   "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
   "updated_at": null,
   "workflows": null
@@ -330,7 +332,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
   "name": "DialogSum Summarization",
   "description": "See which model best summarizes Dialogues ",
   "created_at": "2025-02-19T20:11:55.492000",
-  "task": "summarization",
+  "task_definition": {
+    "task": "summarization"
+  },
   "dataset": "9ac42307-e0e5-4635-a9ce-48acdb451742",
   "updated_at": "2025-02-19T20:11:55.492000",
   "workflows": [

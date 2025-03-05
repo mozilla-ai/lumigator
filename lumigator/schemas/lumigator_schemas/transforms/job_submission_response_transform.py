@@ -92,6 +92,9 @@ def _extract_dataset(config_dict: dict[str, Any]) -> dict[str, Any]:
     :raises ValueError: If the dataset path cannot be found or if the extracted dataset
        ID is not a valid UUID.
     """
+    if not config_dict:
+        raise ValueError(f"Unable to parse dataset, missing entrypoint config: {config_dict}")
+
     dataset_path = config_dict.get("dataset", {}).get("path", "")
     if not dataset_path:
         raise ValueError(f"Unable to parse dataset path from entrypoint config: {config_dict}")
@@ -125,12 +128,15 @@ def _extract_model_name_or_path(config_dict: dict[str, Any]) -> str | None:
         or `inference_server`.
     :returns  (str | None): The model name or path if found, otherwise `None`.
     """
+    if not config_dict:
+        return None
+
     # NOTE: Some jobs don't have models (e.g. evaluation).
     model_name_or_path = (
-        config_dict.get("model", {}).get("path")
-        or config_dict.get("model", {}).get("inference", {}).get("model")
-        or config_dict.get("hf_pipeline", {}).get("model_name_or_path")
-        or config_dict.get("inference_server", {}).get("model")
+        (config_dict.get("model") or {}).get("path")
+        or ((config_dict.get("model") or {}).get("inference") or {}).get("model")
+        or (config_dict.get("hf_pipeline") or {}).get("model_name_or_path")
+        or (config_dict.get("inference_server") or {}).get("model")
     )
 
     return model_name_or_path
@@ -143,6 +149,9 @@ def _extract_max_samples(config_dict: dict[str, Any]) -> int:
     :returns  (int): The value of `max_samples` if found.
     :raises ValueError: If `max_samples` is not found in the `job` or `evaluation` sections.
     """
+    if not config_dict:
+        raise ValueError(f"Unable to parse  max_samples, missing entrypoint config: {config_dict}")
+
     for key in ("job", "evaluation"):
         if (max_samples := config_dict.get(key, {}).get("max_samples")) is not None:
             return max_samples

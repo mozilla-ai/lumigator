@@ -72,6 +72,7 @@ class WorkflowService:
             base_url=request.base_url,
             output_field=request.inference_output_field,
             task_definition=request.task_definition,
+            system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
         )
@@ -103,12 +104,20 @@ class WorkflowService:
             # raise Exception(f"Inference job {inference_job.id} failed")
             return
 
+        # Figure out the dataset filename
+        request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+        dataset_filename = request_dataset.filename
+        dataset_filename = Path(dataset_filename).stem
+        dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
+
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
         self._job_service._add_dataset_to_db(
             inference_job.id,
             job_infer_create,
             self._dataset_service.s3_filesystem,
+            dataset_filename,
+            request_dataset.generated,
         )
         # log the job to the tracking client
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
@@ -208,6 +217,7 @@ class WorkflowService:
             description=request.description,
             name=request.name,
             model=request.model,
+            system_prompt=request.system_prompt,
             # input is WorkflowCreate, we need to split the configs and generate one
             # JobInferenceCreate and one JobEvalCreate
         )

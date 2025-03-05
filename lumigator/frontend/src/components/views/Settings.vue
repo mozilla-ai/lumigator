@@ -9,8 +9,8 @@
       <div>
         <InputText
           id="mistral_api_key"
-          :disabled="mistralApiKey === magicStars"
-          v-model="mistralApiKey"
+          :disabled="getApiKeyRef('mistral_api_key').value === maskedValue"
+          v-model="getApiKeyRef('mistral_api_key').value"
           aria-describedby="Mistral API Key"
           placeholder="Mistral API Key"
         />
@@ -19,7 +19,7 @@
             uploadSecret({
               name: 'mistral_api_key',
               description: 'Mistral API Key',
-              value: mistralApiKey,
+              value: getApiKeyRef('mistral_api_key').value,
             })
           "
           label="Save"
@@ -32,8 +32,8 @@
       <div>
         <InputText
           id="openai_api_key"
-          :disabled="openAIApiKey === magicStars"
-          v-model="openAIApiKey"
+          :disabled="getApiKeyRef('openai_api_key').value === maskedValue"
+          v-model="getApiKeyRef('openai_api_key').value"
           aria-describedby="OpenAI API Key"
           placeholder="OpenAI API Key"
         />
@@ -42,7 +42,7 @@
             uploadSecret({
               name: 'openai_api_key',
               description: 'OpenAI API Key',
-              value: openAIApiKey,
+              value: getApiKeyRef('openai_api_key').value,
             })
           "
           label="Save"
@@ -55,8 +55,8 @@
       <div>
         <InputText
           id="huggingface_api_key"
-          :disabled="huggingFaceApiKey === magicStars"
-          v-model="huggingFaceApiKey"
+          :disabled="getApiKeyRef('huggingface_api_key').value === maskedValue"
+          v-model="getApiKeyRef('huggingface_api_key').value"
           aria-describedby="Hugging Face API Key"
           placeholder="Hugging Face API Key"
         />
@@ -65,7 +65,7 @@
             uploadSecret({
               name: 'huggingface_api_key',
               description: 'Hugging Face API Key',
-              value: huggingFaceApiKey,
+              value: getApiKeyRef('huggingface_api_key').value,
             })
           "
           label="Save"
@@ -79,8 +79,8 @@
       <div>
         <InputText
           id="deepseek_api_key"
-          :disabled="deepSeekApiKey === magicStars"
-          v-model="deepSeekApiKey"
+          :disabled="getApiKeyRef('deepseek_api_key').value === maskedValue"
+          v-model="getApiKeyRef('deepseek_api_key').value"
           aria-describedby="DeepSeek Face API Key"
           placeholder="DeepSeek Face API Key"
         />
@@ -89,7 +89,7 @@
             uploadSecret({
               name: 'deepseek_api_key',
               description: 'DeepSeek Face API Key',
-              value: deepSeekApiKey,
+              value: getApiKeyRef('deepseek_api_key').value,
             })
           "
           label="Save"
@@ -102,45 +102,41 @@
 
 <script setup lang="ts">
 import { settingsService } from '@/sdk/settingsService'
-import type { Secret, SecretUploadPayload } from '@/types/Secret'
+import type { SecretUploadPayload } from '@/types/Secret'
 import { InputText } from 'primevue'
 import Button from 'primevue/button'
-
 import { onMounted, ref, type Ref } from 'vue'
-// Configured secrets
-const secrets: Ref<Secret[]> = ref([])
-// Form fields
-const mistralApiKey = ref()
-const openAIApiKey = ref()
-const huggingFaceApiKey = ref()
-const deepSeekApiKey = ref()
 
-// TODO: this cannot be called magic stars
-const magicStars = '****************'
+// Placeholder for configured secrets where the actual value is hidden
+const maskedValue = '****************';
 
-// TODO: rename this nicely, and make the map linked up all nice ;)
-const myMap = new Map<string, Ref<string>>()
-myMap.set('mistral_api_key', mistralApiKey)
-myMap.set('openai_api_key', openAIApiKey)
-myMap.set('huggingface_api_key', huggingFaceApiKey)
-myMap.set('deepseek_api_key', deepSeekApiKey)
+// API key map is used to track API key names and their corresponding values
+const apiKeyMap = new Map<string, Ref<string>>()
+apiKeyMap.set('mistral_api_key', ref(''))
+apiKeyMap.set('openai_api_key', ref(''))
+apiKeyMap.set('huggingface_api_key', ref(''))
+apiKeyMap.set('deepseek_api_key', ref(''))
+
+// Return the Ref directly, defaulting to an empty ref if not found
+const getApiKeyRef = (key: string): Ref<string> => {
+  return apiKeyMap.get(key) ?? ref('');
+};
 
 onMounted(async () => {
   fetchSecrets()
-  console.log(secrets.value)
 })
 
 const fetchSecrets = async () => {
   const secrets = await settingsService.fetchSecrets()
-  myMap.forEach((ref, secretKey) => {
+  apiKeyMap.forEach((ref, secretKey) => {
     const secret = secrets.find((secret) => secret.name == secretKey)
-    ref.value = secret ? magicStars : ''
+    ref.value = secret ? maskedValue : ''
   })
 }
 
 const deleteSecret = async (key: string) => {
   await settingsService.deleteSecret(key)
-  const correspondingSecretKeyRef = myMap.get(key)
+  const correspondingSecretKeyRef = apiKeyMap.get(key)
   if (correspondingSecretKeyRef) {
     correspondingSecretKeyRef.value = ''
   }
@@ -148,9 +144,9 @@ const deleteSecret = async (key: string) => {
 
 const uploadSecret = async (secret: SecretUploadPayload) => {
   await settingsService.uploadSecret(secret)
-  const correspondingSecretKeyRef = myMap.get(secret.name)
+  const correspondingSecretKeyRef = apiKeyMap.get(secret.name)
   if (correspondingSecretKeyRef) {
-    correspondingSecretKeyRef.value = magicStars
+    correspondingSecretKeyRef.value = maskedValue
   }
 
 }

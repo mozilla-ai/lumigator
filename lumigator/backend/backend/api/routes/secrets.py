@@ -25,6 +25,12 @@ def list_secrets(service: SecretServiceDep) -> list[SecretGetRequest]:
     return service.list_secrets()
 
 
+@router.delete("/{secret_name}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_secret(service: SecretServiceDep, secret_name: str) -> None:
+    """Deletes a secret identified by its name."""
+    service.delete_secret(secret_name)
+
+
 @router.put(
     "/{secret_name}",
     status_code=status.HTTP_201_CREATED,

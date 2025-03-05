@@ -199,7 +199,9 @@ class MLflowTrackingClient(TrackingClient):
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
     # which correspond to what we call "jobs" in our system
-    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         # make sure its status is CREATED
         workflow = self._client.create_run(
@@ -209,6 +211,7 @@ class MLflowTrackingClient(TrackingClient):
                 "status": WorkflowStatus.CREATED.value,
                 "description": description,
                 "model": model,
+                "system_prompt": system_prompt,
             },
         )
         return WorkflowResponse(
@@ -217,6 +220,7 @@ class MLflowTrackingClient(TrackingClient):
             name=name,
             model=model,
             description=description,
+            system_prompt=system_prompt,
             status=WorkflowStatus.CREATED,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
@@ -249,6 +253,7 @@ class MLflowTrackingClient(TrackingClient):
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
             model=workflow.data.tags.get("model"),
+            system_prompt=workflow.data.tags.get("system_prompt"),
             status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
@@ -363,6 +368,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
+            system_prompt=workflow.data.tags.get("system_prompt"),
             status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )

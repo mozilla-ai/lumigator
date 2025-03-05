@@ -54,6 +54,16 @@ def common_resources_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
+def common_resources_sample_data_dir_summarization(common_resources_dir) -> Path:
+    return common_resources_dir / "summarization"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_translation(common_resources_dir) -> Path:
+    return common_resources_dir / "translation"
+
+
+@pytest.fixture(scope="session")
 def json_data_jobs(resources_dir) -> Path:
     return resources_dir / "jobs.json"
 
@@ -202,27 +212,27 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
 
 
 @pytest.fixture(scope="function")
-def dialog_data(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
+def dialog_data(common_resources_sample_data_dir_summarization):
+    with Path.open(common_resources_sample_data_dir_summarization / "dialogsum_exc.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def dialog_data_unannotated(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_mini_no_gt.csv") as file:
+def dialog_data_unannotated(common_resources_sample_data_dir_summarization):
+    with Path.open(common_resources_sample_data_dir_summarization / "dialogsum_mini_no_gt.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def long_sequences_data_unannotated(common_resources_dir):
+def long_sequences_data_unannotated(common_resources_sample_data_dir_summarization):
     # Dataset with long sequences
-    with Path.open(common_resources_dir / "mock_long_sequences_no_gt.csv") as file:
+    with Path.open(common_resources_sample_data_dir_summarization / "mock_long_sequences_no_gt.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def mock_translation_data(common_resources_dir):
-    with Path.open(common_resources_dir / "sample_translation_en_de.csv") as file:
+def mock_translation_data(common_resources_sample_data_dir_translation):
+    with Path.open(common_resources_sample_data_dir_translation / "sample_translation_en_de.csv") as file:
         yield file
 
 

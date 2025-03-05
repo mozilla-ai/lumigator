@@ -143,6 +143,10 @@ To stop the containers you started using Docker Compose, simply run the followin
 make stop-lumigator
 ```
 
+> [!NOTE]
+Since Lumigator is in active development, we always pull the latest images for the frontend and backend in our Docker Compose setup. If you are looking for a stable release, please check out the latest Git tag on our [Releases](https://github.com/mozilla-ai/lumigator/releases) page.
+**Important: You cannot simply change the images in the docker-compose file. Ensure that your working directory matches the Git tag you are using to maintain compatibility.
+
 ## Kubernetes Installation
 
 You can also deploy Lumigator on Kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.

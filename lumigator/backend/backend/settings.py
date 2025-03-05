@@ -58,8 +58,10 @@ class BackendSettings(BaseSettings):
     def TRACKING_BACKEND_URI(self) -> str:  # noqa: N802
         if self.TRACKING_BACKEND == self.TrackingBackendType.MLFLOW:
             # the tracking uri env var must be set, return that
-            assert os.environ.get("MLFLOW_TRACKING_URI", None) is not None
-            return os.environ["MLFLOW_TRACKING_URI"]
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if not tracking_uri:  # This catches both None and empty strings
+                raise ValueError("MLFLOW_TRACKING_URI environment variable must be set to a valid URI")
+            return tracking_uri
         raise ValueError(f"Unsupported tracking backend: {self.TRACKING_BACKEND}")
 
     # Served models

@@ -8,7 +8,7 @@ from lumigator_schemas.jobs import (
     JobResults,
     LowercaseEnum,
 )
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, get_default_system_prompt
 
 
 class WorkflowStatus(LowercaseEnum):
@@ -28,7 +28,7 @@ class WorkflowCreateRequest(BaseModel):
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     base_url: str | None = None
-    system_prompt: str | None = None
+    system_prompt: str | None = Field(default_factory=lambda data: get_default_system_prompt(data["task_definition"]))
     inference_output_field: str = "predictions"
     config_template: str | None = None
     generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
@@ -43,6 +43,7 @@ class WorkflowResponse(BaseModel, from_attributes=True):
     model: str
     name: str
     description: str
+    system_prompt: str
     status: WorkflowStatus
     created_at: datetime.datetime
     updated_at: datetime.datetime | None = None

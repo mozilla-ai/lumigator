@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks
@@ -89,6 +90,7 @@ class WorkflowService:
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
+        self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job.id)
 
         # wait for the inference job to complete
         status = await self._job_service.wait_for_job_complete(
@@ -125,7 +127,7 @@ class WorkflowService:
             parameters={"inference_output_s3_path": inf_path},
             ray_job_id=str(inference_job.id),
         )
-        self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)
+        self._tracking_client.update_job(workflow.id, inference_job_output)
 
         # FIXME The ray status is now _not enough_ to set the job status,
         # use the inference job id to recover the dataset record
@@ -237,4 +239,11 @@ class WorkflowService:
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
-        return self._tracking_client.get_workflow_logs(workflow_id)
+        job_list = self._tracking_client.list_jobs(workflow_id)
+        # sort the jobs by created_at, with the oldest last
+        job_list = sorted(job_list, key=lambda x: x.info.start_time)
+        all_ray_job_ids = [run.data.params.get("ray_job_id") for run in job_list]
+        logs = [self._job_service.get_job_logs(UUID(ray_job_id)) for ray_job_id in all_ray_job_ids]
+        # combine the logs into a single string
+        # TODO: This is not a great solution but it matches the current API
+        return JobLogsResponse(logs="\n================\n".join([log.logs for log in logs]))

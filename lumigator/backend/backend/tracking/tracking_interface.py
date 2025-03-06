@@ -2,6 +2,7 @@ import contextlib
 from collections.abc import Generator
 from typing import Protocol
 from uuid import UUID
+from warnings import warn
 
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
@@ -57,7 +58,7 @@ class TrackingClient(Protocol):
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get workflow logs."""
-        ...
+        warn(DeprecationWarning, stacklevel=2)
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update a workflow."""
@@ -71,8 +72,12 @@ class TrackingClient(Protocol):
         """List all workflows for an experiment."""
         ...
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, data: RunOutputs) -> None:
-        """Log the job output."""
+    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str):
+        """Link a started job to an experiment and a workflow."""
+        ...
+
+    def update_workflow(self, workflow_id: str, data: RunOutputs):
+        """Update the outputs of a workflow"""
         ...
 
     def get_job(self, job_id: str) -> JobResults | None:
@@ -87,7 +92,7 @@ class TrackingClient(Protocol):
         """Delete a job."""
         ...
 
-    def list_jobs(self, experiment_id: str, workflow_id: str) -> list:
+    def list_jobs(self, workflow_id: str) -> list:
         """List all jobs for a workflow."""
         ...
 

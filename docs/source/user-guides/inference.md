@@ -97,7 +97,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 
 ## Model Specification
 
-Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
+Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint. It contains the following information for each model:
 
 * `display_name`: an identification name for the model
 * `model`: The model to use, e.g. `facebook/bart-large-cnn`

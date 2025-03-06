@@ -44,7 +44,7 @@ jobs:
           export RAY_HEAD_NODE_HOST=${{ secrets.CW_RAY_HEAD_NODE_HOST }}
           export AWS_ACCESS_KEY_ID=${{ secrets.CW_AWS_ACCESS_KEY_ID }}
           export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
-          export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
+          export AWS_ENDPOINT_URL="http://54.231.160.168:80"
           export S3_BUCKET="mario-test-stk"
           make start-lumigator-ci
 
@@ -56,6 +56,6 @@ jobs:
           export RAY_HEAD_NODE_HOST=${{ secrets.CW_RAY_HEAD_NODE_HOST }}
           export AWS_ACCESS_KEY_ID=${{ secrets.CW_AWS_ACCESS_KEY_ID }}
           export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
-          export AWS_ENDPOINT_URL=${{ secrets.CW_AWS_ENDPOINT_URL }}
+          export AWS_ENDPOINT_URL="http://54.231.160.168:80"
           export S3_BUCKET="mario-test-stk"
           make test-backend-integration-ci

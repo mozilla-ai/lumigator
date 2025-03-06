@@ -375,8 +375,7 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
-        # include requested api_keys from the secrets repository
-        # otherwise log a warning
+        # Include requested secrets (API keys) from stored secrets.
         if request.secret_key_name:
             value = self._secret_service.get_decrypted_secret_value(request.secret_key_name)
             if value:

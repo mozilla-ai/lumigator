@@ -34,9 +34,18 @@
       @cell-edit-complete="onCellEditComplete"
       @cell-edit-cancel="onCellEditCancel"
     >
-      <template #header v-if="isSearchEnabled">
-        <div>
-          <IconField>
+      <template #header>
+        <div style="display: flex; gap: 2rem; justify-content: space-between">
+          <MultiSelect
+            :modelValue="selectedColumns"
+            :options="columns"
+            @update:modelValue="onToggle"
+            display="chip"
+            placeholder="Select Columns"
+          >
+          </MultiSelect>
+
+          <IconField v-if="isSearchEnabled">
             <InputIcon>
               <i class="pi pi-search"></i>
             </InputIcon>
@@ -47,12 +56,12 @@
       <template #empty> No items found. </template>
       <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
       <Column
-        v-for="col in columns"
+        v-for="col in selectedColumns"
         sortable
         :key="col"
         :field="col"
         :header="col"
-        :style="`width: ${(1 / columns.length) * 100}%`"
+        :style="`width: ${(1 / selectedColumns.length) * 100}%`"
       >
         <template #editor="{ data, field }">
           <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
@@ -71,6 +80,7 @@ import {
   IconField,
   InputIcon,
   InputText,
+  MultiSelect,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
@@ -90,6 +100,7 @@ export default defineComponent({
     IconField,
     InputIcon,
     InputText,
+    MultiSelect,
   },
   emits: ['close'],
   props: {
@@ -121,6 +132,7 @@ export default defineComponent({
   setup(props) {
     const isVisible = ref(true)
     const dataTable = ref()
+    const selectedColumns = ref(props.columns)
     const filters = ref({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     })
@@ -139,6 +151,10 @@ export default defineComponent({
       event.originalEvent.stopPropagation()
     }
 
+    const onToggle = (selected: string[]) => {
+      selectedColumns.value = props.columns.filter((col) => selected.includes(col))
+    }
+
     return {
       isVisible,
       dataTable,
@@ -146,6 +162,8 @@ export default defineComponent({
       onCellEditComplete,
       onCellEditCancel,
       filters,
+      selectedColumns,
+      onToggle,
       ...props,
     }
   },

@@ -120,7 +120,7 @@ class LiteLLMModelClient(BaseModelClient):
         )
 
 
-class HuggingFaceModelClient:
+class HuggingFaceModelClientFactory:
     """Factory class that creates the appropriate specialized client"""
 
     @staticmethod

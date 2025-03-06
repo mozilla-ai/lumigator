@@ -9,7 +9,7 @@ import s3fs
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
+from model_clients import BaseModelClient, HuggingFaceModelClientFactory, LiteLLMModelClient
 from tqdm import tqdm
 from utils import timer
 
@@ -91,7 +91,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
         model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
         logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
-        model_client = HuggingFaceModelClient.create(config)
+        model_client = HuggingFaceModelClientFactory.create(config)
         output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")

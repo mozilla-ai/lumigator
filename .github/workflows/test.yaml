@@ -46,6 +46,9 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
           export AWS_ENDPOINT_URL="http://54.231.160.168:80"
           export S3_BUCKET="mario-test-stk"
+          export LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+          export LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID}
+          export LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY}
           make start-lumigator-ci
 
       - name: Run backend integration tests
@@ -58,4 +61,7 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
           export AWS_ENDPOINT_URL="http://54.231.160.168:80"
           export S3_BUCKET="mario-test-stk"
+          export LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+          export LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID}
+          export LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY}
           make test-backend-integration-ci

@@ -46,6 +46,8 @@ from backend.services.exceptions.job_exceptions import (
     JobTypeUnsupportedError,
     JobUpstreamError,
 )
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
+from backend.services.secrets import SecretService
 from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
@@ -89,12 +91,14 @@ class JobService:
         result_repo: JobResultRepository,
         ray_client: JobSubmissionClient,
         dataset_service: DatasetService,
+        secret_service: SecretService,
         background_tasks: BackgroundTasks,
     ):
         self.job_repo = job_repo
         self.result_repo = result_repo
         self.ray_client = ray_client
         self._dataset_service = dataset_service
+        self._secret_service = secret_service
         self._background_tasks = background_tasks
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
@@ -370,6 +374,15 @@ class JobService:
 
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
+
+        # include requested api_keys from the secrets repository
+        # otherwise log a warning
+        if request.secret_key_name:
+            value = self._secret_service.get_decrypted_secret_value(request.secret_key_name)
+            if value:
+                job_config.api_key = value
+            else:
+                raise SecretNotFoundError(request.secret_key_name) from None
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.

@@ -12,6 +12,7 @@ import evaluator
 import fsspec
 import pytest
 import requests_mock
+import yaml
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
@@ -30,7 +31,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from backend.api.deps import get_db_session, get_s3_client, get_s3_filesystem
+from backend.api.deps import get_db_session, get_job_service, get_s3_client, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.records.jobs import JobRecord
@@ -45,6 +46,7 @@ from backend.tests.fakes.fake_s3 import FakeS3Client
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+MODELS_PATH = Path(__file__).resolve().parents[1] / "models.yaml"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -426,8 +428,16 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service, background_tasks):
-    return JobService(job_repository, result_repository, None, dataset_service, background_tasks)
+def job_service(db_session, job_repository, result_repository, dataset_service, secret_service, background_tasks):
+    return JobService(job_repository, result_repository, None, dataset_service, secret_service, background_tasks)
+
+
+@pytest.fixture(scope="function")
+def job_service_dependency_override(app: FastAPI, job_service) -> None:
+    def get_job_service_override():
+        yield job_service
+
+    app.dependency_overrides[get_job_service] = get_job_service_override
 
 
 @pytest.fixture(scope="function")
@@ -505,3 +515,11 @@ def job_definition_fixture():
         config_model=MagicMock(spec=dict),
         type=JobType.INFERENCE,
     )
+
+
+@pytest.fixture
+def model_specs_data():
+    """Fixture that loads and returns the YAML data."""
+    with Path(MODELS_PATH).open() as file:
+        model_specs = yaml.safe_load(file)
+    return model_specs

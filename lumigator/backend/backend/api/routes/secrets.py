@@ -7,7 +7,11 @@ from starlette.responses import Response
 
 from backend.api.deps import SecretServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
-from backend.services.exceptions.secret_exceptions import SecretDecryptionError, SecretEncryptionError
+from backend.services.exceptions.secret_exceptions import (
+    SecretDecryptionError,
+    SecretEncryptionError,
+    SecretNotFoundError,
+)
 
 router = APIRouter()
 
@@ -16,6 +20,7 @@ def secret_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     return {
         SecretDecryptionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         SecretEncryptionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+        SecretNotFoundError: status.HTTP_400_BAD_REQUEST,
     }
 
 

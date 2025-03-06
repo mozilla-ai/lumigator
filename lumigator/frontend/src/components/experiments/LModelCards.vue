@@ -71,7 +71,7 @@
           :href="model.website_url"
           target="_blank"
           @click.stop
-        />
+        ></Button>
       </div>
     </div>
   </div>

@@ -90,7 +90,7 @@ const apiKeyMap = new Map<
 >([
   ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: 'Mistral' }],
   ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
-  ['hf_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
+  ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
   ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'DeepSeek' }],
 ])
 

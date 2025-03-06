@@ -1,5 +1,5 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { Experiment } from '@/types/Experiment'
+import type { CreateExperimentPayload, Experiment } from '@/types/Experiment'
 import type { WorkflowResults } from '@/types/Metrics'
 import type { Model } from '@/types/Model'
 
@@ -19,12 +19,6 @@ export async function fetchExperiment(id: string): Promise<Experiment> {
 export async function deleteExperiment(id: string) {
   const response = await lumigatorApiAxiosInstance.delete(`experiments/${id}`)
   return response.data
-}
-
-export type CreateExperimentPayload = {
-  name: string
-  description: string
-  task: 'summarization'
 }
 
 // experiment_id and model are set by the inner function

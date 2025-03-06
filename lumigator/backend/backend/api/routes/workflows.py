@@ -50,6 +50,12 @@ def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsR
 
 # delete a workflow
 @router.delete("/{workflow_id}")
-def delete_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
-    """Delete a workflow by ID."""
-    return WorkflowDetailsResponse.model_validate(service.delete_workflow(workflow_id).model_dump())
+def delete_workflow(service: WorkflowServiceDep, workflow_id: str, force: bool = False) -> WorkflowDetailsResponse:
+    """Delete a workflow by ID.
+
+    Args:
+        service: Workflow service dependency
+        workflow_id: ID of the workflow to delete
+        force: If True, force deletion even if the workflow is active or has dependencies
+    """
+    return WorkflowDetailsResponse.model_validate(service.delete_workflow(workflow_id, force=force).model_dump())

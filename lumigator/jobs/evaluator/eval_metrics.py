@@ -40,6 +40,10 @@ class EvaluationMetrics:
                 "method": functools.partial(self._g_eval, task="summarization"),
                 "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.EXAMPLE],
             },
+            "token_length": {
+                "method": self._token_length,
+                "requires": [EvaluationFields.GROUND_TRUTH],
+            },
         }
 
         # chosen metrics are the intersection between the provided and the supported ones
@@ -56,6 +60,7 @@ class EvaluationMetrics:
             logger.warning(f"Unsupported metrics: {self._unsupported_metrics}")
 
     def _rouge(self, pred: list, ref: list):
+        logger.info("Running ROUGE evaluation")
         ev = evaluate.load("rouge")
 
         # compute with use_aggregator = False to get individual scores
@@ -68,6 +73,7 @@ class EvaluationMetrics:
         return evals
 
     def _meteor(self, pred: list, ref: list):
+        logger.info("Running METEOR evaluation")
         ev = evaluate.load("meteor")
 
         # initialize dictionary with metric name
@@ -83,6 +89,7 @@ class EvaluationMetrics:
         return evals
 
     def _bleu(self, pred, ref):
+        logger.info("Running BLEU evaluation")
         ev = evaluate.load("bleu")
 
         # initialize dictionary with metric name
@@ -111,6 +118,7 @@ class EvaluationMetrics:
         references = ["goodnight moon", "the sun is shining"]
         results = bertscore.compute(predictions=predictions)
         """
+        logger.info("Running BERTScore evaluation")
         ev = evaluate.load("bertscore")
 
         # calculate evals (the default is not to aggregate them)
@@ -158,6 +166,7 @@ class EvaluationMetrics:
         See: https://github.com/nlpyang/geval (G-Eval)
         See: https://docs.confident-ai.com/docs/metrics-llm-evals (deepeval)
         """
+        logger.info(f"Running G-Eval evaluation for task: {task}")
         # Load task-dependent criteria / evaluation steps
         with Path(G_EVAL_PROMPTS).open() as f:
             prompt_templates = json.load(f)
@@ -200,6 +209,22 @@ class EvaluationMetrics:
             raise e
 
         return evals
+
+    def _token_length(self, pred: list, ref: list):
+        """Computes the token length of the reference text."""
+        logger.info("Computing token length")
+        # Rough estimate of token length
+        # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
+        ref_lengths = [int(len(r.split()) / 0.75) for r in ref]
+        avg_ref_length = np.mean(ref_lengths)
+        pred_lengths = [int(len(p.split()) / 0.75) for p in pred]
+        avg_pred_length = np.mean(pred_lengths)
+        return {
+            "ref_token_length": ref_lengths,
+            "ref_token_length_mean": avg_ref_length,
+            "pred_token_length": pred_lengths,
+            "pred_token_length_mean": avg_pred_length,
+        }
 
     def run_all(self, examples: list, pred: list, ref: list) -> EvalJobMetrics:
         results = {}

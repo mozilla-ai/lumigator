@@ -12,17 +12,17 @@
       label="Create Experiment"
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
-    />
+    >
+    </Button>
     <p class="l-experiment-empty__note">
       <span>
-        We evaluate Summarization tasks using ROUGE, METEOR, and BERT score, each focusing on
-        different aspects of prediction-ground truth similarity.
+        We evaluate tasks using various industry-standard metrics that measure different aspects of prediction-ground truth similarity.
         <a
           href="https://mozilla-ai.github.io/lumigator/"
           target="_blank"
           style="background-color: transparent"
-          >Learn more <span class="pi pi-arrow-up-right"
-        /></a>
+          >Learn more <span class="pi pi-arrow-up-right"></span
+        ></a>
       </span>
     </p>
   </div>
@@ -39,7 +39,7 @@ const emit = defineEmits(['l-add-experiment'])
 .l-experiment-empty {
   $root: &;
   margin: auto;
-  max-width: 500px;
+  max-width: 560px;
 
   &__instructions {
     color: $l-grey-100;

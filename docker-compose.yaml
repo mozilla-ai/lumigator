@@ -233,6 +233,8 @@ services:
     profiles:
       - local
       - ci
+    volumes:
+      - mlflow-database-data:/db-data
 
 volumes:
     minio-data:
@@ -245,5 +247,8 @@ volumes:
       labels:
         ai.mozilla.product_name: lumigator
     ray-pip-cache:
+      labels:
+        ai.mozilla.product_name: lumigator
+    mlflow-database-data:
       labels:
         ai.mozilla.product_name: lumigator

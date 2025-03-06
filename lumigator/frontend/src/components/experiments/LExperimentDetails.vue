@@ -78,6 +78,24 @@
         </div>
       </div>
       <div
+        v-else
+        class="l-experiment-details__content-item"
+        @click="copyToClipboard(selectedExperiment.id)"
+      >
+        <div class="l-experiment-details__content-label">Experiment id</div>
+        <div
+          class="l-experiment-details__content-field"
+          style="display: flex; justify-content: space-between; cursor: pointer"
+        >
+          {{ selectedExperiment.id }}
+          <i
+            v-tooltip="'Copy ID'"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 14px; padding-left: 3px"
+          ></i>
+        </div>
+      </div>
+      <div
         class="l-experiment-details__content-item"
         v-if="focusedItem && isExperiment(focusedItem)"
       >
@@ -91,13 +109,36 @@
         v-if="focusedItem && isExperiment(focusedItem)"
       >
         <div class="l-experiment-details__content-label">use-case</div>
-        <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
+        <div class="l-experiment-details__content-field">
+          {{ focusedItem?.task_definition.task }}
+        </div>
+      </div>
+      <div
+        class="l-experiment-details__content-item"
+        v-if="
+          focusedItem &&
+          isExperiment(focusedItem) &&
+          focusedItem?.task_definition.task === 'translation'
+        "
+      >
+        <div class="l-experiment-details__content-label">language pair</div>
+        <div class="l-experiment-details__content-field">
+          {{ focusedItem?.task_definition.source_language }} -->
+          {{ focusedItem?.task_definition.target_language }}
+        </div>
+      </div>
+      <div
+        class="l-experiment-details__content-item"
+        v-if="focusedItem && isWorkflowFocused && !isExperiment(focusedItem)"
+      >
+        <div class="l-experiment-details__content-label">prompt</div>
+        <div class="l-experiment-details__content-field">{{ focusedItem.system_prompt }}</div>
       </div>
       <div
         v-if="!isWorkflowFocused && selectedExperiment"
         class="l-experiment-details__content-item"
       >
-        <div class="l-experiment-details__content-label">Evaluated Models</div>
+        <div class="l-experiment-details__content-label">Model Runs</div>
         <div class="l-experiment-details__content-field">
           <ul>
             <li v-for="workflow in selectedExperiment.workflows" :key="workflow.id">
@@ -197,7 +238,7 @@ const copyToClipboard = async (longString: string) => {
 
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
 
-function handleDeleteButtonClicked(e: MouseEvent) {
+function handleDeleteButtonClicked() {
   emit('delete-button-clicked', selectedWorkflow.value || selectedExperiment.value)
 }
 

@@ -377,7 +377,7 @@ class MLflowTrackingClient(TrackingClient):
         """List all workflows in an experiment."""
         raise NotImplementedError
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str):
+    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str) -> str:
         """Link a started job to an experiment and a workflow."""
         run = self._client.create_run(
             experiment_id=experiment_id,
@@ -385,15 +385,14 @@ class MLflowTrackingClient(TrackingClient):
         )
         # log the ray_job_id as a param, we'll use this to get the logs later
         self._client.log_param(run.info.run_id, "ray_job_id", job_id)
+        return run.info.run_id
 
-    def update_workflow(self, workflow_id: str, data: RunOutputs):
-        """Log the run output to MLflow."""
-        self._client.log_batch(workflow_id, metrics=data.metrics)
-        self._client.log_batch(workflow_id, data.parameters)
-
-    def update_job(self, job_id: str, new_data: dict):
+    def update_job(self, job_id: str, data: RunOutputs):
         """Update the metrics and parameters of a job."""
-        raise NotImplementedError
+        for metric, value in data.metrics.items():
+            self._client.log_metric(job_id, metric, value)
+        for parameter, value in data.parameters.items():
+            self._client.log_param(job_id, parameter, value)
 
     def get_job(self, job_id: str):
         """Get the results of a job."""

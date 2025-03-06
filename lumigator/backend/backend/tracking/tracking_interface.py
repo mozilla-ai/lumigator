@@ -84,7 +84,7 @@ class TrackingClient(Protocol):
         """Get a job."""
         ...
 
-    def update_job(self, job_id: str, new_data: dict) -> None:
+    def update_job(self, job_id: str, data: RunOutputs):
         """Update a job."""
         ...
 

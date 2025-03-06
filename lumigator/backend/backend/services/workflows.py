@@ -105,7 +105,9 @@ class WorkflowService:
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
-        self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job.id)
+        inference_run_id = self._tracking_client.create_job(
+            request.experiment_id, workflow.id, "inference", inference_job.id
+        )
 
         # wait for the inference job to complete
         status = await self._job_service.wait_for_job_complete(
@@ -149,7 +151,7 @@ class WorkflowService:
             metrics=inf_output.metrics,
             ray_job_id=str(inference_job.id),
         )
-        self._tracking_client.update_job(workflow.id, inference_job_output)
+        self._tracking_client.update_job(inference_run_id, inference_job_output)
 
         # FIXME The ray status is now _not enough_ to set the job status,
         # use the inference job id to recover the dataset record
@@ -173,6 +175,9 @@ class WorkflowService:
         # submit the job
         evaluation_job = self._job_service.create_job(
             job_eval_create,
+        )
+        eval_run_id = self._tracking_client.create_job(
+            request.experiment_id, workflow.id, "evaluation", evaluation_job.id
         )
 
         # wait for the evaluation job to complete
@@ -212,7 +217,7 @@ class WorkflowService:
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
                 ray_job_id=str(evaluation_job.id),
             )
-            self._tracking_client.create_job(request.experiment_id, workflow.id, "evaluation", outputs)
+            self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
         except Exception as e:
             loguru.logger.error(f"Error validating evaluation results: {e}")

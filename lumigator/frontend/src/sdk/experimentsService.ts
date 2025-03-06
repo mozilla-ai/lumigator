@@ -1,14 +1,17 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
+import type { Experiment } from '@/types/Experiment'
+import type { WorkflowResults } from '@/types/Metrics'
+import type { Model } from '@/types/Model'
 
-import type { ExperimentNew } from '@/types/ExperimentNew'
-import type { CreateWorkflowPayload, WorkflowResults } from '@/types/Workflow'
+import type { CreateWorkflowPayload } from '@/types/Workflow'
+import { workflowsService } from './workflowsService'
 
-export async function fetchExperiments(): Promise<ExperimentNew[]> {
-  const response = await lumigatorApiAxiosInstance.get('/experiments/')
+export async function fetchExperiments(): Promise<Experiment[]> {
+  const response = await lumigatorApiAxiosInstance.get('/experiments')
   return response.data.items
 }
 
-export async function fetchExperiment(id: string): Promise<ExperimentNew> {
+export async function fetchExperiment(id: string): Promise<Experiment> {
   const response = await lumigatorApiAxiosInstance.get(`experiments/${id}`)
   return response.data
 }
@@ -27,15 +30,15 @@ export type CreateExperimentPayload = {
 // experiment_id and model are set by the inner function
 export type createExperimentWithWorkflowsPayload = Omit<
   CreateExperimentPayload & CreateWorkflowPayload,
-  'experiment_id' | 'model'
+  'experiment_id' | 'model' | 'provider'
 >
 
 export async function createExperiment(
   experimentPayload: CreateExperimentPayload,
-): Promise<ExperimentNew> {
+): Promise<Experiment> {
   // first we create an experiment as a container for different workflows
-  const response: { data: ExperimentNew } = await lumigatorApiAxiosInstance.post(
-    'experiments/',
+  const response: { data: Experiment } = await lumigatorApiAxiosInstance.post(
+    '/experiments',
     experimentPayload,
   )
 
@@ -82,11 +85,40 @@ export async function downloadResults(experiment_id: string) {
   return blob
 }
 
+/**
+ * Runs an experiment with multiple models.
+ * Each model triggers a respective evaluation job.
+ *
+ * @param {Object} experimentData - The data for the experiment to run.
+ * @returns {Promise<Array>} The results of the experiment.
+ */
+export async function createExperimentWithWorkflows(
+  experimentData: createExperimentWithWorkflowsPayload,
+  models: Model[],
+) {
+  // first we create an experiment as a container
+  const { id: experimentId } = await experimentsService.createExperiment(experimentData)
+
+  // then we create a workflow for each model to be attached to the experiment
+  return Promise.all(
+    models.map((model: Model) =>
+      workflowsService.createWorkflow({
+        ...experimentData,
+        experiment_id: experimentId,
+        model: model.model,
+        provider: model.provider,
+        base_url: model.base_url,
+      }),
+    ),
+  )
+}
+
 export const experimentsService = {
   fetchExperiments,
   fetchExperiment,
-  // triggerExperiment,
+  createExperimentWithWorkflows,
   fetchExperimentResults,
   downloadResults,
   createExperiment,
+  deleteExperiment,
 }

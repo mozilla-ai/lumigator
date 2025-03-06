@@ -52,13 +52,6 @@ def upload_dataset(
     format: Annotated[DatasetFormat, Form()],
     request: Request,
     response: Response,
-    run_id: Annotated[
-        UUID | None, Form(description="Provide the Job ID that generated this dataset.")
-    ] = None,
-    generated: Annotated[bool, Form(description="Is the dataset AI-generated?")] = False,
-    generated_by: Annotated[
-        str | None, Form(description="The name of the AI model that generated this dataset.")
-    ] = None,
 ) -> DatasetResponse:
     """Uploads the dataset for use in Lumigator.
 
@@ -68,9 +61,7 @@ def upload_dataset(
     NOTE: The recreated version of the CSV file may not have identical delimiters as it will follow
     the format that HuggingFace uses when it generates the CSV.
     """
-    ds_response = service.upload_dataset(
-        dataset, format, run_id=run_id, generated=generated, generated_by=generated_by
-    )
+    ds_response = service.upload_dataset(dataset, format, run_id=None, generated=False, generated_by=None)
 
     url = request.url_for(get_dataset.__name__, dataset_id=ds_response.id)
     response.headers[HttpHeaders.LOCATION] = f"{url}"

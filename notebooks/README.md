@@ -21,7 +21,7 @@ The notebook runs on Jupyter. If you don't yet have Jupyter set up:
     ```
 
     > Note: Set any other environment variables you need to configure the backend or Ray cluster,
-    > such as `MISTRAL_API_KEY` and `OPENAI_API_KEY`.
+    > such as `MISTRAL_API_KEY` and `OPENAI_API_KEY` and `DEEPSEEK_API_KEY`.
 
 A new browser window will open pointing at your new jupyterlab. From there, open the
 `walkthrough.ipynb` file.

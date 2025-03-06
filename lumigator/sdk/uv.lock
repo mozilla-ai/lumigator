@@ -140,7 +140,7 @@ wheels = [
 
 [[package]]
 name = "lumigator-schemas"
-version = "0.1.0a0"
+version = "0.1.1a0"
 source = { editable = "../schemas" }
 dependencies = [
     { name = "pydantic" },
@@ -151,7 +151,7 @@ requires-dist = [{ name = "pydantic", specifier = ">=2.10.0" }]
 
 [[package]]
 name = "lumigator-sdk"
-version = "0.1.0a0"
+version = "0.1.1a0"
 source = { editable = "." }
 dependencies = [
     { name = "loguru" },

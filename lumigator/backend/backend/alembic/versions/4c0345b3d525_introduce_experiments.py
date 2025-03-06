@@ -51,9 +51,7 @@ def upgrade() -> None:
         # constraints to exist in the database that have no identifying name.
         # This can cause issues when trying to drop the constraint later on.
         # See more here: https://alembic.sqlalchemy.org/en/latest/batch.html#dropping-unnamed-or-named-foreign-key-constraints
-        batch_op.create_foreign_key(
-            "fk_jobs_experiments_id", "experiments", ["experiment_id"], ["id"]
-        )
+        batch_op.create_foreign_key("fk_jobs_experiments_id", "experiments", ["experiment_id"], ["id"])
     # ### end Alembic commands ###
 
 

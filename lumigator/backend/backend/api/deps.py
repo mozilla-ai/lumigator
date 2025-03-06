@@ -3,6 +3,7 @@ from typing import Annotated
 
 import boto3
 from fastapi import BackgroundTasks, Depends
+from lumigator_schemas.redactor import Redactor
 from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
@@ -11,9 +12,11 @@ from sqlalchemy.orm import Session
 from backend.db import session_manager
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
 from backend.tracking import TrackingClientManager, tracking_client_manager
@@ -59,13 +62,24 @@ def get_dataset_service(
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]
 
 
+def get_secret_service(session: DBSessionDep) -> SecretService:
+    secret_repo = SecretRepository(session)
+    return SecretService(settings.LUMIGATOR_SECRET_KEY, secret_repo)
+
+
+SecretServiceDep = Annotated[SecretService, Depends(get_secret_service)]
+
+
 def get_job_service(
-    session: DBSessionDep, dataset_service: DatasetServiceDep, background_tasks: BackgroundTasks
+    session: DBSessionDep,
+    dataset_service: DatasetServiceDep,
+    secret_service: SecretServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> JobService:
     job_repo = JobRepository(session)
     result_repo = JobResultRepository(session)
     ray_client = JobSubmissionClient(settings.RAY_DASHBOARD_URL)
-    return JobService(job_repo, result_repo, ray_client, dataset_service, background_tasks)
+    return JobService(job_repo, result_repo, ray_client, dataset_service, secret_service, background_tasks)
 
 
 JobServiceDep = Annotated[JobService, Depends(get_job_service)]
@@ -96,3 +110,8 @@ def get_workflow_service(
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
+def get_redactor() -> Redactor:
+    return Redactor(settings.sensitive_patterns)
+
+
+RedactorDep = Annotated[Redactor, Depends(get_redactor)]

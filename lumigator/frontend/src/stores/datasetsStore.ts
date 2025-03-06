@@ -1,34 +1,24 @@
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import { datasetsService } from '@/sdk/datasetsService'
 
-import { useToast } from 'primevue/usetoast'
-import type { ToastMessageOptions } from 'primevue'
 import type { Dataset } from '@/types/Dataset'
-import { getAxiosError } from '@/helpers/getAxiosError'
-import type { AxiosError } from 'axios'
-import { downloadContent } from '@/helpers/downloadContent'
 import { jobsService } from '@/sdk/jobsService'
-import type { JobDetails } from '@/types/JobDetails'
-import { retrieveEntrypoint } from '@/helpers/retrieveEntrypoint'
-import type { EvaluationJobResults } from '@/types/Experiment'
+import type { Job } from '@/types/Job'
 import { WorkflowStatus } from '@/types/Workflow'
 import { calculateDuration } from '@/helpers/calculateDuration'
 
 export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
-  const selectedJob: Ref<JobDetails | undefined> = ref()
+
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
-  const selectedJobResults: Ref<EvaluationJobResults[]> = ref([])
-  const jobs: Ref<JobDetails[]> = ref([])
-  const inferenceJobs: Ref<JobDetails[]> = ref([])
-  const jobLogs: Ref<string[]> = ref([])
-  const isPolling = ref(false)
-  let jobLogsInterval: number | undefined = undefined
+  const jobs: Ref<Job[]> = ref([])
+  const inferenceJobs: Ref<Job[]> = ref([])
 
-  const toast = useToast()
+  const isPollingForJobStatus = ref(false)
+  let jobStatusInterval: number | undefined = undefined
 
   async function fetchDatasets() {
     try {
@@ -38,15 +28,15 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
-  const hasRunningInferenceJob = computed(() => {
-    return inferenceJobs.value.some((job) => job.status === WorkflowStatus.RUNNING)
-  })
+  const setSelectedDataset = (dataset: Dataset | undefined): void => {
+    selectedDataset.value = dataset
+  }
 
   /**
    * Loads all experiments and jobs.
    */
   async function fetchAllJobs() {
-    let allJobs: JobDetails[]
+    let allJobs: Job[]
     try {
       allJobs = await jobsService.fetchJobs()
     } catch {
@@ -54,98 +44,37 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
     inferenceJobs.value = allJobs
       .filter((job) => job.metadata.job_type === 'inference')
-      .map((job) => parseJobDetails(job))
-    jobs.value = allJobs
-      .filter((job) => job.metadata.job_type === 'evaluate')
-      .map((job) => parseJobDetails(job))
+      // NOTE: 'temporary fix' to prevent showing inference jobs that weren't created by the UI
+      // to generate ground truth.
+      .filter((job) => job.name.startsWith('Ground truth for '))
+      .map((job) => parseJob(job))
   }
 
+  const hasRunningInferenceJob = computed(() => {
+    return inferenceJobs.value.some((job) => job.status === WorkflowStatus.RUNNING)
+  })
+
   /**
-   *
+   * TODO: move to a helper file, this shouldn't be in the store
    * @param {*} job - the job data to parse
    * @returns job data parsed for display as an experiment
    */
-  function parseJobDetails(job: JobDetails) {
+  function parseJob(job: Job) {
     return {
       ...job,
-      entrypoint: undefined,
-      ...retrieveEntrypoint(job),
       runTime: job.end_time ? calculateDuration(job.start_time, job.end_time) : undefined,
     }
   }
 
+  /* TODO: Move all below functions into `Datasets` component where the state can be shared across InferenceJobsTable and DatasetDetails */
   /**
    * The retrieved IDs will determine which experiment is still Running
    * @returns {string[]} IDs of stored experiments that have not completed
    */
   function getIncompleteJobIds() {
-    return jobs.value.filter((job) => !completedStatus.includes(job.status)).map((job) => job.id)
-  }
-
-  async function fetchJobDetails(id: string) {
-    const jobData = await jobsService.fetchJobDetails(id)
-    selectedJob.value = parseJobDetails(jobData)
-  }
-
-  async function retrieveJobLogs() {
-    if (selectedJob.value) {
-      const logsData = await jobsService.fetchLogs(selectedJob.value?.id)
-      const logs = splitByEscapeCharacter(logsData.logs)
-      logs.forEach((log: string) => {
-        const lastEntry = jobLogs.value[jobLogs.value.length - 1]
-        if (jobLogs.value.length === 0 || lastEntry !== log) {
-          jobLogs.value.push(log)
-        }
-      })
-    }
-  }
-
-  function startPolling() {
-    jobLogs.value = []
-    if (!isPolling.value) {
-      isPolling.value = true
-      retrieveJobLogs()
-      // Poll every 3 seconds
-      jobLogsInterval = setInterval(retrieveJobLogs, 3000)
-    }
-  }
-
-  watch(
-    selectedJob,
-    (newValue) => {
-      jobLogs.value = []
-      if (newValue) {
-        // const isEvaluationJob = jobs.value.some((job) => job?.id === newValue.id)
-        // if (isEvaluationJob) {
-        // switch to the experiment the job belongs
-        // const selectedExperimentId = experiments.value.find(experiment => {
-        //   return experiment.workflows.some(workflow => workflow.id === newValue.id)
-        // })
-        // selectedExperiment.value = experiments.value.find((exp) => exp.id === newValue.id)
-        // }
-        retrieveJobLogs()
-      }
-      if (newValue?.status === WorkflowStatus.RUNNING) {
-        startPolling()
-        return
-      } else if (isPolling.value) {
-        stopPolling()
-      }
-    },
-    { deep: true },
-  )
-
-  function stopPolling() {
-    if (isPolling.value) {
-      isPolling.value = false
-      clearInterval(jobLogsInterval)
-      jobLogsInterval = undefined
-    }
-  }
-
-  function splitByEscapeCharacter(input: string) {
-    const result = input.split('\n')
-    return result
+    return inferenceJobs.value
+      .filter((job) => !completedStatus.includes(job.status))
+      .map((job) => job.id)
   }
 
   /**
@@ -167,7 +96,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (jobResponse) {
         // Start polling to monitor the job status
         await updateJobStatus(jobResponse.id) // Ensure initial update
-        startPollingForAnnotationJob(jobResponse.id) // Add polling for ground truth job
+        startPollingForAnnotationJobStatus(jobResponse.id) // Add polling for ground truth job
         return jobResponse
       }
       return
@@ -177,18 +106,25 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
-  function startPollingForAnnotationJob(jobId: string) {
-    isPolling.value = true
-    jobLogsInterval = setInterval(() => {
-      updateJobStatus(jobId).then(() => {
-        const job = jobs.value.find((job) => job.id === jobId)
+  function startPollingForAnnotationJobStatus(jobId: string) {
+    isPollingForJobStatus.value = true
+    jobStatusInterval = setInterval(async () => {
+      await updateJobStatus(jobId).then(() => {
+        const job = inferenceJobs.value.find((job) => job.id === jobId)
         if (job && completedStatus.includes(job.status)) {
-          stopPolling() // Stop polling when the job is complete
+          stopPollingForAnnotationJobStatus() // Stop polling when the job is complete
         }
       })
     }, 3000) // Poll every 3 seconds
   }
 
+  function stopPollingForAnnotationJobStatus() {
+    if (isPollingForJobStatus.value) {
+      isPollingForJobStatus.value = false
+      clearInterval(jobStatusInterval)
+      jobStatusInterval = undefined
+    }
+  }
   /**
    *
    * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
@@ -201,7 +137,7 @@ export const useDatasetStore = defineStore('datasets', () => {
       if (inferenceJob) {
         inferenceJob.status = status
       }
-      const job = jobs.value.find((job) => job.id === id)
+      const job = inferenceJobs.value.find((job) => job.id === id)
       if (job) {
         job.status = status
       }
@@ -210,91 +146,18 @@ export const useDatasetStore = defineStore('datasets', () => {
     }
   }
 
-  async function fetchDatasetDetails(datasetID: string) {
-    try {
-      selectedDataset.value = await datasetsService.fetchDatasetInfo(datasetID)
-    } catch {
-      selectedDataset.value = undefined
-    }
-  }
-
-  function resetSelection() {
-    selectedDataset.value = undefined
-  }
-
-  async function uploadDataset(datasetFile: File) {
-    if (!datasetFile) {
-      return
-    }
-    // Create a new FormData object and append the selected file and the required format
-    const formData = new FormData()
-    formData.append('dataset', datasetFile) // Attach the file
-    formData.append('format', 'job') // Specification @localhost:8000/docs
-    try {
-      await datasetsService.postDataset(formData)
-    } catch (error) {
-      const errorMessage = getAxiosError(error as Error | AxiosError)
-      toast.add({
-        severity: 'error',
-        summary: `${errorMessage}`,
-        messageicon: 'pi pi-exclamation-triangle',
-        group: 'br',
-      } as ToastMessageOptions & { messageicon: string })
-    }
-    await fetchDatasets()
-  }
-
-  // async function fetchJobResults(jobId: string) {
-  //   const results = (await experimentsService.fetchExperimentResults(jobId)) as {
-  //     resultsData: WorkflowResults
-  //     id: string
-  //     download_url: string
-  //   }
-  //   if (results?.id) {
-  //     selectedJob.value = jobs.value.find((job) => job.id === results.id)
-  //     selectedJobResults.value = transformJobResults(results.resultsData)
-  //   }
-  // }
-
-  async function deleteDataset(id: string) {
-    if (!id) {
-      return
-    }
-    if (selectedDataset.value?.id === id) {
-      resetSelection()
-    }
-    await datasetsService.deleteDataset(id)
-    await fetchDatasets()
-  }
-
-  // TODO: this shouldn't depend on refs/state, it can be a util function
-  async function downloadDatasetFile() {
-    if (selectedDataset.value) {
-      const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
-      downloadContent(blob, selectedDataset.value?.filename)
-    }
-  }
-
   return {
     datasets,
-    fetchDatasets,
     selectedDataset,
-    fetchDatasetDetails,
-    jobLogs,
-    resetSelection,
-    uploadDataset,
-    deleteDataset,
-    downloadDatasetFile,
     jobs,
     inferenceJobs,
-    selectedJob,
-    selectedJobResults,
     hasRunningInferenceJob,
+    fetchDatasets,
+    setSelectedDataset,
     fetchAllJobs,
     updateStatusForIncompleteJobs,
-    fetchJobDetails,
-    // fetchJobResults,
+    stopPollingForAnnotationJobStatus,
     startGroundTruthGeneration,
-    parseJobDetails,
+    parseJob,
   }
 })

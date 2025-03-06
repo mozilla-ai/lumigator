@@ -1,14 +1,13 @@
-import os
 import re
 from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
+from litellm import Usage, completion
 from loguru import logger
-from mistralai.client import MistralClient
-from openai import OpenAI, OpenAIError
-from openai.types import Completion
-from transformers import pipeline
-from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
+from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+from utils import retry_with_backoff
+
+from schemas import InferenceMetrics, PredictionResult, TaskType
 
 
 def strip_path_prefix(path: str) -> str:
@@ -30,201 +29,216 @@ class BaseModelClient:
         pass
 
     @abstractmethod
-    def predict(self, prompt: str) -> str:
+    def predict(self, prompt: str) -> PredictionResult:
         """Given a prompt, return a prediction."""
         pass
 
 
-class APIModelClient(BaseModelClient):
-    """General model client for APIs."""
-
-    def __init__(self, config: InferenceJobConfig):
-        self._config = config
-        self._engine = strip_path_prefix(config.inference_server.engine)
-        self._system = config.inference_server.system_prompt
-
-    @abstractmethod
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: OpenAI | MistralClient,
-        prompt: str,
-        system: str,
-    ) -> Completion:
-        """Connects to the API and returns a chat completion holding the model's response."""
-        pass
-
-    def _get_response_with_retries(
-        self,
-        config: InferenceJobConfig,
-        prompt: str,
-    ) -> tuple[str, str]:
-        current_retry_attempt = 1
-        max_retries = 1 if config.inference_server.max_retries is None else config.inference_server.max_retries
-        while current_retry_attempt <= max_retries:
-            try:
-                response = self._chat_completion(self._config, self._client, prompt, self._system)
-                break
-            except OpenAIError as e:
-                logger.warning(f"{e.message}: Retrying ({current_retry_attempt}/{max_retries})")
-                current_retry_attempt += 1
-                if current_retry_attempt > max_retries:
-                    raise e
-        return response
-
-    def predict(self, prompt):
-        response = self._get_response_with_retries(self._config, prompt)
-
-        return response.choices[0].message.content
-
-
-class OpenAIModelClient(APIModelClient):
+class LiteLLMModelClient(BaseModelClient):
     """Model client for models served via openai-compatible API.
     For OpenAI models:
     - The base_url is fixed
-    - Choose an engine name (see https://platform.openai.com/docs/models)
+    - Choose an model name (see https://platform.openai.com/docs/models)
     - Customize the system prompt if needed
 
     For compatible models:
     - Works with local/remote vLLM-served models and llamafiles
-    - Provide base_url and engine
+    - Provide base_url and model
     - Customize the system prompt if needed
     """
 
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = OpenAI(base_url=base_url)
+    def __init__(self, config: InferenceJobConfig):
+        self.config = config
+        self.system_prompt = self.config.system_prompt
+        logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: OpenAI,
-        prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a remote OpenAI-API-compatible endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat.completions.create(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            frequency_penalty=config.params.frequency_penalty,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
+    @retry_with_backoff(max_retries=3)
+    def _make_completion_request(self, litellm_model: str, prompt: str):
+        """Make a request to the LLM with proper error handling"""
+        return completion(
+            model=litellm_model,
+            messages=[
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=self.config.generation_config.max_new_tokens,
+            frequency_penalty=self.config.generation_config.frequency_penalty,
+            temperature=self.config.generation_config.temperature,
+            top_p=self.config.generation_config.top_p,
+            drop_params=True,
+            api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
 
-
-class DeepSeekModelClient(APIModelClient):
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = OpenAI(base_url=base_url, api_key=os.environ["DEEPSEEK_API_KEY"])
-
-    def _chat_completion(
+    def predict(
         self,
-        config: InferenceJobConfig,
-        client: OpenAI,
         prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a remote OpenAI-API-compatible endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat.completions.create(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            frequency_penalty=config.params.frequency_penalty,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
-        )
+    ) -> PredictionResult:
+        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
+        logger.info(f"Sending request to {litellm_model}")
+        response = self._make_completion_request(litellm_model, prompt)
 
+        # LiteLLM gives us the cost of each API which is nice.
+        # Eventually we can add this to the response object as well.
+        cost = response._hidden_params["response_cost"]
+        logger.info(f"Response cost: {cost}")
+        usage: Usage = response["usage"]
+        if usage:
+            logger.info(f"Usage: {usage}")
+        prediction = response.choices[0].message.content
+        print(response.choices[0].message)
+        # LiteLLM will give us the reasoning if the API gives it back in its own field
+        # When talking to llamafile, the reasoning_content key is not present
+        if "reasoning_content" in response.choices[0].message.provider_specific_fields:
+            reasoning = response.choices[0].message.reasoning_content
+        else:
+            reasoning = None
+        if reasoning:
+            reasoning_tokens = response["usage"]["completion_tokens_details"].reasoning_tokens
+        else:
+            reasoning_tokens = 0
+        # In some cases (aka vLLM deployments of DeepSeek R1) the reasoning is in the completion itself
+        # APIs are still catching up to adding "reasoning" as a separate field
+        # since it involves post processing model output
+        if not reasoning and "</think>" in prediction:
+            logger.info("Reasoning found in completion")
+            reasoning = prediction.split("</think>")[0].strip()
+            prediction = prediction.split("</think>")[1].strip()
+            # Rough estimate of reasoning tokens
+            # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
+            reasoning_tokens = int(len(reasoning.split()) / 0.75)
 
-class MistralModelClient(APIModelClient):
-    """Model client for models served via Mistral API.
-    - The base_url is fixed
-    - Choose an engine name (see https://docs.mistral.ai/getting-started/models/)
-    - Customize the system prompt if needed
-    """
-
-    def __init__(self, base_url: str, config: InferenceJobConfig):
-        super().__init__(config)
-        self._client = MistralClient(api_key=os.environ["MISTRAL_API_KEY"])
-
-    def _chat_completion(
-        self,
-        config: InferenceJobConfig,
-        client: MistralClient,
-        prompt: str,
-        system: str = "You are a helpful assisant.",
-    ) -> Completion:
-        """Connects to a Mistral endpoint
-        and returns a chat completion holding the model's response.
-        """
-        return client.chat(
-            model=self._engine,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-            max_tokens=config.params.max_tokens,
-            temperature=config.params.temperature,
-            top_p=config.params.top_p,
+        return PredictionResult(
+            prediction=prediction,
+            reasoning=reasoning,
+            metrics=InferenceMetrics(
+                prompt_tokens=usage.prompt_tokens,
+                total_tokens=usage.total_tokens,
+                completion_tokens=usage.completion_tokens,
+                reasoning_tokens=reasoning_tokens,
+                answer_tokens=usage.completion_tokens - reasoning_tokens,
+            ),
         )
 
 
 class HuggingFaceModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._system_prompt = config.system_prompt
         logger.info(f"System prompt: {config.system_prompt}")
-        self._system = config.system_prompt
         self._task = config.hf_pipeline.task
-        self._pipeline = pipeline(**config.hf_pipeline.model_dump())
-        self._set_tokenizer_max_length()
-
-    def _set_tokenizer_max_length(self):
-        """Set the tokenizer's model_max_length if it's currently the default very large integer.
-        Checks various possible max_length parameters which varies on model architecture.
-        """
-        config = self._pipeline.model.config
-        logger.info(
-            f"Selected HF model's tokenizer has maximum number of input tokens: \
-                    {self._pipeline.tokenizer.model_max_length}"
+        # Load the model configuration to check the architecture type
+        self.hf_model_config = AutoConfig.from_pretrained(
+            config.hf_pipeline.model_name_or_path, trust_remote_code=config.hf_pipeline.trust_remote_code
         )
-        # If suitable model_max_length is already available, don't override it
-        if self._pipeline.tokenizer.model_max_length != VERY_LARGE_INTEGER:
-            return
-        # Only override if it's the default value:
-        # i.e., VERY_LARGE_INTEGER for models that don't have a model_max_length explicity set
-        # Common parameter names to check in config
+        if self._task == TaskType.SUMMARIZATION and self.hf_model_config.is_encoder_decoder:
+            # The summarization pipeline is only supported for Seq2Seq models
+            # https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
+            model = AutoModelForSeq2SeqLM.from_pretrained(
+                config.hf_pipeline.model_name_or_path,
+                trust_remote_code=config.hf_pipeline.trust_remote_code,
+                torch_dtype=config.hf_pipeline.torch_dtype,
+            )
+            # Store this so we can check if the input prompt is too long
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                config.hf_pipeline.model_name_or_path,
+                use_fast=config.hf_pipeline.use_fast,
+                trust_remote_code=config.hf_pipeline.trust_remote_code,
+            )
+
+            # The reason I create the models and tokenizers separately is so that I can validate the model type
+            # before creating the pipeline. This way I can give a more helpful error message
+            self._pipeline = pipeline(
+                task=config.hf_pipeline.task,
+                model=model,
+                tokenizer=self.tokenizer,
+                revision=config.hf_pipeline.revision,
+                device=config.hf_pipeline.device,
+            )
+            self._set_seq2seq_max_length()
+        else:
+            # CausalLM models supported for summarization and translation tasks through system_prompt
+            # HF pipeline task overwritten to 'text-generation' since these causalLMs are not task-specific models
+            self._task = config.hf_pipeline.task = TaskType.TEXT_GENERATION
+            self._pipeline = pipeline(**config.hf_pipeline.model_dump())
+
+    def _set_seq2seq_max_length(self):
+        """Make sure that the model can actually support the max_new_tokens configured.
+        For the Seq2Seq models, the max_length is the max_position_embeddings. That's because the input and output
+        tokens have separate positions, so the model can generate upto max_position_embeddings tokens.
+        This isn't true if it's a CausalLM model, since the output token positions would be len(input) + len(output).
+        """
+        # 1. Setting input sequence max tokens
+        # Taken from https://stackoverflow.com/a/78737021
+        # Different LLM model families use different names for the same field
         plausible_max_length_params = [
-            # BERT-based, LLaMA
             "max_position_embeddings",
-            # GPT-2-based
             "n_positions",
             "n_ctx",
-            # ChatGLM-based
-            "max_sequence_length",
+            "seq_len",
             "seq_length",
-            # Mistral-based
+            "max_sequence_length",
             "sliding_window",
         ]
+        # Check which attribute a given model config object has
+        matched_params = [
+            getattr(self._pipeline.model.config, param)
+            for param in plausible_max_length_params
+            if param in dir(self._pipeline.model.config)
+        ]
+        # Grab the first one in the list; usually there's only 1 anyway
+        if len(matched_params):
+            max_pos_emb = matched_params[0]
+        else:
+            raise ValueError(
+                "No field corresponding to max_position_embeddings parameter found"
+                f" for {self._config.hf_pipeline.model_name_or_path}."
+                f" Checked alternative fields: {plausible_max_length_params}"
+            )
 
-        # Check config parameters
-        for param in plausible_max_length_params:
-            if hasattr(config, param):
-                value = getattr(config, param)
-                if isinstance(value, int) and value < VERY_LARGE_INTEGER:  # Sanity check for reasonable values
-                    self._pipeline.tokenizer.model_max_length = value
-                    logger.info(
-                        f"Setting the maximum length of input tokens to {value} \
-                                based on the config.{param} attribute."
-                    )
-                    return
+        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
+        # tokenizer model and the model have the same max_position_embeddings
+        if self._pipeline.tokenizer.model_max_length > max_pos_emb:
+            logger.warning(
+                f"Tokenizer model_max_length ({self._pipeline.tokenizer.model_max_length})"
+                f" is bigger than the model's max_position_embeddings ({max_pos_emb})"
+                " Setting the tokenizer model_max_length to the model's max_position_embeddings."
+            )
+            self._pipeline.tokenizer.model_max_length = max_pos_emb
 
-        # If no suitable parameter is found, warn the user and continue with the HF default
-        logger.warning(
-            f"Could not find a suitable parameter in the model config to set model_max_length. \
-                Using default value: {self._pipeline.tokenizer.model_max_length}"
-        )
+        # 2. Setting output sequence generation max tokens
+        # If the user has set a max_new_tokens to be generated
+        # we need to make sure it's not bigger than the model's max_position_embeddings
+        if self._config.generation_config.max_new_tokens:
+            if self._config.generation_config.max_new_tokens > max_pos_emb:
+                logger.warning(
+                    f"Model can generate {max_pos_emb} tokens."
+                    f" Requested {self._config.generation_config.max_new_tokens}."
+                    f" Setting max_length to {max_pos_emb}."
+                )
+                self._config.generation_config.max_new_tokens = max_pos_emb
+            else:
+                logger.info(f"Setting max_length to {self._config.generation_config.max_new_tokens}")
+        else:
+            logger.info(
+                f"Setting max_length to the max supported length by the model by its position embeddings: {max_pos_emb}"
+            )
+            self._config.generation_config.max_new_tokens = max_pos_emb
 
-    def predict(self, prompt):
+    def predict(self, prompt) -> PredictionResult:
+        # Case-1: Seq2seq model
+        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
+        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
+        # Get the name of the key and return its value.
+        if self._task == TaskType.SUMMARIZATION and self.hf_model_config.is_encoder_decoder:
+            generation = self._pipeline(
+                prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
+            )[0]
+            return PredictionResult(
+                prediction=generation["summary_text"],
+            )
+
+        # Case-2: CausalLM model: can be used for text-generation/summarization
+        # or translation tasks with right system_prompt
         # When using a text-generation model, the pipeline returns a dictionary with a single key,
         # 'generated_text'. The value of this key is a list of dictionaries, each containing the\
         # role and content of a message. For example:
@@ -232,17 +246,11 @@ class HuggingFaceModelClient(BaseModelClient):
         #  {'role': 'user', 'content': 'What is the capital of France?'}, ...]
         # We want to return the content of the last message in the list, which is the model's
         # response to the prompt.
-        if self._task == "text-generation":
-            messages = [
-                {"role": "system", "content": self._system},
-                {"role": "user", "content": prompt},
-            ]
-            generation = self._pipeline(messages)[0]
-            return generation["generated_text"][-1]["content"]
-
-        # If we're using a summarization model, the pipeline returns a dictionary with a single key.
-        # The name of the key depends on the task (e.g., 'summary_text' for summarization).
-        # Get the name of the key and return its value.
-        if self._task == "summarization":
-            generation = self._pipeline(prompt)[0]
-            return generation["summary_text"]
+        messages = [
+            {"role": "system", "content": self._system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
+        return PredictionResult(
+            prediction=generation["generated_text"][-1]["content"],
+        )

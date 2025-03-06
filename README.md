@@ -45,6 +45,7 @@ need to have the following prerequisites installed on your machine:
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The system Python (version managers such as uv should be deactivated)
+- At least 5 GB available on disk and allocated for docker, since some small language models, [bart](facebook/bart-large) & [roberta](https://huggingface.co/FacebookAI/roberta-large),  will be pre downloaded
 
 You can run and develop Lumigator locally using Docker Compose. This creates four container
 services networked together to make up all the components of the Lumigator application:
@@ -59,10 +60,24 @@ services networked together to make up all the components of the Lumigator appli
 > uses SQLite for this purpose.
 
 > [!NOTE]
-If you want to evaluate against LLM APIs like OpenAI and Mistral, you need to set the appropriate
-environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`. Refer to the
+If you want to evaluate against LLM APIs like OpenAI/Mistral/Deepseek, you need to set the appropriate
+environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. Refer to the
 [troubleshooting section](https://mozilla-ai.github.io/lumigator/get-started/troubleshooting.html#tokens-api-keys-not-set)
 in our documentation for more details.
+
+> [!NOTE]
+To improve performance and ensure smooth execution, Lumigator will automatically pre-download two language models on the first run: `bart-large-cnn` and `roberta-large`. These models are stored in your local Hugging Face cache directory (by default: `${HOME}/.cache/huggingface`).
+
+    If you already have these models downloaded, Lumigator will detect them and skip re-downloading.
+    The cache location can be modified in the [.default.conf](.default.conf) file by setting HF_HOME.
+
+Since this is a one-time setup, the first launch may take some time depending on your internet connection. Subsequent runs will be significantly faster.
+
+If you prefer not to download models automatically, you can disable this behavior by setting:
+
+`ENABLE_FIRST_TIME_CACHE=false`
+
+in the [.default.conf](.default.conf) file.
 
 To start Lumigator locally, follow these steps:
 
@@ -87,10 +102,11 @@ To start Lumigator locally, follow these steps:
     **Important: Continue the next steps in this same terminal.**
 
 
-1. If you intend to use Mistral API or OpenAI API, use that same terminal and run:
+1. If you intend to use Mistral API or OpenAI API or Deepseek API, use that same terminal and run:
     ```bash
     export MISTRAL_API_KEY=your_mistral_api_key
     export OPENAI_API_KEY=your_openai_api_key
+    export DEEPSEEK_API_KEY=your_deepseek_api_key
     ```
     **Important: Continue the next steps in this same terminal.**
 
@@ -111,9 +127,8 @@ quick walkthrough.
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any
 provider’s S3-compatible service, instead of minio. Similarly, one could provide a different
-`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. See the
-[operational guides](https://mozilla-ai.github.io/lumigator/operations-guide/kubernetes.html) in the
-documentation for more deployment options.
+`RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. Ref to the operational guides in the
+[docs](https://mozilla-ai.github.io/lumigator/) for more deployment options.
 
 If you want to permanently set any of the environment variables above, you can  add them to your rc file (e.g. `~/.bashrc`, `~/.zshrc`) or directly to the
 `.env` file that is automatically created after the first execution of lumigator.
@@ -127,6 +142,10 @@ To stop the containers you started using Docker Compose, simply run the followin
 ```bash
 make stop-lumigator
 ```
+
+> [!NOTE]
+Since Lumigator is in active development, we always pull the latest images for the frontend and backend in our Docker Compose setup. If you are looking for a stable release, please check out the latest Git tag on our [Releases](https://github.com/mozilla-ai/lumigator/releases) page.
+**Important: You cannot simply change the images in the docker-compose file. Ensure that your working directory matches the Git tag you are using to maintain compatibility.
 
 ## Kubernetes Installation
 

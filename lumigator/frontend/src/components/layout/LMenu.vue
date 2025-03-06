@@ -13,7 +13,7 @@
           :disabled="item.disabled"
           @click="showSlidingPanel = false"
         >
-          <span :class="item.icon" />
+          <span :class="item.icon"></span>
           <span ripple class="l-main-menu__link-label">{{ item.name }} </span>
         </router-link>
       </template>

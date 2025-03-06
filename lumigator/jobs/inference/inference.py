@@ -9,22 +9,15 @@ import s3fs
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import (
-    BaseModelClient,
-    DeepSeekModelClient,
-    HuggingFaceModelClient,
-    MistralModelClient,
-    OpenAIModelClient,
-)
-from paths import PathPrefix
+from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
 from tqdm import tqdm
 from utils import timer
 
-from schemas import InferenceJobOutput, JobOutput
+from schemas import AverageInferenceMetrics, InferenceJobOutput, JobOutput, PredictionResult
 
 
 @timer
-def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list:
+def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list[PredictionResult]:
     predictions = []
 
     for sample_txt in dataset_iterable:
@@ -94,28 +87,12 @@ def run_inference(config: InferenceJobConfig) -> Path:
     # Choose which model client to use
     if config.inference_server is not None:
         # a model *inference service* is passed
-        base_url = config.inference_server.base_url
-        output_model_name = config.inference_server.engine
-        if "mistral" in base_url:
-            # run the mistral client
-            logger.info(f"Using Mistral client. Endpoint: {base_url}")
-            model_client = MistralModelClient(base_url, config)
-        elif "deepseek" in base_url:
-            # run the openai client using the DeepSeek URL (api.deepseek.com/v1)
-            # see: https://api-docs.deepseek.com/
-            logger.info(f"Using the DeepSeek client. Endpoint: {base_url}")
-            model_client = DeepSeekModelClient(base_url, config)
-        else:
-            # run the openai client
-            logger.info(f"Using OAI client. Endpoint: {base_url}")
-            model_client = OpenAIModelClient(base_url, config)
+        output_model_name = config.inference_server.model
+        model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
-        if config.hf_pipeline.model_uri.startswith(PathPrefix.HUGGINGFACE):
-            logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_uri}.")
-            model_client = HuggingFaceModelClient(config)
-            output_model_name = config.hf_pipeline.model
-        else:
-            raise ValueError("Unsupported model type.")
+        logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
+        model_client = HuggingFaceModelClient(config)
+        output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")
 
@@ -129,16 +106,38 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    output[config.job.output_field], summarization_time = predict(dataset_iterable, model_client)
+    prediction_results, inference_time = predict(dataset_iterable, model_client)
+    prediction_results: list[PredictionResult] = prediction_results
+    output[config.job.output_field] = [p.prediction for p in prediction_results]
+    output["reasoning"] = [p.reasoning for p in prediction_results]
+    output["inference_metrics"] = [p.metrics for p in prediction_results]
     output["model"] = output_model_name
-    output["summarization_time"] = summarization_time
-    logger.info(output)
+    output["inference_time"] = inference_time
 
-    results = JobOutput(
-        metrics=None,
-        parameters=config,
-        artifacts=InferenceJobOutput.model_validate(output),
-    )
+    artifacts = InferenceJobOutput.model_validate(output)
+    if all(p.metrics is not None for p in prediction_results):
+        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in prediction_results]) / len(prediction_results)
+        avg_total_tokens = sum([p.metrics.total_tokens for p in prediction_results]) / len(prediction_results)
+        avg_completion_tokens = sum([p.metrics.completion_tokens for p in prediction_results]) / len(prediction_results)
+        avg_reasoning_tokens = sum([p.metrics.reasoning_tokens for p in prediction_results]) / len(prediction_results)
+        avg_answer_tokens = sum([p.metrics.answer_tokens for p in prediction_results]) / len(prediction_results)
+        metrics = AverageInferenceMetrics(
+            avg_prompt_tokens=avg_prompt_tokens,
+            avg_total_tokens=avg_total_tokens,
+            avg_completion_tokens=avg_completion_tokens,
+            avg_reasoning_tokens=avg_reasoning_tokens,
+            avg_answer_tokens=avg_answer_tokens,
+        )
+        results = JobOutput(
+            metrics=metrics,
+            parameters=config,
+            artifacts=artifacts,
+        )
+    else:
+        results = JobOutput(
+            parameters=config,
+            artifacts=artifacts,
+        )
 
     output_path = save_outputs(config, results)
     return output_path

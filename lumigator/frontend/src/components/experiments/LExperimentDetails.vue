@@ -1,16 +1,26 @@
 <template>
   <div class="l-experiment-details">
-    <div class="l-experiment-details__header" style="position: sticky; top: 0; z-index: 100">
+    <Button
+      icon="pi pi-times"
+      severity="secondary"
+      rounded
+      aria-label="Close"
+      class="l-experiment-details__close"
+      @click="emit('l-close-details')"
+    >
+    </Button>
+
+    <div class="l-experiment-details__header">
       <h3>{{ title }}</h3>
-      <Button
-        icon="pi pi-times"
-        severity="secondary"
-        rounded
-        aria-label="Close"
-        class="l-experiment-details__close"
-        @click="emit('l-close-details')"
-      >
-      </Button>
+      <div class="l-experiment-details__header-actions">
+        <Button
+          severity="secondary"
+          icon="pi pi-bin"
+          variant="text"
+          rounded
+          @click="handleDeleteButtonClicked"
+        ></Button>
+      </div>
     </div>
     <div class="l-experiment-details__content">
       <div class="l-experiment-details__content-item">
@@ -31,7 +41,7 @@
           <Tag
             :severity="tagSeverity"
             rounded
-            :value="currentItemStatus"
+            :value="selectedItemStatus"
             :pt="{ root: 'l-experiment-details__tag' }"
           ></Tag>
           <Button
@@ -41,7 +51,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
-            :disabled="currentItemStatus === WorkflowStatus.PENDING"
+            :disabled="selectedItemStatus === WorkflowStatus.PENDING"
             style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
@@ -54,12 +64,12 @@
         class="l-experiment-details__content-item"
         @click="copyToClipboard(selectedWorkflow.id)"
       >
-        <div class="l-experiment-details__content-label">job id</div>
+        <div class="l-experiment-details__content-label">Model Run id</div>
         <div
           class="l-experiment-details__content-field"
           style="display: flex; justify-content: space-between; cursor: pointer"
         >
-          {{ selectedWorkflow?.id }}
+          {{ selectedWorkflow.id }}
           <i
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
@@ -83,20 +93,23 @@
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">{{ focusedItem?.task }}</div>
       </div>
-      <div v-if="!isWorkflowFocused" class="l-experiment-details__content-item">
+      <div
+        v-if="!isWorkflowFocused && selectedExperiment"
+        class="l-experiment-details__content-item"
+      >
         <div class="l-experiment-details__content-label">Evaluated Models</div>
         <div class="l-experiment-details__content-field">
           <ul>
-            <li v-for="workflow in selectedExperiment?.workflows" :key="workflow.id">
+            <li v-for="workflow in selectedExperiment.workflows" :key="workflow.id">
               · {{ workflow.model }}
             </li>
           </ul>
         </div>
       </div>
-      <div v-if="isWorkflowFocused" class="l-experiment-details__content-item">
+      <div v-if="isWorkflowFocused && selectedWorkflow" class="l-experiment-details__content-item">
         <div class="l-experiment-details__content-label">model</div>
         <div class="l-experiment-details__content-field">
-          {{ (selectedWorkflow as any)?.model.path }}
+          {{ selectedWorkflow.model }}
         </div>
       </div>
       <div class="l-experiment-details__content-item">
@@ -129,7 +142,7 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
+        :disabled="selectedItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="showResults"
       ></Button>
       <Button
@@ -139,7 +152,7 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
+        :disabled="selectedItemStatus !== WorkflowStatus.SUCCEEDED"
         @click="emit('l-download-results', selectedWorkflow)"
       ></Button>
     </div>
@@ -147,15 +160,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, type ComputedRef } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
+import { computed, ref, toRefs, type ComputedRef } from 'vue'
 
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
-import type { ExperimentNew } from '@/types/ExperimentNew'
+import type { Experiment } from '@/types/Experiment'
 
 const emit = defineEmits([
   'l-close-details',
@@ -163,16 +174,17 @@ const emit = defineEmits([
   'l-job-results',
   'l-show-logs',
   'l-download-results',
+  'delete-button-clicked',
 ])
 
-defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-})
-const experimentStore = useExperimentStore()
-const { experiments, selectedExperiment, selectedWorkflow } = storeToRefs(experimentStore)
+const props = defineProps<{
+  title: string
+  selectedExperiment: Experiment
+  selectedWorkflow: Workflow | undefined
+}>()
+
+const { selectedExperiment, selectedWorkflow } = toRefs(props)
+
 const isCopied = ref(false)
 
 const copyToClipboard = async (longString: string) => {
@@ -184,35 +196,30 @@ const copyToClipboard = async (longString: string) => {
 }
 
 const isWorkflowFocused = computed(() => Boolean(selectedWorkflow.value))
-// const allJobs = computed(() => [...jobs.value, ...inferenceJobs.value])
+
+function handleDeleteButtonClicked(e: MouseEvent) {
+  emit('delete-button-clicked', selectedWorkflow.value || selectedExperiment.value)
+}
 
 // TODO: this needs refactor when the backend provides experiment id
-const currentItemStatus = computed(() => {
+const selectedItemStatus = computed(() => {
   if (isWorkflowFocused.value) {
     return selectedWorkflow.value?.status
+  } else {
+    return selectedExperiment.value?.status
   }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
-  )
-  return selected ? selected.status : selectedExperiment.value?.status
 })
 
-// const isInference = computed(() => {
-//   return isWorkflowFocused.value && inferenceJobs.value.some((job) => job.id === selectedWorkflow.value?.id)
-// })
-
-const focusedItem: ComputedRef<Workflow | ExperimentNew | undefined> = computed(() => {
+const focusedItem: ComputedRef<Workflow | Experiment | undefined> = computed(() => {
   if (selectedWorkflow.value) {
     return selectedWorkflow.value
+  } else {
+    return selectedExperiment.value
   }
-  const selected = experiments.value.find(
-    (experiment) => experiment.id === selectedExperiment.value?.id,
-  )
-  return selected ? selected : selectedExperiment.value
 })
 
 const tagSeverity = computed(() => {
-  const status = currentItemStatus.value
+  const status = selectedItemStatus.value
   switch (status) {
     case WorkflowStatus.SUCCEEDED:
       return 'success'
@@ -225,26 +232,6 @@ const tagSeverity = computed(() => {
   }
 })
 
-// const focusedItemRunTime = computed(() => {
-//   if (isWorkflowFocused.value) {
-//     return selectedWorkflow.value?.runTime ? selectedWorkflow.value?.runTime : '-'
-//   }
-
-//   if (
-//     currentItemStatus.value !== WorkflowStatus.RUNNING &&
-//     currentItemStatus.value !== WorkflowStatus.PENDING
-//   ) {
-//     const endTimes = selectedExperiment.value?.workflows.map((workflow) => workflow.end_time) || []
-//     const lastEndTime = endTimes.reduce((latest, current) => {
-//       return new Date(latest) > new Date(current) ? latest : current
-//     })
-//     if (lastEndTime && selectedExperiment.value) {
-//       return calculateDuration(selectedExperiment.value?.created_at, lastEndTime)
-//     }
-//   }
-//   return '-'
-// })
-
 const showResults = () => {
   if (isWorkflowFocused.value) {
     emit('l-job-results', selectedWorkflow.value)
@@ -253,14 +240,28 @@ const showResults = () => {
   emit('l-experiment-results', selectedExperiment.value)
 }
 
-function isExperiment(item: ExperimentNew | Workflow): item is ExperimentNew {
+function isExperiment(item: Experiment | Workflow): item is Experiment {
   return 'workflows' in item
 }
-
-// function _isJob(item: ExperimentNew | JobDetails): item is JobDetails {
-//   return 'entrypoint' in item
-// }
 </script>
+
+<style scoped>
+.l-experiment-details__header {
+  position: sticky;
+  top: 0;
+  padding: 1rem 0;
+  z-index: 100;
+}
+
+.l-experiment-details__header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.l-experiment-details__close {
+  margin-left: auto;
+}
+</style>
 
 <style lang="scss">
 @use '@/styles/variables' as *;

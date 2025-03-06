@@ -9,8 +9,8 @@
         </span>
       </div>
       <div
-        v-for="model of modelsRequiringNoAPIKey"
-        :key="model.name"
+        v-for="model in modelsRequiringNoAPIKey"
+        :key="model.display_name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
       >
@@ -21,7 +21,7 @@
           name="model"
           @click.stop
         />
-        <label :for="model.id">{{ model.name }}</label>
+        <label :for="model.id">{{ model.display_name }}</label>
 
         <!-- Keep @click.stop on external link so it doesn't toggle selection -->
         <Button
@@ -34,8 +34,10 @@
           :href="model.website_url"
           target="_blank"
           @click.stop
-        />
+        >
+        </Button>
       </div>
+      <!-- TODO: this is copy pasted and can be extracted into a component -->
       <div v-if="modelsRequiringAPIKey.length" class="l-models-list__options-container-section">
         <p>VIA APIs</p>
         <span
@@ -45,7 +47,7 @@
       </div>
       <div
         v-for="model in modelsRequiringAPIKey"
-        :key="model.name"
+        :key="model.display_name"
         class="l-models-list__options-container--option"
         @click="toggleModel(model)"
       >
@@ -56,7 +58,7 @@
           name="model"
           @click.stop
         />
-        <label :for="model.id">{{ model.name }}</label>
+        <label :for="model.id">{{ model.display_name }}</label>
 
         <!-- Keep @click.stop on external link so it doesn't toggle selection -->
         <Button
@@ -108,7 +110,7 @@ const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', fa
 
 function toggleModel(model: Model) {
   const index = selectedModels.value.findIndex(
-    (selectedModel: Model) => selectedModel.name === model.name,
+    (selectedModel: Model) => selectedModel.display_name === model.display_name,
   )
 
   if (index === -1) {

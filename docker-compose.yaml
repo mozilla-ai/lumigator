@@ -100,7 +100,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: '5g'
+          memory: '10g'
     environment:
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL

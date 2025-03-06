@@ -13,6 +13,7 @@ export async function getExperimentResults(experiment: Experiment) {
         model: data.artifacts.model,
         meteor: data.metrics.meteor,
         bertscore: data.metrics.bertscore,
+        bleu: data.metrics.bleu,
         rouge: data.metrics.rouge,
         runTime: undefined, //getJobRuntime(results.id),
         jobResults: transformJobResults(data),

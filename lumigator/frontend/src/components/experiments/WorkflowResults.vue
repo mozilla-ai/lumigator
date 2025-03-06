@@ -88,6 +88,14 @@
           {{ slotProps.data.bertscore.f1.toFixed(2) }}
         </template>
       </Column>
+      <Column field="bleu.bleu" sortable>
+        <template #header>
+          <span class="p-datatable-column-title">BLEU </span>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.bleu.bleu.toFixed(2) }}
+        </template>
+      </Column>
     </DataTable>
   </div>
 </template>

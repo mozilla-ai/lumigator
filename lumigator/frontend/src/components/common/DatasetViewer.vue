@@ -61,7 +61,7 @@
         :key="col"
         :field="col"
         :header="col"
-        :style="`width: ${(1 / selectedColumns.length) * 100}%`"
+        :style="`width: ${selectedColumns.length > 0 ? (1 / selectedColumns.length) * 100 : 100}%`"
       >
         <template #editor="{ data, field }">
           <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>

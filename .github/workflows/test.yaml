@@ -65,3 +65,7 @@ jobs:
           export LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID}
           export LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY}
           make test-backend-integration-ci
+
+      - name: Wait
+        run: |
+          sleep 10000000000000000000000

@@ -9,7 +9,9 @@ import s3fs
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import BaseModelClient, HuggingFaceModelClientFactory, LiteLLMModelClient
+from model_clients.base_client import BaseModelClient
+from model_clients.external_api_clients import LiteLLMModelClient
+from model_clients.huggingface_clients import HuggingFaceModelClientFactory
 from tqdm import tqdm
 from utils import timer
 

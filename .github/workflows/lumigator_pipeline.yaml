@@ -77,7 +77,6 @@ jobs:
             test:
               - '.github/**'
               - 'lumigator/**'
-              - '*'
 
       - name: List files
         run: echo "${{ steps.filter.outputs.changed_files }}"
@@ -293,13 +292,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/')
         run: |
           docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:${{ github.ref_name }}
           docker push mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
-        if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')  
+        if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')
         run: |
           docker tag ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
           docker push mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
@@ -352,7 +351,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/') 
+        if: contains(github.ref, 'refs/tags/')
         run: |
           docker tag ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} mzdotai/lumigator-frontend:${{ github.ref_name }}
           docker push mzdotai/lumigator-frontend:${{ github.ref_name }}

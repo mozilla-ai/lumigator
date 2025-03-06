@@ -9,7 +9,7 @@ const PATH_SECRET = (secretName: string) => `${PATH_SECRETS_ROOT}/${secretName}`
  * Deletes a secret by name.
  * @param {string} secretName - The name of the secret.
  */
-export async function deleteSecret(secretName: string): Promise<void> {
+export function deleteSecret(secretName: string): Promise<void> {
   return lumigatorApiAxiosInstance.delete(PATH_SECRET(secretName))
 }
 
@@ -28,7 +28,7 @@ export async function fetchSecrets(): Promise<Secret[]> {
  * @param {string} id - The secret definition (name and description).
  * @param {string} value - The (sensitive) value of the secret.
  */
-export async function uploadSecret(secret: SecretUploadPayload): Promise<void> {
+export function uploadSecret(secret: SecretUploadPayload): Promise<void> {
   return lumigatorApiAxiosInstance.put(PATH_SECRET(secret.name), {
     description: secret.description,
     value: secret.value,

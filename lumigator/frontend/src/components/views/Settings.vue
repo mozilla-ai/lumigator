@@ -57,7 +57,7 @@
                   title,
                 )
               "
-              :disabled="!isValidApiKey(reference.value)"
+              :disabled="!isApiKeyFieldDirty(reference.value)"
               label="Save"
             ></Button>
           </div>
@@ -94,12 +94,12 @@ const apiKeyMap = new Map<
   ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'DeepSeek' }],
 ])
 
-onMounted(async () => {
+onMounted(() => {
   fetchSecrets()
 })
 
-// Check if the API key is valid (e.g. it is some characters, but not the masked value).
-const isValidApiKey = (value: string): boolean => {
+// Check if the API key is dirty/changed (e.g. it has some characters, but not the masked value).
+const isApiKeyFieldDirty = (value: string): boolean => {
   return value !== maskedValue && value.length > 0
 }
 

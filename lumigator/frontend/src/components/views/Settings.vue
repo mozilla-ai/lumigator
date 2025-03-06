@@ -13,7 +13,7 @@
             class="learn-more-link"
             rel="noopener"
             target="_blank"
-            >Learn more
+            >Learn more<span class="pi pi-arrow-up-right"></span>
           </a>
         </p>
       </div>
@@ -277,6 +277,7 @@ const handleBlur = (key: string) => {
 }
 .learn-more-link {
   font-weight: 700;
+  background-color: transparent;
 }
 
 .api-keys {

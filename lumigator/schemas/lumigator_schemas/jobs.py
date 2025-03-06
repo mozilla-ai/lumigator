@@ -158,7 +158,13 @@ class JobCreate(BaseModel):
     name: str
     description: str = ""
     dataset: UUID
-    secret_key_name: str | None = None  # optional name of a secret which stores the key to access the provider
+    secret_key_name: str | None = Field(
+        None,
+        title="Secret Key Name",
+        description="An optional secret key name. "
+        "When creating an inference job, the secret key name identifies an existing secret stored in "
+        "Lumigator that should be used to access the provider.",
+    )
     max_samples: int = -1  # set to all samples by default
     job_config: JobSpecificConfig = Field(discriminator="job_type")
 

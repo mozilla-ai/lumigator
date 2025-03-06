@@ -43,6 +43,7 @@
     - api_key
   tasks:
     - summarization:
+    - translation:
 
 - display_name: gpt-4o
   model: gpt-4o
@@ -53,6 +54,7 @@
     - api_key
   tasks:
     - summarization:
+    - translation:
 
 - display_name: deepseek-R1
   model: deepseek-reasoner
@@ -63,6 +65,7 @@
     - api_key
   tasks:
     - summarization:
+    - translation:
 
 - display_name: deepseek-V3
   model: deepseek-chat
@@ -73,6 +76,7 @@
     - api_key
   tasks:
     - summarization:
+    - translation:
 
 - display_name: open-mistral-7b
   model: open-mistral-7b
@@ -83,6 +87,7 @@
     - api_key
   tasks:
     - summarization:
+    - translation:
 
 - display_name: Llamafile/Mistral-7B-Instruct-v0.2
   model: mistralai/Mistral-7B-Instruct-v0.2
@@ -98,3 +103,4 @@
     - llamafile
   tasks:
     - summarization:
+    - translation:

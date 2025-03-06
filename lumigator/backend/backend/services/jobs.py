@@ -376,12 +376,13 @@ class JobService:
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
         # Include requested secrets (API keys) from stored secrets.
-        if request.secret_key_name:
-            value = self._secret_service.get_decrypted_secret_value(request.secret_key_name)
+        secret_name = getattr(request.job_config, "secret_key_name", None)
+        if secret_name:
+            value = self._secret_service.get_decrypted_secret_value(secret_name)
             if value:
                 job_config.api_key = value
             else:
-                raise SecretNotFoundError(request.secret_key_name) from None
+                raise SecretNotFoundError(secret_name) from None
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.

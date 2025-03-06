@@ -1,5 +1,4 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
-import type { Model } from '@/types/Model'
 
 export async function fetchModels(tasks: string[] = ['summarization', 'translation']) {
   const params = new URLSearchParams()

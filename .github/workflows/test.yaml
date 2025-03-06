@@ -67,5 +67,6 @@ jobs:
           make test-backend-integration-ci
 
       - name: Wait
+        if: failure()
         run: |
           sleep 10000000000000000000000

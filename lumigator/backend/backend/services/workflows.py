@@ -201,7 +201,6 @@ class WorkflowService:
             # we'll make that improvement later
             # Get the dataset from the S3 bucket
             result_key = self._job_service._get_results_s3_key(evaluation_job.id)
-            loguru.logger.info(f"METRICS {eval_output.metrics}")
 
             formatted_metrics = self._prepare_metrics(eval_output)
 

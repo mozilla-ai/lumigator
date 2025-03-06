@@ -91,7 +91,7 @@ def run_inference(config: InferenceJobConfig) -> Path:
         model_client = LiteLLMModelClient(config)
     elif config.hf_pipeline:
         logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
-        model_client = HuggingFaceModelClient(config)
+        model_client = HuggingFaceModelClient.create(config)
         output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")

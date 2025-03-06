@@ -9,7 +9,7 @@ dependencies:
   repository: https://ray-project.github.io/kuberay-helm/
   version: 1.2.2
 - name: mlflow
-  repository: https://community-charts.github.io/helm-charts
-  version: 0.13.1
-digest: sha256:9c37df6fbd0693066c18c7bcb2900571d3067277c26ebebd1ae6be145667513b
-generated: "2025-02-25T13:38:56.43421Z"
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 2.5.2
+digest: sha256:48c5761a4284bcea5787b69d1236b57a83e0cd3cebceff67a444c74ecf892d45
+generated: "2025-03-03T11:05:12.982425+01:00"

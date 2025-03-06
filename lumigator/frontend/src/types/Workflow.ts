@@ -1,3 +1,5 @@
+import type { SummarizationTaskDefinition, TranslationTaskDefinition } from './Experiment'
+
 export type Workflow = {
   id: string
   experiment_id: string
@@ -10,6 +12,7 @@ export type Workflow = {
   metrics?: Metrics
   parameters?: Record<string, unknown>
   artifacts_download_url?: string
+  system_prompt: string
   jobs?: JobResult[]
 }
 
@@ -55,4 +58,5 @@ export type CreateWorkflowPayload = {
   system_prompt?: string
   inference_output_field?: string
   config_template?: string
+  task_definition: SummarizationTaskDefinition | TranslationTaskDefinition
 }

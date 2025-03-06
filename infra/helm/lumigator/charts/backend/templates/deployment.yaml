@@ -63,14 +63,14 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "lumigator.mistral-secret-ref" . }}
-                  key: {{ .Consts.mistralSecretKey }}
+                  key: {{ .mistralSecretKey }}
             {{- end }}
             {{- if or .Values.openaiAPIKey .Values.existingOpenaiAPISecret }}
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "lumigator.openai-secret-ref" . }}
-                  key: {{ .Consts.openaiSecretKey }}
+                  key: {{ .openaiSecretKey }}
             {{- end }}
             - name: EVALUATOR_PIP_REQS
               value: {{ .Values.evaluatorPipReqs }}
@@ -81,7 +81,7 @@ spec:
             - name: INFERENCE_WORK_DIR
               value: {{ .Values.inferenceWorkDir }}
             - name: MLFLOW_TRACKING_URI
-              value: {{ include "lumigator.mlflow-address" .| quote }}
+              value: http://{{ include "lumigator.mlflow-address" .}}:80
             - name: LUMIGATOR_SECRET_KEY
               value: {{ .Values.lumigatorSecretKey | quote }}
           resources:

@@ -52,6 +52,7 @@ class SecretService:
             record = self._secret_repo.get_secret_by_name(name)
             if record is None:
                 return None
+            return self._decrypt(record.value)
         except ValueError as e:
             raise SecretDecryptionError(name) from e
 

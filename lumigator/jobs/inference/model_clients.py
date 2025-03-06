@@ -2,11 +2,12 @@ import re
 from abc import abstractmethod
 
 from inference_config import InferenceJobConfig
-from litellm import completion
+from litellm import Usage, completion
 from loguru import logger
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
+from utils import retry_with_backoff
 
-from schemas import TaskType
+from schemas import InferenceMetrics, PredictionResult, TaskType
 
 
 def strip_path_prefix(path: str) -> str:
@@ -28,7 +29,7 @@ class BaseModelClient:
         pass
 
     @abstractmethod
-    def predict(self, prompt: str) -> str:
+    def predict(self, prompt: str) -> PredictionResult:
         """Given a prompt, return a prediction."""
         pass
 
@@ -51,14 +52,10 @@ class LiteLLMModelClient(BaseModelClient):
         self.system_prompt = self.config.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
-    def predict(
-        self,
-        prompt: str,
-    ) -> str:
-        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
-        logger.info(f"Sending request to {litellm_model}")
-        logger.info(f"Config: {self.config}")
-        response = completion(
+    @retry_with_backoff(max_retries=3)
+    def _make_completion_request(self, litellm_model: str, prompt: str):
+        """Make a request to the LLM with proper error handling"""
+        return completion(
             model=litellm_model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
@@ -71,11 +68,56 @@ class LiteLLMModelClient(BaseModelClient):
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
         )
+
+    def predict(
+        self,
+        prompt: str,
+    ) -> PredictionResult:
+        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
+        logger.info(f"Sending request to {litellm_model}")
+        response = self._make_completion_request(litellm_model, prompt)
+
         # LiteLLM gives us the cost of each API which is nice.
         # Eventually we can add this to the response object as well.
         cost = response._hidden_params["response_cost"]
         logger.info(f"Response cost: {cost}")
-        return response.choices[0].message.content
+        usage: Usage = response["usage"]
+        if usage:
+            logger.info(f"Usage: {usage}")
+        prediction = response.choices[0].message.content
+        print(response.choices[0].message)
+        # LiteLLM will give us the reasoning if the API gives it back in its own field
+        # When talking to llamafile, the reasoning_content key is not present
+        if "reasoning_content" in response.choices[0].message.provider_specific_fields:
+            reasoning = response.choices[0].message.reasoning_content
+        else:
+            reasoning = None
+        if reasoning:
+            reasoning_tokens = response["usage"]["completion_tokens_details"].reasoning_tokens
+        else:
+            reasoning_tokens = 0
+        # In some cases (aka vLLM deployments of DeepSeek R1) the reasoning is in the completion itself
+        # APIs are still catching up to adding "reasoning" as a separate field
+        # since it involves post processing model output
+        if not reasoning and "</think>" in prediction:
+            logger.info("Reasoning found in completion")
+            reasoning = prediction.split("</think>")[0].strip()
+            prediction = prediction.split("</think>")[1].strip()
+            # Rough estimate of reasoning tokens
+            # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
+            reasoning_tokens = int(len(reasoning.split()) / 0.75)
+
+        return PredictionResult(
+            prediction=prediction,
+            reasoning=reasoning,
+            metrics=InferenceMetrics(
+                prompt_tokens=usage.prompt_tokens,
+                total_tokens=usage.total_tokens,
+                completion_tokens=usage.completion_tokens,
+                reasoning_tokens=reasoning_tokens,
+                answer_tokens=usage.completion_tokens - reasoning_tokens,
+            ),
+        )
 
 
 class HuggingFaceModelClient(BaseModelClient):
@@ -182,7 +224,7 @@ class HuggingFaceModelClient(BaseModelClient):
             )
             self._config.generation_config.max_new_tokens = max_pos_emb
 
-    def predict(self, prompt):
+    def predict(self, prompt) -> PredictionResult:
         # Case-1: Seq2seq model
         # If we're using a summarization model, the pipeline returns a dictionary with a single key.
         # The name of the key depends on the task (e.g., 'summary_text' for summarization).
@@ -191,7 +233,9 @@ class HuggingFaceModelClient(BaseModelClient):
             generation = self._pipeline(
                 prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
             )[0]
-            return generation["summary_text"]
+            return PredictionResult(
+                prediction=generation["summary_text"],
+            )
 
         # Case-2: CausalLM model: can be used for text-generation/summarization
         # or translation tasks with right system_prompt
@@ -207,4 +251,6 @@ class HuggingFaceModelClient(BaseModelClient):
             {"role": "user", "content": prompt},
         ]
         generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
-        return generation["generated_text"][-1]["content"]
+        return PredictionResult(
+            prediction=generation["generated_text"][-1]["content"],
+        )

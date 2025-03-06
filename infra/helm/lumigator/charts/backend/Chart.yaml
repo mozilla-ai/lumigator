@@ -40,6 +40,6 @@ dependencies:
     condition: ray-cluster.enabled
 
   - name: mlflow
-    repository: "https://community-charts.github.io/helm-charts"
-    version: "0.13.1"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    version: "2.5.2"
     condition: mlflow.enabled

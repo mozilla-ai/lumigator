@@ -16,7 +16,7 @@ running instance. To get a list of suggested models, you can use the following c
 :sync: tab1
 
 ```console
-user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/summarization | jq
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/?tasks=summarization | jq
 {
   "total": 7,
   "items": [
@@ -45,7 +45,7 @@ from lumigator_sdk.lumigator import LumigatorClient
 
 # The default port for Lumigator is 8000
 lm_client = LumigatorClient("localhost:8000")
-lm_client.models.get_suggested_models("summarization")
+lm_client.models.get_suggested_models(["summarization"])
 ```
 :::
 

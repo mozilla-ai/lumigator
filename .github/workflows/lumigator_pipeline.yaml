@@ -72,10 +72,15 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          list-files: "json"
           filters: |
             test:
               - '.github/**'
               - 'lumigator/**'
+              - '*'
+
+      - name: List files
+        run: echo "${{ steps.filter.outputs.changed_files }}"
 
       - name: Install uv
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

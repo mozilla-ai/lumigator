@@ -131,4 +131,4 @@ You can use the API, SDK or UI to add these keys. However, if you do this manual
 {provider}_api_key
 ```
 
-Where `{provider}` from the ones listed above, is one of `deepseek`, `huggingface`, `mistral` or `openai`.
+Where `{provider}` from the ones listed above, is one of `deepseek`, `hf` (Hugging Face), `mistral` or `openai`.

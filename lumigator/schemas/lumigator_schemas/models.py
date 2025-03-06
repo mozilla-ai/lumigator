@@ -33,7 +33,7 @@ class ModelsResponse(BaseModel):
         title="Model Provider",
         description=(
             "LiteLLM key for where the model is hosted (e.g. `openai`, `deepseek`, `gpt3`, etc). "
-            "If using a HF model that is hosted in the inference job, use `hf`"
+            "If using a Hugging Face model that is hosted in the inference job, use `huggingface`"
         ),
     )
     base_url: str | None = Field(

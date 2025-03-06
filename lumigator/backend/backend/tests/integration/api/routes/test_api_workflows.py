@@ -81,7 +81,7 @@ def test_upload_data_launch_job(
         "job_config": {
             "job_type": JobType.INFERENCE,
             "model": TEST_SEQ2SEQ_MODEL,
-            "provider": "hf",
+            "provider": "huggingface",
             "output_field": "predictions",
             "store_to_dataset": True,
         },
@@ -115,7 +115,7 @@ def test_upload_data_launch_job(
             "job_type": JobType.EVALUATION,
             "metrics": ["rouge", "meteor"],
             "model": TEST_SEQ2SEQ_MODEL,
-            "provider": "hf",
+            "provider": "huggingface",
         },
     }
 
@@ -262,7 +262,7 @@ def run_workflow(
         "description": "Test workflow for inf and eval",
         "task_definitions": task_definition,
         "model": model,
-        "provider": "hf",
+        "provider": "huggingface",
         "dataset": str(dataset_id),
         "experiment_id": experiment_id,
         "max_samples": 1,

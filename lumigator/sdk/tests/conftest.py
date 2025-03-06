@@ -192,7 +192,7 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
     model = {
         "display_name": "facebook/bart-large-cnn",
         "model": "facebook/bart-large-cnn",
-        "provider": "hf",
+        "provider": "huggingface",
         "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
         "tasks": [
             {

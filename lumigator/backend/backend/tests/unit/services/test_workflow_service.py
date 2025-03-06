@@ -17,7 +17,7 @@ def test_workflow_request_requires_system_prompt_for_text_generation():
             name="test_text_generation_run",
             description="Test missing system prompt for text generation",
             model="microsoft/Phi-3-mini-instruct",
-            provider="hf",
+            provider="huggingface",
             task_definition=task_definition,
             # system_prompt is intentionally not provided
             dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
@@ -33,7 +33,7 @@ def test_default_system_prompt_for_summarization():
         name="test_summarization_run",
         description="Test default system prompt for summarization",
         model=TEST_SEQ2SEQ_MODEL,
-        provider="hf",
+        provider="huggingface",
         task_definition={"task": "summarization"},
         # system_prompt is intentionally not provided
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
@@ -50,7 +50,7 @@ def test_default_system_prompt_for_translation():
         name="test_translation_run",
         description="Test default system prompt for translation",
         model="hf-internal-testing/tiny-random-mt5",
-        provider="hf",
+        provider="huggingface",
         task_definition={
             "task": "translation",
             "source_language": "English",
@@ -72,7 +72,7 @@ def test_custom_system_prompt_overrides_default():
         name="test_custom_prompt_run",
         description="Test custom system prompt overrides default",
         model=TEST_SEQ2SEQ_MODEL,
-        provider="hf",
+        provider="huggingface",
         task_definition={"task": "summarization"},
         system_prompt=custom_prompt,  # Provide a custom system prompt
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),

@@ -23,7 +23,7 @@ def test_set_null_inference_job_params(job_record, job_service):
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="huggingface"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -44,7 +44,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
         max_samples=10,
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf"),
+        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="huggingface"),
         dataset="cced289c-f869-4af1-9195-1d58e32d1cc1",
     )
 
@@ -64,11 +64,11 @@ def test_set_explicit_inference_job_params(job_record, job_service):
     ["model", "provider", "input_base_url", "returned_base_url"],
     [
         # generic HF model loaded locally
-        ("facebook/bart-large-cnn", "hf", None, None),
+        ("facebook/bart-large-cnn", "huggingface", None, None),
         # vLLM served model (with HF model name specified to be passed as "model")
         (
             "mistralai/Mistral-7B-Instruct-v0.3",
-            "hf",
+            "huggingface",
             "http://localhost:8000/v1/chat/completions",
             "http://localhost:8000/v1/chat/completions",
         ),
@@ -119,7 +119,9 @@ def test_check_api_key_in_job_creation(
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", api_key=""),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="huggingface", api_key=""
+        ),
         dataset=str(test_dataset.id),
         secret_key_name=key_name,
     )
@@ -139,7 +141,9 @@ def test_missing_api_key_in_job_creation(
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", api_key=""),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="huggingface", api_key=""
+        ),
         dataset=str(test_dataset.id),
         secret_key_name=key_name,
     )

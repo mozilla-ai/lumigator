@@ -23,7 +23,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/summarization
     {
       "name": "facebook/bart-large-cnn",
       "model": "facebook/bart-large-cnn",
-      "provider": "hf",
+      "provider": "huggingface",
       "description": "BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.",
       "info": {
         "parameter_count": "406M",

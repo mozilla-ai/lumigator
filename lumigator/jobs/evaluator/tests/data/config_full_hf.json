@@ -5,7 +5,7 @@
     "path": "facebook/bart-large-cnn"
   },
   "provider": {
-    "path": "hf"
+    "path": "huggingface"
   },
   "evaluation": {
     "metrics": ["rouge", "meteor", "bertscore"],

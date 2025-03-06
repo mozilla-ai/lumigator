@@ -133,7 +133,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
     infer_job_config = JobInferenceConfig(
         # FIXME make a const
         model=TEST_SEQ2SEQ_MODEL,
-        provider="hf",
+        provider="huggingface",
         output_field="predictions",
         store_to_dataset=True,
     )
@@ -290,7 +290,7 @@ def test_create_exp_workflow_check_results(
         description="Test workflow for inf and eval",
         task_definition=task_definition,
         model=model,
-        provider="hf",
+        provider="huggingface",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
         max_samples=1,
@@ -317,7 +317,7 @@ def test_create_exp_workflow_check_results(
         description="Test workflow for inf and eval",
         task_definition=task_definition,
         model=model,
-        provider="hf",
+        provider="huggingface",
         dataset=str(dataset_id),
         experiment_id=str(experiment_id),
         max_samples=1,

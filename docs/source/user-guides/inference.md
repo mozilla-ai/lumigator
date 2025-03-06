@@ -59,7 +59,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     # Create and submit an inference job
     name = "bart-summarization-run"
     model = "facebook/bart-large-cnn"
-    provider = "hf"
+    provider = "huggingface"
     task_definition = {"task": "summarization"}
 
     job_args = jobs.JobInferenceCreate(

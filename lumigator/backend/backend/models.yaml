@@ -1,6 +1,6 @@
 - display_name: facebook/bart-large-cnn
   model: facebook/bart-large-cnn
-  provider: hf
+  provider: huggingface
   website_url: https://huggingface.co/facebook/bart-large-cnn
   description: BART is a large-sized model fine-tuned on the CNN Daily Mail dataset.
   info:
@@ -18,7 +18,7 @@
 
 - display_name: Falconsai/text_summarization
   model: Falconsai/text_summarization
-  provider: hf
+  provider: huggingface
   website_url: https://huggingface.co/Falconsai/text_summarization
   description: A fine-tuned variant of the T5 transformer model, designed for the task of text summarization.
   info:

@@ -32,7 +32,7 @@ class JobDefinitionInference(JobDefinition):
             ),
             system_prompt=request.job_config.system_prompt,
         )
-        if request.job_config.provider == "hf":
+        if request.job_config.provider == "huggingface":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,

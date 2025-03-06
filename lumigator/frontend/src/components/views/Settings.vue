@@ -115,7 +115,7 @@ const fetchSecrets = async () => {
     toast.add({
       severity: 'error',
       summary: 'Unable to fetch configured API keys',
-      detail: `${msg}`,
+      detail: msg,
       messageicon: 'pi pi-exclamation-triangle',
       group: 'br',
       life: 3000,

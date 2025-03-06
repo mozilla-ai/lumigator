@@ -90,7 +90,7 @@ const apiKeyMap = new Map<
 >([
   ['mistral_api_key', { reference: ref(''), existsRemotely: false, title: 'Mistral' }],
   ['openai_api_key', { reference: ref(''), existsRemotely: false, title: 'OpenAI' }],
-  ['huggingface_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
+  ['hf_api_key', { reference: ref(''), existsRemotely: false, title: 'Hugging Face' }],
   ['deepseek_api_key', { reference: ref(''), existsRemotely: false, title: 'DeepSeek' }],
 ])
 
@@ -252,6 +252,7 @@ const handleBlur = (key: string) => {
 
 .settings-container {
   display: flex;
+  min-width: 560px;
   flex-direction: column;
   gap: 0.5rem;
   margin: 0 auto;

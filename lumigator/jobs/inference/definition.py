@@ -34,7 +34,7 @@ class JobDefinitionInference(JobDefinition):
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task_definition.task,
+                task_definition=request.job_config.task_definition.model_dump(),
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,

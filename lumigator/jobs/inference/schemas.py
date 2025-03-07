@@ -5,7 +5,7 @@ This is because the backend and this job will be running in different environmen
 
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, PositiveInt
 
 
 class DatasetConfig(BaseModel):
@@ -21,6 +21,7 @@ class TaskType(str, Enum):
 
 class JobConfig(BaseModel):
     max_samples: int
+    batch_size: PositiveInt
     storage_path: str
     output_field: str | None = "predictions"
     enable_tqdm: bool = True

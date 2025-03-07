@@ -128,14 +128,17 @@ class HuggingFaceSeq2SeqSummarizationClient(BaseModelClient, HuggingFaceSeq2SeqM
         self._config = config
         self._initialize_model_and_tokenizer(config)
 
-    def predict(self, prompt) -> PredictionResult:
-        generation = self._pipeline(
-            prompt, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
-        )[0]
-
-        return PredictionResult(
-            prediction=generation["summary_text"],
+    def predict(self, examples: list) -> list[PredictionResult]:
+        generations = self._pipeline(
+            examples, max_new_tokens=self._config.generation_config.max_new_tokens, truncation=True
         )
+
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation["summary_text"])
+            prediction_results.append(prediction_result)
+
+        return prediction_results
 
 
 class HuggingFaceCausalLMClient(BaseModelClient):
@@ -164,14 +167,12 @@ class HuggingFaceCausalLMClient(BaseModelClient):
 
         self._pipeline = pipeline(**pipeline_config)
 
-    def predict(self, prompt) -> PredictionResult:
-        messages = [
-            {"role": "system", "content": self._system_prompt},
-            {"role": "user", "content": prompt},
-        ]
+    def predict(self, examples: list[list[dict[str, str]]]) -> list[PredictionResult]:
+        generations = self._pipeline(examples, max_new_tokens=self._config.generation_config.max_new_tokens)
 
-        generation = self._pipeline(messages, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation[0]["generated_text"][-1]["content"])
+            prediction_results.append(prediction_result)
 
-        return PredictionResult(
-            prediction=generation["generated_text"][-1]["content"],
-        )
+        return prediction_results

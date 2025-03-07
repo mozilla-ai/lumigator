@@ -4,7 +4,7 @@
 
 backend:
   rayWorkerGPUs: "1.0"
-
+  blah: blah
   ray-cluster:
     image:
       tag: 2.30.0-py311-gpu

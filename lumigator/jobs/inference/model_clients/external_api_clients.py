@@ -40,6 +40,7 @@ class LiteLLMModelClient(BaseModelClient):
             top_p=self.config.generation_config.top_p,
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
+            api_key=self.config.api_key,
         )
 
     def predict(

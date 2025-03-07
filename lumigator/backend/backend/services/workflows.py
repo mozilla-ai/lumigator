@@ -114,9 +114,10 @@ class WorkflowService:
             inference_job.id, max_wait_time_sec=request.job_timeout_sec
         )
         if status != JobStatus.SUCCEEDED:
-            loguru.logger.error(f"Inference job {inference_job.id} failed")
+            loguru.logger.error(f"Inference job {inference_job.id} did not succeed with status {status}")
             try:
                 self._job_service._stop_job(inference_job.id)
+                status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=10)
             except JobUpstreamError:
                 loguru.logger.error(f"Failed to stop infer job {inference_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)

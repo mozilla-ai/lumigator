@@ -13,7 +13,7 @@ class HuggingFaceModelClientFactory:
     def create(config: InferenceJobConfig) -> BaseModelClient:
         """Factory method to create the appropriate client based on config"""
         model_name = config.hf_pipeline.model_name_or_path
-        task = config.hf_pipeline.task
+        task = config.hf_pipeline.task_definition.task
 
         # Load model config to determine architecture - Seq2Seq or CausalLM
         model_config = AutoConfig.from_pretrained(model_name, trust_remote_code=config.hf_pipeline.trust_remote_code)
@@ -46,7 +46,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
         )
 
         self._pipeline = pipeline(
-            task=config.hf_pipeline.task,
+            task=config.hf_pipeline.task_definition.task,
             model=self.model,
             tokenizer=self.tokenizer,
             revision=config.hf_pipeline.revision,

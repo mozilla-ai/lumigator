@@ -4,8 +4,9 @@ This is because the backend and this job will be running in different environmen
 """
 
 from enum import Enum
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DatasetConfig(BaseModel):
@@ -17,6 +18,28 @@ class TaskType(str, Enum):
     SUMMARIZATION = "summarization"
     TRANSLATION = "translation"
     TEXT_GENERATION = "text-generation"
+
+
+class SummarizationTaskDefinition(BaseModel):
+    task: Literal[TaskType.SUMMARIZATION] = TaskType.SUMMARIZATION
+    model_config = ConfigDict(extra="forbid")
+
+
+class TranslationTaskDefinition(BaseModel):
+    task: Literal[TaskType.TRANSLATION] = TaskType.TRANSLATION
+    source_language: str = Field(examples=["en", "English"])
+    target_language: str = Field(examples=["de", "German"])
+    model_config = ConfigDict(extra="forbid")
+
+
+class TextGenerationTaskDefinition(BaseModel):
+    task: Literal[TaskType.TEXT_GENERATION] = TaskType.TEXT_GENERATION
+    model_config = ConfigDict(extra="forbid")
+
+
+TaskDefinition = Annotated[
+    SummarizationTaskDefinition | TranslationTaskDefinition | TextGenerationTaskDefinition, Field(discriminator="task")
+]
 
 
 class JobConfig(BaseModel):
@@ -50,7 +73,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
-    task: TaskType
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     revision: str
     use_fast: bool
     trust_remote_code: bool

@@ -7,5 +7,6 @@
         "storage_path": "s3://lumigator-storage/jobs/results/",
         "output_field": "predictions",
         "enable_tqdm": true
-    }
+    },
+    "api_key": ""
 }

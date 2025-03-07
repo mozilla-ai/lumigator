@@ -38,7 +38,7 @@ jobs:
 
       - name: Copy user.conf
         run: |
-          echo "${{ secrets.CW_USER_CONF }}" > user.conf
+          echo "${{ secrets.CW_USER_CONF }}" > .lumigator/user.conf
 
       - name: Spinning up containers for the tests
         run: |

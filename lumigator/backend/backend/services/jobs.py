@@ -408,6 +408,8 @@ class JobService:
         runtime_env = {
             "pip": job_settings.pip_reqs,
             "working_dir": job_settings.work_dir,
+            # FIXME move to a constant
+            "py_modules": ["../schemas/lumigator_schemas"],
             "env_vars": runtime_env_vars,
         }
 

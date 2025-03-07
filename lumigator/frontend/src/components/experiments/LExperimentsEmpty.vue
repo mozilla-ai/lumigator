@@ -16,7 +16,8 @@
     </Button>
     <p class="l-experiment-empty__note">
       <span>
-        We evaluate tasks using various industry-standard metrics that measure different aspects of prediction-ground truth similarity.
+        We evaluate tasks using various industry-standard metrics that measure different aspects of
+        prediction-ground truth similarity.
         <a
           href="https://mozilla-ai.github.io/lumigator/"
           target="_blank"

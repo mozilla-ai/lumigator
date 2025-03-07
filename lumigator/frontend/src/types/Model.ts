@@ -24,4 +24,5 @@ export type Task = {
     no_repeat_ngram_size: number
     num_beats: number
   } | null
+  translation: unknown | null
 }

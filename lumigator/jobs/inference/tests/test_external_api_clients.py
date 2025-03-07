@@ -17,6 +17,7 @@ BASE_URL = "https://api.openai.com/v1"
 TEST_PROMPT = "Test prompt"
 TEST_RESPONSE = "This is a test response."
 HIDDEN_PARAMS = {"response_cost": 0.001}
+API_KEY_VALUE = '12345'
 
 
 class TestLiteLLMModelClient:
@@ -25,6 +26,7 @@ class TestLiteLLMModelClient:
         """Create a mock InferenceJobConfig for testing."""
         config = MagicMock(spec=InferenceJobConfig)
         config.system_prompt = SYSTEM_PROMPT
+        config.api_key = API_KEY_VALUE
 
         # Create generation_config as a separate mock
         generation_config = MagicMock()
@@ -99,6 +101,7 @@ class TestLiteLLMModelClient:
             top_p=DEFAULT_TOP_P,
             drop_params=True,
             api_base=BASE_URL,
+            api_key=API_KEY_VALUE
         )
 
     @patch("model_clients.external_api_clients.completion")

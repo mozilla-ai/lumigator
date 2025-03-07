@@ -56,6 +56,7 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
               - '*'
+              - 'scripts/**'
 
       - name: Install uv
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -90,6 +91,7 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
               - '*'
+              - 'scripts/**'
 
       - name: Install uv
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -162,6 +164,7 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
               - '*'
+              - 'scripts/**'
 
       - name: Install uv
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -222,6 +225,7 @@ jobs:
               - '.github/**'
               - 'lumigator/**'
               - '*'
+              - 'scripts/**'
 
       - name: Install uv
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

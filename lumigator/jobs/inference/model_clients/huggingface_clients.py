@@ -13,7 +13,7 @@ class HuggingFaceModelClientFactory:
     def create(config: InferenceJobConfig) -> BaseModelClient:
         """Factory method to create the appropriate client based on config"""
         model_name = config.hf_pipeline.model_name_or_path
-        task = config.hf_pipeline.task
+        task = config.hf_pipeline.task_definition.task
 
         # Load model config to determine architecture - Seq2Seq or CausalLM
         model_config = AutoConfig.from_pretrained(model_name, trust_remote_code=config.hf_pipeline.trust_remote_code)
@@ -22,6 +22,16 @@ class HuggingFaceModelClientFactory:
         if task == TaskType.SUMMARIZATION and model_config.is_encoder_decoder:
             logger.info(f"Running inference with HuggingFaceSeq2SeqSummarizationClient for {model_name}")
             return HuggingFaceSeq2SeqSummarizationClient(config)
+
+        elif task == TaskType.TRANSLATION and model_config.is_encoder_decoder:
+            if any(t5_name in model_name.lower() for t5_name in ["t5", "mt5", "byt5"]):
+                logger.info(f"Running inference with HuggingFacePrefixTranslationClient for {model_name}")
+                return HuggingFacePrefixTranslationClient(config)
+            else:
+                logger.warning(
+                    "Translation task is only supported for T5-style models. "
+                    "See https://huggingface.co/models?other=t5 {model_name} is not supported."
+                )
 
         # Default to CausalLM for the general text-generation task
         else:
@@ -46,7 +56,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
         )
 
         self._pipeline = pipeline(
-            task=config.hf_pipeline.task,
+            task=config.hf_pipeline.task_definition.task,
             model=self.model,
             tokenizer=self.tokenizer,
             revision=config.hf_pipeline.revision,
@@ -174,4 +184,28 @@ class HuggingFaceCausalLMClient(BaseModelClient):
 
         return PredictionResult(
             prediction=generation["generated_text"][-1]["content"],
+        )
+
+
+class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqModelClientMixin):
+    """Client for T5-style models that use prefixes for translation"""
+
+    def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._source_language = getattr(config.hf_pipeline.task_definition, "source_language", None)
+        self._target_language = getattr(config.hf_pipeline.task_definition, "target_language", None)
+
+        if not self._source_language or not self._target_language:
+            raise ValueError("Source and target languages must be provided for translation task.")
+
+        self._initialize_model_and_tokenizer(config)
+
+    def predict(self, prompt) -> PredictionResult:
+        prefix = f"translate {self._source_language} to {self._target_language}: "
+        prefixed_prompt = prefix + prompt
+
+        result = self._pipeline(prefixed_prompt, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
+
+        return PredictionResult(
+            prediction=result["translation_text"],
         )

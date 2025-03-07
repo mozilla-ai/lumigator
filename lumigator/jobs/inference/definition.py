@@ -16,8 +16,6 @@ OAI_API_URL: str = "https://api.openai.com/v1"
 MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
 DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
 
-DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
-
 
 class JobDefinitionInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
@@ -36,7 +34,7 @@ class JobDefinitionInference(JobDefinition):
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task_definition.task,
+                task_definition=request.job_config.task_definition.model_dump(),
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,

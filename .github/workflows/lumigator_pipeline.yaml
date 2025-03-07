@@ -47,13 +47,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
       - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
       - name: Run ${{ matrix.test }} unit tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-unit
 
   integration-tests:
@@ -68,26 +82,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
       - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
       - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Create pip cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-integration
 
       - name: Collect logs in case of failure
@@ -124,21 +155,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
       - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         uses: astral-sh/setup-uv@v3
 
       - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
       - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build-postgres
 
       - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         # This setting only affects backend integration tests
         # localhost is used since the postgres DB needs to be
         # accessed from pytest
@@ -169,35 +216,54 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
       - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         uses: astral-sh/setup-uv@v3
 
       - name: Create a virtual environment
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv venv
         working-directory: notebooks
 
       - name: Install required packages
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv pip install -r requirements.txt
         working-directory: notebooks
 
       - name: Install kernel
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
         working-directory: notebooks
 
       - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
       - name: Create pip cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Setup containers
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build
 
       - name: Run notebook
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: source .venv/bin/activate && jupyter execute --kernel_name=lumigator walkthrough.ipynb
         working-directory: notebooks
         shell: bash

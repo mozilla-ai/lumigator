@@ -76,7 +76,7 @@
       <div class="l-experiment-details__content-item" v-if="selectedJob">
         <div class="l-experiment-details__content-label">use-case</div>
         <div class="l-experiment-details__content-field">
-          {{ selectedJob.type }} - {{ selectedJob.metadata.job_type }}
+          {{ selectedJob.config.hf_pipeline.task }} - {{ selectedJob.metadata.job_type }}
         </div>
       </div>
       <div v-if="isJobFocused" class="l-experiment-details__content-item">

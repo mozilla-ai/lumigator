@@ -252,6 +252,8 @@ test-backend-integration:
 test-backend-integration-ci:
 	cd lumigator/backend/; \
 	docker container list --all; \
+	S3_BUCKET=$(S3_BUCKET) \
+	RAY_HEAD_NODE_HOST=$(RAY_HEAD_NODE_HOST) \
 	RAY_DASHBOARD_PORT=8265 \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \

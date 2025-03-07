@@ -36,6 +36,10 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
+      - name: Copy user.conf
+        run: |
+          cat ${{ secrets.CW_USER_CONF }} > user.conf
+
       - name: Spinning up containers for the tests
         run: |
           export RAY_WORKER_GPUS=1

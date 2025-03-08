@@ -91,6 +91,7 @@ class WorkflowService:
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
             generation_config=request.generation_config,
+            api_key=request.secret_key_name,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
@@ -158,12 +159,13 @@ class WorkflowService:
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
+        job_config = JobEvalConfig()
         if request.metrics:
-            job_config = JobEvalConfig(
-                metrics=request.metrics,
-            )
-        else:
-            job_config = JobEvalConfig()
+            job_config.metrics = request.metrics
+            # NOTE: This should be considered a temporary solution as we currently only support
+            # GEval by querying OpenAI's API. This should be refactored to be more robust.
+            if "g_eval_summarization" in job_config.metrics:
+                job_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(

@@ -119,9 +119,10 @@ def test_check_api_key_in_job_creation(
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", api_key=""),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", secret_key_name=key_name
+        ),
         dataset=str(test_dataset.id),
-        secret_key_name=key_name,
     )
     with patch(
         "backend.services.jobs.submit_ray_job",
@@ -139,9 +140,10 @@ def test_missing_api_key_in_job_creation(
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",
-        job_config=JobInferenceConfig(job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", api_key=""),
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", secret_key_name=key_name
+        ),
         dataset=str(test_dataset.id),
-        secret_key_name=key_name,
     )
     with patch(
         "backend.services.jobs.submit_ray_job",

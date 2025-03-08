@@ -25,6 +25,12 @@ class WorkflowCreateRequest(BaseModel):
     task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model: str
     provider: str
+    secret_key_name: str | None = Field(
+        None,
+        title="Secret Key Name",
+        description="An optional secret key name. Identifies an existing secret stored in Lumigator "
+        "that should be used to access the provider.",
+    )
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     base_url: str | None = None

@@ -176,7 +176,6 @@ const toast = useToast()
 const confirm = useConfirm()
 
 async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
-
   const experimentOrWorkflow = selectedItem || selectedWorkflow.value || selectedExperiment.value
   if (!experimentOrWorkflow) {
     return

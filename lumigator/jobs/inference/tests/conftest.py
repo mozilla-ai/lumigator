@@ -1,7 +1,9 @@
 import json
+import logging
 from pathlib import Path
 
 import pytest
+from loguru import logger
 
 
 def load_json(path: Path) -> dict:
@@ -26,3 +28,15 @@ def json_config_full_api() -> dict:
 @pytest.fixture(scope="session")
 def json_config_full_hf() -> dict:
     return load_json(resources_dir() / "config_full_hf.json")
+
+
+@pytest.fixture(autouse=True)
+def configure_loguru(caplog):
+    class PropagateHandler(logging.Handler):
+        def emit(self, record):
+            logging.getLogger(record.name).handle(record)
+
+    logger.remove()
+    logger.add(PropagateHandler(), format="{message}")
+    yield
+    logger.remove()

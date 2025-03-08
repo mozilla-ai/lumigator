@@ -331,7 +331,6 @@ class MLflowTrackingClient(TrackingClient):
             raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
-        """Get the logs for a workflow."""
         workflow_run = self._client.get_run(workflow_id)
         # get the jobs associated with the workflow
         all_jobs = self._client.search_runs(

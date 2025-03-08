@@ -8,6 +8,7 @@ from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
 from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from typing_extensions import deprecated
 
 from backend.tracking.schemas import RunOutputs
 
@@ -56,9 +57,17 @@ class TrackingClient(Protocol):
         """Get a workflow."""
         ...
 
+    @deprecated("get_workflow_logs is deprecated, it will be removed in future versions.")
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
-        """Get workflow logs."""
-        warn(DeprecationWarning, stacklevel=2)
+        """Get workflow logs.
+
+        .. deprecated::
+            get_workflow_logs is deprecated, it will be removed in future versions.
+        """
+        warn(
+            "get_workflow_logs is deprecated, it will be removed in future versions.", DeprecationWarning, stacklevel=2
+        )
+        ...
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update a workflow."""

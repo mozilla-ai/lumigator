@@ -2,6 +2,7 @@ from inference_config import InferenceJobConfig
 from loguru import logger
 from lumigator_schemas.tasks import TaskType
 from model_clients.base_client import BaseModelClient
+from model_clients.translation_utils import load_translation_config
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from schemas import PredictionResult
@@ -25,13 +26,17 @@ class HuggingFaceModelClientFactory:
             return HuggingFaceSeq2SeqSummarizationClient(config)
 
         elif task == TaskType.TRANSLATION and model_config.is_encoder_decoder:
-            if any(t5_name in model_name.lower() for t5_name in ["t5", "mt5", "byt5"]):
+            # Load the translation models configuration
+            translation_config = load_translation_config()
+
+            prefix_models = translation_config.get("prefix_translation_models", [])
+            if model_name in prefix_models:
                 logger.info(f"Running inference with HuggingFacePrefixTranslationClient for {model_name}")
                 return HuggingFacePrefixTranslationClient(config)
             else:
-                logger.warning(
-                    "Translation task is only supported for T5-style models. "
-                    "See https://huggingface.co/models?other=t5 {model_name} is not supported."
+                logger.error(
+                    f"Translation task with HF seq2seq models: {model_name} is not supported. "
+                    f"Check translation_models.yaml for supported models."
                 )
 
         # Default to CausalLM for the general text-generation task

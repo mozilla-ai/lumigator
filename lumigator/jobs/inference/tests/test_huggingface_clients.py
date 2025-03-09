@@ -2,12 +2,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from inference_config import InferenceJobConfig
+from lumigator_schemas.tasks import TaskType
 from model_clients.huggingface_clients import (
     HuggingFaceCausalLMClient,
     HuggingFaceSeq2SeqSummarizationClient,
 )
 
-from schemas import PredictionResult, TaskType
+from schemas import PredictionResult
 
 
 class TestHuggingFaceSeq2SeqSummarizationClient:

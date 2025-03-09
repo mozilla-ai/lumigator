@@ -1,9 +1,10 @@
 from inference_config import InferenceJobConfig
 from loguru import logger
+from lumigator_schemas.tasks import TaskType
 from model_clients.base_client import BaseModelClient
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
-from schemas import PredictionResult, TaskType
+from schemas import PredictionResult
 
 
 class HuggingFaceModelClientFactory:

@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  integration-tests:
+  integration-tests-gpu:
     name: Integration tests (SQLite)
     runs-on: GPU-runner
     strategy:
@@ -68,7 +68,7 @@ jobs:
           name: backend-logs
           path: /tmp/backendlogs/backend.log
 
-  integration-tests-postgres:
+  integration-tests-postgres-gpu:
     name: Integration tests (PostgreSQL)
     runs-on: GPU-runner
     strategy:

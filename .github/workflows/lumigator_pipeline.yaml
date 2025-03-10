@@ -36,7 +36,7 @@ jobs:
         continue-on-error: false
 
   lint-frontend:
-    name: Lint Frontend
+    name: Lint, Format, Type check (Frontend)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

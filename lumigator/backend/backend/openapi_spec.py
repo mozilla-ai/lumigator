@@ -15,7 +15,6 @@ def dump_openapi(dst: str) -> None:
             openapi_version=app.openapi_version,
             description=app.description,
             routes=app.routes,
-            # openapi_prefix=app.openapi_prefix,
         ), f)
 
 def build_argparser() -> argparse.ArgumentParser:

@@ -320,8 +320,8 @@ jobs:
   build-frontend-image:
     name: Build Frontend Docker image
     runs-on: ubuntu-latest
-    needs: lint
-    if: ${{ needs.lint.result == 'success' }}
+    needs: [lint-frontend, unit-tests-frontend, e2e-tests-frontend]
+    if: ${{ needs.lint-frontend.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

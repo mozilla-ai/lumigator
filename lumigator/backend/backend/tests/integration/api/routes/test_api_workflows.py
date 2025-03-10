@@ -266,7 +266,7 @@ def run_workflow(
         "dataset": str(dataset_id),
         "experiment_id": experiment_id,
         "max_samples": 1,
-        # "job_timeout_sec": 1,
+        "job_timeout_sec": 1000,
     }
     # The timeout cannot be 0
     if job_timeout_sec:

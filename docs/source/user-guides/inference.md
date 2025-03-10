@@ -4,6 +4,8 @@ This guide will walk you through the process of running an inference job using t
 a model downloaded from the Hugging Face Hub. The model will generate summaries for a given set of
 text data.
 
+This tutorial will show you how to perform inference as a single job. If you would like to do this as a part of an experiment and workflow (which includes evaluation of the results), see [the quickstart](../get-started/quickstart.md#using-lumigator).
+
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
@@ -12,7 +14,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 
 ## What You'll Need
 
-- A running instance of [Lumigator](../get-started/installation.md).
+- A running instance of [Lumigator](../get-started/quickstart.md).
 
 ## Procedure
 
@@ -48,7 +50,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     lm_client = LumigatorClient(f"{HOST}:{LUMIGATOR_PORT}")
 
     # Upload a dataset
-    dataset_path = "lumigator/sample_data/dialogsum_exc.csv"
+    dataset_path = "lumigator/sample_data/summarization/dialogsum_exc.csv"
     dataset = lm_client.datasets.create_dataset(
         dataset=open(dataset_path, 'rb'),
         format=datasets.DatasetFormat.JOB
@@ -58,14 +60,14 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     name = "bart-summarization-run"
     model = "facebook/bart-large-cnn"
     provider = "hf"
-    task = "summarization"
+    task_definition = {"task": "summarization"}
 
     job_args = jobs.JobInferenceCreate(
         name=name,
         model=model,
         provider=provider,
         dataset=dataset.id,
-        task=task,
+        task_definition=task_definition,
     )
 
     job = lm_client.jobs.create_job(
@@ -95,7 +97,7 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 
 ## Model Specification
 
-Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/summarization` endpoint. It contains the following information for each model:
+Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint. It contains the following information for each model:
 
 * `display_name`: an identification name for the model
 * `model`: The model to use, e.g. `facebook/bart-large-cnn`

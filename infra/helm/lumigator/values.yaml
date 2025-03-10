@@ -3,10 +3,6 @@
 # Declare variables to be passed into your templates.
 
 backend:
-
-  # Name of the Ray head service
-  rayAddress: lumigator-kuberay-head-svc
-  rayPort: "8265"
   rayWorkerGPUs: "1.0"
 
   ray-cluster:

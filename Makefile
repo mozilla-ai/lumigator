@@ -1,11 +1,11 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
 
 # Required binaries in order to correctly run the makefile, if any cannot be found the script will fail.
 # uv is only required for local-up (dev).
-REQUIRED_BINARIES := git docker
+REQUIRED_BINARIES := git docker openssl
 $(foreach bin,$(REQUIRED_BINARIES),\
   $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 
@@ -16,11 +16,17 @@ KEEP_CONTAINERS_UP ?= "FALSE"
 
 # Configuration to identify the input and output config files
 # NOTE: Changing CONFIG_BUILD_DIR will require review of .gitignore
-CONFIG_BUILD_DIR=build
-# Default config prefixed with dot to hide from user
-CONFIG_DEFAULT=.default.conf
-# User editable config file (will be generated if missing)
-CONFIG_OVERRIDE=user.conf
+CONFIG_BUILD_DIR=$(shell pwd)/build
+# Path to default config prefixed with dot to hide from user
+CONFIG_DEFAULT_FILE:=$(shell pwd)/.default.conf
+# Directory for user specific configuration and keys
+CONFIG_USER_DIR:=${HOME}/.lumigator
+# Path to user editable config file (will be generated if missing)
+CONFIG_OVERRIDE_FILE:=$(CONFIG_USER_DIR)/user.conf
+# Location of the key to use for encryption.
+CONFIG_USER_KEY_FILE:=$(CONFIG_USER_DIR)/lumigator.key
+# Env var name to hold encryption key
+CONFIG_USER_KEY_ENV_VAR=LUMIGATOR_SECRET_KEY
 
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
@@ -29,6 +35,7 @@ COMPUTE_TYPE := -cpu
 RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
+MODEL_CACHE_COMPOSE :=
 SQLALCHEMY_DATABASE_URL ?= sqlite:////tmp/local.db
 
 DEBUGPY_ARGS :=
@@ -41,11 +48,22 @@ $(info RAY_WORKER_GPUS = $(RAY_WORKER_GPUS))
 ifeq ($(ARCH), arm64)
 	RAY_ARCH_SUFFIX := -aarch64
 endif
+ifeq ($(ARCH),x86_64)
+  ARCH := amd64
+endif
 
 ifeq ($(shell test $(RAY_WORKER_GPUS) -ge 1; echo $$?) , 0)
 	COMPUTE_TYPE := -gpu
 	GPU_COMPOSE := -f docker-compose.gpu.override.yaml
 endif
+
+ENABLE_FIRST_TIME_CACHE ?= $(shell grep -E '^ENABLE_FIRST_TIME_CACHE=' .default.conf | cut -d'=' -f2)
+
+
+ifneq ($(ENABLE_FIRST_TIME_CACHE), false)
+	MODEL_CACHE_COMPOSE := -f docker-compose.model-cache.override.yaml
+endif
+
 
 # lumigator runs on a set of containers (backend, ray, minio, etc).
 # The following allows one to start all of them before calling a target
@@ -111,10 +129,10 @@ endef
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: config-generate-env
 	uv run pre-commit install
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
 
 local-down: config-generate-env
-	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
+	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
 	$(call remove_config_dir)
 
 local-logs:
@@ -122,26 +140,26 @@ local-logs:
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in) - postgres version
 start-lumigator-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
 start-lumigator: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: config-generate-env
-	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"$(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	ARCH=${ARCH} docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"$(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) down
+	ARCH=${ARCH} RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) down
 	$(call remove_config_dir)
 
 clean-docker-buildcache:
@@ -160,12 +178,17 @@ clean-docker-all: clean-docker-containers clean-docker-buildcache clean-docker-i
 clean-all: clean-docker-buildcache clean-docker-containers config-clean
 
 setup:
-	@command -v uv >/dev/null 2>&1 || { \
-		echo "uv not found. Installing..."; \
-		curl -LsSf https://astral.sh/uv/install.sh | sh; \
-		export PATH="$(HOME)/.local/bin:$(PATH)"; \
-	}
-	@scripts/setup_venvs.sh;
+	@scripts/setup_uv.sh;
+
+# This target is used to update the OpenAPI docs for use in the sphinx docs.
+# Lumigator must be running on localhost
+update-openapi-docs:
+	./scripts/update_openapi_docs.sh
+
+# This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
+# Lumigator must be running on localhost
+check-openapi-docs:
+	./scripts/check_openapi_docs.sh
 
 # SDK tests
 # We have both unit and integration tests for the SDK.
@@ -203,7 +226,8 @@ test-backend-unit:
 	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
 	MLFLOW_TRACKING_URI=http://localhost:8001 \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
 	cd lumigator/backend/; \
@@ -220,7 +244,8 @@ test-backend-integration:
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -238,11 +263,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	cd lumigator/jobs/evaluator; \
-	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
 	cd lumigator/jobs/inference; \
-	uv run $(DEBUGPY_ARGS) --with pytest --with-requirements requirements.txt --isolated pytest
+	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
@@ -255,15 +280,9 @@ config-clean:
 	$(call remove_config_dir)
 
 # config-generate-env: parses a generated config YAML file and outputs a .env file ready for use in Docker.
-config-generate-env: config-clean
-	@mkdir -p $(CONFIG_BUILD_DIR)
+config-generate-env: config-clean config-generate-key
+	@scripts/config_generate_env.sh "$(CONFIG_BUILD_DIR)" "$(CONFIG_USER_KEY_FILE)" "$(CONFIG_USER_KEY_ENV_VAR)" "$(CONFIG_DEFAULT_FILE)" "$(CONFIG_OVERRIDE_FILE)"
 
-	@if [ -f $(CONFIG_OVERRIDE) ]; then \
-		echo "Found user configuration: '$(CONFIG_OVERRIDE)', overrides will be applied"; \
-		scripts/config_generate_env.sh $(CONFIG_DEFAULT) $(CONFIG_OVERRIDE) > "$(CONFIG_BUILD_DIR)/.env"; \
-	else \
-		echo "No user configuration found, default will be used: '$(CONFIG_DEFAULT)'"; \
-		cp $(CONFIG_DEFAULT) "$(CONFIG_BUILD_DIR)/.env"; \
-	fi
-
-	@echo "Config file generated: '$(CONFIG_BUILD_DIR)/.env'";
+# config-generate-key: ensures that a (new or existing) user owned secret key exists to be passed to lumigator and used for encryption.
+config-generate-key:
+	@scripts/config_generate_key.sh $(CONFIG_USER_DIR) $(CONFIG_USER_KEY_FILE)

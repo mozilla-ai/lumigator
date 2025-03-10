@@ -1,6 +1,6 @@
 [project]
 name = "backend"
-version = "0.1.1-alpha"
+version = "0.1.2-alpha"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,7 +23,8 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "alembic>=1.13.3",
     "lumigator-schemas",
-    "mlflow>=2.20.0"
+    "mlflow>=2.20.3",
+    "cryptography>=43.0.0",
 ]
 
 [tool.uv]

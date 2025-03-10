@@ -1,11 +1,7 @@
 <template>
   <div class="l-experiment-logs">
-    <div ref="logContainer" class="l-experiment-logs__container">
-      <div
-        v-for="(log, index) in logSource"
-        :key="index"
-        class="l-experiment-logs__container-log-entry"
-      >
+    <div ref="logContainer" class="l-experiment-logs__container" @scroll.passive="onScroll">
+      <div v-for="(log, index) in logs" :key="index" class="l-experiment-logs__container-log-entry">
         {{ log }}
       </div>
     </div>
@@ -13,38 +9,37 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick, type Ref, type PropType } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useExperimentStore } from '@/stores/experimentsStore'
-import { useDatasetStore } from '@/stores/datasetsStore'
-const experimentStore = useExperimentStore()
-const { workflowLogs } = storeToRefs(experimentStore)
-const datasetStore = useDatasetStore()
-const { jobLogs } = storeToRefs(datasetStore)
+import { ref, watch, computed, nextTick, type Ref, toRefs } from 'vue'
 
-const props = defineProps({
-  logType: {
-    type: String as PropType<'workflow' | 'job'>,
-    required: true,
-  },
-})
+const props = defineProps<{ logs: string[] }>()
 
-const logSource = computed(() =>
-  props.logType === 'workflow' ? workflowLogs.value : jobLogs.value,
-)
+const { logs } = toRefs(props)
 
 const logContainer: Ref<HTMLElement | undefined> = ref()
 
-const logsLength = computed(() => logSource.value.length)
+const logsLength = computed(() => logs.value.length)
+const isAutoScrollEnabled = ref(true)
 
 const scrollToBottom = async () => {
-  if (logContainer.value) {
+  if (logContainer.value && isAutoScrollEnabled.value) {
+    // wait for view to update the DOM with new logs
     await nextTick()
+
     logContainer.value.scrollTop = logContainer.value.scrollHeight
   }
 }
 
-watch(logsLength, () => scrollToBottom())
+const onScroll = () => {
+  if (logContainer.value) {
+    const { scrollTop, scrollHeight, clientHeight } = logContainer.value
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 5
+
+    // resume autoscrolling only if at the bottom
+    isAutoScrollEnabled.value = isAtBottom
+  }
+}
+
+watch(logsLength, scrollToBottom)
 </script>
 
 <style scoped lang="scss">

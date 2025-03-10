@@ -1,15 +1,20 @@
-.. Lumigator documentation master file, created by
-   sphinx-quickstart on Tue Oct 29 13:57:02 2024.
-   You can adapt this file completely to your liking, but it should at least
+.. You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 Mozilla.ai Lumigator
 ====================
 
 Lumigator is an open-source platform built by Mozilla.ai for guiding users through the process of
-selecting the right language model for their needs. Currently, we support evaluating summarization
-tasks using sequence-to-sequence models, like BART and BERT, and causal architectures, like GPT and
-Mistral. However, we will be expanding to other machine learning tasks and use-cases.
+selecting the right language model for their needs.
+
+Currently, we support evaluating summarization
+tasks using sequence-to-sequence models, like BART, and causal architectures, like
+Mistral.
+
+These models can either be loaded and run by Lumigator
+(if they are models stored in `Huggingface Hub <https://huggingface.co/models>`_), or the models can be reached through any OpenAI
+compatible interface (for example, llamafile or OpenAI GPT models). Lumigator will soon
+support additional tasks such as translation  (See `#628 <https://github.com/mozilla-ai/lumigator/issues/628>`_).
 
 .. note::
 
@@ -20,22 +25,37 @@ Mistral. However, we will be expanding to other machine learning tasks and use-c
 Overview
 --------
 
-Lumigator is a Python-based FastAPI web app that features REST API endpoints, providing access to
-services for serving and evaluating large language models. These models can be hosted on both
-Hugging Face and local stores or accessed through APIs. It consists of:
+Lumigator contains several different components and can be used in a few different ways.
 
-   - A Web UI
-   - A FastAPI-based web app that provides various endpoints for serving and evaluating language
-     models.
-   - A Ray cluster to run offline inference or evaluation jobs.
-   - Artifact management (S3 in the cloud, minio locally).
-   - A database to track platform-level lifecycle, job, and dataset metadata.
+The core functionality is the backend, which is a Python-based FastAPI server that features REST API endpoints.
+
+These REST API endpoints can be accessed by a variety of clients, including:
+
+   - A Web UI (See :doc:`get-started/ui-guide`)
+   - A Python SDK (See :doc:`reference/sdk`)
+   - Any http client, like cURL (See :doc:`reference/schemas`)
+
+The backend is responsible for receiving requests from clients and managine the lifecycle of
+datasets, experiments, workflows, and jobs.
+The backend also coordinates interaction with a Ray cluster and a database. The Ray cluster is used to run jobs, and
+the database is used to store metadata about the platform, jobs, and datasets.
+
+For more information about datasets, see :doc:`api/datasets`.
+
+For more information about experiments, see :doc:`api/experiments`.
+
+For more information about workflows, see :doc:`api/workflows`.
+
+For more information about jobs, see :doc:`api/jobs`.
+
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
+
+For more information about the backend routes, see the rendered API specs in the :doc:`API Specs <api/index>`.
 
 .. toctree::
    :maxdepth: 1
    :caption: Get Started
 
-   get-started/installation
    get-started/quickstart
    get-started/ui-guide
    get-started/suggested-models
@@ -46,9 +66,9 @@ Hugging Face and local stores or accessed through APIs. It consists of:
    :caption: Operations Guide
 
    operations-guide/configuration
-   operations-guide/kubernetes
+   operations-guide/kubernetes-installation
    operations-guide/alembic
-   operations-guide/dev
+   operations-guide/local-development
    operations-guide/configure-S3
 
 .. toctree::
@@ -57,13 +77,14 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
    user-guides/inference
    user-guides/local-models
+   user-guides/prepare-evaluation-dataset
 
 .. toctree::
    :maxdepth: 2
    :caption: Conceptual Guides
 
-   conceptual-guides/endpoints
-   conceptual-guides/new-endpoint
+   conceptual-guides/architecture
+   conceptual-guides/datasets
 
 .. toctree::
    :maxdepth: 1
@@ -71,3 +92,8 @@ Hugging Face and local stores or accessed through APIs. It consists of:
 
    reference/sdk
    reference/schemas
+
+.. toctree::
+   :caption: API Specifications
+
+   api/index

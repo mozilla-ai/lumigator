@@ -18,6 +18,10 @@ export type MetricsResult = {
   bertscore: Bertscore
   meteor: Meteor
   rouge: Rouge
+  bleu: {
+    bleu: number[]
+    bleu_mean: number
+  }
 }
 
 export type Parameters = {
@@ -40,7 +44,7 @@ export type Parameters = {
     output_field: string
     storage_path: string
   }
-  params: unknown
+  generation_config: unknown
 }
 
 export type HfPipeline = {

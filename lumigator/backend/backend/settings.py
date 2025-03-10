@@ -1,4 +1,5 @@
 import os
+import re
 from collections.abc import Mapping
 from enum import Enum
 from typing import Final
@@ -11,6 +12,7 @@ from sqlalchemy.engine import URL, make_url
 
 class BackendSettings(BaseSettings):
     # Backend
+    LUMIGATOR_SECRET_KEY: str  # Symmetric encryption key used for interacting with stored secrets
     DEPLOYMENT_TYPE: DeploymentType = DeploymentType.LOCAL
     MAX_DATASET_SIZE_HUMAN_READABLE: Final[str] = "50MB"
     MAX_DATASET_SIZE: ByteSize = MAX_DATASET_SIZE_HUMAN_READABLE
@@ -36,6 +38,12 @@ class BackendSettings(BaseSettings):
     RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
     RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
 
+    # Sensitive data patterns for redaction
+    sensitive_patterns: list[re.Pattern] = [
+        re.compile(r"(?i)_api_key"),  # Matches fields like OPENAI_API_KEY, MISTRAL_API_KEY etc.
+        re.compile(r"(?i)_token"),  # Matches fields like access_token, HF_TOKEN etc.
+    ]
+
     # Tracking
     class TrackingBackendType(str, Enum):
         """Enum for tracking backend types."""
@@ -50,25 +58,16 @@ class BackendSettings(BaseSettings):
     def TRACKING_BACKEND_URI(self) -> str:  # noqa: N802
         if self.TRACKING_BACKEND == self.TrackingBackendType.MLFLOW:
             # the tracking uri env var must be set, return that
-            assert os.environ.get("MLFLOW_TRACKING_URI", None) is not None
-            return os.environ["MLFLOW_TRACKING_URI"]
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if not tracking_uri:  # This catches both None and empty strings
+                raise ValueError("MLFLOW_TRACKING_URI environment variable must be set to a valid URI")
+            return tracking_uri
         raise ValueError(f"Unsupported tracking backend: {self.TRACKING_BACKEND}")
 
     # Served models
     OAI_API_URL: str = "https://api.openai.com/v1"
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
-    DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
-
-    # Eval job details
-    EVALUATOR_WORK_DIR: str | None = None
-    EVALUATOR_PIP_REQS: str | None = None
-    EVALUATOR_COMMAND: str = "python evaluator.py"
-
-    # Inference job details
-    INFERENCE_WORK_DIR: str | None = None
-    INFERENCE_PIP_REQS: str | None = None
-    INFERENCE_COMMAND: str = "python inference.py"
 
     def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
         for env_var_name in self.RAY_WORKER_ENV_VARS:

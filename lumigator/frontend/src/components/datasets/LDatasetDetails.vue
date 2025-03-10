@@ -7,7 +7,8 @@
       aria-label="Close"
       class="l-dataset-details__close"
       @click="onCloseDetails"
-    />
+    >
+    </Button>
     <div class="l-dataset-details__header">
       <h3>Dataset Details</h3>
       <span class="l-dataset-details__header-actions">
@@ -17,14 +18,14 @@
           variant="text"
           rounded
           @click="emit('l-download-dataset', selectedDataset)"
-        />
+        ></Button>
         <Button
           severity="secondary"
           icon="pi pi-bin"
           variant="text"
           rounded
           @click="emit('l-delete-dataset', selectedDataset)"
-        />
+        ></Button>
       </span>
     </div>
     <div class="l-dataset-details__content">
@@ -46,7 +47,7 @@
             v-tooltip="'Copy ID'"
             :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
             style="font-size: 14px; padding-left: 3px; cursor: pointer"
-          />
+          ></i>
         </span>
       </div>
       <div class="l-dataset-details__content-item">
@@ -73,6 +74,16 @@
       </div>
       <div class="l-dataset-details__actions">
         <Button
+          rounded
+          severity="secondary"
+          size="small"
+          icon="pi pi-microchip"
+          label="View Dataset"
+          class="l-dataset-empty__action-btn"
+          @click="emit('view-dataset-clicked', selectedDataset)"
+        ></Button>
+
+        <Button
           v-if="selectedDataset?.ground_truth"
           rounded
           severity="secondary"
@@ -82,7 +93,7 @@
           class="l-dataset-empty__action-btn"
           :disabled="!selectedDataset?.ground_truth"
           @click="emit('l-experiment', selectedDataset)"
-        />
+        ></Button>
         <Button
           v-else
           rounded
@@ -91,7 +102,7 @@
           label="Generate Ground Truth"
           class="l-dataset-empty__action-btn"
           @click="showGenerateGroundTruthPopup"
-        />
+        ></Button>
       </div>
     </div>
 
@@ -127,6 +138,7 @@ const emit = defineEmits([
   'l-download-dataset',
   'l-details-closed',
   'l-experiment',
+  'view-dataset-clicked',
 ])
 
 const copyToClipboard = async (longString: string) => {
@@ -221,6 +233,7 @@ async function handleGenerateGroundTruth() {
     padding: $l-spacing-1 0;
     display: flex;
     justify-content: center;
+    gap: $l-spacing-1;
   }
 }
 </style>

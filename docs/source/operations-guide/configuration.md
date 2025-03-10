@@ -4,7 +4,7 @@
 This guide only covers configuring Lumigator when deployed using Docker.
 ```
 
-Lumigator comes with sensible defaults that allow you to [start using it](../get-started/installation.md) without modification using [`Docker Compose`](https://docs.docker.com/compose/).
+Lumigator comes with sensible defaults that allow you to [start using it](../get-started/quickstart.md) without modification using [`Docker Compose`](https://docs.docker.com/compose/).
 
 This guide explains how configuration works in Lumigator and how you can make changes to settings if required.
 
@@ -20,6 +20,7 @@ When you start Lumigator using commands like `make local-up` or `make start-lumi
 
 1. Any temporary config files used for deployment are removed
 1. Default and user settings (if present) are combined (with user settings preferred - see below for information on using your own settings)
+1. These settings are also combined with the user stored `LUMIGATOR_SECRET_KEY` - see below for more information on the secret key
 1. The generated config file (`.env`) is placed under the `build` directory in the repository root
 1. Docker Compose is supplied with the environment file path to the generated `.env` file
 
@@ -33,7 +34,7 @@ The `build` directory and the user defined config file are both marked in `.giti
 
 ## How should I set my own settings?
 
-User specific configuration can be stored in a file named `user.conf`, this file is configured in `.gitignore` and will never be commited to version control.
+User specific configuration can be stored in a file named `user.conf` in under `${HOME}/.lumigator`, this file is configured in `.gitignore` for safety, but should never appear in your repo directory.
 
 `user.conf` must be created manually when required, **only** add key/values for the settings you explicitly wish to change from the defaults.
 
@@ -45,7 +46,37 @@ Please review `.default.conf` for the format, setting names and default values (
 
 Not currently, there are a lot of settings available in `.default.conf` but for example you cannot yet change the URL that is exposed via FastAPI on our Backend component from http://localhost:8000.
 
+You cannot configure the user secret key under `LUMIGATOR_SECRET_KEY` as the value for this key **must** be read from the Lumigator dot fodler in the user's home directory.
+
+## What is the secret key?
+
+Lumigator requires a (symmetric) secret key which is used for encrypting and decrypting specific settings (secrets) stored via the API.
+
+The key will be created and stored automatically (if it is not present) on startup. The path Lumigator expects to find the key is:
+
+```bash
+${HOME}/.lumigator/lumigator.key`
+```
+
+During deployment, when the `build/.env` file is generated, this key will be merged into the `.env` with the key name `LUMIGATOR_SECRET_KEY`.
+
+Due to the sensitive nature of the key, you cannot override the value for LUMIGATOR_SECRET_KEY that appears
+in the .env using user.conf.
+
+It will be read from ${HOME}/.lumigator/lumigator.key, and must be present.
+
+```{note}
+Please ensure you have not exported LUMIGATOR_SECRET_KEY as this will conflict with the accurate value in the generated .env file.
+```
+
+Once the key is generated, it should not be changed otherwise any data stored in Lumigator's databse will become unreadable.
+
+Additionally it is the user's responsibility to ensure this key is kept safe. The only place it can exist
+within the Lumigator repo is in the `buid/.env` file that is automatically removed when you call `make local-down` or `make stop-lumigator`.
+
 ## Settings
+
+### Configuration file settings
 
 The following section documents the available settings:
 
@@ -66,9 +97,6 @@ The following section documents the available settings:
 | NVIDIA_VISIBLE_DEVICES             | string  | Defaults to 'all', specifies which NVIDIA devices should be visible to Ray                                                 |
 | GPU_COUNT                          | int     | The number of GPUs                                                                                                         |
 | HF_HOME                            | string  | The home directory for HuggingFace (used for caching)                                                                      |
-| HF_TOKEN                           | string  | Sensitive API token used to access gated models in HuggingFace                                                             |
-| MISTRAL_API_KEY                    | string  | Sensitive API key used to access Mistral                                                                                   |
-| OPENAI_API_KEY                     | string  | Sensitive API key used to access OpenAI                                                                                    |
 | MLFLOW_TRACKING_URI                | string  | The URL used to access MLFlow                                                                                              |
 | MLFLOW_DATABASE_URL                | string  | DB connection string/URL used for MLFlow                                                                                   |
 | MLFLOW_S3_ROOT_PATH                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                           |
@@ -80,5 +108,27 @@ The following section documents the available settings:
 | LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
 | INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
 | INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |
-| EVALUATOR_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation jobs                                          |
-| EVALUATOR_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job              |
+| EVALUATOR_PIP_REQS                 | string  | Path within the container to the requirements.txt file for evaluation jobs                                                 |
+| EVALUATOR_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job                     |
+
+### API settings
+
+Some settings can **only** be configured via the Lumigator API (including the UI and SDK).
+
+Currently, these settings are the sensitive API keys that are used to access external services:
+
+* DeepSeek
+* [HuggingFace](https://huggingface.co/settings/tokens)
+* [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
+* [OpenAI]([https://platform.openai.com/api-keys](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key))
+
+As these keys are secret, we don't allow them to be stored in Lumigator's configuration files.
+Instead, they must be added via the API, and are then encrypted and stored in Lumigator's database.
+
+You can use the API, SDK or UI to add these keys. However, if you do this manually you **must** follow the following convention for the key names:
+
+```console
+{provider}_api_key
+```
+
+Where `{provider}` from the ones listed above, is one of `deepseek`, `hf` (Hugging Face), `mistral` or `openai`.

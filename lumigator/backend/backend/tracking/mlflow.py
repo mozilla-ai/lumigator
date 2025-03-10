@@ -1,4 +1,5 @@
 import contextlib
+import http
 import json
 from collections.abc import Generator
 from datetime import datetime
@@ -9,16 +10,18 @@ from uuid import UUID
 import boto3
 import loguru
 import requests
-from fastapi import HTTPException
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
+from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
+from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -31,7 +34,12 @@ class MLflowTrackingClient(TrackingClient):
         self._client = MlflowClient(tracking_uri=tracking_uri)
 
     def create_experiment(
-        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+        self,
+        name: str,
+        description: str,
+        task_definition: TaskDefinition,
+        dataset: UUID,
+        max_samples: int,
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         # The name must be unique to all active experiments
@@ -39,7 +47,7 @@ class MLflowTrackingClient(TrackingClient):
         try:
             experiment_id = self._client.create_experiment(name)
             self._client.set_experiment_tag(experiment_id, "description", description)
-            self._client.set_experiment_tag(experiment_id, "task", task)
+            self._client.set_experiment_tag(experiment_id, "task_definition", task_definition.model_dump_json())
             self._client.set_experiment_tag(experiment_id, "dataset", dataset)
             self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
             self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -53,7 +61,7 @@ class MLflowTrackingClient(TrackingClient):
                 name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
                 experiment_id = self._client.create_experiment(name)
                 self._client.set_experiment_tag(experiment_id, "description", description)
-                self._client.set_experiment_tag(experiment_id, "task", task)
+                self._client.set_experiment_tag(experiment_id, "task_definition", task_definition.model_dump_json())
                 self._client.set_experiment_tag(experiment_id, "dataset", dataset)
                 self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
                 self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
@@ -64,7 +72,7 @@ class MLflowTrackingClient(TrackingClient):
         return GetExperimentResponse(
             id=experiment_id,
             description=description,
-            task=task,
+            task_definition=task_definition,
             name=name,
             dataset=dataset,
             max_samples=max_samples,
@@ -124,14 +132,15 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str):
+    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
         except MlflowException as e:
-            # if the experiment doesn't exist, return None
-            if "RESOURCE_DOES_NOT_EXIST" in str(e):
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
+            raise e
+
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
@@ -141,11 +150,13 @@ class MLflowTrackingClient(TrackingClient):
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
         workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        task_definition_json = experiment.tags.get("task_definition")
+        task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
             id=experiment.experiment_id,
             name=experiment.name,
             description=experiment.tags.get("description") or "",
-            task=experiment.tags.get("task") or "",
+            task_definition=task_definition,
             dataset=experiment.tags.get("dataset") or "",
             max_samples=int(experiment.tags.get("max_samples") or "-1"),
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
@@ -188,7 +199,9 @@ class MLflowTrackingClient(TrackingClient):
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
     # which correspond to what we call "jobs" in our system
-    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         # make sure its status is CREATED
         workflow = self._client.create_run(
@@ -198,6 +211,7 @@ class MLflowTrackingClient(TrackingClient):
                 "status": WorkflowStatus.CREATED.value,
                 "description": description,
                 "model": model,
+                "system_prompt": system_prompt,
             },
         )
         return WorkflowResponse(
@@ -206,13 +220,20 @@ class MLflowTrackingClient(TrackingClient):
             name=name,
             model=model,
             description=description,
+            system_prompt=system_prompt,
             status=WorkflowStatus.CREATED,
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
-        workflow = self._client.get_run(workflow_id)
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
         if workflow.info.lifecycle_stage == "deleted":
             return None
         # similar to the get_experiment method, but for a single workflow,
@@ -232,6 +253,7 @@ class MLflowTrackingClient(TrackingClient):
             description=workflow.data.tags.get("description"),
             name=workflow.data.tags.get("mlflow.runName"),
             model=workflow.data.tags.get("model"),
+            system_prompt=workflow.data.tags.get("system_prompt"),
             status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
             jobs=[self.get_job(job_id) for job_id in all_job_ids],
@@ -292,19 +314,13 @@ class MLflowTrackingClient(TrackingClient):
 
         if resp.status_code == HTTPStatus.NOT_FOUND:
             loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Job logs for ID: {ray_job_id} not found",
-            )
+            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
         elif resp.status_code != HTTPStatus.OK:
             loguru.logger.error(
                 f"Unexpected status code getting job logs: {resp.status_code}, \
                     error: {resp.text or ''}"
             )
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error getting job logs for ID: {ray_job_id}",
-            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
 
         try:
             metadata = json.loads(resp.text)
@@ -312,7 +328,7 @@ class MLflowTrackingClient(TrackingClient):
         except json.JSONDecodeError as e:
             loguru.logger.error(f"JSON decode error: {e}")
             loguru.logger.error(f"Response text: {resp.text}")
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Invalid JSON response") from e
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
@@ -352,6 +368,7 @@ class MLflowTrackingClient(TrackingClient):
             name=workflow.data.tags.get("mlflow.runName"),
             description=workflow.data.tags.get("description"),
             model=workflow.data.tags.get("model"),
+            system_prompt=workflow.data.tags.get("system_prompt"),
             status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )

@@ -5,14 +5,13 @@ import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
-from transformers.pipelines import check_task, get_supported_tasks
 
-from schemas import DatasetConfig
-from schemas import HfPipelineConfig as BaseHfPipelineConfig
+from schemas import DatasetConfig, TaskType
+from schemas import GenerationConfig as BaseGenerationConfig
+from schemas import HuggingFacePipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
 from schemas import InferenceServerConfig as BaseInferenceServerConfig
 from schemas import JobConfig as BaseJobConfig
-from schemas import SamplingParameters as BaseSamplingParameters
 
 
 def _validate_torch_dtype(x: str | torch.dtype) -> str | torch.dtype:
@@ -61,31 +60,6 @@ def _validate_model_name_or_path(path: str) -> str:
 AssetPath = Annotated[str, AfterValidator(lambda x: _validate_model_name_or_path(x))]
 
 
-def _validate_task(task: str) -> None:
-    """Validate the given task.
-
-    There are two types of tasks, simple and parameterized tasks
-    For example, "translation" is a simple task but "translation_xx_to_yy" is a parameterized task.
-    Normalize the task to the corresponding simple task and compare it with the supported tasks.
-
-    Args:
-        task (str): The task to validate.
-
-    Raises:
-        ValueError: If the task is not supported.
-    """
-    supported_tasks = get_supported_tasks()
-    normalized_task, _, _ = check_task(task)
-
-    if normalized_task not in supported_tasks:
-        raise ValueError(f"Task '{task}' is not supported. Supported tasks are: {supported_tasks}")
-
-    return task
-
-
-SupportedTask = Annotated[str, AfterValidator(lambda x: _validate_task(x))]
-
-
 class Accelerator(str, Enum):
     AUTO = "auto"
     CPU = "cpu"
@@ -105,8 +79,8 @@ class InferenceServerConfig(BaseInferenceServerConfig):
     max_retries: int = 3
 
 
-class SamplingParameters(BaseSamplingParameters):
-    max_tokens: int = 1024
+class GenerationConfig(BaseGenerationConfig):
+    max_new_tokens: int = 1024
     frequency_penalty: float = 0.0
     temperature: float = 1.0
     top_p: float = 1.0
@@ -115,14 +89,13 @@ class SamplingParameters(BaseSamplingParameters):
 
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     model_name_or_path: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
-    task: SupportedTask
+    task: TaskType
     revision: str = "main"  # Model version: branch, tag, or commit ID
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False
     torch_dtype: TorchDtype = "auto"
     accelerator: Accelerator = Field(title="Accelerator", default=Accelerator.AUTO, exclude=True)
     model_config = ConfigDict(extra="forbid")
-    max_new_tokens: int = 500  #  Model can generate upto these many tokens
 
     @computed_field
     @property
@@ -158,7 +131,7 @@ class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
         return self.accelerator
 
 
-# FIXME It seems like _either_ params _or_ hf_pipeline
+# FIXME It seems like _either_ inference_server _or_ hf_pipeline
 # is needed; a subclass, generic or similar should be used
 # to model this situation
 class InferenceJobConfig(BaseInferenceJobConfig):
@@ -167,6 +140,6 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     job: JobConfig
     system_prompt: str | None = Field(title="System Prompt", default=None, exclude=True)
     inference_server: InferenceServerConfig | None = None
-    params: SamplingParameters | None = None
+    generation_config: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")

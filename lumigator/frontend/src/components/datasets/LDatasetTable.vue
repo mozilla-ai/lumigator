@@ -45,7 +45,7 @@
               class="pi pi-fw pi-ellipsis-h l-dataset-table__options-trigger"
               aria-controls="optionsMenu"
               @click.stop="togglePopover($event, slotProps.data)"
-            />
+            ></span>
           </template>
         </Column>
       </DataTable>
@@ -84,6 +84,7 @@ const emit = defineEmits([
   'l-dataset-selected',
   'l-experiment',
   'l-download-dataset',
+  'view-dataset-clicked',
 ])
 
 const { showSlidingPanel } = useSlidePanel()
@@ -105,6 +106,13 @@ const options = ref<MenuItem[]>([
   },
   {
     separator: true,
+  },
+  {
+    label: 'View',
+    icon: 'pi pi-external-link',
+    command: () => {
+      emit('view-dataset-clicked', focusedItem.value)
+    },
   },
   {
     label: 'Download',

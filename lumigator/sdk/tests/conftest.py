@@ -11,8 +11,15 @@ from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.models import ModelsResponse
 from lumigator_sdk.health import Health
 from lumigator_sdk.lumigator import LumigatorClient
+from urllib3 import Retry
 
 LUMI_HOST = "localhost:8000"
+
+TEST_RETRY = Retry(
+    connect=10,
+    backoff_factor=1,
+    backoff_max=60,
+)
 
 
 @pytest.fixture(scope="function")
@@ -33,7 +40,7 @@ def lumi_client(request_mock) -> LumigatorClient:
 
 @pytest.fixture(scope="function")
 def lumi_client_int() -> LumigatorClient:
-    return LumigatorClient(LUMI_HOST)
+    return LumigatorClient(LUMI_HOST, retry_conf=TEST_RETRY)
 
 
 @pytest.fixture(scope="session")
@@ -44,6 +51,16 @@ def resources_dir() -> Path:
 @pytest.fixture(scope="session")
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent / "sample_data"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_summarization(common_resources_dir) -> Path:
+    return common_resources_dir / "summarization"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_translation(common_resources_dir) -> Path:
+    return common_resources_dir / "translation"
 
 
 @pytest.fixture(scope="session")
@@ -86,9 +103,12 @@ def json_data_experiment_post_simple(resources_dir) -> Path:
     return resources_dir / "experiment-post-simple.json"
 
 
-@pytest.fixture(scope="session")
-def json_data_experiment_post_all(resources_dir) -> Path:
-    return resources_dir / "experiment-post-all.json"
+@pytest.fixture(
+    scope="session",
+    params=["experiment-post-all.json", "experiment-post-all-translation.json"],
+)
+def json_data_experiment_post_all(resources_dir, request) -> Path:
+    return resources_dir / request.param
 
 
 @pytest.fixture(scope="session")
@@ -123,7 +143,12 @@ def json_data_dataset(resources_dir) -> Path:
 
 @pytest.fixture(
     scope="session",
-    params=["job-all-annotation.json", "job-all-eval.json", "job-all-inference.json"],
+    params=[
+        "job-all-annotation.json",
+        "job-all-eval.json",
+        "job-all-inference.json",
+        "job-all-inference-translation.json",
+    ],
 )
 def json_data_job_all(resources_dir, request) -> Path:
     return resources_dir / request.param
@@ -187,21 +212,27 @@ def json_data_models() -> ListingResponse[ModelsResponse]:
 
 
 @pytest.fixture(scope="function")
-def dialog_data(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_exc.csv") as file:
+def dialog_data(common_resources_sample_data_dir_summarization):
+    with Path.open(common_resources_sample_data_dir_summarization / "dialogsum_exc.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def dialog_data_unannotated(common_resources_dir):
-    with Path.open(common_resources_dir / "dialogsum_mini_no_gt.csv") as file:
+def dialog_data_unannotated(common_resources_sample_data_dir_summarization):
+    with Path.open(common_resources_sample_data_dir_summarization / "dialogsum_mini_no_gt.csv") as file:
         yield file
 
 
 @pytest.fixture(scope="function")
-def long_sequences_data_unannotated(common_resources_dir):
+def long_sequences_data_unannotated(common_resources_sample_data_dir_summarization):
     # Dataset with long sequences
-    with Path.open(common_resources_dir / "mock_long_sequences_no_gt.csv") as file:
+    with Path.open(common_resources_sample_data_dir_summarization / "mock_long_sequences_no_gt.csv") as file:
+        yield file
+
+
+@pytest.fixture(scope="function")
+def mock_translation_data(common_resources_sample_data_dir_translation):
+    with Path.open(common_resources_sample_data_dir_translation / "sample_translation_en_de.csv") as file:
         yield file
 
 

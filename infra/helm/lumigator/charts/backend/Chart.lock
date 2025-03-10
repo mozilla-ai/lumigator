@@ -1,12 +1,15 @@
 dependencies:
-  - name: postgresql
-    repository: oci://registry-1.docker.io/bitnamicharts
-    version: 15.5.20
-  - name: kuberay-operator
-    repository: https://ray-project.github.io/kuberay-helm/
-    version: 1.2.2
-  - name: ray-cluster
-    repository: https://ray-project.github.io/kuberay-helm/
-    version: 1.2.2
-digest: sha256:b25b052a0b1954addb5a9fd35a447fa4296379f76b08896842a5b9aa4bea2742
-generated: "2025-01-17T15:09:21.318365+01:00"
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 15.5.20
+- name: kuberay-operator
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+- name: ray-cluster
+  repository: https://ray-project.github.io/kuberay-helm/
+  version: 1.2.2
+- name: mlflow
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 2.5.2
+digest: sha256:48c5761a4284bcea5787b69d1236b57a83e0cd3cebceff67a444c74ecf892d45
+generated: "2025-03-03T11:05:12.982425+01:00"

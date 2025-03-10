@@ -29,6 +29,8 @@ class EvalJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     evaluation: EvaluationConfig
+    # Optional API key which can be used to access evaluation services such as GEval.
+    api_key: str | None = None
     model_config = ConfigDict(extra="forbid")
 
 
@@ -63,11 +65,40 @@ class Rouge(BaseModel):
     rougeLsum_mean: float  # noqa: N815
 
 
+class GEvalMetric(BaseModel):
+    """A single result from a G-Eval evaluation (a score + an explanation)."""
+
+    score: float
+    reason: str
+
+
+class GEvalSummarizationMetrics(BaseModel):
+    """The following metric names and their respective prompts are defined in `g_eval_prompts.json`."""
+
+    coherence: list[GEvalMetric]
+    coherence_mean: float
+    consistency: list[GEvalMetric]
+    consistency_mean: float
+    fluency: list[GEvalMetric]
+    fluency_mean: float
+    relevance: list[GEvalMetric]
+    relevance_mean: float
+
+
+class TokenLength(BaseModel):
+    ref_token_length: list[int]
+    pred_token_length: list[int]
+    ref_token_length_mean: float
+    pred_token_length_mean: float
+
+
 class EvalJobMetrics(BaseModel):
     bertscore: BertScore | None = None
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
+    g_eval_summarization: GEvalSummarizationMetrics | None = None
+    token_length: TokenLength | None = None
 
 
 class EvalJobArtifacts(BaseModel):

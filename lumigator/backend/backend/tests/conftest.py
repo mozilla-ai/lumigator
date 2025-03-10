@@ -8,12 +8,15 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import boto3
+import evaluator
 import fsspec
 import pytest
 import requests_mock
+import yaml
 from fastapi import FastAPI, UploadFile
 from fastapi.testclient import TestClient
 from fsspec.implementations.memory import MemoryFileSystem
+from inference.definition import JobDefinitionInference
 from loguru import logger
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import (
@@ -28,18 +31,22 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from backend.api.deps import get_db_session, get_s3_client, get_s3_filesystem
+from backend.api.deps import get_db_session, get_job_service, get_s3_client, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.records.jobs import JobRecord
 from backend.repositories.datasets import DatasetRepository
 from backend.repositories.jobs import JobRepository, JobResultRepository
+from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
 
+TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
+MODELS_PATH = Path(__file__).resolve().parents[1] / "models.yaml"
 
 # Maximum amount of polls done to check if a job has finished
 # (status FAILED or SUCCEEDED) in fucntion tests.
@@ -55,14 +62,24 @@ def background_tasks() -> BackgroundTasks:
     return BackgroundTasks()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def common_resources_sample_data_dir(common_resources_dir) -> Path:
     return common_resources_dir / "sample_data"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_summarization(common_resources_sample_data_dir) -> Path:
+    return common_resources_sample_data_dir / "summarization"
+
+
+@pytest.fixture(scope="session")
+def common_resources_sample_data_dir_translation(common_resources_sample_data_dir) -> Path:
+    return common_resources_sample_data_dir / "translation"
 
 
 def format_dataset(data: list[list[str]]) -> str:
@@ -85,6 +102,10 @@ def wait_for_job(client, job_id: UUID) -> bool:
             timed_out = False
             break
         if get_job_response_model.status == JobStatus.FAILED.value:
+            succeeded = False
+            timed_out = False
+            break
+        if get_job_response_model.status == JobStatus.STOPPED.value:
             succeeded = False
             timed_out = False
             break
@@ -177,23 +198,30 @@ def extra_column_dataset() -> str:
     return format_dataset(data)
 
 
-@pytest.fixture(scope="function")
-def dialog_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_exc.csv"
+@pytest.fixture(scope="session")
+def dialog_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_exc.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_empty_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_empty_gt.csv"
+def dialog_empty_gt_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_empty_gt.csv"
     with Path(filename).open("rb") as f:
         yield f
 
 
 @pytest.fixture(scope="function")
-def dialog_no_gt_dataset(common_resources_dir):
-    filename = common_resources_dir / "sample_data" / "dialogsum_mini_no_gt.csv"
+def dialog_no_gt_dataset(common_resources_sample_data_dir_summarization):
+    filename = common_resources_sample_data_dir_summarization / "dialogsum_mini_no_gt.csv"
+    with Path(filename).open("rb") as f:
+        yield f
+
+
+@pytest.fixture(scope="session")
+def mock_translation_dataset(common_resources_sample_data_dir_translation):
+    filename = common_resources_sample_data_dir_translation / "sample_translation_en_de.csv"
     with Path(filename).open("rb") as f:
         yield f
 
@@ -380,13 +408,36 @@ def dataset_service(db_session, fake_s3_client, fake_s3fs):
 
 
 @pytest.fixture(scope="function")
+def secret_repository(db_session):
+    return SecretRepository(db_session)
+
+
+@pytest.fixture(scope="session")
+def secret_key() -> str:
+    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+
+
+@pytest.fixture(scope="function")
+def secret_service(db_session, secret_repository, secret_key):
+    return SecretService(secret_key=secret_key, secret_repo=secret_repository)
+
+
+@pytest.fixture(scope="function")
 def job_record(db_session):
     return JobRecord
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service, background_tasks):
-    return JobService(job_repository, result_repository, None, dataset_service, background_tasks)
+def job_service(db_session, job_repository, result_repository, dataset_service, secret_service, background_tasks):
+    return JobService(job_repository, result_repository, None, dataset_service, secret_service, background_tasks)
+
+
+@pytest.fixture(scope="function")
+def job_service_dependency_override(app: FastAPI, job_service) -> None:
+    def get_job_service_override():
+        yield job_service
+
+    app.dependency_overrides[get_job_service] = get_job_service_override
 
 
 @pytest.fixture(scope="function")
@@ -399,7 +450,7 @@ def create_job_config() -> JobConfig:
     conf_args = {
         "name": "test_run_hugging_face",
         "description": "Test run for Huggingface model",
-        "model": "facebook/bart-large-cnn",
+        "model": "hf-internal-testing/tiny-random-BARTForConditionalGeneration",
         "provider": "hf",
         "dataset": "016c1f72-4604-48a1-b1b1-394239297e29",
         "max_samples": 10,
@@ -410,8 +461,8 @@ def create_job_config() -> JobConfig:
 
     conf = JobConfig(
         job_id=uuid.uuid4(),
-        job_type=JobType.EVALUATION,
-        command=settings.EVALUATOR_COMMAND,
+        job_type=evaluator.definition.JOB_DEFINITION.type,
+        command=evaluator.definition.JOB_DEFINITION.command,
         args=conf_args,
     )
 
@@ -446,11 +497,29 @@ def simple_infer_template():
             "revision": "{revision}",
             "use_fast": "{use_fast}",
             "trust_remote_code": "{trust_remote_code}",
-            "torch_dtype": "{torch_dtype}",
-            "max_new_tokens": 500
+            "torch_dtype": "{torch_dtype}"
         }},
         "job": {{
             "max_samples": {max_samples},
             "storage_path": "{storage_path}"
         }}
     }}"""
+
+
+@pytest.fixture
+def job_definition_fixture():
+    return JobDefinitionInference(
+        command=MagicMock(spec=str),
+        pip_reqs=MagicMock(spec=list),
+        work_dir=MagicMock(spec=str),
+        config_model=MagicMock(spec=dict),
+        type=JobType.INFERENCE,
+    )
+
+
+@pytest.fixture
+def model_specs_data():
+    """Fixture that loads and returns the YAML data."""
+    with Path(MODELS_PATH).open() as file:
+        model_specs = yaml.safe_load(file)
+    return model_specs

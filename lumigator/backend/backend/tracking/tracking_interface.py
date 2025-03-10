@@ -5,6 +5,7 @@ from uuid import UUID
 
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
+from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 
 from backend.tracking.schemas import RunOutputs
@@ -14,7 +15,12 @@ class TrackingClient(Protocol):
     """Interface for tracking clients."""
 
     def create_experiment(
-        self, name: str, description: str, task: str, dataset: UUID, max_samples: int
+        self,
+        name: str,
+        description: str,
+        task_definition: TaskDefinition,
+        dataset: UUID,
+        max_samples: int,
     ) -> GetExperimentResponse:
         """Create a new experiment."""
         ...
@@ -39,7 +45,9 @@ class TrackingClient(Protocol):
         """Count all experiments."""
         ...
 
-    def create_workflow(self, experiment_id: str, description: str, name: str, model: str) -> WorkflowResponse:
+    def create_workflow(
+        self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
+    ) -> WorkflowResponse:
         """Create a new workflow."""
         ...
 

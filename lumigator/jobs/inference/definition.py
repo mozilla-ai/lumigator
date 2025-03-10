@@ -62,7 +62,7 @@ class JobDefinitionInference(JobDefinition):
 # Inference job details
 # FIXME tweak paths in the backend
 INFERENCE_WORK_DIR = "../jobs/inference"
-if os.environ.get("RAY_WORKER_GPUS") > 0:
+if float(os.environ.get("RAY_WORKER_GPUS")) > 0:
     INFERENCE_PIP_REQS = "../jobs/inference/requirements"
 else:
     INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"

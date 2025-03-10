@@ -28,7 +28,7 @@ class HuggingFaceModelClientFactory:
             return HuggingFaceSeq2SeqSummarizationClient(config)
 
         elif task == TaskType.TRANSLATION and model_config.is_encoder_decoder:
-            # Load the translation models configuration
+            # Load the supported translation model families configuration
             translation_config = load_translation_config()
 
             prefix_models = translation_config.get("prefix_translation_models", [])

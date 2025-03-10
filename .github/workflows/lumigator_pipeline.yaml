@@ -86,6 +86,7 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     runs-on: lumigator-integration-tests-runner
+    # cant use this because we need make and docker installed so we rely on lumigator-integration-tests-runner
     # container:
     #   image: mcr.microsoft.com/playwright:v1.50.1-noble
       # options: --user 1001
@@ -101,6 +102,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: lumigator/frontend
+
+     # Cache Playwright Browsers
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps  # Install the browsers if not cached
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -118,13 +131,10 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      # - name: Install make
-      #   run: apt-get update && apt-get install -y make
-
       - name: Spinning up containers for the tests
         run: make start-lumigator-build
 
-      - name: Run tests
+      - name: Run e2e tests
         run: npm run test:e2e
         working-directory: lumigator/frontend
 

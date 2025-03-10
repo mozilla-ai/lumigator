@@ -39,6 +39,7 @@
           <MultiSelect
             :modelValue="selectedColumns"
             :options="columns"
+            :max-selected-labels="0"
             @update:modelValue="onToggle"
             display="chip"
             placeholder="Select Columns"
@@ -54,7 +55,7 @@
         </div>
       </template>
       <template #empty> No items found. </template>
-      <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
+      <Column v-if="showRowNumber && selectedColumns.length" key="rowNumber" field="rowNumber" header="" sortable></Column>
       <Column
         v-for="col in selectedColumns"
         sortable

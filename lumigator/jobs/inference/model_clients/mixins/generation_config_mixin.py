@@ -5,7 +5,7 @@ from loguru import logger
 class GenerationConfigMixin:
     """Mixin to handle ``max_new_tokens`` configuration in the generation config"""
 
-    def adjust_config_max_new_tokens(self, config: GenerationConfig, max_pos_emb: int | None) -> GenerationConfig:
+    def adjust_config_max_new_tokens(self, config: GenerationConfig, max_pos_emb: int) -> GenerationConfig:
         """Adjust the max_new_tokens value in the generation config.
 
         This method mutates the ``max_new_tokens`` attribute of the ``GenerationConfig`` parameter.

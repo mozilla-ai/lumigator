@@ -32,7 +32,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         return config
 
     @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoTokenizer")
-    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModel")
     @patch("model_clients.mixins.huggingface_pipeline_mixin.pipeline")
     def test_predict(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
         """Test the predict method of the seq2seq client."""
@@ -61,7 +61,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
 
     @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoTokenizer")
-    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModel")
     @patch("model_clients.mixins.huggingface_pipeline_mixin.pipeline")
     def test_initialization(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
         """Test initialization of the seq2seq client."""
@@ -89,7 +89,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         assert client.pipeline == mock_pipeline_instance
 
     @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoTokenizer")
-    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModel")
     @patch("model_clients.mixins.huggingface_pipeline_mixin.pipeline")
     def test_max_token_adjustment(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
         """Test that the client adjusts max tokens if over model limits."""

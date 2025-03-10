@@ -1,12 +1,12 @@
 from inference_config import HfPipelineConfig
 from loguru import logger
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, Pipeline, pipeline
+from transformers import AutoModel, AutoTokenizer, Pipeline, pipeline
 
 
 class HuggingFacePipelineMixin:
     """Mixin to handle pipeline related initialization and adjustment."""
 
-    def initialize_model(self, pipeline_config: HfPipelineConfig) -> AutoModelForSeq2SeqLM:
+    def initialize_model(self, pipeline_config: HfPipelineConfig) -> AutoModel:
         """Initialize the model using the provided configuration.
 
         :param pipeline_config: The HuggingFace pipeline configuration.
@@ -16,7 +16,7 @@ class HuggingFacePipelineMixin:
         if pipeline_config is None:
             raise TypeError("The pipeline_config cannot be None")
 
-        return AutoModelForSeq2SeqLM.from_pretrained(
+        return AutoModel.from_pretrained(
             pipeline_config.model_name_or_path,
             trust_remote_code=pipeline_config.trust_remote_code,
             torch_dtype=pipeline_config.torch_dtype,

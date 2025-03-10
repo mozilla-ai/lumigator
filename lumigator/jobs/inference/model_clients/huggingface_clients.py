@@ -59,7 +59,7 @@ class HuggingFaceSeq2SeqSummarizationClient(
         """
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
         # tokenizer model and the model have the same max_position_embeddings.
-        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model, self.config.hf_pipeline.model_name_or_path)
+        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
         self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
         # Adjust output sequence generation max tokens.
         self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)

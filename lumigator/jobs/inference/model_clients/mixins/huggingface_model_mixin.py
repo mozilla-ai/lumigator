@@ -6,11 +6,10 @@ PreTrainedModelType = PreTrainedModel | TFPreTrainedModel
 class HuggingFaceModelMixin:
     """Mixin to handle model initialization and configuration."""
 
-    def get_max_position_embeddings(self, pretrained_model: PreTrainedModelType, model_name_or_path: str) -> int:
+    def get_max_position_embeddings(self, pretrained_model: PreTrainedModelType) -> int:
         """Extract the maximum position embeddings from the model configuration.
 
         :param pretrained_model: The pre-trained model from which to extract the max position embeddings.
-        :param model_name_or_path: The name of the model or path to the model.
         :returns: The maximum position embeddings value.
         :raises ValueError: If no valid ``max_position_embeddings`` found in the model config.
         :raises TypeError: If the pre-trained model or its config is None.
@@ -45,6 +44,6 @@ class HuggingFaceModelMixin:
         else:
             raise ValueError(
                 "No field corresponding to max_position_embeddings parameter found in model config"
-                f" for {model_name_or_path}."
+                f" for {pretrained_model.config.name_or_path}."
                 f" Checked alternative fields: {plausible_max_length_params}"
             )

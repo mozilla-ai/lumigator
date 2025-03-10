@@ -88,7 +88,7 @@ jobs:
     runs-on: lumigator-integration-tests-runner
     container:
       image: mcr.microsoft.com/playwright:v1.50.1-noble
-      options: --user 1001
+      # options: --user 1001
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

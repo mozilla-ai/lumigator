@@ -418,7 +418,10 @@ def secret_repository(db_session):
 
 @pytest.fixture(scope="session")
 def secret_key() -> str:
-    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+    return os.environ.get(
+        "LUMIGATOR_SECRET_KEY",
+        "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o=",  # pragma: allowlist secret
+    )
 
 
 @pytest.fixture(scope="function")

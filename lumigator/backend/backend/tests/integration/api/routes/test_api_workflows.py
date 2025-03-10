@@ -341,11 +341,11 @@ def check_artifacts_times(artifacts_url):
     "dataset_name, task_definition, model",
     [
         ("dialog_dataset", {"task": "summarization"}, TEST_SEQ2SEQ_MODEL),
-        # (
-        #     "mock_translation_dataset",
-        #     {"task": "translation", "source_language": "en", "target_language": "de"},
-        #     TEST_CAUSAL_MODEL,
-        # ),
+        (
+            "mock_translation_dataset",
+            {"task": "translation"},
+            TEST_CAUSAL_MODEL,
+        ),
     ],
 )
 def test_full_experiment_launch(

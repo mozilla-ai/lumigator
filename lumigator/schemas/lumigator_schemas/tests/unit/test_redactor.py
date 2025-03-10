@@ -10,6 +10,12 @@ sensitive_patterns = [
 ]
 
 
+class _TestObject:
+    def __init__(self, name, secret):
+        self.name = name
+        self.secret = secret
+
+
 @pytest.mark.parametrize(
     "redaction_value, input_data, expected_output",
     [
@@ -38,6 +44,18 @@ sensitive_patterns = [
             "HIDDEN",
             {"config": {"api_key": "abcdef", "nested": {"secret": "hidden"}}},
             {"config": {"api_key": "HIDDEN", "nested": {"secret": "HIDDEN"}}},  # pragma: allowlist secret
+        ),
+        # Object redaction (treating objects like dictionaries)
+        (
+            "<REDACTED>",
+            {"user": _TestObject("user1", "mysecret")},
+            {"user": {"name": "user1", "secret": "<REDACTED>"}},
+        ),
+        # Non-sensitive data (no redaction)
+        (
+            "<REDACTED>",
+            {"username": "user1", "email": "user1@example.com"},
+            {"username": "user1", "email": "user1@example.com"},
         ),
     ],
 )

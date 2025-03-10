@@ -107,6 +107,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
                 "No field corresponding to max_position_embeddings parameter found"
                 f" for {self._config.hf_pipeline.model_name_or_path}."
                 f" Checked alternative fields: {plausible_max_length_params}"
+                f" Setting max_position_embeddings to default value: {DEFAULT_MAX_POSITION_EMBEDDINGS}"
             )
 
         # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the

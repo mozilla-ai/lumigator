@@ -118,8 +118,8 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Install make
-        run: apt-get update && apt-get install -y make
+      # - name: Install make
+      #   run: apt-get update && apt-get install -y make
 
       - name: Spinning up containers for the tests
         run: make start-lumigator-build

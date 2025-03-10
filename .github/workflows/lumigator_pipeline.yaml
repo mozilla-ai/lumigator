@@ -81,7 +81,7 @@ jobs:
 
   e2e-tests-frontend:
     name: E2E tests Frontend
-    runs-on: ubuntu-latest
+    runs-on: lumigator-integration-tests-runner
     container:
       image: mcr.microsoft.com/playwright:v1.50.1-noble
       options: --user 1001
@@ -97,6 +97,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: lumigator/frontend
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        run: make start-lumigator-build
 
       - name: Run tests
         run: npm run test:e2e

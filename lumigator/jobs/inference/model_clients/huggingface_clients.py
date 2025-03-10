@@ -2,7 +2,7 @@ from inference_config import InferenceJobConfig
 from loguru import logger
 from lumigator_schemas.tasks import TaskType
 from model_clients.base_client import BaseModelClient
-from model_clients.translation_utils import load_translation_config
+from model_clients.translation_utils import load_translation_config, resolve_user_input_language
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
 from schemas import PredictionResult
@@ -50,7 +50,8 @@ class HuggingFaceModelClientFactory:
 class HuggingFaceSeq2SeqModelClientMixin:
     """Mixin with common functionality for seq2seq models"""
 
-    def _initialize_model_and_tokenizer(self, config):
+    def _initialize_model_and_tokenizer(self, config, pipeline_task=None):
+        """Initialize the model and tokenizer for the seq2seq models"""
         self.tokenizer = AutoTokenizer.from_pretrained(
             config.hf_pipeline.model_name_or_path,
             use_fast=config.hf_pipeline.use_fast,
@@ -64,7 +65,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
         )
 
         self._pipeline = pipeline(
-            task=config.hf_pipeline.task_definition.task,
+            task=config.hf_pipeline.task_definition.task if not pipeline_task else pipeline_task,
             model=self.model,
             tokenizer=self.tokenizer,
             revision=config.hf_pipeline.revision,
@@ -202,13 +203,25 @@ class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqMode
 
     def __init__(self, config: InferenceJobConfig):
         self._config = config
-        self._source_language = getattr(config.hf_pipeline.task_definition, "source_language", None)
-        self._target_language = getattr(config.hf_pipeline.task_definition, "target_language", None)
+        source_language_user_input = getattr(config.hf_pipeline.task_definition, "source_language", None)
+        target_language_user_input = getattr(config.hf_pipeline.task_definition, "target_language", None)
 
-        if not self._source_language or not self._target_language:
+        if not source_language_user_input or not target_language_user_input:
             raise ValueError("Source and target languages must be provided for translation task.")
 
-        self._initialize_model_and_tokenizer(config)
+        source_language_info = resolve_user_input_language(source_language_user_input)
+        target_language_info = resolve_user_input_language(target_language_user_input)
+
+        self._source_language_iso_code = source_language_info["iso_code"]  # e.g. "en"
+        self._source_language = source_language_info["full_name"]  # e.g. "English"
+        self._target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
+        self._target_language = target_language_info["full_name"]  # e.g. "German"
+
+        # Set the task to translation with the source and target languages
+        pipeline_task = (
+            f"{TaskType.TRANSLATION.value}_{self._source_language_iso_code}_to_{self._target_language_iso_code}"
+        )
+        self._initialize_model_and_tokenizer(self._config, pipeline_task)
 
     def predict(self, prompt) -> PredictionResult:
         prefix = f"translate {self._source_language} to {self._target_language}: "

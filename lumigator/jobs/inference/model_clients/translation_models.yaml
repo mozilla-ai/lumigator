@@ -1,4 +1,4 @@
-# Configuration file for translation models that support prefix-based translation
+# Configuration file enumerating supported translation models
 
 # Models that use the "translate {source_language} to {target_language}: " prefix format
 prefix_translation_models:

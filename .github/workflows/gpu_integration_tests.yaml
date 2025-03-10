@@ -1,6 +1,11 @@
 name: GPU integration tests
 
 on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
   push:
     branches:
       - main

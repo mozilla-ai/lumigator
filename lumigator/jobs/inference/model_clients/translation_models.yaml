@@ -1,0 +1,17 @@
+# Configuration file enumerating supported translation models
+
+# Models that use the "translate {source_language} to {target_language}: " prefix format
+prefix_translation_models:
+  # Google's Flan-T5 family
+  - google/flan-t5-small
+  - google/flan-t5-base
+  - google/flan-t5-large
+  - google/flan-t5-xl
+  - google/flan-t5-xxl
+
+  # BigScience mT0 models (multilingual T5 variants)
+  - bigscience/mt0-small
+  - bigscience/mt0-base
+  - bigscience/mt0-large
+  - bigscience/mt0-xl
+  - bigscience/mt0-xxl

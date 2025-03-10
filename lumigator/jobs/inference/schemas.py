@@ -3,20 +3,13 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
-from enum import Enum
-
-from pydantic import BaseModel, ConfigDict
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DatasetConfig(BaseModel):
     path: str
     model_config = ConfigDict(extra="forbid")
-
-
-class TaskType(str, Enum):
-    SUMMARIZATION = "summarization"
-    TRANSLATION = "translation"
-    TEXT_GENERATION = "text-generation"
 
 
 class JobConfig(BaseModel):
@@ -50,7 +43,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
-    task: TaskType
+    task: str
     revision: str
     use_fast: bool
     trust_remote_code: bool
@@ -70,6 +63,7 @@ class InferenceJobConfig(BaseModel):
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None
     hf_pipeline: HuggingFacePipelineConfig | None = None
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model_config = ConfigDict(extra="forbid")
 
 

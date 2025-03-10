@@ -2,12 +2,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from inference_config import InferenceJobConfig
+from lumigator_schemas.tasks import TaskType
 from model_clients.huggingface_clients import (
     HuggingFaceCausalLMClient,
     HuggingFaceSeq2SeqSummarizationClient,
 )
 
-from schemas import PredictionResult, TaskType
+from schemas import PredictionResult
 
 
 class TestHuggingFaceSeq2SeqSummarizationClient:
@@ -128,11 +129,6 @@ class TestHuggingFaceCausalLMClient:
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-causal-model"
         config.hf_pipeline.task = TaskType.TEXT_GENERATION
-        config.hf_pipeline.model_dump.return_value = {
-            "model_name_or_path": "mock-causal-model",
-            "task": TaskType.TEXT_GENERATION,
-        }
-
         config.system_prompt = "You are a helpful assistant."
         config.generation_config = MagicMock()
         config.generation_config.max_new_tokens = 100

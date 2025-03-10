@@ -1,9 +1,11 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from inference_config import HfPipelineConfig
 from model_clients.mixins.huggingface_pipeline_mixin import HuggingFacePipelineMixin
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, Pipeline, PreTrainedTokenizer, pipeline
+
+from schemas import TaskType
 
 
 class MockHfPipelineConfig(HfPipelineConfig):
@@ -15,7 +17,7 @@ class MockHfPipelineConfig(HfPipelineConfig):
 @pytest.fixture(scope="function")
 def pipeline_config():
     mock_config = MagicMock(spec=HfPipelineConfig)
-    mock_config.model_name_or_path = "Helsinki-NLP/opus-mt-en-nl"
+    mock_config.model_name_or_path = "hf-internal-testing/tiny-random-mt5"
     mock_config.trust_remote_code = False
     mock_config.torch_dtype = "auto"
     mock_config.use_fast = True
@@ -29,6 +31,21 @@ def test_initialize_model_none_config():
     mixin = HuggingFacePipelineMixin()
     with pytest.raises(TypeError, match="The pipeline_config cannot be None"):
         mixin.initialize_model(None)
+
+
+@patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModelForSeq2SeqLM")
+def test_initialize_model_seq2seq(mock_automodel, pipeline_config):
+    mock_model = MagicMock(spec=AutoModelForSeq2SeqLM)
+    mock_automodel.from_pretrained.return_value = mock_model
+    pipeline_config.task = TaskType.TRANSLATION
+    mixin = HuggingFacePipelineMixin()
+    model = mixin.initialize_model(pipeline_config)
+    assert isinstance(model, AutoModelForSeq2SeqLM)
+    mock_automodel.from_pretrained.assert_called_once_with(
+        pipeline_config.model_name_or_path,
+        trust_remote_code=pipeline_config.trust_remote_code,
+        torch_dtype=pipeline_config.torch_dtype,
+    )
 
 
 def test_initialize_tokenizer_none_config():

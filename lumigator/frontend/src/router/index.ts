@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const LDatasetes = () => import('@/components/views/LDatasets.vue')
 const LExperiments = () => import('@/components/views/LExperiments.vue')
-const Settings = () => import('@/components/views/Settings.vue')
+const SettingsPage = () => import('@/components/views/SettingsPage.vue')
 
 export const routes: Array<RouteRecordRaw & { icon?: string }> = [
   {
@@ -20,7 +20,7 @@ export const routes: Array<RouteRecordRaw & { icon?: string }> = [
   {
     path: '/settings',
     name: 'settings',
-    component: Settings,
+    component: SettingsPage,
     icon: 'pi pi-cog',
   },
   {

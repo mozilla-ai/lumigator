@@ -14,7 +14,16 @@
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write src/ e2e/"
+    "format": "prettier --write src/ e2e/",
+    "prepare": "cd ../../ && husky install lumigator/frontend/.husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix"
+    ],
+    "*.{json,js,ts,jsx,tsx,vue,html,css,scss}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@primevue/themes": "^4.2.5",
@@ -40,8 +49,10 @@
     "eslint": "^9.20.1",
     "eslint-plugin-playwright": "^2.2.0",
     "eslint-plugin-vue": "^9.32.0",
+    "husky": "^8.0.0",
     "jiti": "^2.4.2",
     "jsdom": "^26.0.0",
+    "lint-staged": "^15.4.3",
     "npm-run-all2": "^7.0.2",
     "prettier": "^3.5.1",
     "sass": "^1.85.0",

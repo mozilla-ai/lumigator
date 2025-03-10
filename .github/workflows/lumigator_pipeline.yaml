@@ -59,6 +59,10 @@ jobs:
         run: npm run format:check
         working-directory: lumigator/frontend
 
+      - name: Run type checking
+        run: npm run type-check
+        working-directory: lumigator/frontend
+
   unit-tests-frontend:
     name: Unit tests Frontend
     runs-on: ubuntu-latest

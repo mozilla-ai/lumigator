@@ -129,11 +129,6 @@ class TestHuggingFaceCausalLMClient:
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-causal-model"
         config.hf_pipeline.task = TaskType.TEXT_GENERATION
-        config.hf_pipeline.model_dump.return_value = {
-            "model_name_or_path": "mock-causal-model",
-            "task": TaskType.TEXT_GENERATION,
-        }
-
         config.system_prompt = "You are a helpful assistant."
         config.generation_config = MagicMock()
         config.generation_config.max_new_tokens = 100

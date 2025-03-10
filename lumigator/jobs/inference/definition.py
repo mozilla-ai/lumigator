@@ -28,13 +28,14 @@ class JobDefinitionInference(JobDefinition):
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
+            task_definition=request.job_config.task_definition,
             system_prompt=request.job_config.system_prompt,
         )
         if request.job_config.provider == "hf":
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task_definition=request.job_config.task_definition.model_dump(),
+                task=request.job_config.task_definition.task.value,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,

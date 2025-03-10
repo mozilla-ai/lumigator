@@ -43,7 +43,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
-    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
+    task: str
     revision: str
     use_fast: bool
     trust_remote_code: bool
@@ -63,6 +63,7 @@ class InferenceJobConfig(BaseModel):
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None
     hf_pipeline: HuggingFacePipelineConfig | None = None
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model_config = ConfigDict(extra="forbid")
 
 

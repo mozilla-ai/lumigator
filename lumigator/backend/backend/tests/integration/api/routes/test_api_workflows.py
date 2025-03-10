@@ -266,7 +266,7 @@ def run_workflow(
         "dataset": str(dataset_id),
         "experiment_id": experiment_id,
         "max_samples": 1,
-        # "job_timeout_sec": 1,
+        "job_timeout_sec": 1000,
     }
     # The timeout cannot be 0
     if job_timeout_sec:
@@ -343,7 +343,7 @@ def check_artifacts_times(artifacts_url):
         ("dialog_dataset", {"task": "summarization"}, TEST_SEQ2SEQ_MODEL),
         (
             "mock_translation_dataset",
-            {"task": "translation"},
+            {"task": "translation", "source_language": "en", "target_language": "de"},
             TEST_CAUSAL_MODEL,
         ),
     ],

@@ -44,7 +44,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         run: |
-          export RAY_WORKER_GPUS="1.0"
+          export RAY_WORKER_GPUS="1"
           export RAY_WORKER_GPUS_FRACTION="1.0"
           make start-lumigator-build
 
@@ -96,7 +96,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         run: |
-          export RAY_WORKER_GPUS="1.0"
+          export RAY_WORKER_GPUS="1"
           export RAY_WORKER_GPUS_FRACTION="1.0"
           make start-lumigator-build-postgres
 

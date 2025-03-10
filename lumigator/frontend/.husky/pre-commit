@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# FRONTEND_DIR="$(dirname "$0")/../lumigator/frontend"
+
+# Run backend linting with pre-commit
+echo "Running backend linting..."
+uv run pre-commit run --all-files
+
+# Run frontend linting with lint-staged
+echo "Running frontend lint-staged..."
+cd lumigator/frontend
+npx lint-staged
+
+echo "✅ Pre-commit checks passed!"

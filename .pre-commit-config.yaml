@@ -6,6 +6,8 @@ repos:
         exclude: |
           (?x)^(
               notebooks/preprocess_thunderbird_samples.ipynb|
+              notebooks/walkthrough.ipynb|
+              docs/source/get-started/quickstart.md|
               .+/tests/data/.+json
           )$
 

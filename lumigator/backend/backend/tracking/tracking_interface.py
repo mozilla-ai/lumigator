@@ -2,11 +2,13 @@ import contextlib
 from collections.abc import Generator
 from typing import Protocol
 from uuid import UUID
+from warnings import warn
 
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResults
 from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
+from typing_extensions import deprecated
 
 from backend.tracking.schemas import RunOutputs
 
@@ -55,8 +57,16 @@ class TrackingClient(Protocol):
         """Get a workflow."""
         ...
 
+    @deprecated("get_workflow_logs is deprecated, it will be removed in future versions.")
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
-        """Get workflow logs."""
+        """Get workflow logs.
+
+        .. deprecated::
+            get_workflow_logs is deprecated, it will be removed in future versions.
+        """
+        warn(
+            "get_workflow_logs is deprecated, it will be removed in future versions.", DeprecationWarning, stacklevel=2
+        )
         ...
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
@@ -71,15 +81,19 @@ class TrackingClient(Protocol):
         """List all workflows for an experiment."""
         ...
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, data: RunOutputs) -> None:
-        """Log the job output."""
+    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str):
+        """Link a started job to an experiment and a workflow."""
+        ...
+
+    def update_workflow(self, workflow_id: str, data: RunOutputs):
+        """Update the outputs of a workflow"""
         ...
 
     def get_job(self, job_id: str) -> JobResults | None:
         """Get a job."""
         ...
 
-    def update_job(self, job_id: str, new_data: dict) -> None:
+    def update_job(self, job_id: str, data: RunOutputs):
         """Update a job."""
         ...
 
@@ -87,7 +101,7 @@ class TrackingClient(Protocol):
         """Delete a job."""
         ...
 
-    def list_jobs(self, experiment_id: str, workflow_id: str) -> list:
+    def list_jobs(self, workflow_id: str) -> list:
         """List all jobs for a workflow."""
         ...
 

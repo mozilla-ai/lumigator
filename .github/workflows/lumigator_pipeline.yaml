@@ -110,7 +110,7 @@ jobs:
 
       # Install Playwright Browsers if they aren't cached
       - name: Install Playwright Browsers
-        run: npx playwright install --no-deps
+        run: npx playwright install
         working-directory: lumigator/frontend
 
       - name: Install uv

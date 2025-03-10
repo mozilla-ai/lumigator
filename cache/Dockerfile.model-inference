@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir transformers huggingface_hub loguru
 
 COPY cache/download_models.py /tmp/download_models.py

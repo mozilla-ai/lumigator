@@ -46,7 +46,7 @@ S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
 
 
 def get_s3_filesystem() -> Generator[S3FileSystem, None, None]:
-    return S3FileSystem()
+    return S3FileSystem(endpoint_url=settings.S3_ENDPOINT_URL)
 
 
 S3FileSystemDep = Annotated[S3FileSystem, Depends(get_s3_filesystem)]
@@ -110,6 +110,8 @@ def get_workflow_service(
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
 def get_redactor() -> Redactor:
     return Redactor(settings.sensitive_patterns)
 

@@ -64,6 +64,8 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
+    # Optional API key which can be used to access inference services such as OpenAI, or gated models in Hugging Face.
+    api_key: str | None = None
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None
@@ -71,17 +73,42 @@ class InferenceJobConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class InferenceMetrics(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prompt_tokens: int
+    total_tokens: int
+    completion_tokens: int
+    reasoning_tokens: int | None = None
+    answer_tokens: int | None = None
+
+
+class AverageInferenceMetrics(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    avg_prompt_tokens: float
+    avg_total_tokens: float
+    avg_completion_tokens: float
+    avg_reasoning_tokens: float | None = None
+    avg_answer_tokens: float = None
+
+
 class InferenceJobOutput(BaseModel):
     predictions: list | None = None
+    reasoning: list | None = None
     examples: list
     ground_truth: list | None = None
     model: str
     inference_time: float
+    inference_metrics: list[InferenceMetrics] | list[None] = None
+
+
+class PredictionResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prediction: str
+    reasoning: str | None = None
+    metrics: InferenceMetrics = None
 
 
 class JobOutput(BaseModel):
-    # Nothing to put in metrics yet
-    # but eventually we will have metrics like tok/s, latency, average output length, etc.
-    metrics: None
+    metrics: AverageInferenceMetrics | None = {}
     artifacts: InferenceJobOutput
     parameters: InferenceJobConfig

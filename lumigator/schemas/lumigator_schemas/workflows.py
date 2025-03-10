@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, PositiveInt
 
 from lumigator_schemas.jobs import (
+    GenerationConfig,
     JobResults,
     LowercaseEnum,
 )
@@ -24,13 +25,22 @@ class WorkflowCreateRequest(BaseModel):
     task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model: str
     provider: str
+    secret_key_name: str | None = Field(
+        None,
+        title="Secret Key Name",
+        description="An optional secret key name. Identifies an existing secret stored in Lumigator "
+        "that should be used to access the provider.",
+    )
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
     base_url: str | None = None
     system_prompt: str | None = Field(default_factory=lambda data: get_default_system_prompt(data["task_definition"]))
     inference_output_field: str = "predictions"
     config_template: str | None = None
-    job_timeout_sec: PositiveInt = 60 * 10
+    generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
+    job_timeout_sec: PositiveInt = 60 * 60
+    # Eventually metrics should be managed by the experiment level https://github.com/mozilla-ai/lumigator/issues/1105
+    metrics: list[str] | None = None
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

@@ -75,6 +75,14 @@
           {{ slotProps.data.rouge.rougeL_mean.toFixed(2) }}
         </template>
       </Column>
+      <Column field="bleu.bleu" sortable>
+        <template #header>
+          <span class="p-datatable-column-title">BLEU </span>
+        </template>
+        <template #body="slotProps">
+          {{ slotProps.data.bleu.bleu_mean.toFixed(2) }}
+        </template>
+      </Column>
       <Column field="model.info.model_size" sortable>
         <template #header>
           <span class="p-datatable-column-title">model size </span>
@@ -108,7 +116,7 @@
       </Column>
       <template #expansion="slotProps">
         <div>
-          <l-job-results :results="slotProps.data.jobResults" :no-radius="true" />
+          <WorkflowResults :results="slotProps.data.jobResults" :no-radius="true" />
         </div>
       </template>
     </DataTable>
@@ -119,11 +127,11 @@
 import { computed, ref, toRefs, type ComputedRef } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
-import LJobResults from '@/components/experiments/LJobResults.vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import type { Model } from '@/types/Model'
 import type { ExperimentResults } from '@/types/Experiment'
+import WorkflowResults from './WorkflowResults.vue'
 
 const modelStore = useModelStore()
 const { models } = storeToRefs(modelStore)
@@ -199,8 +207,6 @@ const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = comp
       (model: Model) => model.model === result.model || model.display_name === result.model,
     )!,
   }))
-
-  console.log('data', data)
 
   return data
 })

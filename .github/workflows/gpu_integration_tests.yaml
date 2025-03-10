@@ -1,0 +1,118 @@
+name: GPU integration tests
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v*.*.*'
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: Integration tests (SQLite)
+    runs-on: GPU-runner
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        run: |
+          export RAY_WORKER_GPUS="1.0"
+          export RAY_WORKER_GPUS_FRACTION="1.0"
+          make start-lumigator-build
+
+      - name: Run ${{ matrix.test }} integration tests
+        run: make test-${{ matrix.test }}-integration
+
+      - name: Collect logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          mkdir /tmp/backendlogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+          docker logs lumigator-backend-1 > /tmp/backendlogs/backend.log
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/
+
+      - name: Upload backend logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-logs
+          path: /tmp/backendlogs/backend.log
+
+  integration-tests-postgres:
+    name: Integration tests (PostgreSQL)
+    runs-on: GPU-runner
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Spinning up containers for the tests
+        run: |
+          export RAY_WORKER_GPUS="1.0"
+          export RAY_WORKER_GPUS_FRACTION="1.0"
+          make start-lumigator-build-postgres
+
+      - name: Run ${{ matrix.test }} integration tests
+        # This setting only affects backend integration tests
+        # localhost is used since the postgres DB needs to be
+        # accessed from pytest
+        # The SDK tests already use a separate Lumigator started
+        # with postgres overrides
+        # Allowing secrets for local test postgres
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs
+          path: /tmp/raylogs/ray/session_*/logs/

@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-schemas test-schemas-unit test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -190,6 +190,13 @@ update-openapi-docs:
 check-openapi-docs:
 	./scripts/check_openapi_docs.sh
 
+# schema tests
+test-schemas-unit:
+	cd lumigator/schemas/lumigator_schemas/tests; \
+	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+
+test-schemas: test-schemas-unit
+
 # SDK tests
 # We have both unit and integration tests for the SDK.
 # Integration tests require all containers to be up, so as a safety measure
@@ -273,7 +280,9 @@ test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
 
 # test everything
-test-all: test-sdk test-backend test-jobs-unit
+test-all: test-schemas test-sdk test-backend test-jobs-unit
+test-all-unit: test-schemas-unit test-sdk-unit test-backend-unit test-jobs-unit
+test-all-integration: test-sdk-integration test-backend-integration
 
 # config-clean: removes any generated config files from the build directory (including the directory itself).
 config-clean:

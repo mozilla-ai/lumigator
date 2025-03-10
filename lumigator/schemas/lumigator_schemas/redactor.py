@@ -25,8 +25,10 @@ class Redactor:
                 return {k: redact_value(k, v) for k, v in value.items()}
             elif isinstance(value, list):
                 return [redact_value(key, v) for v in value]  # Use parent key for lists
-            elif isinstance(value, str):
-                return next((self.redaction_value for pattern in self.sensitive_patterns if pattern.search(key)), value)
+            elif hasattr(value, "__dict__"):
+                return {k: redact_value(k, v) for k, v in value.__dict__.items()}  # Treat objects like dicts
+            elif any(pattern.search(key) for pattern in self.sensitive_patterns):
+                return self.redaction_value
             return value
 
         return {k: redact_value(k, v) for k, v in data.items()}

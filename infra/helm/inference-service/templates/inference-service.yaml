@@ -1,0 +1,132 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: {{ include "inference-service.name" . }}
+  namespace: {{ include "inference-service.namespace" . }}
+spec:
+  serveConfigV2: |
+    applications:
+    - name: {{ .Values.application.name }}
+      route_prefix: {{ .Values.application.routePrefix }}
+      import_path: {{ .Values.application.importPath }}
+      deployments:
+      - name: VLLMDeployment
+        num_replicas: {{ .Values.application.numReplicas }}
+        ray_actor_options:
+          num_cpus: {{ .Values.application.numCpus }}
+      runtime_env:
+        working_dir: {{ .Values.application.runtimeEnv.workingDir }}
+        pip: {{ toYaml .Values.application.runtimeEnv.pip | nindent 8 }}
+        env_vars:
+          MODEL_ID: "{{ .Values.application.runtimeEnv.envVars.modelID }}"
+          SERVED_MODEL_NAME: "{{ .Values.application.runtimeEnv.envVars.servedModelName }}"
+          TENSOR_PARALLELISM: "{{ .Values.application.runtimeEnv.envVars.tensorParallelism }}"
+          PIPELINE_PARALLELISM: "{{ .Values.application.runtimeEnv.envVars.pipelineParallelism }}"
+          DTYPE: "{{ .Values.application.runtimeEnv.envVars.dType }}"
+          GPU_MEMORY_UTILIZATION: "{{ .Values.application.runtimeEnv.envVars.gpuMemoryUtilization }}"
+          DISTRIBUTED_EXECUTOR_BACKEND: "{{ .Values.application.runtimeEnv.envVars.distributedExecutorBackend }}"
+          TRUST_REMOTE_CODE: "{{ .Values.application.runtimeEnv.envVars.trustRemoteCode }}"
+  rayClusterConfig:
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "{{ .Values.rayCluster.dashboardHost }}"
+        object-store-memory: "{{ .Values.rayCluster.objectStoreMemory }}"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: {{ .Values.rayCluster.image }}
+              resources:
+                limits:
+                  cpu: "{{ .Values.rayCluster.headGroup.resources.limits.cpu }}"
+                  memory: "{{ .Values.rayCluster.headGroup.resources.limits.memory }}"
+                  {{- if .Values.rayCluster.headGroup.resources.limits.gpuCount }}
+                  nvidia.com/gpu: "{{ .Values.rayCluster.headGroup.resources.limits.gpuCount }}"
+                  {{- end }}
+              {{- if .Values.rayCluster.persistentVolumeClaimName }}
+              volumeMounts:
+              - mountPath: /mnt/models
+                name: models
+              {{- end }}
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8000
+                  name: serve
+          {{- if .Values.rayCluster.persistentVolumeClaimName }}
+          volumes:
+          - name: models
+            persistentVolumeClaim:
+              claimName: {{ .Values.rayCluster.persistentVolumeClaimName }}
+          {{- end }}
+          {{- if or .Values.rayCluster.workerGroup.affinity.gpuClass .Values.rayCluster.workerGroup.affinity.region }}
+          affinity:
+            nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                - key: gpu.nvidia.com/class
+                  operator: In
+                  values:
+                  - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                {{- end }}
+                {{- if .Values.rayCluster.workerGroup.affinity.region }}
+                - key: topology.kubernetes.io/region
+                  operator: In
+                  values:
+                  - {{ .Values.rayCluster.workerGroup.affinity.region }}
+                {{- end }}
+          {{- end }}
+    workerGroupSpecs:
+      - groupName: {{ .Values.rayCluster.workerGroup.groupName }}
+        replicas: {{ .Values.rayCluster.workerGroup.replicas }}
+        rayStartParams:
+          dashboard-host: "{{ .Values.rayCluster.dashboardHost }}"
+          object-store-memory: "{{ .Values.rayCluster.objectStoreMemory }}"
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: {{ .Values.rayCluster.image }}
+                resources:
+                  limits:
+                    cpu: "{{ .Values.rayCluster.workerGroup.resources.limits.cpu }}"
+                    memory: "{{ .Values.rayCluster.workerGroup.resources.limits.memory }}"
+                    {{- if .Values.rayCluster.workerGroup.resources.limits.gpuCount }}
+                    nvidia.com/gpu: "{{ .Values.rayCluster.workerGroup.resources.limits.gpuCount }}"
+                    {{- end }}
+                {{- if .Values.rayCluster.persistentVolumeClaimName }}
+                volumeMounts:
+                - mountPath: /mnt/models
+                  name: models
+                {{- end }}
+            {{- if .Values.rayCluster.persistentVolumeClaimName }}
+            volumes:
+            - name: models
+              persistentVolumeClaim:
+                claimName: {{ .Values.rayCluster.persistentVolumeClaimName }}
+            {{- end }}
+            {{- if or .Values.rayCluster.workerGroup.affinity.gpuClass .Values.rayCluster.workerGroup.affinity.region }}
+            affinity:
+              nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                  - key: gpu.nvidia.com/class
+                    operator: In
+                    values:
+                    - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                  {{- end }}
+                  {{- if .Values.rayCluster.workerGroup.affinity.region }}
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                    - {{ .Values.rayCluster.workerGroup.affinity.region }}
+                  {{- end }}
+            {{- end }}

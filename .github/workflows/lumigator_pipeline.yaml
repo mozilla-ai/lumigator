@@ -51,16 +51,16 @@ jobs:
         run: npm ci
         working-directory: lumigator/frontend
 
+      - name: Run type checking
+        run: npm run type-check
+        working-directory: lumigator/frontend
+
       - name: Run ESLint
         run: npm run lint
         working-directory: lumigator/frontend
 
       - name: Run Prettier Check
         run: npm run format:check
-        working-directory: lumigator/frontend
-
-      - name: Run type checking
-        run: npm run type-check
         working-directory: lumigator/frontend
 
   unit-tests-frontend:
@@ -85,7 +85,7 @@ jobs:
 
   e2e-tests-frontend:
     name: E2E tests Frontend
-    runs-on: lumigator-integration-tests-runner
+    runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.50.1-noble
       options: --user 1001

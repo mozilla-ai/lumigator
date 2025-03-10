@@ -92,7 +92,7 @@ set_default_vars() {
 }
 
 # Ensure the script is being called with the correct number of arguments
-if [[ $# -lt 1 || $# -gt 1 ]]; then
+if [[ $# -gt 1 ]]; then
     echo "Usage: $0 <env_file>"
     exit 1
 fi

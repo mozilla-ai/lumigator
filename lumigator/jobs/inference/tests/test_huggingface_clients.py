@@ -9,12 +9,15 @@ from model_clients.huggingface_clients import (
 
 from schemas import PredictionResult, TaskType
 
+API_KEY_VALUE = "12345"
 
 class TestHuggingFaceSeq2SeqSummarizationClient:
     @pytest.fixture
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing seq2seq client."""
         config = MagicMock(spec=InferenceJobConfig)
+        config.api_key = API_KEY_VALUE
+
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-seq2seq-model"
         config.hf_pipeline.task = TaskType.SUMMARIZATION
@@ -46,6 +49,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_pipeline_instance = MagicMock()
         mock_pipeline_instance.model = mock_model
         mock_pipeline_instance.tokenizer = mock_tokenizer_instance
+        mock_pipeline_instance.use_auth_token=API_KEY_VALUE,
         mock_pipeline.return_value = mock_pipeline_instance
 
         # Initialize client
@@ -125,6 +129,8 @@ class TestHuggingFaceCausalLMClient:
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing causal LM client."""
         config = MagicMock(spec=InferenceJobConfig)
+        config.api_key = API_KEY_VALUE
+
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-causal-model"
         config.hf_pipeline.task = TaskType.TEXT_GENERATION

@@ -51,6 +51,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
             tokenizer=self.tokenizer,
             revision=config.hf_pipeline.revision,
             device=config.hf_pipeline.device,
+            use_auth_token=config.api_key,
         )
         self._set_seq2seq_max_length()
 
@@ -161,6 +162,7 @@ class HuggingFaceCausalLMClient(BaseModelClient):
         # HF pipeline task overwritten to 'text-generation' since these causalLMs are not task-specific models
         pipeline_config = config.hf_pipeline.model_dump()
         pipeline_config["task"] = TaskType.TEXT_GENERATION
+        pipeline_config["use_auth_token"] = config.api_key,
 
         self._pipeline = pipeline(**pipeline_config)
 

@@ -18,8 +18,8 @@ class Models:
         """
         self.client = c
 
-    def get_suggested_models(self, task_name: str) -> ListingResponse[ModelsResponse]:
-        """Return information on all suggested models.
+    def get_suggested_models(self, tasks: list[str] = None) -> ListingResponse[ModelsResponse]:
+        """Return information on suggested models filtered by tasks.
 
         .. admonition:: Example
 
@@ -28,14 +28,28 @@ class Models:
                 from lumigator_sdk.lumigator import LumigatorClient
 
                 lm_client = LumigatorClient("localhost:8000")
-                lm_client.models.get_suggested_models("summarization")
+                # Get models for a single task
+                lm_client.models.get_suggested_models(["summarization"])
+                # Get models for multiple tasks
+                lm_client.models.get_suggested_models(["summarization", "translation"])
+                # Get all models
+                lm_client.models.get_suggested_models()
 
         Args:
-            task_name (str): The name of the task to get the suggested models for.
+            tasks (list[str], optional): The tasks to get suggested models for.
+                If None, returns all models.
 
         Returns:
-            ListingResponse[dic]: All suggested models.
+            ListingResponse[ModelsResponse]: Suggested models matching the specified tasks.
         """
-        response = self.client.get_response(f"{self.MODELS_ROUTE}/{task_name}")
+        # Default route when no tasks are specified
+        route = self.MODELS_ROUTE
+
+        # Update route if tasks are specified
+        if tasks:
+            task_params = "&".join([f"tasks={task}" for task in tasks])
+            route = f"{route}/?{task_params}"
+
+        response = self.client.get_response(route)
 
         return ListingResponse[ModelsResponse](**response.json())

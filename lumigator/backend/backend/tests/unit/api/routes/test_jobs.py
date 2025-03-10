@@ -2,11 +2,24 @@ import json
 import re
 import urllib
 from pathlib import Path
+from unittest.mock import patch
+from uuid import UUID
 
+import loguru
 from fastapi import status
 from fastapi.testclient import TestClient
+from lumigator_schemas.jobs import (
+    JobInferenceConfig,
+    JobInferenceCreate,
+)
 
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.settings import settings
+
+POST_HEADER = {
+    "accept": "application/json",
+    "Content-Type": "application/json",
+}
 
 
 def load_json(path: Path) -> str:
@@ -103,3 +116,28 @@ def test_job_logs(
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
     assert json.loads(logs_content)["logs"] == json.loads(f'"{log}"')
+
+
+def test_missing_api_key_in_job_creation(
+    job_service, app_client, dependency_overrides_fakes, job_service_dependency_override
+):
+    key_name = "MISTRAL_KEY"
+    infer_model = JobInferenceCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        dataset=UUID("00000000000000000000000000000000"),
+        max_samples=2,
+        api_keys=key_name,
+        job_config=JobInferenceConfig(
+            model="open-mistral-7b",
+            provider="mistral",
+        ),
+    )
+    infer_payload = infer_model.model_dump(mode="json")
+
+    with patch("backend.api.deps.JobSubmissionClient"):
+        with patch.object(job_service, "create_job", side_effect=SecretNotFoundError("test error msg")):
+            response = app_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+            loguru.logger.critical(f"response text: {response.text}")
+            assert response is not None
+            assert response.status_code == status.HTTP_400_BAD_REQUEST

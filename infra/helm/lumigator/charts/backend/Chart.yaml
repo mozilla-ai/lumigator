@@ -21,7 +21,7 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.1.1-alpha"
+appVersion: "v0.1.2-alpha"
 
 dependencies:
   - name: postgresql
@@ -40,6 +40,6 @@ dependencies:
     condition: ray-cluster.enabled
 
   - name: mlflow
-    repository: "https://community-charts.github.io/helm-charts"
-    version: "0.13.1"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    version: "2.5.2"
     condition: mlflow.enabled

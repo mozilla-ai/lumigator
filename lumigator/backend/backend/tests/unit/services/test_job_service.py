@@ -1,16 +1,19 @@
+import json
 from unittest.mock import patch
-from uuid import UUID
 
+import loguru
 import pytest
+from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import (
     JobCreate,
     JobInferenceConfig,
     JobType,
 )
-from lumigator_schemas.tasks import TaskType
-from pydantic import ValidationError
+from lumigator_schemas.secrets import SecretUploadRequest
+from ray.job_submission import JobSubmissionClient
 
-from backend.services.exceptions.job_exceptions import JobValidationError
+from backend.ray_submit.submission import RayJobEntrypoint
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.jobs import job_settings_map
 from backend.settings import settings
 from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
@@ -100,29 +103,51 @@ def test_set_model(job_service, model, provider, input_base_url, returned_base_u
     assert base_url == returned_base_url
 
 
-def test_invalid_text_generation(job_service, job_definition_fixture):
-    with pytest.raises(ValueError) as excinfo:
-        # Create invalid request without system_prompt
-        job_create_request = JobCreate(
-            name="test_text_generation_run",
-            description="Test missing system prompt for text generation",
-            job_config=JobInferenceConfig(
-                job_type=JobType.INFERENCE,
-                model="microsoft/Phi-3-mini-instruct",
-                provider="hf",
-                task_definition={"task": TaskType.TEXT_GENERATION},
-                # system_prompt left out intentionally
-            ),
-            dataset="d34dd34d-d34d-d34d-d34d-d34dd34dd34d",
-        )
+def test_check_api_key_in_job_creation(
+    job_service, secret_service, dataset_service, valid_upload_file, dependency_overrides_fakes
+):
+    key_name = "MISTRAL_KEY"
+    key_value = "12345"
 
-        job_definition_fixture.generate_config(
-            job_create_request,
-            record_id=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
-            dataset_path="s3://lumigator-storage/datasets/d34dd34d-d34d-d34d-d34d-d34dd34dd34d/test.csv",
-            storage_path="s3://lumigator-storage/jobs/results/",
-        )
+    def submit_ray_job_fixture_side_effect(client: JobSubmissionClient, entrypoint: RayJobEntrypoint):
+        parsed_args = json.loads(entrypoint.config.args["--config"])
+        if parsed_args["api_key"] != key_value:
+            raise Exception(f"Passed api key <{parsed_args['api_key']}> different from expected <{key_value}>")
 
-    # Verify exact error message
-    assert "system_prompt required for task=`text-generation`" in str(excinfo.value)
-    assert "Received: None" in str(excinfo.value)
+    test_dataset = dataset_service.upload_dataset(valid_upload_file, DatasetFormat.JOB)
+    secret_service.upload_secret(key_name, SecretUploadRequest(value="12345", description="Mistral key"))
+    request = JobCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", secret_key_name=key_name
+        ),
+        dataset=str(test_dataset.id),
+    )
+    with patch(
+        "backend.services.jobs.submit_ray_job",
+        side_effect=submit_ray_job_fixture_side_effect,
+    ):
+        job_service.create_job(request)
+
+
+def test_missing_api_key_in_job_creation(
+    job_service, secret_service, dataset_service, valid_upload_file, dependency_overrides_fakes
+):
+    key_name = "MISTRAL_KEY"
+
+    test_dataset = dataset_service.upload_dataset(valid_upload_file, DatasetFormat.JOB)
+    request = JobCreate(
+        name="test_run_hugging_face",
+        description="Test run for Huggingface model",
+        job_config=JobInferenceConfig(
+            job_type=JobType.INFERENCE, model=TEST_SEQ2SEQ_MODEL, provider="hf", secret_key_name=key_name
+        ),
+        dataset=str(test_dataset.id),
+    )
+    with patch(
+        "backend.services.jobs.submit_ray_job",
+        return_value=None,
+    ):
+        with pytest.raises(SecretNotFoundError):
+            job_service.create_job(request)

@@ -18,6 +18,10 @@ export type MetricsResult = {
   bertscore: Bertscore
   meteor: Meteor
   rouge: Rouge
+  bleu: {
+    bleu: number[]
+    bleu_mean: number
+  }
 }
 
 export type Parameters = {

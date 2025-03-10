@@ -71,7 +71,7 @@
           :href="model.website_url"
           target="_blank"
           @click.stop
-        />
+        ></Button>
       </div>
     </div>
   </div>
@@ -79,23 +79,23 @@
 
 <script lang="ts" setup>
 import { ref, computed, type Ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useModelStore } from '@/stores/modelsStore'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import type { Model } from '@/types/Model'
 
 const modelStore = useModelStore()
-const { models } = storeToRefs(modelStore)
 const selectedModels: Ref<Model[]> = ref([])
 
-defineProps({
-  modelLink: String,
-})
+const props = defineProps<{
+  useCase: 'summarization' | 'translation'
+}>()
 
 defineExpose({
   selectedModels,
 })
+
+const models = computed(() => modelStore.filterModelsByUseCase(props.useCase))
 
 const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
   return models.value.filter((model: Model) => {

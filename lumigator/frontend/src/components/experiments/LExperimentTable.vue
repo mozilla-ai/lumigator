@@ -24,6 +24,13 @@
             {{ formatDate(slotProps.data.created_at) }}
           </template>
         </Column>
+        <Column field="useCase" :style="columnStyles.useCase" header="use-case">
+          <template #body="slotProps">
+            <span style="text-transform: capitalize">{{
+              slotProps.data.task_definition.task
+            }}</span>
+          </template>
+        </Column>
         <Column field="status" header="status" :style="columnStyles.status">
           <template #body="slotProps">
             <div>
@@ -76,7 +83,8 @@
             <l-jobs-table
               :column-styles="columnStyles"
               :table-data="slotProps.data.workflows"
-              @l-job-selected="onWorkflowSelected($event, slotProps.data)"
+              :useCase="slotProps.data.task_definition.task"
+              @l-job-selected="onWorkflowSelected($event)"
               @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
               @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
             />
@@ -102,7 +110,7 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { workflowsService } from '@/sdk/workflowsService'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
-import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import type { MenuItem } from 'primevue/menuitem'
 import { Menu } from 'primevue'
 const props = defineProps({
   tableData: {
@@ -134,7 +142,7 @@ const options = ref<MenuItem[]>([
     label: 'View Results',
     icon: 'pi pi-external-link',
     disabled: () => {
-      return focusedItem.value?.status !== WorkflowStatus.SUCCEEDED
+      return Boolean(focusedItem.value?.status !== WorkflowStatus.SUCCEEDED)
     },
     command: () => {
       emit('view-experiment-results-clicked', focusedItem.value)
@@ -156,7 +164,7 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-trash',
     style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
     disabled: false,
-    command: (e: MenuItemCommandEvent) => {
+    command: () => {
       emit('delete-option-clicked', focusedItem.value)
     },
   },
@@ -167,6 +175,7 @@ const style = computed(() => {
 })
 
 const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow | Experiment) => {
+  event.stopPropagation()
   focusedItem.value = selectedItem
   optionsMenu.value.toggle(event)
 }
@@ -177,6 +186,7 @@ const columnStyles = computed(() => {
     name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
     created: 'width: 12rem',
     status: 'width: 12rem',
+    useCase: 'width: 8rem',
   }
 })
 
@@ -190,7 +200,7 @@ function handleRowClick(event: DataTableRowClickEvent) {
   emit('l-experiment-selected', event.data)
 }
 
-async function onWorkflowSelected(workflow: Workflow, experiment: Experiment) {
+async function onWorkflowSelected(workflow: Workflow) {
   // fetching job details from BE instead of filtering
   // because job might be still running
   // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
@@ -232,11 +242,11 @@ async function updateExperimentStatus(experiment: Experiment): Promise<void> {
       }
     })
 
-    const status = incompleteWorkflowDetails.every((workflow) =>
-      completedStatus.includes(workflow.status),
-    )
-      ? WorkflowStatus.SUCCEEDED
-      : retrieveStatus(experiment)
+    const status =
+      incompleteWorkflowDetails.length &&
+      incompleteWorkflowDetails.every((workflow) => completedStatus.includes(workflow.status))
+        ? incompleteWorkflowDetails[0].status
+        : retrieveStatus(experiment)
 
     // const e = experiments.value.find((exp) => exp.id === experiment.id)
     // if (e) {

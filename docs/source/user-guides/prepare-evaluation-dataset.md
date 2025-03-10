@@ -13,7 +13,7 @@ Lumigator expects a CSV file containing different columns depending on the use c
 
 **Summarization use case**
 
-Your CSV should at least contain columns named `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/dialogsum_exc.csv ).
+Your CSV should at least contain columns named `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/summarization/dialogsum_exc.csv ).
 
 **Translation use case**
 

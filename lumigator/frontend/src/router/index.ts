@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const LDatasetes = () => import('@/components/views/LDatasets.vue')
 const LExperiments = () => import('@/components/views/LExperiments.vue')
+const Settings = () => import('@/components/views/Settings.vue')
 
 export const routes: Array<RouteRecordRaw & { icon?: string }> = [
   {
@@ -15,6 +16,12 @@ export const routes: Array<RouteRecordRaw & { icon?: string }> = [
     name: 'experiments',
     component: LExperiments,
     icon: 'pi pi-experiments',
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: Settings,
+    icon: 'pi pi-cog',
   },
   {
     path: '/:pathMatch(.*)*', // Catch-all route for undefined paths

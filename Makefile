@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-schemas test-schemas-unit test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -183,7 +183,7 @@ setup:
 # This target is used to update the OpenAPI docs for use in the sphinx docs.
 # Lumigator must be running on localhost
 update-openapi-docs:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
@@ -198,17 +198,24 @@ update-openapi-docs:
 check-openapi-docs:
 	./scripts/check_openapi_docs.sh
 
+# schema tests
+test-schemas-unit:
+	@cd lumigator/schemas; \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="lumigator_schemas/tests/unit/*/test_*.py unit/test_*.py"
+
+test-schemas: test-schemas-unit
+
 # SDK tests
 # We have both unit and integration tests for the SDK.
 # Integration tests require all containers to be up, so as a safety measure
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
-	cd lumigator/sdk/tests; \
+	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
-	cd lumigator/sdk/tests; \
+	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
@@ -227,7 +234,7 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-backend-unit:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
@@ -238,7 +245,7 @@ test-backend-unit:
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	docker container list --all; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
@@ -270,18 +277,20 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/jobs/evaluator; \
+	@cd lumigator/jobs/evaluator; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
-	cd lumigator/jobs/inference; \
+	@cd lumigator/jobs/inference; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
 
 # test everything
-test-all: test-sdk test-backend test-jobs-unit
+test-all: test-schemas test-sdk test-backend test-jobs-unit
+test-all-unit: test-schemas-unit test-sdk-unit test-backend-unit test-jobs-unit
+test-all-integration: test-sdk-integration test-backend-integration
 
 # config-clean: removes any generated config files from the build directory (including the directory itself).
 config-clean:

@@ -12,7 +12,10 @@ logger.info("(this might take a while...)")
 
 # Split by comma and strip whitespace
 models = [model.strip() for model in models_env.split(",")]
+model_total = len(models)
 
 for i, model in enumerate(models):
+    model_count = i + 1
+    logger.info(f"Downlading model {model_count}/{model_total}: {model} ...")
     model_path = snapshot_download(model, cache_dir="/home/ray/.cache/huggingface/hub")
-    logger.info(f"Model {i + 1}/{len(models)} downloaded: {model}")
+    logger.info(f"Model {model_count}/{model_total} downloaded: {model}")

@@ -60,9 +60,9 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         assert result.prediction == "This is a summary."
         mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
 
-    @patch("model_clients.huggingface_clients.AutoTokenizer")
-    @patch("model_clients.huggingface_clients.AutoModelForSeq2SeqLM")
-    @patch("model_clients.huggingface_clients.pipeline")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
     def test_initialization(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config, api_key):
         """Test initialization of the seq2seq client."""
         # Setup mocks

@@ -70,6 +70,7 @@ For more information about the backend routes, see the rendered API specs in the
    operations-guide/alembic
    operations-guide/local-development
    operations-guide/configure-S3
+   operations-guide/vllm-rayserve-deployment
 
 .. toctree::
    :maxdepth: 2

@@ -1,11 +1,12 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from inference_config import InferenceJobConfig
+from inference_config import GenerationConfig, HfPipelineConfig, InferenceJobConfig
 from model_clients.huggingface_clients import (
     HuggingFaceCausalLMClient,
     HuggingFaceSeq2SeqSummarizationClient,
 )
+from transformers import Pipeline, PreTrainedTokenizer
 
 from schemas import PredictionResult, TaskType
 
@@ -18,7 +19,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         """Create a mock InferenceJobConfig for testing seq2seq client."""
         config = MagicMock(spec=InferenceJobConfig)
 
-        config.hf_pipeline = MagicMock()
+        config.hf_pipeline = MagicMock(spec=HfPipelineConfig)
         config.hf_pipeline.model_name_or_path = "mock-seq2seq-model"
         config.hf_pipeline.task = TaskType.SUMMARIZATION
         config.hf_pipeline.use_fast = True
@@ -27,7 +28,7 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         config.hf_pipeline.revision = "main"
         config.hf_pipeline.device = "cpu"
 
-        config.generation_config = MagicMock()
+        config.generation_config = MagicMock(spec=GenerationConfig)
         config.generation_config.max_new_tokens = 100
 
         return config
@@ -42,11 +43,11 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_model.config.max_position_embeddings = 512
         mock_automodel.from_pretrained.return_value = mock_model
 
-        mock_tokenizer_instance = MagicMock()
+        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
         mock_tokenizer_instance.model_max_length = 512
         mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
 
-        mock_pipeline_instance = MagicMock()
+        mock_pipeline_instance = MagicMock(spec=Pipeline)
         mock_pipeline_instance.model = mock_model
         mock_pipeline_instance.tokenizer = mock_tokenizer_instance
         mock_pipeline_instance.token = (API_KEY_VALUE,)
@@ -59,12 +60,12 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_tokenizer.from_pretrained.assert_called_once()
         mock_automodel.from_pretrained.assert_called_once()
         mock_pipeline.assert_called_once()
-        assert client._pipeline == mock_pipeline_instance
+        assert client.pipeline == mock_pipeline_instance
         assert client.api_key == API_KEY_VALUE
 
-    @patch("model_clients.huggingface_clients.AutoTokenizer")
-    @patch("model_clients.huggingface_clients.AutoModelForSeq2SeqLM")
-    @patch("model_clients.huggingface_clients.pipeline")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
     def test_predict(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
         """Test the predict method of the seq2seq client."""
         # Setup mocks
@@ -72,11 +73,11 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_model.config.max_position_embeddings = 512
         mock_automodel.from_pretrained.return_value = mock_model
 
-        mock_tokenizer_instance = MagicMock()
+        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
         mock_tokenizer_instance.model_max_length = 512
         mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
 
-        mock_pipeline_instance = MagicMock()
+        mock_pipeline_instance = MagicMock(spec=Pipeline)
         mock_pipeline_instance.model = mock_model
         mock_pipeline_instance.tokenizer = mock_tokenizer_instance
         mock_pipeline_instance.return_value = [{"summary_text": "This is a summary."}]
@@ -91,9 +92,9 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         assert result.prediction == "This is a summary."
         mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
 
-    @patch("model_clients.huggingface_clients.AutoTokenizer")
-    @patch("model_clients.huggingface_clients.AutoModelForSeq2SeqLM")
-    @patch("model_clients.huggingface_clients.pipeline")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
     def test_max_token_adjustment(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
         """Test that the client adjusts max tokens if over model limits."""
         # Setup mocks with limited max position embeddings
@@ -115,14 +116,14 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         # Initialize client - which should trigger the token adjustment
         client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
         # Verify the max_new_tokens was adjusted down to the model's max_position_embeddings
-        assert client._config.generation_config.max_new_tokens == 50
+        assert client.config.generation_config.max_new_tokens == 50
 
         # Now test with a value that's already within limits
         mock_config.generation_config.max_new_tokens = 30  # Less than max_position_embeddings
         # Initialize a new client
         client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
         # Verify max_new_tokens was NOT adjusted since it was already within limits
-        assert client._config.generation_config.max_new_tokens == 30
+        assert client.config.generation_config.max_new_tokens == 30
 
 
 class TestHuggingFaceCausalLMClient:
@@ -157,8 +158,8 @@ class TestHuggingFaceCausalLMClient:
 
         # Verify initialization
         mock_pipeline.assert_called_once()
-        assert client._pipeline == mock_pipeline_instance
-        assert client._system_prompt == "You are a helpful assistant."
+        assert client.pipeline == mock_pipeline_instance
+        assert client.system_prompt == "You are a helpful assistant."
 
     @patch("model_clients.huggingface_clients.pipeline")
     def test_with_summarization_task(self, mock_pipeline, mock_config):

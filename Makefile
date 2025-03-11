@@ -183,7 +183,7 @@ setup:
 # This target is used to update the OpenAPI docs for use in the sphinx docs.
 # Lumigator must be running on localhost
 update-openapi-docs:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
@@ -200,8 +200,8 @@ check-openapi-docs:
 
 # schema tests
 test-schemas-unit:
-	cd lumigator/schemas; \
-	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
+	@cd lumigator/schemas; \
+	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="lumigator_schemas/tests/unit/*/test_*.py unit/test_*.py"
 
 test-schemas: test-schemas-unit
 
@@ -211,11 +211,11 @@ test-schemas: test-schemas-unit
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
-	cd lumigator/sdk/tests; \
+	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
-	cd lumigator/sdk/tests; \
+	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
@@ -234,7 +234,7 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-backend-unit:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
 	RAY_DASHBOARD_PORT=8265 \
@@ -245,7 +245,7 @@ test-backend-unit:
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
 
 test-backend-integration:
-	cd lumigator/backend/; \
+	@cd lumigator/backend/; \
 	docker container list --all; \
 	S3_BUCKET=lumigator-storage \
 	RAY_HEAD_NODE_HOST=localhost \
@@ -277,11 +277,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/jobs/evaluator; \
+	@cd lumigator/jobs/evaluator; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
-	cd lumigator/jobs/inference; \
+	@cd lumigator/jobs/inference; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit

@@ -25,3 +25,7 @@ jobs:
 
       - uses: azure/setup-helm@v4.3.0
         id: install
+
+      - name: Helm template
+        working-directory: ./infra/helm
+        run: helm template lumigator lumigator --set backend.s3Bucket=blah

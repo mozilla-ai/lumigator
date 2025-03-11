@@ -33,6 +33,35 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
 
         return config
 
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
+    def test_predict(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
+        """Test the predict method of the seq2seq client."""
+        # Setup mocks
+        mock_model = MagicMock()
+        mock_model.config.max_position_embeddings = 512
+        mock_automodel.from_pretrained.return_value = mock_model
+
+        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
+        mock_tokenizer_instance.model_max_length = 512
+        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
+
+        mock_pipeline_instance = MagicMock(spec=Pipeline)
+        mock_pipeline_instance.model = mock_model
+        mock_pipeline_instance.tokenizer = mock_tokenizer_instance
+        mock_pipeline_instance.return_value = [{"summary_text": "This is a summary."}]
+        mock_pipeline.return_value = mock_pipeline_instance
+
+        # Initialize client and call predict
+        client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
+        result = client.predict("This is a test prompt.")
+
+        # Verify prediction
+        assert isinstance(result, PredictionResult)
+        assert result.prediction == "This is a summary."
+        mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
+
     @patch("model_clients.huggingface_clients.AutoTokenizer")
     @patch("model_clients.huggingface_clients.AutoModelForSeq2SeqLM")
     @patch("model_clients.huggingface_clients.pipeline")
@@ -62,35 +91,6 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_pipeline.assert_called_once()
         assert client.pipeline == mock_pipeline_instance
         assert client.api_key == API_KEY_VALUE
-
-    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
-    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
-    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
-    def test_predict(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
-        """Test the predict method of the seq2seq client."""
-        # Setup mocks
-        mock_model = MagicMock()
-        mock_model.config.max_position_embeddings = 512
-        mock_automodel.from_pretrained.return_value = mock_model
-
-        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
-        mock_tokenizer_instance.model_max_length = 512
-        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
-
-        mock_pipeline_instance = MagicMock(spec=Pipeline)
-        mock_pipeline_instance.model = mock_model
-        mock_pipeline_instance.tokenizer = mock_tokenizer_instance
-        mock_pipeline_instance.return_value = [{"summary_text": "This is a summary."}]
-        mock_pipeline.return_value = mock_pipeline_instance
-
-        # Initialize client and call predict
-        client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
-        result = client.predict("This is a test prompt.")
-
-        # Verify prediction
-        assert isinstance(result, PredictionResult)
-        assert result.prediction == "This is a summary."
-        mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
 
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")

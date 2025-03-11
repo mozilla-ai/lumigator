@@ -21,7 +21,7 @@ class TaskType(str, Enum):
 
 class JobConfig(BaseModel):
     max_samples: int
-    batch_size: PositiveInt
+    batch_size: PositiveInt = 1
     storage_path: str
     output_field: str | None = "predictions"
     enable_tqdm: bool = True

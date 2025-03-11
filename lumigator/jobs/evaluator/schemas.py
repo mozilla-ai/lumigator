@@ -104,6 +104,7 @@ class EvalJobMetrics(BaseModel):
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
+    comet: Comet | None = None
     g_eval_summarization: GEvalSummarizationMetrics | None = None
     token_length: TokenLength | None = None
 

@@ -15,17 +15,20 @@
         @click="handleDownloadClicked"
       ></PrimeVueButton>
     </template>
-    <TableView :data="data" :columns="columns" :downloadFileName="downloadFileName" :isEditable="isEditable" :showRowNumber="showRowNumber" :isSearchEnabled="isSearchEnabled" ref="dataTable" />
+    <TableView
+      :data="data"
+      :columns="columns"
+      :downloadFileName="downloadFileName"
+      :isEditable="isEditable"
+      :showRowNumber="showRowNumber"
+      :isSearchEnabled="isSearchEnabled"
+      ref="dataTable"
+    />
   </Drawer>
 </template>
 
 <script lang="ts">
-import {
-  Button,
-  Drawer,
-  type DataTableProps,
-} from 'primevue'
-import { FilterMatchMode } from '@primevue/core/api'
+import { Button, Drawer, type DataTableProps } from 'primevue'
 import { defineComponent, ref, type PropType } from 'vue'
 import TableView from './TableView.vue'
 

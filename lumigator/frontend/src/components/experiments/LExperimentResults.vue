@@ -1,6 +1,6 @@
 <template>
   <div class="l-experiment-results">
-    <DataTable
+    <!-- <DataTable
       v-model:expandedRows="expandedRows"
       class="gridlines"
       :value="tableData"
@@ -119,7 +119,17 @@
           <WorkflowResults :results="slotProps.data.jobResults" :no-radius="true" />
         </div>
       </template>
-    </DataTable>
+    </DataTable> -->
+
+    <TableView
+      :data="tableData"
+      :columns="Object.keys(tableData[0]).filter(key => key !== 'subRows')"
+      :downloadFileName="'results'"
+      :isEditable="false"
+      :showRowNumber="true"
+      :isSearchEnabled="true"
+      ref="dataTable"
+    />
   </div>
 </template>
 
@@ -132,6 +142,7 @@ import Column from 'primevue/column'
 import type { Model } from '@/types/Model'
 import type { ExperimentResults } from '@/types/Experiment'
 import WorkflowResults from './WorkflowResults.vue'
+import TableView from '../common/TableView.vue'
 
 const modelStore = useModelStore()
 const { models } = storeToRefs(modelStore)
@@ -205,7 +216,7 @@ const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = comp
     ...result,
     model: models.value.find(
       (model: Model) => model.model === result.model || model.display_name === result.model,
-    )!,
+    )!.display_name,
   }))
 
   return data

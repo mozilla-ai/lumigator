@@ -143,4 +143,3 @@ class InferenceJobConfig(BaseInferenceJobConfig):
     generation_config: GenerationConfig | None = None
     hf_pipeline: HfPipelineConfig | None = None
     model_config = ConfigDict(extra="forbid")
-    api_key: str | None

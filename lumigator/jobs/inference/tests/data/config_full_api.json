@@ -19,6 +19,5 @@
         "temperature": 1.0,
         "top_p": 1.0
     },
-    "api_key": "",
     "system_prompt": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
 }

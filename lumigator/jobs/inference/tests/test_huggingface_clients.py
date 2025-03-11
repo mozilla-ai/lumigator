@@ -11,12 +11,12 @@ from schemas import PredictionResult, TaskType
 
 API_KEY_VALUE = "12345"
 
+
 class TestHuggingFaceSeq2SeqSummarizationClient:
     @pytest.fixture
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing seq2seq client."""
         config = MagicMock(spec=InferenceJobConfig)
-        config.api_key = API_KEY_VALUE
 
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-seq2seq-model"
@@ -49,17 +49,18 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_pipeline_instance = MagicMock()
         mock_pipeline_instance.model = mock_model
         mock_pipeline_instance.tokenizer = mock_tokenizer_instance
-        mock_pipeline_instance.use_auth_token=API_KEY_VALUE,
+        mock_pipeline_instance.token = (API_KEY_VALUE,)
         mock_pipeline.return_value = mock_pipeline_instance
 
         # Initialize client
-        client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
+        client = HuggingFaceSeq2SeqSummarizationClient(mock_config, API_KEY_VALUE)
 
         # Verify initialization
         mock_tokenizer.from_pretrained.assert_called_once()
         mock_automodel.from_pretrained.assert_called_once()
         mock_pipeline.assert_called_once()
         assert client._pipeline == mock_pipeline_instance
+        assert client.api_key == API_KEY_VALUE
 
     @patch("model_clients.huggingface_clients.AutoTokenizer")
     @patch("model_clients.huggingface_clients.AutoModelForSeq2SeqLM")
@@ -129,7 +130,6 @@ class TestHuggingFaceCausalLMClient:
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing causal LM client."""
         config = MagicMock(spec=InferenceJobConfig)
-        config.api_key = API_KEY_VALUE
 
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-causal-model"

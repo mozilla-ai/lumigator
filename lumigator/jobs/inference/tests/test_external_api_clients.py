@@ -17,7 +17,7 @@ BASE_URL = "https://api.openai.com/v1"
 TEST_PROMPT = "Test prompt"
 TEST_RESPONSE = "This is a test response."
 HIDDEN_PARAMS = {"response_cost": 0.001}
-API_KEY_VALUE = '12345'
+API_KEY_VALUE = "12345"
 
 
 class TestLiteLLMModelClient:
@@ -26,7 +26,6 @@ class TestLiteLLMModelClient:
         """Create a mock InferenceJobConfig for testing."""
         config = MagicMock(spec=InferenceJobConfig)
         config.system_prompt = SYSTEM_PROMPT
-        config.api_key = API_KEY_VALUE
 
         # Create generation_config as a separate mock
         generation_config = MagicMock()
@@ -45,10 +44,19 @@ class TestLiteLLMModelClient:
 
         return config
 
-    @pytest.fixture
+    @pytest.fixture(scope="function")
     def client(self, mock_config):
         """Create a LiteLLMModelClient instance for testing."""
         return LiteLLMModelClient(mock_config)
+
+    @pytest.fixture(scope="function")
+    def client_with_api_key(self, mock_config, api_key):
+        """Create a LiteLLMModelClient instance for testing."""
+        return LiteLLMModelClient(mock_config, api_key)
+
+    @pytest.fixture(scope="function")
+    def api_key(self) -> str:
+        return "12345"
 
     @pytest.fixture
     def mock_standard_response(self):
@@ -70,13 +78,13 @@ class TestLiteLLMModelClient:
         assert client.system_prompt == mock_config.system_prompt
 
     @patch("model_clients.external_api_clients.completion")
-    def test_predict_standard_response(self, mock_completion, client, mock_standard_response):
+    def test_predict_standard_response(self, mock_completion, client_with_api_key, mock_standard_response):
         """Test that predict returns the correct PredictionResult for a standard response."""
         # Setup mock response
         mock_completion.return_value = mock_standard_response
 
         # Call function
-        result = client.predict(TEST_PROMPT)
+        result = client_with_api_key.predict(TEST_PROMPT)
 
         # Verify results
         assert isinstance(result, PredictionResult)
@@ -101,7 +109,7 @@ class TestLiteLLMModelClient:
             top_p=DEFAULT_TOP_P,
             drop_params=True,
             api_base=BASE_URL,
-            api_key=API_KEY_VALUE
+            api_key=API_KEY_VALUE,
         )
 
     @patch("model_clients.external_api_clients.completion")

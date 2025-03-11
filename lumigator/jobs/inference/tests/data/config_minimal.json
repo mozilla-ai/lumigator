@@ -3,6 +3,5 @@
     "dataset": { "path": "s3://lumigator-storage/datasets/deaddead-dead-dead-dead-deaddeaddead/dataset_name.csv" },
     "job": {
         "storage_path": "s3://lumigator-storage/jobs/results/"
-    },
-    "api_key": ""
+    }
 }

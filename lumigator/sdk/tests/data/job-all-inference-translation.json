@@ -1,0 +1,29 @@
+{
+  "name": "test-job-001",
+  "description": "This is a test translation inference job",
+  "dataset": "6f6487ac-7170-4a11-af7a-0f6db1ec9a74",
+  "max_samples": 5,
+  "job_config": {
+    "job_type": "inference",
+    "model": "some_model",
+    "provider": "some_provider",
+    "model_url": "https://huggingface.co/facebook/bart-large-cnn",
+    "task_definition": {
+      "task": "translation",
+      "source_language": "en",
+      "target_language": "fr"
+    },
+    "accelerator": "auto",
+    "revision": "main",
+    "use_fast": true,
+    "trust_remote_code": false,
+    "torch_dtype": "auto",
+    "output_field": "predictions",
+    "max_new_tokens": 100,
+    "frequency_penalty": 0.0,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "store_to_dataset": false,
+    "system_prompt": "translate from en to fr"
+  }
+}

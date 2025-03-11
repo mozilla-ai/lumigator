@@ -20,9 +20,7 @@ class Workflows:
     def create_workflow(self, workflow: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new experiment."""
         WorkflowCreateRequestStrict.model_validate(WorkflowCreateRequest.model_dump(workflow))
-        response = self.__client.get_response(
-            self.WORKFLOWS_ROUTE, HTTPMethod.POST, workflow.model_dump_json()
-        )
+        response = self.__client.get_response(self.WORKFLOWS_ROUTE, HTTPMethod.POST, workflow.model_dump_json())
 
         data = response.json()
         return WorkflowResponse(**data)
@@ -41,7 +39,12 @@ class Workflows:
         data = response.json()
         return JobLogsResponse(**data)
 
-    def delete_workflow(self, workflow_id: str) -> None:
-        """Deletes the experiment for the specified ID."""
-        self.__client.get_response(f"{self.WORKFLOWS_ROUTE}/{workflow_id}", HTTPMethod.DELETE)
+    def delete_workflow(self, workflow_id: str, force: bool = False) -> None:
+        """Deletes the experiment for the specified ID.
+
+        Args:
+            workflow_id: ID of the workflow to delete
+            force: If True, force deletion even if the workflow is active or has dependencies
+        """
+        self.__client.get_response(f"{self.WORKFLOWS_ROUTE}/{workflow_id}", HTTPMethod.DELETE, params={"force": force})
         return None

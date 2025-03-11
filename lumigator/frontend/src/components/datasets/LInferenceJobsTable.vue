@@ -14,7 +14,7 @@
   >
     <Column field="name" header="Filename">
       <template #body="slotProps">
-        {{ slotProps.data.dataset.name }}
+        {{ slotProps.data.config.dataset?.name }}
       </template>
     </Column>
     <Column field="created" header="created" sortable>

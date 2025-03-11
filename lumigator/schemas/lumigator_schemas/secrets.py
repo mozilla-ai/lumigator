@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SecretUploadRequest(BaseModel):
@@ -9,7 +9,12 @@ class SecretUploadRequest(BaseModel):
 
 
 class SecretGetRequest(BaseModel):
-    """Represents the result of a get secret request."""
+    """Represents the result of a get secret request.
+
+    NOTE: The secret value should never be exposed to the end user.
+    """
 
     name: str = Field(..., max_length=255, min_length=1)
     description: str
+
+    model_config = ConfigDict(from_attributes=True)

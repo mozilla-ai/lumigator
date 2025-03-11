@@ -1,11 +1,16 @@
 [project]
 name = "lumigator-schemas"
-version = "0.1.1-alpha"
+version = "0.1.2-alpha"
 description = "Schemas used for REST API communication"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.10.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
 ]
 
 [build-system]

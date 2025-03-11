@@ -1,15 +1,18 @@
 import datetime as dt
+from abc import ABC
 from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from lumigator_schemas.redactable_base_model import RedactableBaseModel
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
     TaskType,
 )
+from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
 
 class LowercaseEnum(str, Enum):
@@ -57,12 +60,12 @@ class JobLogsResponse(BaseModel):
 # Check Ray items actually used and copy
 # those from the schema
 # ref to https://docs.ray.io/en/latest/cluster/running-applications/job-submission/doc/ray.job_submission.JobDetails.html
-class JobSubmissionResponse(BaseModel):
+class JobSubmissionResponse(RedactableBaseModel):
     type: str | None = None
     submission_id: str | None = None
     driver_info: str | None = None
     status: str | None = None
-    entrypoint: str | None = None
+    config: dict | None = Field(default_factory=dict)
     message: str | None = None
     error_type: str | None = None
     start_time: dt.datetime | None = None
@@ -73,13 +76,56 @@ class JobSubmissionResponse(BaseModel):
     driver_node_id: str | None = None
     driver_exit_code: int | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def transform(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """Pre-processes and validates the 'entrypoint' configuration before model validation.
 
-class JobEvalConfig(BaseModel):
+        This method uses Pydantic's 'model_validator' hook to parse the 'entrypoint'
+        configuration, and where appropriate, redact sensitive information. It then
+        assigns the processed configuration to the `config` field of the model
+        (`JobSubmissionResponse`) before model validation occurs.
+
+        :param values: The dictionary of field values to be processed.
+            It contains the model data, including the 'entrypoint' configuration.
+        :return: The updated values dictionary, with the processed and
+            potentially redacted 'entrypoint' configuration assigned to the `config` field.
+        """
+        transformed_values = transform_job_submission_response(values)
+        return transformed_values
+
+
+class BaseJobConfig(BaseModel, ABC):
+    secret_key_name: str | None = Field(
+        None,
+        title="Secret Key Name",
+        description="An optional secret key name. "
+        "When creating a job, the secret key name identifies an existing secret stored in Lumigator "
+        "that should be used to access the provider.",
+    )
+
+
+class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
+    # NOTE: If changing the default  metrics, please ensure that they do not include
+    # any requirements for external API calls that require an API key to be configured.
     metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
 
 
-class JobInferenceConfig(BaseModel):
+class GenerationConfig(BaseModel):
+    """Custom and limited configuration for generation.
+    Sort of a subset of HF GenerationConfig
+    https://huggingface.co/docs/transformers/en/main_classes/text_generation#transformers.GenerationConfig
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    max_new_tokens: int = 1024
+    frequency_penalty: float = 0.0
+    temperature: float = 0.5
+    top_p: float = 0.5
+
+
+class JobInferenceConfig(BaseJobConfig):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
@@ -91,10 +137,7 @@ class JobInferenceConfig(BaseModel):
     torch_dtype: str = "auto"
     base_url: str | None = None
     output_field: str | None = "predictions"
-    max_new_tokens: int = 1024
-    frequency_penalty: float = 0.0
-    temperature: float = 1.0
-    top_p: float = 1.0
+    generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
     store_to_dataset: bool = False
     system_prompt: str | None = Field(
         title="System Prompt",
@@ -180,9 +223,9 @@ class JobResultObject(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    metrics: dict | None = {}
-    parameters: dict | None = {}
-    artifacts: dict | None = {}
+    metrics: dict = {}
+    parameters: dict = {}
+    artifacts: dict = {}
 
 
 class Job(JobResponse, JobSubmissionResponse):

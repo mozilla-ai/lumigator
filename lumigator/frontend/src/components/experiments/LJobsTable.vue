@@ -18,6 +18,11 @@
         {{ formatDate(slotProps.data.created_at) }}
       </template>
     </Column>
+    <Column field="useCase" :style="columnStyles.useCase" header="use-case">
+      <template #body>
+        <span style="text-transform: capitalize">{{ useCase }}</span>
+      </template>
+    </Column>
     <Column field="status" header="status" :style="columnStyles.status">
       <template #body="slotProps">
         <div>
@@ -70,7 +75,7 @@ import Column from 'primevue/column'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import { ref, type PropType } from 'vue'
-import type { MenuItem, MenuItemCommandEvent } from 'primevue/menuitem'
+import type { MenuItem } from 'primevue/menuitem'
 import { Menu } from 'primevue'
 // import type { Job } from '@/types/Job'
 // const experimentStore = useExperimentStore()
@@ -82,6 +87,10 @@ defineProps({
   },
   columnStyles: {
     type: Object,
+    required: true,
+  },
+  useCase: {
+    type: String,
     required: true,
   },
 })
@@ -120,7 +129,7 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-trash',
     style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
     disabled: false,
-    command: (e: MenuItemCommandEvent) => {
+    command: () => {
       emit('delete-workflow-clicked', clickedItem.value)
     },
   },
@@ -128,6 +137,7 @@ const options = ref<MenuItem[]>([
 
 const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow) => {
   clickedItem.value = selectedItem
+  event.stopPropagation()
   optionsMenu.value.toggle(event, selectedItem)
 }
 

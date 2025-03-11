@@ -83,12 +83,12 @@ services:
       - -c
       - |
           set -eaux
-          mkdir -p /tmp/ray_pip_cache
+          mkdir -p /home/ray/.cache/ && mkdir -p /tmp/ray_pip_cache
+          sudo chmod -R 777 /home/ray/.cache/ && sudo chmod -R 777 /tmp/ray_pip_cache/ || true
+          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           # If the file was mounted in a volume instead of
           # a shared dir, permissions need to be setup
           # ... || true allows this to fail (-e is set)
-          sudo chmod -R 777 /tmp/ray_pip_cache/ || true
-          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           mkdir -p /tmp/ray/session_latest/runtime_resources/pip
           rmdir /tmp/ray/session_latest/runtime_resources/pip/ && ln -s /tmp/ray_pip_cache /tmp/ray/session_latest/runtime_resources/pip
           sleep infinity
@@ -100,7 +100,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: '5g'
+          memory: '10g'
     environment:
       # LOCAL_FSSPEC_S3 env vars required by s3fs running inside evaluator ray jobs
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
@@ -230,6 +230,8 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+    volumes:
+      - mlflow-database-data:/db-data
 
 volumes:
     minio-data:
@@ -242,5 +244,8 @@ volumes:
       labels:
         ai.mozilla.product_name: lumigator
     ray-pip-cache:
+      labels:
+        ai.mozilla.product_name: lumigator
+    mlflow-database-data:
       labels:
         ai.mozilla.product_name: lumigator

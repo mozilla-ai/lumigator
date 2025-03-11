@@ -1,34 +1,54 @@
 import json
-from pathlib import Path
 
-import yaml
 from fastapi.testclient import TestClient
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.models import ModelsResponse
 
-from backend.api.routes.models import _get_supported_tasks
-
-MODELS_PATH = Path(__file__).resolve().parents[4] / "models.yaml"
+from backend.api.routes.models import _filter_models_by_tasks, _get_supported_tasks
 
 
-def test_get_suggested_models_summarization_ok(app_client: TestClient):
-    response = app_client.get("/models/summarization")
+def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs_data: dict):
+    response = app_client.get("/models/?tasks=summarization")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
-    with Path(MODELS_PATH).open() as file:
-        data = yaml.safe_load(file)
+    # Filter models that only support summarization
+    filtered_data = _filter_models_by_tasks(model_specs_data, ["summarization"])
 
-    assert models.total == len(data)
+    assert models.total == len(filtered_data)
+    assert len(models.items) == len(filtered_data)
 
 
-def test_get_suggested_models_invalid_task(app_client: TestClient):
-    response = app_client.get("/models/invalid_task")
+def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_specs_data: dict):
+    response = app_client.get("/models/?tasks=summarization&tasks=translation")
+    assert response.status_code == 200
+    models = ListingResponse[ModelsResponse].model_validate(response.json())
+
+    # Filter models that support either summarization or translation
+    filtered_data = _filter_models_by_tasks(model_specs_data, ["summarization", "translation"])
+
+    assert models.total == len(filtered_data)
+    assert len(models.items) == len(filtered_data)
+
+
+def test_get_suggested_models_no_task_specified(app_client: TestClient, model_specs_data: dict):
+    # Should return all models based on your implementation
+    response = app_client.get("/models/")
+    assert response.status_code == 200
+    models = ListingResponse[ModelsResponse].model_validate(response.json())
+
+    assert models.total == len(model_specs_data)
+    assert len(models.items) == len(model_specs_data)
+
+
+def test_get_suggested_models_invalid_task(app_client: TestClient, model_specs_data: dict):
+    response = app_client.get("/models/?tasks=invalid_task")
     assert response.status_code == 400
 
-    with Path(MODELS_PATH).open() as file:
-        data = yaml.safe_load(file)
+    supported_tasks = _get_supported_tasks(model_specs_data)
 
-    supported_tasks = _get_supported_tasks(data)
-
-    assert response.json() == {"detail": f"Unsupported task. Choose from: {supported_tasks}"}
+    # Check that the error message contains the supported tasks
+    error_detail = response.json()["detail"]
+    assert "Unsupported task(s)" in error_detail
+    assert "invalid_task" in error_detail
+    assert str(supported_tasks) in error_detail or ", ".join(supported_tasks) in error_detail

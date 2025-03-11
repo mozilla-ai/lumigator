@@ -1,4 +1,5 @@
 import os
+import re
 from collections.abc import Mapping
 from enum import Enum
 from typing import Final
@@ -37,6 +38,12 @@ class BackendSettings(BaseSettings):
     RAY_WORKER_GPUS_ENV_VAR: str = "RAY_WORKER_GPUS"
     RAY_WORKER_GPUS_FRACTION_ENV_VAR: str = "RAY_WORKER_GPUS_FRACTION"
 
+    # Sensitive data patterns for redaction
+    sensitive_patterns: list[re.Pattern] = [
+        re.compile(r"(?i)_api_key"),  # Matches fields like OPENAI_API_KEY, MISTRAL_API_KEY etc.
+        re.compile(r"(?i)_token"),  # Matches fields like access_token, HF_TOKEN etc.
+    ]
+
     # Tracking
     class TrackingBackendType(str, Enum):
         """Enum for tracking backend types."""
@@ -51,8 +58,10 @@ class BackendSettings(BaseSettings):
     def TRACKING_BACKEND_URI(self) -> str:  # noqa: N802
         if self.TRACKING_BACKEND == self.TrackingBackendType.MLFLOW:
             # the tracking uri env var must be set, return that
-            assert os.environ.get("MLFLOW_TRACKING_URI", None) is not None
-            return os.environ["MLFLOW_TRACKING_URI"]
+            tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+            if not tracking_uri:  # This catches both None and empty strings
+                raise ValueError("MLFLOW_TRACKING_URI environment variable must be set to a valid URI")
+            return tracking_uri
         raise ValueError(f"Unsupported tracking backend: {self.TRACKING_BACKEND}")
 
     # Served models

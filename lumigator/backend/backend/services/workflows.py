@@ -1,4 +1,5 @@
 import json
+import numbers
 from pathlib import Path
 
 import loguru
@@ -56,6 +57,19 @@ class WorkflowService:
         # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
         self.TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value]
 
+    def _prepare_metrics(self, eval_output: JobResultObject) -> dict:
+        """Flatten the metrics dictionary to a single level so that it can be stored in RunOutputs."""
+        formatted_metrics = {}
+        for metric_name, metric_value in eval_output.metrics.items():
+            if isinstance(metric_value, dict):
+                for sub_metric_name, sub_metric_value in metric_value.items():
+                    # only interested in mean, so we only look it items that are not lists
+                    if isinstance(sub_metric_value, numbers.Number) and sub_metric_value is not None:
+                        formatted_metrics[f"{metric_name}_{sub_metric_name}"] = round(sub_metric_value, 3)
+            elif isinstance(metric_value, numbers.Number) and metric_value is not None:
+                formatted_metrics[metric_name] = round(metric_value, 3)
+        return formatted_metrics
+
     async def _run_inference_eval_pipeline(
         self,
         workflow: WorkflowResponse,
@@ -72,8 +86,11 @@ class WorkflowService:
             base_url=request.base_url,
             output_field=request.inference_output_field,
             task_definition=request.task_definition,
+            system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
+            generation_config=request.generation_config,
+            api_key=request.secret_key_name,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
@@ -103,17 +120,32 @@ class WorkflowService:
             # raise Exception(f"Inference job {inference_job.id} failed")
             return
 
+        # Figure out the dataset filename
+        request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+        dataset_filename = request_dataset.filename
+        dataset_filename = Path(dataset_filename).stem
+        dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
+
         # Inference jobs produce a new dataset
         # Add the dataset to the (local) database
         self._job_service._add_dataset_to_db(
             inference_job.id,
             job_infer_create,
             self._dataset_service.s3_filesystem,
+            dataset_filename,
+            request_dataset.generated,
         )
         # log the job to the tracking client
+        result_key = str(
+            Path(settings.S3_JOB_RESULTS_PREFIX)
+            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
+        )
+        with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            inf_output = JobResultObject.model_validate(json.loads(f.read()))
         inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
         inference_job_output = RunOutputs(
             parameters={"inference_output_s3_path": inf_path},
+            metrics=inf_output.metrics,
             ray_job_id=str(inference_job.id),
         )
         self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)
@@ -122,12 +154,20 @@ class WorkflowService:
         # use the inference job id to recover the dataset record
         dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
+        job_config = JobEvalConfig()
+        if request.metrics:
+            job_config.metrics = request.metrics
+            # NOTE: This should be considered a temporary solution as we currently only support
+            # GEval by querying OpenAI's API. This should be refactored to be more robust.
+            if "g_eval_summarization" in job_config.metrics:
+                job_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
+
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
             max_samples=request.max_samples,
-            job_config=JobEvalConfig(),
+            job_config=job_config,
         )
 
         # submit the job
@@ -162,18 +202,10 @@ class WorkflowService:
             # Get the dataset from the S3 bucket
             result_key = self._job_service._get_results_s3_key(evaluation_job.id)
 
+            formatted_metrics = self._prepare_metrics(eval_output)
+
             outputs = RunOutputs(
-                metrics={
-                    "rouge1_mean": round(eval_output.metrics["rouge"]["rouge1_mean"], 3),
-                    "rouge2_mean": round(eval_output.metrics["rouge"]["rouge2_mean"], 3),
-                    "rougeL_mean": round(eval_output.metrics["rouge"]["rougeL_mean"], 3),
-                    "rougeLsum_mean": round(eval_output.metrics["rouge"]["rougeLsum_mean"], 3),
-                    "bertscore_f1_mean": round(eval_output.metrics["bertscore"]["f1_mean"], 3),
-                    "bertscore_precision_mean": round(eval_output.metrics["bertscore"]["precision_mean"], 3),
-                    "bertscore_recall_mean": round(eval_output.metrics["bertscore"]["recall_mean"], 3),
-                    "meteor_mean": round(eval_output.metrics["meteor"]["meteor_mean"], 3),
-                    "bleu_mean": round(eval_output.metrics["bleu"]["bleu_mean"], 3),
-                },
+                metrics=formatted_metrics,
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
@@ -208,6 +240,7 @@ class WorkflowService:
             description=request.description,
             name=request.name,
             model=request.model,
+            system_prompt=request.system_prompt,
             # input is WorkflowCreate, we need to split the configs and generate one
             # JobInferenceCreate and one JobEvalCreate
         )
@@ -217,11 +250,11 @@ class WorkflowService:
 
         return workflow
 
-    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+    def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
         workflow = self.get_workflow(workflow_id)
-        if workflow.status == WorkflowStatus.RUNNING:
+        if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
         return self._tracking_client.delete_workflow(workflow_id)
 

@@ -1,9 +1,14 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 
-const PATH_MODELS_ROOT = (task_name: string) => `models/${task_name}`
+export async function fetchModels(tasks: string[] = ['summarization', 'translation']) {
+  const params = new URLSearchParams()
+  tasks.forEach((task) => {
+    params.append('tasks', task)
+  })
 
-export async function fetchModels(task_name = 'summarization') {
-  const response = await lumigatorApiAxiosInstance.get(PATH_MODELS_ROOT(task_name))
+  const response = await lumigatorApiAxiosInstance.get('/models', {
+    params,
+  })
 
   return response.data.items
 }

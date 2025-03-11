@@ -29,7 +29,7 @@
           v-if="selectedExperiment"
           :selectedExperiment="selectedExperiment"
           :selectedWorkflow="selectedWorkflow"
-          :title="selectedWorkflow ? 'Model Run Details': 'Experiment Details'"
+          :title="selectedWorkflow ? 'Model Run Details' : 'Experiment Details'"
           @l-experiment-results="onShowExperimentResults($event)"
           @l-job-results="onShowWorkflowResults($event)"
           @l-download-results="onDownloadResults($event)"
@@ -50,7 +50,7 @@
         v-if="showExpResults && selectedExperimentResults.length"
         :results="selectedExperimentResults"
       />
-      <l-job-results
+      <WorkflowResults
         v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"
       />
@@ -72,7 +72,6 @@ import LExperimentForm from '@/components/experiments/LExperimentForm.vue'
 import LExperimentDetails from '@/components/experiments/LExperimentDetails.vue'
 import LExperimentsDrawer from '@/components/experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
-import LJobResults from '@/components/experiments/LJobResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
 import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
@@ -83,6 +82,7 @@ import { downloadContent } from '@/helpers/downloadContent'
 import { getExperimentResults } from '@/helpers/getExperimentResults'
 import { transformJobResults } from '@/helpers/transformJobResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
+import WorkflowResults from '../experiments/WorkflowResults.vue'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -111,7 +111,7 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
 
 const getDrawerHeader = () => {
-  const isWorkflowResults = selectedWorkflowResults && showJobResults.value
+  const isWorkflowResults = selectedWorkflowResults.value && showJobResults.value
   return showLogs.value
     ? 'Logs'
     : isWorkflowResults
@@ -176,7 +176,6 @@ const toast = useToast()
 const confirm = useConfirm()
 
 async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
-  console.log({ selectedItem })
   const experimentOrWorkflow = selectedItem || selectedWorkflow.value || selectedExperiment.value
   if (!experimentOrWorkflow) {
     return
@@ -247,12 +246,7 @@ async function retrieveWorkflowLogs() {
     const logsData = await workflowsService.fetchLogs(selectedWorkflow.value?.id)
     const logs = logsData.logs.split('\n')
 
-    logs.forEach((log: string) => {
-      const lastEntry = workflowLogs.value[workflowLogs.value.length - 1]
-      if (workflowLogs.value.length === 0 || lastEntry !== log) {
-        workflowLogs.value.push(log)
-      }
-    })
+    workflowLogs.value = logs
   }
 }
 

@@ -50,7 +50,7 @@ class HuggingFaceModelClientFactory:
 class HuggingFaceSeq2SeqModelClientMixin:
     """Mixin with common functionality for seq2seq models"""
 
-    def _initialize_model_and_tokenizer(self, config):
+    def _initialize_model_and_tokenizer(self, config, specific_pipeline_task: str = None):
         """Initialize the model and tokenizer for the seq2seq models"""
         self.tokenizer = AutoTokenizer.from_pretrained(
             config.hf_pipeline.model_name_or_path,
@@ -65,7 +65,7 @@ class HuggingFaceSeq2SeqModelClientMixin:
         )
 
         self._pipeline = pipeline(
-            task=config.hf_pipeline.task,
+            task=config.hf_pipeline.task if not specific_pipeline_task else specific_pipeline_task,
             model=self.model,
             tokenizer=self.tokenizer,
             revision=config.hf_pipeline.revision,
@@ -218,11 +218,11 @@ class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqMode
         self._target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
         self._target_language = target_language_info["full_name"]  # e.g. "German"
 
-        # Set the task to translation with the source and target languages
-        self._config.hf_pipeline.task = (
+        # Modify the task to include the the source and target languages
+        specific_pipeline_task = (
             f"{TaskType.TRANSLATION.value}_{self._source_language_iso_code}_to_{self._target_language_iso_code}"
         )
-        self._initialize_model_and_tokenizer(self._config)
+        self._initialize_model_and_tokenizer(self._config, specific_pipeline_task)
 
     def predict(self, prompt) -> PredictionResult:
         prefix = f"translate {self._source_language} to {self._target_language}: "

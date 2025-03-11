@@ -3,7 +3,7 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -43,7 +43,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
-    task: str
+    task: TaskType
     revision: str
     use_fast: bool
     trust_remote_code: bool

@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import click
@@ -114,6 +115,11 @@ def eval_command(config: str) -> None:
     config_dict = json.loads(config)
     logger.info(f"{config_dict}")
     config_model = EvalJobConfig(**config_dict)
+
+    # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
+    if "g_eval_summarization" in config_model.evaluation.metrics and (api_key := os.environ.get("api_key")):
+        os.environ["OPENAI_API_KEY"] = api_key
+
     run_eval(config_model)
 
 

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from inference_config import InferenceJobConfig
 from litellm import APIError
-from model_clients import LiteLLMModelClient, PredictionResult
+from model_clients.external_api_clients import LiteLLMModelClient, PredictionResult
 
 # Constants
 SYSTEM_PROMPT = "You are a helpful assistant."
@@ -67,7 +67,7 @@ class TestLiteLLMModelClient:
         assert client.config == mock_config
         assert client.system_prompt == mock_config.system_prompt
 
-    @patch("model_clients.completion")
+    @patch("model_clients.external_api_clients.completion")
     def test_predict_standard_response(self, mock_completion, client, mock_standard_response):
         """Test that predict returns the correct PredictionResult for a standard response."""
         # Setup mock response
@@ -101,7 +101,7 @@ class TestLiteLLMModelClient:
             api_base=BASE_URL,
         )
 
-    @patch("model_clients.completion")
+    @patch("model_clients.external_api_clients.completion")
     def test_predict_with_reasoning_field(self, mock_completion, client):
         """Test that predict extracts reasoning from provider_specific_fields."""
         # Setup mock response
@@ -132,7 +132,7 @@ class TestLiteLLMModelClient:
         assert result.metrics.reasoning_tokens == 10
         assert result.metrics.answer_tokens == 10  # 20 completion - 10 reasoning
 
-    @patch("model_clients.completion")
+    @patch("model_clients.external_api_clients.completion")
     def test_predict_with_think_tag(self, mock_completion, client):
         """Test that predict extracts reasoning from text with </think> tag."""
         # Setup mock response with reasoning in the content
@@ -157,7 +157,7 @@ class TestLiteLLMModelClient:
         # Verify reasoning tokens are estimated based on word count
         assert result.metrics.reasoning_tokens > 0
 
-    @patch("model_clients.completion")
+    @patch("model_clients.external_api_clients.completion")
     def test_retry_mechanism(self, mock_completion, client):
         """Test that the retry mechanism works when API calls fail."""
         # Create API errors for the first two attempts
@@ -183,7 +183,7 @@ class TestLiteLLMModelClient:
         assert mock_completion.call_count == 3
         assert result.prediction == "Success after retry"
 
-    @patch("model_clients.completion")
+    @patch("model_clients.external_api_clients.completion")
     def test_missing_inference_server(self, mock_completion, mock_config):
         """Test behavior when inference_server.base_url is None."""
         # Set the base_url to None

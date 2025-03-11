@@ -1,4 +1,5 @@
 import datetime as dt
+from abc import ABC
 from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
@@ -94,8 +95,20 @@ class JobSubmissionResponse(RedactableBaseModel):
         return transformed_values
 
 
-class JobEvalConfig(BaseModel):
+class BaseJobConfig(BaseModel, ABC):
+    secret_key_name: str | None = Field(
+        None,
+        title="Secret Key Name",
+        description="An optional secret key name. "
+        "When creating a job, the secret key name identifies an existing secret stored in Lumigator "
+        "that should be used to access the provider.",
+    )
+
+
+class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
+    # NOTE: If changing the default  metrics, please ensure that they do not include
+    # any requirements for external API calls that require an API key to be configured.
     metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
 
 
@@ -112,7 +125,7 @@ class GenerationConfig(BaseModel):
     top_p: float = 0.5
 
 
-class JobInferenceConfig(BaseModel):
+class JobInferenceConfig(BaseJobConfig):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
     model: str
     provider: str
@@ -158,7 +171,6 @@ class JobCreate(BaseModel):
     name: str
     description: str = ""
     dataset: UUID
-    secret_key_name: str = ""
     max_samples: int = -1  # set to all samples by default
     job_config: JobSpecificConfig = Field(discriminator="job_type")
 

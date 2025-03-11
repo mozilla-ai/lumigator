@@ -103,7 +103,7 @@
     <div class="l-experiment-form__models-container">
       <h3>Model Selection</h3>
       <div class="l-experiment-form__models">
-        <l-model-cards ref="modelSelection" />
+        <l-model-cards ref="modelSelection" :useCase="useCase" />
       </div>
     </div>
     <div class="l-experiment-form__submit-container">

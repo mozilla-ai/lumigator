@@ -64,7 +64,8 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    api_key: str = ""
+    # Optional API key which can be used to access inference services such as OpenAI, or gated models in Hugging Face.
+    api_key: str | None = None
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None

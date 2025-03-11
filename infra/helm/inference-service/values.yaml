@@ -1,0 +1,129 @@
+# The name of the Ray Service to deploy.
+# It should be 63 characters or less and must follow the DNS naming convention.
+inferenceServiceName: ""
+# The namespace where the Ray Service will be deployed.
+inferenceServiceNamespace: "default"
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------- Application Configuration ------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+application:
+  # The name of the application (e.g., deepseek-v3, llama-3, etc.).
+  name: ""
+  # The route prefix used for serving the application (e.g., "/").
+  routePrefix: "/"
+  # The import path for the model to serve (e.g., lumigator.jobs.vllm.serve:model).
+  importPath: "lumigator.jobs.vllm.serve:model"
+  # The number of replicas for the deployment (e.g., 1).
+  numReplicas: "1"
+  # Number of CPUs allocated for the Ray actor (e.g., 80).
+  numCpus: ""
+  # Configuration for the runtime environment.
+  runtimeEnv:
+    # Working directory for the model (e.g., a zip file URL).
+    workingDir: ""
+    # List of Python packages to install in the runtime environment.
+    # Add the package name and version in the list, separated by '==' (e.g., "vllm==0.7.2").
+    pip:
+      - "vllm==0.7.2"
+    # List of environment variables to set for the application.
+    envVars:
+      # The path to the model.
+      # It can either be a model ID on Hugging Face Hub or a local path to the model directory.
+      # (e.g., 'deepseek-ai/DeepSeek-V3', '/mnt/models/DeepSeek-V3-bf16').
+      modelID: ""
+      # The name of the served model (e.g., DeepSeek-V3).
+      # This is an arbitrary name that you can use to identify the served model. It is the value that you'll pass to the
+      # "model" parameter when making inference requests to a server following the OpenAPI specification.
+      servedModelName: ""
+      # Tensor parallelism level (e.g., 8) - number of GPUs per node.
+      # If your model is too large to fit in a single GPU, but it can fit in a single node with multiple GPUs, you can
+      # use tensor parallelism. The tensor parallel size is the number of GPUs you want to use. For example, if you have
+      # 4 GPUs in a single node, you can set the tensor parallel size to 4.
+      tensorParallelism: ""
+      # Pipeline parallelism level (e.g., 4) - number of nodes.
+      # If your model is too large to fit in a single node, you can use tensor parallel together with pipeline
+      # parallelism. The tensor parallel size is the number of GPUs you want to use in each node, and the pipeline
+      # parallel size is the number of nodes you want to use. For example, if you have 16 GPUs in 2 nodes (8 GPUs per
+      # node), you can set the tensor parallel size to 8 and the pipeline parallel size to 2.
+      pipelineParallelism: ""
+      # Data type (e.g., "float32", "float16", "bfloat16", etc.).
+      dType: ""
+      # GPU memory utilization (e.g., 0.80).
+      # Controls how much of the GPU's total memory (VRAM) is allocated for the model's weights, activations, and
+      # key-value (KV) cache during inference. This sets a safety margin so that system processes, CUDA context, or
+      # other applications can find their place in GPU’s memory without causing out-of-memory issues to your inference
+      # process.
+      gpuMemoryUtilization: "0.80"
+      # Executor backend for distributed computing - 'ray' for Ray, 'mp' for multipocessing.
+      # Multiprocessing (mp) will be used by default when not running in a Ray placement group and if there are
+      # sufficient GPUs available on the same node for the configured 'tensorParallelism', otherwise Ray will be used.
+      distributedExecutorBackend: "ray"
+      # Whether or not to allow for custom code defined on the Hub in their own modeling, configuration, tokenization or
+      # even pipeline files. This option should only be set to True for repositories you trust and in which you have
+      # read the code, as it will execute code present on the Hub on your local machine.
+      trustRemoteCode: "true"
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------- Ray Cluster Configuration ------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+rayCluster:
+  # The Docker image to be used for both head and worker nodes (e.g., "rayproject/ray:2.41.0-py311-gpu").
+  image: "rayproject/ray:2.41.0-py311-gpu"
+  # The host for the Ray dashboard (e.g., "0.0.0.0").
+  dashboardHost: "0.0.0.0"
+  # Memory allocation for the object store (e.g., "1000000000" bytes).
+  # By default Ray allocates 30% of available memory to object storage, this leads to OOM issues for jobs.
+  # This parametere allows you to set the memory allocation for the object store to a fixed, lower value.
+  objectStoreMemory: "1000000000" # 1GB
+  # (Optional) Persistent volume claim name that stores the models (e.g., "models").
+  # Leave it empty if you don't want to use a persistent volume claim.
+  persistentVolumeClaimName: ""
+  # Configuration for the head node of the Ray cluster.
+  headGroup:
+    # Resource requests and limits for the head node
+    resources:
+      limits:
+        # CPU limit (e.g., "80")
+        cpu: ""
+        # Memory limit (e.g., "1000Gi")
+        memory: ""
+        # GPU limit (e.g., "8").
+        # (Optional) Leave it empty if you don't want to allocate GPUs to the head node.
+        gpuCount: ""
+    # (Optional) Node affinity for scheduling the head node.
+    # Leave both fields empty if you don't want to use node affinity.
+    affinity:
+      # (Optional) GPU class for node selection (e.g., "A100_NVLINK_80GB").
+      # Leave it empty if you don't want to use GPU class for node selection.
+      gpuClass: ""
+      # (Optional) Region for node selection (e.g., "US-EAST-04").
+      # Leave it empty if you don't want to use region for node selection.
+      region: ""
+  # Configuration for worker nodes in the Ray cluster
+  workerGroup:
+    # Name of the worker group (e.g., "worker-group")
+    groupName: "worker-group"
+    # Number of replicas for the worker group (e.g., "3")
+    replicas: "1"
+    # Resource requests and limits for the worker nodes
+    resources:
+      limits:
+        # CPU limit (e.g., "80")
+        cpu: ""
+        # Memory limit (e.g., "1000Gi")
+        memory: ""
+        # (Optional) GPU limit (e.g., "8")
+        # Leave it empty if you don't want to allocate GPUs to the worker nodes.
+        gpuCount: ""
+    # (Optional) Node affinity for scheduling the worker nodes.
+    # Leave both fields empty if you don't want to use node affinity.
+    affinity:
+      # (Optional) GPU class for node selection (e.g., "A100_NVLINK_80GB").
+      # Leave it empty if you don't want to use GPU class for node selection.
+      gpuClass: ""
+      # (Optional) Region for node selection (e.g., "US-EAST-04").
+      # Leave it empty if you don't want to use region for node selection.
+      region: ""

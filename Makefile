@@ -218,6 +218,12 @@ test-sdk-integration:
 	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
+test-sdk-integration-gpu:
+	cd lumigator/sdk/tests; \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+
 test-sdk-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
 	$(call run_with_containers, test-sdk-integration)
@@ -255,6 +261,24 @@ test-backend-integration:
 	RAY_WORKER_GPUS="0.0" \
 	RAY_WORKER_GPUS_FRACTION="0.0" \
 	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
+	INFERENCE_WORK_DIR=../jobs/inference \
+	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
+	EVALUATOR_WORK_DIR=../jobs/evaluator \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
+
+test-backend-integration-gpu:
+	cd lumigator/backend/; \
+	docker container list --all; \
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
 	INFERENCE_WORK_DIR=../jobs/inference \
 	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
 	EVALUATOR_WORK_DIR=../jobs/evaluator \

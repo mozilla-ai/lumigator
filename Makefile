@@ -239,8 +239,8 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # Integration tests require all containers to be up, so as a safety measure
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
-test-backend-unit: config-generate-env
-	@source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env" && \
+test-backend-unit:
+	@source ./scripts/set_env_vars.sh && \
 	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"

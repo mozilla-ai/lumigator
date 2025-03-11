@@ -48,9 +48,6 @@ jobs:
           export RAY_WORKER_GPUS_FRACTION="1.0"
           make start-lumigator-build
 
-      - name: Debug w/ tmate
-        uses: mxschmitt/action-tmate@v3
-
       - name: Run ${{ matrix.test }} integration tests
         run: make test-${{ matrix.test }}-integration-gpu
 

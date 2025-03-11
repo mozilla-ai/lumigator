@@ -110,13 +110,13 @@ jobs:
         run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration-gpu # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
-        if: failure()
+        if: ${{ failure() || cancelled() }}
         run: |
           mkdir /tmp/raylogs
           docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
 
       - name: Upload Ray logs in case of failure
-        if: failure()
+        if: ${{ failure() || cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: ray-logs

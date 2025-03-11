@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from inference_config import HfPipelineConfig
-from model_clients.mixins.huggingface_pipeline_mixin import HuggingFacePipelineMixin
+from model_clients.mixins.huggingface_seq2seq_pipeline_mixin import HuggingFaceSeq2SeqPipelineMixin
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, Pipeline, PreTrainedTokenizer, pipeline
 
 from schemas import TaskType
@@ -27,19 +27,23 @@ def pipeline_config():
     return mock_config
 
 
-def test_initialize_model_none_config():
-    mixin = HuggingFacePipelineMixin()
+@pytest.fixture(scope="function")
+def hf_seq2seq_pipeline_mixin() -> HuggingFaceSeq2SeqPipelineMixin:
+    return HuggingFaceSeq2SeqPipelineMixin()
+
+
+def test_initialize_model_none_config(hf_seq2seq_pipeline_mixin):
     with pytest.raises(TypeError, match="The pipeline_config cannot be None"):
-        mixin.initialize_model(None)
+        hf_seq2seq_pipeline_mixin.initialize_model(None)
 
 
-@patch("model_clients.mixins.huggingface_pipeline_mixin.AutoModelForSeq2SeqLM")
-def test_initialize_model_seq2seq(mock_automodel, pipeline_config):
+@patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+def test_initialize_model_seq2seq(mock_automodel, pipeline_config, hf_seq2seq_pipeline_mixin):
     mock_model = MagicMock(spec=AutoModelForSeq2SeqLM)
     mock_automodel.from_pretrained.return_value = mock_model
     pipeline_config.task = TaskType.TRANSLATION
-    mixin = HuggingFacePipelineMixin()
-    model = mixin.initialize_model(pipeline_config)
+
+    model = hf_seq2seq_pipeline_mixin.initialize_model(pipeline_config)
     assert isinstance(model, AutoModelForSeq2SeqLM)
     mock_automodel.from_pretrained.assert_called_once_with(
         pipeline_config.model_name_or_path,
@@ -48,17 +52,15 @@ def test_initialize_model_seq2seq(mock_automodel, pipeline_config):
     )
 
 
-def test_initialize_tokenizer_none_config():
-    mixin = HuggingFacePipelineMixin()
+def test_initialize_tokenizer_none_config(hf_seq2seq_pipeline_mixin):
     with pytest.raises(TypeError, match="The pipeline_config cannot be None"):
-        mixin.initialize_tokenizer(None)
+        hf_seq2seq_pipeline_mixin.initialize_tokenizer(None)
 
 
-def test_initialize_pipeline(pipeline_config):
-    mixin = HuggingFacePipelineMixin()
-    model = mixin.initialize_model(pipeline_config)
-    tokenizer = mixin.initialize_tokenizer(pipeline_config)
-    pipeline_obj = mixin.initialize_pipeline(pipeline_config, model, tokenizer)
+def test_initialize_pipeline(pipeline_config, hf_seq2seq_pipeline_mixin):
+    model = hf_seq2seq_pipeline_mixin.initialize_model(pipeline_config)
+    tokenizer = hf_seq2seq_pipeline_mixin.initialize_tokenizer(pipeline_config)
+    pipeline_obj = hf_seq2seq_pipeline_mixin.initialize_pipeline(pipeline_config, model, tokenizer)
     assert isinstance(pipeline_obj, Pipeline)
 
 
@@ -88,27 +90,26 @@ def test_initialize_pipeline(pipeline_config):
         ),
     ],
 )
-def test_initialize_pipeline_exceptions(model, tokenizer, pipeline_config, expected_exception, match):
-    mixin = HuggingFacePipelineMixin()
+def test_initialize_pipeline_exceptions(
+    hf_seq2seq_pipeline_mixin, model, tokenizer, pipeline_config, expected_exception, match
+):
     with pytest.raises(expected_exception, match=match):
-        mixin.initialize_pipeline(pipeline_config, model, tokenizer)
+        hf_seq2seq_pipeline_mixin.initialize_pipeline(pipeline_config, model, tokenizer)
 
 
-def test_adjust_tokenizer_max_length(pipeline_config):
-    mixin = HuggingFacePipelineMixin()
+def test_adjust_tokenizer_max_length(pipeline_config, hf_seq2seq_pipeline_mixin):
     mock_pipeline = MagicMock(spec=Pipeline)
     mock_pipeline.tokenizer = MagicMock(spec=PreTrainedTokenizer)
     mock_pipeline.tokenizer.model_max_length = 1024
-    mixin.adjust_tokenizer_max_length(mock_pipeline, 512)
+    hf_seq2seq_pipeline_mixin.adjust_tokenizer_max_length(mock_pipeline, 512)
     assert mock_pipeline.tokenizer.model_max_length == 512
 
 
-def test_adjust_tokenizer_max_length_no_change(pipeline_config):
-    mixin = HuggingFacePipelineMixin()
+def test_adjust_tokenizer_max_length_no_change(pipeline_config, hf_seq2seq_pipeline_mixin):
     mock_pipeline = MagicMock(spec=Pipeline)
     mock_pipeline.tokenizer = MagicMock(spec=PreTrainedTokenizer)
     mock_pipeline.tokenizer.model_max_length = 512
-    mixin.adjust_tokenizer_max_length(mock_pipeline, 512)
+    hf_seq2seq_pipeline_mixin.adjust_tokenizer_max_length(mock_pipeline, 512)
     assert mock_pipeline.tokenizer.model_max_length == 512
 
 
@@ -119,7 +120,8 @@ def test_adjust_tokenizer_max_length_no_change(pipeline_config):
         (MagicMock(spec=pipeline, tokenizer=None), 512, TypeError, "The pipeline's tokenizer cannot be None"),
     ],
 )
-def test_adjust_tokenizer_max_length_exceptions(pipeline, max_pos_emb, expected_exception, match):
-    mixin = HuggingFacePipelineMixin()
+def test_adjust_tokenizer_max_length_exceptions(
+    hf_seq2seq_pipeline_mixin, pipeline, max_pos_emb, expected_exception, match
+):
     with pytest.raises(expected_exception, match=match):
-        mixin.adjust_tokenizer_max_length(pipeline, max_pos_emb)
+        hf_seq2seq_pipeline_mixin.adjust_tokenizer_max_length(pipeline, max_pos_emb)

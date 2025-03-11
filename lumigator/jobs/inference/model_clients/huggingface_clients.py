@@ -3,7 +3,7 @@ from loguru import logger
 from model_clients.base_client import BaseModelClient
 from model_clients.mixins.generation_config_mixin import GenerationConfigMixin
 from model_clients.mixins.huggingface_model_mixin import HuggingFaceModelMixin
-from model_clients.mixins.huggingface_pipeline_mixin import HuggingFacePipelineMixin
+from model_clients.mixins.huggingface_seq2seq_pipeline_mixin import HuggingFaceSeq2SeqPipelineMixin
 from transformers import AutoConfig, pipeline
 
 from schemas import PredictionResult, TaskType
@@ -35,7 +35,7 @@ class HuggingFaceModelClientFactory:
 class HuggingFaceSeq2SeqSummarizationClient(
     BaseModelClient,
     HuggingFaceModelMixin,
-    HuggingFacePipelineMixin,
+    HuggingFaceSeq2SeqPipelineMixin,
     GenerationConfigMixin,
 ):
     """Client for seq2seq summarization models.

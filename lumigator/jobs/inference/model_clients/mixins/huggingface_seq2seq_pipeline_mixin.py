@@ -1,7 +1,6 @@
-from inference_config import HfPipelineConfig, TaskType
+from inference_config import HfPipelineConfig
 from loguru import logger
 from transformers import (
-    AutoModel,
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     Pipeline,
@@ -16,11 +15,13 @@ TransformersTokenizerType = PreTrainedTokenizer | PreTrainedTokenizerFast
 TransformersModelType = PreTrainedModel | TFPreTrainedModel
 
 
-class HuggingFacePipelineMixin:
-    """Mixin to handle pipeline related initialization and adjustment."""
+class HuggingFaceSeq2SeqPipelineMixin:
+    """Mixin to handle Seq2Seq pipeline related initialization and adjustment."""
 
-    def initialize_model(self, pipeline_config: HfPipelineConfig) -> AutoModel | AutoModelForSeq2SeqLM:
+    def initialize_model(self, pipeline_config: HfPipelineConfig) -> AutoModelForSeq2SeqLM:
         """Initialize the model using the provided configuration based on task type.
+
+        Seq2Seq models are used for tasks like summarization, text generation or translation.
 
         :param pipeline_config: The HuggingFace pipeline configuration.
         :returns: The initialized model.
@@ -29,19 +30,11 @@ class HuggingFacePipelineMixin:
         if pipeline_config is None:
             raise TypeError("The pipeline_config cannot be None")
 
-        # Use AutoModelForSeq2SeqLM for tasks like summarization, text generation or translation
-        if pipeline_config.task in [TaskType.SUMMARIZATION, TaskType.TEXT_GENERATION, TaskType.TRANSLATION]:
-            return AutoModelForSeq2SeqLM.from_pretrained(
-                pipeline_config.model_name_or_path,
-                trust_remote_code=pipeline_config.trust_remote_code,
-                torch_dtype=pipeline_config.torch_dtype,
-            )
-        else:
-            return AutoModel.from_pretrained(
-                pipeline_config.model_name_or_path,
-                trust_remote_code=pipeline_config.trust_remote_code,
-                torch_dtype=pipeline_config.torch_dtype,
-            )
+        return AutoModelForSeq2SeqLM.from_pretrained(
+            pipeline_config.model_name_or_path,
+            trust_remote_code=pipeline_config.trust_remote_code,
+            torch_dtype=pipeline_config.torch_dtype,
+        )
 
     def initialize_tokenizer(self, pipeline_config: HfPipelineConfig) -> AutoTokenizer:
         """Initialize the tokenizer using the provided configuration.

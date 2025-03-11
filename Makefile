@@ -185,7 +185,15 @@ setup:
 # This target is used to update the OpenAPI docs for use in the sphinx docs.
 # Lumigator must be running on localhost
 update-openapi-docs:
-	./scripts/update_openapi_docs.sh
+	cd lumigator/backend/; \
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run python -m backend.openapi_spec ../../docs/source/specs/openapi.json
 
 # This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
 # Lumigator must be running on localhost

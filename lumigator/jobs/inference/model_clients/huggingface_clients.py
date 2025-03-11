@@ -1,6 +1,6 @@
 from inference_config import InferenceJobConfig
 from loguru import logger
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import TaskDefinition, TaskType
 from model_clients.base_client import BaseModelClient
 from model_clients.translation_utils import load_translation_config, resolve_user_input_language
 from transformers import AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
@@ -31,10 +31,15 @@ class HuggingFaceModelClientFactory:
             # Load the supported translation model families configuration
             translation_config = load_translation_config()
 
-            prefix_models = translation_config.get("prefix_translation_models", [])
+            prefix_models = translation_config.get("prefix_based", [])
+            language_code_models = translation_config.get("language_code_based", [])
+
             if model_name in prefix_models:
                 logger.info(f"Running inference with HuggingFacePrefixTranslationClient for {model_name}")
                 return HuggingFacePrefixTranslationClient(config)
+            elif model_name in language_code_models:
+                logger.info(f"Running inference with HuggingFaceLanguageCodeTranslationClient for {model_name}")
+                return HuggingFaceLanguageCodeTranslationClient(config)
             else:
                 logger.error(
                     f"Translation task with HF seq2seq models: {model_name} is not supported. "
@@ -198,13 +203,13 @@ class HuggingFaceCausalLMClient(BaseModelClient):
         )
 
 
-class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqModelClientMixin):
-    """Client for T5-style models that use prefixes for translation"""
+class LanguageCodesSetupMixin:
+    """Mixin with common functionality for translation clients"""
 
-    def __init__(self, config: InferenceJobConfig):
-        self._config = config
-        source_language_user_input = getattr(config.task_definition, "source_language", None)
-        target_language_user_input = getattr(config.task_definition, "target_language", None)
+    def _setup_translation_languages(self, task_definition: TaskDefinition):
+        """Initialize source and target language information for translation"""
+        source_language_user_input = getattr(task_definition, "source_language", None)
+        target_language_user_input = getattr(task_definition, "target_language", None)
 
         if not source_language_user_input or not target_language_user_input:
             raise ValueError("Source and target languages must be provided for translation task.")
@@ -213,9 +218,17 @@ class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqMode
         target_language_info = resolve_user_input_language(target_language_user_input)
 
         self._source_language_iso_code = source_language_info["iso_code"]  # e.g. "en"
-        self._source_language = source_language_info["full_name"]  # e.g. "English"
+        self._source_language_full_name = source_language_info["full_name"]  # e.g. "English"
         self._target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
-        self._target_language = target_language_info["full_name"]  # e.g. "German"
+        self._target_language_full_name = target_language_info["full_name"]  # e.g. "German"
+
+
+class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqModelClientMixin, LanguageCodesSetupMixin):
+    """Client for T5-style models that use prefixes for translation"""
+
+    def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._setup_translation_languages(config.task_definition)
 
         # Set the task to translation with the source and target languages
         self._config.hf_pipeline.task = (
@@ -224,10 +237,33 @@ class HuggingFacePrefixTranslationClient(BaseModelClient, HuggingFaceSeq2SeqMode
         self._initialize_model_and_tokenizer(self._config)
 
     def predict(self, prompt) -> PredictionResult:
-        prefix = f"translate {self._source_language} to {self._target_language}: "
+        prefix = f"translate {self._source_language_full_name} to {self._target_language_full_name}: "
         prefixed_prompt = prefix + prompt
 
         result = self._pipeline(prefixed_prompt, max_new_tokens=self._config.generation_config.max_new_tokens)[0]
+
+        return PredictionResult(
+            prediction=result["translation_text"],
+        )
+
+
+class HuggingFaceLanguageCodeTranslationClient(
+    BaseModelClient, HuggingFaceSeq2SeqModelClientMixin, LanguageCodesSetupMixin
+):
+    """Client for translation models that require language codes (mBART, NLLB, M2M)"""
+
+    def __init__(self, config: InferenceJobConfig):
+        self._config = config
+        self._setup_translation_languages(config.task_definition)
+        self._initialize_model_and_tokenizer(config)
+
+    def predict(self, prompt) -> PredictionResult:
+        result = self._pipeline(
+            prompt,
+            max_new_tokens=self._config.generation_config.max_new_tokens,
+            src_lang=self._source_language_iso_code,
+            tgt_lang=self._target_language_iso_code,
+        )[0]
 
         return PredictionResult(
             prediction=result["translation_text"],

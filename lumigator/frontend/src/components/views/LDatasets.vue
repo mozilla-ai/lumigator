@@ -249,13 +249,6 @@ async function handleViewDatasetClicked(dataset: Dataset) {
         }
       }, {})
     })
-    .map((row: Record<string, string>, index: number, array) => {
-      return {
-        ...row,
-        rowNumber: index + 1,
-        children: array,
-      }
-    })
 
   isDatasetViewerVisible.value = true
 }

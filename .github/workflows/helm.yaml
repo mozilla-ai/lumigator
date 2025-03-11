@@ -1,0 +1,27 @@
+name: Helm Tests
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    # synchronized is when you push new commits
+    types: ["opened", "synchronize"]
+  push:
+    branches:
+      - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v*.*.*'
+  # required to enable manual triggers on the GH web ui
+  workflow_dispatch:
+
+jobs:
+  helm:
+    name: Helm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4.3.0
+        id: install

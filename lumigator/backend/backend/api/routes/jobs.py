@@ -79,7 +79,6 @@ def create_annotation_job(
     inference_job_create_config_dict = job_create_request.job_config.model_dump()
     inference_job_create_config_dict["model"] = "facebook/bart-large-cnn"
     inference_job_create_config_dict["provider"] = "hf"
-    inference_job_create_config_dict.setdefault("secret_key_name", "hf_api_key")
     inference_job_create_config_dict["output_field"] = "ground_truth"
     inference_job_create_config_dict["store_to_dataset"] = True
     inference_job_create_config_dict["job_type"] = JobType.INFERENCE

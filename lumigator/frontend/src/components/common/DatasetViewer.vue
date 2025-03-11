@@ -39,6 +39,8 @@
           <MultiSelect
             :modelValue="selectedColumns"
             :options="columns"
+            :size="'small'"
+            :selectedItemsLabel="`${selectedColumns.length} Columns Selected`"
             :max-selected-labels="0"
             @update:modelValue="onToggle"
             display="chip"
@@ -50,7 +52,7 @@
             <InputIcon>
               <i class="pi pi-search"></i>
             </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+            <InputText v-model="filters['global'].value" placeholder="Search" />
           </IconField>
         </div>
       </template>
@@ -82,6 +84,7 @@ import {
   InputIcon,
   InputText,
   MultiSelect,
+  SelectStyle,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,

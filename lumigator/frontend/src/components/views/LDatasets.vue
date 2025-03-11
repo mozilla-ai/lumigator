@@ -55,7 +55,7 @@
       @close="isDatasetViewerVisible = false"
     >
       <template #title>
-        <h3 style="gap: 0.125rem; display: flex">
+        <h3 class="dataset-title">
           <span style="color: #888888">Dataset:</span> {{ selectedDataset?.filename }}
         </h3>
       </template>
@@ -390,6 +390,7 @@ const onGenerateGT = () => {
 
 <style lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .l-datasets .p-tabs {
   $root: &;
@@ -442,5 +443,12 @@ const onGenerateGT = () => {
       color: rgba(255, 255, 0, 0.7);
     }
   }
+}
+
+.dataset-title {
+  @include mixins.paragraph;
+  gap: 0.125rem;
+  display: flex
+
 }
 </style>

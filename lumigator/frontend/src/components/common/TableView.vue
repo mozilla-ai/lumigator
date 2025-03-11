@@ -1,83 +1,82 @@
 <template>
   <DataTable
-      class="gridlines"
-      :value="data"
-      ref="dataTable"
-      :reorderableColumns="true"
-      :removableSort="true"
-      :scrollable="true"
-      scrollHeight="flex"
-      :resizableColumns="false"
-      :columnResizeMode="'fit'"
-      :showGridlines="true"
-      :stripedRows="false"
-      :exportFilename="downloadFileName"
-      :globalFilterFields="columns"
-      v-model:filters="filters"
-      :editMode="isEditable ? 'cell' : undefined"
-      v-model:expandedRows="expandedRows"
-      @rowExpand="onRowExpand"
-      @rowCollapse="onRowCollapse"
-      @cell-edit-complete="onCellEditComplete"
-      @cell-edit-cancel="onCellEditCancel"
-    >
-      <template #header>
-        <div style="display: flex; gap: 2rem; justify-content: space-between">
-          <MultiSelect
-            v-if="hasColumnToggle"
-            :modelValue="selectedColumns"
-            :options="columns"
-            @update:modelValue="onToggle"
-            display="chip"
-            placeholder="Select Columns"
-          >
-          </MultiSelect>
+    class="gridlines"
+    :value="data"
+    ref="dataTable"
+    :reorderableColumns="true"
+    :removableSort="true"
+    :scrollable="true"
+    scrollHeight="flex"
+    :resizableColumns="false"
+    :columnResizeMode="'fit'"
+    :showGridlines="true"
+    :stripedRows="false"
+    :exportFilename="downloadFileName"
+    :globalFilterFields="columns"
+    v-model:filters="filters"
+    :editMode="isEditable ? 'cell' : undefined"
+    v-model:expandedRows="expandedRows"
+    @rowExpand="onRowExpand"
+    @rowCollapse="onRowCollapse"
+    @cell-edit-complete="onCellEditComplete"
+    @cell-edit-cancel="onCellEditCancel"
+  >
+    <template #header>
+      <div style="display: flex; gap: 2rem; justify-content: space-between">
+        <MultiSelect
+          v-if="hasColumnToggle"
+          :modelValue="selectedColumns"
+          :options="columns"
+          @update:modelValue="onToggle"
+          display="chip"
+          placeholder="Select Columns"
+        >
+        </MultiSelect>
 
-           <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
+        <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
            <PrimeVueButton text icon="pi pi-minus" label="Collapse All" @click="collapseAll" /> -->
 
-          <IconField v-if="isSearchEnabled">
-            <InputIcon>
-              <i class="pi pi-search"></i>
-            </InputIcon>
-            <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
-          </IconField>
-        </div>
+        <IconField v-if="isSearchEnabled">
+          <InputIcon>
+            <i class="pi pi-search"></i>
+          </InputIcon>
+          <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+        </IconField>
+      </div>
+    </template>
+    <template #empty v-if="isSearchEnabled"> No items found. </template>
+    <Column expander style="width: 10" v-if="hasChildren" />
+    <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
+    <Column
+      v-for="col in selectedColumns"
+      sortable
+      :key="col"
+      :field="col"
+      :header="col"
+      :style="`width: ${(1 / selectedColumns.length) * 100}%`"
+    >
+      <template #editor="{ data, field }" v-if="isEditable">
+        <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
       </template>
-      <template #empty v-if="isSearchEnabled"> No items found. </template>
-      <Column expander style="width: 10" v-if="hasChildren" />
-      <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
-      <Column
-        v-for="col in selectedColumns"
-        sortable
-        :key="col"
-        :field="col"
-        :header="col"
-        :style="`width: ${(1 / selectedColumns.length) * 100}%`"
-      >
-        <template #editor="{ data, field }" v-if="isEditable">
-          <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
-        </template>
-      </Column>
-      <template #expansion="slotProps">
-        <TableView
-          :data="slotProps.data.children"
-          :isSearchEnabled="false"
-          :hasColumnToggle="false"
-          :showRowNumber="showRowNumber"
-          :downloadFileName="downloadFileName"
-          :isEditable="isEditable"
-          :columns="columns"
-         />
-      </template>
-    </DataTable>
-  </template>
-  <script lang="ts">
+    </Column>
+    <template #expansion="slotProps">
+      <TableView
+        :data="slotProps.data.children"
+        :isSearchEnabled="false"
+        :hasColumnToggle="false"
+        :showRowNumber="showRowNumber"
+        :downloadFileName="downloadFileName"
+        :isEditable="isEditable"
+        :columns="columns"
+      />
+    </template>
+  </DataTable>
+</template>
+<script lang="ts">
 import {
-  Button,
+  // Button,
   Column,
   DataTable,
-  Drawer,
   IconField,
   InputIcon,
   InputText,
@@ -93,10 +92,9 @@ import { defineComponent, ref, type PropType } from 'vue'
 export default defineComponent({
   name: 'TableView',
   components: {
-    Drawer,
     DataTable,
     Column,
-    PrimeVueButton: Button,
+    // PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
     IconField,
     InputIcon,
@@ -167,19 +165,21 @@ export default defineComponent({
       selectedColumns.value = props.columns.filter((col) => selected.includes(col))
     }
 
-
-    const onRowExpand = (event) => {
-        // toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
-    };
-    const onRowCollapse = (event) => {
-        // toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
-    };
+    const onRowExpand = (_event) => {
+      // toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
+    }
+    const onRowCollapse = (_event) => {
+      // toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
+    }
     const expandAll = () => {
-        expandedRows.value = (props.data || []).reduce((acc, item, index) => (acc[index] = true) && acc, {});
-    };
+      expandedRows.value = (props.data || []).reduce(
+        (acc, item, index) => (acc[index] = true) && acc,
+        {},
+      )
+    }
     const collapseAll = () => {
-        expandedRows.value = undefined;
-    };
+      expandedRows.value = undefined
+    }
 
     return {
       isVisible,

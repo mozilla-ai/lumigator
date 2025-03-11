@@ -56,7 +56,7 @@ class TestLiteLLMModelClient:
 
     @pytest.fixture(scope="function")
     def api_key(self) -> str:
-        return "12345"
+        return API_KEY_VALUE
 
     @pytest.fixture
     def mock_standard_response(self):

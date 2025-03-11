@@ -6,7 +6,7 @@
         type="button"
         icon="pi pi-download"
         size="small"
-        label="Downlaod"
+        label="Download"
         rounded
         severity="secondary"
         :variant="'text'"

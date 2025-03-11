@@ -201,7 +201,7 @@ check-openapi-docs:
 # schema tests
 test-schemas-unit:
 	@cd lumigator/schemas; \
-	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="lumigator_schemas/tests/unit/*/test_*.py unit/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="lumigator_schemas/tests/unit/*/test_*.py unit/test_*.py"
 
 test-schemas: test-schemas-unit
 

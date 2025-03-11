@@ -488,7 +488,6 @@ def _test_launch_job_with_secret(
         description="Test run for Huggingface model",
         dataset=str(created_dataset.id),
         max_samples=2,
-        api_keys=secret_name,
         job_config=JobInferenceConfig(
             model="open-mistral-7b",
             provider="mistral",

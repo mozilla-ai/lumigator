@@ -29,8 +29,6 @@ class EvalJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     evaluation: EvaluationConfig
-    # Optional API key which can be used to access evaluation services such as GEval.
-    api_key: str | None = None
     model_config = ConfigDict(extra="forbid")
 
 

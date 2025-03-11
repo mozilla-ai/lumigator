@@ -103,19 +103,19 @@ def test_set_model(job_service, model, provider, input_base_url, returned_base_u
     assert base_url == returned_base_url
 
 
-def test_check_api_key_in_job_creation(
+def test_check_api_key_not_in_job_creation_config(
     job_service, secret_service, dataset_service, valid_upload_file, dependency_overrides_fakes
 ):
     key_name = "MISTRAL_KEY"
     key_value = "12345"
 
-    def submit_ray_job_fixture_side_effect(client: JobSubmissionClient, entrypoint: RayJobEntrypoint):
+    def submit_ray_job_fixture_side_effect(_: JobSubmissionClient, entrypoint: RayJobEntrypoint):
         parsed_args = json.loads(entrypoint.config.args["--config"])
-        if parsed_args["api_key"] != key_value:
-            raise Exception(f"Passed api key <{parsed_args['api_key']}> different from expected <{key_value}>")
+        if parsed_args.get("api_key") == key_value:
+            raise Exception(f"Passed API key <{parsed_args['api_key']}> in config")
 
     test_dataset = dataset_service.upload_dataset(valid_upload_file, DatasetFormat.JOB)
-    secret_service.upload_secret(key_name, SecretUploadRequest(value="12345", description="Mistral key"))
+    secret_service.upload_secret(key_name, SecretUploadRequest(value=key_value, description="Mistral key"))
     request = JobCreate(
         name="test_run_hugging_face",
         description="Test run for Huggingface model",

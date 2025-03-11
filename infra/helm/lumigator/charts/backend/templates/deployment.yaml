@@ -51,8 +51,9 @@ spec:
                   key: postgres-password
             - name: SQLALCHEMY_DATABASE_URL
               value: "postgresql://postgres:$(POSTGRESQL_PASSWORD)@{{ .Release.Name }}-postgresql/postgres"
+              blah: blah
             - name: RAY_HEAD_NODE_HOST
-              value: {{ include "lumigator.ray-address" .| quote }}
+              value:
             - name: RAY_DASHBOARD_PORT
               value: {{ required "Missing Ray dashboard node port" .Values.rayPort | quote }}
             - name: RAY_WORKER_GPUS
@@ -61,6 +62,7 @@ spec:
             {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
             - name: MISTRAL_API_KEY
               valueFrom:
+                blah: blah
                 secretKeyRef:
                   name: {{ include "lumigator.mistral-secret-ref" . }}
                   key: {{ .mistralSecretKey }}

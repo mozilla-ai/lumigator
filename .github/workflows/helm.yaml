@@ -26,6 +26,9 @@ jobs:
       - uses: azure/setup-helm@v4.3.0
         id: install
 
+      - name: Set up Kubeconform
+        uses: bmuschko/setup-kubeconform@v1
+
       - name: Helm template
         working-directory: ./infra/helm
-        run: helm template lumigator lumigator --set backend.s3Bucket=blah
+        run: helm template lumigator lumigator --set backend.s3Bucket=blah | kubeconform -ignore-missing-schemas -strict -summary

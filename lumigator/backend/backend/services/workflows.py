@@ -75,7 +75,7 @@ class WorkflowService:
         workflow: WorkflowResponse,
         request: WorkflowCreateRequest,
     ):
-        """Currently this is our only "workflow. As we make this more flexible to handle different
+        """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one

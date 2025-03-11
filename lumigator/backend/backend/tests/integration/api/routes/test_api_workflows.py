@@ -260,7 +260,7 @@ def run_workflow(
     workflow_payload = {
         "name": workflow_name,
         "description": "Test workflow for inf and eval",
-        "task_definitions": task_definition,
+        "task_definition": task_definition,
         "model": model,
         "provider": "hf",
         "dataset": str(dataset_id),

@@ -448,7 +448,6 @@ const onGenerateGT = () => {
 .dataset-title {
   @include mixins.paragraph;
   gap: 0.125rem;
-  display: flex
-
+  display: flex;
 }
 </style>

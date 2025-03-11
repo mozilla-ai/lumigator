@@ -35,7 +35,7 @@
       @cell-edit-cancel="onCellEditCancel"
     >
       <template #header>
-        <div style="display: flex; gap: 2rem; justify-content: space-between">
+        <div style="display: flex; gap: 2rem; justify-content: flex-end">
           <MultiSelect
             :modelValue="selectedColumns"
             :options="columns"
@@ -57,7 +57,13 @@
         </div>
       </template>
       <template #empty> No items found. </template>
-      <Column v-if="showRowNumber && selectedColumns.length" key="rowNumber" field="rowNumber" header="" sortable></Column>
+      <Column
+        v-if="showRowNumber && selectedColumns.length"
+        key="rowNumber"
+        field="rowNumber"
+        header=""
+        sortable
+      ></Column>
       <Column
         v-for="col in selectedColumns"
         sortable
@@ -84,7 +90,6 @@ import {
   InputIcon,
   InputText,
   MultiSelect,
-  SelectStyle,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
@@ -181,6 +186,11 @@ export default defineComponent({
 ::v-deep(.p-datatable-sort-icon) {
   width: 10px;
   height: 10px;
+}
+
+::v-deep(.p-datatable-header) {
+  padding-right: 0;
+  border: none;
 }
 
 .title-slot {

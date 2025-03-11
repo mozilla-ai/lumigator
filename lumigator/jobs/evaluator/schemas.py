@@ -54,6 +54,13 @@ class Bleu(BaseModel):
     bleu_mean: float
 
 
+class Comet(BaseModel):
+    """Neural metric for machine translation evaluation."""
+
+    scores: list[float]
+    mean_score: float
+
+
 class Rouge(BaseModel):
     rouge1: list[float]
     rouge2: list[float]

@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 
 RUN pip install --upgrade pip
+# Shouldn't be required as we use --no-cache-dir, but just to be sure.
+RUN pip cache purge
 RUN pip install --no-cache-dir transformers huggingface_hub loguru
 
 COPY cache/download_models.py /tmp/download_models.py

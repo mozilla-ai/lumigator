@@ -261,20 +261,24 @@ def fake_s3fs() -> S3FileSystem:
 @pytest.fixture(scope="function")
 def fake_s3_client(fake_s3fs) -> S3Client:
     """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://example.com:9000"
+    os.environ["AWS_ACCESS_KEY_ID"] = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
+    os.environ["AWS_DEFAULT_REGION"] = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
+    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ.get(
+        "AWS_SECRET_ACCESS_KEY", "lumigator"
+    )  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
     return FakeS3Client(MemoryFileSystem.store)
 
 
 @pytest.fixture(scope="function")
 def boto_s3_client() -> S3Client:
     """Provide a real S3 client."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://localhost:9000"
+    os.environ["AWS_ACCESS_KEY_ID"] = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
+    os.environ["AWS_DEFAULT_REGION"] = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
+    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ.get(
+        "AWS_SECRET_ACCESS_KEY", "lumigator"
+    )  # pragma: allowlist secret
+    os.environ["AWS_ENDPOINT_URL"] = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
     return boto3.client("s3")
 
 
@@ -414,7 +418,10 @@ def secret_repository(db_session):
 
 @pytest.fixture(scope="session")
 def secret_key() -> str:
-    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+    return os.environ.get(
+        "LUMIGATOR_SECRET_KEY",
+        "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o=",  # pragma: allowlist secret
+    )
 
 
 @pytest.fixture(scope="function")

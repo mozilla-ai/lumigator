@@ -5,7 +5,9 @@ set -e  # Exit on error
 # #######################
 # Source common functions
 # #######################
-COMMON_FILE="$(dirname "$0")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_FILE="$SCRIPT_DIR/common.sh"
+
 if [ -f "$COMMON_FILE" ]; then
     source "$COMMON_FILE"
 else

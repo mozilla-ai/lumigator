@@ -31,6 +31,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
+      - name: Install python
+        run: uv python install
+
       - name: Create a virtual environment
         run: uv venv
 
@@ -40,7 +43,9 @@ jobs:
           uv pip install pre-commit
 
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: |
+          source .venv/bin/activate
+          pre-commit run --all-files
         continue-on-error: false
 
   lint-frontend:

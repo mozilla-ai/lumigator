@@ -1,6 +1,9 @@
+from loguru import logger
 from transformers import PreTrainedModel, TFPreTrainedModel
 
 PreTrainedModelType = PreTrainedModel | TFPreTrainedModel
+
+DEFAULT_MAX_POSITION_EMBEDDINGS = 512
 
 
 class HuggingFaceModelMixin:
@@ -40,10 +43,15 @@ class HuggingFaceModelMixin:
         ]
         # Grab the first one in the list; usually there's only 1 anyway
         if len(matched_params):
-            return matched_params[0]
+            max_pos_emb = matched_params[0]
         else:
-            raise ValueError(
-                "No field corresponding to max_position_embeddings parameter found in model config"
+            # If none of the plausible fields are found (e.g. google/mt5 model family), use a default value
+            max_pos_emb = DEFAULT_MAX_POSITION_EMBEDDINGS
+            logger.warning(
+                "No field corresponding to max_position_embeddings parameter found"
                 f" for {pretrained_model.config.name_or_path}."
                 f" Checked alternative fields: {plausible_max_length_params}"
+                f" Setting max_position_embeddings to default value: {DEFAULT_MAX_POSITION_EMBEDDINGS}"
             )
+
+        return max_pos_emb

@@ -1,5 +1,5 @@
 import pytest
-from model_clients.mixins.huggingface_model_mixin import HuggingFaceModelMixin
+from model_clients.mixins.huggingface_model_mixin import DEFAULT_MAX_POSITION_EMBEDDINGS, HuggingFaceModelMixin
 from transformers import PretrainedConfig, PreTrainedModel
 
 
@@ -26,8 +26,8 @@ def test_get_max_position_embeddings_missing():
     config = MockPretrainedConfig()
     model = MockPreTrainedModel(config)
     mixin = HuggingFaceModelMixin()
-    with pytest.raises(ValueError, match="No field corresponding to max_position_embeddings parameter found"):
-        mixin.get_max_position_embeddings(model)
+    max_pos_emb = mixin.get_max_position_embeddings(model)
+    assert max_pos_emb == DEFAULT_MAX_POSITION_EMBEDDINGS
 
 
 def test_get_max_position_embeddings_none_model():

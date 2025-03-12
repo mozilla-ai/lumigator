@@ -1,126 +1,5 @@
 <template>
   <div class="l-experiment-results">
-    <!-- <DataTable
-      v-model:expandedRows="expandedRows"
-      class="gridlines"
-      :value="tableData"
-      scrollable
-      scrollHeight="90vh"
-      tableStyle="min-width: 50rem;min-width:70vw"
-    >
-      <Column expander />
-      <Column field="model" bodyStyle="width: 300px">
-        <template #header>
-          <span class="p-datatable-column-title">Model </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.model.display_name }}
-        </template>
-      </Column>
-      <Column field="meteor.meteor_mean" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.meteor" class="p-datatable-column-title">Meteor </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.meteor.meteor_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="bertscore" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.bertPrecision" class="p-datatable-column-title"
-            >BERT P
-          </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.bertscore.precision_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="bertscore" sortable>
-        <template #header>
-          <span class="p-datatable-column-title">BERT R </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.bertscore.recall_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="bertscore.f1" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.bertF1" class="p-datatable-column-title">BERT F1 </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.bertscore.f1_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="rouge.rouge1" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.rouge1" class="p-datatable-column-title">ROUGE-1 </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.rouge.rouge1_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="rouge.rouge2" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.rouge2" class="p-datatable-column-title">ROUGe-2 </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.rouge.rouge2_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="rouge.rougeL" sortable>
-        <template #header>
-          <span v-tooltip.bottom="tooltips.rougeL" class="p-datatable-column-title">ROUGE-L </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.rouge.rougeL_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="bleu.bleu" sortable>
-        <template #header>
-          <span class="p-datatable-column-title">BLEU </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.bleu.bleu_mean.toFixed(2) }}
-        </template>
-      </Column>
-      <Column field="model.info.model_size" sortable>
-        <template #header>
-          <span class="p-datatable-column-title">model size </span>
-        </template>
-        <template #body="slotProps">
-          {{
-            slotProps.data.model.info?.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2')
-          }}
-        </template>
-      </Column>
-      <Column field="model.info.parameter_count" sortable>
-        <template #header>
-          <span class="p-datatable-column-title">parameters </span>
-        </template>
-        <template #body="slotProps">
-          {{
-            slotProps.data.model.info?.parameter_count.replace(
-              /(\d+(?:\.\d+)?)([a-zA-Z]+)/g,
-              '$1 $2',
-            )
-          }}
-        </template>
-      </Column>
-      <Column field="runTime" sortable>
-        <template #header>
-          <span class="p-datatable-column-title">Run Time </span>
-        </template>
-        <template #body="slotProps">
-          {{ slotProps.data.runTime }}
-        </template>
-      </Column>
-      <template #expansion="slotProps">
-        <div>
-          <WorkflowResults :results="slotProps.data.jobResults" :no-radius="true" />
-        </div>
-      </template>
-    </DataTable> -->
-
     <TableView
       :data="tableData"
       :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows')"
@@ -134,19 +13,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRefs, type ComputedRef } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import type { Model } from '@/types/Model'
-import type { ExperimentResults } from '@/types/Experiment'
 import TableView from '../common/TableView.vue'
+import type {
+  TableDataForExperimentResults,
+  TableDataForWorkflowResults,
+} from '@/helpers/getExperimentResults'
 
 const modelStore = useModelStore()
 const { models } = storeToRefs(modelStore)
 // const expandedRows = ref([])
 
 const props = defineProps<{
-  results: ExperimentResults[]
+  results: TableDataForExperimentResults[] | TableDataForWorkflowResults[]
 }>()
 
 const { results } = toRefs(props)
@@ -169,6 +51,23 @@ const tooltipColorsConfig = ref({
   },
 })
 const tooltips = ref({
+  examples: {
+    value: `Text which is passed as an input to the model, together
+    with a task-dependent prompt.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value,
+  },
+  ground_truth: {
+    value: `Expected output we are comparing the model's predictions with
+     - all metrics are results of such a comparison.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value,
+  },
+  predictions: {
+    value: `Answers provided by the model after being prompted with the input.`,
+    class: 'metric-tooltip',
+    pt: tooltipColorsConfig.value,
+  },
   rouge1: {
     value: `Measures the overlap of individual words
      between the predicted and ground-truth summaries, focusing on basic word-level similarity.`,
@@ -208,20 +107,29 @@ const tooltips = ref({
   },
 })
 
-const tableData: ComputedRef<Array<Omit<ExperimentResults, 'model' & { model: Model }>>> = computed(
-  () => {
-    const data = results.value.map((result) => ({
+const tableData = computed(() => {
+  const isExperimentResults = isTableDataForExperimentResults(results.value)
+  if (!isExperimentResults) {
+    return results.value.map((result) => ({
       ...result,
       model: (
         models.value.find(
-          (model: Model) => model.model === result.model || model.display_name === result.model,
+          (model: Model) =>
+            model.model === (result as TableDataForExperimentResults).model ||
+            model.display_name === (result as TableDataForExperimentResults).model,
         )! as Model
-      ).display_name,
+      )?.display_name,
     }))
+  } else {
+    return results.value
+  }
+})
 
-    return data
-  },
-)
+function isTableDataForExperimentResults(
+  data: TableDataForExperimentResults[] | TableDataForWorkflowResults[],
+): data is TableDataForExperimentResults[] {
+  return (data as TableDataForExperimentResults[])[0].hasOwnProperty('model')
+}
 </script>
 
 <style scoped lang="scss"></style>

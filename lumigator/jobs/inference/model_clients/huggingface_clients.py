@@ -65,14 +65,17 @@ class HuggingFaceSeq2SeqSummarizationClient(
         # Adjust output sequence generation max tokens.
         self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
 
-    def predict(self, prompt) -> PredictionResult:
-        generation = self.pipeline(
-            prompt, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
-        )[0]
-
-        return PredictionResult(
-            prediction=generation["summary_text"],
+    def predict(self, examples: list) -> list[PredictionResult]:
+        generations = self.pipeline(
+            examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
         )
+
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation["summary_text"])
+            prediction_results.append(prediction_result)
+
+        return prediction_results
 
 
 class HuggingFaceCausalLMClient(BaseModelClient):
@@ -103,14 +106,12 @@ class HuggingFaceCausalLMClient(BaseModelClient):
 
         self.pipeline = pipeline(**pipeline_config)
 
-    def predict(self, prompt) -> PredictionResult:
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt},
-        ]
+    def predict(self, examples: list[list[dict[str, str]]]) -> list[PredictionResult]:
+        generations = self.pipeline(examples, max_new_tokens=self.config.generation_config.max_new_tokens)
 
-        generation = self.pipeline(messages, max_new_tokens=self.config.generation_config.max_new_tokens)[0]
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation[0]["generated_text"][-1]["content"])
+            prediction_results.append(prediction_result)
 
-        return PredictionResult(
-            prediction=generation["generated_text"][-1]["content"],
-        )
+        return prediction_results

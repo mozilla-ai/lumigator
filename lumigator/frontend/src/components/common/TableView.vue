@@ -67,7 +67,12 @@
         :showRowNumber="true"
         :downloadFileName="downloadFileName"
         :isEditable="isEditable"
-        :columns="Object.keys(slotProps.data.subRows[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
+        ref="subTable"
+        :columns="
+          Object.keys(slotProps.data.subRows[0]).filter(
+            (key) => key !== 'subRows' && key !== 'rowNumber',
+          )
+        "
       />
     </template>
   </DataTable>
@@ -84,7 +89,6 @@ import {
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
-  type DataTableProps,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
 import { defineComponent, ref, type PropType } from 'vue'
@@ -123,7 +127,7 @@ export default defineComponent({
       default: false,
     },
     data: {
-      type: Array as PropType<DataTableProps['value']>,
+      type: Array as PropType<Record<string, unknown>[]>,
       required: true,
     },
     columns: {
@@ -135,7 +139,7 @@ export default defineComponent({
   setup(props) {
     const isVisible = ref(true)
     const dataTable = ref()
-    const selectedColumns = ref(props.columns)
+    // const selectedColumns = ref(props.columns)
     const filters = ref({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     })
@@ -148,6 +152,27 @@ export default defineComponent({
       dataTable.value.exportCSV()
     }
 
+    const getAllColumns = (data: typeof props.data) => {
+      const columns = new Set(props.columns)
+      const traverse = (rows: any[]) => {
+        rows.forEach((row) => {
+          Object.keys(row).forEach((key) => {
+            if (key !== 'subRows') {
+              columns.add(key)
+            }
+          })
+          if (row.subRows) {
+            traverse(row.subRows)
+          }
+        })
+      }
+      traverse(data)
+      return Array.from(columns)
+    }
+
+    // const allColumns = getAllColumns(props.data)
+
+    const selectedColumns = ref(props.columns)
     const hasSubRows = props.data!.some((item) => item.subRows)
 
     const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {
@@ -189,6 +214,7 @@ export default defineComponent({
       onCellEditComplete,
       onCellEditCancel,
       filters,
+      // allColumns,
       selectedColumns,
       onToggle,
       expandedRows,

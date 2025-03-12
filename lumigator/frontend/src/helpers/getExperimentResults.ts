@@ -19,16 +19,30 @@ export async function getExperimentResults(
 
 export type TableDataForExperimentResults = {
   model: string
-  'Bert P': string
+  'bert-p': string
   Meteor: string
-  'Bert R': string
-  'Bert F1': string
-  'Rouge-1': string
-  'Rouge-2': string
-  'ROUGE-L': string
+  'bert-r': string
+  'bert-f1': string
+  'rouge-1': string
+  'rouge-2': string
+  'rouge-l': string
   bleu: string
   runTime: string | undefined
   subRows: TableDataForWorkflowResults[]
+}
+export type TableDataForWorkflowResults = {
+  Examples: string
+  'Ground Truth': string
+  predictions: string
+  'rouge-1': string
+  'rouge-2': string
+  'rouge-l': string
+  meteor: string
+  'bert-p': string
+  'bert-f1': string
+  bleu: string
+  evaluation_time: string
+  inference_time: string
 }
 
 function transformExperimentResults(objectData: WorkflowResults): TableDataForExperimentResults {
@@ -36,13 +50,13 @@ function transformExperimentResults(objectData: WorkflowResults): TableDataForEx
 
   return {
     model: data.artifacts.model,
-    'Bert P': data.metrics.bertscore.precision_mean.toFixed(2),
+    'bert-p': data.metrics.bertscore.precision_mean.toFixed(2),
     Meteor: data.metrics.meteor.meteor_mean.toFixed(2),
-    'Bert R': data.metrics.bertscore.recall_mean.toFixed(2),
-    'Bert F1': data.metrics.bertscore.f1_mean.toFixed(2),
-    'Rouge-1': data.metrics.rouge.rouge1_mean.toFixed(2),
-    'Rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2),
-    'ROUGE-L': data.metrics.rouge.rougeL_mean.toFixed(2),
+    'bert-r': data.metrics.bertscore.recall_mean.toFixed(2),
+    'bert-f1': data.metrics.bertscore.f1_mean.toFixed(2),
+    'rouge-1': data.metrics.rouge.rouge1_mean.toFixed(2),
+    'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2),
+    'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2),
     bleu: data.metrics.bleu.bleu_mean.toFixed(2),
     // 'model size': data.artifacts.model.info?.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2')
     // 'parameters':  data.artifacts.model.info?.parameter_count.replace(
@@ -52,21 +66,6 @@ function transformExperimentResults(objectData: WorkflowResults): TableDataForEx
     runTime: undefined, //getJobRuntime(results.id),
     subRows: transformWorkflowResults(data),
   }
-}
-
-export type TableDataForWorkflowResults = {
-  Examples: string
-  'Ground Truth': string
-  predictions: string
-  'rouge-1': string
-  'rouge-2': string
-  'rouge-L': string
-  meteor: string
-  'bert-p': string
-  'bert-f1': string
-  bleu: string
-  evaluation_time: string
-  inference_time: string
 }
 
 /**
@@ -86,7 +85,7 @@ export function transformWorkflowResults(
       predictions: objectData.artifacts.predictions?.[index],
       'rouge-1': objectData.metrics.rouge?.rouge1?.[index].toFixed(2) ?? 0,
       'rouge-2': objectData.metrics.rouge?.rouge2?.[index].toFixed(2) ?? 0,
-      'rouge-L': objectData.metrics.rouge?.rougeL?.[index].toFixed(2) ?? 0,
+      'rouge-l': objectData.metrics.rouge?.rougeL?.[index].toFixed(2) ?? 0,
       meteor: objectData.metrics.meteor?.meteor?.[index].toFixed(2) ?? 0,
       'bert-p': objectData.metrics.bertscore?.precision?.[index].toFixed(2) ?? 0,
       'bert-f1': objectData.metrics.bertscore?.f1?.[index].toFixed(2) ?? 0,

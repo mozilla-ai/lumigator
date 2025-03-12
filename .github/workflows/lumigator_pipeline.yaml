@@ -31,8 +31,21 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Lint
-        run: uvx ruff check --config ruff.toml
+      - name: Install python
+        run: uv python install
+
+      - name: Create a virtual environment
+        run: uv venv
+
+      - name: Install pre-commit
+        run: |
+          source .venv/bin/activate
+          uv pip install pre-commit
+
+      - name: Run pre-commit
+        run: |
+          source .venv/bin/activate
+          pre-commit run --all-files
         continue-on-error: false
 
   lint-frontend:
@@ -132,7 +145,7 @@ jobs:
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Spinning up containers for the tests
-        run: make start-lumigator-build
+        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
       - name: Run e2e tests
         run: npm run test:e2e
@@ -218,7 +231,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make start-lumigator-build
+        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
       - name: Output Ray logs
         run: docker logs lumigator-ray-1
@@ -293,7 +306,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make start-lumigator-build-postgres
+        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build-postgres
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh

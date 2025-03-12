@@ -6,7 +6,7 @@ from huggingface_hub.utils import validate_repo_id
 from loguru import logger
 from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, PositiveInt, computed_field
 
-from schemas import DatasetConfig, TaskType
+from schemas import DatasetConfig
 from schemas import GenerationConfig as BaseGenerationConfig
 from schemas import HuggingFacePipelineConfig as BaseHfPipelineConfig
 from schemas import InferenceJobConfig as BaseInferenceJobConfig
@@ -90,7 +90,6 @@ class GenerationConfig(BaseGenerationConfig):
 
 class HfPipelineConfig(BaseHfPipelineConfig, arbitrary_types_allowed=True):
     model_name_or_path: AssetPath = Field(title="The Model HF Hub repo ID", exclude=True)
-    task: TaskType
     revision: str = "main"  # Model version: branch, tag, or commit ID
     use_fast: bool = True  # Whether or not to use a Fast tokenizer if possible
     trust_remote_code: bool = False

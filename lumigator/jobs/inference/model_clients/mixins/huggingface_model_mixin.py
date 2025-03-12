@@ -49,7 +49,7 @@ class HuggingFaceModelMixin:
             max_pos_emb = DEFAULT_MAX_POSITION_EMBEDDINGS
             logger.warning(
                 "No field corresponding to max_position_embeddings parameter found"
-                f" for {self.config.hf_pipeline.model_name_or_path}."
+                f" for {pretrained_model.config.name_or_path}."
                 f" Checked alternative fields: {plausible_max_length_params}"
                 f" Setting max_position_embeddings to default value: {DEFAULT_MAX_POSITION_EMBEDDINGS}"
             )

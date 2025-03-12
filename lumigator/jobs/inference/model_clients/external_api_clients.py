@@ -20,9 +20,10 @@ class LiteLLMModelClient(BaseModelClient):
     - Customize the system prompt if needed
     """
 
-    def __init__(self, config: InferenceJobConfig):
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None) -> None:
         self.config = config
         self.system_prompt = self.config.system_prompt
+        self.api_key = api_key
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     @retry_with_backoff(max_retries=3)
@@ -40,6 +41,7 @@ class LiteLLMModelClient(BaseModelClient):
             top_p=self.config.generation_config.top_p,
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
+            api_key=self.api_key,
         )
 
     def predict(

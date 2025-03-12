@@ -40,7 +40,7 @@ class BackendSettings(BaseSettings):
 
     # Sensitive data patterns for redaction
     sensitive_patterns: list[re.Pattern] = [
-        re.compile(r"(?i)_api_key"),  # Matches fields like OPENAI_API_KEY, MISTRAL_API_KEY etc.
+        re.compile(r"(?i)api_key"),  # Matches fields like OPENAI_API_KEY, MISTRAL_API_KEY etc.
         re.compile(r"(?i)_token"),  # Matches fields like access_token, HF_TOKEN etc.
     ]
 
@@ -69,11 +69,23 @@ class BackendSettings(BaseSettings):
     MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
     DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
 
-    def inherit_ray_env(self, runtime_env_vars: Mapping[str, str]):
-        for env_var_name in self.RAY_WORKER_ENV_VARS:
-            env_var = os.environ.get(env_var_name, None)
-            if env_var is not None:
-                runtime_env_vars[env_var_name] = env_var
+    def with_ray_worker_env_vars(self, runtime_env_vars: Mapping[str, str]) -> dict[str, str]:
+        """Takes a mapping of runtime environment variables and merges it with environment
+        variables defined in ``RAY_WORKER_ENV_VARS``. If any of these predefined variables already exist
+        in the input mapping, the values from the environment will be preferred (if they exist).
+
+        :param runtime_env_vars: An immutable mapping of environment variables (key-value pairs) to be augmented
+        :returns: A dictionary containing the merged environment variables
+        """
+        # Start with a copy of the input environment variables.
+        merged_env_vars = dict(**runtime_env_vars)
+
+        # Add/update environment variables from RAY_WORKER_ENV_VARS if they exist
+        for var_name in self.RAY_WORKER_ENV_VARS:
+            if (env_value := os.getenv(var_name)) is not None:
+                merged_env_vars[var_name] = env_value
+
+        return merged_env_vars
 
     # URL for Ray jobs API
     @computed_field

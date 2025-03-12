@@ -52,6 +52,7 @@ export type CreateWorkflowPayload = {
   experiment_id: string
   model: string
   provider: string
+  secret_key_name?: string
   dataset: string
   max_samples: number
   base_url?: string

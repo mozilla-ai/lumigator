@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from inference.schemas import (
@@ -35,7 +36,7 @@ class JobDefinitionInference(JobDefinition):
             # Custom logic: if provider is hf, we run the hf model inside the ray job
             job_config.hf_pipeline = HuggingFacePipelineConfig(
                 model_name_or_path=request.job_config.model,
-                task=request.job_config.task_definition.task.value,
+                task=request.job_config.task_definition.task,
                 accelerator=request.job_config.accelerator,
                 revision=request.job_config.revision,
                 use_fast=request.job_config.use_fast,
@@ -60,7 +61,10 @@ class JobDefinitionInference(JobDefinition):
 # Inference job details
 # FIXME tweak paths in the backend
 INFERENCE_WORK_DIR = "../jobs/inference"
-INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
+if float(os.environ.get("RAY_WORKER_GPUS", 0)) > 0:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements.txt"
+else:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
 INFERENCE_COMMAND: str = "python inference.py"
 
 JOB_DEFINITION: JobDefinition = JobDefinitionInference(

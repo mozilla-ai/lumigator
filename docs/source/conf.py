@@ -22,12 +22,20 @@ module_paths = [
 ]
 
 for path in module_paths:
-    sys.path.append(str(path))
+    if str(path) not in sys.path:
+        sys.path.append(str(path))
 
-
-# import the modules that we want to document here to aboid the autodoc error
+# import the modules that we want to document here to avoid the autodoc error
 # see: https://github.com/pydantic/pydantic/discussions/7763#discussioncomment-8417097
-from lumigator_sdk import jobs, lm_datasets, models  # noqa: F401, E402
+from lumigator_sdk import (  # noqa: E402
+    experiments,  # noqa: F401
+    jobs,  # noqa: F401
+    lm_datasets,  # noqa: F401
+    models,  # noqa: F401
+    settings,  # noqa: F401
+    settings_secrets,  # noqa: F401
+    workflows,  # noqa: F401
+)
 
 project = "Lumigator 🐊"
 copyright = "2024, Mozilla AI"

@@ -10,6 +10,10 @@ from transformers import Pipeline, PreTrainedTokenizer
 
 from schemas import PredictionResult, TaskType
 
+TEST_PROMPT = [
+    [{"role": "system", "content": "You are a helpfull assistant."}, {"role": "user", "content": "Test prompt"}]
+]
+
 
 class TestHuggingFaceSeq2SeqSummarizationClient:
     @pytest.fixture
@@ -53,12 +57,12 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
 
         # Initialize client and call predict
         client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
-        result = client.predict("This is a test prompt.")
+        result = client.predict(["This is a test prompt."])
 
         # Verify prediction
-        assert isinstance(result, PredictionResult)
-        assert result.prediction == "This is a summary."
-        mock_pipeline_instance.assert_called_once_with("This is a test prompt.", max_new_tokens=100, truncation=True)
+        assert isinstance(result[0], PredictionResult)
+        assert result[0].prediction == "This is a summary."
+        mock_pipeline_instance.assert_called_once_with(["This is a test prompt."], max_new_tokens=100, truncation=True)
 
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
@@ -166,6 +170,12 @@ class TestHuggingFaceCausalLMClient:
         mock_config.hf_pipeline.task = TaskType.SUMMARIZATION
         mock_config.system_prompt = "Summarize the following text."
 
+        test_prompt = [
+            [
+                {"role": "system", "content": mock_config.system_prompt},
+                {"role": "user", "content": "Long article about climate change..."},
+            ]
+        ]
         # Ensure pipeline config is still set to text-generation (overridden in client init)
         mock_config.hf_pipeline.model_dump.return_value = {
             "model_name_or_path": "mock-causal-model",
@@ -174,13 +184,15 @@ class TestHuggingFaceCausalLMClient:
 
         # Setup mock pipeline response
         mock_response = [
-            {
-                "generated_text": [
-                    {"role": "system", "content": "Summarize the following text."},
-                    {"role": "user", "content": "Long article about climate change..."},
-                    {"role": "assistant", "content": "Climate change is affecting the planet in various ways."},
-                ]
-            }
+            [
+                {
+                    "generated_text": [
+                        {"role": "system", "content": "Summarize the following text."},
+                        {"role": "user", "content": "Long article about climate change..."},
+                        {"role": "assistant", "content": "Climate change is affecting the planet in various ways."},
+                    ]
+                }
+            ]
         ]
         mock_pipeline_instance = MagicMock()
         mock_pipeline_instance.return_value = mock_response
@@ -188,11 +200,11 @@ class TestHuggingFaceCausalLMClient:
 
         # Initialize client and call predict
         client = HuggingFaceCausalLMClient(mock_config)
-        result = client.predict("Long article about climate change...")
+        result = client.predict(test_prompt)
 
         # Verify prediction
-        assert isinstance(result, PredictionResult)
-        assert result.prediction == "Climate change is affecting the planet in various ways."
+        assert isinstance(result[0], PredictionResult)
+        assert result[0].prediction == "Climate change is affecting the planet in various ways."
 
         # Verify pipeline task was correctly overridden to text-generation
         mock_pipeline.assert_called_once()

@@ -1,6 +1,6 @@
 import json
 from http import HTTPMethod, HTTPStatus
-from typing import Any, Dict  # noqa: UP035
+from typing import Any
 
 import requests
 from loguru import logger
@@ -32,11 +32,11 @@ class ApiClient:
         self,
         url: str,
         method: HTTPMethod = HTTPMethod.GET,
-        params: Dict[str, Any] = None,  # noqa: UP006
-        data: Dict[str, Any] = None,  # noqa: UP006
-        files: Dict[str, Any] = None,  # noqa: UP006
-        headers: Dict[str, str] = None,  # noqa: UP006
-        json_: Dict[str, str] = None,  # noqa: UP006
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        files: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        json_: dict[str, str] | None = None,
         timeout: int = 10,
         verbose: bool = True,
         *args,
@@ -87,7 +87,7 @@ class ApiClient:
         files=None,
         json_data=None,
         verbose: bool = False,
-    ) -> requests.Response:
+    ) -> requests.Response | None:
         """Make a request to the specified endpoint.
 
         Args:
@@ -119,10 +119,8 @@ class ApiClient:
                 request error.
         """
         path = f"{self._api_url.rstrip('/')}/{api_path.lstrip('/')}"
+        response = self._make_request(path, method, data=data, files=files, json_=json_data, verbose=verbose)
 
-        response = self._make_request(
-            path, method, data=data, files=files, json_=json_data, verbose=verbose
-        )
         # Support returning a response for 200-204 status codes.
         # NOTE: Other status codes that are returned without an HTTP error aren't supported.
         # e.g. 307 - Temporary Redirect
@@ -170,9 +168,7 @@ class ApiClient:
         """
         path = f"{self._ray_url.rstrip('/')}/{api_path.lstrip('/')}"
 
-        response = self._make_request(
-            path, method, data=data, files=files, json_=json_data, verbose=verbose
-        )
+        response = self._make_request(path, method, data=data, files=files, json_=json_data, verbose=verbose)
         # Support returning a response for 200-204 status codes.
         # NOTE: Other status codes that are returned without an HTTP error aren't supported.
         # e.g. 307 - Temporary Redirect

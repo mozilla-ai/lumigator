@@ -170,6 +170,7 @@ class HuggingFacePrefixTranslationClient(
             self.config.hf_pipeline, self.model, self.tokenizer, specific_pipeline_task, api_key
         )
         self.set_seq2seq_max_length()
+        self.prefix = f"translate {self.source_language} to {self.target_language}: "
 
     def set_seq2seq_max_length(self):
         """Set the maximum sequence length for the seq2seq model.
@@ -185,8 +186,7 @@ class HuggingFacePrefixTranslationClient(
         self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
 
     def predict(self, examples: list) -> list[PredictionResult]:
-        prefix = f"translate {self.source_language} to {self.target_language}: "
-        prefixed_examples = [prefix + example for example in examples]
+        prefixed_examples = [self.prefix + example for example in examples]
 
         generations = self.pipeline(
             prefixed_examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True

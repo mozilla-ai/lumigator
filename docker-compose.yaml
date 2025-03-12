@@ -87,6 +87,7 @@ services:
           # If the file was mounted in a volume instead of
           # a shared dir, ownership needs to be changed
           # ... || true allows this to fail (-e is set)
+          time sudo chown ray:users /home/ray/.cache/huggingface || true
           time sudo chown ray:users /tmp/ray_pip_cache || true
           RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           mkdir -p /tmp/ray/session_latest/runtime_resources/pip

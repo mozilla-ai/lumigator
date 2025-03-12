@@ -2,7 +2,7 @@
 #
 # install_lumigator.sh
 #
-# A script to set up Lumigator locally, installing Docker and Docker Compose as needed.
+# A script to set up Lumigator locally, installing Docker and Docker Compose if needed.
 # Working for macOS and Linux (root-based and rootless Docker scenarios).
 
 set -e
@@ -11,6 +11,8 @@ set -e
 show_help() {
   echo "Usage: $0 [OPTIONS]"
   echo "Sets up Lumigator by checking your environment and installing dependencies."
+  echo "It will install the latest Docker and Docker Compose if they are not available."
+  echo "Finally, it sets up Lumigator."
   echo ""
   echo "Options:"
   echo "  -d, --directory DIR   Specify the directory for installing the code (default: current directory)"
@@ -373,8 +375,10 @@ EOF
 }
 
 install_docker_and_compose() {
-  log "This script will install the latest Docker and Docker Compose, then set up Lumigator."
-  read -p "Proceed? (yes/no): " user_response
+  log "This script will try to find an existing Docker & Docker compose installation."
+  log "If none is found, then it will install the latest Docker and Docker Compose available."
+  log "Finally, the script will set up Lumigator and start running it."
+  read -p "Proceed? (yes/No): " user_response
   if [ "$user_response" != "yes" ]; then
     log "Aborting installation."
     exit 0
@@ -463,8 +467,8 @@ main() {
   OVERWRITE_LUMIGATOR=false
   LUMIGATOR_FOLDER_NAME="lumigator_code"
   LUMIGATOR_REPO_URL="https://github.com/mozilla-ai/lumigator"
-  LUMIGATOR_REPO_TAG="refs/tags/v"
-  LUMIGATOR_VERSION="0.1.2-alpha"
+  LUMIGATOR_REPO_TAG="refs/tags/"
+  LUMIGATOR_VERSION="stable"
   LUMIGATOR_URL="http://localhost:80"
 
   while [ "$#" -gt 0 ]; do

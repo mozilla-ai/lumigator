@@ -87,6 +87,7 @@ services:
           # If the file was mounted in a volume instead of
           # a shared dir, ownership needs to be changed
           # ... || true allows this to fail (-e is set)
+          sudo chmod 777 /tmp/ray_pip_cache || true
           sudo chmod 777 /home/ray/.cache || true
           sudo chmod 777 /home/ray/.cache/huggingface || true
           sudo chmod 777 /home/ray/.cache/huggingface/hub || true

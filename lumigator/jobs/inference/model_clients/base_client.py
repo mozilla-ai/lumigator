@@ -18,6 +18,6 @@ class BaseModelClient(ABC):
         pass
 
     @abstractmethod
-    def predict(self, prompt: str) -> PredictionResult:
-        """Given a prompt, return a prediction."""
+    def predict(self, examples: str | list[list[dict[str, str]]]) -> list[PredictionResult]:
+        """Given a set of examples, return a set of predictions."""
         pass

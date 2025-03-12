@@ -15,6 +15,7 @@
     "lint": "eslint . --fix",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write src/ e2e/",
+    "format:check": "prettier --check src/ e2e/"
     "prepare": "cd ../../ && husky install lumigator/frontend/.husky"
   },
   "lint-staged": {

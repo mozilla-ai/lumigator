@@ -17,6 +17,7 @@ from lumigator_schemas.jobs import (
     JobResultResponse,
     JobSubmissionResponse,
 )
+from lumigator_schemas.secrets import SecretGetRequest, SecretUploadRequest
 from lumigator_schemas.workflows import WorkflowCreateRequest
 from pydantic import ConfigDict
 
@@ -91,3 +92,12 @@ class JobResultDownloadResponse(JobResultDownloadResponse):
 
 class WorkflowCreateRequest(WorkflowCreateRequest):
     model_config = ConfigDict(extra="forbid")
+
+
+class SecretUploadRequest(SecretUploadRequest):
+    model_config = ConfigDict(extra="forbid")
+
+
+class SecretGetRequest(SecretGetRequest):
+    # Append to the existing model_config which is used in the parent class.
+    model_config = {**SecretGetRequest.model_config, "extra": "forbid"}

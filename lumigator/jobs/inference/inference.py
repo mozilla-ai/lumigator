@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -67,7 +68,7 @@ def save_outputs(config: InferenceJobConfig, results: JobOutput) -> Path:
         logger.error(e)
 
 
-def run_inference(config: InferenceJobConfig) -> Path:
+def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Path:
     # initialize output dictionary
     output = {}
 
@@ -90,10 +91,10 @@ def run_inference(config: InferenceJobConfig) -> Path:
     if config.inference_server is not None:
         # a model *inference service* is passed
         output_model_name = config.inference_server.model
-        model_client = LiteLLMModelClient(config)
+        model_client = LiteLLMModelClient(config, api_key)
     elif config.hf_pipeline:
         logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
-        model_client = HuggingFaceModelClientFactory.create(config)
+        model_client = HuggingFaceModelClientFactory.create(config, api_key)
         output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")
@@ -156,5 +157,7 @@ if __name__ == "__main__":
         logger.error(err_str)
     else:
         config = InferenceJobConfig.model_validate_json(args.config)
-        result_dataset_path = run_inference(config)
+        # Attempt to retrieve the API key from the environment for use with the clients.
+        api_key = os.environ.get("api_key")
+        result_dataset_path = run_inference(config, api_key)
         logger.info(f"Inference results stored at {result_dataset_path}")

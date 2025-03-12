@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from loguru import logger
+from model_clients.external_api_clients import LiteLLMModelClient
 
 
 def load_json(path: Path) -> dict:
@@ -40,3 +41,8 @@ def configure_loguru(caplog):
     logger.add(PropagateHandler(), format="{message}")
     yield
     logger.remove()
+
+
+@pytest.fixture(scope="function")
+def api_key() -> str:
+    return "12345"

@@ -14,9 +14,6 @@ rayWorkerGPUs: ""
 
 serviceAccountName: ""
 
-existingMistralAPISecret: ""
-mistralAPIKey: ""
-
 evaluatorPipReqs: "/mzai/lumigator/jobs/evaluator/requirements.txt"
 evaluatorWorkDir: "/mzai/lumigator/jobs/evaluator"
 

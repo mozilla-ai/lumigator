@@ -331,7 +331,6 @@ class MLflowTrackingClient(TrackingClient):
             raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
-        """Get the logs for a workflow."""
         workflow_run = self._client.get_run(workflow_id)
         # get the jobs associated with the workflow
         all_jobs = self._client.search_runs(
@@ -377,23 +376,22 @@ class MLflowTrackingClient(TrackingClient):
         """List all workflows in an experiment."""
         raise NotImplementedError
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, data: RunOutputs):
-        """Log the run output to MLflow."""
+    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str) -> str:
+        """Link a started job to an experiment and a workflow."""
         run = self._client.create_run(
             experiment_id=experiment_id,
             tags={MLFLOW_PARENT_RUN_ID: workflow_id, "mlflow.runName": name},
         )
-        for metric, value in data.metrics.items():
-            self._client.log_metric(run.info.run_id, metric, value)
-        for parameter, value in data.parameters.items():
-            self._client.log_param(run.info.run_id, parameter, value)
-
         # log the ray_job_id as a param, we'll use this to get the logs later
-        self._client.log_param(run.info.run_id, "ray_job_id", data.ray_job_id)
+        self._client.log_param(run.info.run_id, "ray_job_id", job_id)
+        return run.info.run_id
 
-    def update_job(self, job_id: str, new_data: dict):
+    def update_job(self, job_id: str, data: RunOutputs):
         """Update the metrics and parameters of a job."""
-        raise NotImplementedError
+        for metric, value in data.metrics.items():
+            self._client.log_metric(job_id, metric, value)
+        for parameter, value in data.parameters.items():
+            self._client.log_param(job_id, parameter, value)
 
     def get_job(self, job_id: str):
         """Get the results of a job."""
@@ -412,9 +410,15 @@ class MLflowTrackingClient(TrackingClient):
         """Delete a job."""
         self._client.delete_run(job_id)
 
-    def list_jobs(self, experiment_id: str, workflow_id: str):
+    def list_jobs(self, workflow_id: str):
         """List all jobs in a workflow."""
-        raise NotImplementedError
+        workflow_run = self._client.get_run(workflow_id)
+        # get the jobs associated with the workflow
+        all_jobs = self._client.search_runs(
+            experiment_ids=[workflow_run.info.experiment_id],
+            filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
+        )
+        return all_jobs
 
 
 class MLflowClientManager:

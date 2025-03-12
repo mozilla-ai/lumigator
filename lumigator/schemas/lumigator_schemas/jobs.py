@@ -151,7 +151,7 @@ class JobInferenceConfig(BaseJobConfig):
     )
 
 
-class JobAnnotateConfig(BaseModel):
+class JobAnnotateConfig(BaseJobConfig):
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     task: TaskType = Field(default=TaskType.SUMMARIZATION)
     store_to_dataset: bool = False

@@ -5,8 +5,9 @@ repos:
       - id: detect-secrets
         exclude: |
           (?x)^(
-              notebooks/preprocess_thunderbird_samples.ipynb|
-              .+/tests/data/.+json
+              notebooks/walkthrough.ipynb|
+              .+/tests/data/.+json|
+              docs/.+
           )$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

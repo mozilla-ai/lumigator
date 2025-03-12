@@ -165,10 +165,10 @@ export default defineComponent({
       selectedColumns.value = props.columns.filter((col) => selected.includes(col))
     }
 
-    const onRowExpand = (_event) => {
+    const onRowExpand = () => {
       // toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
     }
-    const onRowCollapse = (_event) => {
+    const onRowCollapse = () => {
       // toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
     }
     const expandAll = () => {

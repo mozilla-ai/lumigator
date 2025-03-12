@@ -238,17 +238,15 @@ async function handleViewDatasetClicked(dataset: Dataset) {
 
   // transform parsed csv into DataTable props
   datasetColumns.value = columns
-  datasetFileContent.value = data
-    .slice(1, data.length)
-    .map((row: string[], rowIndex: number) => {
-      return row.reduce((accum, value, index, array) => {
-        return {
-          ...accum,
-          [columns[index]]: value,
-          rowNumber: rowIndex + 1,
-        }
-      }, {})
-    })
+  datasetFileContent.value = data.slice(1, data.length).map((row: string[], rowIndex: number) => {
+    return row.reduce((accum, value, index, array) => {
+      return {
+        ...accum,
+        [columns[index]]: value,
+        rowNumber: rowIndex + 1,
+      }
+    }, {})
+  })
 
   isDatasetViewerVisible.value = true
 }

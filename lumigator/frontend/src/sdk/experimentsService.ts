@@ -101,7 +101,9 @@ export async function createExperimentWithWorkflows(
         experiment_id: experimentId,
         model: model.model,
         provider: model.provider,
-...(model.requirements.includes('api-key') && {secret_key_name: `${model.provider}_api_key`}),
+        secret_key_name: model.requirements.includes('api_key')
+          ? `${model.provider}_api_key`
+          : undefined,
         base_url: model.base_url,
       }),
     ),

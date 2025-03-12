@@ -123,7 +123,7 @@
 
     <TableView
       :data="tableData"
-      :columns="Object.keys(tableData[0]).filter(key => key !== 'subRows')"
+      :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows')"
       :downloadFileName="'results'"
       :isEditable="false"
       :showRowNumber="true"
@@ -137,16 +137,13 @@
 import { computed, ref, toRefs, type ComputedRef } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import type { Model } from '@/types/Model'
 import type { ExperimentResults } from '@/types/Experiment'
-import WorkflowResults from './WorkflowResults.vue'
 import TableView from '../common/TableView.vue'
 
 const modelStore = useModelStore()
 const { models } = storeToRefs(modelStore)
-const expandedRows = ref([])
+// const expandedRows = ref([])
 
 const props = defineProps<{
   results: ExperimentResults[]
@@ -211,16 +208,20 @@ const tooltips = ref({
   },
 })
 
-const tableData: ComputedRef<Array<ExperimentResults & { model: Model }>> = computed(() => {
-  const data = results.value.map((result) => ({
-    ...result,
-    model: models.value.find(
-      (model: Model) => model.model === result.model || model.display_name === result.model,
-    )!.display_name,
-  }))
+const tableData: ComputedRef<Array<Omit<ExperimentResults, 'model' & { model: Model }>>> = computed(
+  () => {
+    const data = results.value.map((result) => ({
+      ...result,
+      model: (
+        models.value.find(
+          (model: Model) => model.model === result.model || model.display_name === result.model,
+        )! as Model
+      ).display_name,
+    }))
 
-  return data
-})
+    return data
+  },
+)
 </script>
 
 <style scoped lang="scss"></style>

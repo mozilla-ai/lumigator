@@ -47,7 +47,7 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="showExpResults && selectedExperimentResults.length"
+        v-if="showExpResults && selectedExperimentResults && selectedExperimentResults.length"
         :results="selectedExperimentResults"
       />
       <WorkflowResults
@@ -81,7 +81,7 @@ import { experimentsService } from '@/sdk/experimentsService'
 import { downloadContent } from '@/helpers/downloadContent'
 import { getExperimentResults } from '@/helpers/getExperimentResults'
 import { transformJobResults } from '@/helpers/transformJobResults'
-import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
+import { useConfirm, useToast, type DataTableProps, type ToastMessageOptions } from 'primevue'
 import WorkflowResults from '../experiments/WorkflowResults.vue'
 
 const { showSlidingPanel } = useSlidePanel()
@@ -92,7 +92,7 @@ const { selectedDataset } = storeToRefs(datasetStore)
 const { experiments } = storeToRefs(experimentStore)
 
 const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
-const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+const selectedExperimentResults: Ref<DataTableProps['value']> = ref([])
 
 const selectedExperiment = ref<Experiment | undefined>()
 const selectedWorkflow = ref<Workflow | undefined>()

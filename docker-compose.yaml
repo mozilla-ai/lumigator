@@ -83,6 +83,7 @@ services:
       - -c
       - |
           set -eaux
+          ls -la /home/ray/.cache/huggingface
           time mkdir -p /home/ray/.cache/huggingface && mkdir -p /tmp/ray_pip_cache
           # If the file was mounted in a volume instead of
           # a shared dir, ownership needs to be changed

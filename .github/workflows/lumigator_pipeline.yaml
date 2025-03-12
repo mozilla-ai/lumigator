@@ -117,6 +117,9 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build
 
+      - name: Output Ray logs
+        run: docker logs lumigator-ray-1
+
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 

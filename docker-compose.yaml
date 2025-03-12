@@ -84,12 +84,10 @@ services:
       - |
           set -eaux
           mkdir -p /home/ray/.cache/huggingface && mkdir -p /tmp/ray_pip_cache
+          ls -la /home/ray/.cache/huggingface
           # If the file was mounted in a volume instead of
           # a shared dir, ownership needs to be changed
           # ... || true allows this to fail (-e is set)
-          sudo chmod 777 /tmp/ray_pip_cache || true
-          sudo chmod 777 /home/ray/.cache || true
-          sudo chmod 777 /home/ray/.cache/huggingface || true
           sudo chmod 777 /home/ray/.cache/huggingface/hub || true
           ls -la /home/ray/.cache/huggingface
           RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001

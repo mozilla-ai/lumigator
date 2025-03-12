@@ -14,6 +14,8 @@ logger.info("(this might take a while...)")
 models = [model.strip() for model in models_env.split(",")]
 model_total = len(models)
 
+os.umask(0o000)
+
 for i, model in enumerate(models):
     model_count = i + 1
     logger.info(f"Downlading model {model_count}/{model_total}: {model} ...")

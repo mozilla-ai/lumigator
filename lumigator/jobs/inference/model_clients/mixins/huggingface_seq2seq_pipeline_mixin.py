@@ -53,7 +53,11 @@ class HuggingFaceSeq2SeqPipelineMixin:
         )
 
     def initialize_pipeline(
-        self, pipeline_config: HfPipelineConfig, model: TransformersModelType, tokenizer: TransformersTokenizerType
+        self,
+        pipeline_config: HfPipelineConfig,
+        model: TransformersModelType,
+        tokenizer: TransformersTokenizerType,
+        api_key: str | None = None,
     ) -> Pipeline:
         """Initialize the pipeline using the provided model and tokenizer.
 
@@ -72,7 +76,7 @@ class HuggingFaceSeq2SeqPipelineMixin:
 
         # Drop any parameters we are sending explicitly, but ensure anything is allowed to be passed to the pipeline.
         pipeline_kwargs = pipeline_config.model_dump(
-            exclude_unset=True, exclude={"model_config", "task", "revision", "device", "model", "tokenizer"}
+            exclude_unset=True, exclude={"model_config", "task", "revision", "device", "model", "tokenizer", "token"}
         )
 
         pipeline_obj = pipeline(
@@ -81,6 +85,7 @@ class HuggingFaceSeq2SeqPipelineMixin:
             device=pipeline_config.device,
             model=model,
             tokenizer=tokenizer,
+            token=api_key,
             **pipeline_kwargs,
         )
 

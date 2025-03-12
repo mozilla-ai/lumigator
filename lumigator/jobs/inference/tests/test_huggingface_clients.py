@@ -63,13 +63,13 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
-    def test_initialization(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config):
+    def test_initialization(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_config, api_key):
         """Test initialization of the seq2seq client."""
         # Setup mocks
         mock_model = MagicMock()
         mock_model.config.max_position_embeddings = 512
         mock_automodel.from_pretrained.return_value = mock_model
-        #
+
         mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
         mock_tokenizer_instance.model_max_length = 512
         mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
@@ -77,16 +77,18 @@ class TestHuggingFaceSeq2SeqSummarizationClient:
         mock_pipeline_instance = MagicMock(spec=Pipeline)
         mock_pipeline_instance.model = mock_model
         mock_pipeline_instance.tokenizer = mock_tokenizer_instance
+        mock_pipeline_instance.token = api_key
         mock_pipeline.return_value = mock_pipeline_instance
 
         # Initialize client
-        client = HuggingFaceSeq2SeqSummarizationClient(mock_config)
+        client = HuggingFaceSeq2SeqSummarizationClient(mock_config, api_key)
 
         # Verify initialization
         mock_tokenizer.from_pretrained.assert_called_once()
         mock_automodel.from_pretrained.assert_called_once()
         mock_pipeline.assert_called_once()
         assert client.pipeline == mock_pipeline_instance
+        assert client.api_key == api_key
 
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
@@ -127,6 +129,7 @@ class TestHuggingFaceCausalLMClient:
     def mock_config(self):
         """Create a mock InferenceJobConfig for testing causal LM client."""
         config = MagicMock(spec=InferenceJobConfig)
+
         config.hf_pipeline = MagicMock()
         config.hf_pipeline.model_name_or_path = "mock-causal-model"
         config.hf_pipeline.task = TaskType.TEXT_GENERATION

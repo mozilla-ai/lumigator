@@ -31,8 +31,21 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Lint
-        run: uvx ruff check --config ruff.toml
+      - name: Install python
+        run: uv python install
+
+      - name: Create a virtual environment
+        run: uv venv
+
+      - name: Install pre-commit
+        run: |
+          source .venv/bin/activate
+          uv pip install pre-commit
+
+      - name: Run pre-commit
+        run: |
+          source .venv/bin/activate
+          pre-commit run --all-files
         continue-on-error: false
 
   lint-frontend:

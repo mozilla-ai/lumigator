@@ -82,9 +82,7 @@ class Datasets:
             DatasetResponse: the information for the newly created dataset.
         """
         files = {"dataset": dataset, "format": (None, format.value)}
-        response = self.client.get_response(
-            self.DATASETS_ROUTE, method=HTTPMethod.POST, data=None, files=files
-        )
+        response = self.client.get_response(self.DATASETS_ROUTE, method=HTTPMethod.POST, data=None, files=files)
 
         return DatasetResponse(**(response.json()))
 
@@ -131,10 +129,7 @@ class Datasets:
         """
         extension = extension.strip().lower() if extension and extension.strip() else None
 
-        endpoint = (
-            f"{self.DATASETS_ROUTE}/{id}/download"
-            f"{f'?extension={extension}' if extension is not None else ''}"
-        )
+        endpoint = f"{self.DATASETS_ROUTE}/{id}/download{f'?extension={extension}' if extension is not None else ''}"
         response = self.client.get_response(endpoint)
 
         return DatasetDownloadResponse(**(response.json()))

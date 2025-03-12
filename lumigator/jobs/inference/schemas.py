@@ -4,7 +4,7 @@ This is because the backend and this job will be running in different environmen
 """
 
 from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class DatasetConfig(BaseModel):
@@ -14,6 +14,7 @@ class DatasetConfig(BaseModel):
 
 class JobConfig(BaseModel):
     max_samples: int
+    batch_size: PositiveInt = 1
     storage_path: str
     output_field: str | None = "predictions"
     enable_tqdm: bool = True

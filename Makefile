@@ -192,8 +192,7 @@ update-openapi-docs:
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run python -m backend.openapi_spec ../../docs/source/specs/openapi.json
-	uvx ruff check --config ruff.toml --fix
-	uvx ruff format --config ruff.toml
+	@echo "Reminder: Please run 'pre-commit run --all-files' locally before committing your changes for consistency."
 
 # This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
 # Lumigator must be running on localhost

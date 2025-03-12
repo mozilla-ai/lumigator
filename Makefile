@@ -148,6 +148,11 @@ start-lumigator: config-generate-env
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
+    source $(CONFIG_BUILD_DIR)/.env ; \
+	echo "Check permissions of hf cache:" ${HF_HOME} ; \
+	ls -lad ${HF_HOME} ; \
+	ls -la ${HF_HOME} ; \
+	chmod -R 777 ${HF_HOME} ; \
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)

@@ -11,6 +11,12 @@ from transformers import AutoConfig, pipeline
 from schemas import PredictionResult
 
 
+def is_encoder_decoder(model_name: str) -> bool:
+    """Check if the model is an encoder-decoder model"""
+    model_config = AutoConfig.from_pretrained(model_name)
+    return model_config.is_encoder_decoder
+
+
 class HuggingFaceModelClientFactory:
     """Factory class that creates the appropriate specialized client"""
 
@@ -18,17 +24,15 @@ class HuggingFaceModelClientFactory:
     def create(config: InferenceJobConfig, api_key: str | None = None) -> BaseModelClient:
         """Factory method to create the appropriate client based on config"""
         model_name = config.hf_pipeline.model_name_or_path
+        is_model_encoder_decoder = is_encoder_decoder(model_name)
         task = config.task_definition.task
 
-        # Load model config to determine architecture - Seq2Seq or CausalLM
-        model_config = AutoConfig.from_pretrained(model_name, trust_remote_code=config.hf_pipeline.trust_remote_code)
-
         # Summarization task with Seq2Seq model
-        if task == TaskType.SUMMARIZATION and model_config.is_encoder_decoder:
+        if task == TaskType.SUMMARIZATION and is_model_encoder_decoder:
             logger.info(f"Running inference with HuggingFaceSeq2SeqSummarizationClient for {model_name}")
             return HuggingFaceSeq2SeqSummarizationClient(config, api_key)
 
-        elif task == TaskType.TRANSLATION and model_config.is_encoder_decoder:
+        elif task == TaskType.TRANSLATION and is_model_encoder_decoder:
             # Load the supported translation model families configuration
             translation_config = load_translation_config()
 
@@ -183,7 +187,6 @@ class HuggingFacePrefixTranslationClient(
     def predict(self, examples: list) -> list[PredictionResult]:
         prefix = f"translate {self.source_language} to {self.target_language}: "
         prefixed_examples = [prefix + example for example in examples]
-        logger.info(f"Prefixed examples: {prefixed_examples}")
 
         generations = self.pipeline(
             prefixed_examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True

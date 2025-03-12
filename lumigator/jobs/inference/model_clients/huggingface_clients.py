@@ -13,7 +13,7 @@ class HuggingFaceModelClientFactory:
     """Factory class that creates the appropriate specialized client"""
 
     @staticmethod
-    def create(config: InferenceJobConfig) -> BaseModelClient:
+    def create(config: InferenceJobConfig, api_key: str | None = None) -> BaseModelClient:
         """Factory method to create the appropriate client based on config"""
         model_name = config.hf_pipeline.model_name_or_path
         task = config.hf_pipeline.task
@@ -24,12 +24,12 @@ class HuggingFaceModelClientFactory:
         # Summarization task with Seq2Seq model
         if task == TaskType.SUMMARIZATION and model_config.is_encoder_decoder:
             logger.info(f"Running inference with HuggingFaceSeq2SeqSummarizationClient for {model_name}")
-            return HuggingFaceSeq2SeqSummarizationClient(config)
+            return HuggingFaceSeq2SeqSummarizationClient(config, api_key)
 
         # Default to CausalLM for the general text-generation task
         else:
             logger.info(f"Running inference with HuggingFaceCausalLMClient for {model_name}")
-            return HuggingFaceCausalLMClient(config)
+            return HuggingFaceCausalLMClient(config, api_key)
 
 
 class HuggingFaceSeq2SeqSummarizationClient(
@@ -44,11 +44,12 @@ class HuggingFaceSeq2SeqSummarizationClient(
     https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.SummarizationPipeline
     """
 
-    def __init__(self, config: InferenceJobConfig):
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
         self.config = config
+        self.api_key = api_key
         self.model = self.initialize_model(self.config.hf_pipeline)
         self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
-        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer)
+        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key)
         self.set_seq2seq_max_length()
 
     def set_seq2seq_max_length(self):
@@ -89,14 +90,16 @@ class HuggingFaceCausalLMClient(BaseModelClient):
     response to the prompt.
     """
 
-    def __init__(self, config: InferenceJobConfig):
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
         self.config = config
+        self.api_key = api_key
         self.system_prompt = config.system_prompt
 
         # CausalLM models supported for summarization and translation tasks through system_prompt
         # HF pipeline task overwritten to 'text-generation' since these causalLMs are not task-specific models
         pipeline_config = config.hf_pipeline.model_dump()
         pipeline_config["task"] = TaskType.TEXT_GENERATION
+        pipeline_config["token"] = self.api_key
 
         self.pipeline = pipeline(**pipeline_config)
 

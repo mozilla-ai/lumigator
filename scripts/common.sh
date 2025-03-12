@@ -26,3 +26,15 @@ echo_green() {
 echo_white() {
     echo -e "\033[1;37m$1\033[0m"
 }
+
+echo_dark_grey() {
+    echo -e "\033[1;90m$1\033[0m"
+}
+
+echo_magenta() {
+    echo -e "\033[1;35m$1\033[0m"
+}
+
+echo_cyan() {
+    echo -e "\033[1;36m$1\033[0m"
+}

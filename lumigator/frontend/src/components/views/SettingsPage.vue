@@ -84,6 +84,7 @@ const toast = useToast()
 const maskedValue = '****************'
 
 // API key map is used to track API key names (based on the provider name) to their corresponding ref, title and whether the setting exists remotely.
+// NOTE: the key names are based on the provider name and should not be changed: ${provider}_api_key
 const apiKeyMap = new Map<
   string,
   { reference: Ref<string>; existsRemotely: boolean; title: string }

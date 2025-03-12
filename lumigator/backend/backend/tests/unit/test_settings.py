@@ -1,3 +1,6 @@
+import os
+from unittest.mock import patch
+
 import pytest
 
 
@@ -39,3 +42,50 @@ def test_api_allowed_origins(backend_settings, test_input, expected):
 
     result = backend_settings.API_CORS_ALLOWED_ORIGINS
     assert result == expected
+
+
+@pytest.mark.parametrize(
+    "input_env_vars, mock_env_vars, ray_worker_env_vars, expected_result",
+    [
+        # Test case: No env vars matching expected Ray worker env vars
+        ({"VAR1": "value1", "VAR2": "value2"}, {}, ["RAY_WORKER_ENV_VAR3"], {"VAR1": "value1", "VAR2": "value2"}),
+        # Test case: Adding new env var which exits in Ray worker env var list
+        (
+            {"VAR1": "value1", "VAR2": "value2"},
+            {"RAY_WORKER_ENV_VAR3": "new_value"},
+            ["RAY_WORKER_ENV_VAR3"],
+            {"VAR1": "value1", "VAR2": "value2", "RAY_WORKER_ENV_VAR3": "new_value"},
+        ),
+        # Test case: Overwriting existing env var
+        (
+            {"VAR1": "value1", "RAY_WORKER_ENV_VAR2": "value2"},
+            {"RAY_WORKER_ENV_VAR2": "new_value2"},
+            ["RAY_WORKER_ENV_VAR2"],
+            {"VAR1": "value1", "RAY_WORKER_ENV_VAR2": "new_value2"},
+        ),
+        # Test case: No changes if Ray worker env var list is empty
+        ({"VAR1": "value1", "VAR2": "value2"}, {}, [], {"VAR1": "value1", "VAR2": "value2"}),
+        # Test case: Only Ray worker env var list (and corresponding env vars) exist
+        ({}, {"RAY_WORKER_ENV_VAR1": "new_value1"}, ["RAY_WORKER_ENV_VAR1"], {"RAY_WORKER_ENV_VAR1": "new_value1"}),
+        # Test case: Multiple variables with the same name in the environment
+        (
+            {"RAY_WORKER_ENV_VAR1": "value1", "RAY_WORKER_ENV_VAR2": "value2"},
+            {"RAY_WORKER_ENV_VAR1": "new_value1", "RAY_WORKER_ENV_VAR2": "new_value2"},
+            ["RAY_WORKER_ENV_VAR1", "RAY_WORKER_ENV_VAR2"],
+            {"RAY_WORKER_ENV_VAR1": "new_value1", "RAY_WORKER_ENV_VAR2": "new_value2"},
+        ),
+    ],
+)
+def test_augment_ray_worker_env_vars(input_env_vars, mock_env_vars, ray_worker_env_vars, expected_result):
+    # Mock the environment variables using patch
+    with patch.dict(os.environ, mock_env_vars):
+        from backend.settings import settings
+
+        # Update the Ray worker environment variables list
+        settings.RAY_WORKER_ENV_VARS = ray_worker_env_vars
+        # Take a copy of the input before calling the function
+        input_copy = input_env_vars.copy()
+        result = settings.with_ray_worker_env_vars(input_env_vars)
+        assert result == expected_result
+        # Ensure the input dictionary is not mutated
+        assert input_env_vars == input_copy

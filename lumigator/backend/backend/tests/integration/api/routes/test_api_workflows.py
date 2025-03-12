@@ -417,10 +417,13 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
     )
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     assert workflow_1_details.status == WorkflowStatus.FAILED
-    for job_id in workflow_1_details.jobs:
-        response = local_client.get(f"/jobs/{job_id}")
+    for job in workflow_1_details.jobs:
+        all_params = {param["name"]: param["value"] for param in job.parameters if "name" in param and "value" in param}
+        response = local_client.get(f"/jobs/{all_params['ray_job_id']}")
+        response_json = response.json()
+        logger.critical(f"--> {response_json}")
         assert response.status_code == 200
-        assert (JobResponse.model_validate(**response.json())).status.value == JobStatus.STOPPED
+        assert (JobResponse(**response_json)).status.value == JobStatus.STOPPED
 
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
@@ -488,7 +491,6 @@ def _test_launch_job_with_secret(
         description="Test run for Huggingface model",
         dataset=str(created_dataset.id),
         max_samples=2,
-        api_keys=secret_name,
         job_config=JobInferenceConfig(
             model="open-mistral-7b",
             provider="mistral",

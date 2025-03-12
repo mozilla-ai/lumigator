@@ -220,9 +220,12 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build
 
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
+
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make test-${{ matrix.test }}-integration
+        run: make test-${{ matrix.test }}-integration IGNORE_ENV_FILE=true
 
       - name: Collect logs in case of failure
         if: failure()
@@ -287,6 +290,9 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make start-lumigator-build-postgres
 
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
+
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         # This setting only affects backend integration tests
@@ -295,7 +301,7 @@ jobs:
         # The SDK tests already use a separate Lumigator started
         # with postgres overrides
         # Allowing secrets for local test postgres
-        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration IGNORE_ENV_FILE=true # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
         if: failure()

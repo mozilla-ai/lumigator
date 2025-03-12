@@ -5,7 +5,7 @@
       :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows')"
       :downloadFileName="'results'"
       :isEditable="false"
-      :showRowNumber="true"
+      :showRowNumber="false"
       :isSearchEnabled="true"
       ref="dataTable"
     />

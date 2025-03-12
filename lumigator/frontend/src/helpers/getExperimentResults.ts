@@ -80,6 +80,7 @@ export function transformWorkflowResults(
 ): TableDataForWorkflowResults[] {
   return objectData.artifacts.examples.map((example, index: number) => {
     return {
+      rowNumber: index + 1,
       Examples: example,
       'Ground Truth': objectData.artifacts.ground_truth?.[index],
       predictions: objectData.artifacts.predictions?.[index],

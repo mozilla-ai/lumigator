@@ -64,10 +64,10 @@
         :data="slotProps.data.subRows"
         :isSearchEnabled="false"
         :hasColumnToggle="false"
-        :showRowNumber="false"
+        :showRowNumber="true"
         :downloadFileName="downloadFileName"
         :isEditable="isEditable"
-        :columns="Object.keys(slotProps.data.subRows[0]).filter((key) => key !== 'subRows')"
+        :columns="Object.keys(slotProps.data.subRows[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
       />
     </template>
   </DataTable>

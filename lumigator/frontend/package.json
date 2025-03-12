@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@primevue/themes": "^4.2.5",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "papaparse": "^5.5.2",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",

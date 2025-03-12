@@ -243,6 +243,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ray-logs
+          overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
       - name: Upload backend logs in case of failure
@@ -250,6 +251,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-logs
+          overwrite: true
           path: /tmp/backendlogs/backend.log
 
   integration-tests-postgres:

@@ -78,11 +78,11 @@
     - summarization:
     - translation:
 
-- display_name: open-mistral-7b
-  model: open-mistral-7b
+- display_name: ministral-8b-latest
+  model: ministral-8b-latest
   provider: mistral
   website_url: https://mistral.ai/technology/#models
-  description: Mistral's 7B model, hosted by mistral
+  description: Mistral's 8B model, hosted by mistral
   requirements:
     - api_key
   tasks:

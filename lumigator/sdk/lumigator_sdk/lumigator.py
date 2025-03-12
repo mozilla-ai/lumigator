@@ -6,6 +6,7 @@ from lumigator_sdk.health import Health
 from lumigator_sdk.jobs import Jobs
 from lumigator_sdk.lm_datasets import Datasets
 from lumigator_sdk.models import Models
+from lumigator_sdk.settings import Settings
 from lumigator_sdk.workflows import Workflows
 
 # Only retries initial connections
@@ -56,3 +57,4 @@ class LumigatorClient:
         self.models = Models(self.client)
         self.workflows = Workflows(self.client)
         self.experiments = Experiments(self.client)
+        self.settings = Settings(self.client)

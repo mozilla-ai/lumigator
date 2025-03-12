@@ -4,7 +4,7 @@ from typing import Annotated
 import torch
 from huggingface_hub.utils import validate_repo_id
 from loguru import logger
-from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, computed_field
+from pydantic import AfterValidator, BeforeValidator, ConfigDict, Field, PositiveInt, computed_field
 
 from schemas import DatasetConfig, TaskType
 from schemas import GenerationConfig as BaseGenerationConfig
@@ -69,6 +69,7 @@ class Accelerator(str, Enum):
 
 class JobConfig(BaseJobConfig):
     max_samples: int = -1  # set to all samples by default
+    batch_size: PositiveInt = 1
     storage_path: str
     output_field: str = "predictions"
     enable_tqdm: bool = True

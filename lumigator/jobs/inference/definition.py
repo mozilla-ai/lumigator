@@ -27,6 +27,7 @@ class JobDefinitionInference(JobDefinition):
             dataset=DatasetConfig(path=dataset_path),
             job=JobConfig(
                 max_samples=request.max_samples,
+                batch_size=request.batch_size,
                 storage_path=storage_path,
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",

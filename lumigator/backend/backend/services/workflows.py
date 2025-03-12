@@ -97,6 +97,7 @@ class WorkflowService:
             name=f"{request.name}-inference",
             dataset=request.dataset,
             max_samples=request.max_samples,
+            batch_size=request.batch_size,
             job_config=job_infer_config,
         )
 

@@ -53,13 +53,21 @@ class HuggingFaceSeq2SeqPipelineMixin:
         )
 
     def initialize_pipeline(
-        self, pipeline_config: HfPipelineConfig, model: TransformersModelType, tokenizer: TransformersTokenizerType
+        self,
+        pipeline_config: HfPipelineConfig,
+        model: TransformersModelType,
+        tokenizer: TransformersTokenizerType,
+        specific_pipeline_task: str | None = None,
+        api_key: str | None = None,
     ) -> Pipeline:
         """Initialize the pipeline using the provided model and tokenizer.
 
         :param model: The model to be used in the pipeline.
         :param tokenizer: The tokenizer to be used in the pipeline.
         :param pipeline_config: The HuggingFace pipeline configuration.
+        :param specific_pipeline_task: The specific pipeline task to if you want to override
+                                       the simple task in the config (translation_en_to_de instead of translation).
+        :param api_key: The API key to use for the pipeline.
         :returns: The initialized pipeline object.
         :raises TypeError: If any of the parameters are None.
         """
@@ -72,15 +80,16 @@ class HuggingFaceSeq2SeqPipelineMixin:
 
         # Drop any parameters we are sending explicitly, but ensure anything is allowed to be passed to the pipeline.
         pipeline_kwargs = pipeline_config.model_dump(
-            exclude_unset=True, exclude={"model_config", "task", "revision", "device", "model", "tokenizer"}
+            exclude_unset=True, exclude={"model_config", "task", "revision", "device", "model", "tokenizer", "token"}
         )
 
         pipeline_obj = pipeline(
-            task=pipeline_config.task,
+            task=pipeline_config.task if specific_pipeline_task is None else specific_pipeline_task,
             revision=pipeline_config.revision,
             device=pipeline_config.device,
             model=model,
             tokenizer=tokenizer,
+            token=api_key,
             **pipeline_kwargs,
         )
 

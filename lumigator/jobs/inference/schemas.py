@@ -3,9 +3,8 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
-from enum import Enum
-
-from pydantic import BaseModel, ConfigDict
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class DatasetConfig(BaseModel):
@@ -13,14 +12,9 @@ class DatasetConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class TaskType(str, Enum):
-    SUMMARIZATION = "summarization"
-    TRANSLATION = "translation"
-    TEXT_GENERATION = "text-generation"
-
-
 class JobConfig(BaseModel):
     max_samples: int
+    batch_size: PositiveInt = 1
     storage_path: str
     output_field: str | None = "predictions"
     enable_tqdm: bool = True
@@ -64,12 +58,11 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    # Optional API key which can be used to access inference services such as OpenAI, or gated models in Hugging Face.
-    api_key: str | None = None
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None
     hf_pipeline: HuggingFacePipelineConfig | None = None
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model_config = ConfigDict(extra="forbid")
 
 

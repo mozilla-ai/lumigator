@@ -121,18 +121,40 @@ class JobService:
 
         return record
 
+    async def stop_job(self, job_id: UUID) -> bool:
+        """Attempts to stop an existing job in Ray by ID, and waits (for up to 10 seconds) for it to 'complete'.
+
+        :param job_id: The ID of the job to stop
+        :returns: True if the job was successfully stopped, False otherwise
+        """
+        try:
+            self._stop_job(job_id)
+        except JobNotFoundError:
+            # If the job is not found, we consider it stopped
+            return True
+
+        try:
+            status = await self.wait_for_job_complete(job_id, max_wait_time_sec=10)
+        except JobUpstreamError as e:
+            loguru.logger.error("Failed to stop job {}: {}", job_id, e)
+            return False
+
+        return status and status.lower() == JobStatus.STOPPED.value
+
     def _stop_job(self, job_id: UUID):
         """Stops an existing job in Ray by ID.
 
         :param job_id: The ID of the job to stop
+        :raises JobNotFoundError: If the job doesn't exist in Ray
+        :raises JobUpstreamError: If there is an unexpected error with the upstream service while stopping the job
         """
         resp = requests.post(urljoin(settings.RAY_JOBS_URL, f"{job_id}/stop"), timeout=5)  # 5 seconds
         if resp.status_code == HTTPStatus.NOT_FOUND:
-            raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None
+            raise JobNotFoundError(job_id, "Unable to stop Ray job") from None
         elif resp.status_code != HTTPStatus.OK:
             raise JobUpstreamError(
                 "ray",
-                f"Unexpected status code getting job logs: {resp.status_code}, error: {resp.text or ''}",
+                f"Unexpected status code when trying to stop job: {resp.status_code}, error: {resp.text or ''}",
             ) from None
 
     def _update_job_record(self, job_id: UUID, **updates) -> JobRecord:
@@ -252,6 +274,7 @@ class JobService:
         loguru.logger.info("Handling evaluation result")
 
         result_key = self._get_results_s3_key(job_id)
+        # TODO: Add dependency to the S3 service and use a path creation function.
         with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             return JobResultObject.model_validate(json.loads(f.read()))
 
@@ -302,7 +325,7 @@ class JobService:
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
-        :param max_wait_time: The maximum time to wait for the job to complete.
+        :param max_wait_time_sec: The maximum time in seconds to wait for the job to complete.
         :return: The status of the job when it completes.
         :rtype: str
         :raises JobUpstreamError: If there is an error with the upstream service returning the
@@ -354,9 +377,14 @@ class JobService:
     def create_job(
         self,
         request: JobCreate,
-        experiment_id: UUID = None,
     ) -> JobResponse:
-        """Creates a new evaluation workload to run on Ray and returns the response status."""
+        """Creates a new evaluation workload to run on Ray and returns the response status.
+
+        :param request: The job creation request.
+        :return: The job response.
+        :raises JobTypeUnsupportedError: If the job type is not supported.
+        :raises SecretNotFoundError: If the secret key identifying the API key required for the job is not found.
+        """
         # Typing won't allow other job_type's
         job_type = request.job_config.job_type
         # Prepare the job configuration that will be sent to submit the ray job.
@@ -375,12 +403,16 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
+        # Build runtime ENV for workers
+        runtime_env_vars = settings.with_ray_worker_env_vars({"MZAI_JOB_ID": str(record.id)})
+
         # Include requested secrets (API keys) from stored secrets.
         secret_name = getattr(request.job_config, "secret_key_name", None)
         if secret_name:
             value = self._secret_service.get_decrypted_secret_value(secret_name)
             if value:
-                job_config.api_key = value
+                # Add the secret to the runtime env vars using 'api_key' to identify it in jobs.
+                runtime_env_vars["api_key"] = value
             else:
                 raise SecretNotFoundError(secret_name) from None
 
@@ -401,13 +433,11 @@ class JobService:
             args=job_config_args,
         )
 
-        # build runtime ENV for workers
-        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        settings.inherit_ray_env(runtime_env_vars)
-
         runtime_env = {
             "pip": job_settings.pip_reqs,
             "working_dir": job_settings.work_dir,
+            # FIXME move to a constant
+            "py_modules": ["../schemas/lumigator_schemas"],
             "env_vars": runtime_env_vars,
         }
 

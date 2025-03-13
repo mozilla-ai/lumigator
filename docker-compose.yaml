@@ -106,11 +106,6 @@ services:
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY
       - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
-      - DEEPSEEK_API_KEY
-      - XAI_API_KEY
-      - HF_TOKEN
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION
@@ -154,7 +149,7 @@ services:
       - DEPLOYMENT_TYPE
       # The local file needs to be available through a mount,
       # if persistence is needed
-      - SQLALCHEMY_DATABASE_URL=${DATABASE_URL}
+      - SQLALCHEMY_DATABASE_URL
       - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
@@ -169,8 +164,6 @@ services:
       - INFERENCE_WORK_DIR
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
       - RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION
       - LUMIGATOR_API_CORS_ALLOWED_ORIGINS

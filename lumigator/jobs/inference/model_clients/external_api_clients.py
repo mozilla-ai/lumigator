@@ -1,5 +1,6 @@
 from inference_config import InferenceJobConfig
-from litellm import Usage, completion
+from litellm import batch_completion
+from litellm.types.utils import ModelResponse
 from loguru import logger
 from model_clients.base_client import BaseModelClient
 from utils import retry_with_backoff
@@ -20,66 +21,72 @@ class LiteLLMModelClient(BaseModelClient):
     - Customize the system prompt if needed
     """
 
-    def __init__(self, config: InferenceJobConfig):
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None) -> None:
         self.config = config
         self.system_prompt = self.config.system_prompt
+        self.api_key = api_key
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     @retry_with_backoff(max_retries=3)
-    def _make_completion_request(self, litellm_model: str, prompt: str):
+    def _make_completion_request(self, litellm_model: str, examples: list[dict[str, str]]) -> list[ModelResponse]:
         """Make a request to the LLM with proper error handling"""
-        return completion(
+        return batch_completion(
             model=litellm_model,
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ],
+            messages=examples,
             max_tokens=self.config.generation_config.max_new_tokens,
             frequency_penalty=self.config.generation_config.frequency_penalty,
             temperature=self.config.generation_config.temperature,
             top_p=self.config.generation_config.top_p,
             drop_params=True,
             api_base=self.config.inference_server.base_url if self.config.inference_server else None,
+            api_key=self.api_key,
         )
 
-    def predict(
-        self,
-        prompt: str,
-    ) -> PredictionResult:
-        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
-        logger.info(f"Sending request to {litellm_model}")
-        response = self._make_completion_request(litellm_model, prompt)
+    def _create_prediction_result(self, response_with_index):
+        index, response = response_with_index
+        logger.info(response)
 
-        # LiteLLM gives us the cost of each API which is nice.
-        # Eventually we can add this to the response object as well.
-        cost = response._hidden_params["response_cost"]
-        logger.info(f"Response cost: {cost}")
-        usage: Usage = response["usage"]
-        if usage:
-            logger.info(f"Usage: {usage}")
+        # Extract and log cost. In the case of self-hosted models,
+        # there is not a _hidden_params attribute in the response.
+        if hasattr(response, "_hidden_params") and "response_cost" in response._hidden_params:
+            cost = response._hidden_params["response_cost"]
+        else:
+            cost = 0
+        logger.info(f"Response {index} cost {cost}")
+
+        # Extract and log usage
+        usage = response["usage"]
+        logger.info(f"Response {index} usage: {usage}.")
+
+        # Extract prediction from response
         prediction = response.choices[0].message.content
-        print(response.choices[0].message)
-        # LiteLLM will give us the reasoning if the API gives it back in its own field
-        # When talking to llamafile, the reasoning_content key is not present
-        if "reasoning_content" in response.choices[0].message.provider_specific_fields:
-            reasoning = response.choices[0].message.reasoning_content
-        else:
-            reasoning = None
+
+        # Check if reasoning is available in provider_specific_fields
+        has_reasoning_content = bool(
+            response.choices[0].message.provider_specific_fields.get("reasoning_content", None)
+        )
+        if not has_reasoning_content:
+            logger.info("No specific reasoning content found in response.")
+        reasoning = response.choices[0].message.reasoning_content if has_reasoning_content else None
         if reasoning:
-            reasoning_tokens = response["usage"]["completion_tokens_details"].reasoning_tokens
-        else:
-            reasoning_tokens = 0
-        # In some cases (aka vLLM deployments of DeepSeek R1) the reasoning is in the completion itself
-        # APIs are still catching up to adding "reasoning" as a separate field
-        # since it involves post processing model output
+            logger.info("Reasoning: {reasoning}")
+
+        # Calculate reasoning tokens
+        reasoning_tokens = usage["completion_tokens_details"].reasoning_tokens if has_reasoning_content else 0
+
+        # Handle cases where reasoning is embedded in the completion (e.g., DeepSeek R1)
         if not reasoning and "</think>" in prediction:
-            logger.info("Reasoning found in completion")
-            reasoning = prediction.split("</think>")[0].strip()
-            prediction = prediction.split("</think>")[1].strip()
+            logger.info(
+                "You’re using a reasoning model, but the response lacks reasoning content. "
+                "Trying to extract the reasoning content..."
+            )
+            reasoning_parts = prediction.split("</think>")
+            reasoning = reasoning_parts[0].strip()
+            prediction = reasoning_parts[1].strip()
             # Rough estimate of reasoning tokens
-            # https://www.restack.io/p/tokenization-answer-token-size-word-count-cat-ai
             reasoning_tokens = int(len(reasoning.split()) / 0.75)
 
+        # Create and return prediction result
         return PredictionResult(
             prediction=prediction,
             reasoning=reasoning,
@@ -91,3 +98,13 @@ class LiteLLMModelClient(BaseModelClient):
                 answer_tokens=usage.completion_tokens - reasoning_tokens,
             ),
         )
+
+    def predict(self, examples: list[list[dict[str, str]]]) -> list[PredictionResult]:
+        litellm_model = f"{self.config.inference_server.provider}/{self.config.inference_server.model}"
+        logger.info(f"Sending request to {litellm_model}")
+
+        responses: list = self._make_completion_request(litellm_model, examples)
+
+        prediction_results = list(map(self._create_prediction_result, enumerate(responses)))
+
+        return prediction_results

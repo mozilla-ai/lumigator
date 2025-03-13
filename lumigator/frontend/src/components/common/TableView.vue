@@ -21,39 +21,47 @@
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
-    <template #header>
-      <div style="display: flex; gap: 2rem; justify-content: space-between">
-        <MultiSelect
-          v-if="hasColumnToggle"
-          :modelValue="selectedColumns"
-          :options="columns"
-          @update:modelValue="onToggle"
-          display="chip"
-          placeholder="Select Columns"
-        >
-        </MultiSelect>
+      <template #header>
+        <div style="display: flex; gap: 2rem; justify-content: flex-end">
+          <MultiSelect
+            :modelValue="selectedColumns"
+            :options="columns"
+            :size="'small'"
+            :selectedItemsLabel="`${selectedColumns.length} Columns Selected`"
+            :max-selected-labels="0"
+            @update:modelValue="onToggle"
+            display="chip"
+            placeholder="Select Columns"
+          >
+          </MultiSelect>
 
-        <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
-           <PrimeVueButton text icon="pi pi-minus" label="Collapse All" @click="collapseAll" /> -->
+          <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
+          <PrimeVueButton text icon="pi pi-minus" label="Collapse All" @click="collapseAll" /> -->
 
-        <IconField v-if="isSearchEnabled">
+          <IconField v-if="isSearchEnabled">
           <InputIcon>
             <i class="pi pi-search"></i>
           </InputIcon>
-          <InputText v-model="filters['global'].value" placeholder="Keyword Search" />
+          <InputText v-model="filters['global'].value" placeholder="Search" />
         </IconField>
       </div>
     </template>
     <template #empty v-if="isSearchEnabled"> No items found. </template>
     <Column expander style="width: 10" v-if="hasChildren" />
-    <Column v-if="showRowNumber" key="rowNumber" field="rowNumber" header="" sortable></Column>
+    <Column
+        v-if="showRowNumber && selectedColumns.length"
+        key="rowNumber"
+        field="rowNumber"
+        header=""
+        sortable
+      ></Column>
     <Column
       v-for="col in selectedColumns"
       sortable
       :key="col"
       :field="col"
       :header="col"
-      :style="`width: ${(1 / selectedColumns.length) * 100}%`"
+      :style="`width: ${selectedColumns.length > 0 ? (1 / selectedColumns.length) * 100 : 100}%`"
     >
       <template #editor="{ data, field }" v-if="isEditable">
         <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
@@ -210,6 +218,11 @@ export default defineComponent({
 ::v-deep(.p-datatable-sort-icon) {
   width: 10px;
   height: 10px;
+}
+
+::v-deep(.p-datatable-header) {
+  padding-right: 0;
+  border: none;
 }
 
 .title-slot {

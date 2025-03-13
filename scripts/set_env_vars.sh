@@ -38,12 +38,15 @@ set_vars_from_file() {
     # Check if the file exists and is readable
     if [[ -f "$ENV_VARS_FILE" ]]; then
         while IFS= read -r line; do
-            # Skip empty lines or lines starting with #
-            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            # Remove inline comments and trim spaces
+            sanitized_line=$(echo "$line" | sed 's/^\([^#]*=[^#]*\).*/\1/' | xargs)
+
+            # Skip empty lines or lines starting with whitespace followed by #
+            [[ -z "$sanitized_line" || "$sanitized_line" =~ ^[[:space:]]*# ]] && continue
 
             # Split the line into key and value based on the first '=' occurrence
-            key="${line%%=*}"
-            value="${line#*=}"
+            key="${sanitized_line%%=*}"
+            value="${sanitized_line#*=}"
 
             # Trim spaces from key and value
             key=$(echo "$key" | xargs)

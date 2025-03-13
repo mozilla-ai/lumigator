@@ -1,5 +1,3 @@
-{{ include "lumigator.mistral-default-secret" . }}
-{{ include "lumigator.openai-default-secret" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,21 +55,6 @@ spec:
               value: {{ required "Missing Ray dashboard node port" .Values.rayPort | quote }}
             - name: RAY_WORKER_GPUS
               value: {{ required "Missing Ray Worker GPU number" .Values.rayWorkerGPUs | quote }}
-              # pragma: allowlist-nextline secret
-            {{- if or .Values.mistralAPIKey .Values.existingMistralAPISecret }}
-            - name: MISTRAL_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "lumigator.mistral-secret-ref" . }}
-                  key: {{ .mistralSecretKey }}
-            {{- end }}
-            {{- if or .Values.openaiAPIKey .Values.existingOpenaiAPISecret }}
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "lumigator.openai-secret-ref" . }}
-                  key: {{ .openaiSecretKey }}
-            {{- end }}
             - name: EVALUATOR_PIP_REQS
               value: {{ .Values.evaluatorPipReqs }}
             - name: EVALUATOR_WORK_DIR

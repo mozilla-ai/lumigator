@@ -21,24 +21,24 @@
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
-      <template #header>
-        <div style="display: flex; gap: 2rem; justify-content: flex-end">
-          <MultiSelect
-            :modelValue="selectedColumns"
-            :options="columns"
-            :size="'small'"
-            :selectedItemsLabel="`${selectedColumns.length} Columns Selected`"
-            :max-selected-labels="0"
-            @update:modelValue="onToggle"
-            display="chip"
-            placeholder="Select Columns"
-          >
-          </MultiSelect>
+    <template #header>
+      <div style="display: flex; gap: 2rem; justify-content: flex-end">
+        <MultiSelect
+          :modelValue="selectedColumns"
+          :options="columns"
+          :size="'small'"
+          :selectedItemsLabel="`${selectedColumns.length} Columns Selected`"
+          :max-selected-labels="0"
+          @update:modelValue="onToggle"
+          display="chip"
+          placeholder="Select Columns"
+        >
+        </MultiSelect>
 
-          <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
+        <!-- <PrimeVueButton text icon="pi pi-plus" label="Expand All" @click="expandAll" />
           <PrimeVueButton text icon="pi pi-minus" label="Collapse All" @click="collapseAll" /> -->
 
-          <IconField v-if="isSearchEnabled">
+        <IconField v-if="isSearchEnabled">
           <InputIcon>
             <i class="pi pi-search"></i>
           </InputIcon>
@@ -49,12 +49,12 @@
     <template #empty v-if="isSearchEnabled"> No items found. </template>
     <Column expander style="width: 10" v-if="hasChildren" />
     <Column
-        v-if="showRowNumber && selectedColumns.length"
-        key="rowNumber"
-        field="rowNumber"
-        header=""
-        sortable
-      ></Column>
+      v-if="showRowNumber && selectedColumns.length"
+      key="rowNumber"
+      field="rowNumber"
+      header=""
+      sortable
+    ></Column>
     <Column
       v-for="col in selectedColumns"
       sortable

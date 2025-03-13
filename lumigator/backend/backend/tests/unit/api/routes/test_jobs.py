@@ -129,7 +129,7 @@ def test_missing_api_key_in_job_creation(
         max_samples=2,
         api_keys=key_name,
         job_config=JobInferenceConfig(
-            model="open-mistral-7b",
+            model="ministral-8b-latest",
             provider="mistral",
         ),
     )

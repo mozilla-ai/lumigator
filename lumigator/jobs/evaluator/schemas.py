@@ -52,6 +52,13 @@ class Bleu(BaseModel):
     bleu_mean: float
 
 
+class Comet(BaseModel):
+    """Neural metric for machine translation evaluation."""
+
+    scores: list[float]
+    mean_score: float
+
+
 class Rouge(BaseModel):
     rouge1: list[float]
     rouge2: list[float]
@@ -95,6 +102,7 @@ class EvalJobMetrics(BaseModel):
     meteor: Meteor | None = None
     rouge: Rouge | None = None
     bleu: Bleu | None = None
+    comet: Comet | None = None
     g_eval_summarization: GEvalSummarizationMetrics | None = None
     token_length: TokenLength | None = None
 

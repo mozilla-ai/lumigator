@@ -17,9 +17,7 @@ export type ModelInfo = {
   tensor_type: string
 }
 
-export type Task =
-  | { summarization: SummarizationTask }
-  | { translation: TranslationTask }
+export type Task = { summarization: SummarizationTask } | { translation: TranslationTask }
 
 export type SummarizationTask = {
   early_stopping?: boolean

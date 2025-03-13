@@ -38,7 +38,7 @@ def test_get_datasets_none(lumi_client, request_mock):
 def test_get_dataset_ok(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
     request_mock.get(
-        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}/{data['id']}",
         status_code=HTTPStatus.OK,
         json=data,
     )
@@ -50,7 +50,7 @@ def test_get_dataset_ok(lumi_client, json_data_dataset, request_mock):
 def test_delete_dataset_ok(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
     request_mock.delete(
-        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}/{data['id']}",
         status_code=HTTPStatus.OK,
         json=data,
     )
@@ -61,7 +61,7 @@ def test_delete_dataset_ok(lumi_client, json_data_dataset, request_mock):
 def test_delete_dataset_not_found(lumi_client, json_data_dataset, request_mock):
     data = load_json(json_data_dataset)
     request_mock.delete(
-        url=lumi_client.client._api_url + f'/{Datasets.DATASETS_ROUTE}/{data["id"]}',
+        url=lumi_client.client._api_url + f"/{Datasets.DATASETS_ROUTE}/{data['id']}",
         status_code=HTTPStatus.NOT_FOUND,
         json=data,
     )
@@ -79,7 +79,5 @@ def test_create_dataset_ok(lumi_client, json_data_dataset, request_mock):
     )
 
     content = io.BytesIO(bytearray(b"0" * 20))
-    dataset = lumi_client.datasets.create_dataset(
-        dataset=(data["filename"], content), format=DatasetFormat.JOB
-    )
+    dataset = lumi_client.datasets.create_dataset(dataset=(data["filename"], content), format=DatasetFormat.JOB)
     assert dataset is not None

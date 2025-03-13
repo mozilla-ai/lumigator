@@ -25,6 +25,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.models import ModelsResponse
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
@@ -524,9 +525,12 @@ def job_definition_fixture():
     )
 
 
-@pytest.fixture
-def model_specs_data():
+@pytest.fixture(scope="function")
+def model_specs_data() -> list[ModelsResponse]:
     """Fixture that loads and returns the YAML data."""
     with Path(MODELS_PATH).open() as file:
         model_specs = yaml.safe_load(file)
-    return model_specs
+
+    models = [ModelsResponse.model_validate(item) for item in model_specs]
+
+    return models

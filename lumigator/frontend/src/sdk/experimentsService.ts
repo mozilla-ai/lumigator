@@ -110,7 +110,7 @@ export async function createExperimentWithWorkflows(
     ),
   )
 
-  return [experimentId, workflowResults];
+  return [experimentId, workflowResults]
 }
 
 export const experimentsService = {

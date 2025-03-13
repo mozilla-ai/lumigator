@@ -138,9 +138,6 @@ import {
   experimentsService,
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
-import type { Workflow } from '@/types/Workflow.ts'
-import { getAxiosError } from '@/helpers/getAxiosError'
-import type { AxiosError } from 'axios'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -234,10 +231,15 @@ async function handleRunExperimentClicked() {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
 
-  const [experimentId, workflowResults] = await experimentsService.createExperimentWithWorkflows(experimentPayload, modelSelection.value.selectedModels)
+  const [experimentId, workflowResults] = await experimentsService.createExperimentWithWorkflows(
+    experimentPayload,
+    modelSelection.value.selectedModels,
+  )
   // Separate successful workflows and errors
-  const workflows = workflowResults.filter(r => r.status === 'fulfilled').map(r => r.value)
-  const failures = workflowResults.filter(r => r.status === 'rejected').map(r => r.reason?.response?.data?.detail)
+  const workflows = workflowResults.filter((r) => r.status === 'fulfilled').map((r) => r.value)
+  const failures = workflowResults
+    .filter((r) => r.status === 'rejected')
+    .map((r) => r.reason?.response?.data?.detail)
 
   failures.forEach((msg: string) => {
     toast.add({

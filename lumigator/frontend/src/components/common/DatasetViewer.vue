@@ -85,7 +85,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '@/styles/mixins';
-
 .title-slot {
   @include mixins.paragraph;
 }

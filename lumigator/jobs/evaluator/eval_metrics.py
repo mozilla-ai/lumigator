@@ -142,7 +142,7 @@ class EvaluationMetrics:
         It requires both the original input and the reference / ground truth, as well as the model's prediction.
         """
         logger.info("Running COMET evaluation")
-        ev = evaluate.load("comet")
+        ev = evaluate.load("comet", "eamt22-cometinho-da")
 
         # output is a dictionary with scores and mean score
         # scores is a list of floats, one per example

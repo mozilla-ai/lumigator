@@ -247,10 +247,10 @@ test-backend-unit:
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration: config-generate-env
-	@if [ "$(IGNORE_ENV_FILE)" = "true" ]; then \
-		source ./scripts/set_env_vars.sh ""; \
-	else \
+	@if [ "$(USE_ENV_FILE)" = "true" ]; then \
 		source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env"; \
+	else \
+		source ./scripts/set_env_vars.sh ""; \
 	fi && \
 	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \

@@ -78,7 +78,7 @@
     - summarization:
     - translation:
 
-- display_name: ministral-8b-latest
+- display_name: ministral-8b
   model: ministral-8b-latest
   provider: mistral
   website_url: https://mistral.ai/technology/#models

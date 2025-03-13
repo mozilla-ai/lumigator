@@ -1,11 +1,11 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from inference_config import InferenceJobConfig
 
 from schemas import PredictionResult
 
 
-class BaseModelClient:
+class BaseModelClient(ABC):
     """Abstract class for a model client, used to provide a uniform interface
     (currentnly just a simple predict method) to models served in different
     ways (e.g. HF models loaded locally, OpenAI endpoints, vLLM inference
@@ -18,6 +18,6 @@ class BaseModelClient:
         pass
 
     @abstractmethod
-    def predict(self, prompt: str) -> PredictionResult:
-        """Given a prompt, return a prediction."""
+    def predict(self, examples: str | list[list[dict[str, str]]]) -> list[PredictionResult]:
+        """Given a set of examples, return a set of predictions."""
         pass

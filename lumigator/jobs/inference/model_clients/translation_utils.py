@@ -57,7 +57,7 @@ def get_language_from_tag(language_tag: str) -> Language | None:
     try:
         normalized = language_tag.replace("_", "-")
         return Language.get(normalized)
-    except LookupError:
+    except LanguageTagError:
         return None
 
 

@@ -5,8 +5,9 @@ repos:
       - id: detect-secrets
         exclude: |
           (?x)^(
-              notebooks/preprocess_thunderbird_samples.ipynb|
-              .+/tests/data/.+json
+              notebooks/walkthrough.ipynb|
+              .+/tests/data/.+json|
+              docs/.+
           )$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -21,10 +22,16 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.9.6
+    rev: v0.9.10
     hooks:
       # Run the linter.
       - id: ruff
-        args: [ --fix ]
+        args:
+          - --config
+          - ruff.toml
+          - --fix
       # Run the formatter.
       - id: ruff-format
+        args:
+          - --config
+          - ruff.toml

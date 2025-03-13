@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from inference.schemas import (
@@ -24,6 +25,7 @@ class JobDefinitionInference(JobDefinition):
             dataset=DatasetConfig(path=dataset_path),
             job=JobConfig(
                 max_samples=request.max_samples,
+                batch_size=request.batch_size,
                 storage_path=storage_path,
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
@@ -60,7 +62,10 @@ class JobDefinitionInference(JobDefinition):
 # Inference job details
 # FIXME tweak paths in the backend
 INFERENCE_WORK_DIR = "../jobs/inference"
-INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
+if float(os.environ.get("RAY_WORKER_GPUS", 0)) > 0:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements.txt"
+else:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
 INFERENCE_COMMAND: str = "python inference.py"
 
 JOB_DEFINITION: JobDefinition = JobDefinitionInference(

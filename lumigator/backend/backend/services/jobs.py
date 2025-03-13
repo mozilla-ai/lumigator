@@ -375,12 +375,16 @@ class JobService:
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
 
+        # Build runtime ENV for workers
+        runtime_env_vars = settings.with_ray_worker_env_vars({"MZAI_JOB_ID": str(record.id)})
+
         # Include requested secrets (API keys) from stored secrets.
         secret_name = getattr(request.job_config, "secret_key_name", None)
         if secret_name:
             value = self._secret_service.get_decrypted_secret_value(secret_name)
             if value:
-                job_config.api_key = value
+                # Add the secret to the runtime env vars using 'api_key' to identify it in jobs.
+                runtime_env_vars["api_key"] = value
             else:
                 raise SecretNotFoundError(secret_name) from None
 
@@ -400,10 +404,6 @@ class JobService:
             command=job_settings.command,
             args=job_config_args,
         )
-
-        # build runtime ENV for workers
-        runtime_env_vars = {"MZAI_JOB_ID": str(record.id)}
-        settings.inherit_ray_env(runtime_env_vars)
 
         runtime_env = {
             "pip": job_settings.pip_reqs,

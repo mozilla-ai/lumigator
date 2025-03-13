@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, Literal, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
 
 from lumigator_schemas.redactable_base_model import RedactableBaseModel
 from lumigator_schemas.tasks import (
@@ -151,7 +151,7 @@ class JobInferenceConfig(BaseJobConfig):
     )
 
 
-class JobAnnotateConfig(BaseModel):
+class JobAnnotateConfig(BaseJobConfig):
     job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
     task: TaskType = Field(default=TaskType.SUMMARIZATION)
     store_to_dataset: bool = False
@@ -172,6 +172,7 @@ class JobCreate(BaseModel):
     description: str = ""
     dataset: UUID
     max_samples: int = -1  # set to all samples by default
+    batch_size: PositiveInt = 1
     job_config: JobSpecificConfig = Field(discriminator="job_type")
 
 

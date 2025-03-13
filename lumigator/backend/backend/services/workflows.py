@@ -1,6 +1,7 @@
 import json
 import numbers
 from pathlib import Path
+from uuid import UUID
 
 import loguru
 from fastapi import BackgroundTasks
@@ -75,7 +76,7 @@ class WorkflowService:
         workflow: WorkflowResponse,
         request: WorkflowCreateRequest,
     ):
-        """Currently this is our only "workflow. As we make this more flexible to handle different
+        """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
         # input is WorkflowCreateRequest, we need to split the configs and generate one
@@ -90,12 +91,13 @@ class WorkflowService:
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
             generation_config=request.generation_config,
-            api_key=request.secret_key_name,
+            secret_key_name=request.secret_key_name,
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
             dataset=request.dataset,
             max_samples=request.max_samples,
+            batch_size=request.batch_size,
             job_config=job_infer_config,
         )
 
@@ -105,15 +107,19 @@ class WorkflowService:
         )
         # workflow has now started!
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
+        inference_run_id = self._tracking_client.create_job(
+            request.experiment_id, workflow.id, "inference", inference_job.id
+        )
 
         # wait for the inference job to complete
         status = await self._job_service.wait_for_job_complete(
             inference_job.id, max_wait_time_sec=request.job_timeout_sec
         )
         if status != JobStatus.SUCCEEDED:
-            loguru.logger.error(f"Inference job {inference_job.id} failed")
+            loguru.logger.error(f"Inference job {inference_job.id} did not succeed with status {status}")
             try:
                 self._job_service._stop_job(inference_job.id)
+                status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=10)
             except JobUpstreamError:
                 loguru.logger.error(f"Failed to stop infer job {inference_job.id}, continuing")
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
@@ -148,7 +154,7 @@ class WorkflowService:
             metrics=inf_output.metrics,
             ray_job_id=str(inference_job.id),
         )
-        self._tracking_client.create_job(request.experiment_id, workflow.id, "inference", inference_job_output)
+        self._tracking_client.update_job(inference_run_id, inference_job_output)
 
         # FIXME The ray status is now _not enough_ to set the job status,
         # use the inference job id to recover the dataset record
@@ -173,6 +179,9 @@ class WorkflowService:
         # submit the job
         evaluation_job = self._job_service.create_job(
             job_eval_create,
+        )
+        eval_run_id = self._tracking_client.create_job(
+            request.experiment_id, workflow.id, "evaluation", evaluation_job.id
         )
 
         # wait for the evaluation job to complete
@@ -211,7 +220,7 @@ class WorkflowService:
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
                 ray_job_id=str(evaluation_job.id),
             )
-            self._tracking_client.create_job(request.experiment_id, workflow.id, "evaluation", outputs)
+            self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
         except Exception as e:
             loguru.logger.error(f"Error validating evaluation results: {e}")
@@ -260,4 +269,11 @@ class WorkflowService:
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
-        return self._tracking_client.get_workflow_logs(workflow_id)
+        job_list = self._tracking_client.list_jobs(workflow_id)
+        # sort the jobs by created_at, with the oldest last
+        job_list = sorted(job_list, key=lambda x: x.info.start_time)
+        all_ray_job_ids = [run.data.params.get("ray_job_id") for run in job_list]
+        logs = [self._job_service.get_job_logs(UUID(ray_job_id)) for ray_job_id in all_ray_job_ids]
+        # combine the logs into a single string
+        # TODO: This is not a great solution but it matches the current API
+        return JobLogsResponse(logs="\n================\n".join([log.logs for log in logs]))

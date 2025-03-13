@@ -12,6 +12,7 @@ class ServiceError(Exception):
         :param message: error message
         :param exc: optional exception
         """
+        super().__init__(message)
         self.message = message
         self.exc = exc
 

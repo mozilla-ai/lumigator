@@ -104,7 +104,7 @@ The following section documents the available settings:
 | MINIO_ROOT_PASSWORD                | string  | Sensitive secret for accessing MinIO as root                                                                               |
 | MINIO_API_CORS_ALLOW_ORIGIN        | string  | Allowed origins for CORS requests to MinIO (defaults to "*")                                                               |
 | DEPLOYMENT_TYPE                    | string  | Allows the user to define which environment Lumigator is deployed in, local', 'development', 'staging' or 'production'     |
-| DATABASE_URL                       | string  | DB connection string/URL used for Lumigator's local DB storage                                                             |
+| SQLALCHEMY_DATABASE_URL            | string  | DB connection string/URL used for Lumigator's local DB storage                                                             |
 | LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
 | INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
 | INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |

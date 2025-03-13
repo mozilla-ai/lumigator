@@ -3,8 +3,8 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition
-from pydantic import BaseModel, ConfigDict, Field
+from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt
 
 
 class DatasetConfig(BaseModel):
@@ -14,6 +14,7 @@ class DatasetConfig(BaseModel):
 
 class JobConfig(BaseModel):
     max_samples: int
+    batch_size: PositiveInt = 1
     storage_path: str
     output_field: str | None = "predictions"
     enable_tqdm: bool = True
@@ -43,7 +44,7 @@ class GenerationConfig(BaseModel):
 
 class HuggingFacePipelineConfig(BaseModel, arbitrary_types_allowed=True):
     model_name_or_path: str
-    task: str
+    task: TaskType
     revision: str
     use_fast: bool
     trust_remote_code: bool
@@ -57,8 +58,6 @@ class InferenceJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     job: JobConfig
-    # Optional API key which can be used to access inference services such as OpenAI, or gated models in Hugging Face.
-    api_key: str | None = None
     system_prompt: str | None = None
     inference_server: InferenceServerConfig | None = None
     generation_config: GenerationConfig | None = None

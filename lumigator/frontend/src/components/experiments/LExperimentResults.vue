@@ -33,23 +33,23 @@ const props = defineProps<{
 
 const { results } = toRefs(props)
 
-const tooltipColorsConfig = ref({
-  root: {
-    style: {
-      background: `transparent`,
-    },
-  },
-  text: {
-    style: {
-      background: `black`,
-    },
-  },
-  arrow: {
-    style: {
-      ['border-bottom-color']: `black`,
-    },
-  },
-})
+// const tooltipColorsConfig = ref({
+//   root: {
+//     style: {
+//       background: `transparent`,
+//     },
+//   },
+//   text: {
+//     style: {
+//       background: `black`,
+//     },
+//   },
+//   arrow: {
+//     style: {
+//       ['border-bottom-color']: `black`,
+//     },
+//   },
+// })
 // const tooltips = ref({
 //   examples: {
 //     value: `Text which is passed as an input to the model, together

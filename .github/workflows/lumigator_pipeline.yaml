@@ -382,7 +382,7 @@ jobs:
 
       - name: Setup containers
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make start-lumigator-build
+        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
       - name: Run notebook
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

@@ -1,37 +1,29 @@
 <template>
   <div class="l-experiment-results">
     <TableView
-      :data="tableData"
-      :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
+      :data="results"
+      :columns="Object.keys(results[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
       :downloadFileName="'results'"
       :isEditable="false"
       :showRowNumber="!isTableDataForExperimentResults(results)"
-      :isSearchEnabled="false"
+      :isSearchEnabled="!isTableDataForExperimentResults(results)"
       ref="dataTable"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, toRefs } from 'vue'
-import { useModelStore } from '@/stores/modelsStore'
-import { storeToRefs } from 'pinia'
-import type { Model } from '@/types/Model'
 import TableView from '../common/TableView.vue'
 import type {
   TableDataForExperimentResults,
   TableDataForWorkflowResults,
 } from '@/helpers/getExperimentResults'
 
-const modelStore = useModelStore()
-const { models } = storeToRefs(modelStore)
 // const expandedRows = ref([])
 
-const props = defineProps<{
+defineProps<{
   results: TableDataForExperimentResults[] | TableDataForWorkflowResults[]
 }>()
-
-const { results } = toRefs(props)
 
 // const tooltipColorsConfig = ref({
 //   root: {
@@ -106,24 +98,6 @@ const { results } = toRefs(props)
 //     pt: tooltipColorsConfig.value,
 //   },
 // })
-
-const tableData = computed(() => {
-  const isExperimentResults = isTableDataForExperimentResults(results.value)
-  if (!isExperimentResults) {
-    return results.value.map((result) => ({
-      ...result,
-      model: (
-        models.value.find(
-          (model: Model) =>
-            model.model === (result as TableDataForExperimentResults).model ||
-            model.display_name === (result as TableDataForExperimentResults).model,
-        )! as Model
-      )?.display_name,
-    }))
-  } else {
-    return results.value
-  }
-})
 
 function isTableDataForExperimentResults(
   data: TableDataForExperimentResults[] | TableDataForWorkflowResults[],

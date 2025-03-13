@@ -1,11 +1,12 @@
 from inference_config import InferenceJobConfig
 from loguru import logger
-from lumigator_schemas.tasks import TaskDefinition, TaskType
+from lumigator_schemas.tasks import TaskType
 from model_clients.base_client import BaseModelClient
 from model_clients.mixins.generation_config_mixin import GenerationConfigMixin
 from model_clients.mixins.huggingface_model_mixin import HuggingFaceModelMixin
 from model_clients.mixins.huggingface_seq2seq_pipeline_mixin import HuggingFaceSeq2SeqPipelineMixin
-from model_clients.translation_utils import load_translation_config, resolve_user_input_language
+from model_clients.mixins.language_code_mixin import LanguageCodesSetupMixin
+from model_clients.translation_utils import load_translation_config
 from transformers import AutoConfig, pipeline
 
 from schemas import PredictionResult
@@ -140,26 +141,6 @@ class HuggingFaceCausalLMClient(BaseModelClient):
             prediction_results.append(prediction_result)
 
         return prediction_results
-
-
-class LanguageCodesSetupMixin:
-    """Mixin with common functionality for translation clients"""
-
-    def setup_translation_languages(self, task_definition: TaskDefinition):
-        """Initialize source and target language information for translation"""
-        source_language_user_input = getattr(task_definition, "source_language", None)
-        target_language_user_input = getattr(task_definition, "target_language", None)
-
-        if not source_language_user_input or not target_language_user_input:
-            raise ValueError("Source and target languages must be provided for translation task.")
-
-        source_language_info = resolve_user_input_language(source_language_user_input)
-        target_language_info = resolve_user_input_language(target_language_user_input)
-
-        self.source_language_iso_code = source_language_info["iso_code"]  # e.g. "en"
-        self.source_language = source_language_info["full_name"]  # e.g. "English"
-        self.target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
-        self.target_language = target_language_info["full_name"]  # e.g. "German"
 
 
 class HuggingFacePrefixTranslationClient(

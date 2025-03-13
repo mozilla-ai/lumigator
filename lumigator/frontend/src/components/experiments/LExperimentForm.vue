@@ -138,6 +138,9 @@ import {
   experimentsService,
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
+import type { Workflow } from '@/types/Workflow.ts'
+import { getAxiosError } from '@/helpers/getAxiosError'
+import type { AxiosError } from 'axios'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -231,30 +234,45 @@ async function handleRunExperimentClicked() {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
 
-  const workflows = await experimentsService.createExperimentWithWorkflows(
-    experimentPayload,
-    modelSelection.value.selectedModels,
-  )
+  const [experimentId, workflowResults] = await experimentsService.createExperimentWithWorkflows(experimentPayload, modelSelection.value.selectedModels)
+  // Separate successful workflows and errors
+  const workflows = workflowResults.filter(r => r.status === 'fulfilled').map(r => r.value)
+  const failures = workflowResults.filter(r => r.status === 'rejected').map(r => r.reason?.response?.data?.detail)
+
+  failures.forEach((msg: string) => {
+    toast.add({
+      severity: 'error',
+      summary: `Workflow failed to start`,
+      detail: `${msg}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+      life: 6000,
+    } as ToastMessageOptions & { messageicon: string })
+  })
+
   if (workflows.length) {
-    // refetch after creating an experiment to update the table
+    // re-fetch after creating an experiment to update the table
     await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()
     toast.add({
       severity: 'secondary',
-      summary: `${workflows[0].name} Started`,
+      summary: `${experimentPayload.name} Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
-      life: 3000,
+      life: 6000,
     } as ToastMessageOptions & { messageicon: string })
-    return
+  } else {
+    // delete the experiment if no workflows were created
+    await experimentsService.deleteExperiment(experimentId)
+    toast.add({
+      severity: 'error',
+      summary: `Experiment failed to start`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+      life: 6000,
+    } as ToastMessageOptions & { messageicon: string })
   }
-  toast.add({
-    severity: 'error',
-    summary: `Experiment failed to start`,
-    messageicon: 'pi pi-exclamation-triangle',
-    group: 'br',
-  } as ToastMessageOptions & { messageicon: string })
 }
 
 function resetForm() {

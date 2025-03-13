@@ -3,7 +3,7 @@ import type { CreateExperimentPayload, Experiment } from '@/types/Experiment'
 import type { WorkflowResults } from '@/types/Metrics'
 import type { Model } from '@/types/Model'
 
-import type { CreateWorkflowPayload } from '@/types/Workflow'
+import type { CreateWorkflowPayload, Workflow } from '@/types/Workflow'
 import { workflowsService } from './workflowsService'
 
 export async function fetchExperiments(): Promise<Experiment[]> {
@@ -84,20 +84,21 @@ export async function downloadResults(experiment_id: string) {
  * Each model triggers a respective evaluation job.
  *
  * @param {Object} experimentData - The data for the experiment to run.
- * @returns {Promise<Array>} The results of the experiment.
+ * @returns {Promise<[string, Array<PromiseSettlement>]>} A tuple containing the experiment ID and the result of the experiment's workflows.
  */
 export async function createExperimentWithWorkflows(
   experimentData: createExperimentWithWorkflowsPayload,
   models: Model[],
-) {
+): Promise<[string, Array<PromiseSettledResult<Workflow>>]> {
   // first we create an experiment as a container
   const { id: experimentId } = await experimentsService.createExperiment(experimentData)
 
   // then we create a workflow for each model to be attached to the experiment
-  return Promise.all(
+  const workflowResults = await Promise.allSettled(
     models.map((model: Model) =>
       workflowsService.createWorkflow({
         ...experimentData,
+        name: `${experimentData.name}/${model.model}`,
         experiment_id: experimentId,
         model: model.model,
         provider: model.provider,
@@ -108,6 +109,8 @@ export async function createExperimentWithWorkflows(
       }),
     ),
   )
+
+  return [experimentId, workflowResults];
 }
 
 export const experimentsService = {

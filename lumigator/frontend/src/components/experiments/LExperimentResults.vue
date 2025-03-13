@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRefs } from 'vue'
+import { computed, toRefs } from 'vue'
 import { useModelStore } from '@/stores/modelsStore'
 import { storeToRefs } from 'pinia'
 import type { Model } from '@/types/Model'

@@ -286,7 +286,7 @@ def boto_s3_client() -> S3Client:
 
 @pytest.fixture(scope="function")
 def boto_s3fs() -> Generator[S3FileSystem, None, None]:
-    """Provide a real s3fs client."""
+    """Provide a real s3fs client wrapped with a mock to intercept calls."""
     aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
     aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", "lumigator")
     aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
@@ -299,7 +299,10 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
         client_kwargs={"region_name": aws_default_region},
     )
 
-    mock_s3fs = MagicMock(wraps=s3fs)
+    mock_s3fs = MagicMock(wraps=s3fs, spec=S3FileSystem)
+    mock_storage_options = MagicMock()
+    mock_storage_options.__getitem__.side_effect = lambda key: aws_endpoint_url if key == "endpoint_url" else None
+    mock_s3fs.storage_options = mock_storage_options
 
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")

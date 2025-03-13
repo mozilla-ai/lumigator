@@ -82,7 +82,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         # openai model (from API)
         ("gpt-4-turbo", "openai", "https://api.openai.com/v1", settings.OAI_API_URL),
         # mistral model (from API)
-        ("open-mistral-7b", "mistral", "https://api.mistral.ai/v1", settings.MISTRAL_API_URL),
+        ("ministral-8b-latest", "mistral", "https://api.mistral.ai/v1", settings.MISTRAL_API_URL),
         # deepseek model (from API)
         ("deepseek-chat", "deepseek", "https://api.deepseek.com/v1", settings.DEEPSEEK_API_URL),
     ],

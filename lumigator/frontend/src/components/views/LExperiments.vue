@@ -92,6 +92,7 @@ const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
+const { models } = storeToRefs(modelStore)
 const { experiments } = storeToRefs(experimentStore)
 
 const selectedWorkflowResults: Ref<TableDataForWorkflowResults[]> = ref([])
@@ -140,7 +141,7 @@ const onSelectWorkflow = async (workflow: Workflow) => {
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {
-  selectedExperimentResults.value = await getExperimentResults(experiment)
+  selectedExperimentResults.value = await getExperimentResults(experiment, models.value)
   selectedExperiment.value = experiment
   showExpResults.value = true
   showDrawer.value = true

@@ -1,16 +1,18 @@
 import type { Experiment } from '@/types/Experiment'
 import type { WorkflowResults } from '@/types/Metrics'
+import type { Model } from '@/types/Model'
 import axios from 'axios'
 
 export async function getExperimentResults(
   experiment: Experiment,
+  models: Model[],
 ): Promise<TableDataForExperimentResults[]> {
   const results = []
   for (const workflow of experiment.workflows) {
     if (workflow.artifacts_download_url) {
       const { data }: { data: WorkflowResults } = await axios.get(workflow.artifacts_download_url)
 
-      const modelRow = transformExperimentResults(data)
+      const modelRow = transformExperimentResults(data, models)
       results.push(modelRow)
     }
   }
@@ -41,13 +43,18 @@ export type TableDataForWorkflowResults = {
   'bert-p': string
   'bert-f1': string
   bleu: string
+  model_size?: string
+  parameters?: string
   // evaluation_time: string
   inference_time: string
 }
 
-function transformExperimentResults(objectData: WorkflowResults): TableDataForExperimentResults {
+function transformExperimentResults(
+  objectData: WorkflowResults,
+  models: Model[],
+): TableDataForExperimentResults {
   const data = objectData
-
+  const model = models.find((model) => model.model === data.artifacts.model)
   return {
     model: data.artifacts.model,
     Meteor: data.metrics.meteor.meteor_mean.toFixed(2),
@@ -58,11 +65,11 @@ function transformExperimentResults(objectData: WorkflowResults): TableDataForEx
     'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2),
     'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2),
     bleu: data.metrics.bleu.bleu_mean.toFixed(2),
-    // 'model size': data.artifacts.model.info?.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2')
-    // 'parameters':  data.artifacts.model.info?.parameter_count.replace(
-    //       /(\d+(?:\.\d+)?)([a-zA-Z]+)/g,
-    //       '$1 $2',
-    //     )
+    ...(model &&
+      model.info && {
+        'model size': model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2'),
+        parameters: model.info.parameter_count.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2'),
+      }),
     // runTime: undefined, //getJobRuntime(results.id),
     subRows: transformWorkflowResults(data),
   }

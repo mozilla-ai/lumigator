@@ -156,25 +156,6 @@ export default defineComponent({
       dataTable.value.exportCSV()
     }
 
-    // const getAllColumns = (data: typeof props.data) => {
-    //   const columns = new Set(props.columns)
-    //   const traverse = (rows: any[]) => {
-    //     rows.forEach((row) => {
-    //       Object.keys(row).forEach((key) => {
-    //         if (key !== 'subRows') {
-    //           columns.add(key)
-    //         }
-    //       })
-    //       if (row.subRows) {
-    //         traverse(row.subRows)
-    //       }
-    //     })
-    //   }
-    //   traverse(data)
-    //   return Array.from(columns)
-    // }
-    // const allColumns = getAllColumns(props.data)
-
     const hasSubRows = props.data!.some((item) => item.subRows)
 
     const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {

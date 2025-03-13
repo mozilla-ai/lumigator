@@ -37,13 +37,10 @@ class HuggingFaceModelClientFactory:
             # Load the supported translation model families configuration
             translation_config = load_translation_config()
 
-            prefix_models = translation_config.get("prefix_based", [])
-            language_code_models = translation_config.get("language_code_based", [])
-
-            if model_name in prefix_models:
+            if model_name in translation_config["prefix_based"]:
                 logger.info(f"Running inference with HuggingFacePrefixTranslationClient for {model_name}")
                 return HuggingFacePrefixTranslationClient(config, api_key)
-            elif model_name in language_code_models:
+            elif model_name in translation_config["language_code_based"]:
                 logger.info(f"Running inference with HuggingFaceLanguageCodeTranslationClient for {model_name}")
                 return HuggingFaceLanguageCodeTranslationClient(config, api_key)
             else:

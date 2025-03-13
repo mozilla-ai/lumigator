@@ -1,6 +1,6 @@
 from inference_config import InferenceJobConfig
 from loguru import logger
-from lumigator_schemas.tasks import TaskType
+from lumigator_schemas.tasks import TaskDefinition, TaskType
 from model_clients.base_client import BaseModelClient
 from model_clients.mixins.generation_config_mixin import GenerationConfigMixin
 from model_clients.mixins.huggingface_model_mixin import HuggingFaceModelMixin
@@ -36,10 +36,15 @@ class HuggingFaceModelClientFactory:
             # Load the supported translation model families configuration
             translation_config = load_translation_config()
 
-            prefix_models = translation_config.get("prefix_translation_models", [])
+            prefix_models = translation_config.get("prefix_based", [])
+            language_code_models = translation_config.get("language_code_based", [])
+
             if model_name in prefix_models:
                 logger.info(f"Running inference with HuggingFacePrefixTranslationClient for {model_name}")
-                return HuggingFacePrefixTranslationClient(config)
+                return HuggingFacePrefixTranslationClient(config, api_key)
+            elif model_name in language_code_models:
+                logger.info(f"Running inference with HuggingFaceLanguageCodeTranslationClient for {model_name}")
+                return HuggingFaceLanguageCodeTranslationClient(config, api_key)
             else:
                 logger.error(
                     f"Translation task with HF seq2seq models: {model_name} is not supported. "
@@ -137,19 +142,13 @@ class HuggingFaceCausalLMClient(BaseModelClient):
         return prediction_results
 
 
-class HuggingFacePrefixTranslationClient(
-    BaseModelClient, HuggingFaceModelMixin, HuggingFaceSeq2SeqPipelineMixin, GenerationConfigMixin
-):
-    """Client for T5-style models that use prefixes for translation"""
+class LanguageCodesSetupMixin:
+    """Mixin with common functionality for translation clients"""
 
-    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
-        self.config = config
-        self.api_key = api_key
-        self.model = self.initialize_model(self.config.hf_pipeline)
-        self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
-
-        source_language_user_input = getattr(config.task_definition, "source_language", None)
-        target_language_user_input = getattr(config.task_definition, "target_language", None)
+    def setup_translation_languages(self, task_definition: TaskDefinition):
+        """Initialize source and target language information for translation"""
+        source_language_user_input = getattr(task_definition, "source_language", None)
+        target_language_user_input = getattr(task_definition, "target_language", None)
 
         if not source_language_user_input or not target_language_user_input:
             raise ValueError("Source and target languages must be provided for translation task.")
@@ -161,6 +160,23 @@ class HuggingFacePrefixTranslationClient(
         self.source_language = source_language_info["full_name"]  # e.g. "English"
         self.target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
         self.target_language = target_language_info["full_name"]  # e.g. "German"
+
+
+class HuggingFacePrefixTranslationClient(
+    BaseModelClient,
+    HuggingFaceModelMixin,
+    HuggingFaceSeq2SeqPipelineMixin,
+    GenerationConfigMixin,
+    LanguageCodesSetupMixin,
+):
+    """Client for T5-style models that use prefixes for translation"""
+
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
+        self.config = config
+        self.api_key = api_key
+        self.setup_translation_languages(config.task_definition)
+        self.model = self.initialize_model(self.config.hf_pipeline)
+        self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
 
         # Modify the task to include the the source and target languages
         specific_pipeline_task = (
@@ -190,6 +206,54 @@ class HuggingFacePrefixTranslationClient(
 
         generations = self.pipeline(
             prefixed_examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
+        )
+
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation["translation_text"])
+            prediction_results.append(prediction_result)
+
+        return prediction_results
+
+
+class HuggingFaceLanguageCodeTranslationClient(
+    BaseModelClient,
+    HuggingFaceModelMixin,
+    HuggingFaceSeq2SeqPipelineMixin,
+    GenerationConfigMixin,
+    LanguageCodesSetupMixin,
+):
+    """Client for translation models that require language codes (mBART, NLLB, M2M)"""
+
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
+        self.config = config
+        self.api_key = api_key
+        self.setup_translation_languages(config.task_definition)
+        self.model = self.initialize_model(self.config.hf_pipeline)
+        self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
+
+        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
+
+    def set_seq2seq_max_length(self):
+        """Set the maximum sequence length for the seq2seq model.
+
+        This method ensures that the tokenizer and model have the same maximum position embeddings
+        and adjusts the generation configuration accordingly.
+        """
+        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
+        # tokenizer model and the model have the same max_position_embeddings.
+        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
+        self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
+        # Adjust output sequence generation max tokens.
+        self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
+
+    def predict(self, examples: str | list[list[dict[str, str]]]) -> list[PredictionResult]:
+        generations = self.pipeline(
+            examples,
+            max_new_tokens=self.config.generation_config.max_new_tokens,
+            truncation=True,
+            src_lang=self.source_language_iso_code,
+            tgt_lang=self.target_language_iso_code,
         )
 
         prediction_results = []

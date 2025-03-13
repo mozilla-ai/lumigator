@@ -78,19 +78,6 @@ class HuggingFaceSeq2SeqSummarizationClient(
         self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key)
         self.set_seq2seq_max_length()
 
-    def set_seq2seq_max_length(self):
-        """Set the maximum sequence length for the seq2seq model.
-
-        This method ensures that the tokenizer and model have the same maximum position embeddings
-        and adjusts the generation configuration accordingly.
-        """
-        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
-        # tokenizer model and the model have the same max_position_embeddings.
-        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
-        self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
-        # Adjust output sequence generation max tokens.
-        self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
-
     def predict(self, examples: list) -> list[PredictionResult]:
         generations = self.pipeline(
             examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
@@ -169,19 +156,6 @@ class HuggingFacePrefixTranslationClient(
         self.set_seq2seq_max_length()
         self.prefix = f"translate {self.source_language} to {self.target_language}: "
 
-    def set_seq2seq_max_length(self):
-        """Set the maximum sequence length for the seq2seq model.
-
-        This method ensures that the tokenizer and model have the same maximum position embeddings
-        and adjusts the generation configuration accordingly.
-        """
-        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
-        # tokenizer model and the model have the same max_position_embeddings.
-        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
-        self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
-        # Adjust output sequence generation max tokens.
-        self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
-
     def predict(self, examples: list) -> list[PredictionResult]:
         prefixed_examples = [self.prefix + example for example in examples]
 
@@ -214,19 +188,7 @@ class HuggingFaceLanguageCodeTranslationClient(
         self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
 
         self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
-
-    def set_seq2seq_max_length(self):
-        """Set the maximum sequence length for the seq2seq model.
-
-        This method ensures that the tokenizer and model have the same maximum position embeddings
-        and adjusts the generation configuration accordingly.
-        """
-        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
-        # tokenizer model and the model have the same max_position_embeddings.
-        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
-        self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
-        # Adjust output sequence generation max tokens.
-        self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)
+        self.set_seq2seq_max_length()
 
     def predict(self, examples: str | list[list[dict[str, str]]]) -> list[PredictionResult]:
         generations = self.pipeline(

@@ -22,6 +22,7 @@
       :isEditable="isEditable"
       :showRowNumber="showRowNumber"
       :isSearchEnabled="isSearchEnabled"
+      :hasEqualColumnSizes="true"
       ref="dataTable"
     />
   </Drawer>

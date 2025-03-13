@@ -53,7 +53,7 @@
       :key="col"
       :field="col"
       :header="col"
-      :style="`width: ${(1 / selectedColumns.length) * 100}%`"
+      :style="hasEqualColumnSizes ? `width: ${(1 / selectedColumns.length) * 100}%` : undefined"
     >
       <template #editor="{ data, field }" v-if="isEditable">
         <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
@@ -106,6 +106,10 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    hasEqualColumnSizes: {
+      type: Boolean,
+      default: false,
+    },
     isSearchEnabled: {
       type: Boolean,
       default: true,

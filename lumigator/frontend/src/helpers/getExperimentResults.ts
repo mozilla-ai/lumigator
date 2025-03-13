@@ -27,7 +27,7 @@ export type TableDataForExperimentResults = {
   'rouge-2': string
   'rouge-l': string
   bleu: string
-  runTime: string | undefined
+  // runTime: string | undefined
   subRows: TableDataForWorkflowResults[]
 }
 export type TableDataForWorkflowResults = {
@@ -41,7 +41,7 @@ export type TableDataForWorkflowResults = {
   'bert-p': string
   'bert-f1': string
   bleu: string
-  evaluation_time: string
+  // evaluation_time: string
   inference_time: string
 }
 
@@ -50,8 +50,8 @@ function transformExperimentResults(objectData: WorkflowResults): TableDataForEx
 
   return {
     model: data.artifacts.model,
-    'bert-p': data.metrics.bertscore.precision_mean.toFixed(2),
     Meteor: data.metrics.meteor.meteor_mean.toFixed(2),
+    'bert-p': data.metrics.bertscore.precision_mean.toFixed(2),
     'bert-r': data.metrics.bertscore.recall_mean.toFixed(2),
     'bert-f1': data.metrics.bertscore.f1_mean.toFixed(2),
     'rouge-1': data.metrics.rouge.rouge1_mean.toFixed(2),
@@ -63,7 +63,7 @@ function transformExperimentResults(objectData: WorkflowResults): TableDataForEx
     //       /(\d+(?:\.\d+)?)([a-zA-Z]+)/g,
     //       '$1 $2',
     //     )
-    runTime: undefined, //getJobRuntime(results.id),
+    // runTime: undefined, //getJobRuntime(results.id),
     subRows: transformWorkflowResults(data),
   }
 }
@@ -83,12 +83,13 @@ export function transformWorkflowResults(
       Examples: example,
       'Ground Truth': objectData.artifacts.ground_truth?.[index],
       predictions: objectData.artifacts.predictions?.[index],
+      meteor: objectData.metrics.meteor?.meteor?.[index].toFixed(2) ?? 0,
+      'bert-p': objectData.metrics.bertscore?.precision?.[index].toFixed(2) ?? 0,
+      'bert-r': objectData.metrics.bertscore?.recall?.[index].toFixed(2) ?? 0,
+      'bert-f1': objectData.metrics.bertscore?.f1?.[index].toFixed(2) ?? 0,
       'rouge-1': objectData.metrics.rouge?.rouge1?.[index].toFixed(2) ?? 0,
       'rouge-2': objectData.metrics.rouge?.rouge2?.[index].toFixed(2) ?? 0,
       'rouge-l': objectData.metrics.rouge?.rougeL?.[index].toFixed(2) ?? 0,
-      meteor: objectData.metrics.meteor?.meteor?.[index].toFixed(2) ?? 0,
-      'bert-p': objectData.metrics.bertscore?.precision?.[index].toFixed(2) ?? 0,
-      'bert-f1': objectData.metrics.bertscore?.f1?.[index].toFixed(2) ?? 0,
       bleu: objectData.metrics.bleu?.bleu?.[index].toFixed(2) ?? 0,
       // bert_recall: objectData.metrics.bertscore?.recall?.[index].toFixed(2) ?? 0,
       evaluation_time: objectData.artifacts.evaluation_time.toFixed(2) ?? 0,

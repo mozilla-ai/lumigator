@@ -2,11 +2,11 @@
   <div class="l-experiment-results">
     <TableView
       :data="tableData"
-      :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows')"
+      :columns="Object.keys(tableData[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
       :downloadFileName="'results'"
       :isEditable="false"
-      :showRowNumber="false"
-      :isSearchEnabled="true"
+      :showRowNumber="!isTableDataForExperimentResults(results)"
+      :isSearchEnabled="false"
       ref="dataTable"
     />
   </div>

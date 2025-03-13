@@ -231,7 +231,7 @@ class TestHuggingFacePrefixTranslationClient:
         config.generation_config.max_new_tokens = 100
         return config
 
-    @patch("model_clients.huggingface_clients.resolve_user_input_language")
+    @patch("model_clients.translation_utils.resolve_user_input_language")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
@@ -277,7 +277,7 @@ class TestHuggingFacePrefixTranslationClient:
         assert pipeline_args["task"] == "translation_en_to_fr"
         assert client.pipeline == mock_pipeline_instance
 
-    @patch("model_clients.huggingface_clients.resolve_user_input_language")
+    @patch("model_clients.translation_utils.resolve_user_input_language")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")

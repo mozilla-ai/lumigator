@@ -122,7 +122,7 @@ jobs:
         with:
           name: ray-logs
           path: /tmp/raylogs/ray/session_*/logs/
-      
+
       - name: Send a Slack notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0

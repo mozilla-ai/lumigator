@@ -34,6 +34,64 @@
         no_repeat_ngram_size: 3
         num_beams: 4
 
+- display_name: facebook/m2m100_418M
+  model: facebook/m2m100_418M
+  provider: hf
+  website_url: https://huggingface.co/facebook/m2m100_418M
+  description: M2M100 is a multilingual encoder-decoder (seq-to-seq) model trained for Many-to-Many multilingual translation. It supports 100 languages. Please check the model card for more details.
+  info:
+    parameter_count: 418M
+    model_size: 242MB
+  tasks:
+    - translation:
+
+- display_name: facebook/m2m100_1.2B
+  model: facebook/m2m100_1.2B
+  provider: hf
+  website_url: https://huggingface.co/facebook/m2m100_1.2B
+  description: M2M100 is a multilingual encoder-decoder (seq-to-seq) model trained for Many-to-Many multilingual translation. It supports 100 languages. Please check the model card for exact list.
+  info:
+    parameter_count: 1.2B
+    model_size: 4.96GB
+  tasks:
+    - translation:
+
+- display_name: bigscience/mt0-base
+  model: bigscience/mt0-base
+  provider: hf
+  website_url: https://huggingface.co/bigscience/mt0-base
+  description: mT0-base is a multilingual encoder-decoder model finetuned on the xP3 dataset. It supports zero-shot cross-lingual generalization for tasks in multiple languages. Please check the model card for exact list.
+  info:
+    parameter_count: 582M
+    tensor_type: F32
+    model_size: 2.3GB
+  tasks:
+    - translation:
+
+- display_name: bigscience/mt0-large
+  model: bigscience/mt0-large
+  provider: hf
+  website_url: https://huggingface.co/bigscience/mt0-large
+  description: mT0-large is a multilingual encoder-decoder model finetuned on the xP3 dataset. It supports zero-shot cross-lingual generalization for tasks in multiple languages. Please check the model card for exact list.
+  info:
+    parameter_count: 1.23B
+    tensor_type: F32
+    model_size: 4.93GB
+  tasks:
+    - translation:
+
+- display_name: bigscience/mt0-xl
+  model: bigscience/mt0-xl
+  provider: hf
+  website_url: https://huggingface.co/bigscience/mt0-xl
+  description: mT0-xl is a multilingual encoder-decoder model finetuned on the xP3 dataset. It supports zero-shot cross-lingual generalization for tasks in multiple languages. Please check the model card for exact list.
+  info:
+    parameter_count: 3.7B
+    tensor_type: F32
+    model_size: 14.5GB
+  tasks:
+    - translation:
+
 - display_name: gpt-4o-mini
   model: gpt-4o-mini
   provider: openai

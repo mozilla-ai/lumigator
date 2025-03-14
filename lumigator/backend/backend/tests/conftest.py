@@ -299,10 +299,7 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
         client_kwargs={"region_name": aws_default_region},
     )
 
-    mock_s3fs = MagicMock(wraps=s3fs, spec=S3FileSystem)
-    mock_storage_options = MagicMock()
-    mock_storage_options.__getitem__.side_effect = lambda key: aws_endpoint_url if key == "endpoint_url" else None
-    mock_s3fs.storage_options = mock_storage_options
+    mock_s3fs = MagicMock(wraps=s3fs, storage_options={"endpoint_url": aws_endpoint_url})
 
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")

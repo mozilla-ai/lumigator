@@ -174,8 +174,7 @@ onMounted(async () => {
     background-color: $l-card-bg;
     transition: margin-right 0.3s ease-in-out;
     border-radius: $l-main-radius;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     text-align: center;
     border: 1px solid black;
   }

@@ -473,13 +473,19 @@ class MLflowTrackingClient(TrackingClient):
 class MLflowClientManager:
     """Connection manager for MLflow client."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._tracking_uri = tracking_uri
+        self._s3_file_system = s3_file_system
+        self._s3_client = s3_client
 
     @contextlib.contextmanager
     def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
-        tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
+        tracking_client = MLflowTrackingClient(
+            tracking_uri=self._tracking_uri,
+            s3_file_system=self._s3_file_system,
+            s3_client=self._s3_client,
+        )
         try:
             yield tracking_client
         except MlflowException as e:

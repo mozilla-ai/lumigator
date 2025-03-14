@@ -138,6 +138,7 @@ import {
   experimentsService,
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
+import { getAxiosError } from '@/helpers/getAxiosError'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -231,30 +232,63 @@ async function handleRunExperimentClicked() {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
 
-  const workflows = await experimentsService.createExperimentWithWorkflows(
-    experimentPayload,
-    modelSelection.value.selectedModels,
-  )
-  if (workflows.length) {
-    // refetch after creating an experiment to update the table
+  const [experimentId, createWorkflowResponses] =
+    await experimentsService.createExperimentWithWorkflows(
+      experimentPayload,
+      modelSelection.value.selectedModels,
+    )
+  // Separate successful workflows and errors
+  const successfulResponses = createWorkflowResponses
+    .filter((promise) => promise.status === 'fulfilled')
+    .map((promise) => promise.value)
+  const failedResponses = createWorkflowResponses
+    .filter((promiseResult) => promiseResult.status === 'rejected')
+    .map((promiseResult) => {
+      const errorMessage = getAxiosError(promiseResult.reason)
+      try {
+        // if its a parseable JSON string, that means it returned `response.data`
+        const responseBody = JSON.parse(errorMessage)
+        return responseBody.detail
+      } catch {
+        // otherwise its just an error message/string
+        return errorMessage
+      }
+    })
+
+  failedResponses.forEach((msg: string) => {
+    toast.add({
+      severity: 'error',
+      summary: `Workflow failed to start`,
+      detail: `${msg}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+      life: 6000,
+    } as ToastMessageOptions & { messageicon: string })
+  })
+
+  if (successfulResponses.length) {
+    // re-fetch after creating an experiment to update the table
     await experimentStore.fetchAllExperiments()
     emit('l-close-form')
     resetForm()
     toast.add({
       severity: 'secondary',
-      summary: `${workflows[0].name} Started`,
+      summary: `${experimentPayload.name} Started`,
       messageicon: 'pi pi-verified',
       group: 'br',
-      life: 3000,
+      life: 6000,
     } as ToastMessageOptions & { messageicon: string })
-    return
+  } else {
+    // delete the experiment if no workflows were created
+    await experimentsService.deleteExperiment(experimentId)
+    toast.add({
+      severity: 'error',
+      summary: `Experiment failed to start`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+      life: 10000,
+    } as ToastMessageOptions & { messageicon: string })
   }
-  toast.add({
-    severity: 'error',
-    summary: `Experiment failed to start`,
-    messageicon: 'pi pi-exclamation-triangle',
-    group: 'br',
-  } as ToastMessageOptions & { messageicon: string })
 }
 
 function resetForm() {

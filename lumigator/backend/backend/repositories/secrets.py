@@ -21,7 +21,11 @@ class SecretRepository(BaseRepository[SecretRecord]):
         return bool(count)
 
     def get_secret_by_name(self, name: str) -> SecretRecord | None:
-        """Retrieve secret by name (case-insensitive)."""
+        """Retrieve secret by name (case-insensitive).
+
+        :param name: The name of the secret to retrieve
+        :returns: The secret record if found, otherwise None
+        """
         return self.session.query(self.record_cls).filter(self.record_cls._name == name.lower()).first()
 
     def list_secrets(self) -> list[SecretRecord]:

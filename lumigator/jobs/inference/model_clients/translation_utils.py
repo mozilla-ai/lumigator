@@ -3,6 +3,7 @@ from pathlib import Path
 import yaml
 from langcodes import Language, find, tag_is_valid
 from langcodes.tag_parser import LanguageTagError
+from loguru import logger
 
 
 def load_translation_config():
@@ -11,12 +12,20 @@ def load_translation_config():
         # Get the current file's directory and construct path to config file
         current_file = Path(__file__).resolve()
         config_path = current_file.parent / "translation_models.yaml"
-
-        # Open and load the yaml file
         with config_path.open() as file:
             translation_config = yaml.safe_load(file)
 
-        return translation_config
+        # Define default configuration
+        default_config = {"prefix_based": [], "language_code_based": []}
+
+        # Merge loaded config with default config
+        validated_config = {**default_config, **translation_config}
+
+        for key in default_config:
+            if key not in translation_config:
+                logger.warning(f"Missing required key in translation_models.yaml: {key}.")
+
+        return validated_config
     except Exception as e:
         raise Exception("Error loading translation models configuration.") from e
 

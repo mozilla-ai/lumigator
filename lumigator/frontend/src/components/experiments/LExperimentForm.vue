@@ -237,9 +237,9 @@ async function handleRunExperimentClicked() {
   )
   // Separate successful workflows and errors
   const successfulResponses = createWorkflowResponses.filter((promise) => promise.status === 'fulfilled').map((promise) => promise.value)
-  const failures = workflowResults
-    .filter((r) => r.status === 'rejected')
-    .map((r) => r.reason?.response?.data?.detail)
+  const failures = createWorkflowResponses
+    .filter((promise) => promise.status === 'rejected')
+    .map((promise) => promise.reason.response?.data?.detail)
 
   failures.forEach((msg: string) => {
     toast.add({

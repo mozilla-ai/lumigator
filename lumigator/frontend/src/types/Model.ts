@@ -14,7 +14,7 @@ export type Model = {
 export type ModelInfo = {
   parameter_count: string
   model_size: string
-  tensor_type: string
+  tensor_type?: string
 }
 
 export type Task = { summarization: SummarizationTask } | { translation: TranslationTask }

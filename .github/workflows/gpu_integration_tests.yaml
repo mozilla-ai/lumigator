@@ -9,7 +9,8 @@ on:
 jobs:
   integration-tests-gpu:
     name: Integration tests (SQLite)
-    runs-on: GPU-runner
+    #runs-on: GPU-runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         test: ["sdk", "backend" ]

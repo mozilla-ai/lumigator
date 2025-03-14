@@ -1,12 +1,30 @@
 <template>
   <div class="settings-container">
-    <div>
-      <h3 class="settings-title">Settings</h3>
+    <h3 class="settings-title">Settings</h3>
+    <div class="settings-group-container">
+      <div class="settings-group-header">
+        <h4 class="settings-group-title">Data usage</h4>
+        <p class="settings-group-description">
+          To help improve Lumigator, You can choose to share completely anonymized error reports via
+          Sentry. We do not profile you or track your location or web activity.
+
+          <!-- <a
+            href=""
+            class="learn-more-link"
+            rel="noopener"
+            target="_blank"
+            >Learn more<span class="pi pi-arrow-up-right"></span>
+          </a> -->
+          <ToggleSwitch v-model:model-value="hasConsented" @update:model-value="setConsent" />
+        </p>
+      </div>
     </div>
-    <div class="api-keys-container">
-      <div class="api-keys-header">
-        <h4 class="api-keys-title">API Keys</h4>
-        <p class="api-keys-description">
+    <Divider />
+
+    <div class="settings-group-container">
+      <div class="settings-group-header">
+        <h4 class="settings-group-title">API Keys</h4>
+        <p class="settings-group-description">
           To use API-based models in Lumigator, add your API keys.
           <a
             href="https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings"
@@ -70,18 +88,21 @@
 <script setup lang="ts">
 import { settingsService } from '@/sdk/settingsService'
 import type { SecretUploadPayload } from '@/types/Secret'
-import { InputText, type ToastMessageOptions } from 'primevue'
+import { Divider, InputText, ToggleSwitch, type ToastMessageOptions } from 'primevue'
 import Button from 'primevue/button'
 import { onMounted, ref, type Ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import axios, { AxiosError } from 'axios'
 import { getAxiosError } from '@/helpers/getAxiosError'
+import { useSentryConsent } from '@/composables/useSentryConsent'
 
 const confirm = useConfirm()
 const toast = useToast()
 // Placeholder for configured secrets where the actual value is hidden.
 const maskedValue = '****************'
+
+const { hasConsented, setConsent } = useSentryConsent()
 
 // API key map is used to track API key names (based on the provider name) to their corresponding ref, title and whether the setting exists remotely.
 // NOTE: the key names are based on the provider name and should not be changed: ${provider}_api_key
@@ -261,19 +282,23 @@ const handleBlur = (key: string) => {
   padding: 2.5rem 1.5rem;
 }
 
-.api-keys-container {
+.settings-group-container {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.api-keys-header {
+.settings-group-header {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.api-keys-description {
+.settings-group-description {
+  // display: flex;
+  // justify-content: space-between;
+  // align-self: stretch;
+  // align-items: center;
   @include mixins.caption;
   color: variables.$l-grey-100;
 }
@@ -288,7 +313,7 @@ const handleBlur = (key: string) => {
   gap: 1.5rem;
 }
 
-.api-keys-title {
+.settings-group-title {
   @include mixins.paragraph-2;
   color: variables.$white;
 }

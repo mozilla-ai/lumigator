@@ -171,7 +171,6 @@ async function handleGenerateGroundTruth() {
 <style lang="scss" scoped>
 @use '@/styles/variables' as *;
 .l-dataset-details {
-  $root: &;
   display: flex;
   flex-direction: column;
 

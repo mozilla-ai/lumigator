@@ -58,7 +58,6 @@ const handleAction = () => {
 @use '@/styles/variables' as *;
 
 .l-page-header {
-  $root: &;
   display: flex;
   width: 100%;
   justify-content: space-between;

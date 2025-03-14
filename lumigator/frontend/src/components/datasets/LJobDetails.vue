@@ -220,7 +220,6 @@ const showResults = () => {
 <style lang="scss">
 @use '@/styles/variables' as *;
 .l-experiment-details {
-  $root: &;
   display: flex;
   flex-direction: column;
 

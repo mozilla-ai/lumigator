@@ -53,7 +53,6 @@ const emit = defineEmits(['l-add-dataset'])
 @use '@/styles/variables' as *;
 
 .l-dataset-empty {
-  $root: &;
   max-width: 600px;
   margin: auto;
 

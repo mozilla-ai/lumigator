@@ -285,7 +285,6 @@ onMounted(async () => {
 }
 
 .l-experiment-form {
-  $root: &;
   display: flex;
   flex-direction: column;
 

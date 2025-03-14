@@ -155,7 +155,6 @@ function handleRowClick(event: DataTableRowClickEvent) {
 }
 
 .l-job-table {
-  $root: &;
   width: 100%;
   display: flex;
   place-content: center;

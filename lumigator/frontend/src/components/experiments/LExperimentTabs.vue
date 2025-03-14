@@ -37,8 +37,6 @@ const emit = defineEmits(['l-close-details'])
 
 <style scoped lang="scss">
 .l-experiment-tabs {
-  $root: &;
-
   &__list {
     position: sticky;
     top: 0;

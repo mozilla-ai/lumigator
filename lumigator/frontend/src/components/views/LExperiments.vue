@@ -341,7 +341,6 @@ watch(showSlidingPanel, (newValue) => {
 @use '@/styles/variables' as *;
 
 .l-experiments {
-  $root: &;
   max-width: $l-main-width;
   margin: 0 auto;
 

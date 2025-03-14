@@ -45,8 +45,6 @@ after the LResultsDrawer is mounted -->
 <style lang="scss">
 @use '@/styles/variables' as *;
 .l-experiments-drawer {
-  $root: &;
-
   .p-drawer-title {
     color: $l-grey-100;
     font-size: $l-font-size-md;

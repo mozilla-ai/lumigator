@@ -1,3 +1,4 @@
+import asyncio
 import json
 import numbers
 from pathlib import Path
@@ -19,12 +20,22 @@ from lumigator_schemas.workflows import (
     WorkflowResponse,
     WorkflowStatus,
 )
+from pydantic_core._pydantic_core import ValidationError
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.dataset_exceptions import (
+    DatasetInvalidError,
+    DatasetMissingFieldsError,
+    DatasetNotFoundError,
+    DatasetSizeError,
+    DatasetUpstreamError,
+)
 from backend.services.exceptions.job_exceptions import (
+    JobTypeUnsupportedError,
     JobUpstreamError,
 )
+from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
     WorkflowValidationError,
@@ -71,6 +82,23 @@ class WorkflowService:
                 formatted_metrics[metric_name] = round(metric_value, 3)
         return formatted_metrics
 
+    async def _handle_workflow_failure(self, workflow_id: str):
+        """Handle a workflow failure by updating the workflow status and stopping any running jobs."""
+        loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
+
+        # Mark the workflow as failed.
+        self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
+
+        # Get the list of jobs in the workflow to stop any that are still running.
+        stop_tasks = [
+            self._job_service.stop_job(UUID(ray_job_id))
+            for job in self._tracking_client.list_jobs(workflow_id)
+            if (ray_job_id := job.data.params.get("ray_job_id"))
+        ]
+        # Wait for all stop tasks to complete concurrently
+        if stop_tasks:
+            await asyncio.gather(*stop_tasks, return_exceptions=False)
+
     async def _run_inference_eval_pipeline(
         self,
         workflow: WorkflowResponse,
@@ -101,60 +129,108 @@ class WorkflowService:
             job_config=job_infer_config,
         )
 
-        # submit inference job first
-        inference_job = self._job_service.create_job(
-            job_infer_create,
-        )
-        # workflow has now started!
+        try:
+            # Attempt to submit the inference job to Ray before we track it in Lumigator.
+            inference_job = self._job_service.create_job(
+                job_infer_create,
+            )
+        except (JobTypeUnsupportedError, SecretNotFoundError) as e:
+            loguru.logger.error("Workflow pipeline error: Workflow {}. Cannot create inference job: {}", workflow.id, e)
+            await self._handle_workflow_failure(workflow.id)
+            return
+
+        # Track the workflow status as running and add the inference job.
         self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
         inference_run_id = self._tracking_client.create_job(
             request.experiment_id, workflow.id, "inference", inference_job.id
         )
 
-        # wait for the inference job to complete
-        status = await self._job_service.wait_for_job_complete(
-            inference_job.id, max_wait_time_sec=request.job_timeout_sec
-        )
-        if status != JobStatus.SUCCEEDED:
-            loguru.logger.error(f"Inference job {inference_job.id} did not succeed with status {status}")
-            try:
-                self._job_service._stop_job(inference_job.id)
-                status = await self._job_service.wait_for_job_complete(inference_job.id, max_wait_time_sec=10)
-            except JobUpstreamError:
-                loguru.logger.error(f"Failed to stop infer job {inference_job.id}, continuing")
-            self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
-            # raise Exception(f"Inference job {inference_job.id} failed")
+        try:
+            # Wait for the inference job to 'complete'.
+            status = await self._job_service.wait_for_job_complete(
+                inference_job.id, max_wait_time_sec=request.job_timeout_sec
+            )
+
+            if status != JobStatus.SUCCEEDED:
+                # Trigger the failure handling logic
+                raise JobUpstreamError(f"Inference job {inference_job.id} failed with status {status}") from None
+        except JobUpstreamError as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Inference job: {} failed: {}", workflow.id, inference_job.id, e
+            )
+            await self._handle_workflow_failure(workflow.id)
             return
 
-        # Figure out the dataset filename
-        request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
-        dataset_filename = request_dataset.filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
+        try:
+            # Figure out the dataset filename
+            request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+            dataset_filename = request_dataset.filename
+            dataset_filename = Path(dataset_filename).stem
+            dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
+        except DatasetNotFoundError as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Inference job: {}. Cannot compute dataset filename: {}",
+                workflow.id,
+                inference_job.id,
+                e,
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
 
-        # Inference jobs produce a new dataset
-        # Add the dataset to the (local) database
-        self._job_service._add_dataset_to_db(
-            inference_job.id,
-            job_infer_create,
-            self._dataset_service.s3_filesystem,
-            dataset_filename,
-            request_dataset.generated,
-        )
-        # log the job to the tracking client
-        result_key = str(
-            Path(settings.S3_JOB_RESULTS_PREFIX)
-            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
-        )
-        with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            inf_output = JobResultObject.model_validate(json.loads(f.read()))
-        inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
-        inference_job_output = RunOutputs(
-            parameters={"inference_output_s3_path": inf_path},
-            metrics=inf_output.metrics,
-            ray_job_id=str(inference_job.id),
-        )
-        self._tracking_client.update_job(inference_run_id, inference_job_output)
+        try:
+            # Inference jobs produce a new dataset
+            # Add the dataset to the (local) database
+            self._job_service._add_dataset_to_db(
+                inference_job.id,
+                job_infer_create,
+                self._dataset_service.s3_filesystem,
+                dataset_filename,
+                request_dataset.generated,
+            )
+        except (
+            DatasetNotFoundError,
+            DatasetSizeError,
+            DatasetInvalidError,
+            DatasetMissingFieldsError,
+            DatasetUpstreamError,
+        ) as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Inference job: {}. Cannot update DB with with result data: {}",
+                workflow.id,
+                inference_job.id,
+                e,
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
+
+        try:
+            # log the job to the tracking client
+            # TODO: Review how JobService._get_job_record works and if it can be re-used/made public.
+            result_key = str(
+                Path(settings.S3_JOB_RESULTS_PREFIX)
+                / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
+            )
+
+            # TODO: Review how DatasetService._get_s3_path (and similar) works and if it can be re-used/made public.
+            dataset_path = self._dataset_service._get_s3_path(result_key)
+            with self._dataset_service.s3_filesystem.open(dataset_path, "r") as f:
+                inf_output = JobResultObject.model_validate(json.loads(f.read()))
+            inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
+            inference_job_output = RunOutputs(
+                parameters={"inference_output_s3_path": inf_path},
+                metrics=inf_output.metrics,
+                ray_job_id=str(inference_job.id),
+            )
+            self._tracking_client.update_job(inference_run_id, inference_job_output)
+        except Exception as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Inference job: {}. Cannot update DB with with result data: {}",
+                workflow.id,
+                inference_job.id,
+                e,
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
 
         # FIXME The ray status is now _not enough_ to set the job status,
         # use the inference job id to recover the dataset record
@@ -176,28 +252,48 @@ class WorkflowService:
             job_config=job_config,
         )
 
-        # submit the job
-        evaluation_job = self._job_service.create_job(
-            job_eval_create,
-        )
+        try:
+            # Attempt to submit the evaluation job before we track it in Lumigator.
+            evaluation_job = self._job_service.create_job(
+                job_eval_create,
+            )
+        except (JobTypeUnsupportedError, SecretNotFoundError) as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Cannot create evaluation job: {}", workflow.id, e
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
+
+        # Track the evaluation job.
         eval_run_id = self._tracking_client.create_job(
             request.experiment_id, workflow.id, "evaluation", evaluation_job.id
         )
 
-        # wait for the evaluation job to complete
-        status = await self._job_service.wait_for_job_complete(
-            evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
-        )
-        self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
-        if status != JobStatus.SUCCEEDED:
-            loguru.logger.error(f"Evaluation job {evaluation_job.id} failed")
-            try:
-                self._job_service._stop_job(evaluation_job.id)
-            except JobUpstreamError:
-                loguru.logger.error(f"Failed to stop eval job {evaluation_job.id}, continuing")
-            self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
         try:
-            loguru.logger.info("Handling evaluation result")
+            # wait for the evaluation job to complete
+            status = await self._job_service.wait_for_job_complete(
+                evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
+            )
+
+            if status != JobStatus.SUCCEEDED:
+                # Trigger the failure handling logic
+                raise JobUpstreamError(f"Evaluation job {evaluation_job.id} failed with status {status}") from None
+
+            # TODO: Handle other error types that can be raised by the method.
+            self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
+        except (JobUpstreamError, ValidationError) as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Evaluation job: {} failed: {}", workflow.id, evaluation_job.id, e
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
+
+        try:
+            loguru.logger.info(
+                "Workflow pipeline: Workflow {}. Evaluation job: {}. Handling evaluation result",
+                workflow.id,
+                evaluation_job,
+            )
 
             result_key = str(
                 Path(settings.S3_JOB_RESULTS_PREFIX)
@@ -223,8 +319,14 @@ class WorkflowService:
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
         except Exception as e:
-            loguru.logger.error(f"Error validating evaluation results: {e}")
-            self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.FAILED)
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
+                workflow.id,
+                evaluation_job.id,
+                e,
+            )
+            await self._handle_workflow_failure(workflow.id)
+            return
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

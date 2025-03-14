@@ -40,7 +40,7 @@ jobs:
           make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
-        run: make test-${{ matrix.test }}-integration-gpu
+        run: USE_ENV_FILE=true make test-${{ matrix.test }}-integration-gpu
 
       - name: Collect logs in case of failure
         if: failure()
@@ -98,7 +98,7 @@ jobs:
         # The SDK tests already use a separate Lumigator started
         # with postgres overrides
         # Allowing secrets for local test postgres
-        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration-gpu # pragma: allowlist secret
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator USE_ENV_FILE=true make test-${{ matrix.test }}-integration-gpu # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
         if: ${{ failure() || cancelled() }}

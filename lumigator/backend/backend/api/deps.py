@@ -116,18 +116,26 @@ def get_experiment_service(
     return ExperimentService(job_repo, job_service, dataset_service, tracking_client)
 
 
-ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
-
-
 def get_workflow_service(
     session: DBSessionDep,
     tracking_client: TrackingClientDep,
     job_service: JobServiceDep,
     dataset_service: DatasetServiceDep,
+    secret_service: SecretServiceDep,
     background_tasks: BackgroundTasks,
 ) -> WorkflowService:
     job_repo = JobRepository(session)
-    return WorkflowService(job_repo, job_service, dataset_service, background_tasks, tracking_client=tracking_client)
+    return WorkflowService(
+        job_repo=job_repo,
+        job_service=job_service,
+        dataset_service=dataset_service,
+        secret_checker=secret_service,
+        background_tasks=background_tasks,
+        tracking_client=tracking_client,
+    )
+
+
+ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]

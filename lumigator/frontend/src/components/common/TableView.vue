@@ -47,7 +47,7 @@
       </div>
     </template>
     <template #empty v-if="isSearchEnabled"> No items found. </template>
-    <Column expander style="width: 10" v-if="hasChildren" />
+    <Column expander style="width: 10" v-if="hasSubRows" />
     <Column
       v-if="showRowNumber && selectedColumns.length"
       key="rowNumber"
@@ -61,7 +61,11 @@
       :key="col"
       :field="col"
       :header="col"
-      :style="`width: ${selectedColumns.length > 0 ? (1 / selectedColumns.length) * 100 : 100}%`"
+      :style="
+        hasEqualColumnSizes
+          ? `width: ${selectedColumns.length > 0 ? (1 / selectedColumns.length) * 100 : 100}% `
+          : undefined
+      "
     >
       <template #editor="{ data, field }" v-if="isEditable">
         <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
@@ -69,13 +73,18 @@
     </Column>
     <template #expansion="slotProps">
       <TableView
-        :data="slotProps.data.children"
-        :isSearchEnabled="false"
+        :data="slotProps.data.subRows"
+        :isSearchEnabled="true"
         :hasColumnToggle="false"
-        :showRowNumber="showRowNumber"
+        :showRowNumber="true"
         :downloadFileName="downloadFileName"
         :isEditable="isEditable"
-        :columns="columns"
+        ref="subTable"
+        :columns="
+          Object.keys(slotProps.data.subRows[0]).filter(
+            (key) => key !== 'subRows' && key !== 'rowNumber',
+          )
+        "
       />
     </template>
   </DataTable>
@@ -92,7 +101,6 @@ import {
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
-  type DataTableProps,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
 import { defineComponent, ref, type PropType } from 'vue'
@@ -110,6 +118,10 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    hasEqualColumnSizes: {
+      type: Boolean,
+      default: false,
+    },
     isSearchEnabled: {
       type: Boolean,
       default: true,
@@ -124,14 +136,14 @@ export default defineComponent({
     },
     downloadFileName: {
       type: String,
-      required: true,
+      default: 'download',
     },
     isEditable: {
       type: Boolean,
       default: false,
     },
     data: {
-      type: Array as PropType<DataTableProps['value']>,
+      type: Array as PropType<Record<string, unknown>[]>,
       required: true,
     },
     columns: {
@@ -156,7 +168,7 @@ export default defineComponent({
       dataTable.value.exportCSV()
     }
 
-    const hasChildren = props.data!.some((item) => item.children)
+    const hasSubRows = props.data!.some((item) => item.subRows)
 
     const onCellEditComplete = (event: DataTableCellEditCompleteEvent) => {
       const { data, newValue, field } = event
@@ -191,12 +203,13 @@ export default defineComponent({
 
     return {
       isVisible,
-      hasChildren,
+      hasSubRows,
       dataTable,
       handleDownloadClicked,
       onCellEditComplete,
       onCellEditCancel,
       filters,
+      // allColumns,
       selectedColumns,
       onToggle,
       expandedRows,

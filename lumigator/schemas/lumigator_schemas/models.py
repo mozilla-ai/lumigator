@@ -18,7 +18,7 @@ class ModelRequirement(str, Enum):
 
 class ModelInfo(BaseModel):
     parameter_count: str
-    tensor_type: str
+    tensor_type: str | None = None
     model_size: str
 
 

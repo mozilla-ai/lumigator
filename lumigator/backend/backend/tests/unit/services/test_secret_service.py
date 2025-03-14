@@ -228,3 +228,9 @@ def test_secret_delete(secret_service: SecretService, secret_repository: SecretR
     assert res is False
     assert secret_repository.list() == []
     assert secret_service.list_secrets() == []
+
+
+def test_secret_existence(secret_service: SecretService):
+    secret_service.upload_secret("valid_secret", SecretUploadRequest(value="123456", description="test desc"))
+    assert secret_service.is_secret_configured("valid_secret") is True
+    assert secret_service.is_secret_configured("invalid_secret") is False

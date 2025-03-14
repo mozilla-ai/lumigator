@@ -371,7 +371,7 @@ class MLflowTrackingClient(TrackingClient):
         """Generate a pre-signed URL for the compiled artifact."""
         return self._s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_path(workflow_id, "compiled.json")},
+            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_key(workflow_id, "compiled.json")},
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
 
@@ -409,8 +409,8 @@ class MLflowTrackingClient(TrackingClient):
             return
 
         # Don't recompile if the artifact already exists.
-        workflow_s3_path = self._get_s3_path(workflow_id, "compiled.json")
-        if self._s3_file_system.exists(workflow_s3_path):
+        workflow_s3_uri = self._get_s3_uri(workflow_id, "compiled.json")
+        if self._s3_file_system.exists(workflow_s3_uri):
             return
 
         aggregated_results = JobResultObject()
@@ -437,7 +437,7 @@ class MLflowTrackingClient(TrackingClient):
             self._log_merged_keys(workflow_id, job.id, overwritten_keys, skipped_keys)
 
         # Upload the compiled results to S3.
-        self._upload_to_s3(workflow_s3_path, aggregated_results.model_dump())
+        self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
 
     def _group_keys_by_top_level(self, keys: set[str]) -> dict[str, list[str]]:
         """Groups a set of keys (formatted with dotted notation) by their top-level category.
@@ -530,9 +530,13 @@ class MLflowTrackingClient(TrackingClient):
         )
         return [job.info.run_id for job in all_jobs]
 
-    def _get_s3_path(self, workflow_id: str, filename: str) -> str:
-        """Construct an S3 path for workflow artifacts."""
-        return f"{settings.S3_BUCKET}/workflows/results/{workflow_id}/{filename}"
+    def _get_s3_uri(self, workflow_id: str, filename: str) -> str:
+        """Construct a full S3 URI for workflow artifacts."""
+        return f"s3://{settings.S3_BUCKET}/{self._get_s3_key(workflow_id, filename)}"
+
+    def _get_s3_key(self, workflow_id: str, filename: str) -> str:
+        """Construct an S3 key for workflow artifacts."""
+        return f"workflows/results/{workflow_id}/{filename}"
 
 
 class MLflowClientManager:

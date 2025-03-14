@@ -231,7 +231,7 @@ async function handleRunExperimentClicked() {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
 
-  const [experimentId, workflowResults] = await experimentsService.createExperimentWithWorkflows(
+  const [experimentId, createWorkflowResponses] = await experimentsService.createExperimentWithWorkflows(
     experimentPayload,
     modelSelection.value.selectedModels,
   )

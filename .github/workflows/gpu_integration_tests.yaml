@@ -64,7 +64,7 @@ jobs:
           name: backend-logs
           path: /tmp/backendlogs/backend.log
 
-      - name: Send an Slack notification
+      - name: Send a Slack notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
@@ -123,7 +123,7 @@ jobs:
           name: ray-logs
           path: /tmp/raylogs/ray/session_*/logs/
       
-      - name: Send an Slack notification
+      - name: Send a Slack notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:

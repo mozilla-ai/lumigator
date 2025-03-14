@@ -233,9 +233,6 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
-      - name: Output Ray logs
-        run: docker logs lumigator-ray-1
-
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
@@ -249,6 +246,7 @@ jobs:
           mkdir /tmp/raylogs
           mkdir /tmp/backendlogs
           docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+          docker logs lumigator-ray-1 > /tmp/raydocker.log
           docker logs lumigator-backend-1 > /tmp/backendlogs/backend.log
 
       - name: Upload Ray logs in case of failure
@@ -259,11 +257,19 @@ jobs:
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
-      - name: Upload backend logs in case of failure
+      - name: Upload Ray docker log in case of failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-logs
+          name: ray-docker-log
+          overwrite: true
+          path: /tmp/raydocker.log
+
+      - name: Upload backend log in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log
           overwrite: true
           path: /tmp/backendlogs/backend.log
 

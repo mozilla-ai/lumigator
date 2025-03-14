@@ -38,7 +38,6 @@ const emit = defineEmits(['l-add-experiment'])
 @use '@/styles/variables' as *;
 
 .l-experiment-empty {
-  $root: &;
   margin: auto;
   max-width: 560px;
 

@@ -13,5 +13,8 @@
         "./lumigator/schemas",
         "./lumigator/jobs",
         "./lumigator/sdk"
+    ],
+    "cSpell.words": [
+        "LUMIGATOR"
     ]
 }

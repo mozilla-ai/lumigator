@@ -39,7 +39,7 @@
         target="_blank"
         style="background-color: transparent"
         >Learn more <span class="pi pi-arrow-up-right"
-      /></a>
+      ></span></a>
     </p>
   </div>
 </template>
@@ -53,7 +53,6 @@ const emit = defineEmits(['l-add-dataset'])
 @use '@/styles/variables' as *;
 
 .l-dataset-empty {
-  $root: &;
   max-width: 600px;
   margin: auto;
 

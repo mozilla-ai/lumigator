@@ -91,7 +91,6 @@
 </template>
 <script lang="ts">
 import {
-  // Button,
   Column,
   DataTable,
   IconField,
@@ -110,7 +109,6 @@ export default defineComponent({
   components: {
     DataTable,
     Column,
-    // PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
     IconField,
     InputIcon,
@@ -209,7 +207,6 @@ export default defineComponent({
       onCellEditComplete,
       onCellEditCancel,
       filters,
-      // allColumns,
       selectedColumns,
       onToggle,
       expandedRows,

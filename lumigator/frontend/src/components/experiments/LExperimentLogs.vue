@@ -46,7 +46,6 @@ watch(logsLength, scrollToBottom)
 @use '@/styles/variables' as *;
 
 .l-experiment-logs {
-  $root: &;
   border-radius: $l-main-radius;
   height: 100%;
 

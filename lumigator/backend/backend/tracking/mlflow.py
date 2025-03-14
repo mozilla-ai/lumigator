@@ -1,6 +1,7 @@
 import contextlib
 import http
 import json
+from collections import defaultdict
 from collections.abc import Generator
 from datetime import datetime
 from http import HTTPStatus
@@ -112,7 +113,11 @@ class MLflowTrackingClient(TrackingClient):
     def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [
+            workflow
+            for workflow in (self.get_workflow(workflow_id) for workflow_id in workflow_ids)
+            if workflow is not None
+        ]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -416,7 +421,7 @@ class MLflowTrackingClient(TrackingClient):
                     (
                         param.get("value")
                         for param in job.parameters or []
-                        if param.get("name", "").startswith("_s3_path")
+                        if param.get("name", "").endswith("_s3_path")
                     ),
                     None,
                 )
@@ -426,14 +431,74 @@ class MLflowTrackingClient(TrackingClient):
             with self._s3_file_system.open(job_s3_path) as f:
                 job_results = JobResultObject.model_validate(json.loads(f.read()))
 
-            aggregated_results, overwritten_keys = merge_models(aggregated_results, job_results)
+            aggregated_results, overwritten_keys, skipped_keys = merge_models(aggregated_results, job_results)
 
-            # Make note of the keys that were overwritten when merging this job's results.
-            for key in overwritten_keys:
-                loguru.logger.warning(f"Job '{job.id}': Existing key '{key}' in results has been overwritten")
+            # Make note of the keys that were overwritten, and skipped when merging this job's results.
+            self._log_merged_keys(workflow_id, job.id, overwritten_keys, skipped_keys)
 
         # Upload the compiled results to S3.
         self._upload_to_s3(workflow_s3_path, aggregated_results.model_dump())
+
+    def _group_keys_by_top_level(self, keys: set[str]) -> dict[str, list[str]]:
+        """Groups a set of keys (formatted with dotted notation) by their top-level category.
+
+        This function splits each key at the first dot ('.') to separate the top-level category
+        from any sub-keys. If a key doesn't contain a dot, it is treated as a top-level key with
+        no sub-keys. The result is a dictionary where the keys are the top-level categories and
+        the values are lists of associated sub-keys, sorted alphabetically.
+
+        :param keys: A set of keys formatted in dotted notation, where each key may consist of
+                      a top-level category followed by one or more sub-keys.
+        :return: A dictionary mapping top-level categories to lists of their associated sub-keys,
+                 sorted alphabetically by the sub-keys.
+        """
+        accumulated = defaultdict(list)
+
+        for key in keys:
+            if "." in key:
+                top_level_key, subkey = key.split(".", 1)
+                accumulated[top_level_key].append(subkey)
+            else:
+                # If there's no dot, treat it as a top-level key without sub-keys
+                accumulated[key].append("")
+
+        return {key: sorted(values) for key, values in sorted(accumulated.items())}
+
+    def _log_merged_keys(self, workflow_id: str, job_id: str, overwritten_keys: set[str], skipped_keys: set[str]):
+        """Logs skipped and overwritten keys during the merge process.
+
+        :param workflow_id: The ID of the workflow.
+        :param job_id: The ID of the job.
+        :param overwritten_keys: A set of keys (to be logged at WARNING level) that were
+                overwritten during the merge process.
+        :param skipped_keys: A set of keys (to be logged at DEBUG level) that were
+                skipped during the merge process
+        """
+        if overwritten_keys:
+            loguru.logger.opt(lazy=True).warning(
+                "Workflow: '{}'. Job '{}'. Overwritten existing keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
+                    if any(sub_keys)
+                    else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(overwritten_keys))
+                ),
+            )
+
+        if skipped_keys:
+            loguru.logger.opt(lazy=True).debug(
+                "Workflow: '{}'. Job '{}'. Skipped keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
+                    if any(sub_keys)
+                    else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(skipped_keys))
+                ),
+            )
 
     def _fetch_workflow_run(self, workflow_id: str):
         """Try to fetch a workflow run from MLFlow.
@@ -467,7 +532,7 @@ class MLflowTrackingClient(TrackingClient):
 
     def _get_s3_path(self, workflow_id: str, filename: str) -> str:
         """Construct an S3 path for workflow artifacts."""
-        return f"{settings.S3_BUCKET}/{workflow_id}/{filename}"
+        return f"{settings.S3_BUCKET}/workflows/results/{workflow_id}/{filename}"
 
 
 class MLflowClientManager:

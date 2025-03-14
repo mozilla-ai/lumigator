@@ -64,52 +64,6 @@ app.kubernetes.io/name: {{ include "lumigator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Generated Secret name for Mistral
-*/}}
-{{- define "lumigator.mistral-secret-name" -}}
-{{- include "lumigator.name" . -}}-mistral
-{{- end }}
-
-{{- define "lumigator.mistral-secret-ref" -}}
-  {{ if .Values.existingMistralAPISecret }}
-    {{- .Values.existingMistralAPISecret }}
-  {{- else -}}
-    {{- include "lumigator.mistral-secret-name" . }}
-  {{- end }}
-{{- end }}
-
-{{- define "lumigator.mistral-default-secret" -}}
-  {{ if .Values.existingMistralAPISecretKey }}
-    {{- $_ := set . "mistralSecretKey" .Values.existingMistralAPISecretKey }}
-  {{- else -}}
-    {{- $_ := set . "mistralSecretKey" "MISTRAL_API_KEY" -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-Generated Secret name for OpenAI
-*/}}
-{{- define "lumigator.openai-secret-name" -}}
-{{- include "lumigator.name" . -}}-openai
-{{- end }}
-
-{{- define "lumigator.openai-secret-ref" -}}
-  {{ if .Values.existingOpenaiAPISecret }}
-    {{- .Values.existingOpenaiAPISecret }}
-  {{- else -}}
-    {{- include "lumigator.openai-secret-name" . }}
-  {{- end }}
-{{- end }}
-
-{{- define "lumigator.openai-default-secret" -}}
-  {{ if .Values.existingOpenaiAPISecretKey }}
-    {{- $_ := set . "openaiSecretKey" .Values.existingOpenaiAPISecretKey }}
-  {{- else -}}
-    {{- $_ := set . "openaiSecretKey" "OPENAI_API_KEY" -}}
-  {{- end -}}
-{{- end -}}
-
 {{- define "lumigator.ray-address" -}}
 {{- if .Values.rayAddress }}
 {{- .Values.rayAddress }}

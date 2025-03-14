@@ -18,6 +18,6 @@ os.umask(0o000)
 
 for i, model in enumerate(models):
     model_count = i + 1
-    logger.info(f"Downlading model {model_count}/{model_total}: {model} ...")
+    logger.info(f"Downloading model {model_count}/{model_total}: {model} ...")
     model_path = snapshot_download(model, cache_dir="/home/ray/.cache/huggingface/hub")
     logger.info(f"Model {model_count}/{model_total} downloaded: {model}")

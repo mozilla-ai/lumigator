@@ -1,6 +1,7 @@
 import base64
 import binascii
 import os
+from typing import Protocol
 
 from cryptography.exceptions import InvalidKey
 from cryptography.hazmat.backends import default_backend
@@ -9,7 +10,11 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from lumigator_schemas.secrets import SecretGetRequest, SecretUploadRequest
 
 from backend.repositories.secrets import SecretRepository
-from backend.services.exceptions.secret_exceptions import SecretDecryptionError, SecretEncryptionError
+from backend.services.exceptions.secret_exceptions import (
+    SecretDecryptionError,
+    SecretEncryptionError,
+    SecretNotFoundError,
+)
 
 
 class SecretService:
@@ -39,19 +44,21 @@ class SecretService:
         """
         return self._secret_repo.delete_secret(name)
 
-    def get_decrypted_secret_value(self, name: str) -> str | None:
+    def get_decrypted_secret_value(self, name: str) -> str:
         """Gets a decrypted value for the secret specified by name.
 
         NOTE: Decrypted secrets must be treated carefully and never exposed to the end user.
 
         :param name: The name of the secret to be decrypted
-        :return: The decrypted secret or None if no secret was found
+        :return: The decrypted secret
+        :raises SecretNotFoundError: raised if the secret is not found
         :raises SecretDecryptionError: raised if there are issues during decryption
         """
         try:
             record = self._secret_repo.get_secret_by_name(name)
             if record is None:
-                return None
+                raise SecretNotFoundError(name) from None
+
             return self._decrypt(record.value)
         except ValueError as e:
             raise SecretDecryptionError(name) from e
@@ -84,8 +91,13 @@ class SecretService:
 
         return self._secret_repo.save_secret(name, secret_dict)
 
-    def _get_secret_by_name(self, name: str) -> SecretGetRequest | None:
-        return self._secret_repo.get_secret_by_name(name)
+    def is_secret_configured(self, name: str) -> bool:
+        """Checks if a secret has been configured (stored) in Lumigator.
+
+        :param name: The name of the secret to check for existence
+        :returns: ``True`` if the secret is configured, ``False`` otherwise
+        """
+        return self._secret_repo.get_secret_by_name(name) is not None
 
     def _encrypt(self, plaintext: str) -> str:
         """Encrypts a plaintext string using AES in CBC mode with PKCS7 padding.
@@ -157,3 +169,14 @@ class SecretService:
     @staticmethod
     def generate_iv():
         return os.urandom(16)
+
+
+class SecretExistenceChecker(Protocol):
+    """A protocol for checking the existence of secrets in Lumigator."""
+
+    def is_secret_configured(self, name: str) -> bool:
+        """Checks if a secret has been configured (stored) in Lumigator.
+
+        :param name: The name of the secret to check for existence
+        :returns: ``True`` if the secret is configured, ``False`` otherwise
+        """

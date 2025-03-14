@@ -5,8 +5,9 @@ import type { Router } from 'vue-router'
 
 export function setupSentry(app: App<Element>, router: Router) {
   const consent = window.localStorage.getItem(SENTRY_CONSENT_LOCAL_STORAGE_KEY)
+  const isProdBuild = import.meta.env.PROD
 
-  if (consent === 'true') {
+  if (consent === 'true' && isProdBuild) {
     return init({
       app,
       dsn: import.meta.env.VITE_APP_LUMIGATOR_SENTRY_DSN,

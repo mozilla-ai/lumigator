@@ -15,6 +15,7 @@
 import { Button } from 'primevue'
 
 export default {
+  name: 'ConsentBanner',
   emits: ['accept', 'reject'],
   components: {
     PrimeVueButton: Button,

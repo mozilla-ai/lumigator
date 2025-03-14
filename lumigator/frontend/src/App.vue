@@ -56,7 +56,7 @@
       <div class="sliding-panel" :class="{ open: showSlidingPanel }"></div>
     </div>
     <ConsentBanner
-      v-if="!hasResponded"
+      v-if="!hasResponded && isProdBuild"
       @accept="acceptConsent"
       @reject="rejectConsent"
     ></ConsentBanner>
@@ -78,6 +78,7 @@ import { useSentryConsent } from './composables/useSentryConsent'
 const datasetsStore = useDatasetStore()
 const experimentsStore = useExperimentStore()
 const { hasResponded, acceptConsent, rejectConsent } = useSentryConsent()
+const isProdBuild = import.meta.env.PROD
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,

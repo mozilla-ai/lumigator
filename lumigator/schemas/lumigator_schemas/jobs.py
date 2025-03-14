@@ -224,9 +224,9 @@ class JobResultObject(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    metrics: dict = {}
-    parameters: dict = {}
-    artifacts: dict = {}
+    metrics: dict = Field(default_factory=dict)
+    parameters: dict = Field(default_factory=dict)
+    artifacts: dict = Field(default_factory=dict)
 
 
 class Job(JobResponse, JobSubmissionResponse):

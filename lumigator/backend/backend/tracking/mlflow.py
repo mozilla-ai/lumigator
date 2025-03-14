@@ -434,7 +434,7 @@ class MLflowTrackingClient(TrackingClient):
             aggregated_results, overwritten_keys, skipped_keys = merge_models(aggregated_results, job_results)
 
             # Make note of the keys that were overwritten, and skipped when merging this job's results.
-            self._log_merged_keys(workflow_id, job.id, overwritten_keys, skipped_keys)
+            self._log_overwritten_and_skipped_keys(workflow_id, job.id, overwritten_keys, skipped_keys)
 
         # Upload the compiled results to S3.
         self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
@@ -464,7 +464,9 @@ class MLflowTrackingClient(TrackingClient):
 
         return {key: sorted(values) for key, values in sorted(accumulated.items())}
 
-    def _log_merged_keys(self, workflow_id: str, job_id: str, overwritten_keys: set[str], skipped_keys: set[str]):
+    def _log_overwritten_and_skipped_keys(
+        self, workflow_id: str, job_id: str, overwritten_keys: set[str], skipped_keys: set[str]
+    ):
         """Logs skipped and overwritten keys during the merge process.
 
         :param workflow_id: The ID of the workflow.

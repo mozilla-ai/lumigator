@@ -38,8 +38,7 @@
       "return_input_data": true,
       "return_predictions": true,
       "storage_path": "s3://lumigator-storage/jobs/results/"
-    },
-    "api_key": null
+    }
   },
   "artifacts": {
     "predictions": [

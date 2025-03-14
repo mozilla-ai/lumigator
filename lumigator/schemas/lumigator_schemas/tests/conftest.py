@@ -31,3 +31,9 @@ def json_workflow_results_overlay_all(resources_dir) -> dict:
 def json_workflow_results_overlay_artifacts_same(resources_dir) -> dict:
     path = resources_dir / "workflow_results_overlay_artifacts_same.json"
     return load_json_from_file(path)
+
+
+@pytest.fixture(scope="session")
+def json_workflow_results_overlay_artifacts_missing(resources_dir) -> dict:
+    path = resources_dir / "workflow_results_overlay_artifacts_missing.json"
+    return load_json_from_file(path)

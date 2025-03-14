@@ -119,3 +119,27 @@ class HuggingFaceSeq2SeqPipelineMixin:
             f"is bigger than the model's max_position_embeddings ({max_pos_emb})."
         )
         pipeline.tokenizer.model_max_length = max_pos_emb
+
+    def set_seq2seq_max_length(self) -> None:
+        """Set the maximum sequence length for input and generation for the seq2seq model.
+
+        This method ensures that the tokenizer and model have the same maximum position embeddings
+        and adjusts the generation configuration accordingly.
+
+        :raises TypeError: If the pipeline, model, or config is None.
+        """
+        if not hasattr(self, "pipeline") or self.pipeline is None:
+            raise TypeError("The pipeline cannot be None")
+        if not hasattr(self.pipeline, "model") or self.pipeline.model is None:
+            raise TypeError("The pipeline's model cannot be None")
+        if not hasattr(self, "config") or self.config is None:
+            raise TypeError("The config cannot be None")
+        if not hasattr(self.config, "generation_config") or self.config.generation_config is None:
+            raise TypeError("The generation_config cannot be None")
+
+        # If the model is of the HF Hub the odds of this being wrong are low, but it's still good to check that the
+        # tokenizer model and the model have the same max_position_embeddings.
+        max_pos_emb = self.get_max_position_embeddings(self.pipeline.model)
+        self.adjust_tokenizer_max_length(self.pipeline, max_pos_emb)
+        # Adjust output sequence generation max tokens.
+        self.adjust_config_max_new_tokens(self.config.generation_config, max_pos_emb)

@@ -371,7 +371,7 @@ class MLflowTrackingClient(TrackingClient):
         """Generate a pre-signed URL for the compiled artifact."""
         return self._s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": settings.S3_BUCKET, "Key": f"{workflow_id}/compiled.json"},
+            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_path(workflow_id, "compiled.json")},
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
 

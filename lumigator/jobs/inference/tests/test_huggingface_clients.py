@@ -5,6 +5,7 @@ from inference_config import GenerationConfig, HfPipelineConfig, InferenceJobCon
 from lumigator_schemas.tasks import TaskDefinition, TaskType
 from model_clients.huggingface_clients import (
     HuggingFaceCausalLMClient,
+    HuggingFaceLanguageCodeTranslationClient,
     HuggingFacePrefixTranslationClient,
     HuggingFaceSeq2SeqSummarizationClient,
 )
@@ -231,7 +232,7 @@ class TestHuggingFacePrefixTranslationClient:
         config.generation_config.max_new_tokens = 100
         return config
 
-    @patch("model_clients.huggingface_clients.resolve_user_input_language")
+    @patch("model_clients.translation_utils.resolve_user_input_language")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
@@ -277,7 +278,7 @@ class TestHuggingFacePrefixTranslationClient:
         assert pipeline_args["task"] == "translation_en_to_fr"
         assert client.pipeline == mock_pipeline_instance
 
-    @patch("model_clients.huggingface_clients.resolve_user_input_language")
+    @patch("model_clients.translation_utils.resolve_user_input_language")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
     @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
@@ -326,3 +327,124 @@ class TestHuggingFacePrefixTranslationClient:
             "translate English to French: I am a translation model.",
         ]
         mock_pipeline_instance.assert_called_once_with(expected_prefixed_inputs, max_new_tokens=100, truncation=True)
+
+
+class TestHuggingFaceLanguageCodeTranslationClient:
+    @pytest.fixture
+    def mock_config(self):
+        """Create a mock InferenceJobConfig for testing language code translation client."""
+        config = MagicMock(spec=InferenceJobConfig)
+        config.task_definition = MagicMock(spec=TaskDefinition)
+        config.task_definition.source_language = "en"
+        config.task_definition.target_language = "fr"
+
+        config.hf_pipeline = MagicMock(spec=HfPipelineConfig)
+        config.hf_pipeline.model_name_or_path = "mock-language-code-model"
+        config.hf_pipeline.task = TaskType.TRANSLATION
+        config.hf_pipeline.trust_remote_code = False
+        config.hf_pipeline.use_fast = True
+        config.hf_pipeline.torch_dtype = "float32"
+        config.hf_pipeline.revision = "main"
+        config.hf_pipeline.device = "cpu"
+
+        config.generation_config = MagicMock(spec=GenerationConfig)
+        config.generation_config.max_new_tokens = 100
+        return config
+
+    @patch("model_clients.translation_utils.resolve_user_input_language")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
+    def test_initialization(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_resolve_lang, mock_config):
+        """Test initialization of the language code translation client."""
+        # Setup mocks
+        mock_model = MagicMock()
+        mock_model.config.max_position_embeddings = 512
+        mock_automodel.from_pretrained.return_value = mock_model
+
+        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
+        mock_tokenizer_instance.model_max_length = 512
+        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
+
+        mock_pipeline_instance = MagicMock(spec=Pipeline)
+        mock_pipeline_instance.model = mock_model
+        mock_pipeline_instance.tokenizer = mock_tokenizer_instance
+        mock_pipeline.return_value = mock_pipeline_instance
+
+        # Mock language resolution
+        mock_resolve_lang.side_effect = [
+            {"iso_code": "en", "full_name": "English"},
+            {"iso_code": "fr", "full_name": "French"},
+        ]
+
+        # Initialize client
+        client = HuggingFaceLanguageCodeTranslationClient(mock_config)
+
+        # Verify initialization
+        mock_tokenizer.from_pretrained.assert_called_once()
+        mock_automodel.from_pretrained.assert_called_once()
+        mock_pipeline.assert_called_once()
+
+        # Check that correct language parameters are set
+        assert client.source_language_iso_code == "en"
+        assert client.source_language == "English"
+        assert client.target_language_iso_code == "fr"
+        assert client.target_language == "French"
+
+        # Verify pipeline task is correctly set for translation
+        mock_pipeline.assert_called_once()
+        pipeline_args = mock_pipeline.call_args[1]
+        assert pipeline_args["task"] == TaskType.TRANSLATION
+        assert client.pipeline == mock_pipeline_instance
+
+    @patch("model_clients.translation_utils.resolve_user_input_language")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoTokenizer")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.AutoModelForSeq2SeqLM")
+    @patch("model_clients.mixins.huggingface_seq2seq_pipeline_mixin.pipeline")
+    def test_predict(self, mock_pipeline, mock_automodel, mock_tokenizer, mock_resolve_lang, mock_config):
+        """Test the predict method of the language code translation client."""
+        # Setup mocks
+        mock_model = MagicMock()
+        mock_model.config.max_position_embeddings = 512
+        mock_automodel.from_pretrained.return_value = mock_model
+
+        mock_tokenizer_instance = MagicMock(spec=PreTrainedTokenizer)
+        mock_tokenizer_instance.model_max_length = 512
+        mock_tokenizer.from_pretrained.return_value = mock_tokenizer_instance
+
+        mock_pipeline_instance = MagicMock(spec=Pipeline)
+        mock_pipeline_instance.model = mock_model
+        mock_pipeline_instance.tokenizer = mock_tokenizer_instance
+        mock_pipeline_instance.return_value = [
+            {"translation_text": "Bonjour, comment ça va?"},
+            {"translation_text": "Je suis un modèle de traduction."},
+        ]
+        mock_pipeline.return_value = mock_pipeline_instance
+
+        # Set max_new_tokens in config
+        mock_config.generation_config.max_new_tokens = 100
+
+        # Mock language resolution
+        mock_resolve_lang.side_effect = [
+            {"iso_code": "en", "full_name": "English"},
+            {"iso_code": "fr", "full_name": "French"},
+        ]
+
+        # Initialize client and call predict
+        client = HuggingFaceLanguageCodeTranslationClient(mock_config)
+        result = client.predict(["Hello, how are you?", "I am a translation model."])
+
+        # Verify prediction
+        assert len(result) == 2
+        assert all(isinstance(r, PredictionResult) for r in result)
+        assert result[0].prediction == "Bonjour, comment ça va?"
+        assert result[1].prediction == "Je suis un modèle de traduction."
+
+        # Verify pipeline was called with correct language codes
+        mock_pipeline_instance.assert_called_once_with(
+            ["Hello, how are you?", "I am a translation model."],
+            max_new_tokens=100,
+            truncation=True,
+            src_lang="en",
+            tgt_lang="fr",
+        )

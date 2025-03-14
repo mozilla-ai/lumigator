@@ -372,13 +372,10 @@ def test_full_experiment_launch(
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
     workflow_1 = run_workflow(local_client, experiment_id, "Workflow_1", model)
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
-    assert workflow_1_details.artifacts_download_url
-    print(f"... workflow_1_details.artifacts_download_url: {workflow_1_details.artifacts_download_url}")
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, experiment_id, "Workflow_2", model)
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
-    assert workflow_2_details.artifacts_download_url
     check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)

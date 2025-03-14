@@ -138,6 +138,7 @@ import {
   experimentsService,
   type createExperimentWithWorkflowsPayload,
 } from '@/sdk/experimentsService'
+import { getAxiosError } from '@/helpers/getAxiosError'
 
 const emit = defineEmits(['l-close-form'])
 
@@ -231,17 +232,30 @@ async function handleRunExperimentClicked() {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
   }
 
-  const [experimentId, createWorkflowResponses] = await experimentsService.createExperimentWithWorkflows(
-    experimentPayload,
-    modelSelection.value.selectedModels,
-  )
+  const [experimentId, createWorkflowResponses] =
+    await experimentsService.createExperimentWithWorkflows(
+      experimentPayload,
+      modelSelection.value.selectedModels,
+    )
   // Separate successful workflows and errors
-  const successfulResponses = createWorkflowResponses.filter((promise) => promise.status === 'fulfilled').map((promise) => promise.value)
-  const failures = createWorkflowResponses
-    .filter((promise) => promise.status === 'rejected')
-    .map((promise) => promise.reason.response?.data?.detail)
+  const successfulResponses = createWorkflowResponses
+    .filter((promise) => promise.status === 'fulfilled')
+    .map((promise) => promise.value)
+  const failedResponses = createWorkflowResponses
+    .filter((promiseResult) => promiseResult.status === 'rejected')
+    .map((promiseResult) => {
+      const errorMessage = getAxiosError(promiseResult.reason)
+      try {
+        // if its a parseable JSON string, that means it returned `response.data`
+        const responseBody = JSON.parse(errorMessage)
+        return responseBody.detail
+      } catch {
+        // otherwise its just an error message/string
+        return errorMessage
+      }
+    })
 
-  failures.forEach((msg: string) => {
+  failedResponses.forEach((msg: string) => {
     toast.add({
       severity: 'error',
       summary: `Workflow failed to start`,
@@ -252,7 +266,7 @@ async function handleRunExperimentClicked() {
     } as ToastMessageOptions & { messageicon: string })
   })
 
-  if (workflows.length) {
+  if (successfulResponses.length) {
     // re-fetch after creating an experiment to update the table
     await experimentStore.fetchAllExperiments()
     emit('l-close-form')
@@ -272,7 +286,7 @@ async function handleRunExperimentClicked() {
       summary: `Experiment failed to start`,
       messageicon: 'pi pi-exclamation-triangle',
       group: 'br',
-      life: 6000,
+      life: 10000,
     } as ToastMessageOptions & { messageicon: string })
   }
 }

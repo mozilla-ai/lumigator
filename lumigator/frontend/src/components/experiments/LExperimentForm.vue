@@ -236,7 +236,7 @@ async function handleRunExperimentClicked() {
     modelSelection.value.selectedModels,
   )
   // Separate successful workflows and errors
-  const workflows = workflowResults.filter((r) => r.status === 'fulfilled').map((r) => r.value)
+  const successfulResponses = createWorkflowResponses.filter((promise) => promise.status === 'fulfilled').map((promise) => promise.value)
   const failures = workflowResults
     .filter((r) => r.status === 'rejected')
     .map((r) => r.reason?.response?.data?.detail)

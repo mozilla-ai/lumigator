@@ -1,10 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from inference.schemas import GenerationConfig
 from transformers import Pipeline, PreTrainedTokenizer
 
-from schemas import PredictionResult
+from schemas import GenerationConfig
 
 
 class MockBaseSetup:

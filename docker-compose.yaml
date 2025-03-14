@@ -120,6 +120,11 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+    healthcheck:
+      test: ["CMD", "ray", "status"]
+      interval: 3s
+      timeout: 20s
+      retries: 5
 
   backend:
     labels:
@@ -137,7 +142,7 @@ services:
         condition: "service_started"
         required: false
       ray:
-        condition: "service_started"
+        condition: "service_healthy"
         required: false
       mlflow:
         condition: "service_started"

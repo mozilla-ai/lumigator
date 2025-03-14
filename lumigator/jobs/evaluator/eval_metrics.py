@@ -34,6 +34,10 @@ class EvaluationMetrics:
             "meteor": {"method": self._meteor, "requires": [EvaluationFields.GROUND_TRUTH]},
             "bertscore": {"method": self._bertscore, "requires": [EvaluationFields.GROUND_TRUTH]},
             "bleu": {"method": self._bleu, "requires": [EvaluationFields.GROUND_TRUTH]},
+            "comet": {
+                "method": self._comet,
+                "requires": [EvaluationFields.GROUND_TRUTH, EvaluationFields.EXAMPLE],
+            },
             "g_eval_summarization": {
                 # the available tasks in g_eval are the ones we have defined
                 # criteria / evaluation steps for inside `g_eval_prompts.json`
@@ -127,6 +131,23 @@ class EvaluationMetrics:
         # calculate mean for each of the submetrics (precision, recall, f1)
         for k in ["precision", "recall", "f1"]:
             evals[f"{k}_mean"] = np.mean(evals[k])
+
+        return evals
+
+    def _comet(self, examples: list, pred: list, ref: list) -> dict:
+        """https://github.com/huggingface/evaluate/tree/main/metrics/comet
+        COMET (Crosslingual Optimized Metric for Evaluation of Translation) is a neural metric
+        for machine translation evaluation.
+        It aims to predict human judgment of translation quality.
+        It requires both the original input and the reference / ground truth, as well as the model's prediction.
+        """
+        logger.info("Running COMET evaluation")
+        ev = evaluate.load("comet", "eamt22-cometinho-da")
+
+        # output is a dictionary with scores and mean score
+        # scores is a list of floats, one per example
+        # mean_score is a float representing the average of the scores
+        evals = ev.compute(predictions=pred, references=ref, sources=examples)
 
         return evals
 

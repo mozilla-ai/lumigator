@@ -34,10 +34,19 @@ merge_conf_files() {
         [[ -f "$file" ]] || continue  # Skip missing files
 
         while IFS= read -r line || [[ -n "$line" ]]; do
-            [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue  # Skip empty/comment lines
+            ## Remove inline comments
+            sanitized_line=$(echo "$line" | sed 's/^\([^#]*=[^#]*\).*/\1/')
 
-            key="${line%%=*}"  # Extract key (before first '=')
-            value="${line#*=}"  # Extract value (after first '=')
+            # Skip empty lines or lines starting with whitespace followed by #
+            [[ -z "$sanitized_line" || "$sanitized_line" =~ ^[[:space:]]*# ]] && continue
+
+            # Split the line into key and value based on the first '=' occurrence
+            key="${sanitized_line%%=*}"
+            value="${sanitized_line#*=}"
+
+            # Trim spaces from key and value
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
 
             # If key is new, add to the order list
             if ! grep -q "^$key=" <<< "$config_values"; then

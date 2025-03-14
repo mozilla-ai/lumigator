@@ -17,6 +17,12 @@ fi
 
 # Default environment variables
 DEFAULT_VARS=(
+    AWS_ACCESS_KEY_ID=lumigator
+    AWS_SECRET_ACCESS_KEY=lumigator # pragma: allowlist secret
+    AWS_DEFAULT_REGION=us-east-2
+    AWS_ENDPOINT_URL=http://localhost:9000
+    S3_ENDPOINT_URL=http://localhost:9000
+    LOCAL_FSSPEC_S3_ENDPOINT_URL=http://localhost:9000
     S3_BUCKET=lumigator-storage
 	RAY_HEAD_NODE_HOST=localhost
 	RAY_DASHBOARD_PORT=8265
@@ -38,12 +44,15 @@ set_vars_from_file() {
     # Check if the file exists and is readable
     if [[ -f "$ENV_VARS_FILE" ]]; then
         while IFS= read -r line; do
-            # Skip empty lines or lines starting with #
-            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            # Remove inline comments and trim spaces
+            sanitized_line=$(echo "$line" | sed 's/^\([^#]*=[^#]*\).*/\1/' | xargs)
+
+            # Skip empty lines or lines starting with whitespace followed by #
+            [[ -z "$sanitized_line" || "$sanitized_line" =~ ^[[:space:]]*# ]] && continue
 
             # Split the line into key and value based on the first '=' occurrence
-            key="${line%%=*}"
-            value="${line#*=}"
+            key="${sanitized_line%%=*}"
+            value="${sanitized_line#*=}"
 
             # Trim spaces from key and value
             key=$(echo "$key" | xargs)
@@ -77,9 +86,17 @@ set_vars_from_file() {
 
 # Function to set default environment variables
 set_default_vars() {
-    for var in "${DEFAULT_VARS[@]}"; do
-        key="${var%%=*}"
-        value="${var#*=}"
+    for line in "${DEFAULT_VARS[@]}"; do
+        # Remove inline comments and trim spaces
+        sanitized_line=$(echo "$line" | sed 's/^\([^#]*=[^#]*\).*/\1/' | xargs)
+
+        # Split the line into key and value based on the first '=' occurrence
+        key="${sanitized_line%%=*}"
+        value="${sanitized_line#*=}"
+
+        # Trim spaces from key and value
+        key=$(echo "$key" | xargs)
+        value=$(echo "$value" | xargs)
 
         # Export the variable if it's non-empty
         if [[ -n "$value" ]]; then

@@ -492,7 +492,7 @@ def _test_launch_job_with_secret(
         dataset=str(created_dataset.id),
         max_samples=2,
         job_config=JobInferenceConfig(
-            model="open-mistral-7b",
+            model="ministral-8b-latest",
             provider="mistral",
         ),
     )
@@ -515,7 +515,7 @@ def _test_launch_job_with_secret(
         max_samples=2,
         api_keys=[secret_name],
         job_config=JobInferenceConfig(
-            model="open-mistral-7b",
+            model="ministral-8b-latest",
             provider="mistral",
         ),
     )

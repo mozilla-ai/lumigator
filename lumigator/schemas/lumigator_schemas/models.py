@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ModelRequirement(str, Enum):
@@ -18,7 +18,7 @@ class ModelRequirement(str, Enum):
 
 class ModelInfo(BaseModel):
     parameter_count: str
-    tensor_type: str
+    tensor_type: str | None = None
     model_size: str
 
 
@@ -54,6 +54,15 @@ class ModelsResponse(BaseModel):
         "or `{ModelRequirement.API_KEY}` to indicate that an API key is necessary)",
     )
     info: ModelInfo | None = Field(None, title="Model info", description="Detailed model capabilities")
-    tasks: list[dict[str, dict | None]] = Field(
+    tasks: list[dict[str, dict]] = Field(
         ..., title="Applicable tasks", description="List of tasks to which the model can be applied"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def ensure_empty_dict_for_none_task_values(cls, values):
+        """Ensure that every task dictionary has an empty dictionary as the default for the value."""
+        values["tasks"] = [
+            {key: (value if value else {}) for key, value in task.items()} for task in values.get("tasks", [])
+        ]
+        return values

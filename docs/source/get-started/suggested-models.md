@@ -86,7 +86,7 @@ launched it.
 | seq2seq    | facebook/bart-large-cnn                  |      X      |     |           |
 | seq2seq    | Falconsai/text_summarization             |      X      |     |           |
 | causal     | gpt-4o-mini, gpt-4o                      |             |  X  |           |
-| causal     | open-mistral-7b                          |             |  X  |           |
+| causal     | Ministral-8B                          |             |  X  |           |
 | causal     | Mistral-7B-Instruct                      |             |     |     X     |
 
 ## BART Large CNN
@@ -142,11 +142,10 @@ The GPT-4o Mini and GPT-4o models are causal language models developed by OpenAI
 
 There are no summarization-specific parameters for these models.
 
-## Open Mistral 7B
+## Ministral 8B
 
-The [Open Mistral 7B](https://mistral.ai/news/announcing-mistral-7b/) model is a causal language
-model developed by [Mistral AI](https://mistral.ai/). It is the smaller version of the
-Mistral AI family of models.
+The [Ministral 8B](https://mistral.ai/news/ministraux) model is an open, causal language
+model developed by [Mistral AI](https://mistral.ai/). It is a small but powerful edge model.
 
 There are no summarization-specific parameters for this model.
 

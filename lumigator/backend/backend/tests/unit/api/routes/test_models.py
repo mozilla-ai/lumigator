@@ -1,5 +1,3 @@
-import json
-
 from fastapi.testclient import TestClient
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.models import ModelsResponse
@@ -7,31 +5,31 @@ from lumigator_schemas.models import ModelsResponse
 from backend.api.routes.models import _filter_models_by_tasks, _get_supported_tasks
 
 
-def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs_data: dict):
+def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs_data):
     response = app_client.get("/models/?tasks=summarization")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
     # Filter models that only support summarization
-    filtered_data = _filter_models_by_tasks(model_specs_data, ["summarization"])
+    filtered_data = _filter_models_by_tasks(model_specs_data, {"summarization"})
 
     assert models.total == len(filtered_data)
     assert len(models.items) == len(filtered_data)
 
 
-def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_specs_data: dict):
+def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_specs_data):
     response = app_client.get("/models/?tasks=summarization&tasks=translation")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
     # Filter models that support either summarization or translation
-    filtered_data = _filter_models_by_tasks(model_specs_data, ["summarization", "translation"])
+    filtered_data = _filter_models_by_tasks(model_specs_data, {"summarization", "translation"})
 
     assert models.total == len(filtered_data)
     assert len(models.items) == len(filtered_data)
 
 
-def test_get_suggested_models_no_task_specified(app_client: TestClient, model_specs_data: dict):
+def test_get_suggested_models_no_task_specified(app_client: TestClient, model_specs_data):
     # Should return all models based on your implementation
     response = app_client.get("/models/")
     assert response.status_code == 200
@@ -41,7 +39,7 @@ def test_get_suggested_models_no_task_specified(app_client: TestClient, model_sp
     assert len(models.items) == len(model_specs_data)
 
 
-def test_get_suggested_models_invalid_task(app_client: TestClient, model_specs_data: dict):
+def test_get_suggested_models_invalid_task(app_client: TestClient, model_specs_data):
     response = app_client.get("/models/?tasks=invalid_task")
     assert response.status_code == 400
 

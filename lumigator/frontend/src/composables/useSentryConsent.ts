@@ -3,8 +3,8 @@ import { ref } from 'vue'
 export const SENTRY_CONSENT_LOCAL_STORAGE_KEY = 'sentry-consent'
 
 export function useSentryConsent() {
-  const hasResponded = ref(window.localStorage.getItem('sentry-consent') !== null)
-  const hasConsented = ref(window.localStorage.getItem('sentry-consent') === 'true')
+  const hasResponded = ref(window.localStorage.getItem(SENTRY_CONSENT_LOCAL_STORAGE_KEY) !== null)
+  const hasConsented = ref(window.localStorage.getItem(SENTRY_CONSENT_LOCAL_STORAGE_KEY) === 'true')
 
   const acceptConsent = () => {
     window.localStorage.setItem(SENTRY_CONSENT_LOCAL_STORAGE_KEY, 'true')

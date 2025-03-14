@@ -272,11 +272,6 @@ function stopPollingForWorkflowLogs() {
   }
 }
 
-// function getJobRuntime(jobId: string) {
-//   const job = jobs.value.find((job) => job.id === jobId)
-//   return job ? job.runTime : undefined
-// }
-
 watch(
   selectedExperiment,
   (newValue) => {

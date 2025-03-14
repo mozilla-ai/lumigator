@@ -188,26 +188,6 @@ const tagSeverity = computed(() => {
   }
 })
 
-// const focusedItemRunTime = computed(() => {
-//   if (isJobFocused.value) {
-//     return selectedJob.value.runTime ? selectedJob.value.runTime : '-'
-//   }
-
-//   if (
-//     currentItemStatus.value !== WorkflowStatus.RUNNING &&
-//     currentItemStatus.value !== WorkflowStatus.PENDING
-//   ) {
-//     const endTimes = selectedJob.value.workflows.map((workflow) => workflow.end_time) || []
-//     const lastEndTime = endTimes.reduce((latest, current) => {
-//       return new Date(latest) > new Date(current) ? latest : current
-//     })
-//     if (lastEndTime && selectedJob) {
-//       return calculateDuration(selectedJob.value.created_at, lastEndTime)
-//     }
-//   }
-//   return '-'
-// })
-
 const showResults = () => {
   if (isJobFocused.value) {
     emit('l-job-results', selectedJob)

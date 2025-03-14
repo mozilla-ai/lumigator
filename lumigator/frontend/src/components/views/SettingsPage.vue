@@ -295,10 +295,6 @@ const handleBlur = (key: string) => {
 }
 
 .settings-group-description {
-  // display: flex;
-  // justify-content: space-between;
-  // align-self: stretch;
-  // align-items: center;
   @include mixins.caption;
   color: variables.$l-grey-100;
 }
@@ -362,7 +358,6 @@ const handleBlur = (key: string) => {
   background: none;
   border: none;
   outline: none;
-  // color: #E0C414;
   color: red;
 }
 

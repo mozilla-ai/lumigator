@@ -45,8 +45,6 @@ export default {
   bottom: 0;
   width: 100%;
   background-color: variables.$l-main-bg;
-  // background: transparent;
-  // border: 1px solid variables.$l-grey-100;
   color: variables.$l-grey-100;
   padding: 10px;
   text-align: center;

@@ -72,7 +72,7 @@ class HuggingFaceSeq2SeqSummarizationClient(
         self.api_key = api_key
         self.model = self.initialize_model(self.config.hf_pipeline)
         self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
-        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key)
+        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
         self.set_seq2seq_max_length()
 
     def predict(self, examples: list) -> list[PredictionResult]:
@@ -148,7 +148,11 @@ class HuggingFacePrefixTranslationClient(
             f"{TaskType.TRANSLATION.value}_{self.source_language_iso_code}_to_{self.target_language_iso_code}"
         )
         self.pipeline = self.initialize_pipeline(
-            self.config.hf_pipeline, self.model, self.tokenizer, specific_pipeline_task, api_key
+            self.config.hf_pipeline,
+            self.model,
+            self.tokenizer,
+            specific_pipeline_task=specific_pipeline_task,
+            api_key=api_key,
         )
         self.set_seq2seq_max_length()
         self.prefix = f"translate {self.source_language} to {self.target_language}: "

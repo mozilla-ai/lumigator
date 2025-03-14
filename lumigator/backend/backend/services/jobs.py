@@ -456,16 +456,13 @@ class JobService:
 
         metadata = {"job_type": job_type}
 
-        loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
-
         entrypoint = RayJobEntrypoint(
             config=ray_config,
             metadata=metadata,
             runtime_env=runtime_env,
             num_gpus=settings.RAY_WORKER_GPUS,
         )
-        loguru.logger.info("Submitting {job_type} Ray job...")
+        loguru.logger.info("fSubmitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
         # NOTE: Only inference jobs can store results in a dataset atm. Among them:

@@ -1,5 +1,6 @@
 import csv
 import io
+import logging
 import os
 import time
 import uuid
@@ -561,3 +562,15 @@ def model_specs_data() -> list[ModelsResponse]:
     models = [ModelsResponse.model_validate(item) for item in model_specs]
 
     return models
+
+
+@pytest.fixture(autouse=True)
+def configure_loguru(caplog):
+    class PropagateHandler(logging.Handler):
+        def emit(self, record):
+            logging.getLogger(record.name).handle(record)
+
+    logger.remove()
+    logger.add(PropagateHandler(), format="{message}")
+    yield
+    logger.remove()

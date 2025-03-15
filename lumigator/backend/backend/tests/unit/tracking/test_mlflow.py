@@ -1,10 +1,4 @@
-from collections import defaultdict
-from unittest.mock import MagicMock
-
 import pytest
-from conftest import boto_s3_client
-from loguru import logger
-from pyarrow._s3fs import S3FileSystem
 
 from backend.tracking.mlflow import MLflowTrackingClient
 

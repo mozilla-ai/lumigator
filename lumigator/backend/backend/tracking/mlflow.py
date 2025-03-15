@@ -496,9 +496,7 @@ class MLflowTrackingClient(TrackingClient):
                 lambda: workflow_id,
                 lambda: job_id,
                 lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
-                    if any(sub_keys)
-                    else key
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
                     for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(overwritten_keys))
                 ),
             )
@@ -509,9 +507,7 @@ class MLflowTrackingClient(TrackingClient):
                 lambda: workflow_id,
                 lambda: job_id,
                 lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
-                    if any(sub_keys)
-                    else key
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
                     for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(unmerged_keys))
                 ),
             )
@@ -522,9 +518,7 @@ class MLflowTrackingClient(TrackingClient):
                 lambda: workflow_id,
                 lambda: job_id,
                 lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
-                    if any(sub_keys)
-                    else key
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
                     for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(skipped_keys))
                 ),
             )

@@ -27,6 +27,8 @@ services:
           action: sync
           ignore:
             - .venv/
+            - jobs/inference/.venv/
+            - jobs/evaluation/.venv/
             - .pytest_cache/
             - .ruff_cache/
         - path: lumigator/schemas/

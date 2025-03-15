@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 from lumigator_schemas.jobs import JobResultObject
-from lumigator_schemas.utils.model_operations import deep_merge_dicts, merge_models
+from lumigator_schemas.utils.model_operations import _deep_merge_dicts, merge_models
 from pydantic import BaseModel
 
 
@@ -12,7 +12,7 @@ class TestModel(BaseModel):
 
 
 @pytest.mark.parametrize(
-    "base_model, overlay_model, deep_merge, expected_merged, expected_overwritten, expected_skipped",
+    "base_model, overlay_model, deep_merge, expected_merged, expected_overwritten, expected_unmerged, expected_skipped",
     [
         # Case 1: base_model is None, overlay_model is provided
         (
@@ -20,6 +20,7 @@ class TestModel(BaseModel):
             TestModel(name="overlay", metadata={"key": "value"}),
             False,
             TestModel(name="overlay", metadata={"key": "value"}),
+            set(),
             set(),
             set(),
         ),
@@ -31,6 +32,7 @@ class TestModel(BaseModel):
             TestModel(name="base", metadata={"key": "base_value"}),
             set(),
             set(),
+            set(),
         ),
         # Case 3: Base and Overlay models are provided, shallow merge (no deep merge)
         (
@@ -40,6 +42,7 @@ class TestModel(BaseModel):
             TestModel(name="overlay", metadata={"key": "overlay_value"}),
             {"name", "metadata"},
             set(),
+            set(),
         ),
         # Case 4: Base and Overlay models are provided, shallow merge (no deep merge)
         (
@@ -48,9 +51,10 @@ class TestModel(BaseModel):
             False,
             TestModel(name="overlay", metadata={"key": "base_value"}),
             {"name"},
+            set(),
             {"metadata"},
         ),
-        # Case 5: Base and Overlay models are provided, deep merge (nested dictionaries)
+        # Case 5: Base and Overlay models are provided, deep merge (nested dictionaries), subkey3 only in base
         (
             TestModel(
                 name="base",
@@ -67,20 +71,24 @@ class TestModel(BaseModel):
                 },
             ),
             {"name", "metadata.key.subkey"},
-            {"metadata.key.subkey2", "metadata.key.subkey3"},
+            {"metadata.key.subkey3"},
+            {"metadata.key.subkey2"},
         ),
     ],
 )
-def test_merge_models(base_model, overlay_model, deep_merge, expected_merged, expected_overwritten, expected_skipped):
-    merged_model, overwritten_keys, skipped_keys = merge_models(base_model, overlay_model, deep_merge)
+def test_merge_models(
+    base_model, overlay_model, deep_merge, expected_merged, expected_overwritten, expected_unmerged, expected_skipped
+):
+    merged_model, overwritten_keys, unmerged_keys, skipped_keys = merge_models(base_model, overlay_model, deep_merge)
 
     assert merged_model == expected_merged
     assert overwritten_keys == expected_overwritten
     assert skipped_keys == expected_skipped
+    assert unmerged_keys == expected_unmerged
 
 
 @pytest.mark.parametrize(
-    "a, b, expected_overwritten, expected_skipped",
+    "a, b, expected_overwritten, expected_unmerged, expected_skipped",
     [
         (
             "json_workflow_results",
@@ -93,6 +101,7 @@ def test_merge_models(base_model, overlay_model, deep_merge, expected_merged, ex
                 "metrics.meteor.meteor",
                 "parameters.name",
             },
+            set(),
             {
                 "artifacts.evaluation_time",
                 "artifacts.ground_truth",
@@ -131,6 +140,7 @@ def test_merge_models(base_model, overlay_model, deep_merge, expected_merged, ex
                 "metrics.meteor.meteor",
                 "parameters.name",
             },
+            set(),
             {
                 "artifacts.evaluation_time",
                 "artifacts.ground_truth",
@@ -174,6 +184,8 @@ def test_merge_models(base_model, overlay_model, deep_merge, expected_merged, ex
                 "artifacts.evaluation_time",
                 "artifacts.ground_truth",
                 "artifacts.predictions",
+            },
+            {
                 "metrics.bertscore.f1",
                 "metrics.bertscore.f1_mean",
                 "metrics.bertscore.precision_mean",
@@ -201,13 +213,15 @@ def test_merge_models(base_model, overlay_model, deep_merge, expected_merged, ex
         ),
     ],
 )
-def test_merge_job_results(a, b, expected_overwritten, expected_skipped, request):
+def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expected_skipped, request):
     # Create JobResultObjects from the JSON data
     job_result_1 = JobResultObject(**request.getfixturevalue(a))
     job_result_2 = JobResultObject(**request.getfixturevalue(b))
 
     # Merge the models using your merge_models function
-    merged_model, overwritten_keys, skipped_keys = merge_models(job_result_1, job_result_2, deep_merge=True)
+    merged_model, overwritten_keys, unmerged_keys, skipped_keys = merge_models(
+        job_result_1, job_result_2, deep_merge=True
+    )
 
     # Assert the merged model is as expected
     bertscore = merged_model.metrics.get("bertscore", {})
@@ -226,6 +240,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_skipped, request
 
     # Assert the overwritten keys are as expected
     assert overwritten_keys == expected_overwritten
+    assert unmerged_keys == expected_unmerged
     assert skipped_keys == expected_skipped
 
 
@@ -281,7 +296,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_skipped, request
 )
 # "base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_skipped",
 def test_deep_merge_dicts(base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_skipped):
-    merged_dict, overwritten_keys, skipped_keys = deep_merge_dicts(base_dict, overlay_dict, deep_merge)
+    merged_dict, overwritten_keys, skipped_keys = _deep_merge_dicts(base_dict, overlay_dict, deep_merge)
 
     assert overwritten_keys == expected_overwritten
     assert skipped_keys == expected_skipped

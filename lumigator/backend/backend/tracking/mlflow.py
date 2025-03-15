@@ -431,10 +431,19 @@ class MLflowTrackingClient(TrackingClient):
             with self._s3_file_system.open(job_s3_path) as f:
                 job_results = JobResultObject.model_validate(json.loads(f.read()))
 
-            aggregated_results, overwritten_keys, skipped_keys = merge_models(aggregated_results, job_results)
+            # Merge the job's results with the aggregated results.
+            merge_results = merge_models(aggregated_results, job_results)
+            # Update the aggregated results with the merged model.
+            aggregated_results = merge_results.merged_model
 
-            # Make note of the keys that were overwritten, and skipped when merging this job's results.
-            self._log_overwritten_and_skipped_keys(workflow_id, job.id, overwritten_keys, skipped_keys)
+            # Make note of the keys that were overwritten, unmerged and skipped when merging this job's results.
+            self._log_key_changes(
+                workflow_id,
+                job.id,
+                merge_results.overwritten_keys,
+                merge_results.unmerged_keys,
+                merge_results.skipped_keys,
+            )
 
         # Upload the compiled results to S3.
         self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
@@ -464,15 +473,20 @@ class MLflowTrackingClient(TrackingClient):
 
         return {key: sorted(values) for key, values in sorted(accumulated.items())}
 
-    def _log_overwritten_and_skipped_keys(
-        self, workflow_id: str, job_id: str, overwritten_keys: set[str], skipped_keys: set[str]
+    def _log_key_changes(
+        self, workflow_id: str, job_id: str, overwritten_keys: set[str], unmerged_keys: set[str], skipped_keys: set[str]
     ):
-        """Logs skipped and overwritten keys during the merge process.
+        """Logs key changes that occurred during the merge.
+
+        e.g. skipped keys that had the same value, overwritten keys with updated values and unmerged keys that were
+        present in the base but absent in the overlay.
 
         :param workflow_id: The ID of the workflow.
         :param job_id: The ID of the job.
         :param overwritten_keys: A set of keys (to be logged at WARNING level) that were
                 overwritten during the merge process.
+        :param unmerged_keys: A set of keys (to be logged at WARNING level) that that were
+                present in the base but absent in the overlay.
         :param skipped_keys: A set of keys (to be logged at DEBUG level) that were
                 skipped during the merge process
         """
@@ -486,6 +500,19 @@ class MLflowTrackingClient(TrackingClient):
                     if any(sub_keys)
                     else key
                     for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(overwritten_keys))
+                ),
+            )
+
+        if unmerged_keys:
+            loguru.logger.opt(lazy=True).warning(
+                "Workflow: '{}'. Job '{}'. No data found for keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if any(sub_keys) else ''}]"
+                    if any(sub_keys)
+                    else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(unmerged_keys))
                 ),
             )
 

@@ -245,7 +245,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
 
 
 @pytest.mark.parametrize(
-    "base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_skipped",
+    "base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_unmerged, expected_skipped",
     [
         # Case 1: Shallow merge (no recursion)
         (
@@ -254,6 +254,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
             False,
             {"key": "overlay_value"},
             {"key"},
+            set(),
             set(),
         ),
         # Case 2: Deep merge (nested dictionaries)
@@ -264,6 +265,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
             {"key": {"subkey": "overlay_value"}},
             {"key.subkey"},
             set(),
+            set(),
         ),
         # Case 3: Overwriting a top-level key (non-nested)
         (
@@ -272,6 +274,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
             True,
             {"key": "overlay_value"},
             {"key"},
+            set(),
             set(),
         ),
         # Case 4: Overwriting a nested key (deep merge)
@@ -282,6 +285,7 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
             {"key": {"subkey": "overlay_value", "subkey2": "base_value2"}},
             {"key.subkey"},
             {"key.subkey2"},
+            set(),
         ),
         # Case 5: No overlay values, so base_dict remains the same
         (
@@ -291,13 +295,16 @@ def test_merge_job_results(a, b, expected_overwritten, expected_unmerged, expect
             {"key": "base_value"},
             set(),
             {"key"},
+            set(),
         ),
     ],
 )
-# "base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_skipped",
-def test_deep_merge_dicts(base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_skipped):
-    merged_dict, overwritten_keys, skipped_keys = _deep_merge_dicts(base_dict, overlay_dict, deep_merge)
+def test_deep_merge_dicts(
+    base_dict, overlay_dict, deep_merge, expected_merged, expected_overwritten, expected_unmerged, expected_skipped
+):
+    merged_dict, overwritten_keys, unmerged_keys, skipped_keys = _deep_merge_dicts(base_dict, overlay_dict, deep_merge)
 
     assert overwritten_keys == expected_overwritten
     assert skipped_keys == expected_skipped
+    assert unmerged_keys == expected_unmerged
     assert merged_dict == expected_merged

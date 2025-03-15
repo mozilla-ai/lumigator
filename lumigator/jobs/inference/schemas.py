@@ -91,14 +91,14 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    inference_metrics: list[InferenceMetrics] | list[None] = None
+    inference_metrics: list[InferenceMetrics] | None = None
 
 
 class PredictionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prediction: str
     reasoning: str | None = None
-    metrics: InferenceMetrics = None
+    metrics: InferenceMetrics | None = None
 
 
 class JobOutput(BaseModel):

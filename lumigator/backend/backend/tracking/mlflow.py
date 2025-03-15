@@ -1,23 +1,26 @@
 import contextlib
 import http
 import json
+from collections import defaultdict
 from collections.abc import Generator
 from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urljoin
 from uuid import UUID
 
-import boto3
 import loguru
 import requests
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.tasks import TaskDefinition
+from lumigator_schemas.utils.model_operations import merge_models
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
+from mlflow.entities import Run as MlflowRun
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
+from mypy_boto3_s3.client import S3Client
 from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
@@ -30,8 +33,10 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._client = MlflowClient(tracking_uri=tracking_uri)
+        self._s3_file_system = s3_file_system
+        self._s3_client = s3_client
 
     def create_experiment(
         self,
@@ -91,47 +96,6 @@ class MLflowTrackingClient(TrackingClient):
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
-    def _compile_metrics(self, job_ids: list) -> dict:
-        """Take the individual metrics from each run and compile them into a single dict
-        for now, assert that each run has no overlapping metrics
-        """
-        metrics = {}
-        for job_id in job_ids:
-            run = self._client.get_run(job_id)
-            for metric in run.data.metrics:
-                assert metric not in metrics
-                metrics[metric] = run.data.metrics[metric]
-
-        return metrics
-
-    def _compile_parameters(self, job_ids: list) -> dict:
-        """Take the individual parameters from each run and compile them into a single dict
-        for now, assert that each run has no overlapping parameters
-        """
-        parameters = {}
-        for job_id in job_ids:
-            run = self._client.get_run(job_id)
-            for parameter in run.data.params:
-                # if the parameter shows up in multiple runs, prepend the run_name to the key
-                # TODO: this is a hacky way to handle this,
-                #  we should come up with a better solution but at least it keeps the info
-                if parameter in parameters:
-                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
-                parameters[parameter] = run.data.params[parameter]
-        return parameters
-
-    def _find_workflows(self, experiment_id: str) -> list:
-        """Find all the workflows associated with an experiment."""
-        all_runs = self._client.search_runs(experiment_ids=[experiment_id])
-        # now organize the runs into workflows so that a nested run goes under the parent run
-        workflow_ids = []
-        for run in all_runs:
-            parent_id = run.data.tags.get(MLFLOW_PARENT_RUN_ID)
-            # if it has a parent id then it's a run, if not then it's a workflow
-            if parent_id is None:
-                workflow_ids.append(run.info.run_id)
-        return workflow_ids
-
     def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
@@ -149,7 +113,11 @@ class MLflowTrackingClient(TrackingClient):
     def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [
+            workflow
+            for workflow in (self.get_workflow(workflow_id) for workflow_id in workflow_ids)
+            if workflow is not None
+        ]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -168,7 +136,7 @@ class MLflowTrackingClient(TrackingClient):
         """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
+    def list_experiments(self, skip: int, limit: int | None) -> list[GetExperimentResponse]:
         """List all experiments."""
         page_token = None
         experiments = []
@@ -226,109 +194,25 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
-        """Get a workflow and all its jobs."""
-        try:
-            workflow = self._client.get_run(workflow_id)
-        except MlflowException as e:
-            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
-                return None
-            raise e
-
-        if workflow.info.lifecycle_stage == "deleted":
+        """Retrieve a workflow and its associated jobs."""
+        workflow = self._fetch_workflow_run(workflow_id)
+        if not workflow:
             return None
-        # similar to the get_experiment method, but for a single workflow,
-        # we need to get all the runs
-        # search for all runs that have the tag "mlflow.parentRunId" equal to the workflow_id
-        all_jobs = self._client.search_runs(
-            experiment_ids=[workflow.info.experiment_id],
-            filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
-        )
-        all_job_ids = [run.info.run_id for run in all_jobs]
-        # sort the jobs by created_at, with the oldest last
-        all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
 
-        workflow_details = WorkflowDetailsResponse(
-            id=workflow_id,
-            experiment_id=workflow.info.experiment_id,
-            description=workflow.data.tags.get("description"),
-            name=workflow.data.tags.get("mlflow.runName"),
-            model=workflow.data.tags.get("model"),
-            system_prompt=workflow.data.tags.get("system_prompt"),
-            status=WorkflowStatus(workflow.data.tags.get("status")),
-            created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
-            jobs=[self.get_job(job_id) for job_id in all_job_ids],
-            metrics=self._compile_metrics(all_job_ids),
-            parameters=self._compile_parameters(all_job_ids),
-        )
-        # Currently, only compile the result json artifact if the workflow has succeeded
-        if workflow_details.status != WorkflowStatus.SUCCEEDED:
-            return workflow_details
-        # now we need to combine all of the files that were output into a single json.
-        # look through every job associated with this workflow and get the results
-        # combine them into a single json file, put that back into s3, and then generate
-        # a presigned URL for that file
-        # check if the compiled results already exist
-        s3 = S3FileSystem()
-        if not s3.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
-            compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
-            for job in workflow_details.jobs:
-                # look for all parameter keys that end in "_s3_path" and download the file
-                for param in job.parameters:
-                    if param["name"].endswith("_s3_path"):
-                        # download the file
-                        # get the file from the S3 bucket
-                        with s3.open(f"{param['value']}") as f:
-                            job_results = JobResultObject.model_validate(json.loads(f.read()))
-                        # if any keys are the same, log a warning and then overwrite the key
-                        for job_result_item in job_results:
-                            if job_result_item[1] is None:
-                                loguru.logger.info(f"No {job_result_item[0]} found for job {job.id}.")
-                                continue
-                            for key in job_result_item[1].keys():
-                                if key in compiled_results[job_result_item[0]]:
-                                    loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
-                                # merge the results into the compiled results
-                                compiled_results[job_result_item[0]][key] = job_result_item[1][key]
-            with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
-                f.write(json.dumps(compiled_results))
-            # Generate presigned download URL for the object
-        s3_client = boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
-        download_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": settings.S3_BUCKET,
-                "Key": f"{workflow_id}/compiled.json",
-            },
-            ExpiresIn=settings.S3_URL_EXPIRATION,
-        )
-        workflow_details.artifacts_download_url = download_url
+        jobs = self._get_job_ids(workflow_id, workflow.info.experiment_id)
+        workflow_details = self._build_workflow_response(workflow, jobs)
+
+        if workflow_details.status == WorkflowStatus.SUCCEEDED:
+            # Only compile the result JSON artifact of all the jobs, if the workflow has succeeded.
+            self._generate_compiled_results(workflow_id, workflow_details.jobs)
+            # Update the download URL in the response now that the compiled results are available.
+            workflow_details.artifacts_download_url = self._generate_presigned_url(workflow_id)
+
         return workflow_details
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update the status of a workflow."""
         self._client.set_tag(workflow_id, "status", status.value)
-
-    def _get_ray_job_logs(self, ray_job_id: str):
-        """Get the logs for a Ray job."""
-        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
-
-        if resp.status_code == HTTPStatus.NOT_FOUND:
-            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise JobNotFoundError(ray_job_id, "Ray job logs not found") from None
-        elif resp.status_code != HTTPStatus.OK:
-            loguru.logger.error(
-                f"Unexpected status code getting job logs: {resp.status_code}, \
-                    error: {resp.text or ''}"
-            )
-            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
-
-        try:
-            metadata = json.loads(resp.text)
-            return JobLogsResponse(**metadata)
-        except json.JSONDecodeError as e:
-            loguru.logger.error(f"JSON decode error: {e}")
-            loguru.logger.error(f"Response text: {resp.text}")
-            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         workflow_run = self._client.get_run(workflow_id)
@@ -420,17 +304,280 @@ class MLflowTrackingClient(TrackingClient):
         )
         return all_jobs
 
+    def _compile_metrics(self, job_ids: list) -> dict:
+        """Take the individual metrics from each run and compile them into a single dict
+        for now, assert that each run has no overlapping metrics
+        """
+        metrics = {}
+        for job_id in job_ids:
+            run = self._client.get_run(job_id)
+            for metric in run.data.metrics:
+                assert metric not in metrics
+                metrics[metric] = run.data.metrics[metric]
+
+        return metrics
+
+    def _compile_parameters(self, job_ids: list) -> dict:
+        """Take the individual parameters from each run and compile them into a single dict
+        for now, assert that each run has no overlapping parameters
+        """
+        parameters = {}
+        for job_id in job_ids:
+            run = self._client.get_run(job_id)
+            for parameter in run.data.params:
+                # if the parameter shows up in multiple runs, prepend the run_name to the key
+                # TODO: this is a hacky way to handle this,
+                #  we should come up with a better solution but at least it keeps the info
+                if parameter in parameters:
+                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
+                parameters[parameter] = run.data.params[parameter]
+        return parameters
+
+    def _find_workflows(self, experiment_id: str) -> list:
+        """Find all the workflows associated with an experiment."""
+        all_runs = self._client.search_runs(experiment_ids=[experiment_id])
+        # now organize the runs into workflows so that a nested run goes under the parent run
+        workflow_ids = []
+        for run in all_runs:
+            parent_id = run.data.tags.get(MLFLOW_PARENT_RUN_ID)
+            # if it has a parent id then it's a run, if not then it's a workflow
+            if parent_id is None:
+                workflow_ids.append(run.info.run_id)
+        return workflow_ids
+
+    def _get_ray_job_logs(self, ray_job_id: str):
+        """Get the logs for a Ray job."""
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
+
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
+            raise JobNotFoundError(UUID(ray_job_id), "Ray job logs not found") from None
+        elif resp.status_code != HTTPStatus.OK:
+            loguru.logger.error(
+                f"Unexpected status code getting job logs: {resp.status_code}, \
+                    error: {resp.text or ''}"
+            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
+
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            loguru.logger.error(f"JSON decode error: {e}")
+            loguru.logger.error(f"Response text: {resp.text}")
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
+
+    def _generate_presigned_url(self, workflow_id: str) -> str:
+        """Generate a pre-signed URL for the compiled artifact."""
+        return self._s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_key(workflow_id, "compiled.json")},
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+    def _upload_to_s3(self, s3_path: str, data):
+        """Upload compiled results to S3."""
+        with self._s3_file_system.open(s3_path, "w") as f:
+            f.write(json.dumps(data))
+
+    def _build_workflow_response(self, workflow: MlflowRun, job_ids: list) -> WorkflowDetailsResponse:
+        """Construct a WorkflowDetailsResponse object ignoring the `artifacts_download_url`."""
+        return WorkflowDetailsResponse(
+            id=workflow.info.run_id,
+            experiment_id=workflow.info.experiment_id,
+            description=workflow.data.tags.get("description"),
+            name=workflow.data.tags.get("mlflow.runName"),
+            model=workflow.data.tags.get("model"),
+            system_prompt=workflow.data.tags.get("system_prompt"),
+            status=WorkflowStatus(workflow.data.tags.get("status")),
+            created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
+            jobs=[self.get_job(job_id) for job_id in job_ids],
+            metrics=self._compile_metrics(job_ids),
+            parameters=self._compile_parameters(job_ids),
+        )
+
+    def _generate_compiled_results(self, workflow_id: str, jobs: list[JobResults]) -> None:
+        """Generates a single compiled JSON artifact of aggregated job results belonging to the workflow.
+
+        Data is compiled in a last-write-wins scenario when there are matching keys with different values.
+
+        :param workflow_id: The ID of the workflow.
+        :param jobs: A list of jobs to try to retrieve result data for to aggregate.
+        """
+        # Nothing to do if there are no jobs for this workflow.
+        if not jobs:
+            return
+
+        # Don't recompile if the artifact already exists.
+        workflow_s3_uri = self._get_s3_uri(workflow_id, "compiled.json")
+        if self._s3_file_system.exists(workflow_s3_uri):
+            return
+
+        aggregated_results = JobResultObject()
+        for job in jobs:
+            # If no valid s3_path_value is found, skip this job.
+            if not (
+                job_s3_path := next(
+                    (
+                        param.get("value")
+                        for param in job.parameters or []
+                        if param.get("name", "").endswith("_s3_path")
+                    ),
+                    None,
+                )
+            ):
+                continue
+
+            with self._s3_file_system.open(job_s3_path) as f:
+                job_results = JobResultObject.model_validate(json.loads(f.read()))
+
+            # Merge the job's results with the aggregated results.
+            merge_results = merge_models(aggregated_results, job_results)
+            # Update the aggregated results with the merged model.
+            aggregated_results = merge_results.merged_model
+
+            # Make note of the keys that were overwritten, unmerged and skipped when merging this job's results.
+            self._log_key_changes(
+                workflow_id,
+                job.id,
+                merge_results.overwritten_keys,
+                merge_results.unmerged_keys,
+                merge_results.skipped_keys,
+            )
+
+        # Upload the compiled results to S3.
+        self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
+
+    def _group_keys_by_top_level(self, keys: set[str]) -> dict[str, list[str]]:
+        """Groups a set of keys (formatted with dotted notation) by their top-level category.
+
+        This function splits each key at the first dot ('.') to separate the top-level category
+        from any sub-keys. If a key doesn't contain a dot, it is treated as a top-level key with
+        no sub-keys. The result is a dictionary where the keys are the top-level categories and
+        the values are lists of associated sub-keys, sorted alphabetically.
+
+        :param keys: A set of keys formatted in dotted notation, where each key may consist of
+                      a top-level category followed by one or more sub-keys.
+        :return: A dictionary mapping top-level categories to lists of their associated sub-keys,
+                 sorted alphabetically by the sub-keys.
+        """
+        accumulated = defaultdict(list)
+
+        for key in keys:
+            if "." in key:
+                top_level_key, subkey = key.split(".", 1)
+                accumulated[top_level_key].append(subkey)
+            else:
+                # If there's no dot, treat it as a top-level key without sub-keys
+                accumulated[key].append("")
+
+        return {key: sorted(values) for key, values in sorted(accumulated.items())}
+
+    def _log_key_changes(
+        self, workflow_id: str, job_id: str, overwritten_keys: set[str], unmerged_keys: set[str], skipped_keys: set[str]
+    ):
+        """Logs key changes that occurred during the merge.
+
+        e.g. skipped keys that had the same value, overwritten keys with updated values and unmerged keys that were
+        present in the base but absent in the overlay.
+
+        :param workflow_id: The ID of the workflow.
+        :param job_id: The ID of the job.
+        :param overwritten_keys: A set of keys (to be logged at WARNING level) that were
+                overwritten during the merge process.
+        :param unmerged_keys: A set of keys (to be logged at WARNING level) that that were
+                present in the base but absent in the overlay.
+        :param skipped_keys: A set of keys (to be logged at DEBUG level) that were
+                skipped during the merge process
+        """
+        if overwritten_keys:
+            loguru.logger.opt(lazy=True).warning(
+                "Workflow: '{}'. Job '{}'. Overwritten existing keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(overwritten_keys))
+                ),
+            )
+
+        if unmerged_keys:
+            loguru.logger.opt(lazy=True).warning(
+                "Workflow: '{}'. Job '{}'. No data found for keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(unmerged_keys))
+                ),
+            )
+
+        if skipped_keys:
+            loguru.logger.opt(lazy=True).debug(
+                "Workflow: '{}'. Job '{}'. Skipped keys: {}",
+                lambda: workflow_id,
+                lambda: job_id,
+                lambda: ", ".join(
+                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
+                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(skipped_keys))
+                ),
+            )
+
+    def _fetch_workflow_run(self, workflow_id: str):
+        """Try to fetch a workflow run from MLFlow.
+
+        :param workflow_id: The ID of the workflow to fetch.
+        :return: The workflow run if it exists and is not deleted, otherwise None.
+        :raises MlflowException: If an unexpected error occurs.
+        """
+        try:
+            workflow = self._client.get_run(workflow_id)
+        except MlflowException as e:
+            if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
+                return None
+            raise e
+
+        return None if workflow.info.lifecycle_stage == "deleted" else workflow
+
+    def _get_job_ids(self, workflow_id: str, experiment_id: str) -> list:
+        """Get the IDs of all jobs associated with a workflow.
+
+        :param workflow_id: The ID of the workflow.
+        :param experiment_id: The ID of the experiment tied to this workflow.
+        :return: A list of job IDs.
+        """
+        all_jobs = self._client.search_runs(
+            experiment_ids=[experiment_id],
+            filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
+            order_by=["start_time DESC"],
+        )
+        return [job.info.run_id for job in all_jobs]
+
+    def _get_s3_uri(self, workflow_id: str, filename: str) -> str:
+        """Construct a full S3 URI for workflow artifacts."""
+        return f"s3://{settings.S3_BUCKET}/{self._get_s3_key(workflow_id, filename)}"
+
+    def _get_s3_key(self, workflow_id: str, filename: str) -> str:
+        """Construct an S3 key for workflow artifacts."""
+        return f"workflows/results/{workflow_id}/{filename}"
+
 
 class MLflowClientManager:
     """Connection manager for MLflow client."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._tracking_uri = tracking_uri
+        self._s3_file_system = s3_file_system
+        self._s3_client = s3_client
 
     @contextlib.contextmanager
     def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
-        tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
+        tracking_client = MLflowTrackingClient(
+            tracking_uri=self._tracking_uri,
+            s3_file_system=self._s3_file_system,
+            s3_client=self._s3_client,
+        )
         try:
             yield tracking_client
         except MlflowException as e:

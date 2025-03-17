@@ -3,11 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, PositiveInt
 
-from lumigator_schemas.jobs import (
-    GenerationConfig,
-    JobResults,
-    LowercaseEnum,
-)
+from lumigator_schemas.jobs import GenerationConfig, JobCreate, JobResults, LowercaseEnum
 from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, get_default_system_prompt
 
 
@@ -42,6 +38,16 @@ class WorkflowCreateRequest(BaseModel):
     job_timeout_sec: PositiveInt = 60 * 60
     # Eventually metrics should be managed by the experiment level https://github.com/mozilla-ai/lumigator/issues/1105
     metrics: list[str] | None = None
+
+
+class WorkflowJobsCreateRequest(BaseModel):
+    name: str
+    description: str = ""
+    experiment_id: str | None = None
+    dataset: UUID
+    model: str
+    job_timeout_sec: PositiveInt = 60 * 60
+    job_list: list[JobCreate]
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

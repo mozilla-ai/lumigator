@@ -94,21 +94,33 @@ print(f"Experiment created and has ID: {experiment_id}")
 ## Trigger the Workflows
 Next, lets trigger workflows to evaluate two models - `gpt-4o-mini` from OpenAI  and [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) from Hugging Face Model Hub. This process can be repeated for as many models as you would like to evaluate in the experiment. In the workflow creation request, we also specify the following metrics to be computed: [BLEU](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) and [METEOR](https://github.com/huggingface/evaluate/tree/main/metrics/meteor) which are word overlap metrics, and [COMET](https://unbabel.github.io/COMET/html/index.html) which is a neural translation metric.
 
+Setup the following environment variables in a file called `common_variables.sh`:
+```
+#!/bin/bash
+# Common API configuration for workflows
+export WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
+export EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
+export METRICS='["bleu", "meteor", "comet"]'
+export BATCH_SIZE=5
+```
+
+And then source the file:
+```console
+user@host:~/lumigator$ source common_variables.sh
+```
+
+
 ::::{tab-set}
 
-:::{tab-item} cURL
-:sync: tab1
+:::{tab-item} cURL (OpenAI)
+:sync: openai-curl
 
 Set the following variables:
 ```console
 user@host:~/lumigator$ export WORKFLOW_NAME="OpenAI Translation" \
-WORKFLOW_DESC="Translate English to Spanish with OpenAI" \
-WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
-EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')" \
-METRICS='["bleu", "meteor", "comet"]'
+WORKFLOW_DESC="Translate English to Spanish with OpenAI"
 ```
-
-Define the JSON string:
+Define the JSON string for OpenAI model:
 ```console
 user@host:~/lumigator$ export JSON_STRING=$(jq -n \
 --arg name "$WORKFLOW_NAME" \
@@ -117,6 +129,7 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
 --arg desc "$WORKFLOW_DESC" \
 --arg dataset_id "$WORKFLOW_DATASET" \
 --arg exp_id "$EXPERIMENT_ID" \
+--arg batch_size "$BATCH_SIZE" \
 --argjson task_definition "$TASK_DEFINITION" \
 --argjson metrics "$METRICS" \
 '{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
@@ -142,19 +155,88 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
 
 :::
 
-:::{tab-item} Python SDK
-:sync: tab2
+:::{tab-item} SDK (OpenAI)
+:sync: openai-python
 ```python
 from lumigator_schemas.workflows import WorkflowCreateRequest
-metrics = [ "bleu", "meteor", "comet"]
+
+batch_size = 5
+metrics = ["bleu", "meteor", "comet"]
 request = WorkflowCreateRequest(
     name="OpenAI Translation",
     description="Translate English to Spanish with OpenAI",
-    model="gpt-4o",
+    model="gpt-4o-mini",
     provider="openai",
     dataset=dataset_id,
     experiment_id=experiment_id,
     task_definition=task_definition,
+    batch_size=batch_size,
+    metrics=metrics
+)
+client.workflows.create_workflow(request).model_dump()
+```
+:::
+
+:::{tab-item} cURL (Hugging Face)
+:sync: hf-curl
+
+Set the following variables:
+```console
+user@host:~/lumigator$ export WORKFLOW_NAME="Hugging Face Translation" \
+WORKFLOW_DESC="Translate English to Spanish with M2M100"
+```
+
+Define the JSON string for HF model:
+```console
+user@host:~/lumigator$ export JSON_STRING=$(jq -n \
+--arg name "$WORKFLOW_NAME" \
+--arg model "facebook/m2m100_418M" \
+--arg provider "hf" \
+--arg desc "$WORKFLOW_DESC" \
+--arg dataset_id "$WORKFLOW_DATASET" \
+--arg exp_id "$EXPERIMENT_ID" \
+--arg batch_size "$BATCH_SIZE" \
+--argjson task_definition "$TASK_DEFINITION" \
+--argjson metrics "$METRICS" \
+'{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
+```
+
+Trigger the workflow:
+```console
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-d "$JSON_STRING" | jq
+{
+  "id": "169c3169b7d549598b8b094c0dd9c806",
+  "experiment_id": "48",
+  "model": "facebook/m2m100_418M",
+  "name": "Hugging Face Translation",
+  "description": "Translate English to Spanish with M2M100",
+  "system_prompt": "translate English to Spanish: ",
+  "status": "created",
+  "created_at": "2025-03-17T16:37:04.211000",
+  "updated_at": null
+}
+```
+:::
+
+:::{tab-item} SDK (Hugging Face)
+:sync: hf-python
+```
+from lumigator_schemas.workflows import WorkflowCreateRequest
+
+batch_size = 5
+metrics = ["bleu", "meteor", "comet"]
+request = WorkflowCreateRequest(
+    name="Hugging Face Translation",
+    description="Translate English to Spanish with M2M100",
+    model="facebook/m2m100_418M",
+    provider="hf",
+    dataset=dataset_id,
+    experiment_id=experiment_id,
+    task_definition=task_definition,
+    batch_size=batch_size,
     metrics=metrics
 )
 client.workflows.create_workflow(request).model_dump()
@@ -162,6 +244,5 @@ client.workflows.create_workflow(request).model_dump()
 :::
 
 ::::
-
 
 ##  Get the Results

@@ -166,7 +166,7 @@ wheels = [
 
 [[package]]
 name = "backend"
-version = "0.1.2a0"
+version = "0.1.3a0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
@@ -1252,7 +1252,7 @@ wheels = [
 
 [[package]]
 name = "lumigator-schemas"
-version = "0.1.2a0"
+version = "0.1.3a0"
 source = { editable = "../schemas" }
 dependencies = [
     { name = "pydantic" },

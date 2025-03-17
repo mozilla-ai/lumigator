@@ -13,3 +13,4 @@ This section contains the API specifications for Lumigator.
    models
    workflows
    health
+   settings

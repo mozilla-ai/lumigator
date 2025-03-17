@@ -79,7 +79,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](operations-guide/configuration.md#api-settings).
+Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](../operations-guide/configuration.md#api-settings).
 ```
 
 Finally click the **Run Experiment** button.

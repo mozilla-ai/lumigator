@@ -204,3 +204,54 @@ def test_fetch_workflow_run_raises_exception(request_mock, fake_mlflow_tracking_
 
     with pytest.raises(MlflowException, match="Some error"):
         fake_mlflow_tracking_client._fetch_workflow_run(workflow_id)
+
+
+def test_get_job_ids_success(request_mock, fake_mlflow_tracking_client, json_mlflow_runs_search_single):
+    """Test that job IDs are correctly returned when jobs are found."""
+    workflow_id = "valid-workflow-id"
+    experiment_id = "valid-experiment-id"
+
+    # Mock the response for search_runs with jobs
+    request_mock.post("http://mlflow.mock/api/2.0/mlflow/runs/search", json=json_mlflow_runs_search_single)
+
+    result = fake_mlflow_tracking_client._get_job_ids(workflow_id, experiment_id)
+
+    assert result == [
+        "e3540cb03c994c549b327b83851cfd2a",  # pragma: allowlist secret
+        "55e682b9b4d54d82b207418a57e8de46",  # pragma: allowlist secret
+        "712d0ff32e22431d9bd60e95791f174d",  # pragma: allowlist secret
+    ]
+    assert request_mock.called
+
+
+def test_get_job_ids_no_jobs(request_mock, fake_mlflow_tracking_client):
+    """Test that an empty list is returned when no jobs are found."""
+    workflow_id = "valid-workflow-id"
+    experiment_id = "valid-experiment-id"
+    response_json = {"runs": []}
+
+    # Mock the response for search_runs with no jobs
+    request_mock.post("http://mlflow.mock/api/2.0/mlflow/runs/search", json=response_json)
+
+    result = fake_mlflow_tracking_client._get_job_ids(workflow_id, experiment_id)
+
+    assert result == []
+    assert request_mock.called
+
+
+def test_get_job_ids_error(request_mock, fake_mlflow_tracking_client):
+    """Test that an error results in an exception being raised."""
+    workflow_id = "valid-workflow-id"
+    experiment_id = "valid-experiment-id"
+
+    # Simulate an error by returning a 500 Internal Server Error
+    request_mock.post(
+        "http://mlflow.mock/api/2.0/mlflow/runs/search",
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+        json={"message": "Internal server error"},
+    )
+
+    with pytest.raises(Exception, match="Internal server error"):
+        fake_mlflow_tracking_client._get_job_ids(workflow_id, experiment_id)
+
+    assert request_mock.called

@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import logging
 import os
 import time
@@ -61,6 +62,12 @@ MAX_POLLS = 18
 
 # Time between job status polls.
 POLL_WAIT_TIME = 10
+
+
+def load_json_from_file(file_path: Path) -> dict:
+    """Load JSON data from a file path and return it as a dictionary."""
+    with Path.open(file_path) as file:
+        return json.load(file)
 
 
 @pytest.fixture(scope="session")
@@ -580,3 +587,9 @@ def configure_loguru(caplog):
 def fake_mlflow_tracking_client(fake_s3_client, fake_s3fs):
     """Fixture for MLflowTrackingClient using the real MLflowClient."""
     return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs, s3_client=fake_s3_client)
+
+
+@pytest.fixture(scope="session")
+def json_mlflow_runs_search_single(resources_dir) -> dict:
+    path = resources_dir / "mlflow_runs_search_single.json"
+    return load_json_from_file(path)

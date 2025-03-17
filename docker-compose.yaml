@@ -123,7 +123,7 @@ services:
     healthcheck:
       test: ["CMD", "ray", "status"]
       interval: 3s
-      timeout: 20s
+      timeout: 3s
       retries: 5
 
   backend:

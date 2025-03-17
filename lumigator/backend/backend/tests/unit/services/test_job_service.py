@@ -13,6 +13,7 @@ from lumigator_schemas.secrets import SecretUploadRequest
 from ray.job_submission import JobSubmissionClient
 
 from backend.ray_submit.submission import RayJobEntrypoint
+from backend.services.exceptions.job_exceptions import JobValidationError
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.jobs import job_settings_map
 from backend.settings import settings
@@ -82,7 +83,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
         # openai model (from API)
         ("gpt-4-turbo", "openai", "https://api.openai.com/v1", settings.OAI_API_URL),
         # mistral model (from API)
-        ("open-mistral-7b", "mistral", "https://api.mistral.ai/v1", settings.MISTRAL_API_URL),
+        ("ministral-8b-latest", "mistral", "https://api.mistral.ai/v1", settings.MISTRAL_API_URL),
         # deepseek model (from API)
         ("deepseek-chat", "deepseek", "https://api.deepseek.com/v1", settings.DEEPSEEK_API_URL),
     ],
@@ -149,5 +150,5 @@ def test_missing_api_key_in_job_creation(
         "backend.services.jobs.submit_ray_job",
         return_value=None,
     ):
-        with pytest.raises(SecretNotFoundError):
+        with pytest.raises(JobValidationError):
             job_service.create_job(request)

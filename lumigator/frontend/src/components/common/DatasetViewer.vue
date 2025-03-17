@@ -22,13 +22,14 @@
       :isEditable="isEditable"
       :showRowNumber="showRowNumber"
       :isSearchEnabled="isSearchEnabled"
+      :hasEqualColumnSizes="true"
       ref="dataTable"
     />
   </Drawer>
 </template>
 
 <script lang="ts">
-import { Button, Drawer, type DataTableProps } from 'primevue'
+import { Button, Drawer } from 'primevue'
 import { defineComponent, ref, type PropType } from 'vue'
 import TableView from './TableView.vue'
 
@@ -58,7 +59,7 @@ export default defineComponent({
       default: false,
     },
     data: {
-      type: Array as PropType<DataTableProps['value']>,
+      type: Array as PropType<Record<string, unknown>[]>,
       required: true,
     },
     columns: {

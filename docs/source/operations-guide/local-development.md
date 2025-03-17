@@ -46,13 +46,8 @@ make to the codebase will be automatically reflected in the running backend serv
 database file to the backend service, so that any changes you make to the database will be
 persisted between runs.
 
-To use the API-based vendor ground truth generation and evaluation, you'll need to pass the
-following environment variables for credentials, into the docker container:
-
-- `MISTRAL_API_KEY`: your Mistral API key.
-- `OPENAI_API_KEY`: your OpenAI API key.
-
-Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
+To use the API-based vendor ground truth generation and evaluation, you'll need to [configure API keys](../operations-guide/configuration#api-settings)
+once Lumigator is running.
 
 ## Testing the backend services
 
@@ -62,7 +57,7 @@ You can test your local setup as follows:
   (e.g., [DBeaver](https://dbeaver.io/)).
 - `minio`: Test your minio setup as follows:
     - connect to http://localhost:9001
-    - log in with `username=lumigator` and `password=lumigator` (you can customize them in your `.env` file)
+    - log in with `username=lumigator` and `password=lumigator` (you may have changed these values in your configuration)
     - check out the `lumigator-storage` bucket
 - `minio` via command line:
     - install the aws cli: `brew install awscli`

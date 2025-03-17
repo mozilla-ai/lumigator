@@ -192,7 +192,7 @@ update-openapi-docs:
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
 	uv run python -m backend.openapi_spec ../../docs/source/specs/openapi.json
-	@echo "Reminder: Please run 'pre-commit run --all-files' locally before committing your changes for consistency."
+	@echo "OpenAPI docs updated: Please run 'uv run pre-commit run --all-files' locally."
 
 # This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
 # Lumigator must be running on localhost
@@ -247,33 +247,22 @@ test-backend-unit:
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
 test-backend-integration: config-generate-env
-	@docker container list --all;
-	@if [ "$(IGNORE_ENV_FILE)" = "true" ]; then \
-		source ./scripts/set_env_vars.sh ""; \
-	else \
+	@if [ "$(USE_ENV_FILE)" = "true" ]; then \
 		source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env"; \
+	else \
+		source ./scripts/set_env_vars.sh ""; \
 	fi && \
 	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-gpu:
-	cd lumigator/backend/; \
-	docker container list --all; \
-	S3_BUCKET=lumigator-storage \
-	RAY_HEAD_NODE_HOST=localhost \
-	RAY_DASHBOARD_PORT=8265 \
-	MLFLOW_TRACKING_URI=http://localhost:8001 \
-	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
+	@source ./scripts/set_env_vars.sh && \
+	cd lumigator/backend/ && \
 	RAY_WORKER_GPUS="1.0" \
 	RAY_WORKER_GPUS_FRACTION="1.0" \
-	INFERENCE_PIP_REQS=../jobs/inference/requirements.txt \
-	INFERENCE_WORK_DIR=../jobs/inference \
-	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
-	EVALUATOR_WORK_DIR=../jobs/evaluator \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)

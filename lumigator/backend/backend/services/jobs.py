@@ -45,8 +45,9 @@ from backend.services.exceptions.job_exceptions import (
     JobNotFoundError,
     JobTypeUnsupportedError,
     JobUpstreamError,
+    JobValidationError,
 )
-from backend.services.exceptions.secret_exceptions import SecretNotFoundError
+from backend.services.exceptions.secret_exceptions import SecretDecryptionError, SecretNotFoundError
 from backend.services.secrets import SecretService
 from backend.settings import settings
 
@@ -451,6 +452,13 @@ class JobService:
         except KeyError:
             raise JobTypeUnsupportedError("Unknown job type") from None
 
+        # If we need a secret key that doesn't exist in Lumigator, there's no point in continuing.
+        secret_name = getattr(request.job_config, "secret_key_name", None)
+        if secret_name and not self._secret_service.is_secret_configured(secret_name):
+            raise JobValidationError(
+                f"Cannot create job '{request.name}': Requested secret key '{secret_name}' is not configured."
+            ) from None
+
         # Create a db record for the job
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
@@ -463,14 +471,14 @@ class JobService:
         runtime_env_vars = settings.with_ray_worker_env_vars({"MZAI_JOB_ID": str(record.id)})
 
         # Include requested secrets (API keys) from stored secrets.
-        secret_name = getattr(request.job_config, "secret_key_name", None)
         if secret_name:
-            value = self._secret_service.get_decrypted_secret_value(secret_name)
-            if value:
-                # Add the secret to the runtime env vars using 'api_key' to identify it in jobs.
-                runtime_env_vars["api_key"] = value
-            else:
-                raise SecretNotFoundError(secret_name) from None
+            try:
+                value = self._secret_service.get_decrypted_secret_value(secret_name)
+            except (SecretNotFoundError, SecretDecryptionError) as e:
+                raise JobValidationError(f"Error configuring secret for job: {record.id}, name: {request.name}") from e
+
+            # Add the secret to the runtime env vars using 'api_key' to identify it in jobs.
+            runtime_env_vars["api_key"] = value
 
         # eval_config_args is used to map input configuration parameters with
         # command parameters provided via command line to the ray job.

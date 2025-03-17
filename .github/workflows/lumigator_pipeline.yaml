@@ -238,7 +238,7 @@ jobs:
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make test-${{ matrix.test }}-integration IGNORE_ENV_FILE=true
+        run: make test-${{ matrix.test }}-integration
 
       - name: Collect logs in case of failure
         if: failure()
@@ -246,6 +246,7 @@ jobs:
           mkdir /tmp/raylogs
           mkdir /tmp/backendlogs
           docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+          docker logs lumigator-ray-1 > /tmp/raydocker.log
           docker logs lumigator-backend-1 > /tmp/backendlogs/backend.log
 
       - name: Upload Ray logs in case of failure
@@ -253,13 +254,23 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ray-logs
+          overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
-      - name: Upload backend logs in case of failure
+      - name: Upload Ray docker log in case of failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-logs
+          name: ray-docker-log
+          overwrite: true
+          path: /tmp/raydocker.log
+
+      - name: Upload backend log in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log
+          overwrite: true
           path: /tmp/backendlogs/backend.log
 
   integration-tests-postgres:
@@ -314,7 +325,7 @@ jobs:
         # The SDK tests already use a separate Lumigator started
         # with postgres overrides
         # Allowing secrets for local test postgres
-        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration IGNORE_ENV_FILE=true # pragma: allowlist secret
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
         if: failure()

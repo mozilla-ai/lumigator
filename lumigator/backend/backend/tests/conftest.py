@@ -574,3 +574,9 @@ def configure_loguru(caplog):
     logger.add(PropagateHandler(), format="{message}")
     yield
     logger.remove()
+
+
+@pytest.fixture(scope="function")
+def fake_mlflow_tracking_client(fake_s3_client, fake_s3fs):
+    """Fixture for MLflowTrackingClient using the real MLflowClient."""
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs, s3_client=fake_s3_client)

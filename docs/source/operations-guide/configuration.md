@@ -80,8 +80,9 @@ within the Lumigator repo is in the `buid/.env` file that is automatically remov
 
 The following section documents the available settings:
 
-> [!Note]
-> To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```{note}
+To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```
 
 | Name                               | Type    | Description                                                                                                                |
 |------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
@@ -120,7 +121,7 @@ Currently, these settings are the sensitive API keys that are used to access ext
 * DeepSeek
 * [HuggingFace](https://huggingface.co/settings/tokens)
 * [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
-* [OpenAI]([https://platform.openai.com/api-keys](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key))
+* OpenAI
 
 As these keys contain secret data, we don't allow them to be stored in Lumigator's configuration files.
 Instead, they **must** be added via the API (UI or SDK), and are then encrypted and stored in Lumigator's database.

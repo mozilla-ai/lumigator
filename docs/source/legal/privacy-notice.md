@@ -40,14 +40,14 @@ Lumigator is not directed to children under 13 years of age (or the minimum age 
 
 ## **How to Contact Us** 
 
-To make requests regarding your personal information, please contact us through our[ Data Subject Access Request Portal](https://privacyportal.onetrust.com/webform/1350748f-7139-405c-8188-22740b3b5587/4ba08202-2ede-4934-a89e-f0b0870f95f0). If you have any other questions regarding personal information or our privacy practices, please contact us at <compliance@mozilla.com>. We respond to all requests we receive from individuals wishing to exercise their rights in accordance with applicable laws. 
+To make requests regarding your personal information, please contact us through our [Data Subject Access Request Portal](https://privacyportal.onetrust.com/webform/1350748f-7139-405c-8188-22740b3b5587/4ba08202-2ede-4934-a89e-f0b0870f95f0). If you have any other questions regarding personal information or our privacy practices, please contact us at <compliance@mozilla.com>. We respond to all requests we receive from individuals wishing to exercise their rights in accordance with applicable laws. 
 
 
 # **Information for EU, EEA, Swiss, California, Connecticut, Virginia and Utah users**
 
 These regions have data protection laws that require us to specify the following:
 
-Our[ ](https://www.mozilla.org/privacy/)Privacy Notice describes the purposes for which we process information about you and the categories of information we process. We do not sell personal data.
+Our [Privacy Notice](https://www.mozilla.org/privacy/) describes the purposes for which we process information about you and the categories of information we process. We do not sell personal data.
 
 Our lawful bases for collecting and processing personal information include:
 
@@ -60,7 +60,7 @@ Our lawful bases for collecting and processing personal information include:
 - The right to know what personal data is collected
 - The right to know if personal data is being shared, and with whom
 - The right to access your personal data
--  The right to exercise your privacy rights without being discriminated against
+- The right to exercise your privacy rights without being discriminated against
 
 
 To make requests regarding your personal data, please contact us through our[ Data Subject Access Request Portal](https://privacyportal.onetrust.com/webform/1350748f-7139-405c-8188-22740b3b5587/4ba08202-2ede-4934-a89e-f0b0870f95f0) or compliance\@mozilla.com. We respond to all requests we receive from individuals wishing to exercise their data protection rights in accordance with applicable data protection laws. You also have the right to lodge a complaint with your local data protection authority.

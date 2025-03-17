@@ -1,10 +1,13 @@
 # Using Lumigator UI
+
 Lumigator comes with a web-based UI that allows you to interact with the Lumigator API. It is designed to be easy to use and to provide a quick way to get started with Lumigator.
 
 ## Getting Started
+
 Follow the [quickstart](quickstart.md) to get Lumigator up and running. The UI can then be accessed by visiting [localhost](http://localhost) on your web browser. You should be able to see a screen with the sections **Datasets** and **Experiments**. Lets go through each of them in detail.
 
 ## Upload a Dataset
+
 The main purpose of Lumigator is to help you select the model that works best for your particular data, amongst several available. It does this by evaluating multiple models on a sample of your data: your dataset.
 
 The first step is to upload your dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
@@ -17,7 +20,53 @@ Once the dataset is uploaded, it can be viewed as a row in the table in the **Da
 
 ![Datasets Table](../../assets/ui_guide_steps/datasets_table.png)
 
-## Create and Run an Experiment
+## Experiments
+
+### Settings
+
+If you want to evaluate against hosted API-based LLM services such as the platforms provided by OpenAI, Mistral, or Deepseek,
+you will need to set the appropriate [API key setting](../operations-guide/configuration.md#api-settings) as a secret in Lumigator.
+
+To do this visit the **Settings** section listed in the navigation bar on the left.
+
+**Note:** API key settings **must** be configured before we try to start an experiment that requires them,
+otherwise Lumigator will not be able to use them.
+
+![Settings Page](../../assets/ui_guide_steps/settings-page.png)
+
+Here you can see the settings page where you can currently set the API keys for Mistral, OpenAI, Hugging Face and DeepSeek.
+The first time you visit this page the settings will be empty. You can add the API keys by filling in the relevant field and
+clicking on the **Save** button.
+
+![Settings Page - Enter Secret](../../assets/ui_guide_steps/settings-enter-secret.png)
+
+The UI will provide a confirmation message that the secret has been saved, and the value will no longer be available.
+
+**Note:** The secret value will not be displayed again, and cannot be retrieved via the Lumigator API,
+so prior to entering it, make sure to save it in a secure location, such as a password manager.
+
+![Settings Page - Secret Saved](../../assets/ui_guide_steps/settings-secret-saved.png)
+
+If you ever generate a new API key and want to update the secret, you can do so by entering the new value and clicking
+on the **Save** button again.
+
+You can also delete the secret by clicking on the **Delete** button, which is represented by a trash can icon.
+
+![Settings Page - Secret Highlight Delete](../../assets/ui_guide_steps/settings-secret-delete-highlight.png)
+
+Clicking on the **Delete** button will prompt you to confirm the deletion of the API key.
+
+![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-confirm.png)
+
+Click on the **Delete** button in the confirmation dialog to delete the secret from Lumigator, or the **Cancel** button
+to abort the deletion and return you to the settings page.
+
+After confirming the request to delete the API key, the UI will provide a confirmation message that the secret has been deleted.
+
+![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-done.png)
+
+### Create and Run an Experiment
+
 Next we move on to the **Experiments** section. Start by clicking on the **Create Experiment** button.
 
 ![Experiments Page](../../assets/ui_guide_steps/experiments_page.png)
@@ -30,7 +79,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-Reminder: In order to be able to use API based models, you must have provided the respective API keys (`OPENAI_API_KEY` or `MISTRAL_API_KEY`) as environment variables before starting Lumigator. See more in the [quickstart](quickstart.md).
+Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](../operations-guide/configuration.md#api-settings).
 ```
 
 Finally click the **Run Experiment** button.

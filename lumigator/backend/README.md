@@ -34,15 +34,13 @@ The available Makefile contains targets to:
 - stop the system (e.g. `local-down`, `stop-lumigator`)
 - run tests (e.g `test-backend`, `test-sdk`, `test-all`)
 
-When the system is started for the first time, a `.env` file is created from the existing
-`.env.template`. This file contains different parameters passed to the system as environment
-variables and you can customize it to suit your specific use case.
+See: [configuring Lumigator](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html) for more information
+on how to set the deploy-time configuration values.
 
 > [!NOTE]
 > We are mindful about your personal settings so we will never overwrite them. For this reason,
-> if you are pulling a new version of lumigator from the repo please make sure that your `.env`
-> file is consistent with the latest `.env.template`, minus your parameters.
-Alternatively, if it does not contain any hardcoded settings of your own, delete the .env and Lumigator will create a new one.
+> if you are pulling a new version of Lumigator from the repo your own configuration settings should be stored in
+> the Lumigator dot folder described in the documentation.
 
 ## Test instructions
 

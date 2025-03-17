@@ -61,9 +61,8 @@ services networked together to make up all the components of the Lumigator appli
 
 > [!NOTE]
 If you want to evaluate against LLM APIs like OpenAI/Mistral/Deepseek, you need to set the appropriate
-environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. Refer to the
-[troubleshooting section](https://mozilla-ai.github.io/lumigator/get-started/troubleshooting.html#tokens-api-keys-not-set)
-in our documentation for more details.
+secrets in Lumigator. Refer to the [API keys configuration](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings)
+section in our documentation for more details.
 
 > [!NOTE]
 To improve performance and ensure smooth execution, Lumigator will automatically pre-download two language models on the first run: `bart-large-cnn` and `roberta-large`. These models are stored in your local Hugging Face cache directory (by default: `${HOME}/.cache/huggingface`).
@@ -102,13 +101,7 @@ To start Lumigator locally, follow these steps:
     **Important: Continue the next steps in this same terminal.**
 
 
-1. If you intend to use Mistral API or OpenAI API or Deepseek API, use that same terminal and run:
-    ```bash
-    export MISTRAL_API_KEY=your_mistral_api_key
-    export OPENAI_API_KEY=your_openai_api_key
-    export DEEPSEEK_API_KEY=your_deepseek_api_key
-    ```
-    **Important: Continue the next steps in this same terminal.**
+1. If you intend to use Mistral API, OpenAI API or Deepseek API, you can easily configure your API keys in the Lumigator UI (under [Settings](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings)) after you start Lumigator.
 
 1. From that same terminal, start Lumigator with:
 
@@ -130,8 +123,8 @@ provider’s S3-compatible service, instead of minio. Similarly, one could provi
 `RAY_HEAD_NODE_HOST` to move compute to a remote ray cluster, and so on. Ref to the operational guides in the
 [docs](https://mozilla-ai.github.io/lumigator/) for more deployment options.
 
-If you want to permanently set any of the environment variables above, you can  add them to your rc file (e.g. `~/.bashrc`, `~/.zshrc`) or directly to the
-`.env` file that is automatically created after the first execution of lumigator.
+If you want to permanently set any of the environment variables above, you should add them directly to your
+[user configuration file](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#how-should-i-set-my-own-settings) (`user.conf`) which can be created in Lumigator's 'dot' folder (e.g. `~/.lumigator/user.conf`).
 
 ### Lumigator UI
 Alternatively, you can also use the UI to interact with Lumigator. Once a Lumigator session is up and running, the UI can be accessed by visiting [`http://localhost`](http://localhost). On the **Datasets** tab, first upload a csv data with columns `examples` and (optionally) `ground_truth`. Next, the dataset can be used to run an evaluation using the **Experiments** tab.

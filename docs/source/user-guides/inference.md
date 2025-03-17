@@ -8,8 +8,8 @@ This tutorial will show you how to perform inference as a single job. If you wou
 
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
-so, you need to set the appropriate environment variables: `OPENAI_API_KEY` or `MISTRAL_API_KEY`.
-Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
+so, you need to set the appropriate API key secrets beforehand.
+Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details.
 ```
 
 ## What You'll Need
@@ -49,6 +49,9 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     # Instantiate the Lumigator client
     lm_client = LumigatorClient(f"{HOST}:{LUMIGATOR_PORT}")
 
+   # Configure the client with the OpenAI API key as we plan to use OpenAI models.
+   lm_client.settings.secrets.upload_api_key(APIKey.OPENAI, "YOUR_OPENAI_API_KEY") # pragma: allowlist secret
+
     # Upload a dataset
     dataset_path = "lumigator/sample_data/summarization/dialogsum_exc.csv"
     dataset = lm_client.datasets.create_dataset(
@@ -57,21 +60,21 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
     )
 
     # Create and submit an inference job
-    name = "bart-summarization-run"
-    model = "facebook/bart-large-cnn"
-    provider = "hf"
-    task_definition = {"task": "summarization"}
+    name = "gpt-40-mini-summarization-run"
+    model = "gpt-4o-mini"
+    provider = "openai"
 
-    job_args = jobs.JobInferenceCreate(
+    job_create_request = jobs.JobCreate(
         name=name,
-        model=model,
-        provider=provider,
         dataset=dataset.id,
-        task_definition=task_definition,
+        job_config=jobs.JobInferenceConfig(
+            model=model,
+            provider=provider,
+            secret_key_name=APIKey.OPENAI.name,
+        ),
     )
 
-    job = lm_client.jobs.create_job(
-        type=jobs.JobType.INFERENCE, request=job_args)
+    job = lm_client.jobs.create_job(job_create_request)
 
     # Wait for the job to complete
     lm_client.jobs.wait_for_job(job.id, poll_wait=10)
@@ -97,18 +100,23 @@ Refer to the [troubleshooting section](../get-started/troubleshooting.md) for mo
 
 ## Model Specification
 
-Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint. It contains the following information for each model:
+Different models can be chosen for summarization.
+The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint.
+It contains the following information for each model:
 
 * `display_name`: an identification name for the model
 * `model`: The model to use, e.g. `facebook/bart-large-cnn`
 * `provider`: a URI specifying how and where to use the model. The following protocols are supported:
   * `hf`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
-  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc. You will need to have set the correct API keys for them, e.g. OPENAI_API_KEY, or MISTRAL_API_KEY, or DEEPSEEK_API_KEY
+  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc.
 * `base_url`: this field can be filled out if running a custom model that uses the openai protocol. For example, llamafile is generally hosted on your computer at `http://localhost:8080/v1`.
 * `website_url`: a link to a web page with more information about the model
 * `description`: a short description about the model
+* `requirements`: additional requirements that need to be fulfilled before using the model
 * `info`: a map containing information about the model like parameter count or model size
 * `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values
+
+Also, see: [Models API docs](https://mozilla-ai.github.io/lumigator/api/models.html) for more information.
 
 ## Verify
 

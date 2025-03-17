@@ -33,6 +33,15 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
+    # Map from Workflow status to MLFlow run status (RunStatus).
+    # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#runstatus
+    WORKFLOW_TO_MLFLOW_STATUS = {
+        WorkflowStatus.CREATED: "SCHEDULED",
+        WorkflowStatus.RUNNING: "RUNNING",
+        WorkflowStatus.FAILED: "FAILED",
+        WorkflowStatus.SUCCEEDED: "FINISHED",
+    }
+
     def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._client = MlflowClient(tracking_uri=tracking_uri)
         self._s3_file_system = s3_file_system
@@ -212,7 +221,11 @@ class MLflowTrackingClient(TrackingClient):
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update the status of a workflow."""
+        # Update our tag, but also the run status of the 'run' in MLflow.
         self._client.set_tag(workflow_id, "status", status.value)
+        # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
+        # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
+        self._client.update_run(workflow_id, status=self.WORKFLOW_TO_MLFLOW_STATUS[status])
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         workflow_run = self._client.get_run(workflow_id)

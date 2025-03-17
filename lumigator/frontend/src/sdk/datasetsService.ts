@@ -23,9 +23,10 @@ export async function postDataset(formData: FormData): Promise<Dataset> {
 export async function deleteDataset(id: string): Promise<void> {
   const response = await lumigatorApiAxiosInstance.delete(`datasets/${id}`)
   if (response.status === 200 || response.status === 204) {
-    return
+    return response.data
   } else {
     console.error('Unexpected response status: ', response.status)
+    throw new Error('Unexpected response status.' + response.status)
   }
 }
 

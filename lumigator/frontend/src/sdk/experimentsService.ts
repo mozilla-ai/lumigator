@@ -94,7 +94,7 @@ export async function createExperimentWithWorkflows(
   const { id: experimentId } = await experimentsService.createExperiment(experimentData)
 
   // then we create a workflow for each model to be attached to the experiment
-  const workflowResults = await Promise.allSettled(
+  const promiseResults = await Promise.allSettled(
     models.map((model: Model) =>
       workflowsService.createWorkflow({
         ...experimentData,
@@ -110,7 +110,7 @@ export async function createExperimentWithWorkflows(
     ),
   )
 
-  return [experimentId, workflowResults]
+  return [experimentId, promiseResults]
 }
 
 export const experimentsService = {

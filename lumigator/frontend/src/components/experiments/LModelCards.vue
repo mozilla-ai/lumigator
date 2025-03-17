@@ -41,7 +41,7 @@
       <div v-if="modelsRequiringAPIKey.length" class="l-models-list__options-container-section">
         <p>VIA APIs</p>
         <span
-          >Ensure your API keys are added to your environment variables (.env) file before using
+          >Ensure your API keys are added via 'Settings' before using
           API-based models.
         </span>
       </div>

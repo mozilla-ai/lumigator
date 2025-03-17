@@ -45,25 +45,25 @@ The UI will provide a confirmation message that the secret has been saved, and t
 **Note:** The secret value will not be displayed again, and cannot be retrieved via the Lumigator API,
 so prior to entering it, make sure to save it in a secure location, such as a password manager.
 
-![Settings Page - Secret Saved](../../assets/ui_guide_steps/settings-secret-saved.png).
+![Settings Page - Secret Saved](../../assets/ui_guide_steps/settings-secret-saved.png)
 
 If you ever generate a new API key and want to update the secret, you can do so by entering the new value and clicking
 on the **Save** button again.
 
 You can also delete the secret by clicking on the **Delete** button, which is represented by a trash can icon.
 
-![Settings Page - Secret Highlight Delete](../../assets/ui_guide_steps/settings-secret-delete-highlight.png).
+![Settings Page - Secret Highlight Delete](../../assets/ui_guide_steps/settings-secret-delete-highlight.png)
 
 Clicking on the **Delete** button will prompt you to confirm the deletion of the API key.
 
-![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-confirm.png).
+![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-confirm.png)
 
 Click on the **Delete** button in the confirmation dialog to delete the secret from Lumigator, or the **Cancel** button
 to abort the deletion and return you to the settings page.
 
 After confirming the request to delete the API key, the UI will provide a confirmation message that the secret has been deleted.
 
-![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-done.png).
+![Settings Page - Secret Confirm Delete](../../assets/ui_guide_steps/settings-secret-delete-done.png)
 
 ### Create and Run an Experiment
 

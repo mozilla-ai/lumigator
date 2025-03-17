@@ -9,15 +9,10 @@ This guide will cover the format Lumigator expects, what to focus on when collec
 
 ## Format
 
-Lumigator expects a CSV file containing different columns depending on the use case. Currently:
+Lumigator expects a CSV file containing two columns namely `examples` and `ground_truth`.
 
-**Summarization use case**
+You can refer to the sample [dialogum dataset](../../../lumigator/sample_data/summarization/dialogsum_exc.csv ) for summarization use case and the sample [English-Spanish dataset](../../../lumigator/sample_data/translation/sample_translation_en_es.csv) for translation use case.
 
-Your CSV should at least contain columns named `examples` and `ground_truth`. See an example [here](../../../lumigator/sample_data/summarization/dialogsum_exc.csv ).
-
-**Translation use case**
-
-Use case under development.
 
 ## Content
 

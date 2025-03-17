@@ -100,18 +100,23 @@ Refer to [API settings configuration](../operations-guide/configuration#api-sett
 
 ## Model Specification
 
-Different models can be chosen for summarization. The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint. It contains the following information for each model:
+Different models can be chosen for summarization.
+The information about those models can be retrieved via the `http://<lumigator-host>:8000/api/v1/models/?tasks=summarization` endpoint.
+It contains the following information for each model:
 
 * `display_name`: an identification name for the model
 * `model`: The model to use, e.g. `facebook/bart-large-cnn`
 * `provider`: a URI specifying how and where to use the model. The following protocols are supported:
   * `hf`: direct model usage in an [HF pipeline](https://huggingface.co/docs/transformers/en/main_classes/pipelines)
-  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc. You will need to have set the correct API keys for them, e.g. OPENAI_API_KEY, or MISTRAL_API_KEY, or DEEPSEEK_API_KEY
+  * Any protocol supported by [LiteLLM](https://docs.litellm.ai/docs/providers). For example, `openai/`, `mistral/`, `deepseek/`, etc.
 * `base_url`: this field can be filled out if running a custom model that uses the openai protocol. For example, llamafile is generally hosted on your computer at `http://localhost:8080/v1`.
 * `website_url`: a link to a web page with more information about the model
 * `description`: a short description about the model
+* `requirements`: additional requirements that need to be fulfilled before using the model
 * `info`: a map containing information about the model like parameter count or model size
 * `tasks`: a list of supported tasks, with parameters and capabilities appropriate to the task and their default or set values
+
+Also, see: [Models API docs](https://mozilla-ai.github.io/lumigator/api/models.html) for more information.
 
 ## Verify
 

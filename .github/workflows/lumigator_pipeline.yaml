@@ -231,10 +231,13 @@ jobs:
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run: CI=true HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} HF_ENDPOINT=${{ secrets.JF_URL_HF }} ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
+
+      - name: Debug w/ tmate
+        uses: mxschmitt/action-tmate@v3
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

@@ -36,6 +36,7 @@ RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
 MODEL_CACHE_COMPOSE :=
+CI_COMPOSE :=
 export SQLALCHEMY_DATABASE_URL ?= sqlite:////tmp/local.db
 
 DEBUGPY_ARGS :=
@@ -64,6 +65,11 @@ ifneq ($(ENABLE_FIRST_TIME_CACHE), false)
 	MODEL_CACHE_COMPOSE := -f docker-compose.model-cache.override.yaml
 endif
 
+ifeq ($(CI), true)
+	@echo "HF_TOKEN=$(HF_TOKEN)" >> $(CONFIG_DEFAULT_FILE)
+	@echo "HF_ENDPOINT=$(HF_ENDPOINT)" >> $(CONFIG_DEFAULT_FILE)
+	CI_COMPOSE := -f docker-compose.ci.override.yaml
+endif
 
 # lumigator runs on a set of containers (backend, ray, minio, etc).
 # The following allows one to start all of them before calling a target
@@ -148,7 +154,7 @@ start-lumigator: config-generate-env
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(CI_COMPOSE) $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env

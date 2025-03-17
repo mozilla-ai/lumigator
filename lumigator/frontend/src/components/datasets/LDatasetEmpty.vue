@@ -38,8 +38,8 @@
         href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#upload-a-dataset"
         target="_blank"
         style="background-color: transparent"
-        >Learn more <span class="pi pi-arrow-up-right"
-      ></span></a>
+        >Learn more <span class="pi pi-arrow-up-right"></span
+      ></a>
     </p>
   </div>
 </template>

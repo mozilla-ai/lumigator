@@ -41,6 +41,7 @@ from backend.services.exceptions.workflow_exceptions import (
     WorkflowValidationError,
 )
 from backend.services.jobs import JobService
+from backend.services.secrets import SecretExistenceChecker
 from backend.settings import settings
 from backend.tracking import TrackingClient
 from backend.tracking.schemas import RunOutputs
@@ -53,12 +54,14 @@ class WorkflowService:
         job_service: JobService,
         dataset_service: DatasetService,
         background_tasks: BackgroundTasks,
+        secret_checker: SecretExistenceChecker,
         tracking_client: TrackingClient,
     ):
         self._job_repo = job_repo
         self._job_service = job_service
         self._dataset_service = dataset_service
         self._tracking_client = tracking_client
+        self._secret_checker = secret_checker
         self._background_tasks = background_tasks
         self.NON_TERMINAL_STATUS = [
             JobStatus.CREATED.value,
@@ -344,7 +347,19 @@ class WorkflowService:
         Returns:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
-        loguru.logger.info(f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'.")
+        # If the experiment this workflow is associated with doesn't exist, there's no point in continuing.
+        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        if not experiment:
+            raise WorkflowValidationError(f"Cannot create workflow '{request.name}': No experiment found.") from None
+
+        # If we need a secret key that doesn't exist in Lumigator, there's no point in continuing.
+        if request.secret_key_name and not self._secret_checker.is_secret_configured(request.secret_key_name):
+            raise WorkflowValidationError(
+                f"Cannot create workflow '{request.name}' for experiment '{experiment.name}': "
+                f"Requested secret key '{request.secret_key_name}' is not configured."
+            ) from None
+
+        loguru.logger.info(f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'")
 
         workflow = self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,

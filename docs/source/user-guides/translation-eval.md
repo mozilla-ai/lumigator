@@ -92,3 +92,76 @@ print(f"Experiment created and has ID: {experiment_id}")
 ::::
 
 ## Trigger the Workflows
+Next, lets trigger workflows to evaluate two models - `gpt-4o-mini` from OpenAI  and [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) from Hugging Face Model Hub. This process can be repeated for as many models as you would like to evaluate in the experiment. In the workflow creation request, we also specify the following metrics to be computed: [BLEU](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) and [METEOR](https://github.com/huggingface/evaluate/tree/main/metrics/meteor) which are word overlap metrics, and [COMET](https://unbabel.github.io/COMET/html/index.html) which is a neural translation metric.
+
+::::{tab-set}
+
+:::{tab-item} cURL
+:sync: tab1
+
+Set the following variables:
+```console
+user@host:~/lumigator$ export WORKFLOW_NAME="OpenAI Translation" \
+WORKFLOW_DESC="Translate English to Spanish with OpenAI" \
+WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
+EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')" \
+METRICS='["bleu", "meteor", "comet"]'
+```
+
+Define the JSON string:
+```console
+user@host:~/lumigator$ export JSON_STRING=$(jq -n \
+--arg name "$WORKFLOW_NAME" \
+--arg model "gpt-4o-mini" \
+--arg provider "openai" \
+--arg desc "$WORKFLOW_DESC" \
+--arg dataset_id "$WORKFLOW_DATASET" \
+--arg exp_id "$EXPERIMENT_ID" \
+--argjson task_definition "$TASK_DEFINITION" \
+--argjson metrics "$METRICS" \
+'{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
+```
+
+Trigger the workflow:
+```console
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-d "$JSON_STRING" | jq
+{
+  "id": "6e757bc0334645749d57023ed0a509df",
+  "experiment_id": "48",
+  "model": "gpt-4o-mini",
+  "name": "OpenAI Translation",
+  "description": "Translate English to Spanish with OpenAI",
+  "system_prompt": "translate English to Spanish: ",
+  "status": "created",
+  "created_at": "2025-03-17T15:46:50.775000",
+  "updated_at": null
+}
+
+:::
+
+:::{tab-item} Python SDK
+:sync: tab2
+```python
+from lumigator_schemas.workflows import WorkflowCreateRequest
+metrics = [ "bleu", "meteor", "comet"]
+request = WorkflowCreateRequest(
+    name="OpenAI Translation",
+    description="Translate English to Spanish with OpenAI",
+    model="gpt-4o",
+    provider="openai",
+    dataset=dataset_id,
+    experiment_id=experiment_id,
+    task_definition=task_definition,
+    metrics=metrics
+)
+client.workflows.create_workflow(request).model_dump()
+```
+:::
+
+::::
+
+
+##  Get the Results

@@ -46,13 +46,8 @@ make to the codebase will be automatically reflected in the running backend serv
 database file to the backend service, so that any changes you make to the database will be
 persisted between runs.
 
-To use the API-based vendor ground truth generation and evaluation, you'll need to pass the
-following environment variables for credentials, into the docker container:
-
-- `MISTRAL_API_KEY`: your Mistral API key.
-- `OPENAI_API_KEY`: your OpenAI API key.
-
-Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
+To use the API-based vendor ground truth generation and evaluation, you'll need to [configure API keys](../operations-guide/configuration#api-settings)
+once Lumigator is running.
 
 ## Testing the backend services
 

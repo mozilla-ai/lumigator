@@ -91,7 +91,7 @@ print(f"Experiment created and has ID: {experiment_id}")
 
 ::::
 
-## Trigger the Workflows
+### Trigger the Workflows
 Next, lets trigger workflows to evaluate two models - `gpt-4o-mini` from OpenAI  and [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) from Hugging Face Model Hub. This process can be repeated for as many models as you would like to evaluate in the experiment. In the workflow creation request, we also specify the following metrics to be computed: [BLEU](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) and [METEOR](https://github.com/huggingface/evaluate/tree/main/metrics/meteor) which are word overlap metrics, and [COMET](https://unbabel.github.io/COMET/html/index.html) which is a neural translation metric.
 
 Setup the following environment variables in a file called `common_variables.sh`:
@@ -245,4 +245,78 @@ client.workflows.create_workflow(request).model_dump()
 
 ::::
 
-##  Get the Results
+## Verify
+After the workflows has been triggered, you may need to wait a few minutes for the jobs to complete - you can check the status on the Experiments Page in the UI. Once completed, you can retrieve the experiment details with the following commands, allowing you to compare results and review performance. All the evaluation details can also be [viewed in the UI](../get-started/ui-guide.md#view-results).
+
+::::{tab-set}
+
+:::{tab-item} cURL
+:sync: tab1
+
+Set the following variables:
+```console
+user@host:~/lumigator$ export EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
+```
+
+Get the experiment and check the `metrics` field for both the workflows:
+
+```console
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIMENT_ID | jq
+{
+  "id": "48",
+  "name": "English to Spanish Translation",
+  "description": "Evaluate which model best translates English to Spanish",
+  "created_at": "2025-03-17T14:01:18.783000",
+  "task_definition": {
+    "task": "translation",
+    "source_language": "English",
+    "target_language": "Spanish"
+  },
+  "dataset": "4fbfc81d-938c-4703-beaf-af404fa5285f",
+  "updated_at": "2025-03-17T14:01:18.783000",
+  "workflows": [
+    {
+      "id": "169c3169b7d549598b8b094c0dd9c806",
+      "experiment_id": "48",
+      "model": "facebook/m2m100_418M",
+      "name": "Hugging Face Translation",
+      "description": "Translate English to Spanish with M2M100",
+      "system_prompt": "translate English to Spanish: ",
+      "status": "succeeded",
+      "created_at": "2025-03-17T16:37:04.211000",
+      "updated_at": null,
+      "jobs": [
+        {
+          "id": "baa73e2a-3c81-4643-8797-513d31825922",
+          "metrics": [
+            {
+              "name": "meteor_meteor_mean",
+              "value": 0.811
+            },
+            {
+              "name": "bleu_bleu_mean",
+              "value": 0.472
+            },
+            {
+              "name": "comet_mean_score",
+              "value": 1.158
+            }
+          ],
+          ...
+```
+:::
+
+:::{tab-item} Python SDK
+:sync: tab2
+```python
+experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+print(experiment_details.model_dump_json())
+```
+:::
+
+::::
+
+
+## Next Steps
+
+You have successfully run an translation evaluation experiment using the Lumigator with a sample dataset. You can now test out other models on your own datasets or translation datasets from the [Hugging Face Hub](https://huggingface.co/datasets?task_categories=task_categories:translation&sort=downloads).

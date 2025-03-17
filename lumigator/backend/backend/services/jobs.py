@@ -389,7 +389,7 @@ class JobService:
         :param request: The job creation request.
         :return: The job response.
         :raises JobTypeUnsupportedError: If the job type is not supported.
-        :raises SecretNotFoundError: If the secret key identifying the API key required for the job is not found.
+        :raises JobValidationError: If the secret key identifying the API key required for the job is not found.
         """
         # Typing won't allow other job_type's
         job_type = request.job_config.job_type

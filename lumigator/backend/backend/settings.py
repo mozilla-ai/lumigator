@@ -5,9 +5,26 @@ from enum import Enum
 from typing import Final
 
 from lumigator_schemas.extras import DeploymentType
+from lumigator_schemas.tasks import TaskDefinition, TaskType
 from pydantic import ByteSize, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy.engine import URL, make_url
+
+SUMMARIZATION_SYSTEM_PROMPT_DEFAULT: str = (
+    "You are a helpful assistant, expert in text summarization. "
+    "For every prompt you receive, provide a summary of its contents in at most two sentences."
+)
+
+TRANSLATION_SYSTEM_PROMPT_DEFAULT: str = (
+    "You are a helpful assistant, expert in text translation. For every prompt you recieve, translate {0} to {1}."
+)
+
+SYSTEM_PROMPT_DEFAULTS: dict = {
+    TaskType.SUMMARIZATION: SUMMARIZATION_SYSTEM_PROMPT_DEFAULT,
+    TaskType.TRANSLATION: lambda task_definition: TRANSLATION_SYSTEM_PROMPT_DEFAULT.format(
+        task_definition.source_language, task_definition.target_language
+    ),
+}
 
 
 class BackendSettings(BaseSettings):
@@ -86,6 +103,16 @@ class BackendSettings(BaseSettings):
                 merged_env_vars[var_name] = env_value
 
         return merged_env_vars
+
+    def get_default_system_prompt(self, task_definition: TaskDefinition) -> str:
+        generator = SYSTEM_PROMPT_DEFAULTS.get(task_definition.task)
+        if not generator:
+            raise ValueError(
+                f"Default system_prompt not available for {task_definition.task.value}. "
+                "It must be provided explicitly by the user."
+            )
+
+        return generator(task_definition) if callable(generator) else generator
 
     # URL for Ray jobs API
     @computed_field

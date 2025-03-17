@@ -28,7 +28,7 @@ with a minimal configuration ready to work with Lumigator.
 If you want Lumigator to be able to access hosted API-based LLM services such as OpenAI, DeepSeek or Mistral, you'll need
 to configure those secrets in Lumigator once it's running.
 
-Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details.
+Refer to [API settings configuration](../operations-guide/configuration.md#api-settings) for more details.
 
 ## Example values configurations
 

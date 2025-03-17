@@ -121,7 +121,7 @@ Currently, these settings are the sensitive API keys that are used to access ext
 * DeepSeek
 * [HuggingFace](https://huggingface.co/settings/tokens)
 * [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
-* [OpenAI](https://platform.openai.com/docs/quickstart/create-and-export-an-api-key)
+* OpenAI
 
 As these keys contain secret data, we don't allow them to be stored in Lumigator's configuration files.
 Instead, they **must** be added via the API (UI or SDK), and are then encrypted and stored in Lumigator's database.

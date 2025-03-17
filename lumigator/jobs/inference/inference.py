@@ -114,8 +114,8 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
 
     prediction_results, inference_time = predict(dataloader_iterable, model_client)
     output[config.job.output_field] = [p.prediction for p in prediction_results]
-    output["reasoning"] = [p.reasoning for p in prediction_results if p.reasoning is not None]
-    output["inference_metrics"] = [p.metrics for p in prediction_results if p.metrics is not None]
+    output["reasoning"] = [p.reasoning for p in prediction_results]
+    output["inference_metrics"] = [p.metrics for p in prediction_results]
     output["model"] = output_model_name
     output["inference_time"] = inference_time
 

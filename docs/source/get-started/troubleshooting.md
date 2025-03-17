@@ -19,11 +19,11 @@ increasing the value specified under `Disk usage limit`
 `docker image prune` command on the command line.
 
 
-## Tokens / API keys not set
+## Tokens/API keys not set
 
 Some models or APIs require a key or a token to work. This may result in different
 kind of errors while trying to run jobs that make use of them. For instance, this
-happens when you try to run inference using Mistral and `MISTRAL_API_KEY` is not set:
+happens when you try to run inference using Mistral and have not [configured the secret](../operations-guide/configuration.html#api-settings) for the Mistral API key:
 
 ```
   File "/tmp/ray/session_2025-01-23_02-13-26_636661_1/runtime_resources/working_dir_files/_ray_pkg_58d1ff7936232bdd/model_clients.py", line 130, in __init__
@@ -34,7 +34,7 @@ KeyError: 'MISTRAL_API_KEY'
 ```
 
 This happens instead when you try to run inference with OpenAI models and you have
-not set `OPENAI_API_KEY`:
+not [configured the secret](../operations-guide/configuration.html#api-settings) for the OpenAI API key:
 
 ```
   File "/tmp/ray/session_2025-01-23_02-18-27_051519_1/runtime_resources/pip/617697551215d8488f42ccab087d2364573ba842/virtualenv/lib/python3.11/site-packages/openai/_client.py", line 105, in __init__
@@ -43,7 +43,7 @@ openai.OpenAIError: The api_key client option must be set either by passing api_
 ```
 
 The following, instead, happens when you try to access a model from a gated repository
-on HuggingFace without authorizing it or without sharing a `HF_TOKEN`:
+on HuggingFace without authorizing it or without [configured the secret](../operations-guide/configuration.html#api-settings) for HuggingFace:
 
 ```
   File "/tmp/ray/session_2025-01-23_02-18-27_051519_1/runtime_resources/pip/b9beac6aa077c93a8e0edf25e6f0e4c96432df34/virtualenv/lib/python3.11/site-packages/transformers/utils/hub.py", line 420, in cached_file
@@ -65,5 +65,4 @@ OpenAI API (see `https://platform.openai.com/docs/quickstart`),
 [tokens](https://huggingface.co/docs/hub/en/security-tokens#how-to-manage-user-access-tokens)
 )
 
-2. Save it in your environment, either by adding it into your `~/.bashrc`, `~/.zshrc` file
-or by adding it to the `.env` file inside lumigator's main directory
+2. Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details on configuring them in Lumigator.

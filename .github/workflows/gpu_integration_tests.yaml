@@ -1,8 +1,8 @@
 name: GPU integration tests
 
 on:
-  schedule:
-    - cron: '0 5 * * *'  # Run every day at 5AM UTC
+  # schedule:
+  #   - cron: '0 5 * * *'  # Run every day at 5AM UTC
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 

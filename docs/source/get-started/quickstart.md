@@ -16,7 +16,7 @@ Before you start, make sure you have the following:
     - On Mac, Docker Desktop >= 4.37, and `docker-compose` >= 2.31.
     - On Linux, please also complete the [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The directory `$HOME/.cache/huggingface/` must exist and be readable and writeable. Lumigator uses this directory for accessing cached huggingface hub models.
-- If you want to evaluate against hosted LLM APIs like the platforms provided by OpenAI, Mistral, or Deepseek, you need to set the appropriate environment variables before running Lumigator: `OPENAI_API_KEY` or `MISTRAL_API_KEY` or `DEEPSEEK_API_KEY`. They can either be set in the terminal you use to run the `start-lumigator` command, or they can be set in the .env file that lumigator automatically creates for you the first time you run it. Refer to the [troubleshooting section](../get-started/troubleshooting.md) for more details.
+- If you want to evaluate against hosted API-based LLM services such as the platforms provided by OpenAI, Mistral, or Deepseek, you will need to set the appropriate API key setting as a secret in Lumigator. Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details.
 - If your system has an NVIDIA GPU, you need to have [installed the NVIDIA Container Toolkit following their instructions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). After that, open a terminal and run:
     ```bash
     export RAY_WORKER_GPUS=1

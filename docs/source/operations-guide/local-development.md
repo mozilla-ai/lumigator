@@ -46,7 +46,7 @@ make to the codebase will be automatically reflected in the running backend serv
 database file to the backend service, so that any changes you make to the database will be
 persisted between runs.
 
-To use the API-based vendor ground truth generation and evaluation, you'll need to [configure API keys](../operations-guide/configuration#api-settings)
+To use the API-based vendor ground truth generation and evaluation, you'll need to [configure API keys](../operations-guide/configuration.md#api-settings)
 once Lumigator is running.
 
 ## Testing the backend services

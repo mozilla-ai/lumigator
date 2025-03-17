@@ -9,7 +9,7 @@ This tutorial will show you how to perform inference as a single job. If you wou
 ```{note}
 You can also use the OpenAI GPT family of models or the Mistral API to run an inference job. To do
 so, you need to set the appropriate API key secrets beforehand.
-Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details.
+Refer to [API settings configuration](../operations-guide/configuration.md#api-settings) for more details.
 ```
 
 ## What You'll Need

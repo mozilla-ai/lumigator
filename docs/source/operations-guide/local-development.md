@@ -57,7 +57,7 @@ You can test your local setup as follows:
   (e.g., [DBeaver](https://dbeaver.io/)).
 - `minio`: Test your minio setup as follows:
     - connect to http://localhost:9001
-    - log in with `username=lumigator` and `password=lumigator` (you can customize them in your `.env` file)
+    - log in with `username=lumigator` and `password=lumigator` (you may have changed these values in your configuration)
     - check out the `lumigator-storage` bucket
 - `minio` via command line:
     - install the aws cli: `brew install awscli`

@@ -239,9 +239,6 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: CI=true ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
-
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-integration
@@ -316,12 +313,15 @@ jobs:
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
+      - name: Add Artifactory configuration
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> .default.conf
+          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> .default.conf
+
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build-postgres
-
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
+        run: CI=true ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build-postgres
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

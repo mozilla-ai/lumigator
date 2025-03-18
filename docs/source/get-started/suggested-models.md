@@ -91,14 +91,30 @@ Please note we do not, at present, launch a llamafile for you, Lumigator assumes
 launched it.
 ```
 
-| Model Type | Model                                    | HuggingFace | API | llamafile |
-|------------|------------------------------------------|-------------|-----|-----------|
-| seq2seq    | facebook/bart-large-cnn                  |      X      |     |           |
-| seq2seq    | Falconsai/text_summarization             |      X      |     |           |
-| causal     | gpt-4o-mini, gpt-4o                      |             |  X  |           |
-| causal     | deepseek-V3, deepseek-R1                 |             |  X  |           |
-| causal     | Ministral-8B                             |             |  X  |           |
-| causal     | Mistral-7B-Instruct                      |             |     |     X     |
+**Summarization-Specific Models**
+
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| seq2seq        | facebook/bart-large-cnn              | X               |         |               |
+| seq2seq        | Falconsai/text_summarization         | X               |         |               |
+
+**Translation-Specific Models**
+
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B              | X               |         |               |
+| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl              | X               |         |               |
+
+**Task-Agnostic Models**:
+These models can be used for either summarization or translation by changing the instructions in the prompt.
+
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| causal         | gpt-4o-mini, gpt-4o                  |                 | X       |               |
+| causal         | deepseek-V3, deepseek-R1             |                 | X       |               |
+| causal         | Ministral-8B                         |                 | X       |               |
+| causal         | Mistral-7B-Instruct                  |                 |         | X             |
+
 
 ### BART Large CNN
 

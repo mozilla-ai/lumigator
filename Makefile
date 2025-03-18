@@ -36,8 +36,6 @@ RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
 MODEL_CACHE_COMPOSE :=
-CI_COMPOSE :=
-export SQLALCHEMY_DATABASE_URL ?= sqlite:////tmp/local.db
 
 DEBUGPY_ARGS :=
 ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
@@ -246,12 +244,14 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # Integration tests require all containers to be up, so as a safety measure
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
+test-backend-unit: export SQLALCHEMY_DATABASE_URL = sqlite:////tmp/local.db
 test-backend-unit:
 	@source ./scripts/set_env_vars.sh && \
 	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
+test-backend-integration: export SQLALCHEMY_DATABASE_URL = sqlite:////tmp/local.db
 test-backend-integration: config-generate-env
 	@if [ "$(USE_ENV_FILE)" = "true" ]; then \
 		source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env"; \

@@ -5,7 +5,7 @@
 
 Lumigator is an open-source platform developed by [Mozilla.ai](https://www.mozilla.ai/) to help
 users select the most suitable language model for their specific needs. Currently, Lumigator
-supports the evaluation of summarization tasks using sequence-to-sequence models such as BART, as well as causal models like GPT and Mistral. We plan to expand support to additional machine
+supports the evaluation of summarization and translation tasks using sequence-to-sequence models such as ones based on BART or T5 architectures, as well as causal models like GPT and Mistral. We plan to expand support to additional machine
 learning tasks and use cases in the future.
 
 To learn more about Lumigator's features and capabilities, see the

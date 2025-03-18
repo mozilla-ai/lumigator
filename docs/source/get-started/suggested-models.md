@@ -164,7 +164,7 @@ At inference time, the model works based on language codes (`src_lang` and `tgt_
 
 MT0 is a family of multilingual text-to-text transformer models, designed for zero-shot cross-lingual generalization [Paper: [Crosslingual Generalization through Multitask Finetuning](https://arxiv.org/abs/2211.01786)].
 
-These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: ". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HF model card for exact list of supported languages.
+These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: <input_sentence>". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HF model card for exact list of supported languages.
 
 ### Mistral 7B Instruct
 

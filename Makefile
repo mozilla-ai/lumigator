@@ -156,7 +156,7 @@ start-lumigator-build: config-generate-env
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(CI_COMPOSE) $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: config-generate-env

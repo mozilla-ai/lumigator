@@ -242,9 +242,6 @@ jobs:
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
-      - name: Debug w/ tmate
-        uses: mxschmitt/action-tmate@v3
-
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-integration

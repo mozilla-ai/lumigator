@@ -1,6 +1,6 @@
 # Translation Use Case
 
-This guide will walk you through the process of running a translation experiment using Lumigator with two models: a many-to-many sequence-to-sequence model from the Hugging Face Hub and `gpt-4o-mini` from  OpenAI.
+This guide will walk you through the process of running a translation experiment using Lumigator with two models: a many-to-many sequence-to-sequence model from the Hugging Face Hub and `gpt-4o-mini` from  OpenAI. Please refer to the list of [suggested models](../get-started/suggested-models.md#model-types-and-parameters) for translation use case for more details.
 
 ## What You'll Need
 

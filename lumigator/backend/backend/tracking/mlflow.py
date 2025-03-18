@@ -35,12 +35,14 @@ class MLflowTrackingClient(TrackingClient):
 
     # Map from Workflow status to MLFlow run status (RunStatus).
     # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#runstatus
-    WORKFLOW_TO_MLFLOW_STATUS = {
+    _WORKFLOW_TO_MLFLOW_STATUS = {
         WorkflowStatus.CREATED: "SCHEDULED",
         WorkflowStatus.RUNNING: "RUNNING",
         WorkflowStatus.FAILED: "FAILED",
         WorkflowStatus.SUCCEEDED: "FINISHED",
     }
+
+    _WORKFLOW_OUTPUT_FILENAME = "compiled.json"
 
     def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._client = MlflowClient(tracking_uri=tracking_uri)
@@ -225,7 +227,7 @@ class MLflowTrackingClient(TrackingClient):
         self._client.set_tag(workflow_id, "status", status.value)
         # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
         # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
-        self._client.update_run(workflow_id, status=self.WORKFLOW_TO_MLFLOW_STATUS[status])
+        self._client.update_run(workflow_id, status=self._WORKFLOW_TO_MLFLOW_STATUS[status])
 
     def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         workflow_run = self._client.get_run(workflow_id)
@@ -384,7 +386,7 @@ class MLflowTrackingClient(TrackingClient):
         """Generate a pre-signed URL for the compiled artifact."""
         return self._s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_key(workflow_id, "compiled.json")},
+            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_key(workflow_id)},
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
 
@@ -422,7 +424,7 @@ class MLflowTrackingClient(TrackingClient):
             return
 
         # Don't recompile if the artifact already exists.
-        workflow_s3_uri = self._get_s3_uri(workflow_id, "compiled.json")
+        workflow_s3_uri = self._get_s3_uri(workflow_id, self._WORKFLOW_OUTPUT_FILENAME)
         if self._s3_file_system.exists(workflow_s3_uri):
             return
 
@@ -566,13 +568,13 @@ class MLflowTrackingClient(TrackingClient):
         )
         return [job.info.run_id for job in all_jobs]
 
-    def _get_s3_uri(self, workflow_id: str, filename: str) -> str:
+    def _get_s3_uri(self, workflow_id: str) -> str:
         """Construct a full S3 URI for workflow artifacts."""
-        return f"s3://{settings.S3_BUCKET}/{self._get_s3_key(workflow_id, filename)}"
+        return f"s3://{settings.S3_BUCKET}/{self._get_s3_key(workflow_id)}"
 
-    def _get_s3_key(self, workflow_id: str, filename: str) -> str:
+    def _get_s3_key(self, workflow_id: str) -> str:
         """Construct an S3 key for workflow artifacts."""
-        return f"workflows/results/{workflow_id}/{filename}"
+        return f"workflows/results/{workflow_id}/{self._WORKFLOW_OUTPUT_FILENAME}"
 
 
 class MLflowClientManager:

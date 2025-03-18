@@ -232,8 +232,8 @@ jobs:
       - name: Add Artifactory configuration
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
-          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> default.conf
-          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> default.conf
+          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> .default.conf
+          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> .default.conf
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

@@ -12,7 +12,7 @@ and created an endpoint to easily retrieve them.
 
 ```{note}
 **Using Hugging Face Models**:
-For *summarization*, Lumigator supports any summarization model uploaded to the [HF Model Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending). For *translation*, current support is limited to model families based on [translation-prefix](https://huggingface.co/bigscience/mt0-base) (e.g., `bigscience/mt0-base`) and those based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (e.g., `facebook/m2m100_418M`). Please check the supported models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
+For *summarization*, Lumigator supports any summarization model uploaded to the [HF Model Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending). For *translation*, current support is limited to two model families - the first based on [translation-prefix](https://huggingface.co/bigscience/mt0-base) (`bigscience/mt0-base`) and the second based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`). Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
 ```
 
 In this guide, we assume that you have already [installed Lumigator locally](quickstart), and have a

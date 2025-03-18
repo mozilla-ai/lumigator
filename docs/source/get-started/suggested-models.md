@@ -96,6 +96,7 @@ launched it.
 | seq2seq    | facebook/bart-large-cnn                  |      X      |     |           |
 | seq2seq    | Falconsai/text_summarization             |      X      |     |           |
 | causal     | gpt-4o-mini, gpt-4o                      |             |  X  |           |
+| causal     | deepseek-V3, deepseek-R1                 |             |  X  |           |
 | causal     | Ministral-8B                             |             |  X  |           |
 | causal     | Mistral-7B-Instruct                      |             |     |     X     |
 
@@ -151,6 +152,9 @@ summarization-specific parameters for this model.
 The GPT-4o Mini and GPT-4o models are causal language models developed by OpenAI.
 
 There are no summarization-specific parameters for these models.
+
+### Deepseek-V3 and Deepseek-R1
+DeepSeek-V3 is a general-purpose LLM with a Mixture-of-Experts (MoE) architecture, featuring 671B parameters (37B activated per token) for NLP tasks like text generation, translation, and summarization. DeepSeek-R1 is a reasoning model built on top of DeepSeek-V3, trained with reinforcement learning for advanced chain-of-thought reasoning and error correction.
 
 ### Ministral 8B
 

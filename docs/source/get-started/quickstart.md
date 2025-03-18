@@ -68,7 +68,7 @@ should receive the following JSON response:
 
 ## Using Lumigator
 
-Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }}.
+Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }}, on the task of summarization. Lumigator also supports evaluation on translation task - refer to the [translation eval guide](../user-guides/translation-eval.md) for details.
 
 We will show how to do this using either cURL or the Lumigator SDK. See [the UI guide](ui-guide.md) for information about how to use the UI.
 

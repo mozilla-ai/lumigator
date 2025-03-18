@@ -25,7 +25,7 @@ Once the dataset is uploaded, it can be viewed as a row in the table in the **Da
 ### Settings
 
 If you want to evaluate against hosted API-based LLM services such as the platforms provided by OpenAI, Mistral, or Deepseek,
-you will need to set the appropriate [API key setting](../operations-guide/configuration#api-settings) as a secret in Lumigator.
+you will need to set the appropriate [API key setting](../operations-guide/configuration.md#api-settings) as a secret in Lumigator.
 
 To do this visit the **Settings** section listed in the navigation bar on the left.
 
@@ -79,7 +79,7 @@ Below that, you have the option to select the models to be used for the experime
 | --- | --- |
 
 ```{note}
-Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](operations-guide/configuration.md#api-settings).
+Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](../operations-guide/configuration.md#api-settings).
 ```
 
 Finally click the **Run Experiment** button.

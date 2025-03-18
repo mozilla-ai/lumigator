@@ -229,9 +229,15 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
+      - name: Add Artifactory configuration
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> default.conf
+          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> default.conf
+
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: CI=true HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} HF_ENDPOINT=${{ secrets.JF_URL_HF }} ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run: CI=true ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh

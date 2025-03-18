@@ -65,9 +65,9 @@ ifneq ($(ENABLE_FIRST_TIME_CACHE), false)
 	MODEL_CACHE_COMPOSE := -f docker-compose.model-cache.override.yaml
 endif
 
+CI ?= false
+
 ifeq ($(CI), true)
-	@echo "HF_TOKEN=$(HF_TOKEN)" >> $(CONFIG_DEFAULT_FILE)
-	@echo "HF_ENDPOINT=$(HF_ENDPOINT)" >> $(CONFIG_DEFAULT_FILE)
 	CI_COMPOSE := -f docker-compose.ci.override.yaml
 endif
 

@@ -154,14 +154,25 @@ evaluation are:
 | `no_repeat_ngram_size` | All n-grams of that size can only occur once           | 3     |
 | `num_beams`            | Number of beams for beam search                        | 4     |
 
+### Facebook M2M100
+
+M2M100 is a multilingual encoder-decoder (seq-to-seq) model trained for many-to-many multilingual translation between 100 languages. It was introduced in the paper: [Beyond English-Centric Multilingual Machine Translation](https://arxiv.org/abs/2010.11125).
+
+At inference time, the model works based on language codes (`src_lang` and `tgt_lang`) specified in the HF generation pipeline. There are two variants of the model: `facebook/m2m100_418M` and `facebook/m2m100_1.2B` which differ in the number of parameters. Please check the HF model card for exact list of supported languages.
+
+### BigScience MT0
+
+MT0 is a family of multilingual text-to-text transformer models, designed for zero-shot cross-lingual generalization [Paper: [Crosslingual Generalization through Multitask Finetuning](https://arxiv.org/abs/2211.01786)].
+
+These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: ". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HF model card for exact list of supported languages.
+
 ### Mistral 7B Instruct
 
-The [mistralai/Mistral-7B-Instruct-v0.3]https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)
+The [mistralai/Mistral-7B-Instruct-v0.3](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)
 Large Language Model (LLM) is an instruct fine-tuned version of the
 [Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3).
 
-The model has 7.25B parameters (BF16), and the model size is 14.5GB. There are no
-summarization-specific parameters for this model.
+The model has 7.25B parameters (BF16), and the model size is 14.5GB.
 
 ### GPT-4o Mini and GPT-4o
 
@@ -177,8 +188,6 @@ DeepSeek-V3 is a general-purpose LLM with a Mixture-of-Experts (MoE) architectur
 The [Ministral 8B](https://mistral.ai/news/ministraux) model is an open, causal language
 model developed by [Mistral AI](https://mistral.ai/). It is a small but powerful edge model.
 
-There are no summarization-specific parameters for this model.
-
 ### Mistral 7B Instruct Llamafile
 
 The [mistralai/Mistral-7B-Instruct-v0.2](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2)
@@ -186,9 +195,6 @@ model is a causal language model developed by [Mistral AI](https://mistral.ai/),
 llamafile. A llamafile is an executable LLM that you can run on your own computer. It contains the
 weights for a given open LLM, as well as everything needed to actually run that model on your
 computer. There's nothing to install or configure.
-
-There are no summarization-specific parameters for this model.
-
 
 ## Reference Models
 

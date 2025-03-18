@@ -5,7 +5,7 @@ This guide will walk you through the process of running a translation experiment
 ## What You'll Need
 
 1. A running instance of [Lumigator](../get-started/quickstart.md).
-1. A dataset for translation use case. You can use the sample [English-Spanish dataset](../../../lumigator/sample_data/translation/sample_translation_en_es.csv) or prepare your own dataset. Refer to [this guide](./prepare-evaluation-dataset.md) for more details.
+1. A dataset for translation use case. You can use the [sample English-Spanish dataset](../../../lumigator/sample_data/translation/sample_translation_en_es.csv) or prepare your own dataset. Refer to [this guide](./prepare-evaluation-dataset.md) for more details.
 1. (Optional) An `OPENAI_API_KEY` if you would like to evaluate one of the OpenAI models. Please refer to the [UI instructions](../get-started/ui-guide.md#settings) for setting up the API keys.
 
 ## Procedure
@@ -15,7 +15,7 @@ To run a translation experiment, one can either use the UI or the API/SDK. If us
 Alternatively, you can also use the API/SDK to run the experiment. The following steps outline the process:
 
 ### Upload the Dataset
-The dataset upload process is the same as outlined in the [quick start guide](../get-started/quickstart.md#upload-a-dataset). Simply update your `DATASET_PATH` to point to your translation dataset in csv format.
+The dataset upload process is the same as outlined in the [quick start guide](../get-started/quickstart.md#upload-a-dataset). Follow the upload dataset steps outlined there and then return to continue with the next steps below - don't forget to update your `DATASET_PATH` to point to your translation dataset in csv format.
 
 ### Create an Experiment
 Next, lets proceed to creating an experiment. The main point to note here is the `task_definition` field, which is a dictionary that specifies the task as `translation` and the `source_language` and the `target_language`.
@@ -101,7 +101,6 @@ Setup the following environment variables in a file called `common_variables.sh`
 export WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
 export EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
 export METRICS='["bleu", "meteor", "comet"]'
-export BATCH_SIZE=5
 ```
 
 And then source the file:
@@ -126,13 +125,14 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
 --arg name "$WORKFLOW_NAME" \
 --arg model "gpt-4o-mini" \
 --arg provider "openai" \
+--arg secret_key_name "openai_api_key" \
 --arg desc "$WORKFLOW_DESC" \
 --arg dataset_id "$WORKFLOW_DATASET" \
 --arg exp_id "$EXPERIMENT_ID" \
---arg batch_size "$BATCH_SIZE" \
+--argjson batch_size 5 \
 --argjson task_definition "$TASK_DEFINITION" \
 --argjson metrics "$METRICS" \
-'{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
+'{name: $name, description: $desc, model: $model, provider: $provider, secret_key_name: $secret_key_name, batch_size: $batch_size, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
 ```
 
 Trigger the workflow:
@@ -167,6 +167,7 @@ request = WorkflowCreateRequest(
     description="Translate English to Spanish with OpenAI",
     model="gpt-4o-mini",
     provider="openai",
+    secret_key_name="openai_api_key",
     dataset=dataset_id,
     experiment_id=experiment_id,
     task_definition=task_definition,
@@ -195,10 +196,10 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
 --arg desc "$WORKFLOW_DESC" \
 --arg dataset_id "$WORKFLOW_DATASET" \
 --arg exp_id "$EXPERIMENT_ID" \
---arg batch_size "$BATCH_SIZE" \
+--arg batch_size 5 \
 --argjson task_definition "$TASK_DEFINITION" \
 --argjson metrics "$METRICS" \
-'{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
+'{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, batch_size: $batch_size, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
 ```
 
 Trigger the workflow:

@@ -424,7 +424,7 @@ class MLflowTrackingClient(TrackingClient):
             return
 
         # Don't recompile if the artifact already exists.
-        workflow_s3_uri = self._get_s3_uri(workflow_id, self._WORKFLOW_OUTPUT_FILENAME)
+        workflow_s3_uri = self._get_s3_uri(workflow_id)
         if self._s3_file_system.exists(workflow_s3_uri):
             return
 

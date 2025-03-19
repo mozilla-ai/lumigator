@@ -1,9 +1,7 @@
 import { lumigatorApiAxiosInstance } from '@/helpers/lumigatorAxiosInstance'
 import type { Secret, SecretUploadPayload } from '@/types/Secret'
 
-const PATH_SETTINGS_ROOT = 'settings'
-const PATH_SECRETS_ROOT = `${PATH_SETTINGS_ROOT}/secrets`
-const PATH_SECRET = (secretName: string) => `${PATH_SECRETS_ROOT}/${secretName}`
+const PATH_SECRET = (secretName: string) => `/settings/secrets/${secretName}`
 
 /**
  * Deletes a secret by name.
@@ -18,7 +16,7 @@ export function deleteSecret(secretName: string): Promise<void> {
  * @returns The list of secrets (without their values).
  */
 export async function fetchSecrets(): Promise<Secret[]> {
-  const response = await lumigatorApiAxiosInstance.get(PATH_SECRETS_ROOT)
+  const response = await lumigatorApiAxiosInstance.get('/settings/secrets')
 
   return response.data
 }

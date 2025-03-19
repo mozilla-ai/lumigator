@@ -12,7 +12,7 @@ This Helm chart deploys the Lumigator core REST API, Ray cluster and postgres. Y
 If you want Lumigator to be able to access hosted API-based LLM services such as OpenAI, DeepSeek or Mistral, you'll need
 to configure those secrets in Lumigator once it's running.
 
-Refer to [API settings configuration](../operations-guide/configuration#api-settings) for more details.
+Refer to [API settings configuration](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html) for more details.
 
 ## Backend Values
 

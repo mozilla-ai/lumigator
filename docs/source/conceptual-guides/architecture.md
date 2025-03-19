@@ -23,7 +23,7 @@ the backend itself relies on:
 
 * **Tracking** implement the tracking interface which is used to log and track the state of experiments and workflows (see: {{ '[code for tracking](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/backend/backend/tracking)'.format(commit_id) }} ). Currently, Mlflow is the only implementation of the tracking interface, but it's designed in such a way to support alternative tracking implementations in the future.
 
-![Lumigator Backend](../../assets/lumigator-backend.jpg)
+![Lumigator Backend](../../assets/lumigator-backend.png)
 
 ```{admonition} Notation
 In the following, we will refer to paths inside Lumigator's repo relative to the

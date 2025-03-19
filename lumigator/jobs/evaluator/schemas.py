@@ -11,13 +11,15 @@ class DatasetConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class ModelConfig(BaseModel):
-    path: str
-    model_config = ConfigDict(extra="forbid")
+class DeepEvalLocalModelConfig(BaseModel):
+    model_name: str
+    model_base_url: str
+    model_api_key: str | None = "ollama"
 
 
 class EvaluationConfig(BaseModel):
     metrics: list[str] = Field(default=["rouge", "meteor", "bertscore", "bleu"])
+    llm_as_judge: DeepEvalLocalModelConfig | None = None
     max_samples: int = 0
     return_input_data: bool = False
     return_predictions: bool = False

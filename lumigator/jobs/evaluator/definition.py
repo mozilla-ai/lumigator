@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from evaluator.schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
+from loguru import logger
 from lumigator_schemas.jobs import JobCreate, JobType
 
 from backend.services.job_interface import JobDefinition
@@ -8,11 +9,13 @@ from backend.services.job_interface import JobDefinition
 
 class JobDefinitionEvaluation(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
+        logger.info(request)
         job_config = EvalJobConfig(
             name=f"{request.name}/{record_id}",
             dataset=DatasetConfig(path=dataset_path),
             evaluation=EvaluationConfig(
                 metrics=request.job_config.metrics,
+                llm_as_judge=request.job_config.llm_as_judge.model_dump() if request.job_config.llm_as_judge else None,
                 max_samples=request.max_samples,
                 return_input_data=True,
                 return_predictions=True,

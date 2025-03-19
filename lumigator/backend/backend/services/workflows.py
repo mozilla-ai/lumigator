@@ -11,7 +11,6 @@ from lumigator_schemas.jobs import (
     JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
-    JobResultDownloadResponse,
     JobResultObject,
     JobStatus,
 )
@@ -337,10 +336,11 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_job_result_download(self, workflow_id: str) -> JobResultDownloadResponse:
+    def get_job_result_download(self, workflow_id: str) -> str:
         try:
             workflow_details = self.get_workflow(workflow_id)
             if workflow_details.artifacts_download_url:
+                loguru.logger.critical(f"--> {workflow_details.artifacts_download_url}")
                 return workflow_details.artifacts_download_url
             else:
                 raise WorkflowNotFoundError(workflow_id, "No result download link has been found") from None

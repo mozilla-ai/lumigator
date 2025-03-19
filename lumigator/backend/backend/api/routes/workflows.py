@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, status
-from lumigator_schemas.jobs import JobLogsResponse, JobResultDownloadResponse
+from lumigator_schemas.jobs import JobLogsResponse
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -52,7 +52,7 @@ def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsR
 def get_job_result_download(
     service: WorkflowServiceDep,
     workflow_id: str,
-) -> JobResultDownloadResponse:
+) -> str:
     """Return job results file URL for downloading."""
     return service.get_job_result_download(workflow_id)
 

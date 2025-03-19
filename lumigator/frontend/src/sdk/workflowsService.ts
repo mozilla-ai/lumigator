@@ -44,12 +44,11 @@ export async function downloadResults(workflow_id: string) {
   const response = await lumigatorApiAxiosInstance.get(
     `workflows/${workflow_id}/result/download`,
   )
-  const { download_url } = response.data
-  if (!download_url) {
-    console.error('No download_url found in the response.')
+  if (!response.data) {
+    console.error('No URL found in the response.')
     return
   }
-  const fileResponse = await lumigatorApiAxiosInstance.get(download_url, {
+  const fileResponse = await lumigatorApiAxiosInstance.get(response.data, {
     responseType: 'blob', // Important: Receive the file as a binary blob
   })
   const blob = fileResponse.data

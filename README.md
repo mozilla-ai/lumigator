@@ -59,25 +59,6 @@ services networked together to make up all the components of the Lumigator appli
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 > uses SQLite for this purpose.
 
-> [!NOTE]
-If you want to evaluate against LLM APIs like OpenAI/Mistral/Deepseek, you need to set the appropriate
-secrets in Lumigator. Refer to the [API keys configuration](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings)
-section in our documentation for more details.
-
-> [!NOTE]
-To improve performance and ensure smooth execution, Lumigator will automatically pre-download two language models on the first run: `bart-large-cnn` and `roberta-large`. These models are stored in your local Hugging Face cache directory (by default: `${HOME}/.cache/huggingface`).
-
-    If you already have these models downloaded, Lumigator will detect them and skip re-downloading.
-    The cache location can be modified in the [.default.conf](.default.conf) file by setting HF_HOME.
-
-Since this is a one-time setup, the first launch may take some time depending on your internet connection. Subsequent runs will be significantly faster.
-
-If you prefer not to download models automatically, you can disable this behavior by setting:
-
-`ENABLE_FIRST_TIME_CACHE=false`
-
-in the [.default.conf](.default.conf) file.
-
 To start Lumigator locally, follow these steps:
 
 1. Clone the Lumigator repository:
@@ -116,6 +97,9 @@ To verify that Lumigator is running, open a web browser and navigate to
 Now that Lumigator is running, you can start using it. The platform provides a REST API that allows
 you to interact with the system. Run the [example notebook](/notebooks/walkthrough.ipynb) for a
 quick walkthrough.
+
+> [!NOTE]
+> When you run an experiment or generate ground truth in Lumigator for the first time, the required models will be downloaded. This may cause an initial delay. However, once downloaded, the models are cached locally, ensuring significantly faster subsequent runs.
 
 Despite the fact this is a local setup, it lends itself to more distributed scenarios. For instance,
 one could provide different `AWS_*` environment variables to the backend container to connect to any

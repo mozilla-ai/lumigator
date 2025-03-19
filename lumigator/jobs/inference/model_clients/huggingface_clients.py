@@ -228,7 +228,9 @@ class HuggingFaceOpusMTTranslationClient(
         self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
         self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
         self.set_seq2seq_max_length()
-        logger.info(f"Loading config: {config}")
+        # Set up prefix string for target language. Required for multilingual versions:
+        # https://huggingface.co/Helsinki-NLP/opus-mt-tc-bible-big-mul-deu_eng_fra_por_spa#how-to-get-started-with-the-model
+        self.target_language_prefix_string = f">>{self.target_language_alpha3_code}<< "
 
     @staticmethod
     def is_model_type_marianmt(model_name_or_path: str) -> bool:
@@ -249,7 +251,9 @@ class HuggingFaceOpusMTTranslationClient(
             )
             try:
                 AutoConfig.from_pretrained(self.config.hf_pipeline.model_name_or_path)
-                logger.info(f"Using default model for language pair: {self.config.hf_pipeline.model_name_or_path}")
+                logger.info(
+                    f"Using default Opus MT model for language pair: {self.config.hf_pipeline.model_name_or_path}"
+                )
             except Exception as e:
                 raise ValueError(
                     f"Model {self.config.hf_pipeline.model_name_or_path} not found on Hugging Face Hub. "
@@ -259,13 +263,16 @@ class HuggingFaceOpusMTTranslationClient(
             # User has specified an exact model name, so we use that
             logger.info(
                 f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
-                "from the default model for the language pair: "
+                "from the default Opus MT model for the language pair: "
                 f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
             )
 
     def predict(self, examples: list) -> list[PredictionResult]:
+        prefixed_examples = [self.target_language_prefix_string + example for example in examples]
+        logger.info(f"Prefixed examples: {prefixed_examples}")
+
         generations = self.pipeline(
-            examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
+            prefixed_examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
         )
 
         prediction_results = []

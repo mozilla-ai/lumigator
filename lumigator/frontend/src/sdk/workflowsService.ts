@@ -41,9 +41,7 @@ export async function deleteWorkflow(id: string) {
  * @returns {Promise<Blob|Error>} A promise that resolves to a Blob containing the file data.
  */
 export async function downloadResults(workflow_id: string) {
-  const response = await lumigatorApiAxiosInstance.get(
-    `workflows/${workflow_id}/result/download`,
-  )
+  const response = await lumigatorApiAxiosInstance.get(`workflows/${workflow_id}/result/download`)
   if (!response.data) {
     console.error('No URL found in the response.')
     return
@@ -54,7 +52,6 @@ export async function downloadResults(workflow_id: string) {
   const blob = fileResponse.data
   return blob
 }
-
 
 export const workflowsService = {
   createWorkflow,

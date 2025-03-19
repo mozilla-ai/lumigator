@@ -44,8 +44,10 @@ from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.services.secrets import SecretService
+from backend.services.workflows import WorkflowService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
+from backend.tracking.mlflow import MLflowTrackingClient
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
@@ -441,6 +443,18 @@ def secret_key() -> str:
 @pytest.fixture(scope="function")
 def secret_service(db_session, secret_repository, secret_key):
     return SecretService(secret_key=secret_key, secret_repo=secret_repository)
+
+
+@pytest.fixture(scope="function")
+def tracking_client():
+    return MagicMock()
+
+
+@pytest.fixture(scope="function")
+def workflow_service(job_repository, job_service, dataset_service, background_tasks, secret_service, tracking_client):
+    return WorkflowService(
+        job_repository, job_service, dataset_service, background_tasks, secret_service, tracking_client
+    )
 
 
 @pytest.fixture(scope="function")

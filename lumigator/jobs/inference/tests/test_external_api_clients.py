@@ -70,7 +70,6 @@ class TestLiteLLMModelClient:
         """Test that the LiteLLMModelClient initializes correctly."""
         client = LiteLLMModelClient(mock_config)
         assert client.config == mock_config
-        assert client.system_prompt == mock_config.system_prompt
 
     @patch("model_clients.external_api_clients.batch_completion")
     def test_predict_standard_response(self, mock_completion, client_with_api_key, mock_standard_response, api_key):

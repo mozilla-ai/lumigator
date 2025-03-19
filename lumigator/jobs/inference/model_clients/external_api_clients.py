@@ -24,7 +24,6 @@ class LiteLLMModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig, api_key: str | None = None) -> None:
         self.api_key = api_key
         self.config = config
-        self.system_prompt = self.config.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     @retry_with_backoff(max_retries=3)

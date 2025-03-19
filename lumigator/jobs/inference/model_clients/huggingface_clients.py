@@ -260,11 +260,16 @@ class HuggingFaceOpusMTTranslationClient(
                 ) from e
         else:
             # User has specified an exact model name, so we use that
-            logger.info(
-                f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
-                "from the default Opus MT model for the language pair: "
-                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
-            )
+            # Warning if the model is not the default Opus MT model for the language pair
+            if (
+                self.config.hf_pipeline.model_name_or_path
+                != f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+            ):
+                logger.error(
+                    f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
+                    "from the default Opus MT model for the language pair: "
+                    f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+                )
 
     def predict(self, examples: list) -> list[PredictionResult]:
         prefixed_examples = [self.target_language_prefix_string + example for example in examples]

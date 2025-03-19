@@ -5,6 +5,7 @@ from inference_config import HfPipelineConfig, InferenceJobConfig
 from lumigator_schemas.tasks import TaskDefinition, TaskType
 from model_clients.huggingface_clients import (
     HuggingFaceLanguageCodeTranslationClient,
+    HuggingFaceOpusMTTranslationClient,
     HuggingFacePrefixTranslationClient,
 )
 
@@ -51,8 +52,8 @@ class TranslationClientTestBase(MockBaseSetup):
         # Setup language resolution
         with patch("model_clients.translation_utils.resolve_user_input_language") as mock_resolve_lang:
             mock_resolve_lang.side_effect = [
-                {"iso_code": "en", "full_name": "English"},
-                {"iso_code": "fr", "full_name": "French"},
+                {"iso_code": "en", "full_name": "English", "alpha3_code": "eng"},
+                {"iso_code": "fr", "full_name": "French", "alpha3_code": "fra"},
             ]
 
             mock_pipeline_instance.return_value = mock_translation_results
@@ -137,3 +138,24 @@ class TestHuggingFaceLanguageCodeTranslationClient(TranslationClientTestBase):
             src_lang="en",
             tgt_lang="fr",
         )
+
+
+class TestHuggingFaceOpusMTTranslationClient(TranslationClientTestBase):
+    def test_initialize(self, setup_translation_mocks, mock_translation_config):
+        """Test the initialization of the Opus MT translation client."""
+        mock_pipeline = setup_translation_mocks[0]
+
+        with patch("model_clients.translation_utils.resolve_user_input_language") as mock_resolve_lang:
+            mock_resolve_lang.side_effect = [
+                {"iso_code": "en", "full_name": "English", "alpha3_code": "eng"},
+                {"iso_code": "fr", "full_name": "French", "alpha3_code": "fra"},
+            ]
+            # Initialize client
+            client = HuggingFaceOpusMTTranslationClient(mock_translation_config)
+
+            # Verify target language prefix string is set correctly
+            assert client.target_language_prefix_string == ">>fra<< "
+
+            # Verify pipeline task is correctly set for translation
+            pipeline_args = mock_pipeline.call_args[1]
+            assert pipeline_args["task"] == TaskType.TRANSLATION

@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import os
+import sys
 import time
 import uuid
 from collections.abc import Generator
@@ -571,18 +572,31 @@ def model_specs_data() -> list[ModelsResponse]:
     return models
 
 
-@pytest.fixture
-def caplog_with_loguru(caplog):
-    """Wraps caplog to auto-configure Loguru."""
+@pytest.fixture(scope="function")
+def configure_loguru(caplog):
+    """Configures Loguru logging but only for tests that explicitly request it."""
 
     class PropagateHandler(logging.Handler):
         def emit(self, record):
             logging.getLogger(record.name).handle(record)
 
+    # Remove existing handlers but store the config
+    existing_handlers = logger._core.handlers.copy()
     logger.remove()
     logger.add(PropagateHandler(), format="{message}")
-    yield caplog
+
+    yield
+
+    # Restore handlers
     logger.remove()
+    for _ in existing_handlers:
+        logger.add(sys.stderr, format="{time} {level} {message}")
+
+
+@pytest.fixture(scope="function")
+def caplog_with_loguru(caplog, configure_loguru):
+    """Wraps caplog to auto-configure Loguru safely."""
+    yield caplog
 
 
 @pytest.fixture(scope="function")

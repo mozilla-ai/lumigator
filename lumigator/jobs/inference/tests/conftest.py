@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from pathlib import Path
 
 import pytest
@@ -31,18 +32,31 @@ def json_config_full_hf() -> dict:
     return load_json(resources_dir() / "config_full_hf.json")
 
 
-@pytest.fixture
-def caplog_with_loguru(caplog):
-    """Wraps caplog to auto-configure Loguru."""
+@pytest.fixture(scope="function")
+def configure_loguru(caplog):
+    """Configures Loguru logging but only for tests that explicitly request it."""
 
     class PropagateHandler(logging.Handler):
         def emit(self, record):
             logging.getLogger(record.name).handle(record)
 
+    # Remove existing handlers but store the config
+    existing_handlers = logger._core.handlers.copy()
     logger.remove()
     logger.add(PropagateHandler(), format="{message}")
-    yield caplog
+
+    yield
+
+    # Restore handlers
     logger.remove()
+    for _ in existing_handlers:
+        logger.add(sys.stderr, format="{time} {level} {message}")
+
+
+@pytest.fixture(scope="function")
+def caplog_with_loguru(caplog, configure_loguru):
+    """Wraps caplog to auto-configure Loguru safely."""
+    yield caplog
 
 
 @pytest.fixture(scope="function")

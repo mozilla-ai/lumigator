@@ -15,7 +15,39 @@ To run a translation experiment, one can either use the UI or the API/SDK. If us
 Alternatively, you can also use the API/SDK to run the experiment. The following steps outline the process:
 
 ### Upload the Dataset
-The dataset upload process is the same as outlined in the [quick start guide](../get-started/quickstart.md#upload-a-dataset). Follow the upload dataset steps outlined there and then return to continue with the next steps below - don't forget to update your `DATASET_PATH` to point to your translation dataset in csv format.
+The dataset upload process is the same as outlined in the [quick start guide](../get-started/quickstart.md#upload-a-dataset). We just update the `DATASET_PATH` to point to your translation dataset in csv format.
+
+::::{tab-set}
+
+:::{tab-item} cURL
+:sync: tab1
+```console
+user@host:~/lumigator$ export DATASET_PATH=lumigator/sample_data/translation/sample_translation_en_es.csv
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/datasets/ \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'dataset=@'$DATASET_PATH';type=text/csv' \
+  -F 'format=job' | jq
+```
+:::
+
+:::{tab-item} Python SDK
+:sync: tab2
+```python
+from lumigator_sdk.lumigator import LumigatorClient
+from lumigator_schemas.datasets import DatasetFormat
+
+dataset_path = 'lumigator/sample_data/translation/sample_translation_en_es.csv'
+client = LumigatorClient('localhost:8000')
+
+response = client.datasets.create_dataset(
+    open(dataset_path, 'rb'),
+    DatasetFormat.JOB
+)
+```
+:::
+
+::::
 
 ### Create an Experiment
 Next, lets proceed to creating an experiment. The main point to note here is the `task_definition` field, which is a dictionary that specifies the task as `translation` and the `source_language` and the `target_language`.

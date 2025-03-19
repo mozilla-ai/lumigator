@@ -84,7 +84,7 @@ The steps are as follows:
 To upload a dataset, you need to send a POST request to the `/datasets` endpoint. The request should
 include the dataset file.
 
-To run this example, first `cd` to the `lumigator` directory. then run
+To run this example, first `cd` to the `lumigator` directory. Then run
 
 ::::{tab-set}
 

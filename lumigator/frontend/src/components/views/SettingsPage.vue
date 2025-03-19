@@ -297,6 +297,8 @@ const handleBlur = (key: string) => {
 .settings-group-description {
   @include mixins.caption;
   color: variables.$l-grey-100;
+  gap: 0.5rem;
+  display: flex;
 }
 .learn-more-link {
   font-weight: 700;

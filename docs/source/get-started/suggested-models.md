@@ -158,13 +158,13 @@ evaluation are:
 
 M2M100 is a multilingual encoder-decoder (seq-to-seq) model trained for many-to-many multilingual translation between 100 languages. It was introduced in the paper: [Beyond English-Centric Multilingual Machine Translation](https://arxiv.org/abs/2010.11125).
 
-At inference time, the model works based on language codes (`src_lang` and `tgt_lang`) specified in the HF generation pipeline. There are two variants of the model: `facebook/m2m100_418M` and `facebook/m2m100_1.2B` which differ in the number of parameters. Please check the HF model card for exact list of supported languages.
+At inference time, the model works based on language codes (`src_lang` and `tgt_lang`) specified in the HuggingFace generation pipeline. There are two variants of the model: [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) and [`facebook/m2m100_1.2B`](https://huggingface.co/facebook/m2m100_1.2B) which differ in the number of parameters. Please check the HuggingFace model card for exact list of supported languages.
 
 ### BigScience MT0
 
 MT0 is a family of multilingual text-to-text transformer models, designed for zero-shot cross-lingual generalization [Paper: [Crosslingual Generalization through Multitask Finetuning](https://arxiv.org/abs/2211.01786)].
 
-These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: <input_sentence>". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HF model card for exact list of supported languages.
+These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: <input_sentence>". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HuggingFace model card for exact list of supported languages.
 
 ### Mistral 7B Instruct
 

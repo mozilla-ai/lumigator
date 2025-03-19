@@ -11,6 +11,7 @@ from lumigator_schemas.jobs import (
     JobEvalConfig,
     JobInferenceConfig,
     JobLogsResponse,
+    JobResultDownloadResponse,
     JobResultObject,
     JobStatus,
 )
@@ -25,6 +26,7 @@ from pydantic_core._pydantic_core import ValidationError
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
+from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.dataset_exceptions import (
     DatasetInvalidError,
     DatasetMissingFieldsError,
@@ -324,6 +326,7 @@ class WorkflowService:
             )
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -333,6 +336,16 @@ class WorkflowService:
             )
             await self._handle_workflow_failure(workflow.id)
             return
+
+    def get_job_result_download(self, workflow_id: str) -> JobResultDownloadResponse:
+        try:
+            workflow_details = self.get_workflow(workflow_id)
+            if workflow_details.artifacts_download_url:
+                return workflow_details.artifacts_download_url
+            else:
+                raise WorkflowNotFoundError(workflow_id, "No result download link has been found") from None
+        except Exception as e:
+            raise ServiceError("Unexpected runtime error", e) from e
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

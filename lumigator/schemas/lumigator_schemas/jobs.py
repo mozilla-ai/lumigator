@@ -193,6 +193,7 @@ class JobResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     status: JobStatus
+    job_type: JobType
     created_at: dt.datetime
     experiment_id: UUID | None = None
     updated_at: dt.datetime | None = None

@@ -157,8 +157,8 @@ const onShowWorkflowResults = async (workflow: Workflow) => {
   showJobResults.value = true
 }
 
-const onDownloadResults = async (workflow: Workflow | Experiment) => {
-  const blob = await experimentsService.downloadResults(workflow.id)
+const onDownloadResults = async (workflow: Workflow) => {
+  const blob = await workflowsService.downloadResults(workflow.id)
   downloadContent(blob, `${selectedWorkflow.value?.name}_results`)
 }
 

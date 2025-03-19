@@ -17,6 +17,7 @@ from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
+from backend.services.jobsworkflows import JobsWorkflowService
 from backend.services.secrets import SecretService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
@@ -139,6 +140,22 @@ ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_servi
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+def get_jobsworkflow_service(
+    session: DBSessionDep,
+    tracking_client: TrackingClientDep,
+    job_service: JobServiceDep,
+    dataset_service: DatasetServiceDep,
+    background_tasks: BackgroundTasks,
+) -> JobsWorkflowService:
+    job_repo = JobRepository(session)
+    return JobsWorkflowService(
+        job_repo, job_service, dataset_service, background_tasks, tracking_client=tracking_client
+    )
+
+
+JobsWorkflowServiceDep = Annotated[JobsWorkflowService, Depends(get_jobsworkflow_service)]
 
 
 def get_redactor() -> Redactor:

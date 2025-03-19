@@ -150,7 +150,7 @@ class WorkflowService:
 
         try:
             # Wait for the inference job to 'complete'.
-            status = await self._job_service.wait_for_job_complete(
+            status = await self._job_service.wait_for_job_finished(
                 inference_job.id, max_wait_time_sec=request.job_timeout_sec
             )
 
@@ -274,7 +274,7 @@ class WorkflowService:
 
         try:
             # wait for the evaluation job to complete
-            status = await self._job_service.wait_for_job_complete(
+            status = await self._job_service.wait_for_job_finished(
                 evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
             )
 

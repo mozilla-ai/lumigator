@@ -5,10 +5,11 @@ from lumigator_schemas.jobs import JobLogsResponse
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
+    WorkflowJobsCreateRequest,
     WorkflowResponse,
 )
 
-from backend.api.deps import WorkflowServiceDep
+from backend.api.deps import JobsWorkflowServiceDep, WorkflowServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
@@ -27,6 +28,16 @@ def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_workflow(service: WorkflowServiceDep, request: WorkflowCreateRequest) -> WorkflowResponse:
+    """A workflow is a single execution for an experiment.
+    A workflow is a collection of 1 or more jobs.
+    It must be associated with an experiment id,
+    which means you must already have created an experiment and have that ID in the request.
+    """
+    return WorkflowResponse.model_validate(service.create_workflow(request))
+
+
+@router.post("/new", status_code=status.HTTP_201_CREATED)
+async def create_workflow_new(service: JobsWorkflowServiceDep, request: WorkflowJobsCreateRequest) -> WorkflowResponse:
     """A workflow is a single execution for an experiment.
     A workflow is a collection of 1 or more jobs.
     It must be associated with an experiment id,

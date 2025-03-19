@@ -11,6 +11,7 @@ from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
     TaskType,
+    get_default_system_prompt,
 )
 from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
@@ -127,7 +128,7 @@ class GenerationConfig(BaseModel):
 
 class JobInferenceConfig(BaseJobConfig):
     job_type: Literal[JobType.INFERENCE] = JobType.INFERENCE
-    model: str
+    model: str | None = None  # Later $ref
     provider: str
     task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     accelerator: str | None = "auto"
@@ -138,12 +139,12 @@ class JobInferenceConfig(BaseJobConfig):
     base_url: str | None = None
     output_field: str | None = "predictions"
     generation_config: GenerationConfig = Field(default_factory=GenerationConfig)
-    store_to_dataset: bool = False
+    store_to_dataset_suffix: str | None = None
     system_prompt: str | None = Field(
         title="System Prompt",
         description="System prompt to use for the model inference."
         "If not provided, a task-specific default prompt will be used.",
-        default=None,
+        default_factory=lambda data: get_default_system_prompt(data["task_definition"]),
         examples=[
             "You are an advanced AI trained to summarize documents accurately and concisely. "
             "Your goal is to extract key information while maintaining clarity and coherence."
@@ -170,7 +171,7 @@ class JobCreate(BaseModel):
 
     name: str
     description: str = ""
-    dataset: UUID
+    dataset: UUID | None = None
     max_samples: int = -1  # set to all samples by default
     batch_size: PositiveInt = 1
     job_config: JobSpecificConfig = Field(discriminator="job_type")

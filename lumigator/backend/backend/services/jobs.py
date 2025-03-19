@@ -61,6 +61,8 @@ job_settings_map = {
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
+JOB_STOP_WAIT = 10
+JOB_POLL_SEC = 5
 DEFAULT_POST_INFER_JOB_TIMEOUT_SEC = 10 * 60
 JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
@@ -76,14 +78,14 @@ class JobService:
     storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
 
     NON_TERMINAL_STATUS = [
-        JobStatus.CREATED.value,
-        JobStatus.PENDING.value,
-        JobStatus.RUNNING.value,
+        JobStatus.CREATED,
+        JobStatus.PENDING,
+        JobStatus.RUNNING,
     ]
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
+    TERMINAL_STATUS = [JobStatus.FAILED, JobStatus.SUCCEEDED, JobStatus.STOPPED]
     """list: A list of terminal job statuses."""
 
     def __init__(
@@ -101,6 +103,7 @@ class JobService:
         self._dataset_service = dataset_service
         self._secret_service = secret_service
         self._background_tasks = background_tasks
+        self._tasks = dict()
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
         records = self.job_repo.get_by_job_type(job_type)
@@ -122,8 +125,9 @@ class JobService:
 
         return record
 
-    async def stop_job(self, job_id: UUID) -> bool:
-        """Attempts to stop an existing job in Ray by ID, and waits (for up to 10 seconds) for it to 'complete'.
+    async def stop_job(self, job_id: UUID) -> tuple[bool, JobStatus]:
+        """Attempts to stop an existing job in Ray by ID, and waits
+        (for up to 10 seconds by default) for it to 'complete'.
 
         :param job_id: The ID of the job to stop
         :returns: True if the job was successfully stopped, False otherwise
@@ -132,15 +136,15 @@ class JobService:
             self._stop_job(job_id)
         except JobNotFoundError:
             # If the job is not found, we consider it stopped
-            return True
+            return True, JobStatus.STOPPED
 
         try:
-            status = await self.wait_for_job_complete(job_id, max_wait_time_sec=10)
+            status = await self._wait_for_job_complete(job_id, max_wait_time_sec=JOB_STOP_WAIT)
         except JobUpstreamError as e:
             loguru.logger.error("Failed to stop job {}: {}", job_id, e)
-            return False
+            return False, status
 
-        return status and status.lower() == JobStatus.STOPPED.value
+        return status and status.lower() == JobStatus.STOPPED.value, status
 
     def _stop_job(self, job_id: UUID):
         """Stops an existing job in Ray by ID.
@@ -322,7 +326,7 @@ class JobService:
         except json.JSONDecodeError as e:
             raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
 
-    async def wait_for_job_complete(self, job_id, max_wait_time_sec):
+    async def _wait_for_job_complete(self, job_id, max_wait_time_sec):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
@@ -338,12 +342,12 @@ class JobService:
 
         # Wait for the job to complete
         elapsed_time = 0
-        while job_status not in self.TERMINAL_STATUS:
+        while JobStatus(job_status) not in self.TERMINAL_STATUS:
             if elapsed_time >= max_wait_time_sec:
                 loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
                 break
-            await asyncio.sleep(5)
-            elapsed_time += 5
+            await asyncio.sleep(JOB_POLL_SEC)
+            elapsed_time += JOB_POLL_SEC
             job_status = self.get_upstream_job_status(job_id)
 
         # Once the job is finished, retrieve the log and store it in the internal db
@@ -351,29 +355,80 @@ class JobService:
 
         return job_status
 
-    async def handle_annotation_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
+    # FIXME rename this and the previous function
+    async def wait_for_job_finished(self, job_id, max_wait_time_sec):
+        """Waits for a job to be finished, or until a maximum wait time is reached.
+
+        :param job_id: The ID of the job to wait for.
+        :param max_wait_time: The maximum time to wait for the job to be finished.
+        :return: The status of the job when it completes.
+        :rtype: str
+        :raises JobUpstreamError: If there is an error with the upstream service returning the
+                                  job status
+        """
+        loguru.logger.info(f"Waiting for job {job_id} to finish...")
+        # Get the initial job status
+        job_status = self.get_job(job_id).status
+
+        # Wait for the job to complete
+        elapsed_time = 0
+        while JobStatus(job_status) not in self.TERMINAL_STATUS:
+            if elapsed_time >= max_wait_time_sec:
+                loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
+                # throw exception?
+                break
+            loguru.logger.info(f"Before sleeping for {job_id}")
+            await asyncio.sleep(JOB_POLL_SEC)
+            loguru.logger.info(f"After sleeping for {job_id}")
+            elapsed_time += JOB_POLL_SEC
+            job_status = self.get_job(job_id).status
+
+        return job_status
+
+    async def handle_post_job(
+        self, job: JobResponse, request: JobCreate, max_wait_time_sec: int, store_to_dataset_suffix: str = None
+    ):
         """Long term we maybe want to move logic about how to handle a specific job
         to be separate from the job service. However, for now, we will keep it here.
         This function can be attached to the jobs that run inference so that the results will
         get added to the dataset db. The job routes that store the results
         in the db will add this function as a background task after the job is created.
         """
-        loguru.logger.info("Handling inference job result")
+        loguru.logger.critical(f"Getting job {job.id}, store {store_to_dataset_suffix}, request {request}")
 
-        # Figure out the dataset filename
-        dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
-        dataset_filename = Path(dataset_filename).stem
-        dataset_filename = f"{dataset_filename}-annotated.csv"
-
-        job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
+        job_status = await self._wait_for_job_complete(job.id, max_wait_time_sec)
         if job_status == JobStatus.SUCCEEDED.value:
-            self._add_dataset_to_db(job_id, request, self._dataset_service.s3_filesystem, dataset_filename)
-        else:
-            loguru.logger.warning(f"Job {job_id} failed, results not stored in DB")
+            if store_to_dataset_suffix is not None:
+                loguru.logger.info("Handling inference job result")
+                # The job status will only be monitored from here
 
-    def add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
+                # Figure out the dataset filename
+                dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
+                dataset_filename = Path(dataset_filename).stem
+                dataset_filename = f"{dataset_filename}-{store_to_dataset_suffix}.csv"
+                try:
+                    self._add_dataset_to_db(job.id, request, self._dataset_service.s3_filesystem, dataset_filename)
+                    # Because status is SUCCEEDED
+                    self.update_job_status(job.id, job_status)
+                except Exception:
+                    loguru.logger.error(f"Job {job.id} succeeded, failure storing results in DB")
+                    self.update_job_status(job.id, JobStatus.FAILED)
+            else:
+                # Because status is SUCCEEDED
+                self.update_job_status(job.id, job_status)
+        else:
+            loguru.logger.error(f"Job {job.id} not succeeded, results not stored in DB")
+            # Could be stopped or could be failed
+            self.update_job_status(job.id, job_status)
+
+    def _add_background_task(self, background_tasks: BackgroundTasks, task: callable, *args):
         """Adds a background task to the background tasks queue."""
-        background_tasks.add_task(task, *args)
+        # background_tasks.add_task(task, *args)
+        # First arg in *args will be taken as the entity, assumed to have an id field
+        backtask = asyncio.create_task(task(*args))
+        id = args[0].id
+        self._tasks[id] = backtask
+        backtask.add_done_callback(lambda _: self._tasks.pop(id, None))
 
     def create_job(
         self,
@@ -386,6 +441,7 @@ class JobService:
         :raises JobTypeUnsupportedError: If the job type is not supported.
         :raises SecretNotFoundError: If the secret key identifying the API key required for the job is not found.
         """
+        loguru.logger.critical(f"--> task queue: {self._tasks.keys()}")
         # Typing won't allow other job_type's
         job_type = request.job_config.job_type
         # Prepare the job configuration that will be sent to submit the ray job.
@@ -463,20 +519,15 @@ class JobService:
         loguru.logger.info("Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
-        # NOTE: Only inference jobs can store results in a dataset atm. Among them:
-        # - prediction jobs are run in a workflow before evaluations => they trigger dataset saving
-        #   at workflow level so it is prepended to the eval job
-        # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
-        # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
-        # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        if getattr(request.job_config, "store_to_dataset", False):
-            self.add_background_task(
-                self._background_tasks,
-                self.handle_annotation_job,
-                record.id,
-                request,
-                DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,
-            )
+        # Now each job decides if the output should be stored as a dataset
+        self._add_background_task(
+            self._background_tasks,
+            self.handle_post_job,
+            record,
+            request,
+            DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,
+            getattr(request.job_config, "store_to_dataset_suffix", None),
+        )
 
         loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
@@ -492,16 +543,16 @@ class JobService:
         record = self._get_job_record(job_id)
         loguru.logger.info(f"Obtaining info for job {job_id}: {record.name}")
 
-        if record.status.value in self.TERMINAL_STATUS:
+        if JobStatus(record.status) in self.TERMINAL_STATUS:
             return JobResponse.model_validate(record)
 
         # get job status from ray
-        job_status = self.ray_client.get_job_status(job_id)
-        loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
+        # job_status = self.ray_client.get_job_status(job_id)
+        # loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
 
         # update job status in the DB if it differs from the current status
-        if job_status.lower() != record.status.value.lower():
-            record = self._update_job_record(job_id, status=job_status.lower())
+        # if job_status.lower() != record.status.value.lower():
+        #     record = self._update_job_record(job_id, status=job_status.lower())
 
         return JobResponse.model_validate(record)
 

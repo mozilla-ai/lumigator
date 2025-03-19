@@ -80,8 +80,9 @@ within the Lumigator repo is in the `buid/.env` file that is automatically remov
 
 The following section documents the available settings:
 
-> [!Note]
-> To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```{note}
+To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```
 
 | Name                               | Type    | Description                                                                                                                |
 |------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
@@ -115,17 +116,20 @@ The following section documents the available settings:
 
 Some settings can **only** be configured via the Lumigator API (including the UI and SDK).
 
-Currently, these settings are the sensitive API keys that are used to access external services:
+Currently, these settings are the sensitive API keys that are used to access external services such as:
 
 * DeepSeek
 * [HuggingFace](https://huggingface.co/settings/tokens)
 * [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
-* [OpenAI]([https://platform.openai.com/api-keys](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key))
+* OpenAI
 
-As these keys are secret, we don't allow them to be stored in Lumigator's configuration files.
-Instead, they must be added via the API, and are then encrypted and stored in Lumigator's database.
+As these keys contain secret data, we don't allow them to be stored in Lumigator's configuration files.
+Instead, they **must** be added via the API (UI or SDK), and are then encrypted and stored in Lumigator's database.
 
-You can use the API, SDK or UI to add these keys. However, if you do this manually you **must** follow the following convention for the key names:
+Once a secret (API key) is added, it can be used within experiments to access the relevant hosted API-based LLM service.
+
+You can use the API, SDK or UI to add these keys. However, if you do this manually via the API then we recommend you follow
+the following convention for the key names:
 
 ```console
 {provider}_api_key

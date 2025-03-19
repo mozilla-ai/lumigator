@@ -253,7 +253,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs
+          name: ray-logs-${{ matrix.test }}
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
@@ -261,7 +261,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-docker-log
+          name: ray-docker-log-${{ matrix.test }}
           overwrite: true
           path: /tmp/raydocker.log
 
@@ -269,7 +269,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-log
+          name: backend-log-${{ matrix.test }}
           overwrite: true
           path: /tmp/backendlogs/backend.log
 
@@ -337,7 +337,8 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs
+          name: ray-logs-${{ matrix.test }}
+          overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
   notebook-integration-test:

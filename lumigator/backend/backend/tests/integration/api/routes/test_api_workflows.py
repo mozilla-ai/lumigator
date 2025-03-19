@@ -421,7 +421,6 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
         all_params = {param["name"]: param["value"] for param in job.parameters if "name" in param and "value" in param}
         response = local_client.get(f"/jobs/{all_params['ray_job_id']}")
         response_json = response.json()
-        logger.critical(f"--> {response_json}")
         assert response.status_code == 200
         assert (JobResponse(**response_json)).status.value == JobStatus.STOPPED
 

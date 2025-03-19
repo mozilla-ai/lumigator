@@ -19,7 +19,6 @@ class TestHuggingFaceCausalLMClient(MockBaseSetup):
         config.hf_pipeline = MagicMock(spec=HfPipelineConfig)
         config.hf_pipeline.model_name_or_path = "mock-causal-model"
         config.hf_pipeline.task = TaskType.TEXT_GENERATION
-        config.system_prompt = "You are a helpful assistant."
         config.generation_config = mock_generation_config
 
         return config
@@ -35,7 +34,6 @@ class TestHuggingFaceCausalLMClient(MockBaseSetup):
         # Verify initialization
         mock_pipeline.assert_called_once()
         assert client.pipeline == mock_pipeline_instance
-        assert client.system_prompt == "You are a helpful assistant."
 
     @patch("model_clients.huggingface_clients.pipeline")
     def test_with_summarization_task(self, mock_pipeline, mock_config):

@@ -20,6 +20,7 @@ class GetExperimentResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     created_at: datetime.datetime
+    max_samples: int = -1
     task_definition: TaskDefinition
     dataset: UUID
     updated_at: datetime.datetime | None = None

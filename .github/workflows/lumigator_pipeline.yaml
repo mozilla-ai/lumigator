@@ -145,7 +145,7 @@ jobs:
           chmod -R 777 /tmp/ray_pip_cache
 
       - name: Spinning up containers for the tests
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run:  make start-lumigator-build
 
       - name: Run e2e tests
         run: npm run test:e2e
@@ -231,7 +231,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run:  make start-lumigator-build
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
@@ -312,7 +312,7 @@ jobs:
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build-postgres
+        run:  make start-lumigator-build-postgres
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
@@ -394,7 +394,7 @@ jobs:
 
       - name: Setup containers
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run:  make start-lumigator-build
 
       - name: Run notebook
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

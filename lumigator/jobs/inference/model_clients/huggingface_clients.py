@@ -223,27 +223,7 @@ class HuggingFaceOpusMTTranslationClient(
         self.config = config
         self.api_key = api_key
         self.setup_translation_languages(config.task_definition)
-
-        if self.config.hf_pipeline.model_name_or_path == "Helsinki-NLP/opus-mt":
-            # User has not specified an exact model name, so we will use the default model for the language pair
-            self.config.hf_pipeline.model_name_or_path = (
-                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
-            )
-            try:
-                AutoConfig.from_pretrained(self.config.hf_pipeline.model_name_or_path)
-            except Exception as e:
-                raise ValueError(
-                    f"Model {self.config.hf_pipeline.model_name_or_path} not found on Hugging Face Hub. "
-                    "Please specify the exact Opus MT that you would like to use."
-                ) from e
-        else:
-            # User has specified an exact model name, so we use that
-            logger.info(
-                f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
-                "from the default model for the language pair: "
-                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
-            )
-
+        self.configure_model_name()
         self.model = self.initialize_model(self.config.hf_pipeline)
         self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
         self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
@@ -257,6 +237,31 @@ class HuggingFaceOpusMTTranslationClient(
             return True
         config = AutoConfig.from_pretrained(model_name_or_path)
         return config.model_type == "marian"
+
+    def configure_model_name(self):
+        """Configure the model name based on the source and target language codes
+        if generic name Helsinki-NLP/opus-mt is used.
+        """
+        if self.config.hf_pipeline.model_name_or_path == "Helsinki-NLP/opus-mt":
+            # User has not specified an exact model name, so we will use the default model for the language pair
+            self.config.hf_pipeline.model_name_or_path = (
+                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+            )
+            try:
+                AutoConfig.from_pretrained(self.config.hf_pipeline.model_name_or_path)
+                logger.info(f"Using default model for language pair: {self.config.hf_pipeline.model_name_or_path}")
+            except Exception as e:
+                raise ValueError(
+                    f"Model {self.config.hf_pipeline.model_name_or_path} not found on Hugging Face Hub. "
+                    "Please specify the exact Opus MT that you would like to use."
+                ) from e
+        else:
+            # User has specified an exact model name, so we use that
+            logger.info(
+                f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
+                "from the default model for the language pair: "
+                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+            )
 
     def predict(self, examples: list) -> list[PredictionResult]:
         generations = self.pipeline(

@@ -571,15 +571,17 @@ def model_specs_data() -> list[ModelsResponse]:
     return models
 
 
-@pytest.fixture(autouse=True)
-def configure_loguru(caplog):
+@pytest.fixture
+def caplog_with_loguru(caplog):
+    """Wraps caplog to auto-configure Loguru."""
+
     class PropagateHandler(logging.Handler):
         def emit(self, record):
             logging.getLogger(record.name).handle(record)
 
     logger.remove()
     logger.add(PropagateHandler(), format="{message}")
-    yield
+    yield caplog
     logger.remove()
 
 

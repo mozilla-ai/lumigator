@@ -21,12 +21,12 @@ from model_clients.mixins.generation_config_mixin import GenerationConfigMixin
         ),
     ],
 )
-def test_adjust_config_max_new_tokens(config, max_pos_emb, expected_max_new_tokens, expected_log, caplog):
+def test_adjust_config_max_new_tokens(config, max_pos_emb, expected_max_new_tokens, expected_log, configure_loguru):
     mixin = GenerationConfigMixin()
     updated_config = mixin.adjust_config_max_new_tokens(config, max_pos_emb)
 
     assert updated_config.max_new_tokens == expected_max_new_tokens
-    assert expected_log in caplog.text
+    assert expected_log in configure_loguru.text
 
 
 def test_adjust_config_max_new_tokens_raises_type_error():

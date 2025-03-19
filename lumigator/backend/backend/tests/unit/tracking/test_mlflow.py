@@ -1,10 +1,6 @@
-import json
-from datetime import datetime, timedelta
 from http import HTTPStatus
 
 import pytest
-from mlflow.entities.run import Run
-from mlflow.entities.run_info import RunInfo
 from mlflow.exceptions import MlflowException
 
 from backend.tracking.mlflow import MLflowTrackingClient
@@ -54,14 +50,16 @@ from backend.tracking.mlflow import MLflowTrackingClient
         ),
     ],
 )
-def test_mlflow_log_key_changes(caplog, overwritten, unmerged, skipped, expected_logs, fake_s3fs, fake_s3_client):
+def test_mlflow_log_key_changes(
+    caplog_with_loguru, overwritten, unmerged, skipped, expected_logs, fake_s3fs, fake_s3_client
+):
     tracking_client = MLflowTrackingClient("uri", fake_s3fs, fake_s3_client)
 
-    with caplog.at_level("DEBUG"):  # Capture all log levels
+    with caplog_with_loguru.at_level("DEBUG"):  # Capture all log levels
         tracking_client._log_key_changes("wf1", "job1", overwritten, unmerged, skipped)
 
     # Normalize logs by stripping extra spaces
-    log_messages = [(record.levelname, record.message.strip()) for record in caplog.records]
+    log_messages = [(record.levelname, record.message.strip()) for record in caplog_with_loguru.records]
 
     assert log_messages == expected_logs
 
@@ -79,7 +77,7 @@ def test_mlflow_log_key_changes(caplog, overwritten, unmerged, skipped, expected
     ],
 )
 def test_mlflow_log_key_changes_warning_level(
-    caplog,
+    caplog_with_loguru,
     overwritten_keys,
     unmerged_keys,
     skipped_keys,
@@ -89,16 +87,21 @@ def test_mlflow_log_key_changes_warning_level(
     fake_s3_client,
 ):
     # Set log level to WARNING (to suppress DEBUG logs)
-    with caplog.at_level("WARNING"):
+    with caplog_with_loguru.at_level("WARNING"):
         # Instantiate the class and call the method
         tracking_client = MLflowTrackingClient("uri", fake_s3fs, fake_s3_client)
         tracking_client._log_key_changes("wf1", "job1", overwritten_keys, unmerged_keys, skipped_keys)
 
     # Check that the WARNING log is emitted as expected
-    assert any(expected_warning_log in record.message and record.levelname == "WARNING" for record in caplog.records)
+    assert any(
+        expected_warning_log in record.message and record.levelname == "WARNING"
+        for record in caplog_with_loguru.records
+    )
 
     # Check that DEBUG logs are not emitted
-    assert not any(expected_debug_log in record.message and record.levelname == "DEBUG" for record in caplog.records)
+    assert not any(
+        expected_debug_log in record.message and record.levelname == "DEBUG" for record in caplog_with_loguru.records
+    )
 
 
 def test_fetch_workflow_run_valid(request_mock, fake_mlflow_tracking_client):

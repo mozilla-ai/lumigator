@@ -13,9 +13,8 @@ from schemas import PredictionResult
 
 
 def is_encoder_decoder(model_name: str) -> bool:
-    """Check if the model is an encoder-decoder model"""
-    model_config = AutoConfig.from_pretrained(model_name)
-    return model_config.is_encoder_decoder
+    """Check if the model is an encoder-decoder model."""
+    return model_name.startswith("Helsinki-NLP/opus-mt") or AutoConfig.from_pretrained(model_name).is_encoder_decoder
 
 
 class HuggingFaceModelClientFactory:
@@ -43,10 +42,13 @@ class HuggingFaceModelClientFactory:
             elif model_name in translation_config["language_code_based"]:
                 logger.info(f"Running inference with HuggingFaceLanguageCodeTranslationClient for {model_name}")
                 return HuggingFaceLanguageCodeTranslationClient(config, api_key)
+            elif HuggingFaceOpusMTTranslationClient.is_model_type_marianmt(model_name):
+                logger.info(f"Running inference with HuggingFaceOpusMTTranslationClient for {model_name}")
+                return HuggingFaceOpusMTTranslationClient(config, api_key)
             else:
                 logger.error(
                     f"Translation task with HF seq2seq models: {model_name} is not supported. "
-                    f"Check translation_models.yaml for supported models."
+                    f"Only models in translation_models.yaml and OpusMT models are currently supported."
                 )
 
         # Default to CausalLM for the general text-generation task
@@ -198,6 +200,67 @@ class HuggingFaceLanguageCodeTranslationClient(
             truncation=True,
             src_lang=self.source_language_iso_code,
             tgt_lang=self.target_language_iso_code,
+        )
+
+        prediction_results = []
+        for generation in generations:
+            prediction_result = PredictionResult(prediction=generation["translation_text"])
+            prediction_results.append(prediction_result)
+
+        return prediction_results
+
+
+class HuggingFaceOpusMTTranslationClient(
+    BaseModelClient,
+    HuggingFaceModelMixin,
+    HuggingFaceSeq2SeqPipelineMixin,
+    GenerationConfigMixin,
+    LanguageCodesSetupMixin,
+):
+    """Client for OpusMT/MarianMT models"""
+
+    def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
+        self.config = config
+        self.api_key = api_key
+        self.setup_translation_languages(config.task_definition)
+
+        if self.config.hf_pipeline.model_name_or_path == "Helsinki-NLP/opus-mt":
+            # User has not specified an exact model name, so we will use the default model for the language pair
+            self.config.hf_pipeline.model_name_or_path = (
+                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+            )
+            try:
+                AutoConfig.from_pretrained(self.config.hf_pipeline.model_name_or_path)
+            except Exception as e:
+                raise ValueError(
+                    f"Model {self.config.hf_pipeline.model_name_or_path} not found on Hugging Face Hub. "
+                    "Please specify the exact Opus MT that you would like to use."
+                ) from e
+        else:
+            # User has specified an exact model name, so we use that
+            logger.info(
+                f"Using model: {self.config.hf_pipeline.model_name_or_path} which is different "
+                "from the default model for the language pair: "
+                f"Helsinki-NLP/opus-mt-{self.source_language_iso_code}-{self.target_language_iso_code}"
+            )
+
+        self.model = self.initialize_model(self.config.hf_pipeline)
+        self.tokenizer = self.initialize_tokenizer(self.config.hf_pipeline)
+        self.pipeline = self.initialize_pipeline(self.config.hf_pipeline, self.model, self.tokenizer, api_key=api_key)
+        self.set_seq2seq_max_length()
+        logger.info(f"Loading config: {config}")
+
+    @staticmethod
+    def is_model_type_marianmt(model_name_or_path: str) -> bool:
+        """Check if the model is a MarianMT model."""
+        if model_name_or_path.startswith("Helsinki-NLP/opus-mt"):
+            return True
+        config = AutoConfig.from_pretrained(model_name_or_path)
+        return config.model_type == "marian"
+
+    def predict(self, examples: list) -> list[PredictionResult]:
+        generations = self.pipeline(
+            examples, max_new_tokens=self.config.generation_config.max_new_tokens, truncation=True
         )
 
         prediction_results = []

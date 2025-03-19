@@ -141,6 +141,12 @@ class TestHuggingFaceLanguageCodeTranslationClient(TranslationClientTestBase):
 
 
 class TestHuggingFaceOpusMTTranslationClient(TranslationClientTestBase):
+    @pytest.fixture
+    def mock_transformers_auto_config(self):
+        """Fixture to mock AutoConfig.from_pretrained."""
+        with patch("transformers.AutoConfig.from_pretrained") as mock:
+            yield mock
+
     def test_initialize(self, setup_translation_mocks, mock_translation_config):
         """Test the initialization of the Opus MT translation client."""
         mock_pipeline = setup_translation_mocks[0]
@@ -159,3 +165,49 @@ class TestHuggingFaceOpusMTTranslationClient(TranslationClientTestBase):
             # Verify pipeline task is correctly set for translation
             pipeline_args = mock_pipeline.call_args[1]
             assert pipeline_args["task"] == TaskType.TRANSLATION
+
+    def test_configure_model_name_default(
+        self, setup_translation_mocks, mock_translation_config, mock_transformers_auto_config
+    ):
+        """Test model name configuration when user sets model without language code Helsinki-NLP/opus-mt"""
+        # Start with the default model name, without language codes
+        mock_translation_config.hf_pipeline.model_name_or_path = "Helsinki-NLP/opus-mt"
+
+        # Initialize client
+        client = HuggingFaceOpusMTTranslationClient(mock_translation_config)
+
+        # Verify model name was configured correctly with source and target language codes
+        assert client.config.hf_pipeline.model_name_or_path == "Helsinki-NLP/opus-mt-en-fr"
+        mock_transformers_auto_config.assert_called_with("Helsinki-NLP/opus-mt-en-fr")
+
+    def test_configure_model_name_custom(
+        self, setup_translation_mocks, mock_translation_config, mock_transformers_auto_config
+    ):
+        """Test model name configuration when user sets model with custom language codes."""
+        # Set a custom model name with language codes
+        mock_translation_config.hf_pipeline.model_name_or_path = "Helsinki-NLP/opus-mt-custom-model"
+
+        # Initialize client
+        client = HuggingFaceOpusMTTranslationClient(mock_translation_config)
+
+        # Verify model name was not changed
+        assert client.config.hf_pipeline.model_name_or_path == "Helsinki-NLP/opus-mt-custom-model"
+
+    def test_predict(self, setup_translation_mocks, mock_translation_config, mock_pipeline_instance):
+        """Test the predict method of the Opus MT translation client."""
+        # Initialize client and call predict
+        client = HuggingFaceOpusMTTranslationClient(mock_translation_config)
+        result = client.predict(["Hello, how are you?", "I am a translation model."])
+
+        # Verify prediction
+        assert len(result) == 2
+        assert all(isinstance(r, PredictionResult) for r in result)
+        assert result[0].prediction == "Bonjour, comment ça va?"
+        assert result[1].prediction == "Je suis un modèle de traduction."
+
+        # Verify pipeline was called with prefixed inputs
+        expected_prefixed_inputs = [
+            ">>fra<< Hello, how are you?",
+            ">>fra<< I am a translation model.",
+        ]
+        mock_pipeline_instance.assert_called_once_with(expected_prefixed_inputs, max_new_tokens=100, truncation=True)

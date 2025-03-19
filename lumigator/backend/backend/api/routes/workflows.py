@@ -49,12 +49,17 @@ def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsR
 
 
 @router.get("/{workflow_id}/result/download")
-def get_job_result_download(
+def get_workflow_result_download(
     service: WorkflowServiceDep,
     workflow_id: str,
 ) -> str:
-    """Return job results file URL for downloading."""
-    return service.get_job_result_download(workflow_id)
+    """Return workflow results file URL for downloading.
+
+    Args:
+        service: Workflow service dependency
+        workflow_id: ID of the workflow whose results will be returned
+    """
+    return service.get_workflow_result_download(workflow_id)
 
 
 # delete a workflow

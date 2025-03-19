@@ -25,7 +25,6 @@ from pydantic_core._pydantic_core import ValidationError
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
-from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.dataset_exceptions import (
     DatasetInvalidError,
     DatasetMissingFieldsError,
@@ -39,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -336,15 +336,17 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_job_result_download(self, workflow_id: str) -> str:
-        try:
-            workflow_details = self.get_workflow(workflow_id)
-            if workflow_details.artifacts_download_url:
-                return workflow_details.artifacts_download_url
-            else:
-                raise WorkflowNotFoundError(workflow_id, "No result download link has been found") from None
-        except Exception as e:
-            raise ServiceError("Unexpected runtime error", e) from e
+    def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id, "No result download link has been found") from None
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

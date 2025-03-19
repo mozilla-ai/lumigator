@@ -9,6 +9,7 @@
         raised
         rounded
         aria-label="Cancel"
+        @click="declineConsent"
       ></PrimeVueButton>
       <div class="content-wrapper">
         <h4 class="header">Data Usage</h4>

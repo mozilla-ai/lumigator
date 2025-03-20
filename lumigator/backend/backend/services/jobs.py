@@ -297,17 +297,34 @@ class JobService:
             raise JobUpstreamError("ray", "error getting Ray job status", e) from e
 
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
-        db_logs = self.job_repo.get(job_id)
-        if not db_logs:
-            raise JobNotFoundError(job_id, "Failed to find the job record holding the logs") from None
-        elif not db_logs.logs:
-            ray_db_logs = self.retrieve_job_logs(job_id)
-            self._update_job_record(job_id, logs=ray_db_logs.logs)
-            return ray_db_logs
-        else:
-            return JobLogsResponse(logs=db_logs.logs)
+        """Retrieves the logs for a job from the upstream service.
 
-    def retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
+        :param job_id: The ID of the job to retrieve logs for.
+        :return: The logs for the job.
+        :raises JobNotFoundError: If the job cannot be found.
+        :raises JobUpstreamError: If there is an error with the upstream service returning the job logs,
+                and there are no logs currently persisted in Lumigator's storage.
+        """
+        job = self.job_repo.get(job_id)
+        if not job:
+            raise JobNotFoundError(job_id) from None
+
+        try:
+            ray_job_logs = self._retrieve_job_logs(job_id)
+        except JobUpstreamError as e:
+            # If we have logs stored, just return them to support 'offline' Ray
+            if job.logs:
+                loguru.logger.error("Unable to retrieve job logs from Ray, returning stored DB logs: {}", e)
+                return JobLogsResponse(logs=job.logs)
+            raise
+
+        # Update the database with the latest logs
+        if job.logs != ray_job_logs.logs:
+            self._update_job_record(job_id, logs=ray_job_logs.logs)
+
+        return ray_job_logs
+
+    def _retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
         resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds
         if resp.status_code == HTTPStatus.NOT_FOUND:
             raise JobUpstreamError("ray", "job_id not found when retrieving logs") from None

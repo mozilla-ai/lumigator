@@ -18,7 +18,8 @@ from backend.services.jobs import JobService
 from backend.services.secrets import SecretService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
-from backend.tracking import TrackingClientManager, tracking_client_manager
+from backend.tracking import TrackingClient, TrackingClientManager
+from backend.tracking.mlflow import MLflowClientManager
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -27,14 +28,6 @@ def get_db_session() -> Generator[Session, None, None]:
 
 
 DBSessionDep = Annotated[Session, Depends(get_db_session)]
-
-
-def get_tracking_client() -> Generator[TrackingClientManager, None, None]:
-    with tracking_client_manager.connect() as client:
-        yield client
-
-
-TrackingClientDep = Annotated[TrackingClientManager, Depends(get_tracking_client)]
 
 
 def get_s3_filesystem() -> S3FileSystem:
@@ -52,6 +45,31 @@ def get_s3_filesystem() -> S3FileSystem:
 
 
 S3FileSystemDep = Annotated[S3FileSystem, Depends(get_s3_filesystem)]
+
+
+def get_tracking_client_manager(s3_file_system: S3FileSystemDep) -> TrackingClientManager:
+    """Dependency to provide a tracking client manager instance."""
+    if settings.TRACKING_BACKEND == settings.TrackingBackendType.MLFLOW:
+        return MLflowClientManager(
+            tracking_uri=settings.TRACKING_BACKEND_URI,
+            s3_file_system=s3_file_system,
+        )
+    else:
+        raise ValueError(f"Unsupported tracking backend: {settings.TRACKING_BACKEND}")
+
+
+TrackingClientManagerDep = Annotated[TrackingClientManager, Depends(get_tracking_client_manager)]
+
+
+def get_tracking_client(
+    tracking_client_manager: TrackingClientManagerDep,
+) -> Generator[TrackingClient, None, None]:
+    """Dependency to provide a tracking client instance from the manager."""
+    with tracking_client_manager.connect() as client:
+        yield client
+
+
+TrackingClientDep = Annotated[TrackingClient, Depends(get_tracking_client)]
 
 
 def get_dataset_service(session: DBSessionDep, s3_filesystem: S3FileSystemDep) -> DatasetService:

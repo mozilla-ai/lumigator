@@ -288,12 +288,9 @@ def test_create_exp_workflow_check_results(
     request = WorkflowCreateRequest(
         name="Workflow_1",
         description="Test workflow for inf and eval",
-        task_definition=task_definition,
         model=model,
         provider="hf",
-        dataset=str(dataset_id),
         experiment_id=str(experiment_id),
-        max_samples=1,
     )
     workflow_1_response = lumi_client_int.workflows.create_workflow(request)
     assert workflow_1_response is not None
@@ -315,12 +312,9 @@ def test_create_exp_workflow_check_results(
     request = WorkflowCreateRequest(
         name="Workflow_2",
         description="Test workflow for inf and eval",
-        task_definition=task_definition,
         model=model,
         provider="hf",
-        dataset=str(dataset_id),
         experiment_id=str(experiment_id),
-        max_samples=1,
     )
     workflow_2_response = lumi_client_int.workflows.create_workflow(request)
     assert workflow_2_response is not None

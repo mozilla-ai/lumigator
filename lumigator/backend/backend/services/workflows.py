@@ -14,6 +14,7 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobStatus,
 )
+from lumigator_schemas.tasks import TextGenerationTaskDefinition
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -110,6 +111,8 @@ class WorkflowService:
         """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
+        experiment = self._tracking_client.get_experiment(request.experiment_id)
+
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
@@ -117,7 +120,7 @@ class WorkflowService:
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            task_definition=request.task_definition,
+            task_definition=experiment.task_definition,
             system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
@@ -126,8 +129,8 @@ class WorkflowService:
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
-            dataset=request.dataset,
-            max_samples=request.max_samples,
+            dataset=experiment.dataset,
+            max_samples=experiment.max_samples,
             batch_size=request.batch_size,
             job_config=job_infer_config,
         )
@@ -166,7 +169,7 @@ class WorkflowService:
 
         try:
             # Figure out the dataset filename
-            request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+            request_dataset = self._dataset_service.get_dataset(dataset_id=experiment.dataset)
             dataset_filename = request_dataset.filename
             dataset_filename = Path(dataset_filename).stem
             dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
@@ -251,7 +254,7 @@ class WorkflowService:
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
-            max_samples=request.max_samples,
+            max_samples=experiment.max_samples,
             job_config=job_config,
         )
 
@@ -360,6 +363,19 @@ class WorkflowService:
             ) from None
 
         loguru.logger.info(f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'")
+
+        if experiment.task_definition == TextGenerationTaskDefinition() and not request.system_prompt:
+            raise WorkflowValidationError("Default system_prompt not available for text-generation") from None
+
+        if request.system_prompt:
+            loguru.logger.info(f"Using system prompt: {request.system_prompt}")
+        else:
+            default_system_prompt = settings.get_default_system_prompt(experiment.task_definition)
+            loguru.logger.warning(
+                f"System prompt not provided. Using default system prompt: '{default_system_prompt}'. "
+                "This may not be optimal for your task."
+            )
+            request.system_prompt = default_system_prompt
 
         workflow = self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,

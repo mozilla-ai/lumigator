@@ -23,7 +23,7 @@ def create_dataloader(dataset: Dataset, config: InferenceJobConfig):
         use_chat_format_dataset = True
 
     if use_chat_format_dataset:
-        torch_dataset = ChatFormatDataset(dataset, config.system_prompt)
+        torch_dataset = ChatFormatDataset(dataset, config)
         return DataLoader(
             torch_dataset, batch_size=batch_size, shuffle=False, collate_fn=lambda batch: {"examples": batch}
         )
@@ -33,14 +33,14 @@ def create_dataloader(dataset: Dataset, config: InferenceJobConfig):
 
 
 class ChatFormatDataset(TorchDataset):
-    def __init__(self, dataset: Dataset, system_prompt: str):
+    def __init__(self, dataset: Dataset, config: InferenceJobConfig):
         """Convert Hugging Face dataset to PyTorch Dataset with chat format.
 
         Args:
             dataset (datasets.Dataset): Input Hugging Face dataset
         """
         self.examples = dataset["examples"]
-        self.system_prompt = system_prompt
+        self.system_prompt = config.system_prompt
 
     def __len__(self):
         """Return the total number of examples."""

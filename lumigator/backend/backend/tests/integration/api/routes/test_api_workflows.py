@@ -249,10 +249,8 @@ def create_experiment(local_client: TestClient, dataset_id: UUID, task_definitio
 
 def run_workflow(
     local_client: TestClient,
-    dataset_id,
     experiment_id,
     workflow_name,
-    task_definition: dict,
     model: str,
     job_timeout_sec: PositiveInt | None = None,
 ):
@@ -260,12 +258,9 @@ def run_workflow(
     workflow_payload = {
         "name": workflow_name,
         "description": "Test workflow for inf and eval",
-        "task_definition": task_definition,
         "model": model,
         "provider": "hf",
-        "dataset": str(dataset_id),
         "experiment_id": experiment_id,
-        "max_samples": 1,
         "job_timeout_sec": 1000,
     }
     # The timeout cannot be 0
@@ -375,11 +370,11 @@ def test_full_experiment_launch(
     dataset = upload_dataset(local_client, dataset)
     check_dataset_count_after_upload(local_client, initial_count)
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow_1 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_1", task_definition, model)
+    workflow_1 = run_workflow(local_client, experiment_id, "Workflow_1", model)
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
-    workflow_2 = run_workflow(local_client, dataset.id, experiment_id, "Workflow_2", task_definition, model)
+    workflow_2 = run_workflow(local_client, experiment_id, "Workflow_2", model)
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
     check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
@@ -408,10 +403,8 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
     workflow_1 = run_workflow(
         local_client,
-        dataset.id,
         experiment_id,
         "Workflow_1",
-        task_definition=task_definition,
         model=TEST_SEQ2SEQ_MODEL,
         job_timeout_sec=1,
     )
@@ -421,7 +414,6 @@ def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependenc
         all_params = {param["name"]: param["value"] for param in job.parameters if "name" in param and "value" in param}
         response = local_client.get(f"/jobs/{all_params['ray_job_id']}")
         response_json = response.json()
-        logger.critical(f"--> {response_json}")
         assert response.status_code == 200
         assert (JobResponse(**response_json)).status.value == JobStatus.STOPPED
 

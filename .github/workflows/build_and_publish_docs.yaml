@@ -29,7 +29,7 @@ jobs:
         run: uv python install
 
       - name: Start Lumigator Docker Compose stack
-        run: ENABLE_FIRST_TIME_CACHE=false make start-lumigator-build
+        run: make start-lumigator-build
 
       - name: Check the OpenAPI spec
         run: make check-openapi-docs

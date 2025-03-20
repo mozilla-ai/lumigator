@@ -593,11 +593,4 @@ class MLflowClientManager:
             s3_file_system=self._s3_file_system,
             s3_client=self._s3_client,
         )
-        try:
-            yield tracking_client
-        except MlflowException as e:
-            print(f"MLflowException occurred: {e}")
-            raise
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            raise
+        yield tracking_client

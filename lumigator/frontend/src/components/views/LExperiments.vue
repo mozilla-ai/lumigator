@@ -86,7 +86,7 @@ import {
   type TableDataForWorkflowResults,
 } from '@/helpers/getExperimentResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -105,7 +105,7 @@ const workflowLogs: Ref<string[]> = ref([])
 const isPolling = ref(false)
 let experimentInterval: number | undefined = undefined
 
-const router = useRouter()
+// const router = useRouter()
 const showDrawer = ref(false)
 const experimentsDrawer = ref()
 const showLogs = ref()

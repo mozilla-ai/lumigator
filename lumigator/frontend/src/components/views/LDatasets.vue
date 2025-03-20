@@ -189,7 +189,7 @@ const uploadDatasetMutation = useMutation({
 
 const deleteDatasetMutation = useMutation({
   mutationFn: datasetsService.deleteDataset,
-  onMutate: (datasetID: string) => {
+  onMutate: () => {
     toast.add({
       severity: 'info',
       summary: 'Deleting dataset...',
@@ -223,7 +223,7 @@ const deleteDatasetMutation = useMutation({
 
 const downloadDatasetMutation = useMutation({
   mutationFn: (dataset: Dataset) => datasetsService.downloadDataset(dataset.id),
-  onMutate: (dataset: Dataset) => {
+  onMutate: () => {
     toast.add({
       severity: 'info',
       summary: 'Downloading dataset...',
@@ -248,9 +248,6 @@ const downloadDatasetMutation = useMutation({
     }
   },
 })
-
-const isUploading = uploadDatasetMutation.isPending.value
-const isDeleting = deleteDatasetMutation.isPending.value
 
 onMounted(async () => {
   await reloadDatasetTable()
@@ -470,7 +467,6 @@ const onGenerateGT = () => {
 @use '@/styles/mixins';
 
 .l-datasets {
-
   .is-running::after {
     content: '';
     display: inline-block;

@@ -7,7 +7,6 @@ from http import HTTPStatus
 from urllib.parse import urljoin
 from uuid import UUID
 
-import boto3
 import loguru
 import requests
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -18,6 +17,7 @@ from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
+from mypy_boto3_s3 import S3Client
 from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
@@ -30,8 +30,10 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._client = MlflowClient(tracking_uri=tracking_uri)
+        self._s3_file_system = s3_file_system
+        self._s3_client = s3_client
 
     def create_experiment(
         self,
@@ -268,8 +270,7 @@ class MLflowTrackingClient(TrackingClient):
         # combine them into a single json file, put that back into s3, and then generate
         # a presigned URL for that file
         # check if the compiled results already exist
-        s3 = S3FileSystem()
-        if not s3.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
+        if not self._s3_file_system.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
             compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
             for job in workflow_details.jobs:
                 # look for all parameter keys that end in "_s3_path" and download the file
@@ -277,7 +278,7 @@ class MLflowTrackingClient(TrackingClient):
                     if param["name"].endswith("_s3_path"):
                         # download the file
                         # get the file from the S3 bucket
-                        with s3.open(f"{param['value']}") as f:
+                        with self._s3_file_system.open(f"{param['value']}") as f:
                             job_results = JobResultObject.model_validate(json.loads(f.read()))
                         # if any keys are the same, log a warning and then overwrite the key
                         for job_result_item in job_results:
@@ -289,11 +290,10 @@ class MLflowTrackingClient(TrackingClient):
                                     loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
                                 # merge the results into the compiled results
                                 compiled_results[job_result_item[0]][key] = job_result_item[1][key]
-            with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
+            with self._s3_file_system.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
                 f.write(json.dumps(compiled_results))
             # Generate presigned download URL for the object
-        s3_client = boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
-        download_url = s3_client.generate_presigned_url(
+        download_url = self._s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,
@@ -424,18 +424,17 @@ class MLflowTrackingClient(TrackingClient):
 class MLflowClientManager:
     """Connection manager for MLflow client."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
         self._tracking_uri = tracking_uri
+        self._s3_file_system = s3_file_system
+        self._s3_client = s3_client
 
     @contextlib.contextmanager
     def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
-        tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
-        try:
-            yield tracking_client
-        except MlflowException as e:
-            print(f"MLflowException occurred: {e}")
-            raise
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            raise
+        tracking_client = MLflowTrackingClient(
+            tracking_uri=self._tracking_uri,
+            s3_file_system=self._s3_file_system,
+            s3_client=self._s3_client,
+        )
+        yield tracking_client

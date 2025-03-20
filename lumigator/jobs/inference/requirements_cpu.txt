@@ -1,13 +1,13 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-accelerate==1.1.1
-datasets==2.20.0
-langcodes==3.5.0
-litellm==1.60.4
-loguru==0.7.2
-pandas>=2.1.2
-pydantic>=2.10.0
-python-box==7.2.0
-s3fs
-sentencepiece==0.2.0
-torch==2.5.1
-transformers==4.46.3
+accelerate>=1.5.2
+datasets>=3.4.1
+langcodes>=3.5.0
+litellm>=1.60.4
+loguru>=0.7.2
+pandas>=2.2.3
+pydantic>=2.10.6
+python-box>=7.3.2
+s3fs>=2024.12.0
+sentencepiece>=0.2.0
+torch>=2.6.0
+transformers>=4.49.0

@@ -7,6 +7,7 @@ import time
 from http import HTTPMethod
 from uuid import UUID
 
+from loguru import logger
 from lumigator_schemas.datasets import DatasetResponse
 from lumigator_schemas.extras import ListingResponse
 from lumigator_schemas.jobs import (
@@ -187,6 +188,10 @@ class Jobs:
         """
         JobCreateStrict.model_validate(JobCreate.model_dump(request))
         if request.job_config.job_type == JobType.ANNOTATION:
+            logger.warning(
+                "Creating an annotation job. "
+                "Note that ground truth generation is currently limited to summarization tasks."
+            )
             JobAnnotateConfigStrict.model_validate(JobAnnotateConfig.model_dump(request.job_config))
         elif request.job_config.job_type == JobType.EVALUATION:
             JobEvalConfigStrict.model_validate(JobEvalConfig.model_dump(request.job_config))

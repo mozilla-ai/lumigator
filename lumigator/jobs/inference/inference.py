@@ -2,14 +2,18 @@
 
 import argparse
 import json
-from collections.abc import Iterable
+import os
 from pathlib import Path
 
 import s3fs
+from dataset import create_dataloader
 from datasets import load_from_disk
 from inference_config import InferenceJobConfig
 from loguru import logger
-from model_clients import BaseModelClient, HuggingFaceModelClient, LiteLLMModelClient
+from model_clients.base_client import BaseModelClient
+from model_clients.external_api_clients import LiteLLMModelClient
+from model_clients.huggingface_clients import HuggingFaceModelClientFactory
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import timer
 
@@ -17,11 +21,12 @@ from schemas import AverageInferenceMetrics, InferenceJobOutput, JobOutput, Pred
 
 
 @timer
-def predict(dataset_iterable: Iterable, model_client: BaseModelClient) -> list[PredictionResult]:
+def predict(dataloader: DataLoader, model_client: BaseModelClient) -> list[PredictionResult]:
     predictions = []
 
-    for sample_txt in dataset_iterable:
-        predictions.append(model_client.predict(sample_txt))
+    for batch in dataloader:
+        examples = batch["examples"]
+        predictions.extend(model_client.predict(examples))
 
     return predictions
 
@@ -65,7 +70,7 @@ def save_outputs(config: InferenceJobConfig, results: JobOutput) -> Path:
         logger.error(e)
 
 
-def run_inference(config: InferenceJobConfig) -> Path:
+def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Path:
     # initialize output dictionary
     output = {}
 
@@ -80,18 +85,20 @@ def run_inference(config: InferenceJobConfig) -> Path:
             max_samples = len(dataset)
         dataset = dataset.select(range(max_samples))
 
+    # Create a torch DataLoader to manage the data in batches
+    torch_dataloader = create_dataloader(dataset, config)
+
     # Enable / disable tqdm
-    input_samples = dataset["examples"]
-    dataset_iterable = tqdm(input_samples) if config.job.enable_tqdm else input_samples
+    dataloader_iterable = tqdm(torch_dataloader, unit="batch") if config.job.enable_tqdm else torch_dataloader
 
     # Choose which model client to use
     if config.inference_server is not None:
         # a model *inference service* is passed
         output_model_name = config.inference_server.model
-        model_client = LiteLLMModelClient(config)
+        model_client = LiteLLMModelClient(config, api_key)
     elif config.hf_pipeline:
         logger.info(f"Using HuggingFace client with model {config.hf_pipeline.model_name_or_path}.")
-        model_client = HuggingFaceModelClient(config)
+        model_client = HuggingFaceModelClientFactory.create(config, api_key)
         output_model_name = config.hf_pipeline.model_name_or_path
     else:
         raise NotImplementedError("Inference pipeline not supported.")
@@ -102,12 +109,10 @@ def run_inference(config: InferenceJobConfig) -> Path:
 
     # We are trusting the user: if the dataset already had a column with the output_field
     # they selected, we overwrite it with the values from our inference.
-
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
-    prediction_results, inference_time = predict(dataset_iterable, model_client)
-    prediction_results: list[PredictionResult] = prediction_results
+    prediction_results, inference_time = predict(dataloader_iterable, model_client)
     output[config.job.output_field] = [p.prediction for p in prediction_results]
     output["reasoning"] = [p.reasoning for p in prediction_results]
     output["inference_metrics"] = [p.metrics for p in prediction_results]
@@ -154,5 +159,7 @@ if __name__ == "__main__":
         logger.error(err_str)
     else:
         config = InferenceJobConfig.model_validate_json(args.config)
-        result_dataset_path = run_inference(config)
+        # Attempt to retrieve the API key from the environment for use with the clients.
+        api_key = os.environ.get("api_key")
+        result_dataset_path = run_inference(config, api_key)
         logger.info(f"Inference results stored at {result_dataset_path}")

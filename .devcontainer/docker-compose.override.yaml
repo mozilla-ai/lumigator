@@ -19,15 +19,24 @@ services:
           action: sync
           ignore:
             - .venv/
+            - .pytest_cache/
+            - .ruff_cache/
+            - backend/tests/
         - path: lumigator/jobs/
           target: /mzai/lumigator/jobs
           action: sync
           ignore:
             - .venv/
+            - jobs/inference/.venv/
+            - jobs/evaluation/.venv/
+            - .pytest_cache/
+            - .ruff_cache/
         - path: lumigator/schemas/
           target: /mzai/lumigator/schemas
           action: sync
           ignore:
             - .venv/
+            - .pytest_cache/
+            - .ruff_cache/
         - path: lumigator/backend/pyproject.toml
           action: rebuild

@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from inference.schemas import (
@@ -16,8 +17,6 @@ OAI_API_URL: str = "https://api.openai.com/v1"
 MISTRAL_API_URL: str = "https://api.mistral.ai/v1"
 DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1"
 
-DEFAULT_SUMMARIZER_PROMPT: str = "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."  # noqa: E501
-
 
 class JobDefinitionInference(JobDefinition):
     def generate_config(self, request: JobCreate, record_id: UUID, dataset_path: str, storage_path: str):
@@ -26,10 +25,12 @@ class JobDefinitionInference(JobDefinition):
             dataset=DatasetConfig(path=dataset_path),
             job=JobConfig(
                 max_samples=request.max_samples,
+                batch_size=request.batch_size,
                 storage_path=storage_path,
                 # TODO Should be unnecessary, check
                 output_field=request.job_config.output_field or "predictions",
             ),
+            task_definition=request.job_config.task_definition,
             system_prompt=request.job_config.system_prompt,
         )
         if request.job_config.provider == "hf":
@@ -61,7 +62,10 @@ class JobDefinitionInference(JobDefinition):
 # Inference job details
 # FIXME tweak paths in the backend
 INFERENCE_WORK_DIR = "../jobs/inference"
-INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
+if float(os.environ.get("RAY_WORKER_GPUS", 0)) > 0:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements.txt"
+else:
+    INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
 INFERENCE_COMMAND: str = "python inference.py"
 
 JOB_DEFINITION: JobDefinition = JobDefinitionInference(

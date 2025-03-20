@@ -47,10 +47,10 @@
       @l-drawer-closed="resetDrawerContent()"
     >
       <l-experiment-results
-        v-if="showExpResults && selectedExperimentResults.length"
+        v-if="showExpResults && selectedExperimentResults && selectedExperimentResults.length"
         :results="selectedExperimentResults"
       />
-      <WorkflowResults
+      <l-experiment-results
         v-if="selectedWorkflowResults && showJobResults"
         :results="selectedWorkflowResults"
       />
@@ -74,25 +74,29 @@ import LExperimentsDrawer from '@/components/experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
 import LExperimentsEmpty from '@/components/experiments/LExperimentsEmpty.vue'
-import type { EvaluationJobResults, Experiment, ExperimentResults } from '@/types/Experiment'
+import type { Experiment } from '@/types/Experiment'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import { workflowsService } from '@/sdk/workflowsService'
 import { experimentsService } from '@/sdk/experimentsService'
 import { downloadContent } from '@/helpers/downloadContent'
-import { getExperimentResults } from '@/helpers/getExperimentResults'
-import { transformJobResults } from '@/helpers/transformJobResults'
+import {
+  getExperimentResults,
+  transformWorkflowResults,
+  type TableDataForExperimentResults,
+  type TableDataForWorkflowResults,
+} from '@/helpers/getExperimentResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
-import WorkflowResults from '../experiments/WorkflowResults.vue'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
 const { selectedDataset } = storeToRefs(datasetStore)
+const { models } = storeToRefs(modelStore)
 const { experiments } = storeToRefs(experimentStore)
 
-const selectedWorkflowResults: Ref<EvaluationJobResults[] | undefined> = ref()
-const selectedExperimentResults: Ref<ExperimentResults[]> = ref([])
+const selectedWorkflowResults: Ref<TableDataForWorkflowResults[]> = ref([])
+const selectedExperimentResults: Ref<TableDataForExperimentResults[]> = ref([])
 
 const selectedExperiment = ref<Experiment | undefined>()
 const selectedWorkflow = ref<Workflow | undefined>()
@@ -137,7 +141,7 @@ const onSelectWorkflow = async (workflow: Workflow) => {
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {
-  selectedExperimentResults.value = await getExperimentResults(experiment)
+  selectedExperimentResults.value = await getExperimentResults(experiment, models.value)
   selectedExperiment.value = experiment
   showExpResults.value = true
   showDrawer.value = true
@@ -147,7 +151,7 @@ const onShowWorkflowResults = async (workflow: Workflow) => {
   const results = await workflowsService.fetchWorkflowResults(workflow)
   if (results) {
     selectedWorkflow.value = workflow
-    selectedWorkflowResults.value = transformJobResults(results)
+    selectedWorkflowResults.value = transformWorkflowResults(results)
   }
   showDrawer.value = true
   showJobResults.value = true
@@ -176,7 +180,6 @@ const toast = useToast()
 const confirm = useConfirm()
 
 async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
-
   const experimentOrWorkflow = selectedItem || selectedWorkflow.value || selectedExperiment.value
   if (!experimentOrWorkflow) {
     return

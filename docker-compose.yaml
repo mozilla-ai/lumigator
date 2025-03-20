@@ -83,12 +83,12 @@ services:
       - -c
       - |
           set -eaux
-          mkdir -p /home/ray/.cache/ && mkdir -p /tmp/ray_pip_cache
-          sudo chmod -R 777 /home/ray/.cache/ && sudo chmod -R 777 /tmp/ray_pip_cache/ || true
-          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           # If the file was mounted in a volume instead of
-          # a shared dir, permissions need to be setup
+          # a shared dir, ownership needs to be changed
           # ... || true allows this to fail (-e is set)
+          sudo chown ray:users /home/ray/.cache/huggingface/hub || true
+          sudo chown ray:users /tmp/ray_pip_cache || true
+          RAY_JOB_ALLOW_DRIVER_ON_WORKER_NODES=1 RAY_REDIS_ADDRESS=redis:6379 ray start --head --dashboard-port=${RAY_DASHBOARD_PORT} --port=6379 --dashboard-host=0.0.0.0 --ray-client-server-port 10001
           mkdir -p /tmp/ray/session_latest/runtime_resources/pip
           rmdir /tmp/ray/session_latest/runtime_resources/pip/ && ln -s /tmp/ray_pip_cache /tmp/ray/session_latest/runtime_resources/pip
           sleep infinity
@@ -106,11 +106,6 @@ services:
       - LOCAL_FSSPEC_S3_ENDPOINT_URL=${AWS_ENDPOINT_URL} # Should match AWS_ENDPOINT_URL
       - LOCAL_FSSPEC_S3_KEY=${AWS_ACCESS_KEY_ID} # Should match AWS_SECRET_ACCESS_KEY
       - LOCAL_FSSPEC_S3_SECRET=${AWS_SECRET_ACCESS_KEY} # Should match AWS_SECRET_ACCESS_KEY
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
-      - DEEPSEEK_API_KEY
-      - XAI_API_KEY
-      - HF_TOKEN
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION
@@ -125,6 +120,11 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+    healthcheck:
+      test: ["CMD", "ray", "status"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   backend:
     labels:
@@ -142,7 +142,7 @@ services:
         condition: "service_started"
         required: false
       ray:
-        condition: "service_started"
+        condition: "service_healthy"
         required: false
       mlflow:
         condition: "service_started"
@@ -154,7 +154,7 @@ services:
       - DEPLOYMENT_TYPE
       # The local file needs to be available through a mount,
       # if persistence is needed
-      - SQLALCHEMY_DATABASE_URL=${DATABASE_URL}
+      - SQLALCHEMY_DATABASE_URL
       - S3_ENDPOINT_URL=${AWS_ENDPOINT_URL}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
@@ -169,8 +169,6 @@ services:
       - INFERENCE_WORK_DIR
       - RAY_DASHBOARD_PORT
       - RAY_HEAD_NODE_HOST
-      - MISTRAL_API_KEY
-      - OPENAI_API_KEY
       - RAY_WORKER_GPUS
       - RAY_WORKER_GPUS_FRACTION
       - LUMIGATOR_API_CORS_ALLOWED_ORIGINS
@@ -230,6 +228,8 @@ services:
       - "localhost:host-gateway"
     profiles:
       - local
+    volumes:
+      - mlflow-database-data:/db-data
 
 volumes:
     minio-data:
@@ -242,5 +242,8 @@ volumes:
       labels:
         ai.mozilla.product_name: lumigator
     ray-pip-cache:
+      labels:
+        ai.mozilla.product_name: lumigator
+    mlflow-database-data:
       labels:
         ai.mozilla.product_name: lumigator

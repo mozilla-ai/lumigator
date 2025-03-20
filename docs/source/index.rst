@@ -7,14 +7,11 @@ Mozilla.ai Lumigator
 Lumigator is an open-source platform built by Mozilla.ai for guiding users through the process of
 selecting the right language model for their needs.
 
-Currently, we support evaluating summarization
-tasks using sequence-to-sequence models, like BART, and causal architectures, like
-Mistral.
+Currently, we support model evaluation for summarization and translation. Users can do evaluations with both sequence-to-sequence models, like BART, and causal architectures, like Mistral.
 
 These models can either be loaded and run by Lumigator
 (if they are models stored in `Huggingface Hub <https://huggingface.co/models>`_), or the models can be reached through any OpenAI
-compatible interface (for example, llamafile or OpenAI GPT models). Lumigator will soon
-support additional tasks such as translation  (See `#628 <https://github.com/mozilla-ai/lumigator/issues/628>`_).
+compatible interface (for example, llamafile or OpenAI GPT models).
 
 .. note::
 
@@ -70,6 +67,7 @@ For more information about the backend routes, see the rendered API specs in the
    operations-guide/alembic
    operations-guide/local-development
    operations-guide/configure-S3
+   operations-guide/vllm-rayserve-deployment
 
 .. toctree::
    :maxdepth: 2
@@ -78,6 +76,7 @@ For more information about the backend routes, see the rendered API specs in the
    user-guides/inference
    user-guides/local-models
    user-guides/prepare-evaluation-dataset
+   user-guides/translation-eval
 
 .. toctree::
    :maxdepth: 2
@@ -97,3 +96,8 @@ For more information about the backend routes, see the rendered API specs in the
    :caption: API Specifications
 
    api/index
+
+.. toctree::
+   :caption: Legal
+
+   legal/privacy-notice

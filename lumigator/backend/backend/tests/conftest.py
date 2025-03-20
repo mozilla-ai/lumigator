@@ -3,6 +3,7 @@ import io
 import os
 import time
 import uuid
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import UUID
@@ -10,6 +11,7 @@ from uuid import UUID
 import boto3
 import evaluator
 import fsspec
+import loguru
 import pytest
 import requests_mock
 import yaml
@@ -25,6 +27,7 @@ from lumigator_schemas.jobs import (
     JobStatus,
     JobType,
 )
+from lumigator_schemas.models import ModelsResponse
 from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
@@ -41,8 +44,10 @@ from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.jobs import JobService
 from backend.services.secrets import SecretService
+from backend.services.workflows import WorkflowService
 from backend.settings import BackendSettings, settings
 from backend.tests.fakes.fake_s3 import FakeS3Client
+from backend.tracking.mlflow import MLflowTrackingClient
 
 TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
@@ -261,28 +266,43 @@ def fake_s3fs() -> S3FileSystem:
 @pytest.fixture(scope="function")
 def fake_s3_client(fake_s3fs) -> S3Client:
     """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://example.com:9000"
     return FakeS3Client(MemoryFileSystem.store)
 
 
 @pytest.fixture(scope="function")
 def boto_s3_client() -> S3Client:
     """Provide a real S3 client."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "lumigator"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "lumigator"  # pragma: allowlist secret
-    os.environ["AWS_ENDPOINT_URL"] = "http://localhost:9000"
-    return boto3.client("s3")
+    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", "lumigator")
+    aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
+    aws_default_region = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
+
+    return boto3.client(
+        "s3",
+        endpoint_url=aws_endpoint_url,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=aws_default_region,
+    )
 
 
 @pytest.fixture(scope="function")
-def boto_s3fs() -> S3FileSystem:
-    """Provide a real s3fs client."""
-    s3fs = S3FileSystem()
-    mock_s3fs = MagicMock(wraps=s3fs)
+def boto_s3fs() -> Generator[S3FileSystem, None, None]:
+    """Provide a real s3fs client wrapped with a mock to intercept calls."""
+    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", "lumigator")
+    aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
+    aws_default_region = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
+
+    s3fs = S3FileSystem(
+        key=aws_access_key_id,
+        secret=aws_secret_access_key,
+        endpoint_url=aws_endpoint_url,
+        client_kwargs={"region_name": aws_default_region},
+    )
+
+    mock_s3fs = MagicMock(wraps=s3fs, storage_options={"endpoint_url": aws_endpoint_url})
+
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")
 
@@ -414,12 +434,27 @@ def secret_repository(db_session):
 
 @pytest.fixture(scope="session")
 def secret_key() -> str:
-    return "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o="  # pragma: allowlist secret
+    return os.environ.get(
+        "LUMIGATOR_SECRET_KEY",
+        "7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o=",  # pragma: allowlist secret
+    )
 
 
 @pytest.fixture(scope="function")
 def secret_service(db_session, secret_repository, secret_key):
     return SecretService(secret_key=secret_key, secret_repo=secret_repository)
+
+
+@pytest.fixture(scope="function")
+def tracking_client():
+    return MagicMock()
+
+
+@pytest.fixture(scope="function")
+def workflow_service(job_repository, job_service, dataset_service, background_tasks, secret_service, tracking_client):
+    return WorkflowService(
+        job_repository, job_service, dataset_service, background_tasks, secret_service, tracking_client
+    )
 
 
 @pytest.fixture(scope="function")
@@ -517,9 +552,12 @@ def job_definition_fixture():
     )
 
 
-@pytest.fixture
-def model_specs_data():
+@pytest.fixture(scope="function")
+def model_specs_data() -> list[ModelsResponse]:
     """Fixture that loads and returns the YAML data."""
     with Path(MODELS_PATH).open() as file:
         model_specs = yaml.safe_load(file)
-    return model_specs
+
+    models = [ModelsResponse.model_validate(item) for item in model_specs]
+
+    return models

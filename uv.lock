@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.13' and sys_platform != 'win32'",
@@ -471,6 +472,7 @@ requires-dist = [
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=3.0.1" },
     { name = "sphinxcontrib-openapi", marker = "extra == 'docs'", specifier = ">=0.8.4" },
 ]
+provides-extras = ["docs"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1343,7 +1345,7 @@ wheels = [
 
 [[package]]
 name = "lumigator-schemas"
-version = "0.1.1a0"
+version = "0.1.3a0"
 source = { editable = "lumigator/schemas" }
 dependencies = [
     { name = "pydantic" },
@@ -1352,9 +1354,12 @@ dependencies = [
 [package.metadata]
 requires-dist = [{ name = "pydantic", specifier = ">=2.10.0" }]
 
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.3.3" }]
+
 [[package]]
 name = "lumigator-sdk"
-version = "0.1.1a0"
+version = "0.1.3a0"
 source = { directory = "lumigator/sdk" }
 dependencies = [
     { name = "loguru" },

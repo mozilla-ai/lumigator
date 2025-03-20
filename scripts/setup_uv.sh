@@ -5,7 +5,9 @@ set -e  # Exit on error
 # #######################
 # Source common functions
 # #######################
-COMMON_FILE="$(dirname "$0")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_FILE="$SCRIPT_DIR/common.sh"
+
 if [ -f "$COMMON_FILE" ]; then
     source "$COMMON_FILE"
 else
@@ -45,6 +47,24 @@ if ! command -v uv >/dev/null 2>&1; then
     echo_red "uv not found. Installing..."
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$LOCAL_BIN" sh
     UV_INSTALL_REQUIRED=1
+else
+    # UV is installed, but we should compare the versions to make sure we're using the latest.
+    current_version=$(uv --version | awk '{print $2}')
+    echo_green "uv (version $current_version) found at: $(command -v uv)"
+
+    # Check if jq is installed first...
+    if command -v jq &> /dev/null; then
+        latest_version=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | jq -r .tag_name)
+
+        if [ "$current_version" != "$latest_version" ]; then
+            echo_yellow "uv update: $current_version => $latest_version ..."
+            uv self update
+        else
+            echo_green "uv is up-to-date (version $current_version)"
+        fi
+    else
+        echo_yellow "Warning: unable to perform uv version check (jq not found)"
+    fi
 fi
 
 # ######################################

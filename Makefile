@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-schemas test-schemas-unit test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -35,8 +35,6 @@ COMPUTE_TYPE := -cpu
 RAY_WORKER_GPUS ?= 0
 RAY_WORKER_GPUS_FRACTION ?= 0.0
 GPU_COMPOSE :=
-MODEL_CACHE_COMPOSE :=
-SQLALCHEMY_DATABASE_URL ?= sqlite:////tmp/local.db
 
 DEBUGPY_ARGS :=
 ifneq ($(shell echo $(DEBUGPY) | grep -i '^true$$'),)
@@ -56,14 +54,6 @@ ifeq ($(shell test $(RAY_WORKER_GPUS) -ge 1; echo $$?) , 0)
 	COMPUTE_TYPE := -gpu
 	GPU_COMPOSE := -f docker-compose.gpu.override.yaml
 endif
-
-ENABLE_FIRST_TIME_CACHE ?= $(shell grep -E '^ENABLE_FIRST_TIME_CACHE=' .default.conf | cut -d'=' -f2)
-
-
-ifneq ($(ENABLE_FIRST_TIME_CACHE), false)
-	MODEL_CACHE_COMPOSE := -f docker-compose.model-cache.override.yaml
-endif
-
 
 # lumigator runs on a set of containers (backend, ray, minio, etc).
 # The following allows one to start all of them before calling a target
@@ -129,10 +119,10 @@ endef
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: config-generate-env
 	uv run pre-commit install
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
 
 local-down: config-generate-env
-	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
+	docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f ${DEV_DOCKER_COMPOSE_FILE} down
 	$(call remove_config_dir)
 
 local-logs:
@@ -140,26 +130,26 @@ local-logs:
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in) - postgres version
 start-lumigator-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d
 
 # Launches lumigator in 'user-local' mode (All services running locally, using latest docker container, no code mounted in)
 start-lumigator: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: config-generate-env
 	ARCH=${ARCH} docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"$(GPU_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d
 
 stop-lumigator: config-generate-env
-	ARCH=${ARCH} RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE) $(MODEL_CACHE_COMPOSE) -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) down
+	ARCH=${ARCH} RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) down
 	$(call remove_config_dir)
 
 clean-docker-buildcache:
@@ -183,12 +173,28 @@ setup:
 # This target is used to update the OpenAPI docs for use in the sphinx docs.
 # Lumigator must be running on localhost
 update-openapi-docs:
-	./scripts/update_openapi_docs.sh
+	@cd lumigator/backend/; \
+	S3_BUCKET=lumigator-storage \
+	RAY_HEAD_NODE_HOST=localhost \
+	RAY_DASHBOARD_PORT=8265 \
+	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
+	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
+	uv run python -m backend.openapi_spec ../../docs/source/specs/openapi.json
+	@echo "OpenAPI docs updated: Please run 'uv run pre-commit run --all-files' locally."
 
 # This target is used to check the OpenAPI docs in the running lumigator vs the existing sphinx docs.
 # Lumigator must be running on localhost
 check-openapi-docs:
 	./scripts/check_openapi_docs.sh
+
+# schema tests
+test-schemas-unit:
+	@cd lumigator/schemas; \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="lumigator_schemas/tests/unit/*/test_*.py unit/test_*.py"
+
+test-schemas: test-schemas-unit
 
 # SDK tests
 # We have both unit and integration tests for the SDK.
@@ -196,11 +202,17 @@ check-openapi-docs:
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
 test-sdk-unit:
-	cd lumigator/sdk/tests; \
+	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -o python_files="unit/*/test_*.py unit/test_*.py"
 
 test-sdk-integration:
+	@cd lumigator/sdk/tests; \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+
+test-sdk-integration-gpu:
 	cd lumigator/sdk/tests; \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
 test-sdk-integration-containers:
@@ -218,34 +230,31 @@ test-sdk: test-sdk-unit test-sdk-integration-containers
 # Integration tests require all containers to be up, so as a safety measure
 # `test-sdk-integration-containers` is usually called and this will either
 # start them if they are not present or use the currently running ones.
+test-backend-unit: export SQLALCHEMY_DATABASE_URL = sqlite:////tmp/local.db
 test-backend-unit:
-	cd lumigator/backend/; \
-	S3_BUCKET=lumigator-storage \
-	RAY_HEAD_NODE_HOST=localhost \
-	RAY_DASHBOARD_PORT=8265 \
-	SQLALCHEMY_DATABASE_URL=sqlite:////tmp/local.db \
-	MLFLOW_TRACKING_URI=http://localhost:8001 \
+	@source ./scripts/set_env_vars.sh && \
+	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py" # pragma: allowlist secret
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/unit/*/test_*.py backend/tests/unit/test_*.py"
 
-test-backend-integration:
-	cd lumigator/backend/; \
-	docker container list --all; \
-	S3_BUCKET=lumigator-storage \
-	RAY_HEAD_NODE_HOST=localhost \
-	RAY_DASHBOARD_PORT=8265 \
-	MLFLOW_TRACKING_URI=http://localhost:8001 \
-	SQLALCHEMY_DATABASE_URL=$(SQLALCHEMY_DATABASE_URL) \
-	RAY_WORKER_GPUS="0.0" \
-	RAY_WORKER_GPUS_FRACTION="0.0" \
-	INFERENCE_PIP_REQS=../jobs/inference/requirements_cpu.txt \
-	INFERENCE_WORK_DIR=../jobs/inference \
-	EVALUATOR_PIP_REQS=../jobs/evaluator/requirements.txt \
-	EVALUATOR_WORK_DIR=../jobs/evaluator \
+test-backend-integration: export SQLALCHEMY_DATABASE_URL = sqlite:////tmp/local.db
+test-backend-integration: config-generate-env
+	@if [ "$(USE_ENV_FILE)" = "true" ]; then \
+		source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env"; \
+	else \
+		source ./scripts/set_env_vars.sh ""; \
+	fi && \
+	cd lumigator/backend/ && \
 	PYTHONPATH=../jobs:$$PYTHONPATH \
-	LUMIGATOR_SECRET_KEY=7yz2E+qwV3TCg4xHTlvXcYIO3PdifFkd1urv2F/u/5o= \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py" # pragma: allowlist secret
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
+
+test-backend-integration-gpu:
+	@source ./scripts/set_env_vars.sh && \
+	cd lumigator/backend/ && \
+	RAY_WORKER_GPUS="1.0" \
+	RAY_WORKER_GPUS_FRACTION="1.0" \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/integration/*/test_*.py"
 
 test-backend-integration-containers:
 ifeq ($(CONTAINERS_RUNNING),)
@@ -262,18 +271,20 @@ test-backend: test-backend-unit test-backend-integration-containers
 # be running, but they will set up a different, volatile python environment
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
-	cd lumigator/jobs/evaluator; \
+	@cd lumigator/jobs/evaluator; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
-	cd lumigator/jobs/inference; \
+	@cd lumigator/jobs/inference; \
 	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
 
 # test everything
-test-all: test-sdk test-backend test-jobs-unit
+test-all: test-schemas test-sdk test-backend test-jobs-unit
+test-all-unit: test-schemas-unit test-sdk-unit test-backend-unit test-jobs-unit
+test-all-integration: test-sdk-integration test-backend-integration
 
 # config-clean: removes any generated config files from the build directory (including the directory itself).
 config-clean:

@@ -25,28 +25,10 @@ those values that are required to make the sub charts work together (like the ad
 By default, the backend chart also deploys a PostgreSQL instance, and a Ray cluster into Kubernetes,
 with a minimal configuration ready to work with Lumigator.
 
-```{note}
-If the Mistral and/or the OpenAI API is used, there are two ways to provide
-it to Lumigator:
-- Using an existing Secret, whose name will be specified in property `existingMistralAPISecret`
-  and/or `existingOpenaiAPISecret`
-- Using an explicit Mistral and/or OpenAI key in property `mistralAPIKey` and/or `openaiAPIKey`,
-  which will be added in a new Secret.
-```
+If you want Lumigator to be able to access hosted API-based LLM services such as OpenAI, DeepSeek or Mistral, you'll need
+to configure those secrets in Lumigator once it's running.
 
-In order to be able to use Mistral and/or the OpenAI API, you also have to add this configuration to your values file:
-
-```console
-ray-cluster:
-  head:
-    containerEnv:
-      - name: MISTRAL_API_KEY
-            valueFrom: "name-of-the-mistral-secret"
-              secretKeyRef: "name-of-the-mistral-secret-key" # pragma: allowlist secret
-      - name: OPENAI_API_KEY
-            valueFrom: "name-of-the-openai-secret"
-              secretKeyRef: "name-of-the-openai-secret-key" # pragma: allowlist secret
-```
+Refer to [API settings configuration](../operations-guide/configuration.md#api-settings) for more details.
 
 ## Example values configurations
 

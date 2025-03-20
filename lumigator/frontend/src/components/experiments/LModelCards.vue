@@ -40,10 +40,7 @@
       <!-- TODO: this is copy pasted and can be extracted into a component -->
       <div v-if="modelsRequiringAPIKey.length" class="l-models-list__options-container-section">
         <p>VIA APIs</p>
-        <span
-          >Ensure your API keys are added to your environment variables (.env) file before using
-          API-based models.
-        </span>
+        <span>Ensure your API keys are added via 'Settings' before using API-based models. </span>
       </div>
       <div
         v-for="model in modelsRequiringAPIKey"
@@ -79,23 +76,23 @@
 
 <script lang="ts" setup>
 import { ref, computed, type Ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useModelStore } from '@/stores/modelsStore'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import type { Model } from '@/types/Model'
 
 const modelStore = useModelStore()
-const { models } = storeToRefs(modelStore)
 const selectedModels: Ref<Model[]> = ref([])
 
-defineProps({
-  modelLink: String,
-})
+const props = defineProps<{
+  useCase: 'summarization' | 'translation'
+}>()
 
 defineExpose({
   selectedModels,
 })
+
+const models = computed(() => modelStore.filterModelsByUseCase(props.useCase))
 
 const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
   return models.value.filter((model: Model) => {

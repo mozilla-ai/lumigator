@@ -44,6 +44,25 @@ types of jobs: Inference and Evaluation.
    :members:
    :undoc-members:
 
+Settings
+--------
+
+The `Settings` class provides a simple interface to configure Lumigator settings
+that don't form part of deployment config.
+
+.. automodule:: lumigator_sdk.settings
+   :members:
+   :undoc-members:
+
+Secrets
+^^^^^^^
+
+The `Secrets` class provides a simple interface to configure Lumigator secrets.
+
+.. automodule:: lumigator_sdk.settings_secrets
+   :members:
+   :undoc-members:
+
 Base Client
 -----------
 

@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 from typing import Annotated
 
@@ -38,15 +39,35 @@ def get_tracking_client() -> Generator[TrackingClientManager, None, None]:
 TrackingClientDep = Annotated[TrackingClientManager, Depends(get_tracking_client)]
 
 
-def get_s3_client() -> Generator[S3Client, None, None]:
-    return boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
+def get_s3_client() -> S3Client:
+    aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    aws_default_region = os.environ.get("AWS_DEFAULT_REGION")
+
+    return boto3.client(
+        "s3",
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        aws_access_key_id=aws_access_key,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=aws_default_region,
+    )
 
 
 S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
 
 
-def get_s3_filesystem() -> Generator[S3FileSystem, None, None]:
-    return S3FileSystem()
+def get_s3_filesystem() -> S3FileSystem:
+    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    aws_default_region = os.environ.get("AWS_DEFAULT_REGION")
+
+    # Pass the session to S3FileSystem
+    return S3FileSystem(
+        key=aws_access_key_id,
+        secret=aws_secret_access_key,
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        client_kwargs={"region_name": aws_default_region},
+    )
 
 
 S3FileSystemDep = Annotated[S3FileSystem, Depends(get_s3_filesystem)]
@@ -95,21 +116,31 @@ def get_experiment_service(
     return ExperimentService(job_repo, job_service, dataset_service, tracking_client)
 
 
-ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
-
-
 def get_workflow_service(
     session: DBSessionDep,
     tracking_client: TrackingClientDep,
     job_service: JobServiceDep,
     dataset_service: DatasetServiceDep,
+    secret_service: SecretServiceDep,
     background_tasks: BackgroundTasks,
 ) -> WorkflowService:
     job_repo = JobRepository(session)
-    return WorkflowService(job_repo, job_service, dataset_service, background_tasks, tracking_client=tracking_client)
+    return WorkflowService(
+        job_repo=job_repo,
+        job_service=job_service,
+        dataset_service=dataset_service,
+        secret_checker=secret_service,
+        background_tasks=background_tasks,
+        tracking_client=tracking_client,
+    )
+
+
+ExperimentServiceDep = Annotated[ExperimentService, Depends(get_experiment_service)]
 
 
 WorkflowServiceDep = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
 def get_redactor() -> Redactor:
     return Redactor(settings.sensitive_patterns)
 

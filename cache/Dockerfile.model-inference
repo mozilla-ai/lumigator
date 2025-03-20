@@ -1,8 +1,0 @@
-FROM python:3.11-slim
-
-RUN pip install --no-cache-dir transformers huggingface_hub loguru
-
-COPY cache/download_models.py /tmp/download_models.py
-
-# Exit immediately (this container’s only job is to populate the cache)
-CMD ["python", "/tmp/download_models.py"]

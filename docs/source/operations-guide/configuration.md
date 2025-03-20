@@ -76,10 +76,13 @@ within the Lumigator repo is in the `buid/.env` file that is automatically remov
 
 ## Settings
 
+### Configuration file settings
+
 The following section documents the available settings:
 
-> [!Note]
-> To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```{note}
+To use an external Ray cluster, you **must** use external S3-compatible storage and ensure the Ray workers can access data from your Lumigator server.
+```
 
 | Name                               | Type    | Description                                                                                                                |
 |------------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
@@ -95,9 +98,6 @@ The following section documents the available settings:
 | NVIDIA_VISIBLE_DEVICES             | string  | Defaults to 'all', specifies which NVIDIA devices should be visible to Ray                                                 |
 | GPU_COUNT                          | int     | The number of GPUs                                                                                                         |
 | HF_HOME                            | string  | The home directory for HuggingFace (used for caching)                                                                      |
-| HF_TOKEN                           | string  | Sensitive API token used to access gated models in HuggingFace                                                             |
-| MISTRAL_API_KEY                    | string  | Sensitive API key used to access Mistral                                                                                   |
-| OPENAI_API_KEY                     | string  | Sensitive API key used to access OpenAI                                                                                    |
 | MLFLOW_TRACKING_URI                | string  | The URL used to access MLFlow                                                                                              |
 | MLFLOW_DATABASE_URL                | string  | DB connection string/URL used for MLFlow                                                                                   |
 | MLFLOW_S3_ROOT_PATH                | string  | S3 URL styl path to the root where MFLow should store artefacts  e.g. S3://mflow                                           |
@@ -105,9 +105,34 @@ The following section documents the available settings:
 | MINIO_ROOT_PASSWORD                | string  | Sensitive secret for accessing MinIO as root                                                                               |
 | MINIO_API_CORS_ALLOW_ORIGIN        | string  | Allowed origins for CORS requests to MinIO (defaults to "*")                                                               |
 | DEPLOYMENT_TYPE                    | string  | Allows the user to define which environment Lumigator is deployed in, local', 'development', 'staging' or 'production'     |
-| DATABASE_URL                       | string  | DB connection string/URL used for Lumigator's local DB storage                                                             |
+| SQLALCHEMY_DATABASE_URL            | string  | DB connection string/URL used for Lumigator's local DB storage                                                             |
 | LUMIGATOR_API_CORS_ALLOWED_ORIGINS | string  | A comma separated string array of URLs which should be allowed origins for CORS requests, "*" can be supplied to allow all |
 | INFERENCE_PIP_REQS                 | string  | Path within the container to the requirements.txt file for inference jobs                                                  |
 | INFERENCE_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an inference job                      |
-| EVALUATOR_PIP_REQS            | string  | Path within the container to the requirements.txt file for evaluation jobs                                          |
-| EVALUATOR_WORK_DIR            | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job              |
+| EVALUATOR_PIP_REQS                 | string  | Path within the container to the requirements.txt file for evaluation jobs                                                 |
+| EVALUATOR_WORK_DIR                 | string  | Path within the container to the working directory that is zipped and sent to Ray as an evaluation job                     |
+
+### API settings
+
+Some settings can **only** be configured via the Lumigator API (including the UI and SDK).
+
+Currently, these settings are the sensitive API keys that are used to access external services such as:
+
+* DeepSeek
+* [HuggingFace](https://huggingface.co/settings/tokens)
+* [Mistral](https://docs.mistral.ai/getting-started/quickstart/#getting-started-with-mistral-ai-api)
+* OpenAI
+
+As these keys contain secret data, we don't allow them to be stored in Lumigator's configuration files.
+Instead, they **must** be added via the API (UI or SDK), and are then encrypted and stored in Lumigator's database.
+
+Once a secret (API key) is added, it can be used within experiments to access the relevant hosted API-based LLM service.
+
+You can use the API, SDK or UI to add these keys. However, if you do this manually via the API then we recommend you follow
+the following convention for the key names:
+
+```console
+{provider}_api_key
+```
+
+Where `{provider}` from the ones listed above, is one of `deepseek`, `hf` (Hugging Face), `mistral` or `openai`.

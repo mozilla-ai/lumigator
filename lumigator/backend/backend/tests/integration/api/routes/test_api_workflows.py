@@ -5,6 +5,7 @@ from uuid import UUID
 import pytest
 import requests
 from fastapi.testclient import TestClient
+from httpx import HTTPStatusError, RequestError
 from inference.schemas import GenerationConfig, InferenceJobConfig, InferenceServerConfig
 from loguru import logger
 from lumigator_schemas.datasets import DatasetFormat, DatasetResponse
@@ -23,7 +24,7 @@ from lumigator_schemas.jobs import (
 from lumigator_schemas.secrets import SecretUploadRequest
 from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
-from pydantic import PositiveInt
+from pydantic import PositiveInt, ValidationError
 
 from backend.main import app
 from backend.tests.conftest import (
@@ -261,7 +262,7 @@ def run_workflow(
         "model": model,
         "provider": "hf",
         "experiment_id": experiment_id,
-        "job_timeout_sec": 1000,
+        "job_timeout_sec": 60 * 3,
     }
     # The timeout cannot be 0
     if job_timeout_sec:
@@ -432,19 +433,49 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
-def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
+def wait_for_workflow_complete(
+    local_client: TestClient,
+    workflow_id: UUID,
+    timeout_seconds: int = 300,
+    initial_poll_interval_seconds: float = 1.0,
+    max_poll_interval_seconds: float = 10.0,
+    backoff_factor: float = 1.5,
+):
+    start_time = time.time()
     workflow_status = WorkflowStatus.CREATED
-    for _ in range(1, 300):
-        time.sleep(1)
-        workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())
-        workflow_status = WorkflowStatus(workflow_details.status)
-        if workflow_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
-            logger.info(f"Workflow status: {workflow_status}")
-            break
-    if workflow_status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
-        raise Exception(f"Stopped, job remains in {workflow_status} status")
+    status_retrieved = False
+    poll_interval = initial_poll_interval_seconds
 
-    return workflow_details
+    logger.info(f"Waiting for workflow {workflow_id} to complete (timeout {timeout_seconds} seconds)...")
+
+    while time.time() - start_time < timeout_seconds:
+        try:
+            response = local_client.get(f"/workflows/{workflow_id}")
+            response.raise_for_status()
+
+            workflow_details = WorkflowDetailsResponse.model_validate(response.json())
+            workflow_status = workflow_details.status
+            status_retrieved = True
+
+            if workflow_status in {WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED}:
+                logger.info(f"Workflow {workflow_id} completed with status: {workflow_status}")
+                return workflow_details
+
+            logger.info(f"Workflow {workflow_id}, current status: {workflow_status}")
+
+        except (RequestError, HTTPStatusError) as e:
+            logger.error(f"Workflow {workflow_id}, request failed (HTTP): {e}")
+        except ValidationError as e:
+            logger.error(f"Workflow {workflow_id}, response parse error: {e}")
+
+        time.sleep(poll_interval)
+        poll_interval = min(poll_interval * backoff_factor, max_poll_interval_seconds)
+
+    raise TimeoutError(
+        f"Workflow {workflow_id} did not complete within {timeout_seconds} seconds.(last status: {workflow_status})"
+        if status_retrieved
+        else "(status never retrieved)"
+    )
 
 
 def _test_launch_job_with_secret(

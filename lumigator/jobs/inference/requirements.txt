@@ -3,7 +3,7 @@ datasets==2.20.0
 langcodes==3.5.0
 litellm==1.60.6
 loguru==0.7.2
-numpy==2.2.3
+numpy==2.2.4
 pandas==2.2.3
 pydantic>=2.10.0
 python-box==7.2.0

@@ -1,6 +1,6 @@
 import asyncio
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 from lumigator_schemas.tasks import (
@@ -24,7 +24,7 @@ def test_workflow_request_requires_system_prompt_for_text_generation(workflow_se
     experiment_mock.name = "Test Experiment"
 
     # Configure tracking client to return our mock experiment
-    workflow_service._tracking_client.get_experiment.return_value = experiment_mock
+    workflow_service._tracking_client.get_experiment = AsyncMock(return_value=experiment_mock)
 
     # Create request without system prompt
     request = WorkflowCreateRequest(

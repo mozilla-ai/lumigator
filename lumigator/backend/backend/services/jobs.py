@@ -310,17 +310,19 @@ class JobService:
             raise JobNotFoundError(job_id) from None
 
         try:
-            job_logs = self._retrieve_job_logs(job_id)
-        except JobUpstreamError:
+            ray_job_logs = self._retrieve_job_logs(job_id)
+        except JobUpstreamError as e:
             # If we have logs stored, just return them to support 'offline' Ray
             if job.logs:
+                loguru.logger.error("Unable to retrieve job logs from Ray, returning stored DB logs: {}", e)
                 return JobLogsResponse(logs=job.logs)
             raise
 
         # Update the database with the latest logs
-        self._update_job_record(job_id, logs=job_logs.logs)
+        if job.logs != ray_job_logs.logs:
+            self._update_job_record(job_id, logs=ray_job_logs.logs)
 
-        return job_logs
+        return ray_job_logs
 
     def _retrieve_job_logs(self, job_id: UUID) -> JobLogsResponse:
         resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{job_id}/logs"), timeout=5)  # 5 seconds

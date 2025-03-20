@@ -17,7 +17,6 @@ app
   .use(createPinia())
   .use(VueQueryPlugin, {
     enableDevtoolsV6Plugin: true,
-    enableDevtoolsV7Plugin: true,
   })
   .use(PrimeVue, {
     theme: {

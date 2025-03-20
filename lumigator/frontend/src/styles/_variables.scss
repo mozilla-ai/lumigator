@@ -57,3 +57,63 @@ $l-button-hover-bg: color.adjust($l-primary-color, $lightness: -10%);
 $l-sliding-panel-size: 370px;
 $l-input-height: 50px;
 $l-bottom-drawer-height: 40vh;
+
+:root {
+  --l-primary-color: #{$l-primary-color};
+  --l-primary-color-text: #{$l-primary-color-text};
+  --white: #{$white};
+  --black: #{$black};
+  --l-grey-100: #{$l-grey-100};
+  --l-grey-150: #{$l-grey-150};
+  --l-grey-200: #{$l-grey-200};
+  --l-grey-300: #{$l-grey-300};
+  --l-grey-400: #{$l-grey-400};
+  --l-grey-600: #{$l-grey-600};
+  --l-menu-bg: #{$l-menu-bg};
+  --l-menu-item-color: #{$l-menu-item-color};
+  --l-logs-bg: #{$l-logs-bg};
+  --l-main-bg: #{$l-main-bg};
+  --l-card-bg: #{$l-card-bg};
+  --l-overlay-color: #{$l-overlay-color};
+  --l-text-color: #{$l-text-color};
+  --l-text-secondary-color: #{$l-text-secondary-color};
+  --l-disabled-input-color: #{$l-disabled-input-color};
+  --l-gridlines-stroke: #{$l-gridlines-stroke};
+
+  /* Typography */
+  --l-font-family: #{$l-font-family};
+  --l-font-size: #{$l-font-size};
+  --l-font-size-xs: #{$l-font-size-xs};
+  --l-font-size-sm: #{$l-font-size-sm};
+  --l-font-size-md: #{$l-font-size-md};
+  --l-menu-font-size: #{$l-menu-font-size};
+  --l-table-font-size: #{$l-table-font-size};
+  --l-font-weight-normal: #{$l-font-weight-normal};
+  --l-font-weight-semibold: #{$l-font-weight-semibold};
+  --l-font-weight-bold: #{$l-font-weight-bold};
+  --l-button-icon-only-width: #{$l-button-icon-only-width};
+
+  /* Spacing and Borders */
+  --l-main-radius: #{$l-main-radius};
+  --l-border-radius: #{$l-border-radius};
+  --l-button-border-radius: #{$l-button-border-radius};
+  --l-input-border-radius: #{$l-input-border-radius};
+  --l-spacing-sm: #{$l-spacing-sm};
+  --l-spacing-1: #{$l-spacing-1};
+  --l-app-width: #{$l-app-width};
+  --l-main-width: #{$l-main-width};
+
+  /* Shadows */
+  --l-box-shadow: #{$l-box-shadow};
+  --border-stroke: #{$border-stroke};
+
+  /* Button Specific */
+  --l-button-bg: #{$l-button-bg};
+  --l-button-text-color: #{$l-button-text-color};
+  --l-button-hover-bg: #{$l-button-hover-bg}; // Using Sass darken() function
+
+  /* Sizes */
+  --l-sliding-panel-size: #{$l-sliding-panel-size};
+  --l-input-height: #{$l-input-height};
+  --l-bottom-drawer-height: #{$l-bottom-drawer-height};
+}

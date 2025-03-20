@@ -1,5 +1,5 @@
 <template>
-  <div class="l-datasets" :class="{ 'is-empty': datasets.length === 0 || !datasets }">
+  <div class="l-datasets" :class="{ 'is-empty': !datasets || datasets.length === 0 }">
     <div v-if="datasets.length > 0" class="l-datasets__header-container">
       <l-page-header
         title="Datasets"
@@ -24,7 +24,7 @@
           <TabPanel value="0">
             <LDatasetTable
               v-if="datasets.length"
-              :isLoading="isDatasetsLoading || isDatasetsFetching || isUploading || isDeleting"
+              :isLoading="isDatasetsLoading || isDatasetsFetching"
               :table-data="datasets"
               @l-dataset-selected="onDatasetSelected($event)"
               @l-experiment="onExperimentDataset($event)"
@@ -127,8 +127,14 @@ import DatasetViewer from '../common/DatasetViewer.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 const datasetStore = useDatasetStore()
-const { datasets, selectedDataset, inferenceJobs, hasRunningInferenceJob, isDatasetsLoading, isDatasetsFetching } =
-  storeToRefs(datasetStore)
+const {
+  datasets,
+  selectedDataset,
+  inferenceJobs,
+  hasRunningInferenceJob,
+  isDatasetsLoading,
+  isDatasetsFetching,
+} = storeToRefs(datasetStore)
 const selectedJob: Ref<Job | undefined> = ref()
 const { showSlidingPanel } = useSlidePanel()
 const toast = useToast()
@@ -144,44 +150,44 @@ const datasetFileContent = ref()
 const datasetColumns = ref()
 const isDatasetViewerVisible = ref(false)
 
-console.log({isDatasetsFetching, isDatasetsLoading})
+console.log({ isDatasetsFetching, isDatasetsLoading })
 const queryClient = useQueryClient()
 
 const uploadDatasetMutation = useMutation({
-    mutationFn: datasetsService.postDataset,
-    onMutate: () => {
-      toast.add({
-        severity: 'info',
-        summary: 'Uploading dataset...',
-        messageicon: 'pi pi-upload',
-        group: 'br',
-        life: 3000,
-      } as ToastMessageOptions & { messageicon: string })
-    },
-    onError: (error) => {
-      const errorMessage = getAxiosError(error as Error | AxiosError)
-      toast.add({
-        severity: 'error',
-        summary: `${errorMessage}`,
-        messageicon: 'pi pi-exclamation-triangle',
-        group: 'br',
-      } as ToastMessageOptions & { messageicon: string })
-    },
-    onSuccess: async () => {
-      toast.add({
-        severity: 'success',
-        summary: 'Dataset uploaded',
-        messageicon: 'pi pi-check',
-        life: 3000,
-        group: 'br',
-      } as ToastMessageOptions & { messageicon: string })
-      await queryClient.invalidateQueries({
-        queryKey: ['datasets'],
-      })
-    },
-  })
+  mutationFn: datasetsService.postDataset,
+  onMutate: () => {
+    toast.add({
+      severity: 'info',
+      summary: 'Uploading dataset...',
+      messageicon: 'pi pi-upload',
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onError: (error) => {
+    const errorMessage = getAxiosError(error as Error | AxiosError)
+    toast.add({
+      severity: 'error',
+      summary: `${errorMessage}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onSuccess: async () => {
+    toast.add({
+      severity: 'success',
+      summary: 'Dataset uploaded',
+      messageicon: 'pi pi-check',
+      life: 3000,
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+    await queryClient.invalidateQueries({
+      queryKey: ['datasets'],
+    })
+  },
+})
 
-  const deleteDatasetMutation = useMutation({
+const deleteDatasetMutation = useMutation({
   mutationFn: datasetsService.deleteDataset,
   onMutate: (datasetID: string) => {
     toast.add({
@@ -216,7 +222,7 @@ const uploadDatasetMutation = useMutation({
 })
 
 const downloadDatasetMutation = useMutation({
-  mutationFn: (dataset: Dataset) =>  datasetsService.downloadDataset(dataset.id),
+  mutationFn: (dataset: Dataset) => datasetsService.downloadDataset(dataset.id),
   onMutate: (dataset: Dataset) => {
     toast.add({
       severity: 'info',
@@ -237,14 +243,14 @@ const downloadDatasetMutation = useMutation({
     } as ToastMessageOptions & { messageicon: string })
   },
   onSuccess: async (blob: Blob) => {
-    if(selectedDataset.value) {
-     downloadContent(blob, selectedDataset.value?.filename)
+    if (selectedDataset.value) {
+      downloadContent(blob, selectedDataset.value?.filename)
     }
   },
 })
 
-  const isUploading = uploadDatasetMutation.isPending.value
-  const isDeleting = deleteDatasetMutation.isPending.value
+const isUploading = uploadDatasetMutation.isPending.value
+const isDeleting = deleteDatasetMutation.isPending.value
 
 onMounted(async () => {
   await reloadDatasetTable()
@@ -375,9 +381,7 @@ const uploadDataset = async (datasetFile: File) => {
   formData.append('dataset', datasetFile) // Attach the file
   formData.append('format', 'job') // Specification @localhost:8000/docs
 
-  uploadDatasetMutation.mutate(formData, {
-
-  })
+  uploadDatasetMutation.mutate(formData, {})
   // refetch datasets after create
   await reloadDatasetTable()
 }
@@ -461,31 +465,11 @@ const onGenerateGT = () => {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
 
-.l-datasets .p-tabs {
-  $root: &;
-
-  & .p-tablist {
-    margin-bottom: $l-spacing-1;
-  }
-
-  & .p-tablist-tab-list {
-    background: $l-card-bg !important;
-    border-color: $l-main-bg;
-
-    & .p-tab {
-      padding-left: $l-spacing-1;
-      padding-right: $l-spacing-1;
-      border-color: $l-main-bg;
-
-      &:hover {
-        border-color: $l-main-bg;
-      }
-    }
-  }
+.l-datasets {
 
   .is-running::after {
     content: '';

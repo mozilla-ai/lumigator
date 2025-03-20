@@ -13,8 +13,8 @@
     <div v-if="experiments.length > 0" class="l-experiments__table-container">
       <l-experiment-table
         :table-data="experiments"
-        @l-experiment-selected="onSelectExperiment($event)"
-        @l-workflow-selected="onSelectWorkflow($event)"
+        @l-experiment-selected="handleExperimentClicked($event)"
+        @l-workflow-selected="handleWorkflowClicked($event)"
         @delete-option-clicked="handleDeleteButtonClicked"
         @view-experiment-results-clicked="onShowExperimentResults($event)"
         @view-workflow-results-clicked="onShowWorkflowResults($event)"
@@ -86,6 +86,7 @@ import {
   type TableDataForWorkflowResults,
 } from '@/helpers/getExperimentResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
+import { useRouter } from 'vue-router'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -104,6 +105,7 @@ const workflowLogs: Ref<string[]> = ref([])
 const isPolling = ref(false)
 let experimentInterval: number | undefined = undefined
 
+const router = useRouter()
 const showDrawer = ref(false)
 const experimentsDrawer = ref()
 const showLogs = ref()
@@ -128,13 +130,14 @@ const onCreateExperiment = () => {
   selectedExperiment.value = undefined
 }
 
-const onSelectExperiment = (experiment: Experiment) => {
+const handleExperimentClicked = (experiment: Experiment) => {
   selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
   selectedWorkflow.value = undefined
   showSlidingPanel.value = true
+  // router.push(`/experiments/${experiment.id}`)
 }
 
-const onSelectWorkflow = async (workflow: Workflow) => {
+const handleWorkflowClicked = async (workflow: Workflow) => {
   selectedWorkflow.value = await workflowsService.fetchWorkflowDetails(workflow.id)
   selectedExperiment.value = undefined
   showSlidingPanel.value = true
@@ -216,7 +219,7 @@ async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
           await workflowsService.deleteWorkflow(experimentOrWorkflow.id)
         }
         toast.add({
-          severity: 'secondary',
+          severity: 'success',
           summary: `MODEL RUN DELETED`,
           messageicon: 'pi pi-trash',
           detail: `${experimentOrWorkflow.name}`,
@@ -226,7 +229,7 @@ async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
       } else {
         await experimentsService.deleteExperiment(experimentOrWorkflow.id)
         toast.add({
-          severity: 'secondary',
+          severity: 'success',
           summary: `EXPERIMENT DELETED`,
           messageicon: 'pi pi-trash',
           detail: `${experimentOrWorkflow.name}`,

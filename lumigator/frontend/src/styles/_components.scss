@@ -231,6 +231,34 @@
     padding: 0;
     background: transparent;
   }
+
+  .p-tablist {
+    margin-bottom: variables.$l-spacing-1;
+  }
+
+  .p-tablist-tab-list {
+    background: variables.$l-card-bg !important;
+    border-color: variables.$l-main-bg;
+
+    .p-tab {
+      padding-left: variables.$l-spacing-1;
+      padding-right: variables.$l-spacing-1;
+      border-color: variables.$l-main-bg;
+
+      &:hover {
+        border-color: variables.$l-main-bg;
+      }
+    }
+  }
+}
+
+// breadcrumbs
+.p-breadcrumb {
+  --l-breadcrumb-background: none;
+  li {
+    background-color: unset;
+  }
+
 }
 
 .p-disabled {

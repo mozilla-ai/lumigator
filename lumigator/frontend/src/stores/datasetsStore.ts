@@ -21,17 +21,26 @@ export const useDatasetStore = defineStore('datasets', () => {
 
   const isPollingForJobStatus = ref(false)
   let jobStatusInterval: number | undefined = undefined
-  const isDatasetsQueryEnabled = ref(false)
+  // const isDatasetsQueryEnabled = ref(false)
 
-  const {data: datasets, isError, error, refetch: refetchDatasets, isFetching: isDatasetsFetching, isLoading: isDatasetsLoading} = useQuery({
+  const {
+    data: datasets,
+    isError,
+    error,
+    refetch: refetchDatasets,
+    isFetching: isDatasetsFetching,
+    isLoading: isDatasetsLoading,
+  } = useQuery({
     queryKey: ['datasets'],
     queryFn: datasetsService.fetchDatasets,
-    enabled: isDatasetsQueryEnabled,
+    // enabled: isDatasetsQueryEnabled,
+    initialData: [],
+    placeholderData: [],
   })
 
   const toast = useToast()
 
-  if(isError.value && error.value) {
+  if (isError.value && error.value) {
     console.error('Failed to fetch datasets:', error.value)
     toast.add({
       severity: 'error',
@@ -41,7 +50,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   }
 
   async function fetchDatasets() {
-    isDatasetsQueryEnabled.value = true
+    // isDatasetsQueryEnabled.value = true
     refetchDatasets()
   }
 

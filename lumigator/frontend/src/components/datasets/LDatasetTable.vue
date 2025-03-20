@@ -154,7 +154,6 @@ const togglePopover = (event: MouseEvent, dataset: Dataset) => {
 watch(showSlidingPanel, (newValue) => {
   focusedItem.value = newValue ? focusedItem.value : undefined
 })
-
 </script>
 
 <style scoped lang="scss">
@@ -177,7 +176,7 @@ watch(showSlidingPanel, (newValue) => {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/styles/variables' as *;
 
 //  In order to have effect the following

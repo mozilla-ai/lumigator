@@ -217,7 +217,7 @@ const showResults = () => {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/styles/variables' as *;
 .l-experiment-details {
   $root: &;

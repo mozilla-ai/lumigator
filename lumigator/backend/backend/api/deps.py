@@ -2,10 +2,8 @@ import os
 from collections.abc import Generator
 from typing import Annotated
 
-import boto3
 from fastapi import BackgroundTasks, Depends
 from lumigator_schemas.redactor import Redactor
-from mypy_boto3_s3.client import S3Client
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.orm import Session
@@ -39,23 +37,6 @@ def get_tracking_client() -> Generator[TrackingClientManager, None, None]:
 TrackingClientDep = Annotated[TrackingClientManager, Depends(get_tracking_client)]
 
 
-def get_s3_client() -> S3Client:
-    aws_access_key = os.environ.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    aws_default_region = os.environ.get("AWS_DEFAULT_REGION")
-
-    return boto3.client(
-        "s3",
-        endpoint_url=settings.S3_ENDPOINT_URL,
-        aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_access_key,
-        region_name=aws_default_region,
-    )
-
-
-S3ClientDep = Annotated[S3Client, Depends(get_s3_client)]
-
-
 def get_s3_filesystem() -> S3FileSystem:
     aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
     aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -73,11 +54,9 @@ def get_s3_filesystem() -> S3FileSystem:
 S3FileSystemDep = Annotated[S3FileSystem, Depends(get_s3_filesystem)]
 
 
-def get_dataset_service(
-    session: DBSessionDep, s3_client: S3ClientDep, s3_filesystem: S3FileSystemDep
-) -> DatasetService:
+def get_dataset_service(session: DBSessionDep, s3_filesystem: S3FileSystemDep) -> DatasetService:
     dataset_repo = DatasetRepository(session)
-    return DatasetService(dataset_repo, s3_client, s3_filesystem)
+    return DatasetService(dataset_repo, s3_filesystem)
 
 
 DatasetServiceDep = Annotated[DatasetService, Depends(get_dataset_service)]

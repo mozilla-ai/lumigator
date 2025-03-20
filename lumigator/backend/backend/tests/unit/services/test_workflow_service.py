@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 from unittest.mock import MagicMock
 from uuid import UUID
@@ -36,7 +37,7 @@ def test_workflow_request_requires_system_prompt_for_text_generation(workflow_se
 
     # Act & Assert
     with unittest.TestCase().assertRaises(WorkflowValidationError) as context:
-        workflow_service.create_workflow(request)
+        asyncio.run(workflow_service.create_workflow(request))
 
     # Verify the error message
     assert str(context.exception) == "Default system_prompt not available for text-generation"

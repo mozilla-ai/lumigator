@@ -120,12 +120,18 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
     output["inference_time"] = inference_time
 
     artifacts = InferenceJobOutput.model_validate(output)
+
+    # Only attempt to metric calculate averages if we have a metric for EVERY prediction result.
     if all(p.metrics is not None for p in prediction_results):
-        avg_prompt_tokens = sum([p.metrics.prompt_tokens for p in prediction_results]) / len(prediction_results)
-        avg_total_tokens = sum([p.metrics.total_tokens for p in prediction_results]) / len(prediction_results)
-        avg_completion_tokens = sum([p.metrics.completion_tokens for p in prediction_results]) / len(prediction_results)
-        avg_reasoning_tokens = sum([p.metrics.reasoning_tokens for p in prediction_results]) / len(prediction_results)
-        avg_answer_tokens = sum([p.metrics.answer_tokens for p in prediction_results]) / len(prediction_results)
+        total_results = len(prediction_results)
+
+        avg_prompt_tokens = sum(p.metrics.prompt_tokens for p in prediction_results) / total_results
+        avg_total_tokens = sum(p.metrics.total_tokens for p in prediction_results) / total_results
+        avg_completion_tokens = sum(p.metrics.completion_tokens for p in prediction_results) / total_results
+        # Provide a default for optional fields so we don't affect the average.
+        avg_reasoning_tokens = sum((p.metrics.reasoning_tokens or 0) for p in prediction_results) / total_results
+        avg_answer_tokens = sum((p.metrics.answer_tokens or 0) for p in prediction_results) / total_results
+
         metrics = AverageInferenceMetrics(
             avg_prompt_tokens=avg_prompt_tokens,
             avg_total_tokens=avg_total_tokens,

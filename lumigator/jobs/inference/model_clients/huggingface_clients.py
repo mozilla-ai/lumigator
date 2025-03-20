@@ -106,7 +106,6 @@ class HuggingFaceCausalLMClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig, api_key: str | None = None):
         self.config = config
         self.api_key = api_key
-        self.system_prompt = config.system_prompt
 
         # CausalLM models supported for summarization and translation tasks through system_prompt
         # HF pipeline task overwritten to 'text-generation' since these causalLMs are not task-specific models

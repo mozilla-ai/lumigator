@@ -70,16 +70,13 @@
 import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import Column from 'primevue/column'
-// import { storeToRefs } from 'pinia'
-// import { useExperimentStore } from '@/stores/experimentsStore'
+
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import { ref, type PropType } from 'vue'
 import type { MenuItem } from 'primevue/menuitem'
 import { Menu } from 'primevue'
-// import type { Job } from '@/types/Job'
-// const experimentStore = useExperimentStore()
-// const { jobs } = storeToRefs(experimentStore)
+
 defineProps({
   tableData: {
     type: Array as PropType<Workflow[]>,
@@ -151,11 +148,9 @@ function handleRowClick(event: DataTableRowClickEvent) {
 @use '@/styles/variables' as *;
 
 .options-trigger {
-  // padding-left: -$l-spacing-1;
 }
 
 .l-job-table {
-  $root: &;
   width: 100%;
   display: flex;
   place-content: center;

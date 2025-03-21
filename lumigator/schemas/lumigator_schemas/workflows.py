@@ -1,5 +1,4 @@
 import datetime
-from uuid import UUID
 
 from pydantic import BaseModel, Field, PositiveInt
 
@@ -8,7 +7,6 @@ from lumigator_schemas.jobs import (
     JobResults,
     LowercaseEnum,
 )
-from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, get_default_system_prompt
 
 
 class WorkflowStatus(LowercaseEnum):
@@ -22,7 +20,6 @@ class WorkflowCreateRequest(BaseModel):
     name: str
     description: str = ""
     experiment_id: str | None = None
-    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     model: str
     provider: str
     secret_key_name: str | None = Field(
@@ -31,11 +28,9 @@ class WorkflowCreateRequest(BaseModel):
         description="An optional secret key name. Identifies an existing secret stored in Lumigator "
         "that should be used to access the provider.",
     )
-    dataset: UUID
-    max_samples: int = -1  # set to all samples by default
     batch_size: PositiveInt = 1
     base_url: str | None = None
-    system_prompt: str | None = Field(default_factory=lambda data: get_default_system_prompt(data["task_definition"]))
+    system_prompt: str = ""
     inference_output_field: str = "predictions"
     config_template: str | None = None
     generation_config: GenerationConfig = Field(default_factory=GenerationConfig)

@@ -299,7 +299,7 @@ class JobService:
             status_response = self.ray_client.get_job_status(str(job_id))
             return str(status_response.value.lower())
         except RuntimeError as e:
-            raise JobUpstreamError("ray", "error getting Ray job status", e) from e
+            raise JobUpstreamError("ray", "error getting Ray job status") from e
 
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
         """Retrieves the logs for a job from the upstream service.
@@ -577,11 +577,12 @@ class JobService:
 
         return JobResultResponse.model_validate(result_record)
 
-    def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
+    async def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
         result_key = self._get_results_s3_key(job_id)
-        download_url = self._dataset_service.s3_client.generate_presigned_url(
+
+        download_url = await self._dataset_service.s3_filesystem.s3.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,

@@ -33,17 +33,18 @@ def test_get_language_from_name():
 
 
 def test_extract_language_info():
-    assert extract_language_info(Language.get("en")) == {"iso_code": "en", "full_name": "English"}
+    assert extract_language_info(Language.get("en")) == {"iso_code": "en", "full_name": "English", "alpha3_code": "eng"}
     assert extract_language_info(None) is None
 
 
 def test_resolve_user_input_language():
     # Language codes
     en_result = resolve_user_input_language("en")
-    assert en_result["type"] == "code" and en_result["iso_code"] == "en"
+    assert en_result["type"] == "code" and en_result["iso_code"] == "en" and en_result["alpha3_code"] == "eng"
+
     # Language names
     fr_result = resolve_user_input_language("French")
-    assert fr_result["type"] == "display_name" and fr_result["iso_code"] == "fr"
+    assert fr_result["type"] == "display_name" and fr_result["iso_code"] == "fr" and fr_result["alpha3_code"] == "fra"
 
     # Invalid input
     with pytest.raises(ValueError, match="Unrecognized language code or name"):

@@ -56,6 +56,17 @@
   tasks:
     - translation:
 
+- display_name: Helsinki-NLP/opus-mt
+  model: Helsinki-NLP/opus-mt
+  provider: hf
+  website_url: https://huggingface.co/docs/transformers/en/model_doc/marian
+  description: Helsinki-NLP Opus-MT models include both multilingual and bilingual translation models with support forover 290 languages. Please check the respective model card for details.
+  info:
+    parameter_count: 67M
+    model_size: 298MB
+  tasks:
+    - translation:
+
 - display_name: bigscience/mt0-base
   model: bigscience/mt0-base
   provider: hf

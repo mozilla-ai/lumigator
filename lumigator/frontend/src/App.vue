@@ -39,9 +39,9 @@
         <ConfirmDialog></ConfirmDialog>
         <Toast position="bottom-right" group="br">
           <template #message="slotProps">
-            <div class="toaster-content" :class="slotProps.message.severity">
+            <div class="toast-content" :class="slotProps.message.severity">
               <span :class="slotProps.message.messageicon"></span>
-              <div class="toaster-content__text">
+              <div class="toast-content__text">
                 <h4>{{ slotProps.message.summary }}</h4>
                 <p v-if="slotProps.message.detail">{{ slotProps.message.detail }}</p>
               </div>
@@ -166,6 +166,7 @@ onMounted(async () => {
 
   .l-main-container {
     flex: 1;
+    overflow: scroll;
     background-color: $l-card-bg;
     transition: margin-right 0.3s ease-in-out;
     border-radius: $l-main-radius;
@@ -197,7 +198,7 @@ onMounted(async () => {
   }
 }
 
-.toaster-content {
+.toast-content {
   width: 100%;
   display: flex;
   gap: 5px;

@@ -1,13 +1,16 @@
 <template>
   <div class="l-experiments" :class="{ 'no-data': experiments.length === 0 }">
-    <l-experiments-empty v-if="experiments.length === 0" @l-add-experiment="onCreateExperiment()" />
+    <l-experiments-empty
+      v-if="experiments.length === 0"
+      @l-add-experiment="handleCreateExperimentClicked()"
+    />
     <div v-if="experiments.length > 0" class="l-experiments__header-container">
       <l-page-header
         title="Experiments"
         :description="headerDescription"
         button-label="Create Experiment"
         :column="experiments.length === 0"
-        @l-header-action="onCreateExperiment()"
+        @l-header-action="handleCreateExperimentClicked()"
       />
     </div>
     <div v-if="experiments.length > 0" class="l-experiments__table-container">
@@ -22,7 +25,10 @@
     </div>
     <Teleport to=".sliding-panel">
       <transition name="transition-fade">
-        <l-experiment-form v-if="isFormVisible" @l-close-form="onDismissForm" />
+        <l-experiment-form
+          v-if="isCreateExperimentFormVisible"
+          @l-close-form="handleCreateExperimentFormClosed"
+        />
       </transition>
       <transition name="transition-fade">
         <LExperimentDetails
@@ -34,7 +40,7 @@
           @l-job-results="onShowWorkflowResults($event)"
           @l-download-results="onDownloadResults($event)"
           @l-show-logs="onShowLogs"
-          @l-close-details="onCloseDetails"
+          @l-close-details="handleExperimentDetailsClosed"
           @delete-button-clicked="handleDeleteButtonClicked"
         />
       </transition>
@@ -56,6 +62,11 @@
       />
       <l-experiment-logs :logs="workflowLogs" v-if="showLogs" />
     </l-experiments-drawer>
+    <CreateExperimentForm
+      :selectedDataset="selectedDataset"
+      @close="closeExperimentForm"
+      v-if="isNewExperimentFormVisible"
+    />
   </div>
 </template>
 
@@ -88,6 +99,7 @@ import {
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
 import { FeatureFlags, isFeatureEnabled } from '@/helpers/FeatureFlags'
 import { useRouter } from 'vue-router'
+import CreateExperimentForm from '../experiments/CreateExperimentForm.vue'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -115,7 +127,15 @@ const showJobResults = ref()
 const headerDescription = ref(`Experiments are a logical sequence of inference and
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
-const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
+const isNewExperimentFormVisible = ref(false)
+
+const isCreateExperimentFormVisible = computed(
+  () => showSlidingPanel.value && !selectedExperiment.value,
+)
+
+const closeExperimentForm = () => {
+  isNewExperimentFormVisible.value = false
+}
 
 const isExperimentManagementFeatureEnabled = computed(() =>
   isFeatureEnabled(FeatureFlags.ExperimentManagement),
@@ -130,9 +150,13 @@ const getDrawerHeader = () => {
       : `Experiment: ${selectedExperiment.value?.name}`
 }
 
-const onCreateExperiment = () => {
-  showSlidingPanel.value = true
+const handleCreateExperimentClicked = () => {
   selectedExperiment.value = undefined
+  if (isExperimentManagementFeatureEnabled.value) {
+    isNewExperimentFormVisible.value = true
+  } else {
+    showSlidingPanel.value = true
+  }
 }
 
 const handleExperimentClicked = (experiment: Experiment) => {
@@ -178,12 +202,12 @@ const onShowLogs = () => {
   showDrawer.value = true
 }
 
-const onDismissForm = () => {
+const handleCreateExperimentFormClosed = () => {
   datasetStore.setSelectedDataset(undefined)
   showSlidingPanel.value = false
 }
 
-const onCloseDetails = () => {
+const handleExperimentDetailsClosed = () => {
   showSlidingPanel.value = false
 }
 
@@ -336,7 +360,7 @@ onMounted(async () => {
   await Promise.all([experimentStore.fetchAllExperiments(), modelStore.fetchModels()])
 
   if (selectedDataset.value) {
-    onCreateExperiment()
+    handleCreateExperimentClicked()
   }
 })
 

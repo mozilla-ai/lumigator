@@ -86,7 +86,7 @@ defineProps({
 const emit = defineEmits([
   'l-delete-dataset',
   'l-dataset-selected',
-  'l-experiment',
+  'use-in-experiment-clicked',
   'l-download-dataset',
   'view-dataset-clicked',
 ])
@@ -104,7 +104,7 @@ const options = ref<MenuItem[]>([
     icon: 'pi pi-experiments',
     disabled: false,
     command: () => {
-      emit('l-experiment', focusedItem.value)
+      emit('use-in-experiment-clicked', focusedItem.value)
     },
   },
   {

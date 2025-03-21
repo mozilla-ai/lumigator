@@ -105,11 +105,18 @@ class BaseJobConfig(BaseModel, ABC):
     )
 
 
+class DeepEvalLocalModelConfig(BaseModel):
+    model_name: str
+    model_base_url: str
+    model_api_key: str | None = "ollama"
+
+
 class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
     # NOTE: If changing the default  metrics, please ensure that they do not include
     # any requirements for external API calls that require an API key to be configured.
     metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
+    llm_as_judge: DeepEvalLocalModelConfig | None = None
 
 
 class GenerationConfig(BaseModel):

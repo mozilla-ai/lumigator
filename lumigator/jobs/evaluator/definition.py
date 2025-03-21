@@ -13,6 +13,7 @@ class JobDefinitionEvaluation(JobDefinition):
             dataset=DatasetConfig(path=dataset_path),
             evaluation=EvaluationConfig(
                 metrics=request.job_config.metrics,
+                llm_as_judge=request.job_config.llm_as_judge.model_dump() if request.job_config.llm_as_judge else None,
                 max_samples=request.max_samples,
                 return_input_data=True,
                 return_predictions=True,

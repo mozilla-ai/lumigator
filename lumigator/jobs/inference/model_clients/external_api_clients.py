@@ -61,9 +61,12 @@ class LiteLLMModelClient(BaseModelClient):
         prediction = response.choices[0].message.content
 
         # Check if reasoning is available in provider_specific_fields
-        has_reasoning_content = bool(
-            response.choices[0].message.provider_specific_fields.get("reasoning_content", None)
-        )
+        if response.choices[0].message.provider_specific_fields is None:
+            has_reasoning_content = False
+        else:
+            has_reasoning_content = bool(
+                response.choices[0].message.provider_specific_fields.get("reasoning_content", None)
+            )
         if not has_reasoning_content:
             logger.info("No specific reasoning content found in response.")
         reasoning = response.choices[0].message.reasoning_content if has_reasoning_content else None

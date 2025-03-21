@@ -34,7 +34,7 @@ EVALUATOR_WORK_DIR = "../jobs/evaluator"
 EVALUATOR_PIP_REQS = "../jobs/evaluator/requirements.txt"
 EVALUATOR_COMMAND = str = "python evaluator.py"
 
-JOB_DEFINITION: JobDefinition = JobDefinitionEvaluation(
+EVALUATOR_JOB_DEFINITION: JobDefinition = JobDefinitionEvaluation(
     command=EVALUATOR_COMMAND,
     pip_reqs=EVALUATOR_PIP_REQS,
     work_dir=EVALUATOR_WORK_DIR,

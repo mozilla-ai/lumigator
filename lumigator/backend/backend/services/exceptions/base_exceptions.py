@@ -1,8 +1,3 @@
-def _append_message(existing: str, message: str | None) -> str:
-    """Appends a message to the existing message if it exists."""
-    return f"{existing}{f': {message}' if message else ''}"
-
-
 class ServiceError(Exception):
     """Base exception for service-related errors."""
 
@@ -10,11 +5,20 @@ class ServiceError(Exception):
         """Creates a ServiceError.
 
         :param message: error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(message)
         self.message = message
         self.exc = exc
+
+    def _append_message(self, existing: str, message: str | None) -> str:
+        """Appends a ``message`` to the ``existing`` message if it exists.
+
+        :param existing: the existing message.
+        :param message: the message to append.
+        :return: the combined message joined by ':'.
+        """
+        return f"{existing}{f': {message}' if message else ''}"
 
 
 class NotFoundError(ServiceError):
@@ -32,10 +36,10 @@ class NotFoundError(ServiceError):
         :param resource: the resource that was not found
         :param resource_id: the ID of the resource that was not found
         :param message: an optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         msg = f"{resource} with ID {resource_id} not found"
-        super().__init__(_append_message(msg, message), exc)
+        super().__init__(self._append_message(msg, message), exc)
         self.resource = resource
         self.resource_id = resource_id
 
@@ -47,7 +51,7 @@ class ValidationError(ServiceError):
         """Creates a ValidationError
 
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(message, exc)
 
@@ -60,9 +64,9 @@ class UpstreamError(ServiceError):
 
         :param service_name: the name of the service which threw the error
         :param message: an optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
-        msg = _append_message(f"Upstream error with {service_name}", message)
+        msg = self._append_message(f"Upstream error with {service_name}", message)
         super().__init__(msg, exc)
         self.service_name = service_name
 
@@ -80,8 +84,8 @@ class NotAvailableError(ServiceError):
 
         :param resource: the resource type that was not available
         :param message: error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         msg = f"{resource} not available"
-        super().__init__(_append_message(msg, message), exc)
+        super().__init__(self._append_message(msg, message), exc)
         self.resource = resource

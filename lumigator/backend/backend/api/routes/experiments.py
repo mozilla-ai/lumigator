@@ -27,19 +27,21 @@ def create_experiment_id(service: ExperimentServiceDep, request: ExperimentCreat
 
 
 @router.get("/{experiment_id}")
-def get_experiment(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
+async def get_experiment(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
-    return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+    experiment = await service.get_experiment(experiment_id)
+    return GetExperimentResponse.model_validate(experiment.model_dump())
 
 
 @router.get("/")
-def list_experiments(
+async def list_experiments(
     service: ExperimentServiceDep,
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[GetExperimentResponse]:
     """List all experiments."""
-    return ListingResponse[GetExperimentResponse].model_validate(service.list_experiments(skip, limit).model_dump())
+    experiments = await service.list_experiments(skip, limit)
+    return ListingResponse[GetExperimentResponse].model_validate(experiments.model_dump())
 
 
 @router.delete("/{experiment_id}")

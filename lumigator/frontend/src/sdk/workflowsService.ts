@@ -43,8 +43,7 @@ export async function deleteWorkflow(id: string) {
 export async function downloadResults(workflow_id: string) {
   const response = await lumigatorApiAxiosInstance.get(`workflows/${workflow_id}/result/download`)
   if (!response.data) {
-    console.error('No URL found in the response.')
-    return
+    throw new Error('No URL found in the response.')
   }
   const fileResponse = await lumigatorApiAxiosInstance.get(response.data, {
     responseType: 'blob', // Important: Receive the file as a binary blob

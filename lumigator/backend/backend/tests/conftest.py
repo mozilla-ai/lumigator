@@ -4,6 +4,7 @@ import os
 import time
 import uuid
 from collections.abc import Generator
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import UUID
@@ -26,6 +27,7 @@ from lumigator_schemas.jobs import (
     JobType,
 )
 from lumigator_schemas.models import ModelsResponse
+from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunTag
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
@@ -532,3 +534,60 @@ def model_specs_data() -> list[ModelsResponse]:
     models = [ModelsResponse.model_validate(item) for item in model_specs]
 
     return models
+
+
+@pytest.fixture(scope="function")
+def fake_mlflow_tracking_client(fake_s3fs):
+    """Fixture for MLflowTrackingClient using the real MLflowClient."""
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)
+
+
+@pytest.fixture
+def sample_mlflow_run():
+    """Fixture for a sample MlflowRun with mock data."""
+    return Run(
+        run_info=RunInfo(
+            run_uuid="d34dbeef-1000-0000-0000-000000000000",
+            experiment_id="exp-1",
+            user_id="user",
+            status="FINISHED",
+            start_time=123456789,
+            end_time=None,
+            lifecycle_stage="active",
+            artifact_uri="",
+        ),
+        run_data=RunData(
+            metrics=[
+                Metric(key="accuracy", value=0.75, timestamp=123456789, step=0),
+            ],
+            params=[
+                Param(key="batch_size", value="32"),
+            ],
+            tags=[
+                RunTag(key="description", value="A sample workflow"),
+                RunTag(key="mlflow.runName", value="Run2"),
+                RunTag(key="model", value="SampleModel"),
+                RunTag(key="system_prompt", value="Prompt text"),
+                RunTag(key="status", value="COMPLETED"),
+            ],
+        ),
+    )
+
+
+@pytest.fixture
+def fake_mlflow_run_deleted():
+    """Fixture for a deleted MLflow run."""
+    run_info = RunInfo(
+        run_uuid="d34dbeef-1000-0000-0000-000000000000",
+        experiment_id="exp-456",
+        user_id="user-789",
+        status="FAILED",
+        start_time=int(datetime(2024, 1, 1).timestamp() * 1000),
+        end_time=None,
+        lifecycle_stage="deleted",
+        artifact_uri="s3://some-bucket",
+    )
+
+    run_data = RunData(metrics={}, params={}, tags={})
+
+    return Run(run_info=run_info, run_data=run_data)

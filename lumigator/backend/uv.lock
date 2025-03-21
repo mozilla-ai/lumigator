@@ -182,7 +182,6 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "pytest-asyncio" },
     { name = "python-dotenv" },
     { name = "ray", extra = ["client"] },
     { name = "requests" },
@@ -196,6 +195,7 @@ dev = [
     { name = "debugpy" },
     { name = "moto", extra = ["s3"] },
     { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "requests-mock" },
 ]
 
@@ -214,7 +214,6 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = "==2.9.9" },
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "pydantic-settings", specifier = "==2.2.1" },
-    { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "ray", extras = ["client"], specifier = "==2.30.0" },
     { name = "requests", specifier = ">=2,<3" },
@@ -228,6 +227,7 @@ dev = [
     { name = "debugpy", specifier = ">=1.8.11" },
     { name = "moto", extras = ["s3"], specifier = ">=5.0,<6" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "pytest-asyncio", specifier = ">=0.25.3" },
     { name = "requests-mock", specifier = ">=1.12.1" },
 ]
 

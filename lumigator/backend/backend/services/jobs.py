@@ -53,10 +53,17 @@ from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
 ############################
-job_modules = [evaluator, inference]
+job_modules = [
+    {"name": "evaluator", "definition": evaluator.definition},
+    {"name": "inference", "definition": inference.definition},
+    {"name": "annotation", "definition": inference.definition},
+]
 ############################
 job_settings_map = {
-    job_module.definition.JOB_DEFINITION.type: job_module.definition.JOB_DEFINITION for job_module in job_modules
+    getattr(job_module["definition"], f"{job_module['name'].upper()}_JOB_DEFINITION").type: getattr(
+        job_module["definition"], f"{job_module['name'].upper()}_JOB_DEFINITION"
+    )
+    for job_module in job_modules
 }
 
 DEFAULT_SKIP = 0

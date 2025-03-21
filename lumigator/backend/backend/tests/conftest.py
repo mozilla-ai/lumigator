@@ -1,6 +1,9 @@
 import csv
 import io
+import json
+import logging
 import os
+import sys
 import time
 import uuid
 from collections.abc import Generator
@@ -57,6 +60,12 @@ MAX_POLLS = 18
 
 # Time between job status polls.
 POLL_WAIT_TIME = 10
+
+
+def load_json_from_file(file_path: Path) -> dict:
+    """Load JSON data from a file path and return it as a dictionary."""
+    with Path.open(file_path) as file:
+        return json.load(file)
 
 
 @pytest.fixture(scope="session")
@@ -532,3 +541,42 @@ def model_specs_data() -> list[ModelsResponse]:
     models = [ModelsResponse.model_validate(item) for item in model_specs]
 
     return models
+
+
+@pytest.fixture(scope="function")
+def configure_loguru(caplog):
+    """Configures Loguru logging but only for tests that explicitly request it."""
+
+    class PropagateHandler(logging.Handler):
+        def emit(self, record):
+            logging.getLogger(record.name).handle(record)
+
+    # Remove existing handlers but store the config
+    existing_handlers = logger._core.handlers.copy()
+    logger.remove()
+    logger.add(PropagateHandler(), format="{message}")
+
+    yield
+
+    # Restore handlers
+    logger.remove()
+    for _ in existing_handlers:
+        logger.add(sys.stderr, format="{time} {level} {message}")
+
+
+@pytest.fixture(scope="function")
+def caplog_with_loguru(caplog, configure_loguru):
+    """Wraps caplog to auto-configure Loguru safely."""
+    yield caplog
+
+
+@pytest.fixture(scope="function")
+def fake_mlflow_tracking_client(fake_s3fs):
+    """Fixture for MLflowTrackingClient using the real MLflowClient."""
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)
+
+
+@pytest.fixture(scope="session")
+def json_mlflow_runs_search_single(resources_dir) -> dict:
+    path = resources_dir / "mlflow_runs_search_single.json"
+    return load_json_from_file(path)

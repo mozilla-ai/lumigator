@@ -91,7 +91,7 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    inference_metrics: list[InferenceMetrics] | list[None] = None
+    inference_metrics: list[InferenceMetrics | None] = []
 
 
 class PredictionResult(BaseModel):

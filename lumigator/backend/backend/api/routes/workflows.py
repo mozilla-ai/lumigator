@@ -49,6 +49,20 @@ def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsR
     return JobLogsResponse.model_validate(service.get_workflow_logs(workflow_id).model_dump())
 
 
+@router.get("/{workflow_id}/result/download")
+def get_workflow_result_download(
+    service: WorkflowServiceDep,
+    workflow_id: str,
+) -> str:
+    """Return workflow results file URL for downloading.
+
+    Args:
+        service: Workflow service dependency
+        workflow_id: ID of the workflow whose results will be returned
+    """
+    return service.get_workflow_result_download(workflow_id)
+
+
 # delete a workflow
 @router.delete("/{workflow_id}")
 def delete_workflow(service: WorkflowServiceDep, workflow_id: str, force: bool = False) -> WorkflowDetailsResponse:

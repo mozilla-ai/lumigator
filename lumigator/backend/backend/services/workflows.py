@@ -38,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -324,6 +325,7 @@ class WorkflowService:
             )
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -333,6 +335,18 @@ class WorkflowService:
             )
             await self._handle_workflow_failure(workflow.id)
             return
+
+    def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id, "No result download link has been found") from None
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

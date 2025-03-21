@@ -24,12 +24,13 @@ dependencies = [
     "alembic>=1.13.3",
     "lumigator-schemas",
     "mlflow>=2.20.3",
-    "cryptography>=43.0.0",
+    "cryptography>=43.0.0"
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.3",
+    "pytest-asyncio>=0.25.3",
     "requests-mock>=1.12.1",
     "moto[s3]>=5.0,<6",
     "debugpy>=1.8.11"
@@ -37,3 +38,6 @@ dev = [
 
 [tool.uv.sources]
 lumigator-schemas = { path = "../schemas", editable = true }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

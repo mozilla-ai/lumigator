@@ -159,7 +159,7 @@ const onShowWorkflowResults = async (workflow: Workflow) => {
 
 const onDownloadResults = async (workflow: Workflow) => {
   const blob = await workflowsService.downloadResults(workflow.id)
-  downloadContent(blob, `${selectedWorkflow.value?.name}_results.json`)
+  downloadContent(blob, `${workflow.name}_results.json`)
 }
 
 const onShowLogs = () => {

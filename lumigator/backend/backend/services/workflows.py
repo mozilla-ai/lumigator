@@ -38,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -333,6 +334,18 @@ class WorkflowService:
             )
             await self._handle_workflow_failure(workflow.id)
             return
+
+    def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id) from None
 
     def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

@@ -294,7 +294,7 @@ class JobService:
             status_response = self.ray_client.get_job_status(str(job_id))
             return str(status_response.value.lower())
         except RuntimeError as e:
-            raise JobUpstreamError("ray", "error getting Ray job status", e) from e
+            raise JobUpstreamError("ray", "error getting Ray job status") from e
 
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
         """Retrieves the logs for a job from the upstream service.

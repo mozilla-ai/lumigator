@@ -8,12 +8,17 @@ import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 import { LumiPreset } from './primevue.config'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 
 const app = createApp(App)
 
 app
   .use(router)
   .use(createPinia())
+  .use(VueQueryPlugin, {
+    enableDevtoolsV6Plugin: true,
+    enableDevtoolsV7Plugin: true,
+  })
   .use(PrimeVue, {
     theme: {
       preset: LumiPreset,

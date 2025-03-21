@@ -14,7 +14,7 @@
         scrollable
         scrollHeight="75vh"
         :pt="{ table: 'table-root' }"
-        :loading
+        :loading="isLoading"
         @row-click="emit('l-dataset-selected', $event.data)"
         @row-unselect="showSlidingPanel = false"
       >
@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Menu from 'primevue/menu'
@@ -72,9 +72,13 @@ import type { MenuItem } from 'primevue/menuitem'
 import type { Dataset } from '@/types/Dataset'
 import { formatDate } from '@/helpers/formatDate'
 
-const props = defineProps({
+defineProps({
   tableData: {
     type: Array,
+    required: true,
+  },
+  isLoading: {
+    type: Boolean,
     required: true,
   },
 })
@@ -92,7 +96,6 @@ const style = computed(() => {
   return showSlidingPanel.value ? 'min-width: 40vw' : 'min-width: min(80vw, 1200px)'
 })
 
-const loading = ref(true)
 const focusedItem = ref()
 const optionsMenu = ref()
 const options = ref<MenuItem[]>([
@@ -130,11 +133,6 @@ const options = ref<MenuItem[]>([
   },
 ])
 
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 1000)
-})
 const ptConfigOptionsMenu = ref({
   list: 'l-dataset-table__options-menu',
   itemLink: 'l-dataset-table__menu-option',
@@ -157,16 +155,6 @@ watch(showSlidingPanel, (newValue) => {
   focusedItem.value = newValue ? focusedItem.value : undefined
 })
 
-watch(props.tableData, (newValue) => {
-  if (!newValue.length) {
-    loading.value = true
-    setTimeout(() => {
-      loading.value = false
-    }, 500)
-  }
-})
-
-defineExpose({ loading })
 </script>
 
 <style scoped lang="scss">

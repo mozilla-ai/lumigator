@@ -39,7 +39,7 @@
         target="_blank"
         style="background-color: transparent"
         >Learn more <span class="pi pi-arrow-up-right"
-      /></a>
+      ></span></a>
     </p>
   </div>
 </template>

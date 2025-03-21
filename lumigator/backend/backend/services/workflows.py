@@ -38,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -111,7 +112,7 @@ class WorkflowService:
         """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
 
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
@@ -324,6 +325,7 @@ class WorkflowService:
             )
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -334,14 +336,26 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id, "No result download link has been found") from None
+
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
-        tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
         return tracking_server_workflow
 
-    def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
+    async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
@@ -351,7 +365,7 @@ class WorkflowService:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
         # If the experiment this workflow is associated with doesn't exist, there's no point in continuing.
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
         if not experiment:
             raise WorkflowValidationError(f"Cannot create workflow '{request.name}': No experiment found.") from None
 

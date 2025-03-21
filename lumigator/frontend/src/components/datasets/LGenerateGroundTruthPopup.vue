@@ -11,13 +11,16 @@
             <a href="https://huggingface.co/facebook/bart-large-cnn" target="_blank"
               >BART</a
             > </strong
-          >, Lumigator's reference model for this task.
+          >, Lumigator's reference model for summarization.
         </p>
         <p>
           Since result quality can vary substantially depending on your dataset, we recommend
           reviewing the output before using it as ground truth for your experiments.
         </p>
         <p>Processing time depends on your compute power.</p>
+        <Message severity="warn" variant="simple"
+          >Note that ground truth generation is currently limited to summarization tasks.</Message
+        >
       </div>
       <div class="popup-footer">
         <Button
@@ -42,6 +45,7 @@
 
 <script lang="ts" setup>
 import Button from 'primevue/button'
+import Message from 'primevue/message'
 
 // Define the props
 const props = defineProps({

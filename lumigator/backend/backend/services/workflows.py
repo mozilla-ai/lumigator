@@ -112,7 +112,7 @@ class WorkflowService:
         """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
 
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
@@ -325,6 +325,7 @@ class WorkflowService:
             )
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -347,14 +348,14 @@ class WorkflowService:
         else:
             raise WorkflowDownloadNotAvailableError(workflow_id) from None
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
-        tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
         return tracking_server_workflow
 
-    def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
+    async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
@@ -364,7 +365,7 @@ class WorkflowService:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
         # If the experiment this workflow is associated with doesn't exist, there's no point in continuing.
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
         if not experiment:
             raise WorkflowValidationError(f"Cannot create workflow '{request.name}': No experiment found.") from None
 

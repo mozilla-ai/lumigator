@@ -53,10 +53,17 @@ from backend.settings import settings
 
 # ADD YOUR JOB IMPORT HERE #
 ############################
-job_modules = [evaluator, inference]
+job_modules = [
+    {"name": "evaluator", "definition": evaluator.definition},
+    {"name": "inference", "definition": inference.definition},
+    {"name": "annotation", "definition": inference.definition},
+]
 ############################
 job_settings_map = {
-    job_module.definition.JOB_DEFINITION.type: job_module.definition.JOB_DEFINITION for job_module in job_modules
+    getattr(job_module["definition"], f"{job_module['name'].upper()}_JOB_DEFINITION").type: getattr(
+        job_module["definition"], f"{job_module['name'].upper()}_JOB_DEFINITION"
+    )
+    for job_module in job_modules
 }
 
 DEFAULT_SKIP = 0
@@ -212,13 +219,18 @@ class JobService:
         return bin_data
 
     def _add_dataset_to_db(
-        self, job_id: UUID, request: JobCreate, s3: S3FileSystem, dataset_filename: str, is_gt_generated: bool = True
+        self,
+        job_id: UUID,
+        request: JobCreate,
+        s3_file_system: S3FileSystem,
+        dataset_filename: str,
+        is_gt_generated: bool = True,
     ):
         """Attempts to add the result of a job (generated dataset) as a new dataset in Lumigator.
 
         :param job_id: The ID of the job, used to identify the S3 path
         :param request: The job request containing the dataset and output fields
-        :param s3: The S3 filesystem dependency for accessing storage
+        :param s3_file_system: The S3 filesystem dependency for accessing storage
         :raises DatasetNotFoundError: If the dataset in the request does not exist
         :raises DatasetSizeError: if the dataset is too large
         :raises DatasetInvalidError: if the dataset is invalid
@@ -228,7 +240,7 @@ class JobService:
         loguru.logger.info("Adding a new dataset entry to the database...")
 
         # Get the dataset from the S3 bucket
-        results = self._validate_results(job_id, s3)
+        results = self._validate_results(job_id, s3_file_system)
 
         # make sure the artifacts are present in the results
         required_keys = {"examples", "ground_truth", request.job_config.output_field}
@@ -261,12 +273,12 @@ class JobService:
 
         loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
 
-    def _validate_results(self, job_id: UUID, s3: S3FileSystem) -> JobResultObject:
+    def _validate_results(self, job_id: UUID, s3_file_system: S3FileSystem) -> JobResultObject:
         """Handles the evaluation result for a given job.
 
         Args:
             job_id (UUID): The unique identifier of the job.
-            s3 (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
+            s3_file_system (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
         Note:
             Currently, this function only validates the evaluation result. Future implementations
@@ -275,8 +287,8 @@ class JobService:
         loguru.logger.info("Handling evaluation result")
 
         result_key = self._get_results_s3_key(job_id)
-        # TODO: Add dependency to the S3 service and use a path creation function.
-        with s3.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+        # TODO: use a path creation function.
+        with s3_file_system.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
             return JobResultObject.model_validate(json.loads(f.read()))
 
     def get_upstream_job_status(self, job_id: UUID) -> str:
@@ -401,7 +413,7 @@ class JobService:
         :param request: The job creation request.
         :return: The job response.
         :raises JobTypeUnsupportedError: If the job type is not supported.
-        :raises SecretNotFoundError: If the secret key identifying the API key required for the job is not found.
+        :raises JobValidationError: If the secret key identifying the API key required for the job is not found.
         """
         # Typing won't allow other job_type's
         job_type = request.job_config.job_type
@@ -477,7 +489,7 @@ class JobService:
             runtime_env=runtime_env,
             num_gpus=settings.RAY_WORKER_GPUS,
         )
-        loguru.logger.info("Submitting {job_type} Ray job...")
+        loguru.logger.info(f"Submitting {job_type} Ray job...")
         submit_ray_job(self.ray_client, entrypoint)
 
         # NOTE: Only inference jobs can store results in a dataset atm. Among them:
@@ -572,11 +584,12 @@ class JobService:
 
         return JobResultResponse.model_validate(result_record)
 
-    def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
+    async def get_job_result_download(self, job_id: UUID) -> JobResultDownloadResponse:
         """Return job results file URL for downloading."""
         # Generate presigned download URL for the object
         result_key = self._get_results_s3_key(job_id)
-        download_url = self._dataset_service.s3_client.generate_presigned_url(
+
+        download_url = await self._dataset_service.s3_filesystem.s3.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,

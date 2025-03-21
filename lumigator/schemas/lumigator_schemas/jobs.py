@@ -5,12 +5,12 @@ from typing import Any, Literal, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
 from lumigator_schemas.redactable_base_model import RedactableBaseModel
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
-    TaskType,
 )
 from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
@@ -151,10 +151,37 @@ class JobInferenceConfig(BaseJobConfig):
     )
 
 
-class JobAnnotateConfig(BaseJobConfig):
-    job_type: Literal[JobType.ANNOTATION] = JobType.ANNOTATION
-    task: TaskType = Field(default=TaskType.SUMMARIZATION)
-    store_to_dataset: bool = False
+class JobAnnotateConfig(JobInferenceConfig):
+    """Job configuration for the annotation job type
+
+    An annotation job is a special type of inference job that is used to
+    annotate a dataset with predictions from a model. The predictions are
+    stored in the dataset as a new field called `ground_truth`.
+
+    JobAnnotateConfig inherits from JobInferenceConfig but fixes the following
+    fields, using the `SkipJsonSchema` type to prevent them from being included
+    in the JSON schema:
+    - job_type: Literal[JobType.ANNOTATION]
+    - output_field: "ground_truth"
+
+    It also sets sensible defaults for the following fields:
+    - store_to_dataset: True
+    - model: "facebook/bart-large-cnn"
+    - provider: "hf"
+
+    Users can change the model and provider fields but cannot change the
+    job_type or output_field fields.
+
+    Note that, currently, ground truth generation is limited to summarization
+    tasks from the UI. Users can run any ground truth generation task from the
+    API.
+    """
+
+    job_type: SkipJsonSchema[Literal[JobType.ANNOTATION]] = JobType.ANNOTATION
+    model: str = Field(default="facebook/bart-large-cnn")
+    provider: str = Field(default="hf")
+    output_field: SkipJsonSchema[str] | None = "ground_truth"
+    store_to_dataset: bool = True
 
 
 JobSpecificConfig = JobEvalConfig | JobInferenceConfig | JobAnnotateConfig
@@ -193,6 +220,7 @@ class JobResponse(BaseModel, from_attributes=True):
     name: str
     description: str
     status: JobStatus
+    job_type: JobType
     created_at: dt.datetime
     experiment_id: UUID | None = None
     updated_at: dt.datetime | None = None

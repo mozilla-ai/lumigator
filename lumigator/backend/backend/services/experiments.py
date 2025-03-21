@@ -36,16 +36,17 @@ class ExperimentService:
         loguru.logger.info(f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'.")
         return experiment
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
-        record = self._tracking_session.get_experiment(experiment_id)
+    async def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
+        record = await self._tracking_session.get_experiment(experiment_id)
         if record is None:
             raise ExperimentNotFoundError(experiment_id) from None
         return GetExperimentResponse.model_validate(record)
 
-    def list_experiments(self, skip: int, limit: int) -> ListingResponse[GetExperimentResponse]:
-        records = self._tracking_session.list_experiments(skip, limit)
+    async def list_experiments(self, skip: int, limit: int) -> ListingResponse[GetExperimentResponse]:
+        records = await self._tracking_session.list_experiments(skip, limit)
+        total = await self._tracking_session.experiments_count()
         return ListingResponse(
-            total=self._tracking_session.experiments_count(),
+            total=total,
             items=[GetExperimentResponse.model_validate(x) for x in records],
         )
 

@@ -480,9 +480,6 @@ class JobService:
 
         metadata = {"job_type": job_type}
 
-        loguru.logger.info("runtime env setup...")
-        loguru.logger.info(f"{runtime_env}")
-
         entrypoint = RayJobEntrypoint(
             config=ray_config,
             metadata=metadata,

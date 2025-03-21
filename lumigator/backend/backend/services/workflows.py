@@ -154,13 +154,13 @@ class WorkflowService:
         try:
             # Wait for the inference job to 'complete'.
             status = await self._job_service.wait_for_job_complete(
-                inference_job.id, max_wait_time_sec=request.job_timeout_sec
+                inference_job.id, timeout_seconds=request.job_timeout_sec
             )
 
             if status != JobStatus.SUCCEEDED:
                 # Trigger the failure handling logic
                 raise JobUpstreamError(f"Inference job {inference_job.id} failed with status {status}") from None
-        except JobUpstreamError as e:
+        except TimeoutError as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Inference job: {} failed: {}", workflow.id, inference_job.id, e
             )
@@ -278,7 +278,7 @@ class WorkflowService:
         try:
             # wait for the evaluation job to complete
             status = await self._job_service.wait_for_job_complete(
-                evaluation_job.id, max_wait_time_sec=request.job_timeout_sec
+                evaluation_job.id, timeout_seconds=request.job_timeout_sec
             )
 
             if status != JobStatus.SUCCEEDED:
@@ -287,7 +287,7 @@ class WorkflowService:
 
             # TODO: Handle other error types that can be raised by the method.
             self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
-        except (JobUpstreamError, ValidationError) as e:
+        except (TimeoutError, ValidationError) as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} failed: {}", workflow.id, evaluation_job.id, e
             )

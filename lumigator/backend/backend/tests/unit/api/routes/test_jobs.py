@@ -138,6 +138,5 @@ def test_missing_api_key_in_job_creation(
     with patch("backend.api.deps.JobSubmissionClient"):
         with patch.object(job_service, "create_job", side_effect=SecretNotFoundError("test error msg")):
             response = app_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
-            loguru.logger.critical(f"response text: {response.text}")
             assert response is not None
             assert response.status_code == status.HTTP_400_BAD_REQUEST

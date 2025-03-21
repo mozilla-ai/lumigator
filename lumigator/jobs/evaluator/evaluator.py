@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
+from datasets.features.features import Value
 from eval_metrics import EvaluationMetrics
 from loguru import logger
 from utils import timer
@@ -76,7 +77,27 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
+    # Cast non-string fields into strings. If it cannot be done, then
+    # the dataset is most probably broken.
+    # All-empty fields are interpreted by the loader as 'float64' by default,
+    # which causes issues when an empty 'predictions'
+    for fname in dataset.features:
+        feature = dataset.features[fname]
+        if not (isinstance(feature, Value) and feature.dtype == "string"):
+            logger.warning(
+                f"Found column '{fname}' with non-string type '{feature}', "
+                "converting type to string and None values to ''"
+            )
+            dataset = dataset.cast_column(fname, Value("string"))
+
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
+
+    def replace_none_with_empty(row):
+        if row["predictions"] is None:
+            row["predictions"] = ""
+        return row
+
+    dataset = dataset.map(replace_none_with_empty)
 
     # Check for required fields
     # If any of the G-Eval metrics are in config.evaluation.metrics,

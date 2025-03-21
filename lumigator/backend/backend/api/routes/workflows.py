@@ -32,13 +32,14 @@ async def create_workflow(service: WorkflowServiceDep, request: WorkflowCreateRe
     It must be associated with an experiment id,
     which means you must already have created an experiment and have that ID in the request.
     """
-    return WorkflowResponse.model_validate(service.create_workflow(request))
+    return WorkflowResponse.model_validate(await service.create_workflow(request))
 
 
 @router.get("/{workflow_id}")
-def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
+async def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetailsResponse:
     """Get a workflow by ID."""
-    return WorkflowDetailsResponse.model_validate(service.get_workflow(workflow_id).model_dump())
+    workflow_details = await service.get_workflow(workflow_id)
+    return WorkflowDetailsResponse.model_validate(workflow_details.model_dump())
 
 
 # get the logs
@@ -46,6 +47,20 @@ def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> WorkflowDetai
 def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsResponse:
     """Get the logs for a workflow."""
     return JobLogsResponse.model_validate(service.get_workflow_logs(workflow_id).model_dump())
+
+
+@router.get("/{workflow_id}/result/download")
+def get_workflow_result_download(
+    service: WorkflowServiceDep,
+    workflow_id: str,
+) -> str:
+    """Return workflow results file URL for downloading.
+
+    Args:
+        service: Workflow service dependency
+        workflow_id: ID of the workflow whose results will be returned
+    """
+    return service.get_workflow_result_download(workflow_id)
 
 
 # delete a workflow

@@ -27,7 +27,7 @@ class TrackingClient(Protocol):
         """Create a new experiment."""
         ...
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
+    async def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment."""
         ...
 
@@ -39,11 +39,11 @@ class TrackingClient(Protocol):
         """Delete an experiment."""
         ...
 
-    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
+    async def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
         """List all experiments."""
         ...
 
-    def experiments_count(self) -> int:
+    async def experiments_count(self) -> int:
         """Count all experiments."""
         ...
 
@@ -53,7 +53,7 @@ class TrackingClient(Protocol):
         """Create a new workflow."""
         ...
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow."""
         ...
 

@@ -39,7 +39,7 @@ class FakeS3Client:
             "Contents": [self.__map_entry_to_content(k) for k in self.storage.keys() if k.startswith(key)],
         }
 
-    def generate_presigned_url(self, method, **kwargs):
+    async def generate_presigned_url(self, method, **kwargs):
         params = kwargs["Params"]
         bucket = params["Bucket"]
         path = params["Key"]

@@ -221,12 +221,12 @@ def get_job_dataset(
 
 
 @router.get("/{job_id}/result/download")
-def get_job_result_download(
+async def get_job_result_download(
     service: JobServiceDep,
     job_id: UUID,
 ) -> JobResultDownloadResponse:
     """Return job results file URL for downloading."""
-    return service.get_job_result_download(job_id)
+    return await service.get_job_result_download(job_id)
 
 
 def _get_all_ray_jobs() -> list[RayJobDetails]:

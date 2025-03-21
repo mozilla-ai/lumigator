@@ -17,7 +17,6 @@ from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
-from mypy_boto3_s3 import S3Client
 from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
@@ -30,10 +29,9 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
-    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._client = MlflowClient(tracking_uri=tracking_uri)
         self._s3_file_system = s3_file_system
-        self._s3_client = s3_client
 
     def create_experiment(
         self,
@@ -134,7 +132,7 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
+    async def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
@@ -146,12 +144,12 @@ class MLflowTrackingClient(TrackingClient):
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
-        return self._format_experiment(experiment)
+        return await self._format_experiment(experiment)
 
-    def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
+    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [await self.get_workflow(workflow_id) for workflow_id in workflow_ids]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -170,7 +168,7 @@ class MLflowTrackingClient(TrackingClient):
         """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
+    async def list_experiments(self, skip: int, limit: int | None) -> list[GetExperimentResponse]:
         """List all experiments."""
         page_token = None
         experiments = []
@@ -191,12 +189,12 @@ class MLflowTrackingClient(TrackingClient):
             if response.token is None:
                 break
         reduced_experiments = experiments[:limit] if limit is not None else experiments
-        return [self._format_experiment(experiment) for experiment in reduced_experiments]
+        return [await self._format_experiment(experiment) for experiment in reduced_experiments]
 
     # TODO find a cheaper call
-    def experiments_count(self):
+    async def experiments_count(self):
         """Get the number of experiments."""
-        return len(self.list_experiments(skip=0, limit=None))
+        return len(await self.list_experiments(skip=0, limit=None))
 
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
@@ -227,7 +225,7 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
         try:
             workflow = self._client.get_run(workflow_id)
@@ -293,7 +291,7 @@ class MLflowTrackingClient(TrackingClient):
             with self._s3_file_system.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
                 f.write(json.dumps(compiled_results))
             # Generate presigned download URL for the object
-        download_url = self._s3_client.generate_presigned_url(
+        download_url = await self._s3_file_system.s3.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,
@@ -424,10 +422,9 @@ class MLflowTrackingClient(TrackingClient):
 class MLflowClientManager:
     """Connection manager for MLflow client."""
 
-    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem, s3_client: S3Client):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._tracking_uri = tracking_uri
         self._s3_file_system = s3_file_system
-        self._s3_client = s3_client
 
     @contextlib.contextmanager
     def connect(self) -> Generator[TrackingClient, None, None]:
@@ -435,6 +432,5 @@ class MLflowClientManager:
         tracking_client = MLflowTrackingClient(
             tracking_uri=self._tracking_uri,
             s3_file_system=self._s3_file_system,
-            s3_client=self._s3_client,
         )
         yield tracking_client

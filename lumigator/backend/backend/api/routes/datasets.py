@@ -89,7 +89,7 @@ def list_datasets(
 
 
 @router.get("/{dataset_id}/download")
-def get_dataset_download(
+async def get_dataset_download(
     service: DatasetServiceDep,
     dataset_id: UUID,
     extension: str | None = Query(
@@ -100,4 +100,4 @@ def get_dataset_download(
     ),
 ) -> DatasetDownloadResponse:
     """Returns a collection of pre-signed URLs which can be used to download the dataset."""
-    return service.get_dataset_download(dataset_id, extension)
+    return await service.get_dataset_download(dataset_id, extension)

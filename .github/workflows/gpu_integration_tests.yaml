@@ -54,14 +54,14 @@ jobs:
         if: ${{ failure() || cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs
+          name: ray-logs-${{ matrix.test }}-sqlite-gpu-${{ github.run_id }}
           path: /tmp/raylogs/ray/session_*/logs/
 
       - name: Upload backend logs in case of failure
         if: ${{ failure() || cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: backend-logs
+          name: backend-log-${{ matrix.test }}-sqlite-gpu-${{ github.run_id }}
           path: /tmp/backendlogs/backend.log
 
       - name: Send a Slack notification
@@ -120,7 +120,7 @@ jobs:
         if: ${{ failure() || cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs
+          name: ray-logs-${{ matrix.test }}-postgres-gpu-${{ github.run_id }}
           path: /tmp/raylogs/ray/session_*/logs/
 
       - name: Send a Slack notification

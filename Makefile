@@ -54,6 +54,11 @@ ifeq ($(shell test $(RAY_WORKER_GPUS) -ge 1; echo $$?) , 0)
 	COMPUTE_TYPE := -gpu
 	GPU_COMPOSE := -f docker-compose.gpu.override.yaml
 endif
+CI ?= false
+
+ifeq ($(CI), true)
+	CI_COMPOSE := -f docker-compose.ci.override.yaml
+endif
 
 # lumigator runs on a set of containers (backend, ray, minio, etc).
 # The following allows one to start all of them before calling a target
@@ -138,11 +143,11 @@ start-lumigator: config-generate-env
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(CI_COMPOSE) $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(CI_COMPOSE) $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(POSTGRES_DOCKER_COMPOSE_FILE) up -d --build
 
 # Launches lumigator without local dependencies (ray, S3)
 start-lumigator-external-services: config-generate-env

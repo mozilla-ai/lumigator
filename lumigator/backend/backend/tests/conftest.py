@@ -8,13 +8,11 @@ import time
 import uuid
 from collections.abc import Generator
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid import UUID
 
-import boto3
 import evaluator
 import fsspec
-import loguru
 import pytest
 import requests_mock
 import yaml
@@ -31,13 +29,12 @@ from lumigator_schemas.jobs import (
     JobType,
 )
 from lumigator_schemas.models import ModelsResponse
-from mypy_boto3_s3 import S3Client
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
-from backend.api.deps import get_db_session, get_job_service, get_s3_client, get_s3_filesystem
+from backend.api.deps import get_db_session, get_job_service, get_s3_filesystem
 from backend.api.router import API_V1_PREFIX
 from backend.main import create_app
 from backend.records.jobs import JobRecord
@@ -268,31 +265,17 @@ def db_session(db_engine: Engine):
 def fake_s3fs() -> S3FileSystem:
     """Replace the filesystem registry for S3 with a MemoryFileSystem implementation."""
     fsspec.register_implementation("s3", MemoryFileSystem, clobber=True, errtxt="Failed to register mock S3FS")
-    yield MemoryFileSystem()
+    mfs = MemoryFileSystem()
+    mfs_mock = MagicMock(wraps=mfs)
+    mfs_mock.s3 = FakeS3Client(MemoryFileSystem.store)
+    # Mock the find method to match the path (minus the S3:// prefix)
+    # and be a bit less strict about just seeing the prefix in the path in general.
+    mfs_mock.find = lambda path, prefix: [
+        k for k in MemoryFileSystem.store.keys() if k.removeprefix("s3://").startswith(path) and k.find(prefix) != -1
+    ]
+
+    yield mfs_mock
     logger.info(f"final s3fs contents: {str(MemoryFileSystem.store)}")
-
-
-@pytest.fixture(scope="function")
-def fake_s3_client(fake_s3fs) -> S3Client:
-    """Provide a fake S3 client using MemoryFileSystem as underlying storage."""
-    return FakeS3Client(MemoryFileSystem.store)
-
-
-@pytest.fixture(scope="function")
-def boto_s3_client() -> S3Client:
-    """Provide a real S3 client."""
-    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID", "lumigator")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY", "lumigator")
-    aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
-    aws_default_region = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
-
-    return boto3.client(
-        "s3",
-        endpoint_url=aws_endpoint_url,
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        region_name=aws_default_region,
-    )
 
 
 @pytest.fixture(scope="function")
@@ -349,9 +332,7 @@ def local_client(app: FastAPI):
 
 
 @pytest.fixture(scope="function")
-def dependency_overrides_fakes(
-    app: FastAPI, db_session: Session, fake_s3_client: S3Client, fake_s3fs: S3FileSystem
-) -> None:
+def dependency_overrides_fakes(app: FastAPI, db_session: Session, fake_s3fs: S3FileSystem) -> None:
     """Override the FastAPI dependency injection for test DB sessions. Uses mocks/fakes for unit tests.
 
     Reference: https://sqlmodel.tiangolo.com/tutorial/fastapi/tests/#override-a-dependency
@@ -360,21 +341,15 @@ def dependency_overrides_fakes(
     def get_db_session_override():
         yield db_session
 
-    def get_s3_client_override():
-        yield fake_s3_client
-
     def get_s3_filesystem_override():
         yield fake_s3fs
 
     app.dependency_overrides[get_db_session] = get_db_session_override
-    app.dependency_overrides[get_s3_client] = get_s3_client_override
     app.dependency_overrides[get_s3_filesystem] = get_s3_filesystem_override
 
 
 @pytest.fixture(scope="function")
-def dependency_overrides_services(
-    app: FastAPI, db_session: Session, boto_s3_client: S3Client, boto_s3fs: S3FileSystem
-) -> None:
+def dependency_overrides_services(app: FastAPI, db_session: Session, boto_s3fs: S3FileSystem) -> None:
     """Override the FastAPI dependency injection for test DB sessions. Uses real clients for integration tests.
 
     Reference: https://sqlmodel.tiangolo.com/tutorial/fastapi/tests/#override-a-dependency
@@ -383,14 +358,10 @@ def dependency_overrides_services(
     def get_db_session_override():
         yield db_session
 
-    def get_s3_client_override():
-        yield boto_s3_client
-
     def get_s3_filesystem_override():
         yield boto_s3fs
 
     app.dependency_overrides[get_db_session] = get_db_session_override
-    app.dependency_overrides[get_s3_client] = get_s3_client_override
     app.dependency_overrides[get_s3_filesystem] = get_s3_filesystem_override
 
 
@@ -431,9 +402,9 @@ def result_repository(db_session):
 
 
 @pytest.fixture(scope="function")
-def dataset_service(db_session, fake_s3_client, fake_s3fs):
+def dataset_service(db_session, fake_s3fs):
     dataset_repo = DatasetRepository(db_session)
-    return DatasetService(dataset_repo=dataset_repo, s3_client=fake_s3_client, s3_filesystem=fake_s3fs)
+    return DatasetService(dataset_repo=dataset_repo, s3_filesystem=fake_s3fs)
 
 
 @pytest.fixture(scope="function")

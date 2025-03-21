@@ -89,7 +89,7 @@ class TrackingClient(Protocol):
         """Update the outputs of a workflow"""
         ...
 
-    def get_job(self, job_id: str) -> JobResults | None:
+    def get_job(self, job_id: str) -> JobResults:
         """Get a job."""
         ...
 

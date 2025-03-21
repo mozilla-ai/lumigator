@@ -571,9 +571,9 @@ def caplog_with_loguru(caplog, configure_loguru):
 
 
 @pytest.fixture(scope="function")
-def fake_mlflow_tracking_client(fake_s3_client, fake_s3fs):
+def fake_mlflow_tracking_client(fake_s3fs):
     """Fixture for MLflowTrackingClient using the real MLflowClient."""
-    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs, s3_client=fake_s3_client)
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)
 
 
 @pytest.fixture(scope="session")

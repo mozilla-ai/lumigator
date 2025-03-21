@@ -50,10 +50,8 @@ from backend.tracking.mlflow import MLflowTrackingClient
         ),
     ],
 )
-def test_mlflow_log_key_changes(
-    caplog_with_loguru, overwritten, unmerged, skipped, expected_logs, fake_s3fs, fake_s3_client
-):
-    tracking_client = MLflowTrackingClient("uri", fake_s3fs, fake_s3_client)
+def test_mlflow_log_key_changes(caplog_with_loguru, overwritten, unmerged, skipped, expected_logs, fake_s3fs):
+    tracking_client = MLflowTrackingClient("uri", fake_s3fs)
 
     with caplog_with_loguru.at_level("DEBUG"):  # Capture all log levels
         tracking_client._log_key_changes("wf1", "job1", overwritten, unmerged, skipped)
@@ -84,12 +82,11 @@ def test_mlflow_log_key_changes_warning_level(
     expected_warning_log,
     expected_debug_log,
     fake_s3fs,
-    fake_s3_client,
 ):
     # Set log level to WARNING (to suppress DEBUG logs)
     with caplog_with_loguru.at_level("WARNING"):
         # Instantiate the class and call the method
-        tracking_client = MLflowTrackingClient("uri", fake_s3fs, fake_s3_client)
+        tracking_client = MLflowTrackingClient("uri", fake_s3fs)
         tracking_client._log_key_changes("wf1", "job1", overwritten_keys, unmerged_keys, skipped_keys)
 
     # Check that the WARNING log is emitted as expected

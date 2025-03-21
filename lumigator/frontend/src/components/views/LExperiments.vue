@@ -86,7 +86,8 @@ import {
   type TableDataForWorkflowResults,
 } from '@/helpers/getExperimentResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
-// import { useRouter } from 'vue-router'
+import { FeatureFlags, isFeatureEnabled } from '@/helpers/FeatureFlags'
+import { useRouter } from 'vue-router'
 
 const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
@@ -105,7 +106,7 @@ const workflowLogs: Ref<string[]> = ref([])
 const isPolling = ref(false)
 let experimentInterval: number | undefined = undefined
 
-// const router = useRouter()
+const router = useRouter()
 const showDrawer = ref(false)
 const experimentsDrawer = ref()
 const showLogs = ref()
@@ -115,6 +116,10 @@ const headerDescription = ref(`Experiments are a logical sequence of inference a
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isFormVisible = computed(() => showSlidingPanel.value && !selectedExperiment.value)
+
+const isExperimentManagementFeatureEnabled = computed(() =>
+  isFeatureEnabled(FeatureFlags.ExperimentManagement),
+)
 
 const getDrawerHeader = () => {
   const isWorkflowResults = selectedWorkflowResults.value && showJobResults.value
@@ -133,8 +138,11 @@ const onCreateExperiment = () => {
 const handleExperimentClicked = (experiment: Experiment) => {
   selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
   selectedWorkflow.value = undefined
-  showSlidingPanel.value = true
-  // router.push(`/experiments/${experiment.id}`)
+  if (isExperimentManagementFeatureEnabled.value) {
+    router.push(`/experiments/${experiment.id}`)
+  } else {
+    showSlidingPanel.value = true
+  }
 }
 
 const handleWorkflowClicked = async (workflow: Workflow) => {

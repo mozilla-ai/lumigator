@@ -253,7 +253,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs-${{ matrix.test }}-sqlite-${{ github.run_id }}
+          name: ray-logs-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
@@ -261,7 +261,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-docker-log-${{ matrix.test }}-sqlite-${{ github.run_id }}
+          name: ray-docker-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raydocker.log
 
@@ -269,7 +269,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-log-${{ matrix.test }}-sqlite-${{ github.run_id }}
+          name: backend-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/backendlogs/backend.log
 
@@ -337,7 +337,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs-${{ matrix.test }}-postgres-${{ github.run_id }}
+          name: ray-logs-${{ matrix.test }}-postgres-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 

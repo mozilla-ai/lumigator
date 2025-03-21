@@ -41,3 +41,17 @@ export const router = createRouter({
     }
   },
 })
+
+// preserve query strings when navigating between pages to maintain feature flags
+router.beforeEach((to, from, next) => {
+  // Preserve query parameters if missing, but avoid unnecessary redirects
+  if (from.query.experimentManagement === 'true' && !to.query.experimentManagement) {
+    next({
+      path: to.path,
+      query: { ...to.query, experimentManagement: 'true' }, // Only add if missing
+      replace: true,
+    })
+  } else {
+    next() // Proceed normally if no changes needed
+  }
+})

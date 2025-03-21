@@ -27,7 +27,7 @@
               :isLoading="isDatasetsLoading || isDatasetsFetching"
               :table-data="datasets"
               @l-dataset-selected="onDatasetSelected($event)"
-              @l-experiment="onExperimentDataset($event)"
+              @use-in-experiment-clicked="handleUseInExperimentClicked($event)"
               @l-download-dataset="handleDownloadDatasetClicked($event)"
               @l-delete-dataset="handleDeleteDatasetClicked($event)"
               @view-dataset-clicked="handleViewDatasetClicked"
@@ -63,7 +63,7 @@
     <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"
-        @l-experiment="onExperimentDataset($event)"
+        @use-in-experiment-clicked="handleUseInExperimentClicked($event)"
         @l-generate-gt="onGenerateGT()"
         @l-details-closed="onClearSelection()"
         @l-delete-dataset="handleDeleteDatasetClicked($event)"
@@ -401,7 +401,8 @@ const onClearSelection = () => {
   datasetStore.setSelectedDataset(undefined)
 }
 
-const onExperimentDataset = (dataset: Dataset) => {
+const handleUseInExperimentClicked = (dataset: Dataset) => {
+  showSlidingPanel.value = false
   router.push('experiments')
   datasetStore.setSelectedDataset(dataset)
   fetchDatasetDetails(dataset.id)

@@ -46,7 +46,7 @@ class HuggingFaceModelClientFactory:
                 logger.info(f"Running inference with HuggingFaceOpusMTTranslationClient for {model_name}")
                 return HuggingFaceOpusMTTranslationClient(config, api_key)
             else:
-                logger.error(
+                raise ValueError(
                     f"Translation task with HF seq2seq models: {model_name} is not supported. "
                     f"Only models in translation_models.yaml and OpusMT models are currently supported."
                 )

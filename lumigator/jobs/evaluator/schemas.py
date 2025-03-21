@@ -3,6 +3,7 @@ This file must only depend on pydantic and not on any other external library.
 This is because the backend and this job will be running in different environments.
 """
 
+from lumigator_schemas.jobs import DeepEvalLocalModelConfig
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -11,13 +12,9 @@ class DatasetConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class ModelConfig(BaseModel):
-    path: str
-    model_config = ConfigDict(extra="forbid")
-
-
 class EvaluationConfig(BaseModel):
     metrics: list[str] = Field(default=["rouge", "meteor", "bertscore", "bleu"])
+    llm_as_judge: DeepEvalLocalModelConfig | None = None
     max_samples: int = 0
     return_input_data: bool = False
     return_predictions: bool = False

@@ -3,7 +3,7 @@ import copy
 import pytest
 from pydantic import ValidationError
 
-from schemas import DatasetConfig, EvalJobConfig, EvaluationConfig, ModelConfig
+from schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
 
 
 def test_valid_config():

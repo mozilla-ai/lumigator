@@ -7,7 +7,6 @@ from http import HTTPStatus
 from urllib.parse import urljoin
 from uuid import UUID
 
-import boto3
 import loguru
 import requests
 from lumigator_schemas.experiments import GetExperimentResponse
@@ -30,8 +29,9 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._client = MlflowClient(tracking_uri=tracking_uri)
+        self._s3_file_system = s3_file_system
 
     def create_experiment(
         self,
@@ -132,7 +132,7 @@ class MLflowTrackingClient(TrackingClient):
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
+    async def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
             experiment = self._client.get_experiment(experiment_id)
@@ -144,12 +144,12 @@ class MLflowTrackingClient(TrackingClient):
         # If the experiment is in the deleted lifecylce, return None
         if experiment.lifecycle_stage == "deleted":
             return None
-        return self._format_experiment(experiment)
+        return await self._format_experiment(experiment)
 
-    def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
+    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [await self.get_workflow(workflow_id) for workflow_id in workflow_ids]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -168,7 +168,7 @@ class MLflowTrackingClient(TrackingClient):
         """Update the name of an experiment."""
         raise NotImplementedError
 
-    def list_experiments(self, skip: int, limit: int) -> list[GetExperimentResponse]:
+    async def list_experiments(self, skip: int, limit: int | None) -> list[GetExperimentResponse]:
         """List all experiments."""
         page_token = None
         experiments = []
@@ -189,12 +189,12 @@ class MLflowTrackingClient(TrackingClient):
             if response.token is None:
                 break
         reduced_experiments = experiments[:limit] if limit is not None else experiments
-        return [self._format_experiment(experiment) for experiment in reduced_experiments]
+        return [await self._format_experiment(experiment) for experiment in reduced_experiments]
 
     # TODO find a cheaper call
-    def experiments_count(self):
+    async def experiments_count(self):
         """Get the number of experiments."""
-        return len(self.list_experiments(skip=0, limit=None))
+        return len(await self.list_experiments(skip=0, limit=None))
 
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
@@ -225,7 +225,7 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
         """Get a workflow and all its jobs."""
         try:
             workflow = self._client.get_run(workflow_id)
@@ -268,8 +268,7 @@ class MLflowTrackingClient(TrackingClient):
         # combine them into a single json file, put that back into s3, and then generate
         # a presigned URL for that file
         # check if the compiled results already exist
-        s3 = S3FileSystem()
-        if not s3.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
+        if not self._s3_file_system.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
             compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
             for job in workflow_details.jobs:
                 # look for all parameter keys that end in "_s3_path" and download the file
@@ -277,7 +276,7 @@ class MLflowTrackingClient(TrackingClient):
                     if param["name"].endswith("_s3_path"):
                         # download the file
                         # get the file from the S3 bucket
-                        with s3.open(f"{param['value']}") as f:
+                        with self._s3_file_system.open(f"{param['value']}") as f:
                             job_results = JobResultObject.model_validate(json.loads(f.read()))
                         # if any keys are the same, log a warning and then overwrite the key
                         for job_result_item in job_results:
@@ -289,11 +288,10 @@ class MLflowTrackingClient(TrackingClient):
                                     loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
                                 # merge the results into the compiled results
                                 compiled_results[job_result_item[0]][key] = job_result_item[1][key]
-            with s3.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
+            with self._s3_file_system.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
                 f.write(json.dumps(compiled_results))
             # Generate presigned download URL for the object
-        s3_client = boto3.client("s3", endpoint_url=settings.S3_ENDPOINT_URL)
-        download_url = s3_client.generate_presigned_url(
+        download_url = await self._s3_file_system.s3.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.S3_BUCKET,
@@ -424,18 +422,15 @@ class MLflowTrackingClient(TrackingClient):
 class MLflowClientManager:
     """Connection manager for MLflow client."""
 
-    def __init__(self, tracking_uri: str):
+    def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._tracking_uri = tracking_uri
+        self._s3_file_system = s3_file_system
 
     @contextlib.contextmanager
     def connect(self) -> Generator[TrackingClient, None, None]:
         """Yield an MLflow client, handling exceptions."""
-        tracking_client = MLflowTrackingClient(tracking_uri=self._tracking_uri)
-        try:
-            yield tracking_client
-        except MlflowException as e:
-            print(f"MLflowException occurred: {e}")
-            raise
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            raise
+        tracking_client = MLflowTrackingClient(
+            tracking_uri=self._tracking_uri,
+            s3_file_system=self._s3_file_system,
+        )
+        yield tracking_client

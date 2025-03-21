@@ -8,10 +8,7 @@ from uuid import UUID
 import loguru
 from fastapi import status
 from fastapi.testclient import TestClient
-from lumigator_schemas.jobs import (
-    JobInferenceConfig,
-    JobInferenceCreate,
-)
+from lumigator_schemas.jobs import JobInferenceConfig, JobInferenceCreate, JobType
 
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.settings import settings
@@ -35,7 +32,7 @@ def test_get_job_status(
     json_data_health_job_metadata_ray,
     dependency_overrides_fakes,
 ):
-    created_job = job_repository.create(name="test", description="test desc")
+    created_job = job_repository.create(name="test", description="test desc", job_type=JobType.INFERENCE)
 
     # The Ray client will call the Ray API to get the version before getting the job status
     # Mock the Ray version API
@@ -138,6 +135,5 @@ def test_missing_api_key_in_job_creation(
     with patch("backend.api.deps.JobSubmissionClient"):
         with patch.object(job_service, "create_job", side_effect=SecretNotFoundError("test error msg")):
             response = app_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
-            loguru.logger.critical(f"response text: {response.text}")
             assert response is not None
             assert response.status_code == status.HTTP_400_BAD_REQUEST

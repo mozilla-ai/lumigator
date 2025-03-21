@@ -8,7 +8,7 @@ class SecretEncryptionError(ValidationError):
         """Creates a SecretEncryptionError
 
         :param name: the name of the secret that caused the error
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(f"Error encrypting secret: {name}", exc)
 
@@ -20,7 +20,7 @@ class SecretDecryptionError(ValidationError):
         """Creates a SecretDecryptionError
 
         :param name: the name of the secret that caused the error
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(f"Error decrypting secret: {name}", exc)
 
@@ -33,6 +33,6 @@ class SecretNotFoundError(NotFoundError):
 
         :param resource_id: the name of the secret that was not found
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__("Secret", resource_id, message, exc)

@@ -35,10 +35,28 @@ export async function deleteWorkflow(id: string) {
   return response.data
 }
 
+/**
+ * Downloads the results of a specific workflow by ID.
+ * @param {string} workflow_id .
+ * @returns {Promise<Blob|Error>} A promise that resolves to a Blob containing the file data.
+ */
+export async function downloadResults(workflow_id: string) {
+  const response = await lumigatorApiAxiosInstance.get(`workflows/${workflow_id}/result/download`)
+  if (!response.data) {
+    throw new Error('No URL found in the response.')
+  }
+  const fileResponse = await lumigatorApiAxiosInstance.get(response.data, {
+    responseType: 'blob', // Important: Receive the file as a binary blob
+  })
+  const blob = fileResponse.data
+  return blob
+}
+
 export const workflowsService = {
   createWorkflow,
   fetchLogs,
   fetchWorkflowResults,
   fetchWorkflowDetails,
   deleteWorkflow,
+  downloadResults,
 }

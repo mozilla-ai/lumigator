@@ -346,7 +346,7 @@ class WorkflowService:
         if workflow_details.artifacts_download_url:
             return workflow_details.artifacts_download_url
         else:
-            raise WorkflowDownloadNotAvailableError(workflow_id, "No result download link has been found") from None
+            raise WorkflowDownloadNotAvailableError(workflow_id) from None
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""

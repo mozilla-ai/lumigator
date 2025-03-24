@@ -4,10 +4,7 @@
     modal
     :closable="true"
     close-icon=""
-    @update:visible="
-      isVisible = $event
-      emit('close')
-    "
+    @update:visible="handleIsVisibleChanged"
   >
     <template #header>
       <div class="header">Create Experiment</div>
@@ -191,6 +188,11 @@ const targetLanguageOptions = computed(() =>
 const useCase: Ref<'summarization' | 'translation'> = ref(
   useCaseOptions.value[0].value as 'summarization' | 'translation',
 )
+
+const handleIsVisibleChanged = (value: boolean) => {
+  isVisible.value = value
+  emit('close')
+}
 
 const experimentTitle = ref('')
 const experimentDescription = ref('')

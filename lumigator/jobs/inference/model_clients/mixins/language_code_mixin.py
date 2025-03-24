@@ -18,5 +18,7 @@ class LanguageCodesSetupMixin:
 
         self.source_language_iso_code = source_language_info["iso_code"]  # e.g. "en"
         self.source_language = source_language_info["full_name"]  # e.g. "English"
+        self.source_language_alpha3_code = source_language_info["alpha3_code"]  # e.g. "eng"
         self.target_language_iso_code = target_language_info["iso_code"]  # e.g. "de"
         self.target_language = target_language_info["full_name"]  # e.g. "German"
+        self.target_language_alpha3_code = target_language_info["alpha3_code"]  # e.g. "deu"

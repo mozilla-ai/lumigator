@@ -225,12 +225,14 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
 :sync: tab2
 ```python
 from lumigator_schemas.experiments import ExperimentCreate
+from lumigator_schemas.tasks import SummarizationTaskDefinition
 
 dataset_id = datasets.items[-1].id
 request = ExperimentCreate(
     name="DialogSum Summarization",
-    description="See which model best summarizes Dialogues",
-    dataset=dataset_id
+    description="See which model best summarizes Dialogues.",
+    dataset=dataset_id,
+    task_definition=SummarizationTaskDefinition()
 )
 experiment_response = client.experiments.create_experiment(request)
 experiment_id = experiment_response.id
@@ -246,7 +248,7 @@ Before creating your first evaluation workflow with an OpenAI model, you need to
 
 ::::{tab-set}
 
-::::{tab-item} cURL
+:::{tab-item} cURL
 :sync: tab1
 
 Set the following variables:
@@ -271,6 +273,22 @@ user@host:~/lumigator$ curl -X PUT http://localhost:8000/api/v1/settings/secrets
   -H 'Content-Type: application/json' \
   -d "$JSON_STRING" | jq
 ```
+
+:::
+
+:::{tab-item} Python SDK
+:sync: tab2
+```python
+api_key = client.settings.secrets.APIKey.OPENAI
+
+response = client.settings.secrets.upload_api_key(
+    api_key,
+    secret_value="sk-...",
+)
+```
+:::
+
+::::
 
 ## Trigger the workflows
 
@@ -330,13 +348,13 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
 :sync: tab2
 ```python
 from lumigator_schemas.workflows import WorkflowCreateRequest
-# Now let's run the same thing, but with o3-mini
+
 request = WorkflowCreateRequest(
     name="OpenAI 4o",
-    description="Summarize with 4o",
+    description="Summarize with 4o.",
     model="gpt-4o",
     provider="openai",
-    dataset=dataset_id,
+    secret_key_name="openai_api_key",
     experiment_id=experiment_id
 )
 client.workflows.create_workflow(request).model_dump()
@@ -403,7 +421,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+experiment_details = client.experiments.get_experiment(experiment_id)
 print(experiment_details.model_dump_json())
 ```
 :::

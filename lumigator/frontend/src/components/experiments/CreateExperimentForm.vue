@@ -2,13 +2,16 @@
   <Dialog
     v-model:visible="isVisible"
     modal
-    header="Create Experiment"
     :closable="true"
+    close-icon=""
     @update:visible="
       isVisible = $event
       emit('close')
     "
   >
+    <template #header>
+      <div class="header">Create Experiment</div>
+    </template>
     <div class="form-body">
       <FloatLabel variant="in" class="form-field">
         <InputText id="title" v-model="experimentTitle" variant="filled" />
@@ -21,7 +24,7 @@
           rows="2"
           style="resize: none"
         ></Textarea>
-        <label for="description_input">Description</label>
+        <label for="description_input">Description for your own reference</label>
       </FloatLabel>
 
       <FloatLabel variant="in" class="form-field">
@@ -31,7 +34,6 @@
           :options="filteredDatasets"
           optionLabel="filename"
           variant="filled"
-          size="small"
         ></Select>
         <label for="dataset">Dataset</label>
       </FloatLabel>
@@ -45,7 +47,7 @@
         />
         <label for="max_samples">Maximum samples (optional)</label>
       </FloatLabel>
-      <p>Limit how many rows of your dataset to use for this experiment.</p>
+      <p class="caption">Limit how many rows of your dataset to use for this experiment.</p>
 
       <FloatLabel variant="in" size="small" class="form-field">
         <Select
@@ -60,7 +62,7 @@
         </Select>
         <label for="usecase">Use-case</label>
       </FloatLabel>
-      <!-- <p>Summarization experiments are evaluated with ROUGE, METEOR, and BERT.</p> -->
+      <p class="caption">Summarization experiments are evaluated with ROUGE, METEOR, and BERT.</p>
 
       <div v-if="useCase === 'translation'" class="languages form-field">
         <FloatLabel variant="in" class="form-field form-field--inline">
@@ -87,28 +89,30 @@
           <label for="targetLanguage">Target Language</label>
         </FloatLabel>
       </div>
-      <div>
+      <div v-if="useCase === 'summarization'" class="g-eval-field">
         <Checkbox disabled v-model="includeGEval" inputId="g-eval" name="g-eval" binary />
         <label for="g-eval"> Include G-Eval scores using LLM as a Judge </label>
       </div>
     </div>
-    <div class="actions">
-      <Button
-        type="button"
-        label="Cancel"
-        rounded
-        severity="secondary"
-        @click="handleCancelClicked"
-      ></Button>
-      <Button
-        type="button"
-        rounded
-        :loading="createExperimentMutation.isPending.value"
-        label="Continue"
-        :disabled="isFormInvalid || createExperimentMutation.isPending.value"
-        @click="handleContinueClicked"
-      ></Button>
-    </div>
+    <template #footer>
+      <div class="actions">
+        <Button
+          type="button"
+          label="Cancel"
+          rounded
+          severity="secondary"
+          @click="handleCancelClicked"
+        ></Button>
+        <Button
+          type="button"
+          rounded
+          :loading="createExperimentMutation.isPending.value"
+          label="Continue"
+          :disabled="isFormInvalid || createExperimentMutation.isPending.value"
+          @click="handleContinueClicked"
+        ></Button>
+      </div>
+    </template>
   </Dialog>
 </template>
 
@@ -147,7 +151,7 @@ const { datasets } = storeToRefs(datasetStore)
 const filteredDatasets = computed(() =>
   datasets.value.filter((dataset) => dataset.ground_truth === true),
 )
-const dataset: Ref<Dataset | undefined> = ref(selectedDataset || filteredDatasets.value[0])
+const dataset: Ref<Dataset | undefined> = ref(selectedDataset)
 const includeGEval = ref(false)
 
 const useCaseOptions = ref([
@@ -280,19 +284,38 @@ function handleCancelClicked() {
 
 <style lang="scss" scoped>
 @use '@/styles/variables.scss';
+@use '@/styles/mixins.scss';
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.header {
+  text-align: center;
   width: 100%;
+  @include mixins.heading-2;
 }
+
+// .form {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 1.5rem;
+//   width: 100%;
+// }
 
 .form-body {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
+.caption {
+  color: var(--l-grey-100, #bbb);
+
+  @include mixins.caption;
+}
+
+.g-eval-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .languages {
   display: flex;
   gap: 1rem;
@@ -300,8 +323,6 @@ function handleCancelClicked() {
 }
 
 .form-field {
-  margin-bottom: var(--l-spacing-1);
-
   > div,
   > input {
     width: 100%;
@@ -310,13 +331,11 @@ function handleCancelClicked() {
   }
 
   textarea {
-    background-color: var(--l-card-bg);
     width: 100%;
     font-size: var(--l-font-size-sm);
   }
 
   .number-input {
-    background-color: var(--l-card-bg);
     width: 100%;
   }
 
@@ -330,5 +349,6 @@ function handleCancelClicked() {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  width: 100%;
 }
 </style>

@@ -12,8 +12,13 @@
     background-color: variables.$l-button-hover-bg;
   }
 
+  &:disabled {
+    background-color: var(--l-grey-300);
+    border: 0.5px solid var(--border-stroke);
+  }
+
   &:disabled:hover {
-    background-color: var(--l-button-secondary-background);
+    background-color: var(--l-grey-300);
     cursor: not-allowed;
   }
 }
@@ -26,10 +31,34 @@
 }
 
 .p-inputtext {
-  background-color: variables.$l-main-bg;
+  // background-color: variables.$l-main-bg;
+  --l-inputtext-filled-background: var(--l-grey-300);
+  --l-inputtext-border-radius: 0.5rem;
+  --l-inputtext-border-color: var(--l-grey-300);
+  --l-inputtext-shadow: var(--neutral-box-shadow);
+
   color: variables.$l-text-color;
   padding: variables.$l-spacing-1 * 0.5;
-  border-radius: variables.$l-input-border-radius;
+}
+
+.p-textarea {
+  --l-textarea-background: var(--l-grey-300);
+  --l-textarea-border-radius: 0.5rem;
+  --l-textarea-border-color: var(--l-grey-300);
+  --l-textarea-shadow: var(--neutral-box-shadow);
+
+  color: variables.$l-text-color;
+  padding: variables.$l-spacing-1 * 0.5;
+}
+
+.p-select {
+  --l-select-background: var(--l-grey-300);
+  --l-select-filled-background: var(--l-grey-300);
+  --l-select-border-radius: 0.5rem;
+  --l-select-border-color: var(--l-grey-300);
+  --l-select-shadow: var(--neutral-box-shadow);
+
+  color: variables.$l-text-color;
 }
 
 .hidden {

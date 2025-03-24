@@ -265,6 +265,19 @@
   pointer-events: all !important;
 }
 
+.p-dialog {
+  display: flex;
+  width: 35rem;
+  padding: 1.5rem 2rem;
+  --l-dialog-header-padding: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  --l-dialog-color: var(--l-grey-100);
+  --l-dialog-border-radius: 0.5rem;
+  --l-dialog-background: var(--l-grey-400);
+}
+
 // hides the "X" button from confirm popup
 .p-confirmdialog .p-dialog-close-button {
   display: none;

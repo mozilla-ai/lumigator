@@ -249,7 +249,7 @@ const createExperimentMutation = useMutation({
     })
 
     // queryClient.invalidateQueries('experiments')
-    await experimentStore.fetchAllExperiments()
+    experimentStore.fetchAllExperiments()
     router.push(`/experiments/${data.id}`)
   },
 })

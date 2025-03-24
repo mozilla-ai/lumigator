@@ -93,8 +93,8 @@ def run_eval(config: EvalJobConfig) -> Path:
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
 
     def replace_none_with_empty(row):
-        if row["predictions"] is None:
-            row["predictions"] = ""
+        if row[config.predictions_field] is None:
+            row[config.predictions_field] = ""
         return row
 
     dataset = dataset.map(replace_none_with_empty)
@@ -111,13 +111,15 @@ def run_eval(config: EvalJobConfig) -> Path:
     dataset = dataset.select(range(max_samples))
 
     metric_results, evaluation_time = run_eval_metrics(
-        dataset["examples"], dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+        dataset["examples"], dataset[config.predictions_field], dataset["ground_truth"], config.evaluation.metrics
     )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
         artifacts = EvalJobArtifacts(
-            predictions=dataset["predictions"], ground_truth=dataset["ground_truth"], evaluation_time=evaluation_time
+            predictions=dataset[config.predictions_field],
+            ground_truth=dataset["ground_truth"],
+            evaluation_time=evaluation_time,
         )
     else:
         artifacts = None

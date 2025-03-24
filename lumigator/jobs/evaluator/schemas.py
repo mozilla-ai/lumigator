@@ -29,6 +29,7 @@ class EvalJobConfig(BaseModel):
     name: str
     dataset: DatasetConfig
     evaluation: EvaluationConfig
+    predictions_field: str = "predictions"
     model_config = ConfigDict(extra="forbid")
 
 

@@ -36,13 +36,13 @@ export type TableDataForWorkflowResults = {
   Examples: string
   'Ground Truth': string
   predictions: string
-  'rouge-1': string | number
-  'rouge-2': string | number
-  'rouge-l': string | number
-  meteor: string | number
-  'bert-p': string | number
-  'bert-f1': string | number
-  bleu: string | number
+  'rouge-1'?: string
+  'rouge-2'?: string
+  'rouge-l'?: string
+  meteor?: string
+  'bert-p'?: string
+  'bert-f1'?: string
+  bleu?: string
   model_size?: string
   parameters?: string
   // evaluation_time: string
@@ -55,12 +55,6 @@ function transformExperimentResults(
 ): TableDataForExperimentResults {
   const data = objectData
   const model = models.find((model) => model.model === data.artifacts.model)
-  // const filteredMetrics  = Object.keys(data.metrics).reduce((acc, key) => {
-  //  if(data.metrics[key]) {
-  //     acc[key as any] = data.metrics[key]
-  //   }
-  //   return acc
-  // }, {})
 
   return {
     model: data.artifacts.model,
@@ -97,25 +91,16 @@ export function transformWorkflowResults(
       Examples: example,
       'Ground Truth': objectData.artifacts.ground_truth?.[index],
       predictions: objectData.artifacts.predictions?.[index],
-      meteor: objectData.metrics.meteor?.meteor?.[index].toFixed(2) ?? 0,
-      'bert-p': objectData.metrics.bertscore?.precision?.[index].toFixed(2) ?? 0,
-      'bert-r': objectData.metrics.bertscore?.recall?.[index].toFixed(2) ?? 0,
-      'bert-f1': objectData.metrics.bertscore?.f1?.[index].toFixed(2) ?? 0,
-      'rouge-1': objectData.metrics.rouge?.rouge1?.[index].toFixed(2) ?? 0,
-      'rouge-2': objectData.metrics.rouge?.rouge2?.[index].toFixed(2) ?? 0,
-      'rouge-l': objectData.metrics.rouge?.rougeL?.[index].toFixed(2) ?? 0,
-      bleu: objectData.metrics.bleu?.bleu?.[index].toFixed(2) ?? 0,
-      // bert_recall: objectData.metrics.bertscore?.recall?.[index].toFixed(2) ?? 0,
-      evaluation_time: objectData.artifacts.evaluation_time.toFixed(2) ?? 0,
-      // meteor_mean: objectData.metrics.meteor?.meteor_mean.toFixed(2) ?? 0,
-      // bleu_mean: objectData.metrics.bleu?.bleu_mean.toFixed(2) ?? 0,
-      // model: objectData.artifacts.model,
-      // rouge1_mean: objectData.metrics.rouge?.rouge1_mean.toFixed(2) ?? 0,
-      // rouge2_mean: objectData.metrics.rouge?.rouge2_mean.toFixed(2) ?? 0,
-      // rougeL_mean: objectData.metrics.rouge?.rougeL_mean.toFixed(2) ?? 0,
-      // rougeLsum: objectData.metrics.rouge?.rougeLsum?.[index].toFixed(2) ?? 0,
-      // rougeLsum_mean: objectData.metrics.rouge?.rougeLsum_mean.toFixed(2) ?? 0,
-      inference_time: objectData.artifacts.inference_time.toFixed(2) ?? 0,
+      ...(objectData.metrics.meteor && { meteor: objectData.metrics.meteor.meteor?.[index].toFixed(2) }),
+      ...(objectData.metrics.bertscore && { 'bert-p': objectData.metrics.bertscore.precision?.[index].toFixed(2) }),
+      ...(objectData.metrics.bertscore && { 'bert-r': objectData.metrics.bertscore.recall?.[index].toFixed(2) }),
+      ...(objectData.metrics.bertscore && { 'bert-f1': objectData.metrics.bertscore.f1?.[index].toFixed(2) }),
+      ...(objectData.metrics.rouge && { 'rouge-1': objectData.metrics.rouge.rouge1?.[index].toFixed(2) }),
+      ...(objectData.metrics.rouge && { 'rouge-2': objectData.metrics.rouge.rouge2?.[index].toFixed(2) }),
+      ...(objectData.metrics.rouge && { 'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2) }),
+      ...(objectData.metrics.bleu && { bleu: objectData.metrics.bleu.bleu?.[index].toFixed(2) }),
+      evaluation_time: String(objectData.artifacts.evaluation_time.toFixed(2) ?? '0'),
+      inference_time: String(objectData.artifacts.inference_time.toFixed(2) ?? '0'),
     }
   })
 }

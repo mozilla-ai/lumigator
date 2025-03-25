@@ -1,7 +1,7 @@
 accelerate==1.5.2
 datasets==2.19.1
 langcodes==3.5.0
-litellm==1.63.12
+litellm==1.63.14
 loguru==0.7.3
 numpy==1.26.3
 pandas==2.2.3

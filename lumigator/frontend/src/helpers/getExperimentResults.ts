@@ -21,14 +21,14 @@ export async function getExperimentResults(
 
 export type TableDataForExperimentResults = {
   model: string
-  'bert-p': string
-  Meteor: string
-  'bert-r': string
-  'bert-f1': string
-  'rouge-1': string
-  'rouge-2': string
-  'rouge-l': string
-  bleu: string
+  'bert-p'?: string
+  Meteor?: string
+  'bert-r'?: string
+  'bert-f1'?: string
+  'rouge-1'?: string
+  'rouge-2'?: string
+  'rouge-l'?: string
+  bleu?: string
   // runTime: string | undefined
   subRows: TableDataForWorkflowResults[]
 }
@@ -36,13 +36,13 @@ export type TableDataForWorkflowResults = {
   Examples: string
   'Ground Truth': string
   predictions: string
-  'rouge-1': string
-  'rouge-2': string
-  'rouge-l': string
-  meteor: string
-  'bert-p': string
-  'bert-f1': string
-  bleu: string
+  'rouge-1': string | number
+  'rouge-2': string | number
+  'rouge-l': string | number
+  meteor: string | number
+  'bert-p': string | number
+  'bert-f1': string | number
+  bleu: string | number
   model_size?: string
   parameters?: string
   // evaluation_time: string
@@ -55,16 +55,23 @@ function transformExperimentResults(
 ): TableDataForExperimentResults {
   const data = objectData
   const model = models.find((model) => model.model === data.artifacts.model)
+  // const filteredMetrics  = Object.keys(data.metrics).reduce((acc, key) => {
+  //  if(data.metrics[key]) {
+  //     acc[key as any] = data.metrics[key]
+  //   }
+  //   return acc
+  // }, {})
+
   return {
     model: data.artifacts.model,
-    Meteor: data.metrics.meteor.meteor_mean.toFixed(2),
-    'bert-p': data.metrics.bertscore.precision_mean.toFixed(2),
-    'bert-r': data.metrics.bertscore.recall_mean.toFixed(2),
-    'bert-f1': data.metrics.bertscore.f1_mean.toFixed(2),
-    'rouge-1': data.metrics.rouge.rouge1_mean.toFixed(2),
-    'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2),
-    'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2),
-    bleu: data.metrics.bleu.bleu_mean.toFixed(2),
+    ...(data.metrics.meteor && { Meteor: data.metrics.meteor.meteor_mean.toFixed(2) }),
+    ...(data.metrics.bertscore && { 'bert-p': data.metrics.bertscore.precision_mean.toFixed(2) }),
+    ...(data.metrics.bertscore && { 'bert-r': data.metrics.bertscore.recall_mean.toFixed(2) }),
+    ...(data.metrics.bertscore && { 'bert-f1': data.metrics.bertscore.f1_mean.toFixed(2) }),
+    ...(data.metrics.rouge && { 'rouge-1': data.metrics.rouge.rouge1_mean.toFixed(2) }),
+    ...(data.metrics.rouge && { 'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2) }),
+    ...(data.metrics.rouge && { 'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2) }),
+    ...(data.metrics.bleu && { bleu: data.metrics.bleu.bleu_mean.toFixed(2) }),
     ...(model &&
       model.info && {
         'model size': model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2'),

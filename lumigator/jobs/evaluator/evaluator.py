@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
+from datasets.features.features import Value
 from eval_metrics import EvaluationMetrics
 from loguru import logger
 from utils import timer
@@ -78,7 +79,27 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
+    # Cast non-string fields into strings. If it cannot be done, then
+    # the dataset is most probably broken.
+    # All-empty fields are interpreted by the loader as 'float64' by default,
+    # which causes issues when an empty 'predictions'
+    for fname in dataset.features:
+        feature = dataset.features[fname]
+        if not (isinstance(feature, Value) and feature.dtype == "string"):
+            logger.warning(
+                f"Found column '{fname}' with non-string type '{feature}', "
+                "converting type to string and None values to ''"
+            )
+            dataset = dataset.cast_column(fname, Value("string"))
+
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
+
+    def replace_none_with_empty(row):
+        if row[config.predictions_field] is None:
+            row[config.predictions_field] = ""
+        return row
+
+    dataset = dataset.map(replace_none_with_empty)
 
     # Check for required fields
     # If any of the G-Eval metrics are in config.evaluation.metrics,
@@ -92,13 +113,15 @@ def run_eval(config: EvalJobConfig) -> Path:
     dataset = dataset.select(range(max_samples))
 
     metric_results, evaluation_time = run_eval_metrics(
-        dataset["examples"], dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+        dataset["examples"], dataset[config.predictions_field], dataset["ground_truth"], config.evaluation.metrics
     )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
         artifacts = EvalJobArtifacts(
-            predictions=dataset["predictions"], ground_truth=dataset["ground_truth"], evaluation_time=evaluation_time
+            predictions=dataset[config.predictions_field],
+            ground_truth=dataset["ground_truth"],
+            evaluation_time=evaluation_time,
         )
     else:
         artifacts = None

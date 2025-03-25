@@ -418,7 +418,7 @@ class MLflowTrackingClient(TrackingClient):
             self._client.log_param(job_id, parameter, value)
 
     def get_job(self, job_id: str) -> JobResults:
-        """Get the results of a job.
+        """Get the results of a job (known as a Run in MLFlow).
 
         This method is used to get the metrics and parameters of a job.
 

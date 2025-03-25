@@ -238,7 +238,10 @@ def test_compile_parameters_conflict(fake_mlflow_tracking_client):
                 lifecycle_stage="active",
             ),
             run_data=RunData(
-                params=[Param(key="other_thing", value="0.01"), Param(key="learning_rate", value="7")],
+                params=[
+                    Param(key="other_thing", value="0.01"),
+                    Param(key="learning_rate", value="7"),
+                ],
                 tags=[
                     RunTag(key="mlflow.runName", value="Run1"),
                 ],
@@ -255,7 +258,10 @@ def test_compile_parameters_conflict(fake_mlflow_tracking_client):
                 lifecycle_stage="active",
             ),
             run_data=RunData(
-                params=[Param(key="learning_rate", value="5")],
+                params=[
+                    Param(key="other_thing", value="0.01"),
+                    Param(key="learning_rate", value="5"),
+                ],
                 tags=[
                     RunTag(key="mlflow.runName", value="Run2"),
                 ],
@@ -289,6 +295,7 @@ def test_compile_parameters_conflict(fake_mlflow_tracking_client):
             "value": "0.01",
             "jobs": {
                 "Run1": "0.01",
+                "Run2": "0.01",
             },
         },
         "learning_rate": {

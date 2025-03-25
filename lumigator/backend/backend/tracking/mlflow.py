@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import http
 import json
@@ -180,7 +181,11 @@ class MLflowTrackingClient(TrackingClient):
     async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [await self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [
+            workflow
+            for workflow in await asyncio.gather(*(self.get_workflow(wid) for wid in workflow_ids))
+            if workflow is not None
+        ]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -311,7 +316,7 @@ class MLflowTrackingClient(TrackingClient):
                         # get the file from the S3 bucket
                         with self._s3_file_system.open(f"{param['value']}") as f:
                             job_results = JobResultObject.model_validate(json.loads(f.read()))
-                            compiled_results[job.id] = job_results
+                            compiled_results[str(job.id)] = job_results.model_dump()
 
             with self._s3_file_system.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
                 f.write(json.dumps(compiled_results))

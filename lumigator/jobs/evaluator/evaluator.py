@@ -12,6 +12,8 @@ from utils import timer
 
 from schemas import EvalJobArtifacts, EvalJobConfig, EvalJobMetrics, JobOutput
 
+DEEPEVAL_CONFIG_FILENAME = ".deepeval"
+
 
 def save_to_disk(local_path: Path, data: JobOutput):
     logger.info(f"Storing evaluation results into {local_path}...")
@@ -142,6 +144,21 @@ def eval_command(config: str) -> None:
     # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
     if "g_eval_summarization" in config_model.evaluation.metrics and (api_key := os.environ.get("api_key")):
         os.environ["OPENAI_API_KEY"] = api_key
+
+    if config_model.evaluation.llm_as_judge is not None:
+        # create a .deepeval config file if an ollama model is specified
+        deepeval_config = {
+            "LOCAL_MODEL_NAME": config_model.evaluation.llm_as_judge.model_name,
+            "LOCAL_MODEL_BASE_URL": config_model.evaluation.llm_as_judge.model_base_url,
+            "USE_LOCAL_MODEL": "YES",
+            "USE_AZURE_OPENAI": "NO",
+            "LOCAL_MODEL_API_KEY": config_model.evaluation.llm_as_judge.model_api_key,
+        }
+        with Path(DEEPEVAL_CONFIG_FILENAME).open("w") as f:
+            json.dump(deepeval_config, f)
+    else:
+        # otherwise, make sure we'll start without a .deepeval config file
+        Path(DEEPEVAL_CONFIG_FILENAME).unlink(missing_ok=True)
 
     run_eval(config_model)
 

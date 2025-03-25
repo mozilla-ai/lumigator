@@ -94,7 +94,7 @@ def extract_language_info(lang: Language | None) -> dict[str, str] | None:
 
     Example:
         extract_language_info(Language.get("fr")) ->
-        {"iso_code": "fr", "full_name": "French"}
+        {"iso_code": "fr", "full_name": "French", "alpha3_code": "fra"}
 
     Args:
         lang: A Language object
@@ -104,8 +104,7 @@ def extract_language_info(lang: Language | None) -> dict[str, str] | None:
     """
     if not lang:
         return None
-
-    return {"iso_code": lang.language, "full_name": lang.display_name()}
+    return {"iso_code": lang.language, "full_name": lang.display_name(), "alpha3_code": lang.to_alpha3()}
 
 
 def resolve_user_input_language(language_str: str) -> dict[str, str]:
@@ -113,10 +112,10 @@ def resolve_user_input_language(language_str: str) -> dict[str, str]:
 
     Example:
         resolve_user_input_language("de") ->
-        {"type": "code", "iso_code": "de", "full_name": "German"}
+        {"type": "code", "iso_code": "de", "full_name": "German", "alpha3_code": "deu"}
 
         resolve_user_input_language("French") ->
-        {"type": "display_name", "iso_code": "fr", "full_name": "French"}
+        {"type": "display_name", "iso_code": "fr", "full_name": "French", "alpha3_code": "fra"}
 
     Args:
         language_str: A string that might be a language code or name

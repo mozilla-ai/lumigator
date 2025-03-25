@@ -180,3 +180,5 @@ user.conf
 
 # Config: Temporary build directory
 build/
+
+.deepeval*

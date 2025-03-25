@@ -39,7 +39,7 @@
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { storeToRefs } from 'pinia'
 import Breadcrumb from 'primevue/breadcrumb'
-import { type MenuItem } from 'primevue/menuitem'
+
 import { computed, type ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
@@ -47,6 +47,7 @@ import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
+import type { MenuItem } from 'primevue/menuitem'
 
 const { id } = defineProps<{
   id: string

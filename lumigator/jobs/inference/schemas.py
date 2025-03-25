@@ -71,8 +71,8 @@ class InferenceMetrics(BaseModel):
     prompt_tokens: int
     total_tokens: int
     completion_tokens: int
-    reasoning_tokens: int | None = None
-    answer_tokens: int | None = None
+    reasoning_tokens: int
+    answer_tokens: int
 
 
 class AverageInferenceMetrics(BaseModel):
@@ -91,7 +91,7 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    inference_metrics: list[InferenceMetrics | None] = []
+    inference_metrics: list[InferenceMetrics] = []
 
 
 class PredictionResult(BaseModel):

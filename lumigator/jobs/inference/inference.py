@@ -111,6 +111,8 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
     if config.job.output_field in dataset.column_names:
         logger.warning(f"Overwriting {config.job.output_field}")
 
+    prediction_results: list[PredictionResult]
+    inference_time: float
     prediction_results, inference_time = predict(dataloader_iterable, model_client)
     output[config.job.output_field] = [p.prediction for p in prediction_results]
     output["reasoning"] = [p.reasoning for p in prediction_results]
@@ -120,16 +122,21 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
 
     artifacts = InferenceJobOutput.model_validate(output)
 
-    # Only attempt to metric calculate averages if we have a metric for EVERY prediction result.
-    if all(p.metrics is not None for p in prediction_results):
-        total_results = len(prediction_results)
+    all_metrics_present = all(p.metrics for p in prediction_results)
 
+    if any(p.metrics for p in prediction_results) != all_metrics_present:
+        raise ValueError("Prediction result 'metrics' must be present in ALL results or NONE, but not in SOME.")
+
+    results = JobOutput(artifacts=artifacts, parameters=config)
+
+    # Only attempt to metric calculate averages if we have a metric for EVERY prediction result.
+    if all_metrics_present:
+        total_results = len(prediction_results)
         avg_prompt_tokens = sum(p.metrics.prompt_tokens for p in prediction_results) / total_results
         avg_total_tokens = sum(p.metrics.total_tokens for p in prediction_results) / total_results
         avg_completion_tokens = sum(p.metrics.completion_tokens for p in prediction_results) / total_results
-        # Provide a default for optional fields so we don't affect the average.
-        avg_reasoning_tokens = sum((p.metrics.reasoning_tokens or 0) for p in prediction_results) / total_results
-        avg_answer_tokens = sum((p.metrics.answer_tokens or 0) for p in prediction_results) / total_results
+        avg_reasoning_tokens = sum(p.metrics.reasoning_tokens for p in prediction_results) / total_results
+        avg_answer_tokens = sum(p.metrics.answer_tokens for p in prediction_results) / total_results
 
         metrics = AverageInferenceMetrics(
             avg_prompt_tokens=avg_prompt_tokens,
@@ -138,16 +145,8 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
             avg_reasoning_tokens=avg_reasoning_tokens,
             avg_answer_tokens=avg_answer_tokens,
         )
-        results = JobOutput(
-            metrics=metrics,
-            parameters=config,
-            artifacts=artifacts,
-        )
-    else:
-        results = JobOutput(
-            parameters=config,
-            artifacts=artifacts,
-        )
+
+        results.metrics = metrics
 
     output_path = save_outputs(config, results)
     return output_path

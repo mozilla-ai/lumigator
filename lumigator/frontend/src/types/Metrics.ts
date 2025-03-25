@@ -15,10 +15,10 @@ export type Artifacts = {
 }
 
 export type MetricsResult = {
-  bertscore: Bertscore
-  meteor: Meteor
-  rouge: Rouge
-  bleu: {
+  bertscore?: Bertscore
+  meteor?: Meteor
+  rouge?: Rouge
+  bleu?: {
     bleu: number[]
     bleu_mean: number
   }

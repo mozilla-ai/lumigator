@@ -21,8 +21,8 @@ class TestLanguageCodesSetupMixin:
 
         # Mock the resolve_user_input_language function
         mock_resolve.side_effect = [
-            {"iso_code": "en", "full_name": "English"},
-            {"iso_code": "fr", "full_name": "French"},
+            {"iso_code": "en", "full_name": "English", "alpha3_code": "eng"},
+            {"iso_code": "fr", "full_name": "French", "alpha3_code": "fra"},
         ]
 
         # Call the method
@@ -31,8 +31,10 @@ class TestLanguageCodesSetupMixin:
         # Verify the attributes were set correctly
         assert language_mixin.source_language_iso_code == "en"
         assert language_mixin.source_language == "English"
+        assert language_mixin.source_language_alpha3_code == "eng"
         assert language_mixin.target_language_iso_code == "fr"
         assert language_mixin.target_language == "French"
+        assert language_mixin.target_language_alpha3_code == "fra"
 
         # Verify resolve_user_input_language was called twice with correct arguments
         assert mock_resolve.call_count == 2
@@ -49,8 +51,8 @@ class TestLanguageCodesSetupMixin:
 
         # Mock the resolve_user_input_language function
         mock_resolve.side_effect = [
-            {"iso_code": "en", "full_name": "English"},
-            {"iso_code": "fr", "full_name": "French"},
+            {"iso_code": "en", "full_name": "English", "alpha3_code": "eng"},
+            {"iso_code": "fr", "full_name": "French", "alpha3_code": "fra"},
         ]
 
         # Call the method
@@ -59,8 +61,10 @@ class TestLanguageCodesSetupMixin:
         # Verify the attributes were set correctly
         assert language_mixin.source_language_iso_code == "en"
         assert language_mixin.source_language == "English"
+        assert language_mixin.source_language_alpha3_code == "eng"
         assert language_mixin.target_language_iso_code == "fr"
         assert language_mixin.target_language == "French"
+        assert language_mixin.target_language_alpha3_code == "fra"
 
         # Verify resolve_user_input_language was called with ISO codes
         mock_resolve.assert_any_call("en")

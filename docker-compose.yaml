@@ -215,6 +215,7 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_DEFAULT_REGION
+      - AWS_ENDPOINT_URL
       - MLFLOW_TRACKING_URI
       - MLFLOW_DATABASE_URL
       - MLFLOW_S3_ROOT_PATH
@@ -223,7 +224,13 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-    command: mlflow server --backend-store-uri ${MLFLOW_DATABASE_URL} --default-artifact-root ${MLFLOW_S3_ROOT_PATH} --host 0.0.0.0
+    command:
+      - sh
+      - -c
+      - |
+        pip install --upgrade pip > /dev/null 2>&1
+        pip install --no-cache-dir mlflow[extras] > /dev/null 2>&1
+        mlflow server --backend-store-uri ${MLFLOW_DATABASE_URL} --default-artifact-root ${MLFLOW_S3_ROOT_PATH} --host 0.0.0.0
     extra_hosts:
       - "localhost:host-gateway"
     profiles:

@@ -29,6 +29,9 @@ from backend.tracking.tracking_interface import TrackingClient
 class MLflowTrackingClient(TrackingClient):
     """MLflow implementation of the TrackingClient interface."""
 
+    # The filename for results compiled from all jobs in a workflow.
+    _WORKFLOW_OUTPUT_FILENAME = "compiled.json"
+
     def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._client = MlflowClient(tracking_uri=tracking_uri)
         self._s3_file_system = s3_file_system
@@ -268,7 +271,8 @@ class MLflowTrackingClient(TrackingClient):
         # combine them into a single json file, put that back into s3, and then generate
         # a presigned URL for that file
         # check if the compiled results already exist
-        if not self._s3_file_system.exists(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json"):
+        workflow_s3_uri = self._get_s3_uri(workflow_id)
+        if not self._s3_file_system.exists(workflow_s3_uri):
             compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
             for job in workflow_details.jobs:
                 # look for all parameter keys that end in "_s3_path" and download the file
@@ -288,18 +292,13 @@ class MLflowTrackingClient(TrackingClient):
                                     loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
                                 # merge the results into the compiled results
                                 compiled_results[job_result_item[0]][key] = job_result_item[1][key]
-            with self._s3_file_system.open(f"{settings.S3_BUCKET}/{workflow_id}/compiled.json", "w") as f:
-                f.write(json.dumps(compiled_results))
-            # Generate presigned download URL for the object
-        download_url = await self._s3_file_system.s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": settings.S3_BUCKET,
-                "Key": f"{workflow_id}/compiled.json",
-            },
-            ExpiresIn=settings.S3_URL_EXPIRATION,
-        )
-        workflow_details.artifacts_download_url = download_url
+
+            # Upload the compiled results to S3.
+            self._upload_to_s3(workflow_s3_uri, json.dumps(compiled_results))
+
+        # Update the download URL in the response as compiled results are available.
+        workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
+
         return workflow_details
 
     def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
@@ -417,6 +416,27 @@ class MLflowTrackingClient(TrackingClient):
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
         return all_jobs
+
+    async def _generate_presigned_url(self, workflow_id: str) -> str:
+        """Generate a pre-signed URL for the compiled artifact."""
+        return await self._s3_file_system.s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": settings.S3_BUCKET, "Key": self._get_s3_key(workflow_id)},
+            ExpiresIn=settings.S3_URL_EXPIRATION,
+        )
+
+    def _upload_to_s3(self, s3_path: str, data):
+        """Upload compiled results to S3."""
+        with self._s3_file_system.open(s3_path, "w") as f:
+            f.write(json.dumps(data))
+
+    def _get_s3_uri(self, workflow_id: str) -> str:
+        """Construct a full S3 URI for workflow artifacts."""
+        return f"s3://{settings.S3_BUCKET}/{self._get_s3_key(workflow_id)}"
+
+    def _get_s3_key(self, workflow_id: str) -> str:
+        """Construct an S3 key for workflow artifacts."""
+        return f"workflows/results/{workflow_id}/{self._WORKFLOW_OUTPUT_FILENAME}"
 
 
 class MLflowClientManager:

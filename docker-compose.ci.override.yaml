@@ -1,0 +1,10 @@
+services:
+  ray:
+    environment:
+      - HF_TOKEN
+      - HF_ENDPOINT
+
+  backend:
+    environment:
+      - HF_TOKEN
+      - HF_ENDPOINT

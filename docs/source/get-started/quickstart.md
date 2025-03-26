@@ -68,7 +68,7 @@ should receive the following JSON response:
 
 ## Using Lumigator
 
-Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }}.
+Now that Lumigator is deployed, we can use it to compare a few models. In this guide, we'll evaluate GPT-4o for a few samples of the [dialogsum](https://github.com/cylnlp/dialogsum) dataset that we store {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }}, on the task of summarization. Lumigator also supports evaluation on translation tasks; refer to the [translation evaluation guide](../user-guides/translation-eval.md) for details.
 
 We will show how to do this using either cURL or the Lumigator SDK. See [the UI guide](ui-guide.md) for information about how to use the UI.
 
@@ -84,7 +84,7 @@ The steps are as follows:
 To upload a dataset, you need to send a POST request to the `/datasets` endpoint. The request should
 include the dataset file.
 
-To run this example, first `cd` to the `lumigator` directory. then run
+To run this example, first `cd` to the `lumigator` directory. Then run
 
 ::::{tab-set}
 
@@ -168,6 +168,7 @@ required fields:
 - A name for the experiment job.
 - A short description.
 - The ID of the dataset you want to use for evaluations.
+- The task definition, which is `summarization` for this example.
 
 Here is an example of how to create an experiment:
 
@@ -183,8 +184,9 @@ The steps assume you only have uploaded a single dataset. If you have multiple d
 Set the following variables:
 ```console
 user@host:~/lumigator$ export EXP_NAME="DialogSum Summarization" \
-       EXP_DESC="See which model best summarizes Dialogues " \
-       EXP_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
+       EXP_DESC="See which model best summarizes Dialogues." \
+       EXP_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
+       EXP_TASK="summarization"
 ```
 
 Define the JSON string:
@@ -193,7 +195,8 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
         --arg name "$EXP_NAME" \
         --arg desc "$EXP_DESC" \
         --arg dataset_id "$EXP_DATASET" \
-        '{name: $name, description: $desc, dataset: $dataset_id}')
+        --arg task "$EXP_TASK" \
+        '{name: $name, description: $desc, dataset: $dataset_id, task_definition: {task: $task}}')
 ```
 
 Create the experiment:
@@ -205,7 +208,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
 {
   "id": "1",
   "name": "DialogSum Summarization",
-  "description": "See which model best summarizes Dialogues ",
+  "description": "See which model best summarizes Dialogues.",
   "created_at": "2025-02-19T20:11:55.492000",
   "task_definition": {
     "task": "summarization"
@@ -222,16 +225,66 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
 :sync: tab2
 ```python
 from lumigator_schemas.experiments import ExperimentCreate
+from lumigator_schemas.tasks import SummarizationTaskDefinition
 
 dataset_id = datasets.items[-1].id
 request = ExperimentCreate(
     name="DialogSum Summarization",
-    description="See which model best summarizes Dialogues",
-    dataset=dataset_id
+    description="See which model best summarizes Dialogues.",
+    dataset=dataset_id,
+    task_definition=SummarizationTaskDefinition()
 )
 experiment_response = client.experiments.create_experiment(request)
 experiment_id = experiment_response.id
 print(f"Experiment created and has ID: {experiment_id}")
+```
+:::
+
+::::
+
+## Create a new secret for your OpenAI API key
+
+Before creating your first evaluation workflow with an OpenAI model, you need to create a secret in Lumigator to store your OpenAI API key. This secret will be used by Lumigator to authenticate with the OpenAI API.
+
+::::{tab-set}
+
+:::{tab-item} cURL
+:sync: tab1
+
+Set the following variables:
+```console
+user@host:~/lumigator$ export SECRET_NAME="openai_api_key" \
+       VALUE="sk-..." \
+       DESCRIPTION="My OpenAI API Key"
+```
+
+Define the JSON string:
+```console
+usert@host:~/lumigator$ export JSON_STRING=$(jq -n \
+        --arg value "$VALUE" \
+        --arg desc "$DESCRIPTION" \
+        '{value: $value, description: $desc}')
+```
+
+Submit the secret:
+```console
+user@host:~/lumigator$ curl -X PUT http://localhost:8000/api/v1/settings/secrets/$SECRET_NAME \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d "$JSON_STRING" | jq
+```
+
+:::
+
+:::{tab-item} Python SDK
+:sync: tab2
+```python
+api_key = client.settings.secrets.APIKey.OPENAI
+
+response = client.settings.secrets.upload_api_key(
+    api_key,
+    secret_value="sk-...",
+)
 ```
 :::
 
@@ -243,7 +296,7 @@ Now it's time to evaluate a model! Let's trigger workflows to evaluate GPT-4o. T
 
 
 ```{note}
-the steps assume you only have created a single experiment. If you have multiple experiments, replace the `"$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"` code with the ID of the experiment you want
+the steps assume you only have created a single experiment. If you have multiple experiments, replace the `"$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"` code with the ID of the experiment you want.
 ```
 
 ::::{tab-set}
@@ -254,9 +307,9 @@ the steps assume you only have created a single experiment. If you have multiple
 Set the following variables:
 ```console
 user@host:~/lumigator$ export WORKFLOW_NAME="OpenAI 4o" \
-       WORKFLOW_DESC="Summarize with 4o" \
-       WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')" \
-       EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
+       WORKFLOW_DESC="Summarize with 4o." \
+       EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')" \
+       SECRET_KEY_NAME="openai_api_key"
 ```
 
 Define the JSON string:
@@ -266,9 +319,9 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
         --arg model "gpt-4o" \
         --arg provider "openai" \
         --arg desc "$WORKFLOW_DESC" \
-        --arg dataset_id "$WORKFLOW_DATASET" \
+        --arg secret_key_name "$SECRET_KEY_NAME" \
         --arg exp_id "$EXPERIMENT_ID" \
-        '{name: $name, description: $desc, model: $model, provider: $provider, experiment_id: $exp_id, dataset: $dataset_id}')
+        '{name: $name, description: $desc, model: $model, provider: $provider, secret_key_name: $secret_key_name, experiment_id: $exp_id}')
 ```
 
 Trigger the workflow:
@@ -278,13 +331,14 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
   -H 'Content-Type: application/json' \
   -d "$JSON_STRING" | jq
 {
-  "id": "ffa38f72fe7e4b06a60de5bf797c31d6",
+  "id": "2ad30ca4aa7c4aa59eb6dc7235eebd57",
   "experiment_id": "1",
   "model": "gpt-4o",
   "name": "OpenAI 4o",
-  "description": "Summarize with 4o",
+  "description": "Summarize with 4o.",
+  "system_prompt": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.",
   "status": "created",
-  "created_at": "2025-02-19T20:30:33.713000",
+  "created_at": "2025-03-24T09:15:30.376000",
   "updated_at": null
 }
 
@@ -294,13 +348,13 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
 :sync: tab2
 ```python
 from lumigator_schemas.workflows import WorkflowCreateRequest
-# Now let's run the same thing, but with o3-mini
+
 request = WorkflowCreateRequest(
     name="OpenAI 4o",
-    description="Summarize with 4o",
+    description="Summarize with 4o.",
     model="gpt-4o",
     provider="openai",
-    dataset=dataset_id,
+    secret_key_name="openai_api_key",
     experiment_id=experiment_id
 )
 client.workflows.create_workflow(request).model_dump()
@@ -330,7 +384,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
 {
   "id": "1",
   "name": "DialogSum Summarization",
-  "description": "See which model best summarizes Dialogues ",
+  "description": "See which model best summarizes Dialogues.",
   "created_at": "2025-02-19T20:11:55.492000",
   "task_definition": {
     "task": "summarization"
@@ -343,7 +397,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
       "experiment_id": "1",
       "model": "gpt-4o",
       "name": "OpenAI 4o",
-      "description": "Summarize with 4o",
+      "description": "Summarize with 4o.",
       "status": "succeeded",
       "created_at": "2025-02-19T20:30:33.713000",
       "updated_at": null,
@@ -367,7 +421,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+experiment_details = client.experiments.get_experiment(experiment_id)
 print(experiment_details.model_dump_json())
 ```
 :::

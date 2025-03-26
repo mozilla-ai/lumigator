@@ -24,7 +24,6 @@ class LiteLLMModelClient(BaseModelClient):
     def __init__(self, config: InferenceJobConfig, api_key: str | None = None) -> None:
         self.api_key = api_key
         self.config = config
-        self.system_prompt = self.config.system_prompt
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     @retry_with_backoff(max_retries=3)
@@ -62,9 +61,12 @@ class LiteLLMModelClient(BaseModelClient):
         prediction = response.choices[0].message.content
 
         # Check if reasoning is available in provider_specific_fields
-        has_reasoning_content = bool(
-            response.choices[0].message.provider_specific_fields.get("reasoning_content", None)
-        )
+        if response.choices[0].message.provider_specific_fields is None:
+            has_reasoning_content = False
+        else:
+            has_reasoning_content = bool(
+                response.choices[0].message.provider_specific_fields.get("reasoning_content", None)
+            )
         if not has_reasoning_content:
             logger.info("No specific reasoning content found in response.")
         reasoning = response.choices[0].message.reasoning_content if has_reasoning_content else None

@@ -1,84 +1,93 @@
+import asyncio
+import unittest
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
-import pytest
-from lumigator_schemas.tasks import SYSTEM_PROMPT_DEFAULTS
+from lumigator_schemas.tasks import (
+    SummarizationTaskDefinition,
+    TaskType,
+    TextGenerationTaskDefinition,
+    TranslationTaskDefinition,
+)
 from lumigator_schemas.workflows import WorkflowCreateRequest
 
-from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
+from backend.services.exceptions.workflow_exceptions import WorkflowValidationError
+from backend.services.workflows import WorkflowService
+from backend.settings import SYSTEM_PROMPT_DEFAULTS, settings
+from backend.tests.conftest import TEST_CAUSAL_MODEL, TEST_SEQ2SEQ_MODEL
 
 
-def test_workflow_request_requires_system_prompt_for_text_generation():
-    # Create a text generation task definition
-    task_definition = {"task": "text-generation"}
+def test_workflow_request_requires_system_prompt_for_text_generation(workflow_service):
+    # Mock an experiment with text generation task
+    experiment_mock = MagicMock()
+    experiment_mock.task_definition = TextGenerationTaskDefinition()
+    experiment_mock.name = "Test Experiment"
 
-    # Test that creating a WorkflowCreateRequest without system_prompt raises an error
-    with pytest.raises(ValueError) as excinfo:
-        WorkflowCreateRequest(
-            name="test_text_generation_run",
-            description="Test missing system prompt for text generation",
-            model="microsoft/Phi-3-mini-instruct",
-            provider="hf",
-            task_definition=task_definition,
-            # system_prompt is intentionally not provided
-            dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
-        )
+    # Configure tracking client to return our mock experiment
+    workflow_service._tracking_client.get_experiment = AsyncMock(return_value=experiment_mock)
 
-    # Verify exact error message
-    assert "Default system_prompt not available for text-generation" in str(excinfo.value)
+    # Create request without system prompt
+    request = WorkflowCreateRequest(
+        name="Test Workflow",
+        experiment_id="cced289c-f869-4af1-9195-1d58e32d1cc1",
+        # Add other required fields here
+        model=TEST_CAUSAL_MODEL,
+        provider="hf",
+    )
+
+    # Act & Assert
+    with unittest.TestCase().assertRaises(WorkflowValidationError) as context:
+        asyncio.run(workflow_service.create_workflow(request))
+
+    # Verify the error message
+    assert str(context.exception) == "Default system_prompt not available for text-generation"
+
+    # Verify the experiment was retrieved
+    workflow_service._tracking_client.get_experiment.assert_called_once_with(request.experiment_id)
 
 
 def test_default_system_prompt_for_summarization():
-    # Create a WorkflowCreateRequest without specifying system_prompt
-    workflow_request = WorkflowCreateRequest(
-        name="test_summarization_run",
-        description="Test default system prompt for summarization",
-        model=TEST_SEQ2SEQ_MODEL,
-        provider="hf",
-        task_definition={"task": "summarization"},
-        # system_prompt is intentionally not provided
-        dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
-    )
+    task_definition = SummarizationTaskDefinition()
+    default_system_prompt = settings.get_default_system_prompt(task_definition)
 
     # Verify that the default system prompt for summarization was applied
     expected_prompt = SYSTEM_PROMPT_DEFAULTS["summarization"]
-    assert workflow_request.system_prompt == expected_prompt
+    assert default_system_prompt == expected_prompt
 
 
 def test_default_system_prompt_for_translation():
-    # Create a WorkflowCreateRequest without specifying system_prompt
-    workflow_request = WorkflowCreateRequest(
-        name="test_translation_run",
-        description="Test default system prompt for translation",
-        model="hf-internal-testing/tiny-random-mt5",
-        provider="hf",
-        task_definition={
-            "task": "translation",
-            "source_language": "English",
-            "target_language": "Spanish",
-        },
-        # system_prompt is intentionally not provided
-        dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
+    src_lang = "English"
+    tgt_lang = "Spanish"
+
+    task_definition = TranslationTaskDefinition(
+        source_language=src_lang,
+        target_language=tgt_lang,
     )
+    default_system_prompt = settings.get_default_system_prompt(task_definition)
 
     # Verify that the default system prompt for translation was applied
-    expected_prompt = "translate English to Spanish: "
-    assert workflow_request.system_prompt == expected_prompt
+    expected_prompt = (
+        f"You are a helpful assistant, expert in text translation. "
+        f"For every prompt you recieve, translate {src_lang} to {tgt_lang}."
+    )
+    assert default_system_prompt == expected_prompt
 
 
 def test_custom_system_prompt_overrides_default():
     # Create a WorkflowCreateRequest with a custom system prompt
+    task_definition = SummarizationTaskDefinition()
+    default_system_prompt = settings.get_default_system_prompt(task_definition)
     custom_prompt = "Create a one-sentence summary."
+
     workflow_request = WorkflowCreateRequest(
         name="test_custom_prompt_run",
         description="Test custom system prompt overrides default",
         model=TEST_SEQ2SEQ_MODEL,
         provider="hf",
-        task_definition={"task": "summarization"},
         system_prompt=custom_prompt,  # Provide a custom system prompt
         dataset=UUID("d34dd34d-d34d-d34d-d34d-d34dd34dd34d"),
     )
 
     # Verify that the custom system prompt was used instead of the default
-    default_summarization_prompt = SYSTEM_PROMPT_DEFAULTS["summarization"]
     assert workflow_request.system_prompt == custom_prompt
-    assert workflow_request.system_prompt != default_summarization_prompt
+    assert workflow_request.system_prompt != default_system_prompt

@@ -13,6 +13,7 @@ class JobDefinitionEvaluation(JobDefinition):
             dataset=DatasetConfig(path=dataset_path),
             evaluation=EvaluationConfig(
                 metrics=request.job_config.metrics,
+                llm_as_judge=request.job_config.llm_as_judge.model_dump() if request.job_config.llm_as_judge else None,
                 max_samples=request.max_samples,
                 return_input_data=True,
                 return_predictions=True,
@@ -33,7 +34,7 @@ EVALUATOR_WORK_DIR = "../jobs/evaluator"
 EVALUATOR_PIP_REQS = "../jobs/evaluator/requirements.txt"
 EVALUATOR_COMMAND = str = "python evaluator.py"
 
-JOB_DEFINITION: JobDefinition = JobDefinitionEvaluation(
+EVALUATOR_JOB_DEFINITION: JobDefinition = JobDefinitionEvaluation(
     command=EVALUATOR_COMMAND,
     pip_reqs=EVALUATOR_PIP_REQS,
     work_dir=EVALUATOR_WORK_DIR,

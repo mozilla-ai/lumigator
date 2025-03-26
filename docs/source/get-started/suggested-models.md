@@ -1,14 +1,27 @@
 # Suggested Models
 
-Lumigator supports any model uploaded to the [Hugging Face Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending)
-and trained for *summarization*, provided the model is compatible with the required library versions
+Users can carry out evaluation experiments currently for two tasks with Lumigator: *summarization* and *translation*.
+Lumigator supports evaluation with range of models for these tasks - including API-based models (e.g., OpenAI's GPT-4o)
+and LLMs [hosted on-premise or on cloud](https://blog.mozilla.ai/running-an-open-source-llm-in-2025/) as well as models from Hugging Face Model Hub (e.g., BART for summarization). Please refer to the [local model guide](../user-guides/local-models.md) for evaluation of local models available via providers such as Ollama and the [remote deployment guide](../operations-guide/vllm-rayserve-deployment.md) for evaluation of models deployed on remote servers via vLLM and Ray Serve.
+
+It is recommended to check if the model is compatible with the required library versions
 (e.g., Transformers) and runtime dependencies (e.g., vLLM). Practical factors such as compute
 availability and system configurations may also impact the successful use of a model. To get
 started, [we have extensively tested a few models](https://blog.mozilla.ai/on-model-selection-for-text-summarization/)
 and created an endpoint to easily retrieve them.
 
+```{note}
+**Using Hugging Face Models**:
+For *summarization*, Lumigator supports any summarization model uploaded to the [HF Model Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending). For *translation*, current support is limited to 3 model families:
+1. multi-lingual models based on [translation-prefix](https://huggingface.co/bigscience/mt0-base) (`bigscience/mt0-base`)
+2. multi-lingual models based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`)
+3. bilingual and multi-lingual models based on [Opus-MT](https://huggingface.co/Helsinki-NLP#models) built on top of the [marian architecture](https://huggingface.co/docs/transformers/en/model_doc/marian)
+
+Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
+```
+
 In this guide, we assume that you have already [installed Lumigator locally](quickstart), and have a
-running instance. To get a list of suggested models, you can use the following command:
+running instance. To get a list of suggested models, you can use the following command specifying the task name (`summarization` or `translation`):
 
 ::::{tab-set}
 
@@ -16,7 +29,8 @@ running instance. To get a list of suggested models, you can use the following c
 :sync: tab1
 
 ```console
-user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/?tasks=summarization | jq
+user@host:~/lumigator$ export TASK="summarization"
+user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/?tasks=$TASK | jq
 {
   "total": 7,
   "items": [
@@ -44,8 +58,9 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/models/?tasks=summar
 from lumigator_sdk.lumigator import LumigatorClient
 
 # The default port for Lumigator is 8000
+task = "summarization"
 lm_client = LumigatorClient("localhost:8000")
-lm_client.models.get_suggested_models(["summarization"])
+lm_client.models.get_suggested_models([task])
 ```
 :::
 
@@ -81,15 +96,33 @@ Please note we do not, at present, launch a llamafile for you, Lumigator assumes
 launched it.
 ```
 
-| Model Type | Model                                    | HuggingFace | API | llamafile |
-|------------|------------------------------------------|-------------|-----|-----------|
-| seq2seq    | facebook/bart-large-cnn                  |      X      |     |           |
-| seq2seq    | Falconsai/text_summarization             |      X      |     |           |
-| causal     | gpt-4o-mini, gpt-4o                      |             |  X  |           |
-| causal     | Ministral-8B                          |             |  X  |           |
-| causal     | Mistral-7B-Instruct                      |             |     |     X     |
+**Summarization-Specific Models**
 
-## BART Large CNN
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| seq2seq        | facebook/bart-large-cnn              | <div align="center">X</div> |         |               |
+| seq2seq        | Falconsai/text_summarization         | <div align="center">X</div> |         |               |
+
+**Translation-Specific Models**
+
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B              | <div align="center">X</div> |         |               |
+| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl              | <div align="center">X</div> |         |               |
+| seq2seq        | Helsinki-NLP/opus-mt-{src}-{tgt}             | <div align="center">X</div> |         |               |
+
+**Task-Agnostic Models**:
+These models can be used for either summarization or translation by changing the instructions in the prompt.
+
+| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
+|----------------|---------------------------------------|-----------------|---------|---------------|
+| causal         | gpt-4o-mini, gpt-4o                  |                 | <div align="center">X</div> |               |
+| causal         | deepseek-V3, deepseek-R1             |                 | <div align="center">X</div> |               |
+| causal         | Ministral-8B                         |                 | <div align="center">X</div> |               |
+| causal         | Mistral-7B-Instruct                  |                 |         | <div align="center">X</div> |
+
+
+### BART Large CNN
 
 The [`facebook/bart-large-cnn`](https://huggingface.co/facebook/bart-large-cnn) model is pre-trained
 on English language, and fine-tuned on [CNN Daily Mail](https://huggingface.co/datasets/cnn_dailymail).
@@ -109,7 +142,7 @@ evaluation are:
 | `no_repeat_ngram_size` | All n-grams of that size can only occur once           | 3     |
 | `num_beams`            | Number of beams for beam search                        | 4     |
 
-## Falconsai Text Summarization
+### Falconsai Text Summarization
 
 The [`Falconsai/text_summarization`](https://huggingface.co/Falconsai/text_summarization) model is
 a variant of the T5 transformer model, designed for the task of text summarization. It is adapted
@@ -127,29 +160,41 @@ evaluation are:
 | `no_repeat_ngram_size` | All n-grams of that size can only occur once           | 3     |
 | `num_beams`            | Number of beams for beam search                        | 4     |
 
-## Mistral 7B Instruct
+### Facebook M2M100
 
-The [mistralai/Mistral-7B-Instruct-v0.3]https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)
+M2M100 is a multilingual encoder-decoder (seq-to-seq) model trained for many-to-many multilingual translation between 100 languages. It was introduced in the paper: [Beyond English-Centric Multilingual Machine Translation](https://arxiv.org/abs/2010.11125).
+
+At inference time, the model works based on language codes (`src_lang` and `tgt_lang`) specified in the HuggingFace generation pipeline. There are two variants of the model: [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) and [`facebook/m2m100_1.2B`](https://huggingface.co/facebook/m2m100_1.2B) which differ in the number of parameters. Please check the HuggingFace model card for exact list of supported languages.
+
+### BigScience MT0
+
+MT0 is a family of multilingual text-to-text transformer models, designed for zero-shot cross-lingual generalization [Paper: [Crosslingual Generalization through Multitask Finetuning](https://arxiv.org/abs/2211.01786)].
+
+These models are fine-tuned versions of Google's MT5 architecture, and at inference time, they work based on prefix instructions such as "Translate English to French: <input_sentence>". The MT0 family includes multiple variants, which differ in size and parameter count, ranging from 300M to 13.9B parameters. Please check the HuggingFace model card for exact list of supported languages.
+
+### Mistral 7B Instruct
+
+The [mistralai/Mistral-7B-Instruct-v0.3](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3)
 Large Language Model (LLM) is an instruct fine-tuned version of the
 [Mistral-7B-v0.3](https://huggingface.co/mistralai/Mistral-7B-v0.3).
 
-The model has 7.25B parameters (BF16), and the model size is 14.5GB. There are no
-summarization-specific parameters for this model.
+The model has 7.25B parameters (BF16), and the model size is 14.5GB.
 
-## GPT-4o Mini and GPT-4o
+### GPT-4o Mini and GPT-4o
 
 The GPT-4o Mini and GPT-4o models are causal language models developed by OpenAI.
 
 There are no summarization-specific parameters for these models.
 
-## Ministral 8B
+### Deepseek-V3 and Deepseek-R1
+DeepSeek-V3 is a general-purpose LLM with a Mixture-of-Experts (MoE) architecture, featuring 671B parameters (37B activated per token) for NLP tasks like text generation, translation, and summarization. DeepSeek-R1 is a reasoning model built on top of DeepSeek-V3, trained with reinforcement learning for advanced chain-of-thought reasoning and error correction.
+
+### Ministral 8B
 
 The [Ministral 8B](https://mistral.ai/news/ministraux) model is an open, causal language
 model developed by [Mistral AI](https://mistral.ai/). It is a small but powerful edge model.
 
-There are no summarization-specific parameters for this model.
-
-## Mistral 7B Instruct Llamafile
+### Mistral 7B Instruct Llamafile
 
 The [mistralai/Mistral-7B-Instruct-v0.2](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2)
 model is a causal language model developed by [Mistral AI](https://mistral.ai/), packaged as a
@@ -157,16 +202,13 @@ llamafile. A llamafile is an executable LLM that you can run on your own compute
 weights for a given open LLM, as well as everything needed to actually run that model on your
 computer. There's nothing to install or configure.
 
-There are no summarization-specific parameters for this model.
-
-
-# Reference Models
+## Reference Models
 
 Before you jump into evaluating datasets, you should consider the following importance of quality ground-truth and annotations.
 
 Ground-truth would be the actual, expected output or correct answer in for a given task (such as summarization), serving as a reference to compare the model's predictions. Typically, a human with enough expertise in the task will annotate or label a dataset with those references for each sample (for example, an acceptable summary of the input text).
 
-To evaluate a model as reliably as possible, we encourage using human-provided ground-truth to compare against. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) ([BART](https://mozilla-ai.github.io/lumigator/get-started/suggested-models.html#bart-large-cnn) for summarization task).
+To evaluate a model as reliably as possible, we encourage using human-provided ground-truth to compare against. Failing that, Lumigator enables the user to do automatic annotation with a [well tested model](https://blog.mozilla.ai/on-model-selection-for-text-summarization/) ([BART](https://mozilla-ai.github.io/lumigator/get-started/suggested-models.html#bart-large-cnn) for summarization task). Automatic annotation for translation task is currently not supported.
 
 You can do this through the API, using one of Lumigator jobs: `/jobs/annotate`.
 

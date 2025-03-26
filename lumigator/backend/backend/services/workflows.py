@@ -14,6 +14,7 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobStatus,
 )
+from lumigator_schemas.tasks import TextGenerationTaskDefinition
 from lumigator_schemas.workflows import (
     WorkflowCreateRequest,
     WorkflowDetailsResponse,
@@ -37,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -110,6 +112,8 @@ class WorkflowService:
         """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
+
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
         job_infer_config = JobInferenceConfig(
@@ -117,7 +121,7 @@ class WorkflowService:
             provider=request.provider,
             base_url=request.base_url,
             output_field=request.inference_output_field,
-            task_definition=request.task_definition,
+            task_definition=experiment.task_definition,
             system_prompt=request.system_prompt,
             # we store the dataset explicitly below, so it gets queued before eval
             store_to_dataset=False,
@@ -126,8 +130,8 @@ class WorkflowService:
         )
         job_infer_create = JobCreate(
             name=f"{request.name}-inference",
-            dataset=request.dataset,
-            max_samples=request.max_samples,
+            dataset=experiment.dataset,
+            max_samples=experiment.max_samples,
             batch_size=request.batch_size,
             job_config=job_infer_config,
         )
@@ -166,7 +170,7 @@ class WorkflowService:
 
         try:
             # Figure out the dataset filename
-            request_dataset = self._dataset_service.get_dataset(dataset_id=request.dataset)
+            request_dataset = self._dataset_service.get_dataset(dataset_id=experiment.dataset)
             dataset_filename = request_dataset.filename
             dataset_filename = Path(dataset_filename).stem
             dataset_filename = f"{dataset_filename}-{request.model.replace('/', '-')}-predictions.csv"
@@ -251,7 +255,7 @@ class WorkflowService:
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=dataset_record.id,
-            max_samples=request.max_samples,
+            max_samples=experiment.max_samples,
             job_config=job_config,
         )
 
@@ -321,6 +325,7 @@ class WorkflowService:
             )
             self._tracking_client.update_job(eval_run_id, outputs)
             self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -331,14 +336,26 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+    def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id) from None
+
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
-        tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
         return tracking_server_workflow
 
-    def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
+    async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
@@ -348,7 +365,7 @@ class WorkflowService:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
         # If the experiment this workflow is associated with doesn't exist, there's no point in continuing.
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
         if not experiment:
             raise WorkflowValidationError(f"Cannot create workflow '{request.name}': No experiment found.") from None
 
@@ -360,6 +377,19 @@ class WorkflowService:
             ) from None
 
         loguru.logger.info(f"Creating workflow '{request.name}' for experiment ID '{request.experiment_id}'")
+
+        if experiment.task_definition == TextGenerationTaskDefinition() and not request.system_prompt:
+            raise WorkflowValidationError("Default system_prompt not available for text-generation") from None
+
+        if request.system_prompt:
+            loguru.logger.info(f"Using system prompt: {request.system_prompt}")
+        else:
+            default_system_prompt = settings.get_default_system_prompt(experiment.task_definition)
+            loguru.logger.warning(
+                f"System prompt not provided. Using default system prompt: '{default_system_prompt}'. "
+                "This may not be optimal for your task."
+            )
+            request.system_prompt = default_system_prompt
 
         workflow = self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,

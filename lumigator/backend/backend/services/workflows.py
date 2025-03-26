@@ -22,6 +22,7 @@ from lumigator_schemas.workflows import (
     WorkflowStatus,
 )
 from pydantic_core._pydantic_core import ValidationError
+from typing_extensions import deprecated
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
@@ -92,12 +93,12 @@ class WorkflowService:
         loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
 
         # Mark the workflow as failed.
-        self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
+        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
         # Get the list of jobs in the workflow to stop any that are still running.
         stop_tasks = [
             self._job_service.stop_job(UUID(ray_job_id))
-            for job in self._tracking_client.list_jobs(workflow_id)
+            for job in await self._tracking_client.list_jobs(workflow_id)
             if (ray_job_id := job.data.params.get("ray_job_id"))
         ]
         # Wait for all stop tasks to complete concurrently
@@ -147,8 +148,8 @@ class WorkflowService:
             return
 
         # Track the workflow status as running and add the inference job.
-        self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
-        inference_run_id = self._tracking_client.create_job(
+        await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
+        inference_run_id = await self._tracking_client.create_job(
             request.experiment_id, workflow.id, "inference", inference_job.id
         )
 
@@ -228,7 +229,7 @@ class WorkflowService:
                 metrics=inf_output.metrics,
                 ray_job_id=str(inference_job.id),
             )
-            self._tracking_client.update_job(inference_run_id, inference_job_output)
+            await self._tracking_client.update_job(inference_run_id, inference_job_output)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Inference job: {}. Cannot update DB with with result data: {}",
@@ -272,7 +273,7 @@ class WorkflowService:
             return
 
         # Track the evaluation job.
-        eval_run_id = self._tracking_client.create_job(
+        eval_run_id = await self._tracking_client.create_job(
             request.experiment_id, workflow.id, "evaluation", evaluation_job.id
         )
 
@@ -323,9 +324,9 @@ class WorkflowService:
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
                 ray_job_id=str(evaluation_job.id),
             )
-            self._tracking_client.update_job(eval_run_id, outputs)
-            self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
-            self._tracking_client.get_workflow(workflow.id)
+            await self._tracking_client.update_job(eval_run_id, outputs)
+            await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            await self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -336,13 +337,13 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_workflow_result_download(self, workflow_id: str) -> str:
+    async def get_workflow_result_download(self, workflow_id: str) -> str:
         """Return workflow results file URL for downloading.
 
         Args:
             workflow_id: ID of the workflow whose results will be returned
         """
-        workflow_details = self.get_workflow(workflow_id)
+        workflow_details = await self.get_workflow(workflow_id)
         if workflow_details.artifacts_download_url:
             return workflow_details.artifacts_download_url
         else:
@@ -391,7 +392,7 @@ class WorkflowService:
             )
             request.system_prompt = default_system_prompt
 
-        workflow = self._tracking_client.create_workflow(
+        workflow = await self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,
             description=request.description,
             name=request.name,
@@ -406,17 +407,18 @@ class WorkflowService:
 
         return workflow
 
-    def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
+    async def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
         workflow = self.get_workflow(workflow_id)
         if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
-        return self._tracking_client.delete_workflow(workflow_id)
+        return await self._tracking_client.delete_workflow(workflow_id)
 
-    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+    @deprecated("get_workflow_logs is deprecated, it will be removed in future versions.")
+    async def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
-        job_list = self._tracking_client.list_jobs(workflow_id)
+        job_list = await self._tracking_client.list_jobs(workflow_id)
         # sort the jobs by created_at, with the oldest last
         job_list = sorted(job_list, key=lambda x: x.info.start_time)
         all_ray_job_ids = [run.data.params.get("ray_job_id") for run in job_list]

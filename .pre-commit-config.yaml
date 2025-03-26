@@ -35,3 +35,10 @@ repos:
         args:
           - --config
           - ruff.toml
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.6.9
+    hooks:
+      # Update the uv lockfile
+      - id: uv-lock

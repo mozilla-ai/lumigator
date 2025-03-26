@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Common deps to develop"
 requires-python = ">=3.11"
 dependencies = [
-    "pre-commit>=4.0.1",
+    "pre-commit>=4.2.0",
 ]
 
 [project.optional-dependencies]
@@ -31,9 +31,7 @@ dev = [
     "loguru>=0.7.2",
     "lumigator-schemas",
     "lumigator-sdk",
-    "mlflow>=2.20.0",
     "mlflow>=2.20.3",
-    "mypy-boto3-s3>=1.36.0",
     "pytest>=8.3.4",
     "python-dotenv>=1.0.1",
     "ray>=2.41.0",
@@ -46,3 +44,8 @@ members = ["notebooks"]
 [tool.uv.sources]
 lumigator-sdk = { path = "lumigator/sdk" }
 lumigator-schemas = { path = "lumigator/schemas" }
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]

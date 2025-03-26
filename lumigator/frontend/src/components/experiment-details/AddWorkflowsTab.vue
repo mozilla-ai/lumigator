@@ -140,7 +140,7 @@ const createWorkflowMutation = useMutation({
   onError: (error) => {
     toast.add({
       group: 'br',
-      life: 3000,
+      closable: true,
       severity: 'error',
       summary: 'Error',
       detail: getAxiosError(error),

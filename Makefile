@@ -118,7 +118,7 @@ endef
 
 # Launches Lumigator in 'development' mode (all services running locally, code mounted in)
 local-up: config-generate-env
-	uv run pre-commit install
+	uv sync && uv run pre-commit install
 	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) -f $(DEV_DOCKER_COMPOSE_FILE) up --watch --build
 
 local-down: config-generate-env

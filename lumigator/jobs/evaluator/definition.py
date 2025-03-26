@@ -32,7 +32,7 @@ EVALUATOR_WORK_DIR = "../jobs/evaluator"
 # FIXME maybe we can read the requirements file and tweak it in the backend
 # otherwise, we make another method in the job interface
 EVALUATOR_PIP_REQS = "../jobs/evaluator/requirements.txt"
-EVALUATOR_COMMAND = str = "python evaluator.py"
+EVALUATOR_COMMAND: str = "python evaluator.py"
 
 EVALUATOR_JOB_DEFINITION: JobDefinition = JobDefinitionEvaluation(
     command=EVALUATOR_COMMAND,

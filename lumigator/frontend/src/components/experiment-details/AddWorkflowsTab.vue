@@ -26,7 +26,7 @@
             severity="secondary"
             rounded
             label="Run"
-            disabled
+            :disabled="selectedModels.length === 0"
             icon="pi pi-play"
             @click="handleRunClicked"
           ></Button>
@@ -36,69 +36,31 @@
         <div class="models-wrapper">
           <h5 class="caption-caps">via hugging face</h5>
           <div class="models-grid">
-            <article class="model-card">
-              <div class="model-field">
-                <Checkbox binary input-id="card-input"></Checkbox>
-                <label for="card-input" class="model-label">Model 1</label>
-              </div>
-              <div class="model-actions">
-                <Button
-                  icon="pi pi-heart"
-                  severity="help"
-                  variant="text"
-                  rounded
-                  aria-label="Favorite"
-                ></Button>
-                <Button
-                  icon="pi pi-times"
-                  severity="danger"
-                  variant="text"
-                  rounded
-                  aria-label="Cancel"
-                ></Button>
-                <Button
-                  icon="pi pi-star"
-                  severity="contrast"
-                  variant="text"
-                  rounded
-                  aria-label="Star"
-                ></Button>
-              </div>
-            </article>
+            <ModelCard
+              v-for="model in modelsRequiringNoAPIKey"
+              :key="model.model"
+              :model="model"
+              :is-selected="selectedModels.includes(model.model)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
           </div>
         </div>
         <div class="models-wrapper">
           <h5 class="caption-caps">via apis</h5>
           <div class="models-grid">
-            <article class="model-card">
-              <div class="model-field">
-                <Checkbox binary input-id="card-input"></Checkbox>
-                <label for="card-input" class="model-label">Model 1</label>
-              </div>
-              <div class="model-actions">
-                <Button
-                  icon="pi pi-heart"
-                  severity="help"
-                  variant="text"
-                  rounded
-                  aria-label="Favorite"
-                ></Button>
-                <Button
-                  icon="pi pi-times"
-                  severity="danger"
-                  variant="text"
-                  rounded
-                  aria-label="Cancel"
-                ></Button>
-                <Button
-                  icon="pi pi-star"
-                  severity="contrast"
-                  variant="text"
-                  rounded
-                  aria-label="Star"
-                ></Button>
-              </div>
-            </article>
+            <ModelCard
+              v-for="model in modelsRequiringAPIKey"
+              :key="model.model"
+              :model="model"
+              :is-selected="selectedModels.includes(model.model)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
           </div>
         </div>
       </div>
@@ -140,38 +102,121 @@
 </template>
 
 <script setup lang="ts">
-// import { useModelStore } from '@/stores/modelsStore'
-import { Button, Checkbox, InputNumber, Slider, Textarea } from 'primevue'
+import { useModelStore } from '@/stores/modelsStore'
+import type { Experiment } from '@/types/Experiment'
+import type { Model } from '@/types/Model'
+import { Button, InputNumber, Slider, Textarea, useToast } from 'primevue'
 import { computed, ref } from 'vue'
+import ModelCard from './ModelCard.vue'
+import { useMutation } from '@tanstack/vue-query'
+import { workflowsService } from '@/sdk/workflowsService'
+import type { CreateWorkflowPayload } from '@/types/Workflow'
+import { getAxiosError } from '@/helpers/getAxiosError'
 
-// const modelStore = useModelStore()
+const props = defineProps<{ experiment: Experiment }>()
+const modelStore = useModelStore()
+const toast = useToast()
+const selectedModels = ref<Model['model'][]>(['facebook/bart-large-cnn'])
 
 const experimentPrompt = ref('')
 const defaultPrompt = computed(() => {
-  // if (useCase.value === 'summarization') {
-  return 'You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.'
-  // }
-  // return `translate ${sourceLanguage.value} to ${targetLanguage.value}:`
+  const task = props.experiment.task_definition.task
+  if (task === 'summarization') {
+    return 'You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.'
+  } else {
+    const { source_language: sourceLanguage, target_language: targetLanguage } =
+      props.experiment.task_definition
+    return `translate ${sourceLanguage} to ${targetLanguage}:`
+  }
 })
 const topP = ref(0.55)
 const temperature = ref(0.55)
+const createWorkflowMutation = useMutation({
+  mutationFn: workflowsService.createWorkflow,
+  onError: (error) => {
+    toast.add({
+      group: 'br',
+      life: 3000,
+      severity: 'error',
+      summary: 'Error',
+      detail: getAxiosError(error),
+    })
+  },
+  onSuccess: () => {
+    toast.add({
+      group: 'br',
+      life: 3000,
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Model Run created successfully',
+    })
+  },
+  onMutate: () => {
+    toast.add({
+      group: 'br',
+      life: 3000,
+      severity: 'info',
+      summary: 'Creating Model Run',
+      detail: 'Please wait...',
+    })
+  },
+})
 
-// const models = computed(() => modelStore.filterModelsByUseCase(props.useCase))
-
-// const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
-//   return models.value.filter((model: Model) => {
-//     const isKeyPresent = model.requirements?.includes(requirementKey)
-//     return isRequired ? isKeyPresent : !isKeyPresent
-//   })
-// }
-
-// const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
-
-// const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
+const models = computed(() =>
+  modelStore.filterModelsByUseCase(props.experiment.task_definition.task),
+)
+const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
+  return models.value.filter((model: Model) => {
+    const isKeyPresent = model.requirements?.includes(requirementKey)
+    return isRequired ? isKeyPresent : !isKeyPresent
+  })
+}
+const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
+const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
 
 const handleAddModelClicked = () => {}
 
-const handleRunClicked = () => {}
+const handleRunClicked = () => {
+  selectedModels.value.forEach((selectedModel) => {
+    const model = models.value.find((m: Model) => m.model === selectedModel)
+
+    const workflowPayload: CreateWorkflowPayload = {
+      dataset: props.experiment.dataset,
+      experiment_id: props.experiment.id,
+      task_definition: props.experiment.task_definition,
+      system_prompt: experimentPrompt.value || defaultPrompt.value,
+      description: props.experiment.description,
+      max_samples: props.experiment.max_samples,
+      name: `${props.experiment.name}/${model.model}`,
+      model: model.model,
+      provider: model.provider,
+      secret_key_name: model.requirements.includes('api_key')
+        ? `${model.provider}_api_key`
+        : undefined,
+      base_url: model.base_url,
+    }
+
+    createWorkflowMutation.mutate(workflowPayload)
+  })
+}
+
+const handleCheckboxToggled = (model: Model) => {
+  selectedModels.value = selectedModels.value.includes(model.model)
+    ? selectedModels.value.filter((selectedModel) => selectedModel !== model.model)
+    : [...selectedModels.value, model.model]
+}
+
+const handleCloneClicked = (model: Model) => {
+  console.log('clone clicked', model)
+}
+
+const handleCustomizeClicked = (model: Model) => {
+  console.log('customize clicked', model)
+}
+
+const handleDeleteClicked = (model: Model) => {
+  console.log('delete clicked', model)
+}
 </script>
 
 <style scoped lang="scss">
@@ -199,16 +244,6 @@ const handleRunClicked = () => {}
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.model-label {
-  color: var(--l-grey-100);
-  font-family: Inter;
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  letter-spacing: -0.015rem;
 }
 
 .models-grid {
@@ -308,22 +343,5 @@ article {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}
-
-.model-card {
-  display: flex;
-  padding: 0rem 0.5rem 0rem 0.75rem;
-  max-width: 19.875rem;
-  // flex: 1 0 0;
-  min-height: 3.625rem;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0.5rem;
-  background: var(--l-grey-300);
-}
-
-.model-field {
-  display: flex;
-  gap: 0.5rem;
 }
 </style>

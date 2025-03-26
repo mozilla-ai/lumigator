@@ -23,7 +23,7 @@
               <WorkflowsTab />
             </TabPanel>
             <TabPanel value="add-model-run">
-              <AddWorkflowsTab />
+              <AddWorkflowsTab :experiment="experiment" v-if="experiment" />
             </TabPanel>
             <TabPanel value="details">
               <ExperimentInfo />

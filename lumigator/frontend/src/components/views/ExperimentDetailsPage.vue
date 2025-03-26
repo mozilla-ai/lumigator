@@ -7,7 +7,7 @@
       </Breadcrumb>
     </div>
 
-    <Tabs value="model-runs">
+    <Tabs :value="activeTab" @update:value="activeTab = String($event)">
       <div class="experiment-container">
         <div class="experiment-details-header">
           <h3 class="experiment-title"><i class="pi pi-experiments"></i>{{ experiment?.name }}</h3>
@@ -23,7 +23,11 @@
               <WorkflowsTab />
             </TabPanel>
             <TabPanel value="add-model-run">
-              <AddWorkflowsTab :experiment="experiment" v-if="experiment" />
+              <AddWorkflowsTab
+                :experiment="experiment"
+                v-if="experiment"
+                @workflow-created="activeTab = 'model-runs'"
+              />
             </TabPanel>
             <TabPanel value="details">
               <ExperimentInfo />
@@ -40,7 +44,7 @@ import { useExperimentStore } from '@/stores/experimentsStore'
 import { storeToRefs } from 'pinia'
 import Breadcrumb from 'primevue/breadcrumb'
 
-import { computed, type ComputedRef } from 'vue'
+import { computed, ref, type ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -59,7 +63,7 @@ const router = useRouter()
 const experimentsStore = useExperimentStore()
 const { experiments } = storeToRefs(experimentsStore)
 const experiment = computed(() => experiments.value.find((exp) => exp.id === id))
-
+const activeTab = ref('model-runs')
 const items: ComputedRef<MenuItem[]> = computed(() => [
   {
     label: 'Experiments',

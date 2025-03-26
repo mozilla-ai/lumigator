@@ -118,6 +118,8 @@ const modelStore = useModelStore()
 const toast = useToast()
 const selectedModels = ref<Model['model'][]>(['facebook/bart-large-cnn'])
 
+const emit = defineEmits(['workflowCreated'])
+
 const experimentPrompt = ref('')
 const defaultPrompt = computed(() => {
   const task = props.experiment.task_definition.task
@@ -150,6 +152,7 @@ const createWorkflowMutation = useMutation({
       summary: 'Success',
       detail: 'Model Run created successfully',
     })
+    emit('workflowCreated')
   },
   onMutate: () => {
     toast.add({

@@ -140,7 +140,6 @@ class DatasetService:
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
-            # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, storage_options=self.s3_filesystem.storage_options)
 
             # Use the converted HF format files to rebuild the CSV and store it as 'dataset.csv'.

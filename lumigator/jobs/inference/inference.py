@@ -1,7 +1,6 @@
 """python job to run batch inference"""
 
 import argparse
-import json
 import os
 from pathlib import Path
 
@@ -35,7 +34,7 @@ def save_to_disk(local_path: Path, results: JobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(results.model_dump(), f)
+        f.write(results.model_dump_json())
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):

@@ -19,7 +19,7 @@ def save_to_disk(local_path: Path, data: JobOutput):
     logger.info(f"Storing evaluation results into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data.model_dump(), f)
+        f.write(data.model_dump_json())
 
 
 def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):

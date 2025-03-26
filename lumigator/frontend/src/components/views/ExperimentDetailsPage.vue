@@ -20,13 +20,13 @@
         <div class="experiment-details-tab-content">
           <TabPanels>
             <TabPanel value="model-runs">
-              <WorkflowsTab />
+              <WorkflowsTab v-if="experiment" :experiment="experiment" :workflows="experiment.workflows" />
             </TabPanel>
             <TabPanel value="add-model-run">
               <AddWorkflowsTab
                 :experiment="experiment"
                 v-if="experiment"
-                @workflow-created="activeTab = 'model-runs'"
+                @workflowCreated="handleWorkflowCreated"
               />
             </TabPanel>
             <TabPanel value="details">
@@ -86,6 +86,13 @@ const items: ComputedRef<MenuItem[]> = computed(() => [
 
 const handleBackButtonClicked = () => {
   router.back()
+}
+
+const handleWorkflowCreated = async () => {
+    // invalidate query
+    // await experimentStore.fetchAllExperiments()
+  activeTab.value = 'model-runs'
+  await experimentsStore.fetchAllExperiments()
 }
 </script>
 

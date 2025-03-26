@@ -41,7 +41,7 @@
       ></Button>
       <Button
         icon="pi pi-sliders-v"
-        severity="secondary"
+        :severity="isCustom ? 'primary' : 'secondary'"
         @click="emit('customizeClicked', model)"
         variant="text"
         rounded
@@ -55,7 +55,7 @@
 import type { Model } from '@/types/Model'
 import { Button, Checkbox } from 'primevue'
 
-const { isSelected } = defineProps<{ model: Model; isSelected: boolean }>()
+const { isSelected, isCustom } = defineProps<{ model: Model; isSelected: boolean; isCustom: boolean; }>()
 const emit = defineEmits(['checkboxToggled', 'deleteClicked', 'cloneClicked', 'customizeClicked'])
 </script>
 

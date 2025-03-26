@@ -23,7 +23,6 @@
             @click="handleAddModelClicked"
           ></Button>
           <Button
-            severity="secondary"
             rounded
             label="Run"
             :disabled="selectedModels.length === 0"
@@ -41,6 +40,7 @@
               :key="model.model"
               :model="model"
               :is-selected="selectedModels.includes(model.model)"
+              :is-custom="customWorkflows.some(workflow => workflow.model === model.model)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -56,6 +56,7 @@
               :key="model.model"
               :model="model"
               :is-selected="selectedModels.includes(model.model)"
+              :is-custom="customWorkflows.some(workflow => workflow.model === model.model)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -117,6 +118,7 @@ const props = defineProps<{ experiment: Experiment }>()
 const modelStore = useModelStore()
 const toast = useToast()
 const selectedModels = ref<Model['model'][]>(['facebook/bart-large-cnn'])
+const customWorkflows = ref<CreateWorkflowPayload[]>([])
 
 const emit = defineEmits(['workflowCreated'])
 

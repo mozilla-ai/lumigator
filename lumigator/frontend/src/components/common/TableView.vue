@@ -21,9 +21,10 @@
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
-    <template #header>
+    <template #header v-if="hasColumnToggle || isSearchEnabled">
       <div style="display: flex; gap: 2rem; justify-content: flex-end">
         <MultiSelect
+          v-if="hasColumnToggle"
           :modelValue="selectedColumns"
           :options="columns"
           :size="'small'"

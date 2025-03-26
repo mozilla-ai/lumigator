@@ -105,6 +105,23 @@ class TrackingClient(Protocol):
         """List all jobs for a workflow."""
         ...
 
+    async def is_status_match(self, tracking_client_status: str, workflow_status: WorkflowStatus) -> bool:
+        """Checks whether the given tracking client status correctly maps to the specified workflow status.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :param workflow_status: A workflow status to compare against.
+        :return: True if the status matches, False otherwise.
+        """
+        ...
+
+    async def is_status_terminal(self, tracking_client_status: str) -> bool:
+        """Checks whether the given tracking client status is terminal.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :return: True if the status is terminal, False otherwise.
+        """
+        ...
+
 
 class TrackingClientManager(Protocol):
     """Interface for tracking client managers."""

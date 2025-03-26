@@ -57,6 +57,12 @@ export type CreateWorkflowPayload = {
   max_samples: number
   base_url?: string
   system_prompt?: string
+  generation_config?: {
+    max_new_tokens?: number,
+    frequency_penalty?: number,
+    temperature?: number,
+    top_p?: number
+  },
   inference_output_field?: string
   config_template?: string
   task_definition: SummarizationTaskDefinition | TranslationTaskDefinition

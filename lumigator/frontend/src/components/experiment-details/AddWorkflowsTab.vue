@@ -83,16 +83,16 @@
           <div class="parameter-field">
             <div class="field-label">
               <label for="temperature" class="parameter-label">Temperature</label>
-              <InputNumber v-model="temperature" />
+              <InputNumber v-model="temperature" :step="0.1" />
             </div>
-            <Slider v-model="temperature" name="temperature" :step="0.1" :min="0" :max="1" />
+            <Slider v-model="temperature" name="temperature" :step="0.01" :min="0" :max="1" />
           </div>
           <div class="parameter-field">
             <div class="field-label">
               <label for="topP" class="parameter-label">Top-P</label>
-              <InputNumber v-model="topP" />
+              <InputNumber v-model="topP" :step="0.1" />
             </div>
-            <Slider v-model="topP" name="top-p" :step="0.1" :min="0" :max="1" />
+            <Slider v-model="topP" name="top-p" :step="0.01" :min="0" :max="1" />
           </div>
         </div>
       </div>
@@ -199,6 +199,12 @@ const handleRunClicked = () => {
         ? `${model.provider}_api_key`
         : undefined,
       base_url: model.base_url,
+      generation_config: {
+        temperature: temperature.value,
+        top_p: topP.value,
+        // max_new_tokens: 1024,
+        // frequency_penalty: 0
+      }
     }
 
     createWorkflowMutation.mutate(workflowPayload)

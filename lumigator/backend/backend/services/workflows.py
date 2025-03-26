@@ -91,16 +91,34 @@ class WorkflowService:
         """Handle a workflow failure by updating the workflow status and stopping any running jobs."""
         loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
 
-        # Mark the workflow as failed.
+        # Mark the parent workflow as failed.
         await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
-        # Get the list of jobs in the workflow to stop any that are still running.
-        stop_tasks = [
+        # Get the list of non-complete jobs in the workflow, to stop them and mark them failed.
+        non_terminal_runs = [
+            run
+            for run in await self._tracking_client.list_jobs(workflow_id)
+            if not (await self._tracking_client.is_status_terminal(run.info.status))
+        ]
+
+        # Get Ray jobs tied to this workflow so we can stop them.
+        ray_stop_tasks = [
             self._job_service.stop_job(UUID(ray_job_id))
-            for job in await self._tracking_client.list_jobs(workflow_id)
+            for job in non_terminal_runs
             if (ray_job_id := job.data.params.get("ray_job_id"))
         ]
-        # Wait for all stop tasks to complete concurrently
+
+        # Mark MLFlow jobs (runs) that are not in a terminal state, as failed.
+        mlflow_stop_tasks = [
+            self._tracking_client.update_workflow_status(run.info.run_id, WorkflowStatus.FAILED)
+            for run in non_terminal_runs
+        ]
+
+        stop_tasks = []
+        stop_tasks.extend(ray_stop_tasks)
+        stop_tasks.extend(mlflow_stop_tasks)
+
+        # Wait for all tasks to complete concurrently.
         if stop_tasks:
             await asyncio.gather(*stop_tasks, return_exceptions=False)
 
@@ -160,7 +178,10 @@ class WorkflowService:
 
             if status != JobStatus.SUCCEEDED:
                 # Trigger the failure handling logic
-                raise JobUpstreamError(f"Inference job {inference_job.id} failed with status {status}") from None
+                raise JobUpstreamError(f"Inference job {inference_job.id} failed with status '{status}'") from None
+
+            # Mark the job as successful in the tracking client.
+            await self._tracking_client.update_workflow_status(inference_run_id, WorkflowStatus.SUCCEEDED)
         except JobUpstreamError as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Inference job: {} failed: {}", workflow.id, inference_job.id, e
@@ -284,10 +305,13 @@ class WorkflowService:
 
             if status != JobStatus.SUCCEEDED:
                 # Trigger the failure handling logic
-                raise JobUpstreamError(f"Evaluation job {evaluation_job.id} failed with status {status}") from None
+                raise JobUpstreamError(f"Evaluation job {evaluation_job.id} failed with status '{status}'") from None
 
             # TODO: Handle other error types that can be raised by the method.
             self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
+
+            # Mark the job as successful in the tracking client.
+            await self._tracking_client.update_workflow_status(eval_run_id, WorkflowStatus.SUCCEEDED)
         except (JobUpstreamError, ValidationError) as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} failed: {}", workflow.id, evaluation_job.id, e

@@ -98,7 +98,7 @@ class PredictionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prediction: str
     reasoning: str | None = None
-    metrics: InferenceMetrics = None
+    metrics: InferenceMetrics | None = None
 
 
 class JobOutput(BaseModel):

@@ -1,6 +1,7 @@
 """python job to run batch inference"""
 
 import argparse
+import json
 import os
 from pathlib import Path
 
@@ -34,7 +35,7 @@ def save_to_disk(local_path: Path, results: JobOutput):
     logger.info(f"Storing into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        f.write(results.model_dump_json())
+        json.dump(results.model_dump(), f)
 
 
 def save_to_s3(config: InferenceJobConfig, local_path: Path, storage_path: str):
@@ -121,13 +122,28 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
     output["inference_time"] = inference_time
 
     artifacts = InferenceJobOutput.model_validate(output)
+    metrics = _calculate_average_metrics(prediction_results)
+    results = JobOutput(artifacts=artifacts, parameters=config, metrics=metrics)
+
+    output_path = save_outputs(config, results)
+    return output_path
+
+
+def _calculate_average_metrics(prediction_results: list[PredictionResult]) -> AverageInferenceMetrics | None:
+    """Calculate the average metrics from a list of prediction results.
+
+    :param prediction_results: List of prediction results to calculate the average metrics from.
+    :returns: ``AverageInferenceMetrics`` object containing the average metrics,
+                or None if the prediction results don't contain any metrics.
+    :raises ValueError: If some prediction results have metrics and some don't.
+    """
+    if not prediction_results:
+        return None
 
     all_metrics_present = all(p.metrics for p in prediction_results)
 
     if any(p.metrics for p in prediction_results) != all_metrics_present:
         raise ValueError("Prediction result 'metrics' must be present in ALL results or NONE, but not in SOME.")
-
-    results = JobOutput(artifacts=artifacts, parameters=config)
 
     # Only attempt to metric calculate averages if we have a metric for EVERY prediction result.
     if all_metrics_present:
@@ -138,7 +154,7 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
         avg_reasoning_tokens = sum(p.metrics.reasoning_tokens for p in prediction_results) / total_results
         avg_answer_tokens = sum(p.metrics.answer_tokens for p in prediction_results) / total_results
 
-        metrics = AverageInferenceMetrics(
+        return AverageInferenceMetrics(
             avg_prompt_tokens=avg_prompt_tokens,
             avg_total_tokens=avg_total_tokens,
             avg_completion_tokens=avg_completion_tokens,
@@ -146,10 +162,7 @@ def run_inference(config: InferenceJobConfig, api_key: str | None = None) -> Pat
             avg_answer_tokens=avg_answer_tokens,
         )
 
-        results.metrics = metrics
-
-    output_path = save_outputs(config, results)
-    return output_path
+    return None
 
 
 if __name__ == "__main__":

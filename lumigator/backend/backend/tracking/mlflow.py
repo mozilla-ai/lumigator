@@ -14,6 +14,7 @@ from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.tasks import TaskDefinition
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
+from mlflow.entities import RunStatus
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
@@ -31,12 +32,15 @@ class MLflowTrackingClient(TrackingClient):
 
     # Map from Workflow status to MLFlow run status (RunStatus).
     # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#runstatus
-    _WORKFLOW_TO_MLFLOW_STATUS = {
-        WorkflowStatus.CREATED: "SCHEDULED",
-        WorkflowStatus.RUNNING: "RUNNING",
-        WorkflowStatus.FAILED: "FAILED",
-        WorkflowStatus.SUCCEEDED: "FINISHED",
+    _WORKFLOW_TO_MLFLOW_STATUS: dict[WorkflowStatus, RunStatus] = {
+        WorkflowStatus.CREATED: RunStatus.SCHEDULED,
+        WorkflowStatus.RUNNING: RunStatus.RUNNING,
+        WorkflowStatus.FAILED: RunStatus.FAILED,
+        WorkflowStatus.SUCCEEDED: RunStatus.FINISHED,
     }
+
+    # Map from MLFlow run status (RunStatus) to Workflow status.
+    _MLFLOW_TO_WORKFLOW_STATUS: dict[RunStatus, WorkflowStatus] = {v: k for k, v in _WORKFLOW_TO_MLFLOW_STATUS.items()}
 
     # The filename for results compiled from all jobs in a workflow.
     _WORKFLOW_OUTPUT_FILENAME = "compiled.json"
@@ -321,7 +325,7 @@ class MLflowTrackingClient(TrackingClient):
         self._client.set_tag(workflow_id, "status", status.value)
         # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
         # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
-        self._client.update_run(workflow_id, status=self._WORKFLOW_TO_MLFLOW_STATUS[status])
+        self._client.update_run(workflow_id, status=RunStatus.to_string(self._WORKFLOW_TO_MLFLOW_STATUS[status]))
 
     def _get_ray_job_logs(self, ray_job_id: str):
         """Get the logs for a Ray job."""
@@ -434,6 +438,37 @@ class MLflowTrackingClient(TrackingClient):
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
         return all_jobs
+
+    async def is_status_match(self, tracking_client_status: str, workflow_status: WorkflowStatus) -> bool:
+        """Check if a status from the MLFlow client is mapped to a workflow status.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :param workflow_status: A workflow status to compare against.
+        :return: True if the status matches, False otherwise.
+        :raises ValueError: if the tracking client status provided is not a valid ``RunStatus``.
+        """
+        try:
+            status = RunStatus.from_string(tracking_client_status)
+        except Exception as e:
+            raise ValueError(f"Status '{tracking_client_status}' not valid.") from e
+
+        return status == self._WORKFLOW_TO_MLFLOW_STATUS[workflow_status]
+
+    async def is_status_terminal(self, tracking_client_status: str) -> bool:
+        """Check if a status from the MLFlow client is terminal.
+
+        :raises ValueError: if the tracking client status provided is not a valid ``RunStatus``.
+        :raises ValueError: if the tracking client status provided cannot be mapped to a ``WorkflowStatus``
+        """
+        try:
+            current_status = self._MLFLOW_TO_WORKFLOW_STATUS.get(RunStatus.from_string(tracking_client_status), None)
+        except Exception as e:
+            raise ValueError(f"Status '{tracking_client_status}' not valid.") from e
+
+        if not current_status:
+            raise ValueError(f"Status '{tracking_client_status}' not found in mapping.")
+
+        return current_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
     async def _generate_presigned_url(self, workflow_id: str) -> str:
         """Generate a pre-signed URL for the compiled artifact."""

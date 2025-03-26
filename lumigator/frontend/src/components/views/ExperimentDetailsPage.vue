@@ -20,13 +20,13 @@
         <div class="experiment-details-tab-content">
           <TabPanels>
             <TabPanel value="model-runs">
-              <p>Model Runs</p>
+              <WorkflowsTab />
             </TabPanel>
             <TabPanel value="add-model-run">
-              <p>Trigger Model Run</p>
+              <AddWorkflowsTab />
             </TabPanel>
             <TabPanel value="details">
-              <p>Details</p>
+              <ExperimentInfo />
             </TabPanel>
           </TabPanels>
         </div>
@@ -48,6 +48,9 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import type { MenuItem } from 'primevue/menuitem'
+import WorkflowsTab from '@/components/experiment-details/WorkflowsTab.vue'
+import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue'
+import ExperimentInfo from '@/components/experiment-details/ExperimentInfo.vue'
 
 const { id } = defineProps<{
   id: string

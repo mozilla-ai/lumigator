@@ -25,8 +25,8 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
-        experiment = self._tracking_session.create_experiment(
+    async def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
+        experiment = await self._tracking_session.create_experiment(
             request.name,
             request.description,
             request.task_definition,
@@ -50,5 +50,5 @@ class ExperimentService:
             items=[GetExperimentResponse.model_validate(x) for x in records],
         )
 
-    def delete_experiment(self, experiment_id: str):
-        self._tracking_session.delete_experiment(experiment_id)
+    async def delete_experiment(self, experiment_id: str):
+        await self._tracking_session.delete_experiment(experiment_id)

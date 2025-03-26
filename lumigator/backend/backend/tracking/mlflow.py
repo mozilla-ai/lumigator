@@ -294,7 +294,7 @@ class MLflowTrackingClient(TrackingClient):
                                 compiled_results[job_result_item[0]][key] = job_result_item[1][key]
 
             # Upload the compiled results to S3.
-            self._upload_to_s3(workflow_s3_uri, json.dumps(compiled_results))
+            self._upload_to_s3(workflow_s3_uri, compiled_results)
 
         # Update the download URL in the response as compiled results are available.
         workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)

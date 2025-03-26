@@ -1,5 +1,4 @@
 import asyncio
-import json
 import numbers
 from pathlib import Path
 from uuid import UUID
@@ -222,7 +221,7 @@ class WorkflowService:
             # TODO: Review how DatasetService._get_s3_path (and similar) works and if it can be re-used/made public.
             dataset_path = self._dataset_service._get_s3_path(result_key)
             with self._dataset_service.s3_filesystem.open(dataset_path, "r") as f:
-                inf_output = JobResultObject.model_validate(json.loads(f.read()))
+                inf_output = JobResultObject.model_validate_json(f.read())
             inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
             inference_job_output = RunOutputs(
                 parameters={"inference_output_s3_path": inf_path},
@@ -308,7 +307,7 @@ class WorkflowService:
                 / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_eval_create.name, job_id=evaluation_job.id)
             )
             with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-                eval_output = JobResultObject.model_validate(json.loads(f.read()))
+                eval_output = JobResultObject.model_validate_json(f.read())
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later
@@ -325,8 +324,6 @@ class WorkflowService:
                 ray_job_id=str(evaluation_job.id),
             )
             await self._tracking_client.update_job(eval_run_id, outputs)
-            await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
-            await self._tracking_client.get_workflow(workflow.id)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -336,6 +333,16 @@ class WorkflowService:
             )
             await self._handle_workflow_failure(workflow.id)
             return
+
+        try:
+            await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            await self._tracking_client.get_workflow(workflow.id)
+        except Exception as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Error updating completed workflow: {}",
+                workflow.id,
+                e,
+            )
 
     async def get_workflow_result_download(self, workflow_id: str) -> str:
         """Return workflow results file URL for downloading.

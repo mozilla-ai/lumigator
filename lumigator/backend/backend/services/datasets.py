@@ -9,7 +9,6 @@ from fastapi import UploadFile
 from loguru import logger
 from lumigator_schemas.datasets import DatasetDownloadResponse, DatasetFormat, DatasetResponse
 from lumigator_schemas.extras import ListingResponse
-from mypy_boto3_s3.client import S3Client
 from pydantic import ByteSize
 from s3fs import S3FileSystem
 
@@ -102,9 +101,8 @@ def dataset_has_gt(filename: str) -> bool:
 
 
 class DatasetService:
-    def __init__(self, dataset_repo: DatasetRepository, s3_client: S3Client, s3_filesystem: S3FileSystem):
+    def __init__(self, dataset_repo: DatasetRepository, s3_filesystem: S3FileSystem):
         self.dataset_repo = dataset_repo
-        self.s3_client = s3_client
         self.s3_filesystem = s3_filesystem
 
     def _get_dataset_record(self, dataset_id: UUID) -> DatasetRecord | None:
@@ -142,7 +140,6 @@ class DatasetService:
             # Upload to S3
             dataset_key = self._get_s3_key(record.id, record.filename)
             dataset_path = self._get_s3_path(dataset_key)
-            # Deprecated!!!
             dataset_hf.save_to_disk(dataset_path, storage_options=self.s3_filesystem.storage_options)
 
             # Use the converted HF format files to rebuild the CSV and store it as 'dataset.csv'.
@@ -153,7 +150,7 @@ class DatasetService:
             if record:
                 self.dataset_repo.delete(record.id)
 
-            raise DatasetUpstreamError("s3", "error attempting to save dataset to S3", e) from e
+            raise DatasetUpstreamError("s3", "error attempting to save dataset to S3") from e
         finally:
             # Clean up temp file
             Path(temp.name).unlink()
@@ -281,12 +278,12 @@ class DatasetService:
                 f"Cleaning up DB by removing ID. {e}"
             )
         except Exception as e:
-            raise DatasetUpstreamError("s3", f"error attempting to delete dataset {dataset_id} from S3", e) from e
+            raise DatasetUpstreamError("s3", f"error attempting to delete dataset {dataset_id} from S3") from e
 
         # Getting this far means we are OK to remove the record from the DB.
         self.dataset_repo.delete(record.id)
 
-    def get_dataset_download(self, dataset_id: UUID, extension: str | None = None) -> DatasetDownloadResponse:
+    async def get_dataset_download(self, dataset_id: UUID, extension: str | None = None) -> DatasetDownloadResponse:
         """Generate pre-signed download URLs for dataset files.
 
         When supplied, only URLs for files that match the specified extension are returned.
@@ -306,31 +303,32 @@ class DatasetService:
         dataset_key = self._get_s3_key(dataset_id, record.filename)
 
         try:
-            # Call list_objects_v2 to get all objects whose key names start with `dataset_key`
-            s3_response = self.s3_client.list_objects_v2(Bucket=settings.S3_BUCKET, Prefix=dataset_key)
+            # Call find to get all objects whose key names start with `dataset_key`
+            s3_response = self.s3_filesystem.find(path=settings.S3_BUCKET, prefix=dataset_key)
 
-            if s3_response.get("KeyCount") == 0:
+            if not len(s3_response):
                 raise DatasetNotFoundError(dataset_id, f"No S3 files found with prefix '{dataset_key}'") from None
 
             download_urls = []
-            for s3_object in s3_response["Contents"]:
+            for s3_object in s3_response:
                 # Ignore files that don't end with the extension if it was specified
-                if extension and not s3_object["Key"].lower().endswith(extension):
+                if extension and not s3_object.lower().endswith(extension):
                     continue
 
-                download_url = self.s3_client.generate_presigned_url(
+                download_url = await self.s3_filesystem.s3.generate_presigned_url(
                     "get_object",
                     Params={
                         "Bucket": settings.S3_BUCKET,
-                        "Key": s3_object["Key"],
+                        "Key": s3_object.removeprefix(settings.S3_BUCKET),
                     },
                     ExpiresIn=settings.S3_URL_EXPIRATION,
                 )
                 download_urls.append(download_url)
-
+        except DatasetNotFoundError:
+            raise
         except Exception as e:
             msg = f"Error generating pre-signed download URLs for dataset {dataset_id}"
-            raise DatasetUpstreamError("s3", msg, e) from e
+            raise DatasetUpstreamError("s3", msg) from e
 
         return DatasetDownloadResponse(id=dataset_id, download_urls=download_urls)
 

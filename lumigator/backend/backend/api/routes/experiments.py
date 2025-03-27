@@ -21,28 +21,31 @@ def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_experiment_id(service: ExperimentServiceDep, request: ExperimentCreate) -> GetExperimentResponse:
+async def create_experiment_id(service: ExperimentServiceDep, request: ExperimentCreate) -> GetExperimentResponse:
     """Create an experiment ID."""
-    return GetExperimentResponse.model_validate(service.create_experiment(request).model_dump())
+    experiment = await service.create_experiment(request)
+    return GetExperimentResponse.model_validate(experiment.model_dump())
 
 
 @router.get("/{experiment_id}")
-def get_experiment(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
+async def get_experiment(service: ExperimentServiceDep, experiment_id: str) -> GetExperimentResponse:
     """Get an experiment by ID."""
-    return GetExperimentResponse.model_validate(service.get_experiment(experiment_id).model_dump())
+    experiment = await service.get_experiment(experiment_id)
+    return GetExperimentResponse.model_validate(experiment.model_dump())
 
 
 @router.get("/")
-def list_experiments(
+async def list_experiments(
     service: ExperimentServiceDep,
     skip: int = 0,
     limit: int = 100,
 ) -> ListingResponse[GetExperimentResponse]:
     """List all experiments."""
-    return ListingResponse[GetExperimentResponse].model_validate(service.list_experiments(skip, limit).model_dump())
+    experiments = await service.list_experiments(skip, limit)
+    return ListingResponse[GetExperimentResponse].model_validate(experiments.model_dump())
 
 
 @router.delete("/{experiment_id}")
-def delete_experiment(service: ExperimentServiceDep, experiment_id: str) -> None:
+async def delete_experiment(service: ExperimentServiceDep, experiment_id: str) -> None:
     """Delete an experiment by ID."""
-    service.delete_experiment(experiment_id)
+    await service.delete_experiment(experiment_id)

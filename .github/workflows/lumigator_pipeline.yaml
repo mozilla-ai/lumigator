@@ -31,21 +31,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: Install python
-        run: uv python install
-
-      - name: Create a virtual environment
-        run: uv venv
+      - name: Install Python and virtual environment
+        run: uv sync
 
       - name: Install pre-commit
-        run: |
-          source .venv/bin/activate
-          uv pip install pre-commit
+        run: uv run pre-commit install
 
       - name: Run pre-commit
-        run: |
-          source .venv/bin/activate
-          pre-commit run --all-files
+        run: uv run pre-commit run --all-files
         continue-on-error: false
 
   lint-frontend:
@@ -253,7 +246,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs-${{ matrix.test }}
+          name: ray-logs-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
@@ -261,7 +254,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-docker-log-${{ matrix.test }}
+          name: ray-docker-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raydocker.log
 
@@ -269,7 +262,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-log-${{ matrix.test }}
+          name: backend-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/backendlogs/backend.log
 
@@ -337,7 +330,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ray-logs-${{ matrix.test }}
+          name: ray-logs-${{ matrix.test }}-postgres-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 

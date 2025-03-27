@@ -25,8 +25,8 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
-        experiment = self._tracking_session.create_experiment(
+    async def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
+        experiment = await self._tracking_session.create_experiment(
             request.name,
             request.description,
             request.task_definition,
@@ -36,18 +36,19 @@ class ExperimentService:
         loguru.logger.info(f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'.")
         return experiment
 
-    def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
-        record = self._tracking_session.get_experiment(experiment_id)
+    async def get_experiment(self, experiment_id: str) -> GetExperimentResponse:
+        record = await self._tracking_session.get_experiment(experiment_id)
         if record is None:
             raise ExperimentNotFoundError(experiment_id) from None
         return GetExperimentResponse.model_validate(record)
 
-    def list_experiments(self, skip: int, limit: int) -> ListingResponse[GetExperimentResponse]:
-        records = self._tracking_session.list_experiments(skip, limit)
+    async def list_experiments(self, skip: int, limit: int) -> ListingResponse[GetExperimentResponse]:
+        records = await self._tracking_session.list_experiments(skip, limit)
+        total = await self._tracking_session.experiments_count()
         return ListingResponse(
-            total=self._tracking_session.experiments_count(),
+            total=total,
             items=[GetExperimentResponse.model_validate(x) for x in records],
         )
 
-    def delete_experiment(self, experiment_id: str):
-        self._tracking_session.delete_experiment(experiment_id)
+    async def delete_experiment(self, experiment_id: str):
+        await self._tracking_session.delete_experiment(experiment_id)

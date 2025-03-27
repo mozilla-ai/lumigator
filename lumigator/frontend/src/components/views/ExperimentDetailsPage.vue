@@ -7,7 +7,7 @@
       </Breadcrumb>
     </div>
 
-    <Tabs :value="activeTab" @update:value="activeTab = String($event)">
+    <Tabs :value="activeTab || defaultActiveTab" @update:value="activeTab = String($event)">
       <div class="experiment-container">
         <div class="experiment-details-header">
           <h3 class="experiment-title"><i class="pi pi-experiments"></i>{{ experiment?.name }}</h3>
@@ -68,7 +68,10 @@ const router = useRouter()
 const experimentsStore = useExperimentStore()
 const { experiments } = storeToRefs(experimentsStore)
 const experiment = computed(() => experiments.value.find((exp) => exp.id === id))
-const activeTab = ref('model-runs')
+const activeTab = ref()
+const defaultActiveTab = computed(() => {
+  return experiment.value?.workflows.length ? 'model-runs' : 'add-model-run'
+})
 const items: ComputedRef<MenuItem[]> = computed(() => [
   {
     label: 'Experiments',
@@ -98,6 +101,7 @@ const handleWorkflowCreated = async () => {
   // await experimentStore.fetchAllExperiments()
   activeTab.value = 'model-runs'
   await experimentsStore.fetchAllExperiments()
+  // todo - get workflows
 }
 </script>
 

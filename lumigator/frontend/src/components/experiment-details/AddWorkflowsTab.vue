@@ -25,7 +25,7 @@
           <Button
             rounded
             label="Run"
-            :disabled="selectedModels.length === 0"
+            :disabled="selectedModels.length === 0 || createWorkflowMutation.isPending.value"
             icon="pi pi-play"
             @click="handleRunClicked"
           ></Button>

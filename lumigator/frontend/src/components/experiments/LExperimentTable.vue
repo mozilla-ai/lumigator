@@ -310,7 +310,6 @@ watch(
 @use '@/styles/variables' as *;
 
 .l-experiment-table {
-  $root: &;
   width: 100%;
   display: flex;
   place-content: center;

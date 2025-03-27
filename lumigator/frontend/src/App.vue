@@ -23,12 +23,12 @@
           <ul>
             <li>
               <a href="https://github.com/mozilla-ai/lumigator" target="_blank"
-                >GitHub <span class="pi pi-arrow-up-right" />
+                >GitHub <span class="pi pi-arrow-up-right"></span>
               </a>
             </li>
             <li>
               <a href="https://mozilla-ai.github.io/lumigator/" target="_blank"
-                >Documentation <span class="pi pi-arrow-up-right" />
+                >Documentation <span class="pi pi-arrow-up-right"></span>
               </a>
             </li>
           </ul>
@@ -55,6 +55,11 @@
       </div>
       <div class="sliding-panel" :class="{ open: showSlidingPanel }"></div>
     </div>
+    <ConsentBanner
+      v-if="!hasResponded && isProdBuild"
+      @accept="acceptConsent"
+      @reject="rejectConsent"
+    ></ConsentBanner>
   </div>
 </template>
 
@@ -67,9 +72,13 @@ import { useSlidePanel } from '@/composables/useSlidePanel'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
+import ConsentBanner from './components/common/ConsentBanner.vue'
+import { useSentryConsent } from './composables/useSentryConsent'
 
 const datasetsStore = useDatasetStore()
 const experimentsStore = useExperimentStore()
+const { hasResponded, acceptConsent, rejectConsent } = useSentryConsent()
+const isProdBuild = import.meta.env.PROD
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,

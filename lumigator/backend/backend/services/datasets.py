@@ -319,7 +319,7 @@ class DatasetService:
                     "get_object",
                     Params={
                         "Bucket": settings.S3_BUCKET,
-                        "Key": s3_object,
+                        "Key": s3_object.removeprefix(settings.S3_BUCKET),
                     },
                     ExpiresIn=settings.S3_URL_EXPIRATION,
                 )

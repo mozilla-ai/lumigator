@@ -1,10 +1,13 @@
+import argparse
 import json
 import os
+import re
 from pathlib import Path
+from uuid import UUID
 
-import click
 import s3fs
 from datasets import load_from_disk
+from datasets.features.features import Value
 from eval_metrics import EvaluationMetrics
 from loguru import logger
 from utils import timer
@@ -13,41 +16,49 @@ from schemas import EvalJobArtifacts, EvalJobConfig, EvalJobMetrics, JobOutput
 
 DEEPEVAL_CONFIG_FILENAME = ".deepeval"
 
+SAFE_JOB_NAME_REGEX = re.compile(r"[^\w\-_.]")
+
+JOB_NAME_REPLACEMENT_CHAR = "-"
+
 
 def save_to_disk(local_path: Path, data: JobOutput):
-    logger.info(f"Storing evaluation results into {local_path}...")
+    logger.info(f"Storing evaluation results to {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data.model_dump(), f)
+        f.write(data.model_dump_json())
 
 
-def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):
+def save_to_s3(job_id: UUID, job_name: str, local_path: Path, storage_path: str):
     s3 = s3fs.S3FileSystem()
+    # If there's no 'filename' let's build a path.
     if storage_path.endswith("/"):
-        storage_path = "s3://" + str(Path(storage_path[5:]) / config.name / "results.json")
-    logger.info(f"Storing evaluation results into {storage_path}...")
+        safe_name = sanitize_job_name(job_name)
+        storage_path = storage_path.removeprefix("s3://").rstrip("/")
+        storage_path = f"s3://{storage_path}/{safe_name}/{job_id}/results.json"
+    logger.info(f"Storing evaluation results for S3 to {storage_path}...")
     s3.put_file(local_path, storage_path)
 
 
-def save_outputs(config: EvalJobConfig, eval_results: JobOutput) -> Path:
-    storage_path = config.evaluation.storage_path
+def save_outputs(job_id: UUID, job_name: str, storage_path: str, eval_results: JobOutput) -> str | None:
+    # Sanitize name to be S3-safe.
+    safe_name = sanitize_job_name(job_name)
 
     # generate local temp file ANYWAY:
     # - if storage_path is not provided, it will be stored and kept into a default dir
     # - if storage_path is provided AND saving to S3 is successful, local file is deleted
-    local_path = Path(Path.home() / ".lumigator" / "results" / config.name / "results.json")
+    local_path = Path(Path.home() / ".lumigator" / "results" / safe_name / str(job_id) / "results.json")
 
     try:
         save_to_disk(local_path, eval_results)
 
         # copy to s3 and return path
         if storage_path is not None and storage_path.startswith("s3://"):
-            save_to_s3(config, local_path, storage_path)
+            save_to_s3(job_id, job_name, local_path, storage_path)
             Path.unlink(local_path)
             Path.rmdir(local_path.parent)
             return storage_path
         else:
-            return local_path
+            return str(local_path)
 
     except Exception as e:
         logger.error(e)
@@ -73,12 +84,32 @@ def run_eval_metrics(examples: list, predictions: list, ground_truth: list, eval
     return EvalJobMetrics.model_validate(evaluation_results)
 
 
-def run_eval(config: EvalJobConfig) -> Path:
+def run_eval(config: EvalJobConfig, job_id: UUID) -> str | None:
     max_samples = config.evaluation.max_samples
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
+    # Cast non-string fields into strings. If it cannot be done, then
+    # the dataset is most probably broken.
+    # All-empty fields are interpreted by the loader as 'float64' by default,
+    # which causes issues when an empty 'predictions'
+    for fname in dataset.features:
+        feature = dataset.features[fname]
+        if not (isinstance(feature, Value) and feature.dtype == "string"):
+            logger.warning(
+                f"Found column '{fname}' with non-string type '{feature}', "
+                "converting type to string and None values to ''"
+            )
+            dataset = dataset.cast_column(fname, Value("string"))
+
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
+
+    def replace_none_with_empty(row):
+        if row[config.predictions_field] is None:
+            row[config.predictions_field] = ""
+        return row
+
+    dataset = dataset.map(replace_none_with_empty)
 
     # Check for required fields
     # If any of the G-Eval metrics are in config.evaluation.metrics,
@@ -91,14 +122,21 @@ def run_eval(config: EvalJobConfig) -> Path:
         max_samples = len(dataset)
     dataset = dataset.select(range(max_samples))
 
+    metric_results: EvalJobMetrics
+    evaluation_time: float
     metric_results, evaluation_time = run_eval_metrics(
-        dataset["examples"], dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+        examples=dataset["examples"],
+        predictions=dataset[config.predictions_field],
+        ground_truth=dataset["ground_truth"],
+        evaluation_metrics=config.evaluation.metrics,
     )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
         artifacts = EvalJobArtifacts(
-            predictions=dataset["predictions"], ground_truth=dataset["ground_truth"], evaluation_time=evaluation_time
+            predictions=dataset[config.predictions_field],
+            ground_truth=dataset["ground_truth"],
+            evaluation_time=evaluation_time,
         )
     else:
         artifacts = None
@@ -107,39 +145,47 @@ def run_eval(config: EvalJobConfig) -> Path:
         parameters=config,
         artifacts=artifacts,
     )
-    output_path = save_outputs(config, evaluation_results)
+    output_path = save_outputs(job_id, config.name, config.evaluation.storage_path, evaluation_results)
     return output_path
 
 
-@click.command()
-@click.option("--config")
-def eval_command(config: str) -> None:
-    config_dict = json.loads(config)
-    logger.info(f"{config_dict}")
-    config_model = EvalJobConfig(**config_dict)
-
-    # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
-    if "g_eval_summarization" in config_model.evaluation.metrics and (api_key := os.environ.get("api_key")):
-        os.environ["OPENAI_API_KEY"] = api_key
-
-    if config_model.evaluation.llm_as_judge is not None:
+def prepare_deepeval_config_file(config: EvalJobConfig) -> None:
+    if config.evaluation.llm_as_judge is not None:
         # create a .deepeval config file if an ollama model is specified
         deepeval_config = {
-            "LOCAL_MODEL_NAME": config_model.evaluation.llm_as_judge.model_name,
-            "LOCAL_MODEL_BASE_URL": config_model.evaluation.llm_as_judge.model_base_url,
+            "LOCAL_MODEL_NAME": config.evaluation.llm_as_judge.model_name,
+            "LOCAL_MODEL_BASE_URL": config.evaluation.llm_as_judge.model_base_url,
             "USE_LOCAL_MODEL": "YES",
             "USE_AZURE_OPENAI": "NO",
-            "LOCAL_MODEL_API_KEY": config_model.evaluation.llm_as_judge.model_api_key,
+            "LOCAL_MODEL_API_KEY": config.evaluation.llm_as_judge.model_api_key,
         }
         with Path(DEEPEVAL_CONFIG_FILENAME).open("w") as f:
-            json.dump(deepeval_config, f)
+            json.dump(deepeval_config, f, indent=4)
     else:
         # otherwise, make sure we'll start without a .deepeval config file
         Path(DEEPEVAL_CONFIG_FILENAME).unlink(missing_ok=True)
 
-    run_eval(config_model)
+
+def sanitize_job_name(job_name: str) -> str:
+    """Sanitize a job name to be S3-safe."""
+    return re.sub(SAFE_JOB_NAME_REGEX, JOB_NAME_REPLACEMENT_CHAR, job_name)
 
 
 if __name__ == "__main__":
-    logger.info("Starting evaluation job...")
-    eval_command()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, help="Configuration in JSON format")
+    args = parser.parse_args()
+
+    if not args.config:
+        parser.print_help()  # Print the usage message and exit
+        err_str = "No input configuration provided. Please pass one using the --config flag"
+        logger.error(err_str)
+    else:
+        config = EvalJobConfig.model_validate_json(args.config)
+        # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
+        if "g_eval_summarization" in config.evaluation.metrics and (api_key := os.environ.get("api_key")):
+            os.environ["OPENAI_API_KEY"] = api_key
+
+        job_id: UUID = UUID(os.environ.get("MZAI_JOB_ID"))
+        prepare_deepeval_config_file(config)
+        run_eval(config, job_id)

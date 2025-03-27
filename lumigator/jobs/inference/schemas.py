@@ -4,7 +4,7 @@ This is because the backend and this job will be running in different environmen
 """
 
 from lumigator_schemas.tasks import SummarizationTaskDefinition, TaskDefinition, TaskType
-from pydantic import BaseModel, ConfigDict, Field, PositiveInt
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt, model_validator
 
 
 class DatasetConfig(BaseModel):
@@ -71,8 +71,8 @@ class InferenceMetrics(BaseModel):
     prompt_tokens: int
     total_tokens: int
     completion_tokens: int
-    reasoning_tokens: int | None = None
-    answer_tokens: int | None = None
+    reasoning_tokens: int
+    answer_tokens: int
 
 
 class AverageInferenceMetrics(BaseModel):
@@ -91,7 +91,7 @@ class InferenceJobOutput(BaseModel):
     ground_truth: list | None = None
     model: str
     inference_time: float
-    inference_metrics: list[InferenceMetrics | None] = Field(default_factory=list)
+    inference_metrics: list[InferenceMetrics | None] = []
 
 
 class PredictionResult(BaseModel):
@@ -102,6 +102,14 @@ class PredictionResult(BaseModel):
 
 
 class JobOutput(BaseModel):
-    metrics: AverageInferenceMetrics | None = {}
+    metrics: AverageInferenceMetrics | dict = {}
     artifacts: InferenceJobOutput
     parameters: InferenceJobConfig
+
+    @model_validator(mode="before")
+    @classmethod
+    def ensure_metrics_default(cls, values):
+        # If metrics is set to None, set it to an empty dict.
+        if values.get("metrics") is None:
+            values["metrics"] = {}
+        return values

@@ -17,6 +17,7 @@ from lumigator_schemas.utils.model_operations import merge_models
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.entities import Run as MlflowRun
+from mlflow.entities import RunStatus
 from mlflow.exceptions import MlflowException
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
@@ -34,20 +35,24 @@ class MLflowTrackingClient(TrackingClient):
 
     # Map from Workflow status to MLFlow run status (RunStatus).
     # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#runstatus
-    _WORKFLOW_TO_MLFLOW_STATUS = {
-        WorkflowStatus.CREATED: "SCHEDULED",
-        WorkflowStatus.RUNNING: "RUNNING",
-        WorkflowStatus.FAILED: "FAILED",
-        WorkflowStatus.SUCCEEDED: "FINISHED",
+    _WORKFLOW_TO_MLFLOW_STATUS: dict[WorkflowStatus, RunStatus] = {
+        WorkflowStatus.CREATED: RunStatus.SCHEDULED,
+        WorkflowStatus.RUNNING: RunStatus.RUNNING,
+        WorkflowStatus.FAILED: RunStatus.FAILED,
+        WorkflowStatus.SUCCEEDED: RunStatus.FINISHED,
     }
 
+    # Map from MLFlow run status (RunStatus) to Workflow status.
+    _MLFLOW_TO_WORKFLOW_STATUS: dict[RunStatus, WorkflowStatus] = {v: k for k, v in _WORKFLOW_TO_MLFLOW_STATUS.items()}
+
+    # The filename for results compiled from all jobs in a workflow.
     _WORKFLOW_OUTPUT_FILENAME = "compiled.json"
 
     def __init__(self, tracking_uri: str, s3_file_system: S3FileSystem):
         self._client = MlflowClient(tracking_uri=tracking_uri)
         self._s3_file_system = s3_file_system
 
-    def create_experiment(
+    async def create_experiment(
         self,
         name: str,
         description: str,
@@ -93,7 +98,7 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
         )
 
-    def delete_experiment(self, experiment_id: str) -> None:
+    async def delete_experiment(self, experiment_id: str) -> None:
         """Delete an experiment. Although Mflow has a delete_experiment method,
         We will use the functions of this class instead, so that we make sure we correctly
         clean up all the artifacts/runs/etc. associated with the experiment.
@@ -101,7 +106,7 @@ class MLflowTrackingClient(TrackingClient):
         workflow_ids = self._find_workflows(experiment_id)
         # delete all the workflows
         for workflow_id in workflow_ids:
-            self.delete_workflow(workflow_id)
+            await self.delete_workflow(workflow_id)
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
@@ -119,29 +124,7 @@ class MLflowTrackingClient(TrackingClient):
             return None
         return await self._format_experiment(experiment)
 
-    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
-        # now get all the workflows associated with that experiment
-        workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [
-            workflow
-            for workflow in (await self.get_workflow(workflow_id) for workflow_id in workflow_ids)
-            if workflow is not None
-        ]
-        task_definition_json = experiment.tags.get("task_definition")
-        task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
-        return GetExperimentResponse(
-            id=experiment.experiment_id,
-            name=experiment.name,
-            description=experiment.tags.get("description") or "",
-            task_definition=task_definition,
-            dataset=experiment.tags.get("dataset") or "",
-            max_samples=int(experiment.tags.get("max_samples") or "-1"),
-            created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
-            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
-            workflows=workflows,
-        )
-
-    def update_experiment(self, experiment_id: str, new_name: str) -> None:
+    async def update_experiment(self, experiment_id: str, new_name: str) -> None:
         """Update the name of an experiment."""
         raise NotImplementedError
 
@@ -176,7 +159,7 @@ class MLflowTrackingClient(TrackingClient):
     # this corresponds to creating a run in MLflow.
     # The run will have n number of nested runs,
     # which correspond to what we call "jobs" in our system
-    def create_workflow(
+    async def create_workflow(
         self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
     ) -> WorkflowResponse:
         """Create a new workflow."""
@@ -211,23 +194,34 @@ class MLflowTrackingClient(TrackingClient):
         jobs = self._get_job_ids(workflow_id, workflow.info.experiment_id)
         workflow_details = self._build_workflow_response(workflow, jobs)
 
-        if workflow_details.status == WorkflowStatus.SUCCEEDED:
-            # Only compile the result JSON artifact of all the jobs, if the workflow has succeeded.
+        # Currently, only compile the result json artifact if the workflow has succeeded
+        if workflow_details.status != WorkflowStatus.SUCCEEDED:
+            return workflow_details
+
+        # Only compile the result JSON artifact of all the jobs, if the workflow has succeeded.
+        workflow_s3_uri = self._get_s3_uri(workflow_id)
+        if not self._s3_file_system.exists(workflow_s3_uri):
             self._generate_compiled_results(workflow_id, workflow_details.jobs)
-            # Update the download URL in the response now that the compiled results are available.
-            workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
+
+        # Update the download URL in the response as compiled results are available.
+        workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
 
         return workflow_details
 
-    def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
-        """Update the status of a workflow."""
+    async def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
+        """Update the status of a workflow.
+
+        :param workflow_id: The ID of the workflow to update.
+        :param status: The new status of the workflow.
+        :raises MlflowException: If there is an error updating the workflow status.
+        """
         # Update our tag, but also the run status of the 'run' in MLflow.
         self._client.set_tag(workflow_id, "status", status.value)
         # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
         # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
-        self._client.update_run(workflow_id, status=self._WORKFLOW_TO_MLFLOW_STATUS[status])
+        self._client.update_run(workflow_id, status=RunStatus.to_string(self._WORKFLOW_TO_MLFLOW_STATUS[status]))
 
-    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+    async def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         workflow_run = self._client.get_run(workflow_id)
         # get the jobs associated with the workflow
         all_jobs = self._client.search_runs(
@@ -242,7 +236,7 @@ class MLflowTrackingClient(TrackingClient):
         # TODO: This is not a great solution but it matches the current API
         return JobLogsResponse(logs="\n================\n".join([log.logs for log in logs]))
 
-    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+    async def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         """Delete a workflow."""
         # first, get the workflow
         workflow = self._client.get_run(workflow_id)
@@ -269,11 +263,11 @@ class MLflowTrackingClient(TrackingClient):
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
         )
 
-    def list_workflows(self, experiment_id: str) -> list:
+    async def list_workflows(self, experiment_id: str) -> list:
         """List all workflows in an experiment."""
         raise NotImplementedError
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str) -> str:
+    async def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str) -> str:
         """Link a started job to an experiment and a workflow."""
         run = self._client.create_run(
             experiment_id=experiment_id,
@@ -283,14 +277,14 @@ class MLflowTrackingClient(TrackingClient):
         self._client.log_param(run.info.run_id, "ray_job_id", job_id)
         return run.info.run_id
 
-    def update_job(self, job_id: str, data: RunOutputs):
+    async def update_job(self, job_id: str, data: RunOutputs):
         """Update the metrics and parameters of a job."""
         for metric, value in data.metrics.items():
             self._client.log_metric(job_id, metric, value)
         for parameter, value in data.parameters.items():
             self._client.log_param(job_id, parameter, value)
 
-    def get_job(self, job_id: str):
+    async def get_job(self, job_id: str):
         """Get the results of a job."""
         run = self._client.get_run(job_id)
         if run.info.lifecycle_stage == "deleted":
@@ -303,11 +297,11 @@ class MLflowTrackingClient(TrackingClient):
             artifact_url="TODO",
         )
 
-    def delete_job(self, job_id: str):
+    async def delete_job(self, job_id: str):
         """Delete a job."""
         self._client.delete_run(job_id)
 
-    def list_jobs(self, workflow_id: str):
+    async def list_jobs(self, workflow_id: str):
         """List all jobs in a workflow."""
         workflow_run = self._client.get_run(workflow_id)
         # get the jobs associated with the workflow
@@ -316,6 +310,81 @@ class MLflowTrackingClient(TrackingClient):
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
         return all_jobs
+
+    async def is_status_match(self, tracking_client_status: str, workflow_status: WorkflowStatus) -> bool:
+        """Check if a status from the MLFlow client is mapped to a workflow status.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :param workflow_status: A workflow status to compare against.
+        :return: True if the status matches, False otherwise.
+        :raises ValueError: if the tracking client status provided is not a valid ``RunStatus``.
+        """
+        try:
+            status = RunStatus.from_string(tracking_client_status)
+        except Exception as e:
+            raise ValueError(f"Status '{tracking_client_status}' not valid.") from e
+
+        return status == self._WORKFLOW_TO_MLFLOW_STATUS[workflow_status]
+
+    async def is_status_terminal(self, tracking_client_status: str) -> bool:
+        """Check if a status from the MLFlow client is terminal.
+
+        :raises ValueError: if the tracking client status provided is not a valid ``RunStatus``.
+        :raises ValueError: if the tracking client status provided cannot be mapped to a ``WorkflowStatus``
+        """
+        try:
+            current_status = self._MLFLOW_TO_WORKFLOW_STATUS.get(RunStatus.from_string(tracking_client_status), None)
+        except Exception as e:
+            raise ValueError(f"Status '{tracking_client_status}' not valid.") from e
+
+        if not current_status:
+            raise ValueError(f"Status '{tracking_client_status}' not found in mapping.")
+
+        return current_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
+
+    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
+        # now get all the workflows associated with that experiment
+        workflow_ids = self._find_workflows(experiment.experiment_id)
+        workflows = [
+            workflow
+            for workflow in (await self.get_workflow(workflow_id) for workflow_id in workflow_ids)
+            if workflow is not None
+        ]
+        task_definition_json = experiment.tags.get("task_definition")
+        task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
+        return GetExperimentResponse(
+            id=experiment.experiment_id,
+            name=experiment.name,
+            description=experiment.tags.get("description") or "",
+            task_definition=task_definition,
+            dataset=experiment.tags.get("dataset") or "",
+            max_samples=int(experiment.tags.get("max_samples") or "-1"),
+            created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
+            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
+            workflows=workflows,
+        )
+
+    def _get_ray_job_logs(self, ray_job_id: str):
+        """Get the logs for a Ray job."""
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
+
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
+            raise JobNotFoundError(UUID(ray_job_id), "Ray job logs not found") from None
+        elif resp.status_code != HTTPStatus.OK:
+            loguru.logger.error(
+                f"Unexpected status code getting job logs: {resp.status_code}, \
+                    error: {resp.text or ''}"
+            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
+
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            loguru.logger.error(f"JSON decode error: {e}")
+            loguru.logger.error(f"Response text: {resp.text}")
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     def _compile_metrics(self, job_ids: list) -> dict:
         """Take the individual metrics from each run and compile them into a single dict
@@ -357,28 +426,6 @@ class MLflowTrackingClient(TrackingClient):
             if parent_id is None:
                 workflow_ids.append(run.info.run_id)
         return workflow_ids
-
-    def _get_ray_job_logs(self, ray_job_id: str):
-        """Get the logs for a Ray job."""
-        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
-
-        if resp.status_code == HTTPStatus.NOT_FOUND:
-            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise JobNotFoundError(UUID(ray_job_id), "Ray job logs not found") from None
-        elif resp.status_code != HTTPStatus.OK:
-            loguru.logger.error(
-                f"Unexpected status code getting job logs: {resp.status_code}, \
-                    error: {resp.text or ''}"
-            )
-            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
-
-        try:
-            metadata = json.loads(resp.text)
-            return JobLogsResponse(**metadata)
-        except json.JSONDecodeError as e:
-            loguru.logger.error(f"JSON decode error: {e}")
-            loguru.logger.error(f"Response text: {resp.text}")
-            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     async def _generate_presigned_url(self, workflow_id: str) -> str:
         """Generate a pre-signed URL for the compiled artifact."""

@@ -12,7 +12,12 @@ and created an endpoint to easily retrieve them.
 
 ```{note}
 **Using Hugging Face Models**:
-For *summarization*, Lumigator supports any summarization model uploaded to the [HF Model Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending). For *translation*, current support is limited to two model families - the first based on [translation-prefix](https://huggingface.co/bigscience/mt0-base) (`bigscience/mt0-base`) and the second based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`). Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
+For *summarization*, Lumigator supports any summarization model uploaded to the [HF Model Hub](https://huggingface.co/models?pipeline_tag=summarization&sort=trending). For *translation*, current support is limited to 3 model families:
+1. multi-lingual models based on [translation-prefix](https://huggingface.co/bigscience/mt0-base) (`bigscience/mt0-base`)
+2. multi-lingual models based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`)
+3. bilingual and multi-lingual models based on [Opus-MT](https://huggingface.co/Helsinki-NLP#models) built on top of the [marian architecture](https://huggingface.co/docs/transformers/en/model_doc/marian)
+
+Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
 ```
 
 In this guide, we assume that you have already [installed Lumigator locally](quickstart), and have a
@@ -95,25 +100,26 @@ launched it.
 
 | **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
 |----------------|---------------------------------------|-----------------|---------|---------------|
-| seq2seq        | facebook/bart-large-cnn              | X               |         |               |
-| seq2seq        | Falconsai/text_summarization         | X               |         |               |
+| seq2seq        | facebook/bart-large-cnn              | <div align="center">X</div> |         |               |
+| seq2seq        | Falconsai/text_summarization         | <div align="center">X</div> |         |               |
 
 **Translation-Specific Models**
 
 | **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
 |----------------|---------------------------------------|-----------------|---------|---------------|
-| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B              | X               |         |               |
-| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl              | X               |         |               |
+| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B              | <div align="center">X</div> |         |               |
+| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl              | <div align="center">X</div> |         |               |
+| seq2seq        | Helsinki-NLP/opus-mt-{src}-{tgt}             | <div align="center">X</div> |         |               |
 
 **Task-Agnostic Models**:
 These models can be used for either summarization or translation by changing the instructions in the prompt.
 
 | **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
 |----------------|---------------------------------------|-----------------|---------|---------------|
-| causal         | gpt-4o-mini, gpt-4o                  |                 | X       |               |
-| causal         | deepseek-V3, deepseek-R1             |                 | X       |               |
-| causal         | Ministral-8B                         |                 | X       |               |
-| causal         | Mistral-7B-Instruct                  |                 |         | X             |
+| causal         | gpt-4o-mini, gpt-4o                  |                 | <div align="center">X</div> |               |
+| causal         | deepseek-V3, deepseek-R1             |                 | <div align="center">X</div> |               |
+| causal         | Ministral-8B                         |                 | <div align="center">X</div> |               |
+| causal         | Mistral-7B-Instruct                  |                 |         | <div align="center">X</div> |
 
 
 ### BART Large CNN

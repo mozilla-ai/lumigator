@@ -110,6 +110,47 @@ class MLflowTrackingClient(TrackingClient):
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
+    def _compile_metrics(self, job_ids: list) -> dict:
+        """Take the individual metrics from each run and compile them into a single dict
+        for now, assert that each run has no overlapping metrics
+        """
+        metrics = {}
+        for job_id in job_ids:
+            run = self._client.get_run(job_id)
+            for metric in run.data.metrics:
+                assert metric not in metrics
+                metrics[metric] = run.data.metrics[metric]
+
+        return metrics
+
+    def _compile_parameters(self, job_ids: list) -> dict:
+        """Take the individual parameters from each run and compile them into a single dict
+        for now, assert that each run has no overlapping parameters
+        """
+        parameters = {}
+        for job_id in job_ids:
+            run = self._client.get_run(job_id)
+            for parameter in run.data.params:
+                # if the parameter shows up in multiple runs, prepend the run_name to the key
+                # TODO: this is a hacky way to handle this,
+                #  we should come up with a better solution but at least it keeps the info
+                if parameter in parameters:
+                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
+                parameters[parameter] = run.data.params[parameter]
+        return parameters
+
+    def _find_workflows(self, experiment_id: str) -> list:
+        """Find all the workflows associated with an experiment."""
+        all_runs = self._client.search_runs(experiment_ids=[experiment_id])
+        # now organize the runs into workflows so that a nested run goes under the parent run
+        workflow_ids = []
+        for run in all_runs:
+            parent_id = run.data.tags.get(MLFLOW_PARENT_RUN_ID)
+            # if it has a parent id then it's a run, if not then it's a workflow
+            if parent_id is None:
+                workflow_ids.append(run.info.run_id)
+        return workflow_ids
+
     async def get_experiment(self, experiment_id: str) -> GetExperimentResponse | None:
         """Get an experiment and all its workflows."""
         try:
@@ -123,6 +164,28 @@ class MLflowTrackingClient(TrackingClient):
         if experiment.lifecycle_stage == "deleted":
             return None
         return await self._format_experiment(experiment)
+
+    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
+        # now get all the workflows associated with that experiment
+        workflow_ids = self._find_workflows(experiment.experiment_id)
+        workflows = [
+            workflow
+            for workflow in (await self.get_workflow(workflow_id) for workflow_id in workflow_ids)
+            if workflow is not None
+        ]
+        task_definition_json = experiment.tags.get("task_definition")
+        task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
+        return GetExperimentResponse(
+            id=experiment.experiment_id,
+            name=experiment.name,
+            description=experiment.tags.get("description") or "",
+            task_definition=task_definition,
+            dataset=experiment.tags.get("dataset") or "",
+            max_samples=int(experiment.tags.get("max_samples") or "-1"),
+            created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
+            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
+            workflows=workflows,
+        )
 
     async def update_experiment(self, experiment_id: str, new_name: str) -> None:
         """Update the name of an experiment."""
@@ -220,6 +283,28 @@ class MLflowTrackingClient(TrackingClient):
         # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
         # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
         self._client.update_run(workflow_id, status=RunStatus.to_string(self._WORKFLOW_TO_MLFLOW_STATUS[status]))
+
+    def _get_ray_job_logs(self, ray_job_id: str):
+        """Get the logs for a Ray job."""
+        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
+
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
+            raise JobNotFoundError(UUID(ray_job_id), "Ray job logs not found") from None
+        elif resp.status_code != HTTPStatus.OK:
+            loguru.logger.error(
+                f"Unexpected status code getting job logs: {resp.status_code}, \
+                    error: {resp.text or ''}"
+            )
+            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
+
+        try:
+            metadata = json.loads(resp.text)
+            return JobLogsResponse(**metadata)
+        except json.JSONDecodeError as e:
+            loguru.logger.error(f"JSON decode error: {e}")
+            loguru.logger.error(f"Response text: {resp.text}")
+            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
 
     async def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         workflow_run = self._client.get_run(workflow_id)
@@ -341,91 +426,6 @@ class MLflowTrackingClient(TrackingClient):
             raise ValueError(f"Status '{tracking_client_status}' not found in mapping.")
 
         return current_status in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
-
-    async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
-        # now get all the workflows associated with that experiment
-        workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [
-            workflow
-            for workflow in (await self.get_workflow(workflow_id) for workflow_id in workflow_ids)
-            if workflow is not None
-        ]
-        task_definition_json = experiment.tags.get("task_definition")
-        task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
-        return GetExperimentResponse(
-            id=experiment.experiment_id,
-            name=experiment.name,
-            description=experiment.tags.get("description") or "",
-            task_definition=task_definition,
-            dataset=experiment.tags.get("dataset") or "",
-            max_samples=int(experiment.tags.get("max_samples") or "-1"),
-            created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
-            updated_at=datetime.fromtimestamp(experiment.last_update_time / 1000),
-            workflows=workflows,
-        )
-
-    def _get_ray_job_logs(self, ray_job_id: str):
-        """Get the logs for a Ray job."""
-        resp = requests.get(urljoin(settings.RAY_JOBS_URL, f"{ray_job_id}/logs"), timeout=5)  # 5 sec
-
-        if resp.status_code == HTTPStatus.NOT_FOUND:
-            loguru.logger.error(f"Upstream job logs not found: {resp.status_code}, error: {resp.text or ''}")
-            raise JobNotFoundError(UUID(ray_job_id), "Ray job logs not found") from None
-        elif resp.status_code != HTTPStatus.OK:
-            loguru.logger.error(
-                f"Unexpected status code getting job logs: {resp.status_code}, \
-                    error: {resp.text or ''}"
-            )
-            raise JobUpstreamError(ray_job_id, "Non OK status code retrieving Ray job information") from None
-
-        try:
-            metadata = json.loads(resp.text)
-            return JobLogsResponse(**metadata)
-        except json.JSONDecodeError as e:
-            loguru.logger.error(f"JSON decode error: {e}")
-            loguru.logger.error(f"Response text: {resp.text}")
-            raise JobUpstreamError(ray_job_id, "JSON decode error in Ray response") from e
-
-    def _compile_metrics(self, job_ids: list) -> dict:
-        """Take the individual metrics from each run and compile them into a single dict
-        for now, assert that each run has no overlapping metrics
-        """
-        metrics = {}
-        for job_id in job_ids:
-            run = self._client.get_run(job_id)
-            for metric in run.data.metrics:
-                assert metric not in metrics
-                metrics[metric] = run.data.metrics[metric]
-
-        return metrics
-
-    def _compile_parameters(self, job_ids: list) -> dict:
-        """Take the individual parameters from each run and compile them into a single dict
-        for now, assert that each run has no overlapping parameters
-        """
-        parameters = {}
-        for job_id in job_ids:
-            run = self._client.get_run(job_id)
-            for parameter in run.data.params:
-                # if the parameter shows up in multiple runs, prepend the run_name to the key
-                # TODO: this is a hacky way to handle this,
-                #  we should come up with a better solution but at least it keeps the info
-                if parameter in parameters:
-                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
-                parameters[parameter] = run.data.params[parameter]
-        return parameters
-
-    def _find_workflows(self, experiment_id: str) -> list:
-        """Find all the workflows associated with an experiment."""
-        all_runs = self._client.search_runs(experiment_ids=[experiment_id])
-        # now organize the runs into workflows so that a nested run goes under the parent run
-        workflow_ids = []
-        for run in all_runs:
-            parent_id = run.data.tags.get(MLFLOW_PARENT_RUN_ID)
-            # if it has a parent id then it's a run, if not then it's a workflow
-            if parent_id is None:
-                workflow_ids.append(run.info.run_id)
-        return workflow_ids
 
     async def _generate_presigned_url(self, workflow_id: str) -> str:
         """Generate a pre-signed URL for the compiled artifact."""

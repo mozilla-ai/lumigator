@@ -1,7 +1,6 @@
 import contextlib
 import http
 import json
-from collections import defaultdict
 from collections.abc import Generator
 from datetime import datetime
 from http import HTTPStatus
@@ -13,7 +12,6 @@ import requests
 from lumigator_schemas.experiments import GetExperimentResponse
 from lumigator_schemas.jobs import JobLogsResponse, JobResultObject, JobResults
 from lumigator_schemas.tasks import TaskDefinition
-from lumigator_schemas.utils.model_operations import merge_models
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.entities import Run as MlflowRun
@@ -473,6 +471,7 @@ class MLflowTrackingClient(TrackingClient):
         if self._s3_file_system.exists(workflow_s3_uri):
             return
 
+        compiled_results: dict[str, JobResultObject] = {}
         aggregated_results = JobResultObject()
         for job in jobs:
             # If no valid s3_path_value is found, skip this job.
@@ -489,99 +488,11 @@ class MLflowTrackingClient(TrackingClient):
                 continue
 
             with self._s3_file_system.open(job_s3_path) as f:
-                job_results = JobResultObject.model_validate(json.loads(f.read()))
-
-            # Merge the job's results with the aggregated results.
-            merge_results = merge_models(aggregated_results, job_results)
-            # Update the aggregated results with the merged model.
-            aggregated_results = merge_results.merged_model
-
-            # Make note of the keys that were overwritten, unmerged and skipped when merging this job's results.
-            self._log_key_changes(
-                workflow_id,
-                job.id,
-                merge_results.overwritten_keys,
-                merge_results.unmerged_keys,
-                merge_results.skipped_keys,
-            )
+                job_results = JobResultObject.model_validate_json(f.read())
+                compiled_results[str(job.id)] = job_results.model_dump()
 
         # Upload the compiled results to S3.
         self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
-
-    def _group_keys_by_top_level(self, keys: set[str]) -> dict[str, list[str]]:
-        """Groups a set of keys (formatted with dotted notation) by their top-level category.
-
-        This function splits each key at the first dot ('.') to separate the top-level category
-        from any sub-keys. If a key doesn't contain a dot, it is treated as a top-level key with
-        no sub-keys. The result is a dictionary where the keys are the top-level categories and
-        the values are lists of associated sub-keys, sorted alphabetically.
-
-        :param keys: A set of keys formatted in dotted notation, where each key may consist of
-                      a top-level category followed by one or more sub-keys.
-        :return: A dictionary mapping top-level categories to lists of their associated sub-keys,
-                 sorted alphabetically by the sub-keys.
-        """
-        accumulated = defaultdict(list)
-
-        for key in keys:
-            if "." in key:
-                top_level_key, subkey = key.split(".", 1)
-                accumulated[top_level_key].append(subkey)
-            else:
-                # If there's no dot, treat it as a top-level key without sub-keys
-                accumulated[key].append("")
-
-        return {key: sorted(values) for key, values in sorted(accumulated.items())}
-
-    def _log_key_changes(
-        self, workflow_id: str, job_id: str, overwritten_keys: set[str], unmerged_keys: set[str], skipped_keys: set[str]
-    ):
-        """Logs key changes that occurred during the merge.
-
-        e.g. skipped keys that had the same value, overwritten keys with updated values and unmerged keys that were
-        present in the base but absent in the overlay.
-
-        :param workflow_id: The ID of the workflow.
-        :param job_id: The ID of the job.
-        :param overwritten_keys: A set of keys (to be logged at WARNING level) that were
-                overwritten during the merge process.
-        :param unmerged_keys: A set of keys (to be logged at WARNING level) that that were
-                present in the base but absent in the overlay.
-        :param skipped_keys: A set of keys (to be logged at DEBUG level) that were
-                skipped during the merge process
-        """
-        if overwritten_keys:
-            loguru.logger.opt(lazy=True).warning(
-                "Workflow: '{}'. Job '{}'. Overwritten existing keys: {}",
-                lambda: workflow_id,
-                lambda: job_id,
-                lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
-                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(overwritten_keys))
-                ),
-            )
-
-        if unmerged_keys:
-            loguru.logger.opt(lazy=True).warning(
-                "Workflow: '{}'. Job '{}'. No data found for keys: {}",
-                lambda: workflow_id,
-                lambda: job_id,
-                lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
-                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(unmerged_keys))
-                ),
-            )
-
-        if skipped_keys:
-            loguru.logger.opt(lazy=True).debug(
-                "Workflow: '{}'. Job '{}'. Skipped keys: {}",
-                lambda: workflow_id,
-                lambda: job_id,
-                lambda: ", ".join(
-                    f"{key} [{', '.join(f'.{sub}' for sub in sub_keys) if sub_keys else ''}]" if any(sub_keys) else key
-                    for key, sub_keys in (lambda d: d.items())(self._group_keys_by_top_level(skipped_keys))
-                ),
-            )
 
     def _fetch_workflow_run(self, workflow_id: str):
         """Try to fetch a workflow run from MLFlow.

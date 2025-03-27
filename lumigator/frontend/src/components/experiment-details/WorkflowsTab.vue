@@ -66,7 +66,7 @@
         v-if="showExpResults && experimentResults && experimentResults.length"
         :results="experimentResults"
       />
-      <l-experiment-logs :logs="workflowLogsQuery.data.value" v-if="showLogs" />
+      <l-experiment-logs :logs="clickedWorkflowLogs" v-if="showLogs" />
     </l-experiments-drawer>
   </div>
 </template>
@@ -128,6 +128,7 @@ const workflowLogsQuery = useQuery({
   enabled: computed(() => !!logsItem.value), // Prevent fetching when no workflow is selected
   select: (data) => data.logs.split('\n'),
 })
+const clickedWorkflowLogs = computed(() => workflowLogsQuery.data.value || [])
 
 const deleteWorkflowMutation = useMutation({
   mutationFn: workflowsService.deleteWorkflow,

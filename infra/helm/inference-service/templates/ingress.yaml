@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name:  {{ .Values.application.name }}
+spec:
+  defaultBackend:
+    service:
+      name: {{ include "inference-service.name" . }}-serve-svc
+      port:
+        number: 8000
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - {{ .Values.application.name }}

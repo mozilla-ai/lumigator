@@ -452,7 +452,6 @@ dev = [
     { name = "lumigator-schemas" },
     { name = "lumigator-sdk" },
     { name = "mlflow" },
-    { name = "mypy-boto3-s3" },
     { name = "pytest" },
     { name = "python-dotenv" },
     { name = "ray" },
@@ -464,7 +463,7 @@ requires-dist = [
     { name = "autodoc", marker = "extra == 'docs'", specifier = ">=0.5.0" },
     { name = "loguru", marker = "extra == 'docs'", specifier = "==0.7.2" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4.0.0" },
-    { name = "pre-commit", specifier = ">=4.0.1" },
+    { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pydantic", marker = "extra == 'docs'", specifier = ">=2.10.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.2.0" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = ">=0.5.2" },
@@ -484,9 +483,7 @@ dev = [
     { name = "loguru", specifier = ">=0.7.2" },
     { name = "lumigator-schemas", directory = "lumigator/schemas" },
     { name = "lumigator-sdk", directory = "lumigator/sdk" },
-    { name = "mlflow", specifier = ">=2.20.0" },
     { name = "mlflow", specifier = ">=2.20.3" },
-    { name = "mypy-boto3-s3", specifier = ">=1.36.0" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "ray", specifier = ">=2.41.0" },
@@ -1696,18 +1693,6 @@ wheels = [
 ]
 
 [[package]]
-name = "mypy-boto3-s3"
-version = "1.36.21"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/14/dc3737dfd3d105d9a4f11065798f525deebd1bc8093b58c4ff2aff344aff/mypy_boto3_s3-1.36.21.tar.gz", hash = "sha256:9c6143c0dabfbd98e6c741e7cc65a33c7f87b8c28eeb373a2bc3e2c923af8283", size = 73643 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/9a/4740755604974b32247b00d82d8e5f7f88e3f39200dbacaf83c212ab13ef/mypy_boto3_s3-1.36.21-py3-none-any.whl", hash = "sha256:bfda17f51efafc2cdcefad7a13f5ac35bd721291476d8558c2d3a21758442be5", size = 80240 },
-]
-
-[[package]]
 name = "myst-parser"
 version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2013,7 +1998,7 @@ wheels = [
 
 [[package]]
 name = "pre-commit"
-version = "4.1.0"
+version = "4.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cfgv" },
@@ -2022,9 +2007,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "virtualenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/13/b62d075317d8686071eb843f0bb1f195eb332f48869d3c31a4c6f1e063ac/pre_commit-4.1.0.tar.gz", hash = "sha256:ae3f018575a588e30dfddfab9a05448bfbd6b73d78709617b5a2b853549716d4", size = 193330 }
+sdist = { url = "https://files.pythonhosted.org/packages/08/39/679ca9b26c7bb2999ff122d50faa301e49af82ca9c066ec061cfbc0c6784/pre_commit-4.2.0.tar.gz", hash = "sha256:601283b9757afd87d40c4c4a9b2b5de9637a8ea02eaff7adc2d0fb4e04841146", size = 193424 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/43/b3/df14c580d82b9627d173ceea305ba898dca135feb360b6d84019d0803d3b/pre_commit-4.1.0-py2.py3-none-any.whl", hash = "sha256:d29e7cb346295bcc1cc75fc3e92e343495e3ea0196c9ec6ba53f49f10ab6ae7b", size = 220560 },
+    { url = "https://files.pythonhosted.org/packages/88/74/a88bf1b1efeae488a0c0b7bdf71429c313722d1fc0f377537fbe554e6180/pre_commit-4.2.0-py2.py3-none-any.whl", hash = "sha256:a009ca7205f1eb497d10b845e52c838a98b6cdd2102a6c8e4540e94ee75c58bd", size = 220707 },
 ]
 
 [[package]]

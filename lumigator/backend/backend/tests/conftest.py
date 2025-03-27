@@ -279,6 +279,7 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
     aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
     aws_default_region = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
 
+    # Mock the S3 'storage_options' property to match the real client.
     s3fs = S3FileSystem(
         key=aws_access_key_id,
         secret=aws_secret_access_key,
@@ -286,7 +287,15 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
         client_kwargs={"region_name": aws_default_region},
     )
 
-    mock_s3fs = MagicMock(wraps=s3fs, storage_options={"endpoint_url": aws_endpoint_url})
+    mock_s3fs = MagicMock(
+        wraps=s3fs,
+        storage_options={
+            "client_kwargs": {"region_name": aws_default_region},
+            "key": aws_access_key_id,
+            "secret": aws_secret_access_key,
+            "endpoint_url": aws_endpoint_url,
+        },
+    )
 
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")

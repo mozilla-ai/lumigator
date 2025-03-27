@@ -16,7 +16,7 @@ from backend.tracking.schemas import RunOutputs
 class TrackingClient(Protocol):
     """Interface for tracking clients."""
 
-    def create_experiment(
+    async def create_experiment(
         self,
         name: str,
         description: str,
@@ -31,11 +31,11 @@ class TrackingClient(Protocol):
         """Get an experiment."""
         ...
 
-    def update_experiment(self, experiment_id: str, new_name: str) -> None:
+    async def update_experiment(self, experiment_id: str, new_name: str) -> None:
         """Update an experiment."""
         ...
 
-    def delete_experiment(self, experiment_id: str) -> None:
+    async def delete_experiment(self, experiment_id: str) -> None:
         """Delete an experiment."""
         ...
 
@@ -47,7 +47,7 @@ class TrackingClient(Protocol):
         """Count all experiments."""
         ...
 
-    def create_workflow(
+    async def create_workflow(
         self, experiment_id: str, description: str, name: str, model: str, system_prompt: str
     ) -> WorkflowResponse:
         """Create a new workflow."""
@@ -58,7 +58,7 @@ class TrackingClient(Protocol):
         ...
 
     @deprecated("get_workflow_logs is deprecated, it will be removed in future versions.")
-    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+    async def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get workflow logs.
 
         .. deprecated::
@@ -69,40 +69,57 @@ class TrackingClient(Protocol):
         )
         ...
 
-    def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
+    async def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
         """Update a workflow."""
         ...
 
-    def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
+    async def delete_workflow(self, workflow_id: str) -> WorkflowResponse:
         """Delete a workflow."""
         ...
 
-    def list_workflows(self, experiment_id: str) -> list:
+    async def list_workflows(self, experiment_id: str) -> list:
         """List all workflows for an experiment."""
         ...
 
-    def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str):
+    async def create_job(self, experiment_id: str, workflow_id: str, name: str, job_id: str):
         """Link a started job to an experiment and a workflow."""
         ...
 
-    def update_workflow(self, workflow_id: str, data: RunOutputs):
+    async def update_workflow(self, workflow_id: str, data: RunOutputs):
         """Update the outputs of a workflow"""
         ...
 
-    def get_job(self, job_id: str) -> JobResults:
+    async def get_job(self, job_id: str) -> JobResults | None:
         """Get a job."""
         ...
 
-    def update_job(self, job_id: str, data: RunOutputs):
+    async def update_job(self, job_id: str, data: RunOutputs):
         """Update a job."""
         ...
 
-    def delete_job(self, job_id: str) -> None:
+    async def delete_job(self, job_id: str) -> None:
         """Delete a job."""
         ...
 
-    def list_jobs(self, workflow_id: str) -> list:
+    async def list_jobs(self, workflow_id: str) -> list:
         """List all jobs for a workflow."""
+        ...
+
+    async def is_status_match(self, tracking_client_status: str, workflow_status: WorkflowStatus) -> bool:
+        """Checks whether the given tracking client status correctly maps to the specified workflow status.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :param workflow_status: A workflow status to compare against.
+        :return: True if the status matches, False otherwise.
+        """
+        ...
+
+    async def is_status_terminal(self, tracking_client_status: str) -> bool:
+        """Checks whether the given tracking client status is terminal.
+
+        :param tracking_client_status: The status understood by the tracking client.
+        :return: True if the status is terminal, False otherwise.
+        """
         ...
 
 

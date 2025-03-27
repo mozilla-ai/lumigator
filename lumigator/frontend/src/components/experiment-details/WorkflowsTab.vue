@@ -23,7 +23,7 @@
       :columns="columns"
       :data="tableData"
       :columnStyles="columnStyles"
-      @row-clicked="onWorkflowClicked"
+      @row-click="onWorkflowClicked"
       :is-search-enabled="false"
       :has-column-toggle="false"
     >
@@ -162,6 +162,7 @@ const deleteWorkflowMutation = useMutation({
 
 const onWorkflowClicked = (workflow: Workflow) => {
   console.log('workflow clicked', workflow)
+  return handleViewAllResultsClicked()
 }
 
 const columns = ['model', 'created_at', 'status', 'options']

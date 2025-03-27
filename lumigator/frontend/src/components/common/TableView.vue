@@ -18,6 +18,7 @@
     v-model:expandedRows="expandedRows"
     @rowExpand="onRowExpand"
     @rowCollapse="onRowCollapse"
+    @row-click="$emit('row-click')"
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
@@ -180,6 +181,7 @@ export default defineComponent({
     },
   },
   exposes: ['exportCSV'],
+  emits: ['row-click'],
   setup(props) {
     const isVisible = ref(true)
     const dataTable = ref()

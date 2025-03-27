@@ -1,6 +1,6 @@
 <template>
   <DataTable
-    class="gridlines"
+    :class="showGridlines ? '' : 'gridlines'"
     :value="data"
     ref="dataTable"
     :reorderableColumns="true"
@@ -9,7 +9,7 @@
     scrollHeight="flex"
     :resizableColumns="false"
     :columnResizeMode="'fit'"
-    :showGridlines="true"
+    :showGridlines="showGridlines"
     :stripedRows="false"
     :exportFilename="downloadFileName"
     :globalFilterFields="columns"
@@ -68,6 +68,26 @@
           : undefined
       "
     >
+      <template #body="slotProps" v-if="col === 'status' || col === 'options'">
+        <Tag
+          v-if="col === 'status'"
+          :severity="
+            slotProps.data.status === WorkflowStatus.SUCCEEDED
+              ? 'success'
+              : slotProps.data.status === WorkflowStatus.FAILED
+                ? 'danger'
+                : 'warn'
+          "
+          rounded
+          :value="slotProps.data.status"
+          class="tag"
+        >
+          {{ slotProps.data.status }}
+        </Tag>
+        <div class="options" v-if="col === 'options'">
+          <slot name="options" :data="slotProps.data"></slot>
+        </div>
+      </template>
       <template #editor="{ data, field }" v-if="isEditable">
         <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
       </template>
@@ -99,18 +119,21 @@ import {
   InputIcon,
   InputText,
   MultiSelect,
+  Tag,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
 import { defineComponent, ref, type PropType } from 'vue'
+import { WorkflowStatus } from '@/types/Workflow'
 
 export default defineComponent({
   name: 'TableView',
   components: {
     DataTable,
     Column,
+    Tag,
     // PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
     IconField,
@@ -119,6 +142,10 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    showGridlines: {
+      type: Boolean,
+      default: true,
+    },
     hasEqualColumnSizes: {
       type: Boolean,
       default: false,
@@ -208,6 +235,7 @@ export default defineComponent({
       dataTable,
       handleDownloadClicked,
       onCellEditComplete,
+      WorkflowStatus,
       onCellEditCancel,
       filters,
       // allColumns,
@@ -237,6 +265,20 @@ export default defineComponent({
 ::v-deep(.p-datatable-header) {
   padding-right: 0;
   border: none;
+}
+
+.options {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tag {
+  color: var(--l-grey-100);
+  font-size: var(--l-font-size-sm);
+  line-height: 1;
+  font-weight: var(--l-font-weight-normal);
+  text-transform: uppercase;
 }
 
 .title-slot {

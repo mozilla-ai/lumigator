@@ -55,7 +55,11 @@
 import type { Model } from '@/types/Model'
 import { Button, Checkbox } from 'primevue'
 
-const { isSelected, isCustom } = defineProps<{ model: Model; isSelected: boolean; isCustom: boolean; }>()
+const { isSelected, isCustom } = defineProps<{
+  model: Model
+  isSelected: boolean
+  isCustom: boolean
+}>()
 const emit = defineEmits(['checkboxToggled', 'deleteClicked', 'cloneClicked', 'customizeClicked'])
 </script>
 

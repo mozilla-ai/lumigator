@@ -20,7 +20,12 @@
         <div class="experiment-details-tab-content">
           <TabPanels>
             <TabPanel value="model-runs">
-              <WorkflowsTab v-if="experiment" :experiment="experiment" :workflows="experiment.workflows" />
+              <WorkflowsTab
+                v-if="experiment"
+                @add-model-run-clicked="activeTab = 'add-model-run'"
+                :experiment="experiment"
+                :workflows="experiment.workflows"
+              />
             </TabPanel>
             <TabPanel value="add-model-run">
               <AddWorkflowsTab
@@ -89,8 +94,8 @@ const handleBackButtonClicked = () => {
 }
 
 const handleWorkflowCreated = async () => {
-    // invalidate query
-    // await experimentStore.fetchAllExperiments()
+  // invalidate query
+  // await experimentStore.fetchAllExperiments()
   activeTab.value = 'model-runs'
   await experimentsStore.fetchAllExperiments()
 }
@@ -136,7 +141,7 @@ const handleWorkflowCreated = async () => {
 .experiment-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .experiment-details-header {

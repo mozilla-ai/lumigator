@@ -40,7 +40,7 @@
               :key="model.model"
               :model="model"
               :is-selected="selectedModels.includes(model.model)"
-              :is-custom="customWorkflows.some(workflow => workflow.model === model.model)"
+              :is-custom="customWorkflows.some((workflow) => workflow.model === model.model)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -56,7 +56,7 @@
               :key="model.model"
               :model="model"
               :is-selected="selectedModels.includes(model.model)"
-              :is-custom="customWorkflows.some(workflow => workflow.model === model.model)"
+              :is-custom="customWorkflows.some((workflow) => workflow.model === model.model)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -117,7 +117,7 @@ import { getAxiosError } from '@/helpers/getAxiosError'
 const props = defineProps<{ experiment: Experiment }>()
 const modelStore = useModelStore()
 const toast = useToast()
-const selectedModels = ref<Model['model'][]>(['facebook/bart-large-cnn'])
+const selectedModels = ref<Model['model'][]>([])
 const customWorkflows = ref<CreateWorkflowPayload[]>([])
 
 const emit = defineEmits(['workflowCreated'])
@@ -182,9 +182,10 @@ const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', fa
 const handleAddModelClicked = () => {}
 
 const handleRunClicked = () => {
+  console.log(selectedModels.value, models.value)
   selectedModels.value.forEach((selectedModel) => {
     const model = models.value.find((m: Model) => m.model === selectedModel)
-
+    console.log('model', model)
     const workflowPayload: CreateWorkflowPayload = {
       dataset: props.experiment.dataset,
       experiment_id: props.experiment.id,
@@ -204,7 +205,7 @@ const handleRunClicked = () => {
         top_p: topP.value,
         // max_new_tokens: 1024,
         // frequency_penalty: 0
-      }
+      },
     }
 
     createWorkflowMutation.mutate(workflowPayload)

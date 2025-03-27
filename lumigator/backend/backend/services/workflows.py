@@ -1,5 +1,4 @@
 import asyncio
-import json
 import numbers
 from pathlib import Path
 from uuid import UUID
@@ -22,6 +21,7 @@ from lumigator_schemas.workflows import (
     WorkflowStatus,
 )
 from pydantic_core._pydantic_core import ValidationError
+from typing_extensions import deprecated
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
@@ -38,6 +38,7 @@ from backend.services.exceptions.job_exceptions import (
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
 from backend.services.exceptions.workflow_exceptions import (
+    WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
     WorkflowValidationError,
 )
@@ -90,16 +91,34 @@ class WorkflowService:
         """Handle a workflow failure by updating the workflow status and stopping any running jobs."""
         loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
 
-        # Mark the workflow as failed.
-        self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
+        # Mark the parent workflow as failed.
+        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
-        # Get the list of jobs in the workflow to stop any that are still running.
-        stop_tasks = [
+        # Get the list of non-complete jobs in the workflow, to stop them and mark them failed.
+        non_terminal_runs = [
+            run
+            for run in await self._tracking_client.list_jobs(workflow_id)
+            if not (await self._tracking_client.is_status_terminal(run.info.status))
+        ]
+
+        # Get Ray jobs tied to this workflow so we can stop them.
+        ray_stop_tasks = [
             self._job_service.stop_job(UUID(ray_job_id))
-            for job in self._tracking_client.list_jobs(workflow_id)
+            for job in non_terminal_runs
             if (ray_job_id := job.data.params.get("ray_job_id"))
         ]
-        # Wait for all stop tasks to complete concurrently
+
+        # Mark MLFlow jobs (runs) that are not in a terminal state, as failed.
+        mlflow_stop_tasks = [
+            self._tracking_client.update_workflow_status(run.info.run_id, WorkflowStatus.FAILED)
+            for run in non_terminal_runs
+        ]
+
+        stop_tasks = []
+        stop_tasks.extend(ray_stop_tasks)
+        stop_tasks.extend(mlflow_stop_tasks)
+
+        # Wait for all tasks to complete concurrently.
         if stop_tasks:
             await asyncio.gather(*stop_tasks, return_exceptions=False)
 
@@ -111,7 +130,7 @@ class WorkflowService:
         """Currently this is our only workflow. As we make this more flexible to handle different
         sequences of jobs, we'll need to refactor this function to be more generic.
         """
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
 
         # input is WorkflowCreateRequest, we need to split the configs and generate one
         # JobInferenceCreate and one JobEvalCreate
@@ -146,8 +165,8 @@ class WorkflowService:
             return
 
         # Track the workflow status as running and add the inference job.
-        self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
-        inference_run_id = self._tracking_client.create_job(
+        await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.RUNNING)
+        inference_run_id = await self._tracking_client.create_job(
             request.experiment_id, workflow.id, "inference", inference_job.id
         )
 
@@ -159,7 +178,10 @@ class WorkflowService:
 
             if status != JobStatus.SUCCEEDED:
                 # Trigger the failure handling logic
-                raise JobUpstreamError(f"Inference job {inference_job.id} failed with status {status}") from None
+                raise JobUpstreamError(f"Inference job {inference_job.id} failed with status '{status}'") from None
+
+            # Mark the job as successful in the tracking client.
+            await self._tracking_client.update_workflow_status(inference_run_id, WorkflowStatus.SUCCEEDED)
         except JobUpstreamError as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Inference job: {} failed: {}", workflow.id, inference_job.id, e
@@ -220,14 +242,14 @@ class WorkflowService:
             # TODO: Review how DatasetService._get_s3_path (and similar) works and if it can be re-used/made public.
             dataset_path = self._dataset_service._get_s3_path(result_key)
             with self._dataset_service.s3_filesystem.open(dataset_path, "r") as f:
-                inf_output = JobResultObject.model_validate(json.loads(f.read()))
+                inf_output = JobResultObject.model_validate_json(f.read())
             inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
             inference_job_output = RunOutputs(
                 parameters={"inference_output_s3_path": inf_path},
                 metrics=inf_output.metrics,
                 ray_job_id=str(inference_job.id),
             )
-            self._tracking_client.update_job(inference_run_id, inference_job_output)
+            await self._tracking_client.update_job(inference_run_id, inference_job_output)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Inference job: {}. Cannot update DB with with result data: {}",
@@ -271,7 +293,7 @@ class WorkflowService:
             return
 
         # Track the evaluation job.
-        eval_run_id = self._tracking_client.create_job(
+        eval_run_id = await self._tracking_client.create_job(
             request.experiment_id, workflow.id, "evaluation", evaluation_job.id
         )
 
@@ -283,10 +305,13 @@ class WorkflowService:
 
             if status != JobStatus.SUCCEEDED:
                 # Trigger the failure handling logic
-                raise JobUpstreamError(f"Evaluation job {evaluation_job.id} failed with status {status}") from None
+                raise JobUpstreamError(f"Evaluation job {evaluation_job.id} failed with status '{status}'") from None
 
             # TODO: Handle other error types that can be raised by the method.
             self._job_service._validate_results(evaluation_job.id, self._dataset_service.s3_filesystem)
+
+            # Mark the job as successful in the tracking client.
+            await self._tracking_client.update_workflow_status(eval_run_id, WorkflowStatus.SUCCEEDED)
         except (JobUpstreamError, ValidationError) as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} failed: {}", workflow.id, evaluation_job.id, e
@@ -306,7 +331,7 @@ class WorkflowService:
                 / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_eval_create.name, job_id=evaluation_job.id)
             )
             with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-                eval_output = JobResultObject.model_validate(json.loads(f.read()))
+                eval_output = JobResultObject.model_validate_json(f.read())
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later
@@ -322,8 +347,7 @@ class WorkflowService:
                 parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
                 ray_job_id=str(evaluation_job.id),
             )
-            self._tracking_client.update_job(eval_run_id, outputs)
-            self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            await self._tracking_client.update_job(eval_run_id, outputs)
         except Exception as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Evaluation job: {} Error validating results: {}",
@@ -334,14 +358,36 @@ class WorkflowService:
             await self._handle_workflow_failure(workflow.id)
             return
 
-    def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
+        try:
+            await self._tracking_client.update_workflow_status(workflow.id, WorkflowStatus.SUCCEEDED)
+            await self._tracking_client.get_workflow(workflow.id)
+        except Exception as e:
+            loguru.logger.error(
+                "Workflow pipeline error: Workflow {}. Error updating completed workflow: {}",
+                workflow.id,
+                e,
+            )
+
+    async def get_workflow_result_download(self, workflow_id: str) -> str:
+        """Return workflow results file URL for downloading.
+
+        Args:
+            workflow_id: ID of the workflow whose results will be returned
+        """
+        workflow_details = await self.get_workflow(workflow_id)
+        if workflow_details.artifacts_download_url:
+            return workflow_details.artifacts_download_url
+        else:
+            raise WorkflowDownloadNotAvailableError(workflow_id) from None
+
+    async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
         """Get a workflow."""
-        tracking_server_workflow = self._tracking_client.get_workflow(workflow_id)
+        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
         return tracking_server_workflow
 
-    def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
+    async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
         """Creates a new workflow and submits inference and evaluation jobs.
 
         Args:
@@ -351,7 +397,7 @@ class WorkflowService:
             WorkflowResponse: The response object containing the details of the created workflow.
         """
         # If the experiment this workflow is associated with doesn't exist, there's no point in continuing.
-        experiment = self._tracking_client.get_experiment(request.experiment_id)
+        experiment = await self._tracking_client.get_experiment(request.experiment_id)
         if not experiment:
             raise WorkflowValidationError(f"Cannot create workflow '{request.name}': No experiment found.") from None
 
@@ -377,7 +423,7 @@ class WorkflowService:
             )
             request.system_prompt = default_system_prompt
 
-        workflow = self._tracking_client.create_workflow(
+        workflow = await self._tracking_client.create_workflow(
             experiment_id=request.experiment_id,
             description=request.description,
             name=request.name,
@@ -392,17 +438,18 @@ class WorkflowService:
 
         return workflow
 
-    def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
+    async def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
         workflow = self.get_workflow(workflow_id)
         if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
-        return self._tracking_client.delete_workflow(workflow_id)
+        return await self._tracking_client.delete_workflow(workflow_id)
 
-    def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
+    @deprecated("get_workflow_logs is deprecated, it will be removed in future versions.")
+    async def get_workflow_logs(self, workflow_id: str) -> JobLogsResponse:
         """Get the logs for a workflow."""
-        job_list = self._tracking_client.list_jobs(workflow_id)
+        job_list = await self._tracking_client.list_jobs(workflow_id)
         # sort the jobs by created_at, with the oldest last
         job_list = sorted(job_list, key=lambda x: x.info.start_time)
         all_ray_job_ids = [run.data.params.get("ray_job_id") for run in job_list]

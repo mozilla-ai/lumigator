@@ -553,33 +553,6 @@ def model_specs_data() -> list[ModelsResponse]:
 
 
 @pytest.fixture(scope="function")
-def configure_loguru(caplog):
-    """Configures Loguru logging but only for tests that explicitly request it."""
-
-    class PropagateHandler(logging.Handler):
-        def emit(self, record):
-            logging.getLogger(record.name).handle(record)
-
-    # Remove existing handlers but store the config
-    existing_handlers = logger._core.handlers.copy()
-    logger.remove()
-    logger.add(PropagateHandler(), format="{message}")
-
-    yield
-
-    # Restore handlers
-    logger.remove()
-    for _ in existing_handlers:
-        logger.add(sys.stderr, format="{time} {level} {message}")
-
-
-@pytest.fixture(scope="function")
-def caplog_with_loguru(caplog, configure_loguru):
-    """Wraps caplog to auto-configure Loguru safely."""
-    yield caplog
-
-
-@pytest.fixture(scope="function")
 def fake_mlflow_tracking_client(fake_s3fs):
     """Fixture for MLflowTrackingClient using the real MLflowClient."""
     return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)

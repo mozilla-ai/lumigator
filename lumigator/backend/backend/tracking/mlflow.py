@@ -1,9 +1,11 @@
+import asyncio
 import contextlib
 import http
 import json
 from collections.abc import Generator
 from datetime import datetime
 from http import HTTPStatus
+from typing import Any
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -22,6 +24,7 @@ from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
 from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
+from backend.services.exceptions.tracking_exceptions import RunNotFoundError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -107,33 +110,62 @@ class MLflowTrackingClient(TrackingClient):
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
-    def _compile_metrics(self, job_ids: list) -> dict:
-        """Take the individual metrics from each run and compile them into a single dict
-        for now, assert that each run has no overlapping metrics
+    def _compile_metrics(self, job_ids: list) -> dict[str, float]:
+        """Aggregate metrics from job runs, ensuring no duplicate keys.
+
+        :param job_ids: A list of job IDs to aggregate metrics from.
+        :return: A dictionary mapping metric names to their values.
+        :raises ValueError: If a duplicate metric is found across jobs.
         """
         metrics = {}
+
         for job_id in job_ids:
             run = self._client.get_run(job_id)
-            for metric in run.data.metrics:
-                assert metric not in metrics
-                metrics[metric] = run.data.metrics[metric]
+            for metric, value in run.data.metrics.items():
+                if metric in metrics:
+                    raise ValueError(
+                        f"Duplicate metric '{metric}' found in job '{job_id}'. "
+                        f"Stored value: {metrics[metric]}, this value: {value}"
+                    )
+                metrics[metric] = value
 
         return metrics
 
-    def _compile_parameters(self, job_ids: list) -> dict:
-        """Take the individual parameters from each run and compile them into a single dict
-        for now, assert that each run has no overlapping parameters
+    def _compile_parameters(self, job_ids: list) -> dict[str, dict[str, Any]]:
+        """Aggregate parameters across runs while associating each value with its specific run name/job ID.
+
+        If all values for a parameter across jobs are the same,
+        the 'value' key will exist for that parameter with the shared value.
+
+        :param job_ids: A list of job IDs to aggregate parameters from.
+        :return: A dictionary where each key is a parameter name, and the value is a dictionary containing a 'runs'
+            key mapping a run's parameter value. Also, when all values are the same, a 'value' key is present.
+        :raises MlflowException: If there is a problem getting the run data for a job.
+        :raises ValueError: If a run name is not found in the tags for a particular job.
         """
         parameters = {}
+        value_key = "value"
+        jobs_key = "jobs"
+
         for job_id in job_ids:
             run = self._client.get_run(job_id)
-            for parameter in run.data.params:
-                # if the parameter shows up in multiple runs, prepend the run_name to the key
-                # TODO: this is a hacky way to handle this,
-                #  we should come up with a better solution but at least it keeps the info
-                if parameter in parameters:
-                    parameters[f"{run.data.tags['mlflow.runName']}_{parameter}"] = run.data.params[parameter]
-                parameters[parameter] = run.data.params[parameter]
+            run_name = run.data.tags.get("mlflow.runName")
+            if not run_name:
+                raise ValueError(f"Cannot compile parameters, run name not found in tags for job: {job_id}")
+
+            for param_key, param_value in run.data.params.items():
+                param_entry = parameters.setdefault(param_key, {jobs_key: {}})
+
+                # Remove the shared value if it exists but doesn't match the current value.
+                if value_key in param_entry and param_entry[value_key] != param_value:
+                    param_entry.pop(value_key, None)
+                # Add the shared value if we haven't added data for any runs yet
+                elif not bool(param_entry.get(jobs_key)):
+                    param_entry[value_key] = param_value
+
+                # Finally add the run-specific value.
+                param_entry[jobs_key][run_name] = param_value
+
         return parameters
 
     def _find_workflows(self, experiment_id: str) -> list:
@@ -165,7 +197,11 @@ class MLflowTrackingClient(TrackingClient):
     async def _format_experiment(self, experiment: MlflowExperiment) -> GetExperimentResponse:
         # now get all the workflows associated with that experiment
         workflow_ids = self._find_workflows(experiment.experiment_id)
-        workflows = [await self.get_workflow(workflow_id) for workflow_id in workflow_ids]
+        workflows = [
+            workflow
+            for workflow in await asyncio.gather(*(self.get_workflow(wid) for wid in workflow_ids))
+            if workflow is not None
+        ]
         task_definition_json = experiment.tags.get("task_definition")
         task_definition = TypeAdapter(TaskDefinition).validate_python(json.loads(task_definition_json))
         return GetExperimentResponse(
@@ -259,9 +295,10 @@ class MLflowTrackingClient(TrackingClient):
             experiment_ids=[workflow.info.experiment_id],
             filter_string=f"tags.{MLFLOW_PARENT_RUN_ID} = '{workflow_id}'",
         )
-        all_job_ids = [run.info.run_id for run in all_jobs]
+
         # sort the jobs by created_at, with the oldest last
         all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
+        all_job_ids = [run.info.run_id for run in all_jobs]
 
         workflow_details = WorkflowDetailsResponse(
             id=workflow_id,
@@ -286,32 +323,21 @@ class MLflowTrackingClient(TrackingClient):
         # check if the compiled results already exist
         workflow_s3_uri = self._get_s3_uri(workflow_id)
         if not self._s3_file_system.exists(workflow_s3_uri):
-            compiled_results = {"metrics": {}, "parameters": {}, "artifacts": {}}
+            compiled_results: dict[str, JobResultObject] = {}
             for job in workflow_details.jobs:
                 # look for all parameter keys that end in "_s3_path" and download the file
                 for param in job.parameters:
                     if param["name"].endswith("_s3_path"):
-                        # download the file
                         # get the file from the S3 bucket
                         with self._s3_file_system.open(f"{param['value']}") as f:
                             job_results = JobResultObject.model_validate_json(f.read())
-                        # if any keys are the same, log a warning and then overwrite the key
-                        for job_result_item in job_results:
-                            if job_result_item[1] is None:
-                                loguru.logger.info(f"No {job_result_item[0]} found for job {job.id}.")
-                                continue
-                            for key in job_result_item[1].keys():
-                                if key in compiled_results[job_result_item[0]]:
-                                    loguru.logger.warning(f"Key '{key}' already exists in the results. Overwriting.")
-                                # merge the results into the compiled results
-                                compiled_results[job_result_item[0]][key] = job_result_item[1][key]
+                            compiled_results[str(job.id)] = job_results.model_dump()
 
             # Upload the compiled results to S3.
             self._upload_to_s3(workflow_s3_uri, compiled_results)
 
         # Update the download URL in the response as compiled results are available.
         workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
-
         return workflow_details
 
     async def update_workflow_status(self, workflow_id: str, status: WorkflowStatus) -> None:
@@ -412,17 +438,25 @@ class MLflowTrackingClient(TrackingClient):
         for parameter, value in data.parameters.items():
             self._client.log_param(job_id, parameter, value)
 
-    async def get_job(self, job_id: str):
-        """Get the results of a job."""
+    async def get_job(self, job_id: str) -> JobResults:
+        """Get the results of a job (known as a Run in MLFlow).
+
+        This method is used to get the metrics and parameters of a job.
+
+        :param job_id: The ID of the job.
+        :return: The results of the job.
+        :raises RunNotFoundError: If the job is not found.
+        """
         run = self._client.get_run(job_id)
         if run.info.lifecycle_stage == "deleted":
-            return None
+            raise RunNotFoundError(job_id, "deleted")
+
         return JobResults(
             id=job_id,
-            metrics=[{"name": metric[0], "value": metric[1]} for metric in run.data.metrics.items()],
-            parameters=[{"name": param[0], "value": param[1]} for param in run.data.params.items()],
-            metric_url="TODO",
-            artifact_url="TODO",
+            metrics=[{"name": key, "value": value} for key, value in run.data.metrics.items()],
+            parameters=[{"name": key, "value": value} for key, value in run.data.params.items()],
+            metric_url="",  # TODO: Implement
+            artifact_url="",  # TODO: Implement
         )
 
     async def delete_job(self, job_id: str):

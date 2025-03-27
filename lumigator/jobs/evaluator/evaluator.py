@@ -5,18 +5,21 @@ from pathlib import Path
 import click
 import s3fs
 from datasets import load_from_disk
+from datasets.features.features import Value
 from eval_metrics import EvaluationMetrics
 from loguru import logger
 from utils import timer
 
 from schemas import EvalJobArtifacts, EvalJobConfig, EvalJobMetrics, JobOutput
 
+DEEPEVAL_CONFIG_FILENAME = ".deepeval"
+
 
 def save_to_disk(local_path: Path, data: JobOutput):
     logger.info(f"Storing evaluation results into {local_path}...")
     local_path.parent.mkdir(exist_ok=True, parents=True)
     with local_path.open("w") as f:
-        json.dump(data.model_dump(), f)
+        f.write(data.model_dump_json())
 
 
 def save_to_s3(config: EvalJobConfig, local_path: Path, storage_path: str):
@@ -76,7 +79,27 @@ def run_eval(config: EvalJobConfig) -> Path:
 
     # Load dataset given its URI
     dataset = load_from_disk(config.dataset.path)
+    # Cast non-string fields into strings. If it cannot be done, then
+    # the dataset is most probably broken.
+    # All-empty fields are interpreted by the loader as 'float64' by default,
+    # which causes issues when an empty 'predictions'
+    for fname in dataset.features:
+        feature = dataset.features[fname]
+        if not (isinstance(feature, Value) and feature.dtype == "string"):
+            logger.warning(
+                f"Found column '{fname}' with non-string type '{feature}', "
+                "converting type to string and None values to ''"
+            )
+            dataset = dataset.cast_column(fname, Value("string"))
+
     logger.info(f"Retrieving {config.dataset.path} for evaluation")
+
+    def replace_none_with_empty(row):
+        if row[config.predictions_field] is None:
+            row[config.predictions_field] = ""
+        return row
+
+    dataset = dataset.map(replace_none_with_empty)
 
     # Check for required fields
     # If any of the G-Eval metrics are in config.evaluation.metrics,
@@ -90,13 +113,15 @@ def run_eval(config: EvalJobConfig) -> Path:
     dataset = dataset.select(range(max_samples))
 
     metric_results, evaluation_time = run_eval_metrics(
-        dataset["examples"], dataset["predictions"], dataset["ground_truth"], config.evaluation.metrics
+        dataset["examples"], dataset[config.predictions_field], dataset["ground_truth"], config.evaluation.metrics
     )
 
     # add input data to results dict
     if config.evaluation.return_input_data:
         artifacts = EvalJobArtifacts(
-            predictions=dataset["predictions"], ground_truth=dataset["ground_truth"], evaluation_time=evaluation_time
+            predictions=dataset[config.predictions_field],
+            ground_truth=dataset["ground_truth"],
+            evaluation_time=evaluation_time,
         )
     else:
         artifacts = None
@@ -119,6 +144,21 @@ def eval_command(config: str) -> None:
     # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
     if "g_eval_summarization" in config_model.evaluation.metrics and (api_key := os.environ.get("api_key")):
         os.environ["OPENAI_API_KEY"] = api_key
+
+    if config_model.evaluation.llm_as_judge is not None:
+        # create a .deepeval config file if an ollama model is specified
+        deepeval_config = {
+            "LOCAL_MODEL_NAME": config_model.evaluation.llm_as_judge.model_name,
+            "LOCAL_MODEL_BASE_URL": config_model.evaluation.llm_as_judge.model_base_url,
+            "USE_LOCAL_MODEL": "YES",
+            "USE_AZURE_OPENAI": "NO",
+            "LOCAL_MODEL_API_KEY": config_model.evaluation.llm_as_judge.model_api_key,
+        }
+        with Path(DEEPEVAL_CONFIG_FILENAME).open("w") as f:
+            json.dump(deepeval_config, f)
+    else:
+        # otherwise, make sure we'll start without a .deepeval config file
+        Path(DEEPEVAL_CONFIG_FILENAME).unlink(missing_ok=True)
 
     run_eval(config_model)
 

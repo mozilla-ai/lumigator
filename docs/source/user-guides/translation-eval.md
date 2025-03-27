@@ -103,6 +103,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/ \
 :sync: tab2
 ```python
 from lumigator_schemas.experiments import ExperimentCreate
+
 dataset_id = datasets.items[-1].id
 task_definition = {
     "task": "translation",
@@ -127,12 +128,14 @@ print(f"Experiment created and has ID: {experiment_id}")
 Next, lets trigger workflows to evaluate two models - `gpt-4o-mini` from OpenAI  and [`facebook/m2m100_418M`](https://huggingface.co/facebook/m2m100_418M) from Hugging Face Model Hub. This process can be repeated for as many models as you would like to evaluate in the experiment. In the workflow creation request, we also specify the following metrics to be computed: [BLEU](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) and [METEOR](https://github.com/huggingface/evaluate/tree/main/metrics/meteor) which are word overlap metrics, and [COMET](https://unbabel.github.io/COMET/html/index.html) which is a neural translation metric.
 
 Setup the following environment variables in a file called `common_variables.sh`:
-```
+```bash
+user@host:~/lumigator$ cat <<EOF > common_variables.sh
 #!/bin/bash
 # Common API configuration for workflows
-export WORKFLOW_DATASET="$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
-export EXPERIMENT_ID="$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
+export WORKFLOW_DATASET="\$(curl -s http://localhost:8000/api/v1/datasets/ | jq -r '.items | .[0].id')"
+export EXPERIMENT_ID="\$(curl -s http://localhost:8000/api/v1/experiments/ | jq -r '.items | .[0].id')"
 export METRICS='["bleu", "meteor", "comet"]'
+EOF
 ```
 
 And then source the file:
@@ -159,12 +162,11 @@ user@host:~/lumigator$ export JSON_STRING=$(jq -n \
 --arg provider "openai" \
 --arg secret_key_name "openai_api_key" \
 --arg desc "$WORKFLOW_DESC" \
---arg dataset_id "$WORKFLOW_DATASET" \
 --arg exp_id "$EXPERIMENT_ID" \
 --argjson batch_size 5 \
 --argjson task_definition "$TASK_DEFINITION" \
 --argjson metrics "$METRICS" \
-'{name: $name, description: $desc, model: $model, provider: $provider, secret_key_name: $secret_key_name, batch_size: $batch_size, experiment_id: $exp_id, dataset: $dataset_id, task_definition: $task_definition, metrics: $metrics}')
+'{name: $name, description: $desc, model: $model, provider: $provider, secret_key_name: $secret_key_name, batch_size: $batch_size, experiment_id: $exp_id, task_definition: $task_definition, metrics: $metrics}')
 ```
 
 Trigger the workflow:
@@ -184,6 +186,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/workflows/ \
   "created_at": "2025-03-17T15:46:50.775000",
   "updated_at": null
 }
+```
 
 :::
 
@@ -200,7 +203,6 @@ request = WorkflowCreateRequest(
     model="gpt-4o-mini",
     provider="openai",
     secret_key_name="openai_api_key",
-    dataset=dataset_id,
     experiment_id=experiment_id,
     task_definition=task_definition,
     batch_size=batch_size,
@@ -216,7 +218,7 @@ client.workflows.create_workflow(request).model_dump()
 Set the following variables:
 ```console
 user@host:~/lumigator$ export WORKFLOW_NAME="Hugging Face Translation" \
-WORKFLOW_DESC="Translate English to Spanish with M2M100"
+       export WORKFLOW_DESC="Translate English to Spanish with M2M100"
 ```
 
 Define the JSON string for HF model:
@@ -266,7 +268,6 @@ request = WorkflowCreateRequest(
     description="Translate English to Spanish with M2M100",
     model="facebook/m2m100_418M",
     provider="hf",
-    dataset=dataset_id,
     experiment_id=experiment_id,
     task_definition=task_definition,
     batch_size=batch_size,
@@ -342,7 +343,7 @@ user@host:~/lumigator$ curl -s http://localhost:8000/api/v1/experiments/$EXPERIM
 :::{tab-item} Python SDK
 :sync: tab2
 ```python
-experiment_details = lumi_client_int.experiments.get_experiment(experiment_id)
+experiment_details = client.experiments.get_experiment(experiment_id)
 print(experiment_details.model_dump_json())
 ```
 :::

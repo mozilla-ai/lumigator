@@ -34,7 +34,7 @@ class RayJobEntrypoint(ABC):
 
 
 def submit_ray_job(client: JobSubmissionClient, entrypoint: RayJobEntrypoint) -> str:
-    loguru.logger.info(f"Submitting {entrypoint.get_command_with_params}...{entrypoint.runtime_env}")
+    loguru.logger.info(f"Submitting {entrypoint.get_command_with_params}...")
     return client.submit_job(
         entrypoint=entrypoint.get_command_with_params,
         metadata=entrypoint.metadata,

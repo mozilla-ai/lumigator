@@ -16,7 +16,7 @@ class DatasetNotFoundError(NotFoundError):
 
         :param resource_id: UUID of dataset resource
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__("Dataset", str(resource_id), message, exc)
 
@@ -28,7 +28,7 @@ class DatasetValidationError(ValidationError):
         """Creates a DatasetValidationError.
 
         :param message: optional error message
-        :param exc: optional exception instance
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(message, exc)
 
@@ -40,7 +40,7 @@ class DatasetInvalidError(DatasetValidationError):
         """Creates a DatasetInvalidError.
 
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(f"Dataset is invalid: {message}", exc)
 
@@ -52,7 +52,7 @@ class DatasetSizeError(DatasetValidationError):
         """Creates a DatasetSizeError.
 
         :param max_size: the maximum allowed dataset size
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(f"Dataset upload exceeds the {max_size} limit", exc)
         self.max_size = max_size
@@ -65,7 +65,7 @@ class DatasetMissingFieldsError(DatasetValidationError):
         """Creates a DatasetMissingFieldsError.
 
         :param missing_fields: list of distinct fields missing from the dataset
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(f"Dataset is missing required fields: {', '.join(missing_fields)}", exc)
         self.missing_fields = missing_fields
@@ -79,7 +79,7 @@ class DatasetUpstreamError(UpstreamError):
 
         :param service_name: the name of the service which threw the error
         :param message: an optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(service_name, message, exc)
 
@@ -102,6 +102,6 @@ class DatasetNotAvailableError(NotAvailableError):
         """Creates a DatasetNotAvailableError.
 
         :param message: error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__("Dataset", message, exc)

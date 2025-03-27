@@ -322,13 +322,14 @@ def list_experiments(local_client: TestClient):
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
-def check_artifacts_times(artifacts_url):
-    artifacts = requests.get(
-        artifacts_url,
-        timeout=5,  # 5 seconds
-    ).json()
-    assert "evaluation_time" in artifacts["artifacts"]
-    assert "inference_time" in artifacts["artifacts"]
+def check_artifacts_times(artifacts_url: str):
+    response = requests.get(artifacts_url, timeout=5)  # 5 second timeout
+    response.raise_for_status()
+    data = response.json()
+    assert "artifacts" in data
+    artifacts = data["artifacts"]
+    assert "evaluation_time" in artifacts
+    assert "inference_time" in artifacts
 
 
 @pytest.mark.integration
@@ -372,10 +373,14 @@ def test_full_experiment_launch(
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
     workflow_1 = run_workflow(local_client, experiment_id, "Workflow_1", model)
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+    assert workflow_1_details
+    assert len(workflow_1_details.artifacts_download_url)
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, experiment_id, "Workflow_2", model)
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+    assert workflow_2_details
+    assert len(workflow_2_details.artifacts_download_url)
     check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
@@ -434,6 +439,8 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID):
     workflow_status = WorkflowStatus.CREATED
+    workflow_details = None
+
     for _ in range(1, 300):
         time.sleep(1)
         workflow_details = WorkflowDetailsResponse.model_validate(local_client.get(f"/workflows/{workflow_id}").json())

@@ -68,10 +68,18 @@ else:
     INFERENCE_PIP_REQS = "../jobs/inference/requirements_cpu.txt"
 INFERENCE_COMMAND: str = "python inference.py"
 
-JOB_DEFINITION: JobDefinition = JobDefinitionInference(
+INFERENCE_JOB_DEFINITION: JobDefinition = JobDefinitionInference(
     command=INFERENCE_COMMAND,
     pip_reqs=INFERENCE_PIP_REQS,
     work_dir=INFERENCE_WORK_DIR,
     config_model=InferenceJobConfig,
     type=JobType.INFERENCE,
+)
+
+ANNOTATION_JOB_DEFINITION: JobDefinition = JobDefinitionInference(
+    command=INFERENCE_COMMAND,
+    pip_reqs=INFERENCE_PIP_REQS,
+    work_dir=INFERENCE_WORK_DIR,
+    config_model=InferenceJobConfig,
+    type=JobType.ANNOTATION,
 )

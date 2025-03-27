@@ -7,7 +7,6 @@ from backend.services.exceptions.base_exceptions import (
     ServiceError,
     UpstreamError,
     ValidationError,
-    _append_message,
 )
 
 
@@ -19,7 +18,7 @@ class JobNotFoundError(NotFoundError):
 
         :param resource_id: UUID of job resource
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__("Job", str(resource_id), message, exc)
 
@@ -33,14 +32,14 @@ class JobTypeUnsupportedError(ServiceError):
         :param job_type: the type of job that is not supported,
             either a JobType or the creation request
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         if isinstance(job_type, JobType):
             job_type_name = job_type.name
         else:
             job_type_name = type(job_type).__name__
 
-        msg = _append_message(f"Job type '{job_type}' not yet supported", message)
+        msg = self._append_message(f"Job type '{job_type}' not yet supported", message)
         super().__init__(msg, exc)
         self.job_type = job_type
         self.job_type_name = job_type_name
@@ -54,7 +53,7 @@ class JobUpstreamError(UpstreamError):
 
         :param service_name: the name of the service which threw the error
         :param message: an optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(service_name, message, exc)
 
@@ -66,6 +65,6 @@ class JobValidationError(ValidationError):
         """Creates a JobValidationError
 
         :param message: an optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(message, exc)

@@ -42,7 +42,7 @@ const drawerVisible = ref(true)
 
 <!-- Style here cannot be scoped because Drawer is attached to the DOM
 after the LResultsDrawer is mounted -->
-<style lang="scss" scoped>
+<style lang="scss">
 @use '@/styles/variables' as *;
 .l-experiments-drawer {
   $root: &;

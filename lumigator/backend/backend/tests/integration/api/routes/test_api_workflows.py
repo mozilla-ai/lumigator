@@ -309,8 +309,10 @@ def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
     logs = JobLogsResponse.model_validate(logs_job_response.json())
     assert logs.logs is not None
     assert "Inference results stored at" in logs.logs
-    assert "Storing evaluation results into" in logs.logs
-    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results into")
+    assert "Storing evaluation results to" in logs.logs
+    assert "Storing evaluation results for S3 to" in logs.logs
+    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results to")
+    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results for S3 to")
 
 
 def delete_experiment_and_validate(local_client: TestClient, experiment_id):
@@ -441,14 +443,15 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
 
 
 def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> WorkflowDetailsResponse | None:
-    """Wait for the workflow to complete, including post-completion processing to create compiled results.
+    """Wait for the workflow to complete, including post-completion processing for successful
+    workflows to create compiled results.
 
     Makes a total of ``MAX_POLLS`` (as configured in the ``conftest.py``).
     Sleeps for ``POLL_WAIT_TIME`` seconds between each poll (as configured in the ``conftest.py``).
 
     :param local_client: The test client.
     :param workflow_id: The workflow ID of the workflow to wait for.
-    :return: The workflow details, or ``None`` if the workflow did not reach the required successful state
+    :return: The workflow details, or ``None`` if the workflow did not reach the required completed state
                 within the maximum number of polls.
     """
     attempt = 0
@@ -477,21 +480,21 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> W
             logger.info(
                 f"Workflow: {workflow_id}, "
                 f"request: ({attempt}/{max_attempts}), "
-                f"status: {workflow.status} "
+                f"status: {workflow.status}, "
                 f"not in terminal state"
             )
             continue
 
         # If the workflow failed, we can stop checking.
         if workflow.status == WorkflowStatus.FAILED:
-            return None
+            return workflow
 
         # The workflow was successful, but we need the artifacts download url to be populated.
         if not workflow.artifacts_download_url:
             logger.info(
                 f"Workflow: {workflow_id}, "
                 f"request: ({attempt}/{max_attempts}), "
-                f"status: {workflow.status} "
+                f"status: {workflow.status}, "
                 f"artifacts not ready"
             )
             continue
@@ -499,8 +502,8 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> W
         logger.info(
             f"Workflow: {workflow_id},"
             f"request: ({attempt}/{max_attempts}), "
-            f"status: {workflow.status} "
-            f"completed and processed)"
+            f"status: {workflow.status}, "
+            f"succeeded and processed)"
         )
         return workflow
 

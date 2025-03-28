@@ -35,7 +35,7 @@ def test_set_null_inference_job_params(job_record, job_service):
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings_map[JobType.INFERENCE].generate_config(
-            request, request.dataset, dataset_s3_path, job_service.storage_path
+            request, request.dataset, dataset_s3_path, "s3://lumigator-storage/path/to/results.json"
         )
         assert job_config.job.max_samples == -1
 
@@ -56,7 +56,7 @@ def test_set_explicit_inference_job_params(job_record, job_service):
     ):
         dataset_s3_path = job_service._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings_map[JobType.INFERENCE].generate_config(
-            request, request.dataset, dataset_s3_path, job_service.storage_path
+            request, request.dataset, dataset_s3_path, "s3://lumigator-storage/path/to/results.json"
         )
         assert job_config.job.max_samples == 10
 

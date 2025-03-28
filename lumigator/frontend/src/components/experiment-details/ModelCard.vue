@@ -67,7 +67,7 @@ const emit = defineEmits(['checkboxToggled', 'deleteClicked', 'cloneClicked', 'c
 .model-card {
   display: flex;
   padding: 0rem 0.5rem 0rem 0.75rem;
-  // max-width: 19.875rem;
+  min-width: 19.875rem;
   // flex: 1 0 0;
   min-height: 3.625rem;
   justify-content: space-between;

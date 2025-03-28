@@ -7,6 +7,9 @@
     :removableSort="true"
     :scrollable="true"
     scrollHeight="flex"
+    :loading="isLoading"
+    :sort-field="sortField"
+    :sort-order="sortOrder"
     :resizableColumns="false"
     :columnResizeMode="'fit'"
     :showGridlines="showGridlines"
@@ -18,7 +21,7 @@
     v-model:expandedRows="expandedRows"
     @rowExpand="onRowExpand"
     @rowCollapse="onRowCollapse"
-    @row-click="$emit('row-click')"
+    @row-click="$emit('row-click', $event)"
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
@@ -59,7 +62,7 @@
     ></Column>
     <Column
       v-for="col in selectedColumns"
-      sortable
+      :sortable="col !== 'options'"
       :key="col"
       :field="col"
       :header="col"
@@ -143,6 +146,18 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    sortField: {
+      type: String,
+      default: undefined,
+    },
+    sortOrder: {
+      type: Number,
+      default: undefined,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
+    },
     showGridlines: {
       type: Boolean,
       default: true,

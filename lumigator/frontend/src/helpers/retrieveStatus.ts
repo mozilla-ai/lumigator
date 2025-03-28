@@ -15,6 +15,6 @@ export function retrieveStatus(experiment: Experiment): WorkflowStatus {
     return WorkflowStatus.INCOMPLETE
   } else {
     // if none of its workflows are running, or if some failed and others succeeded, then it probably means they all have the same status so just return it
-    return [...uniqueStatuses][0]
+    return [...uniqueStatuses][0] || 'empty'
   }
 }

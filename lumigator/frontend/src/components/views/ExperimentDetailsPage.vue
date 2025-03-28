@@ -12,7 +12,7 @@
         <div class="experiment-details-header">
           <h3 class="experiment-title"><i class="pi pi-experiments"></i>{{ experiment?.name }}</h3>
           <TabList>
-            <Tab value="model-runs">Model Runs</Tab>
+            <Tab value="model-runs" :class="{ 'is-running': hasRunningWorkflow }">Model Runs</Tab>
             <Tab value="models-selection">Models Selection</Tab>
             <Tab value="details">Experiment Details</Tab>
           </TabList>
@@ -44,7 +44,6 @@
 </template>
 
 <script setup lang="ts">
-import { useExperimentStore } from '@/stores/experimentsStore'
 import Breadcrumb from 'primevue/breadcrumb'
 
 import { computed, ref, type ComputedRef } from 'vue'
@@ -60,30 +59,26 @@ import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue
 import ExperimentDetailsTab from '@/components/experiment-details/ExperimentDetailsTab.vue'
 import { useQuery } from '@tanstack/vue-query'
 import { experimentsService } from '@/sdk/experimentsService'
-import { storeToRefs } from 'pinia'
+import { WorkflowStatus } from '@/types/Workflow'
 
 const { id } = defineProps<{
   id: string
 }>()
 const experimentId = computed(() => id)
 const router = useRouter()
-const experimentsStore = useExperimentStore()
-const { experiments } = storeToRefs(experimentsStore)
-const existingExperiment = computed(() => experiments.value.find((exp) => exp.id === id))
-
 const { data: experiment } = useQuery({
   queryKey: ['experiment', experimentId],
-  placeholderData: existingExperiment.value,
-  initialData: existingExperiment.value,
   refetchInterval: 3000,
   queryFn: () => experimentsService.fetchExperiment(experimentId.value),
 })
 
-const workflows = computed(() => experiment.value?.workflows || [])
-
 const activeTab = ref()
 const defaultActiveTab = computed(() => {
-  return workflows.value.length ? 'model-runs' : 'models-selection'
+  return experiment.value?.workflows.length ? 'model-runs' : 'models-selection'
+})
+
+const hasRunningWorkflow = computed(() => {
+  return experiment.value?.workflows.some((workflow) => workflow.status === WorkflowStatus.RUNNING)
 })
 
 const items: ComputedRef<MenuItem[]> = computed(() => [
@@ -111,9 +106,6 @@ const handleBackButtonClicked = () => {
 }
 
 const handleWorkflowCreated = async () => {
-  // invalidate query
-  // await experimentStore.fetchAllExperiments()
-  // await experimentsStore.fetchAllExperiments()
   activeTab.value = 'model-runs'
 }
 </script>
@@ -124,6 +116,18 @@ const handleWorkflowCreated = async () => {
 /* reset global css from _resetcss.scss */
 :deep(a, li) {
   background-color: unset;
+}
+
+.is-running::before {
+  content: ' ';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--l-primary-color);
+  margin-right: 8px;
+  margin-bottom: 2px;
+  animation: pulse-dot 1.5s infinite ease-in-out;
 }
 
 .back-button {

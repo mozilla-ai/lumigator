@@ -11,7 +11,7 @@ export const useExperimentStore = defineStore('experiments', () => {
     experiments.value = (await experimentsService.fetchExperiments()).map((experiment) => {
       return {
         ...experiment,
-        status: retrieveStatus(experiment),
+        status: retrieveStatus(experiment) || 'empty',
       }
     })
   }

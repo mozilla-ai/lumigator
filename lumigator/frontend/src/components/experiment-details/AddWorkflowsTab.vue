@@ -210,6 +210,8 @@ const handleRunClicked = () => {
     }
 
     createWorkflowMutation.mutate(workflowPayload)
+
+    selectedModels.value = []
   })
 }
 

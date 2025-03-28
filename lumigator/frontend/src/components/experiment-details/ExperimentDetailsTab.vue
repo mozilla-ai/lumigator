@@ -80,8 +80,6 @@ const props = defineProps<{
   experiment: Experiment
 }>()
 
-const toast = useToast()
-const router = useRouter()
 const confirm = useConfirm()
 
 const isCopied = ref(false)
@@ -93,6 +91,9 @@ const copyToClipboard = async (longString: string) => {
   }, 3000)
   await navigator.clipboard.writeText(longString)
 }
+
+const toast = useToast()
+const router = useRouter()
 
 const deleteExperimentMutation = useMutation({
   mutationFn: experimentsService.deleteExperiment,

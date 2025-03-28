@@ -117,10 +117,9 @@
 import { getAxiosError } from '@/helpers/getAxiosError'
 import { experimentsService } from '@/sdk/experimentsService'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import type { Dataset } from '@/types/Dataset'
 import type { CreateExperimentPayload } from '@/types/Experiment'
-import { useMutation } from '@tanstack/vue-query'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { storeToRefs } from 'pinia'
 import {
   Button,
@@ -142,7 +141,6 @@ const { selectedDataset } = defineProps<{
 
 const isVisible = ref(true)
 const datasetStore = useDatasetStore()
-const experimentStore = useExperimentStore()
 const { datasets } = storeToRefs(datasetStore)
 
 const filteredDatasets = computed(() =>
@@ -217,6 +215,8 @@ const isFormInvalid = computed(
     (useCase.value === 'translation' && (!sourceLanguage.value || !targetLanguage.value)),
 )
 
+const queryClient = useQueryClient()
+
 const router = useRouter()
 const createExperimentMutation = useMutation({
   mutationFn: experimentsService.createExperiment,
@@ -248,8 +248,9 @@ const createExperimentMutation = useMutation({
       group: 'br',
     })
 
-    // queryClient.invalidateQueries('experiments')
-    experimentStore.fetchAllExperiments()
+    queryClient.invalidateQueries({
+      queryKey: ['experiments'],
+    })
     router.push(`/experiments/${data.id}`)
   },
 })

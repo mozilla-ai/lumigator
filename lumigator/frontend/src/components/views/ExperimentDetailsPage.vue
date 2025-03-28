@@ -44,7 +44,6 @@
 </template>
 
 <script setup lang="ts">
-import { useExperimentStore } from '@/stores/experimentsStore'
 import Breadcrumb from 'primevue/breadcrumb'
 
 import { computed, ref, type ComputedRef } from 'vue'
@@ -60,21 +59,14 @@ import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue
 import ExperimentDetailsTab from '@/components/experiment-details/ExperimentDetailsTab.vue'
 import { useQuery } from '@tanstack/vue-query'
 import { experimentsService } from '@/sdk/experimentsService'
-import { storeToRefs } from 'pinia'
 
 const { id } = defineProps<{
   id: string
 }>()
 const experimentId = computed(() => id)
 const router = useRouter()
-const experimentsStore = useExperimentStore()
-const { experiments } = storeToRefs(experimentsStore)
-const existingExperiment = computed(() => experiments.value.find((exp) => exp.id === id))
-
 const { data: experiment } = useQuery({
   queryKey: ['experiment', experimentId],
-  placeholderData: existingExperiment.value,
-  initialData: existingExperiment.value,
   refetchInterval: 3000,
   queryFn: () => experimentsService.fetchExperiment(experimentId.value),
 })
@@ -111,9 +103,6 @@ const handleBackButtonClicked = () => {
 }
 
 const handleWorkflowCreated = async () => {
-  // invalidate query
-  // await experimentStore.fetchAllExperiments()
-  // await experimentsStore.fetchAllExperiments()
   activeTab.value = 'model-runs'
 }
 </script>

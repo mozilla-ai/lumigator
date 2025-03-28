@@ -263,6 +263,17 @@ class JobResultObject(BaseModel):
     parameters: dict = {}
     artifacts: dict = {}
 
+    def merge(self, other: "JobResultObject"):
+        """Merge the properties from another JobResultObject into this one."""
+        for field in self.model_fields:
+            # Get the current and new field values
+            current_value = getattr(self, field)
+            new_value = getattr(other, field)
+
+            # Update if the field is a dict and the new value is non-empty
+            if isinstance(current_value, dict) and new_value:
+                current_value.update(new_value)
+
 
 class Job(JobResponse, JobSubmissionResponse):
     """Job represents the composition of JobResponse and JobSubmissionResponse.

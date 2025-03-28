@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import http
 import json
@@ -16,13 +17,16 @@ from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowRespons
 from mlflow.entities import Experiment as MlflowExperiment
 from mlflow.entities import Run as MlflowRun
 from mlflow.entities import RunStatus
-from mlflow.exceptions import MlflowException
+from mlflow.exceptions import MlflowException, RestException
+from mlflow.protos.databricks_pb2 import ErrorCode
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
 from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
+from backend.services.exceptions.experiment_exceptions import ExperimentConflictError
 from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
+from backend.services.exceptions.tracking_exceptions import TrackingClientUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -58,43 +62,48 @@ class MLflowTrackingClient(TrackingClient):
         dataset: UUID,
         max_samples: int,
     ) -> GetExperimentResponse:
-        """Create a new experiment."""
-        # The name must be unique to all active experiments
-        # Refactor like "for key in [...] set tag ..."
+        """Creates a new experiment to be tracked by the tracking client.
+
+        If the experiment ``name`` already exists in the tracking client, a timestamp suffix will be appended
+        to the ``name`` and the operation will be retried before an exception is raised.
+
+        :param name: The name of the experiment, this must be unique across all experiments being tracked.
+        :param description: A description of the experiment.
+        :param task_definition: The ``TaskDefinition`` for the experiment (e.g. summarization, translation).
+        :param dataset: The dataset ID associated with the experiment.
+        :param max_samples: The maximum number of samples to use for the experiment.
+        :return: The experiment response containing the new experiment ID and other details.
+        :raises ExperimentConflictError: If the experiment name already exists.
+        :raises TrackingClientUpstreamError: If there is a problem with the tracking client.
+        """
+        experiment_name = name
+        tags = {
+            "description": description,
+            "task_definition": task_definition.model_dump_json(),
+            "dataset": str(dataset),
+            "max_samples": str(max_samples),
+            "lumigator_version": "0.2.1",
+        }
+
+        # Try to create the experiment and handle any conflicts
         try:
-            experiment_id = self._client.create_experiment(name)
-            self._client.set_experiment_tag(experiment_id, "description", description)
-            self._client.set_experiment_tag(experiment_id, "task_definition", task_definition.model_dump_json())
-            self._client.set_experiment_tag(experiment_id, "dataset", dataset)
-            self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
-            self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
-        # FIXME Let the user decide in the case of failures.
-        # Also, use a uuid as name and an arbitrary tag as descriptive name
-        except MlflowException as e:
-            # if the experiment name already exists,
-            # log a warning and then append a short timestamp to the name
-            if "RESOURCE_ALREADY_EXISTS" in str(e):
-                print(f"Experiment name '{name}' already exists. Appending timestamp.")
-                name = f"{name} {datetime.now().strftime('%Y%m%d%H%M%S')}"
-                experiment_id = self._client.create_experiment(name)
-                self._client.set_experiment_tag(experiment_id, "description", description)
-                self._client.set_experiment_tag(experiment_id, "task_definition", task_definition.model_dump_json())
-                self._client.set_experiment_tag(experiment_id, "dataset", dataset)
-                self._client.set_experiment_tag(experiment_id, "max_samples", str(max_samples))
-                self._client.set_experiment_tag(experiment_id, "lumigator_version", "0.2.1")
-            else:
-                raise e
+            experiment_id = self._create_experiment(experiment_name, tags)
+        except ExperimentConflictError:
+            # FIXME Let the user decide in the case of failures.
+            # Also, use a uuid as name and an arbitrary tag as descriptive name
+            timestamp_suffix = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            loguru.logger.warning(
+                f"Error creating experiment, "
+                f"name: '{experiment_name}' already exists. "
+                f"Appending timestamp: '{timestamp_suffix}'"
+            )
+            experiment_name = f"{experiment_name}_{timestamp_suffix}"
+            # One last attempt, this time we allow all exceptions to bubble up.
+            experiment_id = self._create_experiment(experiment_name, tags)
+
         # get the experiment so you can populate the response
         experiment = self._client.get_experiment(experiment_id)
-        return GetExperimentResponse(
-            id=experiment_id,
-            description=description,
-            task_definition=task_definition,
-            name=name,
-            dataset=dataset,
-            max_samples=max_samples,
-            created_at=datetime.fromtimestamp(experiment.creation_time / 1000),
-        )
+        return await self._format_experiment(experiment)
 
     async def delete_experiment(self, experiment_id: str) -> None:
         """Delete an experiment. Although Mflow has a delete_experiment method,
@@ -168,7 +177,7 @@ class MLflowTrackingClient(TrackingClient):
         workflow_ids = self._find_workflows(experiment.experiment_id)
         workflows = [
             workflow
-            for workflow in (await self.get_workflow(workflow_id) for workflow_id in workflow_ids)
+            for workflow in await asyncio.gather(*(self.get_workflow(workflow_id) for workflow_id in workflow_ids))
             if workflow is not None
         ]
         task_definition_json = experiment.tags.get("task_definition")
@@ -253,16 +262,18 @@ class MLflowTrackingClient(TrackingClient):
             return None
 
         jobs = self._get_job_ids(workflow_id, workflow.info.experiment_id)
-        workflow_details = self._build_workflow_response(workflow, jobs)
+        workflow_details = await self._build_workflow_response(workflow, jobs)
 
         # Currently, only compile the result json artifact if the workflow has succeeded
         if workflow_details.status != WorkflowStatus.SUCCEEDED:
             return workflow_details
 
-        # Only compile the result JSON artifact of all the jobs, if the workflow has succeeded.
+        # Sanity check, don't recompile if the artifact already exists.
         workflow_s3_uri = self._get_s3_uri(workflow_id)
         if not self._s3_file_system.exists(workflow_s3_uri):
-            self._generate_compiled_results(workflow_id, workflow_details.jobs)
+            results = self._generate_compiled_results(workflow_details.jobs)
+            # Upload the compiled results to S3.
+            self._upload_to_s3(workflow_s3_uri, results.model_dump())
 
         # Update the download URL in the response as compiled results are available.
         workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
@@ -330,8 +341,8 @@ class MLflowTrackingClient(TrackingClient):
         )
         all_job_ids = [run.info.run_id for run in all_jobs]
         # delete all the jobs
-        for job_id in all_job_ids:
-            self.delete_job(job_id)
+        await asyncio.gather(*(self.delete_job(job_id) for job_id in all_job_ids))
+
         # delete the workflow
         self._client.delete_run(workflow_id)
         # TODO: delete the compiled results from S3, and any saved artifacts
@@ -438,7 +449,7 @@ class MLflowTrackingClient(TrackingClient):
         with self._s3_file_system.open(s3_path, "w") as f:
             f.write(json.dumps(data))
 
-    def _build_workflow_response(self, workflow: MlflowRun, job_ids: list) -> WorkflowDetailsResponse:
+    async def _build_workflow_response(self, workflow: MlflowRun, job_ids: list) -> WorkflowDetailsResponse:
         """Construct a WorkflowDetailsResponse object ignoring the `artifacts_download_url`."""
         return WorkflowDetailsResponse(
             id=workflow.info.run_id,
@@ -449,50 +460,38 @@ class MLflowTrackingClient(TrackingClient):
             system_prompt=workflow.data.tags.get("system_prompt"),
             status=WorkflowStatus(workflow.data.tags.get("status")),
             created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
-            jobs=[self.get_job(job_id) for job_id in job_ids],
+            jobs=await asyncio.gather(*(self.get_job(job_id) for job_id in job_ids)),
             metrics=self._compile_metrics(job_ids),
             parameters=self._compile_parameters(job_ids),
         )
 
-    def _generate_compiled_results(self, workflow_id: str, jobs: list[JobResults]) -> None:
-        """Generates a single compiled JSON artifact of aggregated job results belonging to the workflow.
+    def _generate_compiled_results(self, jobs: list[JobResults]) -> JobResultObject:
+        """Generates a single compiled artifact of aggregated job results belonging to the workflow.
 
         Data is compiled in a last-write-wins scenario when there are matching keys with different values.
 
-        :param workflow_id: The ID of the workflow.
         :param jobs: A list of jobs to try to retrieve result data for to aggregate.
+        :return: A JobResultObject containing the aggregated results.
         """
-        # Nothing to do if there are no jobs for this workflow.
-        if not jobs:
-            return
-
-        # Don't recompile if the artifact already exists.
-        workflow_s3_uri = self._get_s3_uri(workflow_id)
-        if self._s3_file_system.exists(workflow_s3_uri):
-            return
-
-        compiled_results: dict[str, JobResultObject] = {}
         aggregated_results = JobResultObject()
+
         for job in jobs:
-            # If no valid s3_path_value is found, skip this job.
-            if not (
-                job_s3_path := next(
-                    (
-                        param.get("value")
-                        for param in job.parameters or []
-                        if param.get("name", "").endswith("_s3_path")
-                    ),
-                    None,
-                )
-            ):
+            # Get the S3 path value from job parameters (if any)
+            job_s3_path = next(
+                (param.get("value") for param in job.parameters or [] if param.get("name", "").endswith("_s3_path")),
+                None,
+            )
+
+            # Skip the job if no valid s3_path_value is found
+            if not job_s3_path:
                 continue
 
+            # Read the job result data and merge into the aggregated results.
             with self._s3_file_system.open(job_s3_path) as f:
                 job_results = JobResultObject.model_validate_json(f.read())
-                compiled_results[str(job.id)] = job_results.model_dump()
+                aggregated_results.merge(job_results)
 
-        # Upload the compiled results to S3.
-        self._upload_to_s3(workflow_s3_uri, aggregated_results.model_dump())
+        return aggregated_results
 
     def _fetch_workflow_run(self, workflow_id: str):
         """Try to fetch a workflow run from MLFlow.
@@ -531,6 +530,21 @@ class MLflowTrackingClient(TrackingClient):
     def _get_s3_key(self, workflow_id: str) -> str:
         """Construct an S3 key for workflow artifacts."""
         return f"workflows/results/{workflow_id}/{self._WORKFLOW_OUTPUT_FILENAME}"
+
+    def _create_experiment(self, name: str, tags: dict[str, any] | None = None) -> str:
+        """Try to create an experiment and return its ID.
+
+        :param name: The name of the experiment.
+        :return: The ID for the created experiment.
+        :raises ExperimentConflictError: If the experiment name already exists.
+        :raises TrackingClientUpstreamError: If there is any other problem creating the experiment.
+        """
+        try:
+            return self._client.create_experiment(name, tags=tags)
+        except RestException as e:
+            if e.error_code == ErrorCode.Name(ErrorCode.RESOURCE_ALREADY_EXISTS):
+                raise ExperimentConflictError(name) from e
+            raise TrackingClientUpstreamError(name) from e
 
 
 class MLflowClientManager:

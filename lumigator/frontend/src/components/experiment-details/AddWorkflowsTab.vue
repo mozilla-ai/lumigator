@@ -109,7 +109,7 @@ import type { Model } from '@/types/Model'
 import { Button, InputNumber, Slider, Textarea, useToast } from 'primevue'
 import { computed, ref } from 'vue'
 import ModelCard from './ModelCard.vue'
-import { useMutation } from '@tanstack/vue-query'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
 import type { CreateWorkflowPayload } from '@/types/Workflow'
 import { getAxiosError } from '@/helpers/getAxiosError'
@@ -119,7 +119,7 @@ const modelStore = useModelStore()
 const toast = useToast()
 const selectedModels = ref<Model['model'][]>([])
 const customWorkflows = ref<CreateWorkflowPayload[]>([])
-
+const queryClient = useQueryClient()
 const emit = defineEmits(['workflowCreated'])
 
 const experimentPrompt = ref('')
@@ -146,13 +146,16 @@ const createWorkflowMutation = useMutation({
       detail: getAxiosError(error),
     })
   },
-  onSuccess: () => {
+  onSuccess: async () => {
     toast.add({
       group: 'br',
       life: 3000,
       severity: 'success',
       summary: 'Success',
       detail: 'Model Run created successfully',
+    })
+    queryClient.invalidateQueries({
+      queryKey: ['experiment', props.experiment.id],
     })
     emit('workflowCreated')
   },
@@ -182,10 +185,8 @@ const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', fa
 const handleAddModelClicked = () => {}
 
 const handleRunClicked = () => {
-  console.log(selectedModels.value, models.value)
   selectedModels.value.forEach((selectedModel) => {
     const model = models.value.find((m: Model) => m.model === selectedModel)
-    console.log('model', model)
     const workflowPayload: CreateWorkflowPayload = {
       dataset: props.experiment.dataset,
       experiment_id: props.experiment.id,

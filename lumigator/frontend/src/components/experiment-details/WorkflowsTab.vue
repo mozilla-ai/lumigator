@@ -19,7 +19,7 @@
       </div>
     </div>
     <TableView
-      v-if="workflows.length > 0"
+      v-if="experiment.workflows.length > 0"
       :columns="columns"
       :data="tableData"
       :columnStyles="columnStyles"
@@ -92,7 +92,6 @@ import { getAxiosError } from '@/helpers/getAxiosError'
 import { downloadContent } from '@/helpers/downloadContent'
 
 const props = defineProps<{
-  workflows: Workflow[]
   experiment: Experiment
 }>()
 const emit = defineEmits(['add-model-run-clicked'])
@@ -100,7 +99,6 @@ const emit = defineEmits(['add-model-run-clicked'])
 const showDrawer = ref(false)
 const showLogs = ref(false)
 const showExpResults = ref(false)
-
 const getDrawerHeader = () => {
   return showLogs.value ? 'Logs' : `Experiment: ${props.experiment.name}`
 }
@@ -125,9 +123,11 @@ const workflowLogsQuery = useQuery({
     if (!logsItem.value) return null
     return workflowsService.fetchLogs(logsItem.value.id)
   },
-  enabled: computed(() => !!logsItem.value), // Prevent fetching when no workflow is selected
+  refetchInterval: 3000,
+  enabled: computed(() => !!logsItem.value),
   select: (data) => data.logs.split('\n'),
 })
+
 const clickedWorkflowLogs = computed(() => workflowLogsQuery.data.value || [])
 
 const deleteWorkflowMutation = useMutation({
@@ -160,14 +160,13 @@ const deleteWorkflowMutation = useMutation({
   },
 })
 
-const onWorkflowClicked = (workflow: Workflow) => {
-  console.log('workflow clicked', workflow)
+const onWorkflowClicked = () => {
   return handleViewAllResultsClicked()
 }
 
 const columns = ['model', 'created_at', 'status', 'options']
 const tableData = computed(() => {
-  return props.workflows.map((workflow: Workflow) => {
+  return props.experiment.workflows.map((workflow: Workflow) => {
     return {
       // id: workflow.id,
       // name: workflow.name,
@@ -192,7 +191,6 @@ const columnStyles = computed(() => {
 })
 
 const handleDeleteWorkflowClicked = (workflow: (typeof tableData.value)[0]) => {
-  console.log('delete workflow clicked', workflow)
   confirm.require({
     message: `This will permanently delete this model run from your experiment.`,
     header: `Delete Model Run?`,
@@ -220,27 +218,21 @@ const isViewResultsDisabled = computed(
     !props.experiment.workflows.some((workflow) => workflow.status === WorkflowStatus.SUCCEEDED),
 )
 const handleViewLogsClicked = async (workflow: (typeof tableData.value)[0]) => {
-  console.log('view logs clicked', workflow)
-
   logsItem.value = workflow
   showLogs.value = true
   showDrawer.value = true
 }
 
 const handleDownloadResultsClicked = async (workflow: (typeof tableData.value)[0]) => {
-  console.log('download results clicked', workflow)
   const blob = await workflowsService.downloadResults(workflow.id)
   downloadContent(blob, `${workflow.name}_results.json`)
 }
 
 const handleAddModelClicked = () => {
-  console.log('add model clicked')
   emit('add-model-run-clicked')
 }
 
 const handleViewAllResultsClicked = async () => {
-  console.log('view all results clicked')
-
   experimentResults.value = await getExperimentResults(props.experiment, models.value)
 
   logsItem.value = undefined

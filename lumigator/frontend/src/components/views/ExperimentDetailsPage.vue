@@ -24,7 +24,6 @@
                 v-if="experiment"
                 @add-model-run-clicked="activeTab = 'add-model-run'"
                 :experiment="experiment"
-                :workflows="experiment.workflows"
               />
             </TabPanel>
             <TabPanel value="add-model-run">
@@ -46,7 +45,6 @@
 
 <script setup lang="ts">
 import { useExperimentStore } from '@/stores/experimentsStore'
-import { storeToRefs } from 'pinia'
 import Breadcrumb from 'primevue/breadcrumb'
 
 import { computed, ref, type ComputedRef } from 'vue'
@@ -60,18 +58,34 @@ import type { MenuItem } from 'primevue/menuitem'
 import WorkflowsTab from '@/components/experiment-details/WorkflowsTab.vue'
 import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue'
 import ExperimentInfo from '@/components/experiment-details/ExperimentInfo.vue'
+import { useQuery } from '@tanstack/vue-query'
+import { experimentsService } from '@/sdk/experimentsService'
+import { storeToRefs } from 'pinia'
 
 const { id } = defineProps<{
   id: string
 }>()
+const experimentId = computed(() => id)
 const router = useRouter()
 const experimentsStore = useExperimentStore()
 const { experiments } = storeToRefs(experimentsStore)
-const experiment = computed(() => experiments.value.find((exp) => exp.id === id))
+const existingExperiment = computed(() => experiments.value.find((exp) => exp.id === id))
+
+const { data: experiment } = useQuery({
+  queryKey: ['experiment', experimentId],
+  placeholderData: existingExperiment.value,
+  initialData: existingExperiment.value,
+  refetchInterval: 3000,
+  queryFn: () => experimentsService.fetchExperiment(experimentId.value),
+})
+
+const workflows = computed(() => experiment.value?.workflows || [])
+
 const activeTab = ref()
 const defaultActiveTab = computed(() => {
-  return experiment.value?.workflows.length ? 'model-runs' : 'add-model-run'
+  return workflows.value.length ? 'model-runs' : 'add-model-run'
 })
+
 const items: ComputedRef<MenuItem[]> = computed(() => [
   {
     label: 'Experiments',
@@ -99,9 +113,8 @@ const handleBackButtonClicked = () => {
 const handleWorkflowCreated = async () => {
   // invalidate query
   // await experimentStore.fetchAllExperiments()
+  // await experimentsStore.fetchAllExperiments()
   activeTab.value = 'model-runs'
-  await experimentsStore.fetchAllExperiments()
-  // todo - get workflows
 }
 </script>
 

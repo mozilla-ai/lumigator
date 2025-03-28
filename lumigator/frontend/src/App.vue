@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <VueQueryDevtools></VueQueryDevtools>
     <div class="content-wrapper">
       <div class="l-menu-container">
         <div class="l-menu__top">
@@ -67,6 +68,8 @@ import { useSlidePanel } from '@/composables/useSlidePanel'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
 import Button from 'primevue/button'
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
+import { initFeatureFlags } from './helpers/FeatureFlags'
 
 const datasetsStore = useDatasetStore()
 const experimentsStore = useExperimentStore()
@@ -95,6 +98,7 @@ const tooltipConfig = ref({
 const { showSlidingPanel } = useSlidePanel()
 
 onMounted(async () => {
+  initFeatureFlags(window.location.search)
   await Promise.all([
     datasetsStore.fetchAllJobs(),
     datasetsStore.fetchDatasets(),

@@ -1,6 +1,6 @@
 <template>
   <nav class="l-main-menu-container">
-    <Menu :model="routes">
+    <Menu :model="menuItems">
       <template #start>
         <div class="l-main-menu__logo">
           <img src="@/assets/lumigator.svg" alt="lumigator-logo" />
@@ -10,7 +10,7 @@
         <router-link
           :to="item.path"
           class="l-main-menu__link"
-          :disabled="item.disabled"
+          :disabled="item.isDisabled"
           @click="showSlidingPanel = false"
         >
           <span :class="item.icon"></span>
@@ -23,9 +23,29 @@
 
 <script lang="ts" setup>
 import Menu from 'primevue/menu'
-import { routes } from '@/router'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 const { showSlidingPanel } = useSlidePanel()
+
+const menuItems = [
+  {
+    path: '/datasets',
+    name: 'datasets',
+    icon: 'pi pi-dataset',
+    isDisabled: false,
+  },
+  {
+    path: '/experiments',
+    name: 'experiments',
+    icon: 'pi pi-experiments',
+    isDisabled: false,
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    icon: 'pi pi-cog',
+    isDisabled: false,
+  },
+]
 </script>
 
 <style scoped lang="scss">

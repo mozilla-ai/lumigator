@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from uuid import UUID
 
 import numpy as np
 import pytest
@@ -71,10 +72,11 @@ def test_empty_fields_cast_as_float64():
     test_path = test_path_csv.with_suffix("")
     csv = load_dataset("csv", data_files=str(test_path_csv), split="train")
     csv.save_to_disk(test_path)
+    non_existing_id = UUID("d34dbeef-4bea-4d19-ad06-214202165812")
     eval = EvalJobConfig(
         name="test",
         dataset=DatasetConfig(path=str(test_path)),
         evaluation=EvaluationConfig(metrics=["rouge"], storage_path="/tmp/test_empty_fields_cast_as_float64.metrics"),
     )
-    run_eval(eval)
+    run_eval(eval, non_existing_id)
     shutil.rmtree(test_path)

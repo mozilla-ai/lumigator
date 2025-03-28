@@ -89,3 +89,20 @@ class NotAvailableError(ServiceError):
         msg = f"{resource} not available"
         super().__init__(self._append_message(msg, message), exc)
         self.resource = resource
+
+
+class ConflictError(ServiceError):
+    """Base exception for conflicts occurring due to non-unique constraints or existing resources."""
+
+    def __init__(self, resource: str, identifier: str, message: str | None = None, exc: Exception | None = None):
+        """Creates a ConflictError.
+
+        :param resource: the resource that caused the conflict
+        :param identifier: the identifier of the conflicting resource
+        :param message: an optional error message
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
+        """
+        msg = f"Conflict: {resource} with unique identifier '{identifier}' already exists"
+        super().__init__(self._append_message(msg, message), exc)
+        self.resource = resource
+        self.identifier = identifier

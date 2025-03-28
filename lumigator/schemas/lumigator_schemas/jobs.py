@@ -113,7 +113,7 @@ class DeepEvalLocalModelConfig(BaseModel):
 
 class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    # NOTE: If changing the default  metrics, please ensure that they do not include
+    # NOTE: If changing the default metrics, please ensure that they do not include
     # any requirements for external API calls that require an API key to be configured.
     metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
     llm_as_judge: DeepEvalLocalModelConfig | None = None
@@ -258,7 +258,7 @@ class JobResultObject(BaseModel):
     it should be accepted by the backend.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
     metrics: dict = {}
     parameters: dict = {}
     artifacts: dict = {}

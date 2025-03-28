@@ -156,9 +156,7 @@ class WorkflowService:
 
         try:
             # Attempt to submit the inference job to Ray before we track it in Lumigator.
-            inference_job = self._job_service.create_job(
-                job_infer_create,
-            )
+            inference_job = self._job_service.create_job(job_infer_create)
         except (JobTypeUnsupportedError, SecretNotFoundError) as e:
             loguru.logger.error("Workflow pipeline error: Workflow {}. Cannot create inference job: {}", workflow.id, e)
             await self._handle_workflow_failure(workflow.id)
@@ -208,12 +206,12 @@ class WorkflowService:
         try:
             # Inference jobs produce a new dataset
             # Add the dataset to the (local) database
-            self._job_service._add_dataset_to_db(
-                inference_job.id,
-                job_infer_create,
-                self._dataset_service.s3_filesystem,
-                dataset_filename,
-                request_dataset.generated,
+            inference_dataset_id = self._job_service._add_dataset_to_db(
+                job_id=inference_job.id,
+                request=job_infer_create,
+                s3_file_system=self._dataset_service.s3_filesystem,
+                dataset_filename=dataset_filename,
+                is_gt_generated=request_dataset.generated,
             )
         except (
             DatasetNotFoundError,
@@ -233,19 +231,14 @@ class WorkflowService:
 
         try:
             # log the job to the tracking client
-            # TODO: Review how JobService._get_job_record works and if it can be re-used/made public.
-            result_key = str(
-                Path(settings.S3_JOB_RESULTS_PREFIX)
-                / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_infer_create.name, job_id=inference_job.id)
-            )
+            # TODO: Review how JobService._get_s3_uri works and if it can be re-used/made public.
+            inference_results_path = self._job_service._get_s3_uri(inference_job.id)
 
-            # TODO: Review how DatasetService._get_s3_path (and similar) works and if it can be re-used/made public.
-            dataset_path = self._dataset_service._get_s3_path(result_key)
-            with self._dataset_service.s3_filesystem.open(dataset_path, "r") as f:
+            with self._dataset_service.s3_filesystem.open(inference_results_path, "r") as f:
                 inf_output = JobResultObject.model_validate_json(f.read())
-            inf_path = f"{settings.S3_BUCKET}/{self._job_service._get_results_s3_key(inference_job.id)}"
+
             inference_job_output = RunOutputs(
-                parameters={"inference_output_s3_path": inf_path},
+                parameters={"inference_output_s3_path": inference_results_path},
                 metrics=inf_output.metrics,
                 ray_job_id=str(inference_job.id),
             )
@@ -261,8 +254,6 @@ class WorkflowService:
             return
 
         # FIXME The ray status is now _not enough_ to set the job status,
-        # use the inference job id to recover the dataset record
-        dataset_record = self._dataset_service._get_dataset_record_by_job_id(inference_job.id)
 
         job_config = JobEvalConfig()
         if request.metrics:
@@ -275,16 +266,14 @@ class WorkflowService:
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
-            dataset=dataset_record.id,
+            dataset=inference_dataset_id,
             max_samples=experiment.max_samples,
             job_config=job_config,
         )
 
         try:
             # Attempt to submit the evaluation job before we track it in Lumigator.
-            evaluation_job = self._job_service.create_job(
-                job_eval_create,
-            )
+            evaluation_job = self._job_service.create_job(job_eval_create)
         except (JobTypeUnsupportedError, SecretNotFoundError) as e:
             loguru.logger.error(
                 "Workflow pipeline error: Workflow {}. Cannot create evaluation job: {}", workflow.id, e
@@ -294,7 +283,10 @@ class WorkflowService:
 
         # Track the evaluation job.
         eval_run_id = await self._tracking_client.create_job(
-            request.experiment_id, workflow.id, "evaluation", evaluation_job.id
+            experiment_id=request.experiment_id,
+            workflow_id=workflow.id,
+            name="evaluation",
+            job_id=evaluation_job.id,
         )
 
         try:
@@ -326,17 +318,14 @@ class WorkflowService:
                 evaluation_job,
             )
 
-            result_key = str(
-                Path(settings.S3_JOB_RESULTS_PREFIX)
-                / settings.S3_JOB_RESULTS_FILENAME.format(job_name=job_eval_create.name, job_id=evaluation_job.id)
-            )
-            with self._dataset_service.s3_filesystem.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
+            # Get the path to the job results stored in S3.
+            evaluation_result_path = self._job_service._get_s3_uri(evaluation_job.id)
+
+            with self._dataset_service.s3_filesystem.open(evaluation_result_path, "r") as f:
                 eval_output = JobResultObject.model_validate_json(f.read())
 
             # TODO this generic interface should probably be the output type of the eval job but
             # we'll make that improvement later
-            # Get the dataset from the S3 bucket
-            result_key = self._job_service._get_results_s3_key(evaluation_job.id)
 
             formatted_metrics = self._prepare_metrics(eval_output)
 
@@ -344,7 +333,7 @@ class WorkflowService:
                 metrics=formatted_metrics,
                 # eventually this could be an artifact and be stored by the tracking client,
                 #  but we'll keep it as being stored the way it is for right now.
-                parameters={"eval_output_s3_path": f"{settings.S3_BUCKET}/{result_key}"},
+                parameters={"eval_output_s3_path": evaluation_result_path},
                 ray_job_id=str(evaluation_job.id),
             )
             await self._tracking_client.update_job(eval_run_id, outputs)

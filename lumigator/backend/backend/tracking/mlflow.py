@@ -294,7 +294,7 @@ class MLflowTrackingClient(TrackingClient):
                         # download the file
                         # get the file from the S3 bucket
                         with self._s3_file_system.open(f"{param['value']}") as f:
-                            job_results = JobResultObject.model_validate(json.loads(f.read()))
+                            job_results = JobResultObject.model_validate_json(f.read())
                         # if any keys are the same, log a warning and then overwrite the key
                         for job_result_item in job_results:
                             if job_result_item[1] is None:

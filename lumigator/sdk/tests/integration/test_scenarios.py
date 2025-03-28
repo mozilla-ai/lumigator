@@ -339,9 +339,13 @@ def test_create_exp_workflow_check_results(
     assert logs_response is not None
     assert logs_response.logs is not None
     assert "Inference results stored at" in logs_response.logs
-    assert "Storing evaluation results into" in logs_response.logs
+    assert "Storing evaluation results to" in logs_response.logs
+    assert "Storing evaluation results for S3 to" in logs_response.logs
     assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
-        "Storing evaluation results into"
+        "Storing evaluation results to"
+    )
+    assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
+        "Storing evaluation results for S3 to"
     )
 
     # Delete the experiment

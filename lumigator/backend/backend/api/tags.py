@@ -8,6 +8,7 @@ class Tags(str, Enum):
     EXPERIMENTS = "experiments"
     WORKFLOWS = "workflows"
     MODELS = "models"
+    LLM_ROUTER = "llm_router"
     SETTINGS = "settings"
 
 
@@ -35,6 +36,10 @@ TAGS_METADATA = [
     {
         "name": Tags.MODELS,
         "description": "Return a list of suggested models for a given task.",
+    },
+    {
+        "name": Tags.LLM_ROUTER,
+        "description": "Route messages to different models.",
     },
     {
         "name": Tags.SETTINGS,

@@ -15,6 +15,7 @@ from backend.repositories.secrets import SecretRepository
 from backend.services.datasets import DatasetService
 from backend.services.experiments import ExperimentService
 from backend.services.jobs import JobService
+from backend.services.llm_router import RouterServiceFactory
 from backend.services.secrets import SecretService
 from backend.services.workflows import WorkflowService
 from backend.settings import settings
@@ -101,6 +102,13 @@ def get_job_service(
 
 
 JobServiceDep = Annotated[JobService, Depends(get_job_service)]
+
+
+def get_router_factory_service(secret_service: SecretServiceDep) -> RouterServiceFactory:
+    return RouterServiceFactory(secret_service)
+
+
+RouterServiceFactoryDep = Annotated[RouterServiceFactory, Depends(get_router_factory_service)]
 
 
 def get_experiment_service(

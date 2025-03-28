@@ -225,6 +225,31 @@ const handleCloneClicked = (model: Model) => {
 
 const handleCustomizeClicked = (model: Model) => {
   console.log('customize clicked', model)
+  if (customWorkflows.value.some((workflow) => workflow.model === model.model)) {
+    customWorkflows.value = customWorkflows.value.filter(
+      (workflow) => workflow.model !== model.model,
+    )
+  } else {
+    customWorkflows.value.push({
+      dataset: props.experiment.dataset,
+      experiment_id: props.experiment.id,
+      task_definition: props.experiment.task_definition,
+      system_prompt: experimentPrompt.value || defaultPrompt.value,
+      description: props.experiment.description,
+      max_samples: props.experiment.max_samples,
+      name: `${props.experiment.name}/${model.model}`,
+      model: model.model,
+      provider: model.provider,
+      secret_key_name: model.requirements.includes('api_key')
+        ? `${model.provider}_api_key`
+        : undefined,
+      base_url: model.base_url,
+      generation_config: {
+        temperature: temperature.value,
+        top_p: topP.value,
+      },
+    })
+  }
 }
 
 const handleDeleteClicked = (model: Model) => {

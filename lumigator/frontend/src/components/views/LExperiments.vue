@@ -15,7 +15,7 @@
     </div>
     <div v-if="experiments.length > 0" class="l-experiments__table-container">
       <l-experiment-table
-        :table-data="experiments"
+        :experiments="experiments"
         @l-experiment-selected="handleExperimentClicked($event)"
         @l-workflow-selected="handleWorkflowClicked($event)"
         @delete-option-clicked="handleDeleteButtonClicked"
@@ -378,6 +378,7 @@ watch(showSlidingPanel, (newValue) => {
 .l-experiments {
   $root: &;
   max-width: $l-main-width;
+  width: 100%;
   margin: 0 auto;
 
   &__header-container {

@@ -92,6 +92,7 @@ const isThrottled = ref(false)
 
 const closeExperimentForm = () => {
   isNewExperimentFormVisible.value = false
+  datasetStore.setSelectedDataset(undefined)
 }
 
 const getDrawerHeader = () => {

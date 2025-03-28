@@ -115,8 +115,9 @@ const modelsStore = useModelStore()
 const { models } = storeToRefs(modelsStore)
 const logsItem = ref()
 
+const workflowId = computed(() => logsItem.value?.id)
 const workflowLogsQuery = useQuery({
-  queryKey: computed(() => ['workflowLogs', logsItem.value?.id]),
+  queryKey: computed(() => ['workflowLogs', workflowId]),
   placeholderData: [],
   initialData: [],
   queryFn: async () => {

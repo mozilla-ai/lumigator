@@ -274,6 +274,7 @@ async function handleContinueClicked() {
   }
 
   createExperimentMutation.mutate(experimentPayload)
+  datasetStore.setSelectedDataset(undefined)
 }
 
 const emit = defineEmits(['close'])

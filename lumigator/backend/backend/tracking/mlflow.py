@@ -264,13 +264,30 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
-        """Retrieve a workflow and its associated jobs."""
-        workflow = self._fetch_workflow_run(workflow_id)
+        """Retrieve a workflow and its associated jobs.
+
+        :param workflow_id: The ID of the workflow to retrieve.
+        :return: A WorkflowDetailsResponse object containing the workflow details.
+        :raises TrackingClientUpstreamError: If the workflow is not found, there is an error retrieving
+                    it or building a response.
+        """
+        try:
+            workflow = self._fetch_workflow_run(workflow_id)
+        except MlflowException as e:
+            raise TrackingClientUpstreamError("mlflow", "Error fetching workflow") from e
+
         if not workflow:
             return None
 
         jobs = self._get_job_ids(workflow_id, workflow.info.experiment_id)
-        workflow_details = await self._build_workflow_response(workflow, jobs)
+
+        try:
+            workflow_details = await self._build_workflow_response(workflow, jobs)
+        except (RunNotFoundError, ValueError) as e:
+            raise TrackingClientUpstreamError(
+                "mlflow",
+                f"Workflow: {workflow_id}Error building response",
+            ) from e
 
         # Currently, only compile the result json artifact if the workflow has succeeded
         if workflow_details.status != WorkflowStatus.SUCCEEDED:
@@ -295,11 +312,16 @@ class MLflowTrackingClient(TrackingClient):
         :param status: The new status of the workflow.
         :raises MlflowException: If there is an error updating the workflow status.
         """
-        # Update our tag, but also the run status of the 'run' in MLflow.
-        self._client.set_tag(workflow_id, "status", status.value)
-        # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
-        # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
-        self._client.update_run(workflow_id, status=RunStatus.to_string(self._WORKFLOW_TO_MLFLOW_STATUS[status]))
+        try:
+            # Update our tag, but also the run status of the 'run' in MLflow.
+            self._client.set_tag(workflow_id, "status", status.value)
+            # See: https://mlflow.org/docs/latest/api_reference/rest-api.html#mlflowupdaterun
+            # See: https://github.com/mlflow/mlflow/blob/4a4716324a2e736eaad73ff9dcc76ff478a29ea9/mlflow/tracking/client.py#L2181
+            self._client.update_run(workflow_id, status=RunStatus.to_string(self._WORKFLOW_TO_MLFLOW_STATUS[status]))
+        except MlflowException as e:
+            raise TrackingClientUpstreamError(
+                "mlflow", f"Error updating workflow: {workflow_id} status: {status.value}"
+            ) from e
 
     def _get_ray_job_logs(self, ray_job_id: str):
         """Get the logs for a Ray job."""
@@ -465,7 +487,14 @@ class MLflowTrackingClient(TrackingClient):
             f.write(json.dumps(data))
 
     async def _build_workflow_response(self, workflow: MlflowRun, job_ids: list) -> WorkflowDetailsResponse:
-        """Construct a WorkflowDetailsResponse object ignoring the `artifacts_download_url`."""
+        """Construct a WorkflowDetailsResponse object ignoring the `artifacts_download_url`.
+
+        :param workflow: The workflow run to build the response from.
+        :param job_ids: A list of job IDs associated with the workflow.
+        :return: A WorkflowDetailsResponse object.
+        :raises RunNotFoundError: If a job is not found or has been deleted.
+        :raises ValueError: If a duplicate metric is found across jobs.
+        """
         return WorkflowDetailsResponse(
             id=workflow.info.run_id,
             experiment_id=workflow.info.experiment_id,

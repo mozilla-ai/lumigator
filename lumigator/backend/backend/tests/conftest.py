@@ -64,12 +64,6 @@ MAX_POLLS = 18
 POLL_WAIT_TIME = 10
 
 
-def load_json_from_file(file_path: Path) -> dict:
-    """Load JSON data from a file path and return it as a dictionary."""
-    with Path.open(file_path) as file:
-        return json.load(file)
-
-
 @pytest.fixture(scope="session")
 def background_tasks() -> BackgroundTasks:
     return BackgroundTasks()
@@ -563,7 +557,8 @@ def fake_mlflow_tracking_client(fake_s3fs):
 @pytest.fixture(scope="session")
 def json_mlflow_runs_search_single(resources_dir) -> dict:
     path = resources_dir / "mlflow_runs_search_single.json"
-    return load_json_from_file(path)
+    with Path.open(path) as file:
+        return json.load(file)
 
 
 @pytest.fixture

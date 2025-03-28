@@ -26,7 +26,7 @@ from s3fs import S3FileSystem
 
 from backend.services.exceptions.experiment_exceptions import ExperimentConflictError
 from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
-from backend.services.exceptions.tracking_exceptions import TrackingClientUpstreamError
+from backend.services.exceptions.tracking_exceptions import RunNotFoundError, TrackingClientUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -117,16 +117,24 @@ class MLflowTrackingClient(TrackingClient):
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
-    def _compile_metrics(self, job_ids: list) -> dict:
-        """Take the individual metrics from each run and compile them into a single dict
-        for now, assert that each run has no overlapping metrics
+    def _compile_metrics(self, job_ids: list) -> dict[str, float]:
+        """Aggregate metrics from job runs, ensuring no duplicate keys.
+
+        :param job_ids: A list of job IDs to aggregate metrics from.
+        :return: A dictionary mapping metric names to their values.
+        :raises ValueError: If a duplicate metric is found across jobs.
         """
         metrics = {}
+
         for job_id in job_ids:
             run = self._client.get_run(job_id)
-            for metric in run.data.metrics:
-                assert metric not in metrics
-                metrics[metric] = run.data.metrics[metric]
+            for metric, value in run.data.metrics.items():
+                if metric in metrics:
+                    raise ValueError(
+                        f"Duplicate metric '{metric}' found in job '{job_id}'. "
+                        f"Stored value: {metrics[metric]}, this value: {value}"
+                    )
+                metrics[metric] = value
 
         return metrics
 
@@ -379,16 +387,23 @@ class MLflowTrackingClient(TrackingClient):
             self._client.log_param(job_id, parameter, value)
 
     async def get_job(self, job_id: str):
-        """Get the results of a job."""
+        """Get the results of a job (known as a Run in MLFlow).
+
+        This method is used to get the metrics and parameters of a job.
+
+        :param job_id: The ID of the job.
+        :return: The results of the job.
+        :raises RunNotFoundError: If the job is not found.
+        """
         run = self._client.get_run(job_id)
         if run.info.lifecycle_stage == "deleted":
-            return None
+            raise RunNotFoundError(job_id, "deleted")
         return JobResults(
             id=job_id,
-            metrics=[{"name": metric[0], "value": metric[1]} for metric in run.data.metrics.items()],
-            parameters=[{"name": param[0], "value": param[1]} for param in run.data.params.items()],
-            metric_url="TODO",
-            artifact_url="TODO",
+            metrics=[{"name": key, "value": value} for key, value in run.data.metrics.items()],
+            parameters=[{"name": key, "value": value} for key, value in run.data.params.items()],
+            metric_url="",  # TODO: Implement
+            artifact_url="",  # TODO: Implement
         )
 
     async def delete_job(self, job_id: str):

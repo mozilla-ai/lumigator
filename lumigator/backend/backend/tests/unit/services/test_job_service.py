@@ -1,8 +1,10 @@
 import json
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import loguru
 import pytest
+import requests_mock
 from lumigator_schemas.datasets import DatasetFormat
 from lumigator_schemas.jobs import (
     JobCreate,
@@ -10,12 +12,13 @@ from lumigator_schemas.jobs import (
     JobType,
 )
 from lumigator_schemas.secrets import SecretUploadRequest
+from ray.dashboard.modules.job.common import JobStatus
 from ray.job_submission import JobSubmissionClient
 
 from backend.ray_submit.submission import RayJobEntrypoint
-from backend.services.exceptions.job_exceptions import JobValidationError
+from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError, JobValidationError
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
-from backend.services.jobs import job_settings_map
+from backend.services.jobs import JobService, job_settings_map
 from backend.settings import settings
 from backend.tests.conftest import TEST_SEQ2SEQ_MODEL
 
@@ -152,3 +155,31 @@ def test_missing_api_key_in_job_creation(
     ):
         with pytest.raises(JobValidationError):
             job_service.create_job(request)
+
+
+def test_get_upstream_job_status_success(job_service: JobService, valid_job_id: UUID):
+    # Mock the Ray client's get_job_status method to return a mock response
+    mock_job_status = MagicMock()
+    mock_job_status.value = "SUCCEEDED"
+    job_service._ray_client.get_job_status = MagicMock(return_value=mock_job_status)
+    status = job_service.get_upstream_job_status(valid_job_id)
+    assert status == "succeeded"
+
+
+def test_get_upstream_job_status_job_not_found(job_service: JobService, valid_job_id: UUID):
+    """Test for job not found error (404)."""
+    # This is the current response from the Ray client when a job is not found.
+    job_service._ray_client.get_job_status.side_effect = RuntimeError(
+        "Request failed with status code 404: Job not found."
+    )
+
+    with pytest.raises(JobNotFoundError):
+        job_service.get_upstream_job_status(valid_job_id)
+
+
+def test_get_upstream_job_status_other_error(job_service: JobService, valid_job_id: UUID):
+    """Test for any other error."""
+    job_service._ray_client.get_job_status.side_effect = RuntimeError("Some other error occurred")
+
+    with pytest.raises(JobUpstreamError):
+        job_service.get_upstream_job_status(valid_job_id)

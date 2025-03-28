@@ -13,8 +13,8 @@
           <h3 class="experiment-title"><i class="pi pi-experiments"></i>{{ experiment?.name }}</h3>
           <TabList>
             <Tab value="model-runs">Model Runs</Tab>
-            <Tab value="add-model-run">Trigger Model Run</Tab>
-            <Tab value="details">Details</Tab>
+            <Tab value="models-selection">Models Selection</Tab>
+            <Tab value="details">Experiment Details</Tab>
           </TabList>
         </div>
         <div class="experiment-details-tab-content">
@@ -22,11 +22,11 @@
             <TabPanel value="model-runs">
               <WorkflowsTab
                 v-if="experiment"
-                @add-model-run-clicked="activeTab = 'add-model-run'"
+                @add-model-run-clicked="activeTab = 'models-selection'"
                 :experiment="experiment"
               />
             </TabPanel>
-            <TabPanel value="add-model-run">
+            <TabPanel value="models-selection">
               <AddWorkflowsTab
                 :experiment="experiment"
                 v-if="experiment"
@@ -34,7 +34,7 @@
               />
             </TabPanel>
             <TabPanel value="details">
-              <ExperimentInfo />
+              <ExperimentDetailsTab v-if="experiment" :experiment="experiment" />
             </TabPanel>
           </TabPanels>
         </div>
@@ -57,7 +57,7 @@ import TabPanel from 'primevue/tabpanel'
 import type { MenuItem } from 'primevue/menuitem'
 import WorkflowsTab from '@/components/experiment-details/WorkflowsTab.vue'
 import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue'
-import ExperimentInfo from '@/components/experiment-details/ExperimentInfo.vue'
+import ExperimentDetailsTab from '@/components/experiment-details/ExperimentDetailsTab.vue'
 import { useQuery } from '@tanstack/vue-query'
 import { experimentsService } from '@/sdk/experimentsService'
 import { storeToRefs } from 'pinia'
@@ -83,7 +83,7 @@ const workflows = computed(() => experiment.value?.workflows || [])
 
 const activeTab = ref()
 const defaultActiveTab = computed(() => {
-  return workflows.value.length ? 'model-runs' : 'add-model-run'
+  return workflows.value.length ? 'model-runs' : 'models-selection'
 })
 
 const items: ComputedRef<MenuItem[]> = computed(() => [

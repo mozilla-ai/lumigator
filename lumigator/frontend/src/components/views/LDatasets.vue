@@ -150,7 +150,6 @@ const datasetFileContent = ref()
 const datasetColumns = ref()
 const isDatasetViewerVisible = ref(false)
 
-console.log({ isDatasetsFetching, isDatasetsLoading })
 const queryClient = useQueryClient()
 
 const uploadDatasetMutation = useMutation({

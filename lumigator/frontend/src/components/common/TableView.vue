@@ -1,7 +1,7 @@
 <template>
   <DataTable
     :class="showGridlines ? '' : 'gridlines'"
-    :value="data"
+    :value="reactiveData"
     ref="dataTable"
     :reorderableColumns="true"
     :removableSort="true"
@@ -18,6 +18,7 @@
     v-model:expandedRows="expandedRows"
     @rowExpand="onRowExpand"
     @rowCollapse="onRowCollapse"
+    @row-click="$emit('row-click')"
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
@@ -125,7 +126,7 @@ import {
   type DataTableCellEditCompleteEvent,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
-import { defineComponent, ref, type PropType } from 'vue'
+import { defineComponent, ref, toRef, type PropType } from 'vue'
 import { WorkflowStatus } from '@/types/Workflow'
 
 export default defineComponent({
@@ -180,7 +181,9 @@ export default defineComponent({
     },
   },
   exposes: ['exportCSV'],
+  emits: ['row-click'],
   setup(props) {
+    const reactiveData = toRef(props, 'data')
     const isVisible = ref(true)
     const dataTable = ref()
     const selectedColumns = ref(props.columns)
@@ -247,6 +250,7 @@ export default defineComponent({
       expandAll,
       collapseAll,
       exportCSV,
+      reactiveData,
       ...props,
     }
   },

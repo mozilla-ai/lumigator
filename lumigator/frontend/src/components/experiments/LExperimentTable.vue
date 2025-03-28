@@ -8,6 +8,7 @@
         selectionMode="single"
         data-key="id"
         :value="tableData"
+        :loading="isLoading"
         :tableStyle="style"
         columnResizeMode="expand"
         sortField="created"
@@ -116,6 +117,10 @@ const props = defineProps({
   tableData: {
     type: Array as PropType<Experiment[]>,
     required: true,
+  },
+  isLoading: {
+    type: Boolean,
+    default: false,
   },
 })
 

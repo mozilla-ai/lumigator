@@ -78,7 +78,7 @@ const items: ComputedRef<MenuItem[]> = computed(() => [
 ])
 
 const handleBackButtonClicked = () => {
-  history.back()
+  router.back()
 }
 </script>
 

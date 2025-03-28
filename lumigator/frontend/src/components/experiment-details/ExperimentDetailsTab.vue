@@ -20,9 +20,18 @@
       </div>
     </div>
     <div class="body-wrapper">
-      <div class="field">
+      <div class="field" @click="copyToClipboard(experiment.id)">
         <h6 class="field-title">Experiment id</h6>
-        <p class="field-value">{{ experiment.id }}</p>
+        <div
+          style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; cursor: pointer"
+        >
+          <p class="field-value">{{ experiment.id }}</p>
+          <i
+            v-tooltip="'Copy ID'"
+            :class="isCopied ? 'pi pi-check' : 'pi pi-clone'"
+            style="font-size: 14px; padding-left: 3px"
+          ></i>
+        </div>
       </div>
       <div class="field">
         <h6 class="field-title">title</h6>
@@ -58,6 +67,7 @@ import { experimentsService } from '@/sdk/experimentsService'
 import type { Experiment } from '@/types/Experiment'
 import { useMutation } from '@tanstack/vue-query'
 import { Button, useConfirm, useToast } from 'primevue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{
@@ -67,6 +77,16 @@ const props = defineProps<{
 const toast = useToast()
 const router = useRouter()
 const confirm = useConfirm()
+
+const isCopied = ref(false)
+
+const copyToClipboard = async (longString: string) => {
+  isCopied.value = true
+  setTimeout(() => {
+    isCopied.value = false
+  }, 3000)
+  await navigator.clipboard.writeText(longString)
+}
 
 const deleteExperimentMutation = useMutation({
   mutationFn: experimentsService.deleteExperiment,

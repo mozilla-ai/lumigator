@@ -7,7 +7,7 @@
       </Breadcrumb>
     </div>
 
-    <Tabs value="model-runs">
+    <Tabs :value="activeTab" @update:value="activeTab = String($event)">
       <div class="experiment-container">
         <div class="experiment-details-header">
           <h3 class="experiment-title"><i class="pi pi-experiments"></i>{{ experiment?.name }}</h3>
@@ -20,13 +20,22 @@
         <div class="experiment-details-tab-content">
           <TabPanels>
             <TabPanel value="model-runs">
-              <p>Model Runs</p>
+              <WorkflowsTab
+                v-if="experiment"
+                @add-model-run-clicked="activeTab = 'add-model-run'"
+                :experiment="experiment"
+                :workflows="experiment.workflows"
+              />
             </TabPanel>
             <TabPanel value="add-model-run">
-              <p>Trigger Model Run</p>
+              <AddWorkflowsTab
+                :experiment="experiment"
+                v-if="experiment"
+                @workflowCreated="handleWorkflowCreated"
+              />
             </TabPanel>
             <TabPanel value="details">
-              <p>Details</p>
+              <ExperimentInfo />
             </TabPanel>
           </TabPanels>
         </div>
@@ -40,7 +49,7 @@ import { useExperimentStore } from '@/stores/experimentsStore'
 import { storeToRefs } from 'pinia'
 import Breadcrumb from 'primevue/breadcrumb'
 
-import { computed, type ComputedRef } from 'vue'
+import { computed, ref, type ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -48,6 +57,9 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import type { MenuItem } from 'primevue/menuitem'
+import WorkflowsTab from '@/components/experiment-details/WorkflowsTab.vue'
+import AddWorkflowsTab from '@/components/experiment-details/AddWorkflowsTab.vue'
+import ExperimentInfo from '@/components/experiment-details/ExperimentInfo.vue'
 
 const { id } = defineProps<{
   id: string
@@ -56,7 +68,7 @@ const router = useRouter()
 const experimentsStore = useExperimentStore()
 const { experiments } = storeToRefs(experimentsStore)
 const experiment = computed(() => experiments.value.find((exp) => exp.id === id))
-
+const activeTab = ref('model-runs')
 const items: ComputedRef<MenuItem[]> = computed(() => [
   {
     label: 'Experiments',
@@ -79,6 +91,13 @@ const items: ComputedRef<MenuItem[]> = computed(() => [
 
 const handleBackButtonClicked = () => {
   router.back()
+}
+
+const handleWorkflowCreated = async () => {
+  // invalidate query
+  // await experimentStore.fetchAllExperiments()
+  activeTab.value = 'model-runs'
+  await experimentsStore.fetchAllExperiments()
 }
 </script>
 
@@ -122,7 +141,7 @@ const handleBackButtonClicked = () => {
 .experiment-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .experiment-details-header {

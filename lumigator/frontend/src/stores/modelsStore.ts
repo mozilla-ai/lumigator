@@ -1,13 +1,18 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { modelsService } from '@/sdk/modelsService'
 import type { Model } from '@/types/Model'
+import { useQuery } from '@tanstack/vue-query'
 
 export const useModelStore = defineStore('models', () => {
-  const models = ref([])
+  const { data: models, refetch } = useQuery({
+    queryKey: ['models'],
+    queryFn: () => modelsService.fetchModels(),
+    placeholderData: [],
+    initialData: [],
+  })
 
   async function fetchModels() {
-    models.value = await modelsService.fetchModels()
+    refetch()
   }
 
   function filterModelsByUseCase(useCase: 'summarization' | 'translation') {

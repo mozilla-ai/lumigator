@@ -17,11 +17,11 @@
         <Checkbox
           v-model="selectedModels"
           :value="model"
-          :inputId="model.id"
+          :inputId="model.model"
           name="model"
           @click.stop
         />
-        <label :for="model.id">{{ model.display_name }}</label>
+        <label :for="model.model">{{ model.display_name }}</label>
 
         <!-- Keep @click.stop on external link so it doesn't toggle selection -->
         <Button
@@ -51,11 +51,11 @@
         <Checkbox
           v-model="selectedModels"
           :value="model"
-          :inputId="model.id"
+          :inputId="model.model"
           name="model"
           @click.stop
         />
-        <label :for="model.id">{{ model.display_name }}</label>
+        <label :for="model.model">{{ model.display_name }}</label>
 
         <!-- Keep @click.stop on external link so it doesn't toggle selection -->
         <Button

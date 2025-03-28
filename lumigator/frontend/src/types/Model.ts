@@ -1,5 +1,4 @@
 export type Model = {
-  id: string
   description: string
   info?: ModelInfo
   display_name: string

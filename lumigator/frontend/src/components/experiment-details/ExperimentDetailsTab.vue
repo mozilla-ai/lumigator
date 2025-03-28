@@ -23,7 +23,13 @@
       <div class="field" @click="copyToClipboard(experiment.id)">
         <h6 class="field-title">Experiment id</h6>
         <div
-          style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; cursor: pointer"
+          style="
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+          "
         >
           <p class="field-value">{{ experiment.id }}</p>
           <i

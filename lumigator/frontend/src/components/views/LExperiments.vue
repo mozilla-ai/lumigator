@@ -23,28 +23,6 @@
         @view-workflow-results-clicked="onShowWorkflowResults($event)"
       />
     </div>
-    <Teleport to=".sliding-panel">
-      <transition name="transition-fade">
-        <l-experiment-form
-          v-if="isCreateExperimentFormVisible"
-          @l-close-form="handleCreateExperimentFormClosed"
-        />
-      </transition>
-      <transition name="transition-fade">
-        <LExperimentDetails
-          v-if="selectedExperiment"
-          :selectedExperiment="selectedExperiment"
-          :selectedWorkflow="selectedWorkflow"
-          :title="selectedWorkflow ? 'Model Run Details' : 'Experiment Details'"
-          @l-experiment-results="onShowExperimentResults($event)"
-          @l-job-results="onShowWorkflowResults($event)"
-          @l-download-results="onDownloadResults($event)"
-          @l-show-logs="onShowLogs"
-          @l-close-details="handleExperimentDetailsClosed"
-          @delete-button-clicked="handleDeleteButtonClicked"
-        />
-      </transition>
-    </Teleport>
     <l-experiments-drawer
       v-if="showDrawer"
       ref="experimentsDrawer"
@@ -71,16 +49,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, watch, ref, computed, type Ref } from 'vue'
+import { onMounted, watch, ref, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExperimentStore } from '@/stores/experimentsStore'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useModelStore } from '@/stores/modelsStore'
-import { useSlidePanel } from '@/composables/useSlidePanel'
 import LPageHeader from '@/components/layout/LPageHeader.vue'
 import LExperimentTable from '@/components/experiments/LExperimentTable.vue'
-import LExperimentForm from '@/components/experiments/LExperimentForm.vue'
-import LExperimentDetails from '@/components/experiments/LExperimentDetails.vue'
 import LExperimentsDrawer from '@/components/experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '@/components/experiments/LExperimentResults.vue'
 import LExperimentLogs from '@/components/experiments/LExperimentLogs.vue'
@@ -89,7 +64,6 @@ import type { Experiment } from '@/types/Experiment'
 import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import { workflowsService } from '@/sdk/workflowsService'
 import { experimentsService } from '@/sdk/experimentsService'
-import { downloadContent } from '@/helpers/downloadContent'
 import {
   getExperimentResults,
   transformWorkflowResults,
@@ -97,11 +71,9 @@ import {
   type TableDataForWorkflowResults,
 } from '@/helpers/getExperimentResults'
 import { useConfirm, useToast, type ToastMessageOptions } from 'primevue'
-import { FeatureFlags, isFeatureEnabled } from '@/helpers/FeatureFlags'
 import { useRouter } from 'vue-router'
 import CreateExperimentForm from '../experiments/CreateExperimentForm.vue'
 
-const { showSlidingPanel } = useSlidePanel()
 const experimentStore = useExperimentStore()
 const datasetStore = useDatasetStore()
 const modelStore = useModelStore()
@@ -129,17 +101,9 @@ evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isNewExperimentFormVisible = ref(false)
 
-const isCreateExperimentFormVisible = computed(
-  () => showSlidingPanel.value && !selectedExperiment.value,
-)
-
 const closeExperimentForm = () => {
   isNewExperimentFormVisible.value = false
 }
-
-const isExperimentManagementFeatureEnabled = computed(() =>
-  isFeatureEnabled(FeatureFlags.ExperimentManagement),
-)
 
 const getDrawerHeader = () => {
   const isWorkflowResults = selectedWorkflowResults.value && showJobResults.value
@@ -152,27 +116,18 @@ const getDrawerHeader = () => {
 
 const handleCreateExperimentClicked = () => {
   selectedExperiment.value = undefined
-  if (isExperimentManagementFeatureEnabled.value) {
-    isNewExperimentFormVisible.value = true
-  } else {
-    showSlidingPanel.value = true
-  }
+  isNewExperimentFormVisible.value = true
 }
 
 const handleExperimentClicked = (experiment: Experiment) => {
   selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
   selectedWorkflow.value = undefined
-  if (isExperimentManagementFeatureEnabled.value) {
-    router.push(`/experiments/${experiment.id}`)
-  } else {
-    showSlidingPanel.value = true
-  }
+  router.push(`/experiments/${experiment.id}`)
 }
 
 const handleWorkflowClicked = async (workflow: Workflow) => {
   selectedWorkflow.value = await workflowsService.fetchWorkflowDetails(workflow.id)
   selectedExperiment.value = undefined
-  showSlidingPanel.value = true
 }
 
 const onShowExperimentResults = async (experiment: Experiment) => {
@@ -190,25 +145,6 @@ const onShowWorkflowResults = async (workflow: Workflow) => {
   }
   showDrawer.value = true
   showJobResults.value = true
-}
-
-const onDownloadResults = async (workflow: Workflow) => {
-  const blob = await workflowsService.downloadResults(workflow.id)
-  downloadContent(blob, `${workflow.name}_results.json`)
-}
-
-const onShowLogs = () => {
-  showLogs.value = true
-  showDrawer.value = true
-}
-
-const handleCreateExperimentFormClosed = () => {
-  datasetStore.setSelectedDataset(undefined)
-  showSlidingPanel.value = false
-}
-
-const handleExperimentDetailsClosed = () => {
-  showSlidingPanel.value = false
 }
 
 const toast = useToast()
@@ -269,7 +205,6 @@ async function handleDeleteButtonClicked(selectedItem: Workflow | Experiment) {
           life: 3000,
         } as ToastMessageOptions & { messageicon: string })
       }
-      showSlidingPanel.value = false
       selectedExperiment.value = undefined
       selectedWorkflow.value = undefined
 
@@ -361,13 +296,6 @@ onMounted(async () => {
 
   if (selectedDataset.value) {
     handleCreateExperimentClicked()
-  }
-})
-
-watch(showSlidingPanel, (newValue) => {
-  if (!newValue) {
-    selectedExperiment.value = undefined
-    selectedWorkflow.value = undefined
   }
 })
 </script>

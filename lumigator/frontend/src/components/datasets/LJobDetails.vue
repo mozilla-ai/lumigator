@@ -41,7 +41,7 @@
             size="small"
             label="Logs"
             aria-label="Logs"
-            :disabled="currentItemStatus === WorkflowStatus.PENDING"
+            :disabled="currentItemStatus === JobStatus.PENDING"
             style="padding: 0; background: transparent; border: none; font-weight: 400; gap: 4px"
             class="l-experiment-details__content-item-logs"
             iconClass="logs-btn"
@@ -109,7 +109,7 @@
         size="small"
         icon="pi pi-external-link"
         label="View Results"
-        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
+        :disabled="currentItemStatus !== JobStatus.SUCCEEDED"
         @click="showResults"
       ></Button>
       <Button
@@ -119,7 +119,7 @@
         size="small"
         icon="pi pi-download"
         label="Download Results"
-        :disabled="currentItemStatus !== WorkflowStatus.SUCCEEDED"
+        :disabled="currentItemStatus !== JobStatus.SUCCEEDED"
         @click="emit('l-download-results', selectedJob)"
       ></Button>
     </div>
@@ -133,7 +133,7 @@ import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus } from '@/types/Workflow'
+import { JobStatus } from '@/types/Job'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import type { Job } from '@/types/Job'
 
@@ -177,12 +177,11 @@ const isInference = computed(() => {
 const tagSeverity = computed(() => {
   const status = currentItemStatus.value
   switch (status) {
-    case WorkflowStatus.SUCCEEDED:
+    case JobStatus.SUCCEEDED:
       return 'success'
-    case WorkflowStatus.FAILED:
+    case JobStatus.FAILED:
+    case JobStatus.UNRECOVERABLE:
       return 'danger'
-    case WorkflowStatus.INCOMPLETE:
-      return 'info'
     default:
       return 'warn'
   }

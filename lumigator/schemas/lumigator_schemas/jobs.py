@@ -37,6 +37,8 @@ class JobStatus(LowercaseEnum):
     FAILED = "failed"
     SUCCEEDED = "succeeded"
     STOPPED = "stopped"
+    # Unrecoverable reflects a state where the job no longer appears in Ray and further updates are not possible
+    UNRECOVERABLE = "unrecoverable"
 
 
 class JobConfig(BaseModel):

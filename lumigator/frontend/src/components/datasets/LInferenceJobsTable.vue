@@ -26,14 +26,14 @@
       <template #body="slotProps">
         <div>
           <Tag
-            v-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.SUCCEEDED"
+            v-if="retrieveStatus(slotProps.data.id) === JobStatus.SUCCEEDED"
             severity="success"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
             :pt="{ root: 'l-job-table__tag' }"
           />
           <Tag
-            v-else-if="retrieveStatus(slotProps.data.id) === WorkflowStatus.FAILED"
+            v-else-if="retrieveStatus(slotProps.data.id) === JobStatus.FAILED"
             severity="danger"
             rounded
             :value="retrieveStatus(slotProps.data.id)"
@@ -70,7 +70,7 @@ import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus } from '@/types/Workflow'
+import { JobStatus } from '@/types/Job'
 
 const datasetStore = useDatasetStore()
 const { inferenceJobs, hasRunningInferenceJob } = storeToRefs(datasetStore)

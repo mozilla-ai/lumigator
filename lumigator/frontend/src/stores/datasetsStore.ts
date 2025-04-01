@@ -4,15 +4,14 @@ import { datasetsService } from '@/sdk/datasetsService'
 
 import type { Dataset } from '@/types/Dataset'
 import { jobsService } from '@/sdk/jobsService'
-import type { Job } from '@/types/Job'
-import { WorkflowStatus } from '@/types/Workflow'
+import { type Job, JobStatus } from '@/types/Job'
 import { calculateDuration } from '@/helpers/calculateDuration'
 
 export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
 
-  const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
+  const completedStatus = [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.UNRECOVERABLE]
 
   const jobs: Ref<Job[]> = ref([])
   const inferenceJobs: Ref<Job[]> = ref([])
@@ -48,7 +47,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   }
 
   const hasRunningInferenceJob = computed(() => {
-    return inferenceJobs.value.some((job) => job.status === WorkflowStatus.RUNNING)
+    return inferenceJobs.value.some((job) => job.status === JobStatus.RUNNING)
   })
 
   /**

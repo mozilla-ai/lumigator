@@ -92,7 +92,12 @@ class JobService:
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
+    TERMINAL_STATUS = [
+        JobStatus.FAILED.value,
+        JobStatus.SUCCEEDED.value,
+        JobStatus.STOPPED.value,
+        JobStatus.UNRECOVERABLE.value,
+    ]
     """list: A list of terminal job statuses."""
 
     SAFE_JOB_NAME_REGEX = re.compile(r"[^\w\-_.]")
@@ -544,7 +549,13 @@ class JobService:
             return JobResponse.model_validate(record)
 
         # Attempt to get the latest job status from the upstream service.
-        job_status = self.get_upstream_job_status(job_id)
+        try:
+            job_status = self.get_upstream_job_status(job_id)
+        except JobNotFoundError as e:
+            job_status = JobStatus.UNRECOVERABLE.value.lower()
+            loguru.logger.error(
+                f"Job ID: {job_id} cannot be found in Ray, Using status: {job_status.value}", f"error: {e}"
+            )
 
         # Update job status in the DB if it differs from the current status
         if job_status != record.status.value.lower():

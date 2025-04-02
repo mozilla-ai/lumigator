@@ -1,10 +1,14 @@
-from unittest.mock import MagicMock
+import uuid
+from http import HTTPStatus
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from lumigator_schemas.jobs import JobResults
 from lumigator_schemas.workflows import WorkflowStatus
 from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunStatus, RunTag
+from mlflow.exceptions import MlflowException
 
+from backend.services.exceptions.tracking_exceptions import RunNotFoundError
 from backend.tracking.mlflow import MLflowTrackingClient
 
 
@@ -63,6 +67,34 @@ async def test_is_status_terminal_unmapped_status(fake_s3fs, monkeypatch):
     client = MLflowTrackingClient(tracking_uri="http://fake-tracking-uri", s3_file_system=fake_s3fs)
     with pytest.raises(ValueError, match="Status 'KILLED' not found in mapping."):
         await client.is_status_terminal(RunStatus.to_string(RunStatus.KILLED))
+
+
+async def test_get_job_success(fake_mlflow_tracking_client, sample_mlflow_run):
+    """Test fetching job results successfully."""
+    job_id = uuid.UUID("d34dbeef-1000-0000-0000-000000000000")
+
+    fake_mlflow_tracking_client._client.get_run = MagicMock(return_value=sample_mlflow_run)
+
+    result = await fake_mlflow_tracking_client.get_job(str(job_id))
+
+    assert isinstance(result, JobResults)
+    assert result.id == job_id
+    assert result.metrics == [{"name": "accuracy", "value": 0.75}]
+    assert result.parameters == [{"name": "batch_size", "value": "32"}]
+
+    fake_mlflow_tracking_client._client.get_run.assert_called_once_with(str(job_id))
+
+
+async def test_get_job_deleted(fake_mlflow_tracking_client, fake_mlflow_run_deleted):
+    """Test fetching a deleted job returns None."""
+    job_id = uuid.UUID("d34dbeef-1000-0000-0000-000000000000")
+
+    fake_mlflow_tracking_client._client.get_run = MagicMock(return_value=fake_mlflow_run_deleted)
+
+    with pytest.raises(RunNotFoundError):
+        await fake_mlflow_tracking_client.get_job(str(job_id))
+
+    fake_mlflow_tracking_client._client.get_run.assert_called_once_with(str(job_id))
 
 
 def test_compile_metrics(fake_mlflow_tracking_client):

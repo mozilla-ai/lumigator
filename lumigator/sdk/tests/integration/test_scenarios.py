@@ -219,7 +219,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    annotate_job_config = JobAnnotateConfig(task="summarization")
+    annotate_job_config = JobAnnotateConfig(task_definition={"task": "summarization"})
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",
@@ -339,9 +339,13 @@ def test_create_exp_workflow_check_results(
     assert logs_response is not None
     assert logs_response.logs is not None
     assert "Inference results stored at" in logs_response.logs
-    assert "Storing evaluation results into" in logs_response.logs
+    assert "Storing evaluation results to" in logs_response.logs
+    assert "Storing evaluation results for S3 to" in logs_response.logs
     assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
-        "Storing evaluation results into"
+        "Storing evaluation results to"
+    )
+    assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
+        "Storing evaluation results for S3 to"
     )
 
     # Delete the experiment

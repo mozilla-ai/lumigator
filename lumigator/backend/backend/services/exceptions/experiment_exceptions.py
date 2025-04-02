@@ -9,6 +9,6 @@ class ExperimentNotFoundError(NotFoundError):
 
         :param resource_id: str of experiment resource
         :param message: optional error message
-        :param exc: optional exception
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__("Experiment", resource_id, message, exc)

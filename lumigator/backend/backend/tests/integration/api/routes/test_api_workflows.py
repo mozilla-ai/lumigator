@@ -28,6 +28,8 @@ from pydantic import PositiveInt, ValidationError
 
 from backend.main import app
 from backend.tests.conftest import (
+    MAX_POLLS,
+    POLL_WAIT_TIME,
     TEST_CAUSAL_MODEL,
     TEST_SEQ2SEQ_MODEL,
     wait_for_job,
@@ -307,8 +309,10 @@ def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
     logs = JobLogsResponse.model_validate(logs_job_response.json())
     assert logs.logs is not None
     assert "Inference results stored at" in logs.logs
-    assert "Storing evaluation results into" in logs.logs
-    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results into")
+    assert "Storing evaluation results to" in logs.logs
+    assert "Storing evaluation results for S3 to" in logs.logs
+    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results to")
+    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results for S3 to")
 
 
 def delete_experiment_and_validate(local_client: TestClient, experiment_id):
@@ -323,13 +327,14 @@ def list_experiments(local_client: TestClient):
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
-def check_artifacts_times(artifacts_url):
-    artifacts = requests.get(
-        artifacts_url,
-        timeout=5,  # 5 seconds
-    ).json()
-    assert "evaluation_time" in artifacts["artifacts"]
-    assert "inference_time" in artifacts["artifacts"]
+def check_artifacts_times(artifacts_url: str):
+    response = requests.get(artifacts_url, timeout=5)  # 5 second timeout
+    response.raise_for_status()
+    data = response.json()
+    assert "artifacts" in data
+    artifacts = data["artifacts"]
+    assert "evaluation_time" in artifacts
+    assert "inference_time" in artifacts
 
 
 @pytest.mark.integration
@@ -373,10 +378,14 @@ def test_full_experiment_launch(
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
     workflow_1 = run_workflow(local_client, experiment_id, "Workflow_1", model)
     workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
+    assert workflow_1_details
+    assert workflow_1_details.artifacts_download_url
     check_artifacts_times(workflow_1_details.artifacts_download_url)
     validate_experiment_results(local_client, experiment_id, workflow_1_details)
     workflow_2 = run_workflow(local_client, experiment_id, "Workflow_2", model)
     workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
+    assert workflow_2_details
+    assert workflow_2_details.artifacts_download_url
     check_artifacts_times(workflow_2_details.artifacts_download_url)
     list_experiments(local_client)
     validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
@@ -433,49 +442,73 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
-def wait_for_workflow_complete(
-    local_client: TestClient,
-    workflow_id: UUID,
-    timeout_seconds: int = 300,
-    initial_poll_interval_seconds: float = 1.0,
-    max_poll_interval_seconds: float = 10.0,
-    backoff_factor: float = 1.5,
-):
-    start_time = time.time()
-    workflow_status = WorkflowStatus.CREATED
-    status_retrieved = False
-    poll_interval = initial_poll_interval_seconds
+def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> WorkflowDetailsResponse | None:
+    """Wait for the workflow to complete, including post-completion processing for successful
+    workflows to create compiled results.
 
-    logger.info(f"Waiting for workflow {workflow_id} to complete (timeout {timeout_seconds} seconds)...")
+    Makes a total of ``MAX_POLLS`` (as configured in the ``conftest.py``).
+    Sleeps for ``POLL_WAIT_TIME`` seconds between each poll (as configured in the ``conftest.py``).
 
-    while time.time() - start_time < timeout_seconds:
+    :param local_client: The test client.
+    :param workflow_id: The workflow ID of the workflow to wait for.
+    :return: The workflow details, or ``None`` if the workflow did not reach the required completed state
+                within the maximum number of polls.
+    """
+    attempt = 0
+    max_attempts = MAX_POLLS
+    wait_duration = POLL_WAIT_TIME
+
+    while attempt < max_attempts:
+        # Allow the waiting interval if we're coming around again.
+        if attempt > 0:
+            time.sleep(wait_duration)
+
+        attempt += 1
         try:
             response = local_client.get(f"/workflows/{workflow_id}")
             response.raise_for_status()
-
-            workflow_details = WorkflowDetailsResponse.model_validate(response.json())
-            workflow_status = workflow_details.status
-            status_retrieved = True
-
-            if workflow_status in {WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED}:
-                logger.info(f"Workflow {workflow_id} completed with status: {workflow_status}")
-                return workflow_details
-
-            logger.info(f"Workflow {workflow_id}, current status: {workflow_status}")
-
+            # Validation failure will raise an exception (``ValidationError``) which is fine
+            # as if we're getting a response we expect it to be valid.
+            workflow = WorkflowDetailsResponse.model_validate(response.json())
         except (RequestError, HTTPStatusError) as e:
-            logger.error(f"Workflow {workflow_id}, request failed (HTTP): {e}")
-        except ValidationError as e:
-            logger.error(f"Workflow {workflow_id}, response parse error: {e}")
+            # Log the error but allow us to retry the request until we've maxed out our attempts.
+            logger.warning(f"Workflow: {workflow_id}, request: ({attempt}/{max_attempts}) failed: {e}")
+            continue
 
-        time.sleep(poll_interval)
-        poll_interval = min(poll_interval * backoff_factor, max_poll_interval_seconds)
+        # Check if the workflow is not in a terminal state.
+        if workflow.status not in {WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED}:
+            logger.info(
+                f"Workflow: {workflow_id}, "
+                f"request: ({attempt}/{max_attempts}), "
+                f"status: {workflow.status}, "
+                f"not in terminal state"
+            )
+            continue
 
-    raise TimeoutError(
-        f"Workflow {workflow_id} did not complete within {timeout_seconds} seconds.(last status: {workflow_status})"
-        if status_retrieved
-        else "(status never retrieved)"
-    )
+        # If the workflow failed, we can stop checking.
+        if workflow.status == WorkflowStatus.FAILED:
+            return workflow
+
+        # The workflow was successful, but we need the artifacts download url to be populated.
+        if not workflow.artifacts_download_url:
+            logger.info(
+                f"Workflow: {workflow_id}, "
+                f"request: ({attempt}/{max_attempts}), "
+                f"status: {workflow.status}, "
+                f"artifacts not ready"
+            )
+            continue
+
+        logger.info(
+            f"Workflow: {workflow_id},"
+            f"request: ({attempt}/{max_attempts}), "
+            f"status: {workflow.status}, "
+            f"succeeded and processed"
+        )
+        return workflow
+
+    # Couldn't get the workflow details within the maximum number of polls.
+    return None
 
 
 def _test_launch_job_with_secret(

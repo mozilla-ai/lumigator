@@ -541,3 +541,9 @@ def model_specs_data() -> list[ModelsResponse]:
     models = [ModelsResponse.model_validate(item) for item in model_specs]
 
     return models
+
+
+@pytest.fixture(scope="function")
+def fake_mlflow_tracking_client(fake_s3fs):
+    """Fixture for MLflowTrackingClient using the real MLflowClient."""
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)

@@ -107,16 +107,24 @@ class MLflowTrackingClient(TrackingClient):
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 
-    def _compile_metrics(self, job_ids: list) -> dict:
-        """Take the individual metrics from each run and compile them into a single dict
-        for now, assert that each run has no overlapping metrics
+    def _compile_metrics(self, job_ids: list) -> dict[str, float]:
+        """Aggregate metrics from job runs, ensuring no duplicate keys.
+
+        :param job_ids: A list of job IDs to aggregate metrics from.
+        :return: A dictionary mapping metric names to their values.
+        :raises ValueError: If a duplicate metric is found across jobs.
         """
         metrics = {}
+
         for job_id in job_ids:
             run = self._client.get_run(job_id)
-            for metric in run.data.metrics:
-                assert metric not in metrics
-                metrics[metric] = run.data.metrics[metric]
+            for metric, value in run.data.metrics.items():
+                if metric in metrics:
+                    raise ValueError(
+                        f"Duplicate metric '{metric}' found in job '{job_id}'. "
+                        f"Stored value: {metrics[metric]}, this value: {value}"
+                    )
+                metrics[metric] = value
 
         return metrics
 

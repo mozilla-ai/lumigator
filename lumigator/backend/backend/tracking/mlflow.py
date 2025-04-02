@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import http
 import json
@@ -383,8 +384,7 @@ class MLflowTrackingClient(TrackingClient):
         )
         all_job_ids = [run.info.run_id for run in all_jobs]
         # delete all the jobs
-        for job_id in all_job_ids:
-            self.delete_job(job_id)
+        await asyncio.gather(*(self.delete_job(job_id) for job_id in all_job_ids))
         # delete the workflow
         self._client.delete_run(workflow_id)
         # TODO: delete the compiled results from S3, and any saved artifacts

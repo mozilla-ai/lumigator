@@ -286,7 +286,7 @@ class MLflowTrackingClient(TrackingClient):
         except (RunNotFoundError, ValueError) as e:
             raise TrackingClientUpstreamError(
                 "mlflow",
-                f"Workflow: {workflow_id}Error building response",
+                f"Workflow: {workflow_id}, Error building response",
             ) from e
 
         # Currently, only compile the result json artifact if the workflow has succeeded

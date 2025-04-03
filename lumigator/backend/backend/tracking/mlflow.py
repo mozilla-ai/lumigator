@@ -107,13 +107,13 @@ class MLflowTrackingClient(TrackingClient):
 
     async def delete_experiment(self, experiment_id: str) -> None:
         """Delete an experiment. Although Mflow has a delete_experiment method,
-        We will use the functions of this class instead, so that we make sure we correctly
+        we will use the functions of this class instead, so that we make sure we correctly
         clean up all the artifacts/runs/etc. associated with the experiment.
         """
         workflow_ids = self._find_workflows(experiment_id)
         # delete all the workflows
-        for workflow_id in workflow_ids:
-            await self.delete_workflow(workflow_id)
+        await asyncio.gather(*(self.delete_workflow(workflow_id) for workflow_id in workflow_ids))
+
         # delete the experiment
         self._client.delete_experiment(experiment_id)
 

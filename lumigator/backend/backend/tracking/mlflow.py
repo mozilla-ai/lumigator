@@ -21,7 +21,7 @@ from mlflow.exceptions import MlflowException, RestException
 from mlflow.protos.databricks_pb2 import ErrorCode
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
-from pydantic import TypeAdapter
+from pydantic import BaseModel, TypeAdapter
 from s3fs import S3FileSystem
 
 from backend.services.exceptions.experiment_exceptions import ExperimentConflictError
@@ -298,7 +298,7 @@ class MLflowTrackingClient(TrackingClient):
         if not self._s3_file_system.exists(workflow_s3_uri):
             results = self._generate_compiled_results(workflow_details.jobs)
             # Upload the compiled results to S3.
-            self._upload_to_s3(workflow_s3_uri, results.model_dump())
+            self._upload_to_s3(workflow_s3_uri, results)
 
         # Update the download URL in the response as compiled results are available.
         workflow_details.artifacts_download_url = await self._generate_presigned_url(workflow_id)
@@ -481,10 +481,10 @@ class MLflowTrackingClient(TrackingClient):
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
 
-    def _upload_to_s3(self, s3_path: str, data):
+    def _upload_to_s3(self, s3_path: str, data: BaseModel):
         """Upload compiled results to S3."""
         with self._s3_file_system.open(s3_path, "w") as f:
-            f.write(json.dumps(data))
+            f.write(json.dumps(data.model_dump()))
 
     async def _build_workflow_response(self, workflow: MlflowRun, job_ids: list) -> WorkflowDetailsResponse:
         """Construct a WorkflowDetailsResponse object ignoring the `artifacts_download_url`.

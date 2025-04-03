@@ -37,9 +37,11 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
+from backend.services.exceptions.tracking_exceptions import TrackingClientUpstreamError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
+    WorkflowUpstreamError,
     WorkflowValidationError,
 )
 from backend.services.jobs import JobService
@@ -370,10 +372,21 @@ class WorkflowService:
             raise WorkflowDownloadNotAvailableError(workflow_id) from None
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
-        """Get a workflow."""
-        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
+        """Get a workflow.
+
+        :param workflow_id: The ID of the workflow to retrieve.
+        :return: The workflow details.
+        :raises WorkflowNotFoundError: If the workflow is not found.
+        :raises WorkflowUpstreamError: If there is an error retrieving the workflow from the tracking client.
+        """
+        try:
+            tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
+        except TrackingClientUpstreamError as e:
+            raise WorkflowUpstreamError("mlflow", f"Workflow: {workflow_id}, Error getting workflow.") from e
+
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
+
         return tracking_server_workflow
 
     async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:

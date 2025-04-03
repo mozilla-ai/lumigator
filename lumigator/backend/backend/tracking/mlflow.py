@@ -23,6 +23,7 @@ from pydantic import TypeAdapter
 from s3fs import S3FileSystem
 
 from backend.services.exceptions.job_exceptions import JobNotFoundError, JobUpstreamError
+from backend.services.exceptions.tracking_exceptions import RunNotFoundError, TrackingClientUpstreamError
 from backend.settings import settings
 from backend.tracking.schemas import RunOutputs
 from backend.tracking.tracking_interface import TrackingClient
@@ -251,13 +252,22 @@ class MLflowTrackingClient(TrackingClient):
         )
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse | None:
-        """Get a workflow and all its jobs."""
+        """Retrieve a workflow and its associated jobs.
+
+        :param workflow_id: The ID of the workflow to retrieve.
+        :return: A WorkflowDetailsResponse object containing the workflow details.
+        :raises TrackingClientUpstreamError: If the workflow is not found, there is an error retrieving
+                    it or building a response.
+        """
         try:
             workflow = self._client.get_run(workflow_id)
         except MlflowException as e:
             if e.get_http_status_code() == http.HTTPStatus.NOT_FOUND:
                 return None
-            raise e
+            raise TrackingClientUpstreamError(
+                "mlflow",
+                f"Workflow: {workflow_id}, Error fetching workflow",
+            ) from e
 
         if workflow.info.lifecycle_stage == "deleted":
             return None
@@ -272,19 +282,26 @@ class MLflowTrackingClient(TrackingClient):
         # sort the jobs by created_at, with the oldest last
         all_jobs = sorted(all_jobs, key=lambda x: x.info.start_time)
 
-        workflow_details = WorkflowDetailsResponse(
-            id=workflow_id,
-            experiment_id=workflow.info.experiment_id,
-            description=workflow.data.tags.get("description"),
-            name=workflow.data.tags.get("mlflow.runName"),
-            model=workflow.data.tags.get("model"),
-            system_prompt=workflow.data.tags.get("system_prompt"),
-            status=WorkflowStatus(workflow.data.tags.get("status")),
-            created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
-            jobs=[await self.get_job(job_id) for job_id in all_job_ids],
-            metrics=self._compile_metrics(all_job_ids),
-            parameters=self._compile_parameters(all_job_ids),
-        )
+        try:
+            workflow_details = WorkflowDetailsResponse(
+                id=workflow_id,
+                experiment_id=workflow.info.experiment_id,
+                description=workflow.data.tags.get("description"),
+                name=workflow.data.tags.get("mlflow.runName"),
+                model=workflow.data.tags.get("model"),
+                system_prompt=workflow.data.tags.get("system_prompt"),
+                status=WorkflowStatus(workflow.data.tags.get("status")),
+                created_at=datetime.fromtimestamp(workflow.info.start_time / 1000),
+                jobs=await asyncio.gather(*(self.get_job(job_id) for job_id in all_job_ids)),
+                metrics=self._compile_metrics(all_job_ids),
+                parameters=self._compile_parameters(all_job_ids),
+            )
+        except (RunNotFoundError, ValueError) as e:
+            raise TrackingClientUpstreamError(
+                "mlflow",
+                f"Workflow: {workflow_id}, Error building response",
+            ) from e
+
         # Currently, only compile the result json artifact if the workflow has succeeded
         if workflow_details.status != WorkflowStatus.SUCCEEDED:
             return workflow_details
@@ -421,16 +438,23 @@ class MLflowTrackingClient(TrackingClient):
             self._client.log_param(job_id, parameter, value)
 
     async def get_job(self, job_id: str):
-        """Get the results of a job."""
+        """Get the results of a job (known as a Run in MLFlow).
+
+        This method is used to get the metrics and parameters of a job.
+
+        :param job_id: The ID of the job.
+        :return: The results of the job.
+        :raises RunNotFoundError: If the job is not found.
+        """
         run = self._client.get_run(job_id)
         if run.info.lifecycle_stage == "deleted":
-            return None
+            raise RunNotFoundError(job_id, "deleted")
         return JobResults(
             id=job_id,
-            metrics=[{"name": metric[0], "value": metric[1]} for metric in run.data.metrics.items()],
-            parameters=[{"name": param[0], "value": param[1]} for param in run.data.params.items()],
-            metric_url="TODO",
-            artifact_url="TODO",
+            metrics=[{"name": key, "value": value} for key, value in run.data.metrics.items()],
+            parameters=[{"name": key, "value": value} for key, value in run.data.params.items()],
+            metric_url="",  # TODO: Implement
+            artifact_url="",  # TODO: Implement
         )
 
     async def delete_job(self, job_id: str):

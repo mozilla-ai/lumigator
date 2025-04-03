@@ -1,6 +1,7 @@
 from backend.services.exceptions.base_exceptions import (
     NotAvailableError,
     NotFoundError,
+    UpstreamError,
     ValidationError,
 )
 
@@ -42,3 +43,15 @@ class WorkflowValidationError(ValidationError):
         :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
         """
         super().__init__(message, exc)
+
+
+class WorkflowUpstreamError(UpstreamError):
+    """Raised when there are issues with upstream services."""
+
+    def __init__(self, service_name: str, message: str | None = None, exc: Exception | None = None):
+        """Creates a WorkflowUpstreamError.
+        :param service_name: the name of the service which threw the error
+        :param message: an optional error message
+        :param exc: optional exception, where possible raise ``from exc`` to preserve the original traceback
+        """
+        super().__init__(service_name, message, exc)

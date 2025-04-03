@@ -267,7 +267,7 @@ class MLflowTrackingClient(TrackingClient):
         """Retrieve a workflow and its associated jobs.
 
         :param workflow_id: The ID of the workflow to retrieve.
-        :return: A WorkflowDetailsResponse object containing the workflow details.
+        :return: A WorkflowDetailsResponse object containing the workflow details, or None if not found (deleted).
         :raises TrackingClientUpstreamError: If the workflow is not found, there is an error retrieving
                     it or building a response.
         """

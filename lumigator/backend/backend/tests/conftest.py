@@ -1,6 +1,9 @@
 import csv
 import io
+import json
+import logging
 import os
+import sys
 import time
 import uuid
 from collections.abc import Generator
@@ -549,6 +552,13 @@ def model_specs_data() -> list[ModelsResponse]:
 def fake_mlflow_tracking_client(fake_s3fs):
     """Fixture for MLflowTrackingClient using the real MLflowClient."""
     return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)
+
+
+@pytest.fixture(scope="session")
+def json_mlflow_runs_search_single(resources_dir) -> dict:
+    path = resources_dir / "mlflow_runs_search_single.json"
+    with Path.open(path) as file:
+        return json.load(file)
 
 
 @pytest.fixture

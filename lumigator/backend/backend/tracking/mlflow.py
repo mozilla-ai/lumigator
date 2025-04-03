@@ -89,7 +89,7 @@ class MLflowTrackingClient(TrackingClient):
         try:
             experiment_id = self._create_experiment(experiment_name, tags)
         except ExperimentConflictError:
-            # FIXME Let the user decide in the case of failures.
+            # TODO Let the user decide in the case of failures.
             # Also, use a uuid as name and an arbitrary tag as descriptive name
             timestamp_suffix = datetime.now().strftime("%Y%m%d%H%M%S%f")
             loguru.logger.warning(

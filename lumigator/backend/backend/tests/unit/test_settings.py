@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -89,3 +90,19 @@ def test_augment_ray_worker_env_vars(input_env_vars, mock_env_vars, ray_worker_e
         assert result == expected_result
         # Ensure the input dictionary is not mutated
         assert input_env_vars == input_copy
+
+
+def test_backend_project_root():
+    """Test to ensure we know the project root."""
+    from backend.settings import settings
+
+    # This test should be running from: lumigator/backend/backend/tests/unit
+    expected_path = Path(__file__).resolve().parent.parent.parent.parent
+    assert settings.PROJECT_ROOT == expected_path
+
+
+def test_backend_version():
+    """Test to ensure we know the current backend version."""
+    from backend.settings import settings
+
+    assert settings.VERSION == "0.1.3-alpha"

@@ -82,7 +82,7 @@ class MLflowTrackingClient(TrackingClient):
             "task_definition": task_definition.model_dump_json(),
             "dataset": str(dataset),
             "max_samples": str(max_samples),
-            "lumigator_version": "0.2.1",
+            "lumigator_version": settings.VERSION,
         }
 
         # Try to create the experiment and handle any conflicts

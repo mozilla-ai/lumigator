@@ -222,10 +222,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Spinning up containers for the tests
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build
-
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 

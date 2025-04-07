@@ -1,5 +1,8 @@
 name: Lumigator pipeline
 
+env:
+  HF_HOME: ${{ runner.home }}/.cache/huggingface
+
 on:
   pull_request:
     branches:

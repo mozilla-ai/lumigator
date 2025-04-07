@@ -63,6 +63,9 @@ MAX_POLLS = 18
 # Time between job status polls.
 POLL_WAIT_TIME = 10
 
+# Maximum time we should allow test jobs to run
+MAX_JOB_TIMEOUT_SECS = 60 * 5
+
 
 @pytest.fixture(scope="session")
 def background_tasks() -> BackgroundTasks:

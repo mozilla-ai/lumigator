@@ -1,4 +1,6 @@
+import asyncio
 import time
+import uuid
 from http import HTTPStatus
 from uuid import UUID
 
@@ -28,6 +30,7 @@ from pydantic import PositiveInt, ValidationError
 
 from backend.main import app
 from backend.tests.conftest import (
+    MAX_JOB_TIMEOUT_SECS,
     MAX_POLLS,
     POLL_WAIT_TIME,
     TEST_CAUSAL_MODEL,
@@ -233,34 +236,47 @@ def check_dataset_count_after_upload(local_client: TestClient, initial_count):
     return get_ds_after
 
 
-def create_experiment(local_client: TestClient, dataset_id: UUID, task_definition: dict):
+def create_experiment(
+    local_client: TestClient,
+    dataset_id: UUID,
+    task_definition: dict,
+    name: str = "test_create_exp_workflow_check_results",
+    description: str = "Test for an experiment with associated workflows",
+) -> str:
     """Create an experiment."""
     experiment = local_client.post(
         "/experiments/",
         headers=POST_HEADER,
         json={
-            "name": "test_create_exp_workflow_check_results",
-            "description": "Test for an experiment with associated workflows",
+            "name": name,
+            "description": description,
             "task_definition": task_definition,
             "dataset": str(dataset_id),
             "max_samples": 1,
         },
     )
     assert experiment.status_code == 201
-    return experiment.json()["id"]
+    json_response = experiment.json()
+    assert "id" in json_response
+    experiment_id = json_response["id"]
+    assert isinstance(experiment_id, str)
+    assert len(experiment_id.strip()) > 0
+
+    return experiment_id
 
 
 def run_workflow(
     local_client: TestClient,
-    experiment_id,
-    workflow_name,
+    experiment_id: str,
+    workflow_name: str,
     model: str,
-    job_timeout_sec: PositiveInt | None = None,
-):
+    job_timeout_sec: PositiveInt | None = MAX_JOB_TIMEOUT_SECS,
+    description: str = "Test workflow for inf and eval",
+) -> WorkflowResponse:
     """Run a workflow for the experiment."""
     workflow_payload = {
         "name": workflow_name,
-        "description": "Test workflow for inf and eval",
+        "description": description,
         "model": model,
         "provider": "hf",
         "experiment_id": experiment_id,
@@ -279,47 +295,75 @@ def run_workflow(
     return workflow
 
 
-def validate_experiment_results(local_client: TestClient, experiment_id, workflow_details):
-    """Validate experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
-    assert workflow_details.experiment_id == experiment_results.id
-    assert len(experiment_results.workflows) == 1
-    assert workflow_details.model_dump(exclude={"artifacts_download_url"}) == experiment_results.workflows[
-        0
-    ].model_dump(exclude={"artifacts_download_url"})
-
-
-def validate_updated_experiment_results(
-    local_client: TestClient, experiment_id, workflow_1_details, workflow_2_details
+def validate_experiment_results(
+    local_client: TestClient, experiment_id: str, workflow_details_list: list[WorkflowDetailsResponse]
 ):
-    """Validate updated experiment results."""
-    experiment_results = GetExperimentResponse.model_validate(local_client.get(f"/experiments/{experiment_id}").json())
-    assert len(experiment_results.workflows) == 2
-    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
-    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
-        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
-    ]
+    """Validate that the experiment results match the expected workflows.
+
+    This function retrieves the experiment details via the API and verifies that:
+    1. The experiment ID in the results matches the expected ID.
+    2. The number of workflows in the experiment matches the number of expected workflows.
+    3. Each workflow in the experiment:
+       - Has the correct experiment ID.
+       - Is marked as "SUCCEEDED".
+       - Has a valid artifacts download URL.
+
+    @param local_client: The test client used to make requests to the API.
+    @param experiment_id: The ID of the experiment to validate.
+    @param workflow_details_list: A list of expected workflow details to compare against the experiment results.
+    """
+    response = local_client.get(f"/experiments/{experiment_id}")
+    response.raise_for_status()
+    response_json = response.json()
+    assert response_json
+    experiment_results = GetExperimentResponse.model_validate(response_json)
+
+    # Ensure all workflows have the correct experiment ID
+    assert all(workflow.experiment_id == experiment_results.id for workflow in workflow_details_list)
+
+    # Validate the number of workflows
+    assert len(experiment_results.workflows) == len(workflow_details_list)
+
+    # Validate that each workflow is successful and has a valid download URL
+    for expected_details in workflow_details_list:
+        actual_workflow = next(
+            (workflow for workflow in experiment_results.workflows if workflow.id == expected_details.id), None
+        )
+        assert actual_workflow is not None
+        assert actual_workflow.status == WorkflowStatus.SUCCEEDED
+        assert actual_workflow.artifacts_download_url is not None
+        # Compare properties of the workflow, excluding the download URL
+        expected_workflow_data = expected_details.model_dump(exclude={"artifacts_download_url"})
+        actual_workflow_data = actual_workflow.model_dump(exclude={"artifacts_download_url"})
+        assert expected_workflow_data == actual_workflow_data
 
 
-def retrieve_and_validate_workflow_logs(local_client: TestClient, workflow_id):
+def retrieve_and_validate_workflow_logs(
+    local_client: TestClient, workflow_details_list: list[WorkflowDetailsResponse]
+) -> None:
     """Retrieve and validate workflow logs."""
-    logs_job_response = local_client.get(f"/workflows/{workflow_id}/logs")
-    logs = JobLogsResponse.model_validate(logs_job_response.json())
-    assert logs.logs is not None
-    assert "Inference results stored at" in logs.logs
-    assert "Storing evaluation results to" in logs.logs
-    assert "Storing evaluation results for S3 to" in logs.logs
-    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results to")
-    assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results for S3 to")
+    for workflow_details in workflow_details_list:
+        logs_job_response = local_client.get(f"/workflows/{workflow_details.id}/logs")
+        logs_job_response.raise_for_status()
+        logs = JobLogsResponse.model_validate(logs_job_response.json())
+        assert logs.logs is not None
+        assert "Inference results stored at" in logs.logs
+        assert "Storing evaluation results to" in logs.logs
+        assert "Storing evaluation results for S3 to" in logs.logs
+        assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results to")
+        assert logs.logs.index("Inference results stored at") < logs.logs.index("Storing evaluation results for S3 to")
 
 
-def delete_experiment_and_validate(local_client: TestClient, experiment_id):
+def delete_experiment_and_validate(
+    local_client: TestClient, experiment_id: str, workflow_details_list: list[WorkflowDetailsResponse]
+) -> None:
     """Delete the experiment and ensure associated workflows are also deleted."""
     local_client.delete(f"/experiments/{experiment_id}")
     response = local_client.get(f"/experiments/{experiment_id}")
     assert response.status_code == 404
+    for workflow_details in workflow_details_list:
+        response = local_client.get(f"/workflows/{workflow_details.id}")
+        assert response.status_code == 404
 
 
 def list_experiments(local_client: TestClient):
@@ -327,7 +371,7 @@ def list_experiments(local_client: TestClient):
     ListingResponse[GetExperimentResponse].model_validate(response)
 
 
-def check_artifacts_times(artifacts_url: str):
+def check_artifacts_contain_times(artifacts_url: str):
     response = requests.get(artifacts_url, timeout=5)  # 5 second timeout
     response.raise_for_status()
     data = response.json()
@@ -338,18 +382,29 @@ def check_artifacts_times(artifacts_url: str):
 
 
 @pytest.mark.integration
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "dataset_name, task_definition, model",
     [
-        ("dialog_dataset", {"task": "summarization"}, TEST_SEQ2SEQ_MODEL),
+        (
+            "dialog_dataset",
+            {
+                "task": "summarization",
+            },
+            TEST_SEQ2SEQ_MODEL,
+        ),
         (
             "mock_translation_dataset",
-            {"task": "translation", "source_language": "en", "target_language": "de"},
+            {
+                "task": "translation",
+                "source_language": "en",
+                "target_language": "de",
+            },
             TEST_CAUSAL_MODEL,
         ),
     ],
 )
-def test_full_experiment_launch(
+async def test_full_experiment_launch(
     local_client: TestClient,
     dataset_name: str,
     task_definition: dict,
@@ -369,63 +424,103 @@ def test_full_experiment_launch(
     * Retrieving and validating workflow logs
     * Deleting the experiment and ensuring associated workflows are also deleted
     """
+    test_name = f"test_full_experiment_launch/{dataset_name}"
+
+    logger.info(
+        f"Running '{test_name}"
+        f"dataset_name: {dataset_name}, "
+        f"task_definition: {task_definition.get('task')}, "
+        f"model: {model}",
+    )
+
+    # Load the fixture using the name in the 'parametrize' params
     dataset = request.getfixturevalue(dataset_name)
 
+    # Health check
     check_backend_health_status(local_client)
+
+    # Dataset upload
     initial_count = check_initial_dataset_count(local_client)
     dataset = upload_dataset(local_client, dataset)
     check_dataset_count_after_upload(local_client, initial_count)
+
+    # Trigger experiment/workflows
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow_1 = run_workflow(local_client, experiment_id, "Workflow_1", model)
-    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
-    assert workflow_1_details
-    assert workflow_1_details.artifacts_download_url
-    check_artifacts_times(workflow_1_details.artifacts_download_url)
-    validate_experiment_results(local_client, experiment_id, workflow_1_details)
-    workflow_2 = run_workflow(local_client, experiment_id, "Workflow_2", model)
-    workflow_2_details = wait_for_workflow_complete(local_client, workflow_2.id)
-    assert workflow_2_details
-    assert workflow_2_details.artifacts_download_url
-    check_artifacts_times(workflow_2_details.artifacts_download_url)
-    list_experiments(local_client)
-    validate_updated_experiment_results(local_client, experiment_id, workflow_1_details, workflow_2_details)
-    retrieve_and_validate_workflow_logs(local_client, workflow_1_details.id)
-    delete_experiment_and_validate(local_client, experiment_id)
+    workflow_names = ["Workflow_1", "Workflow_2"]
+    workflows = [
+        run_workflow(
+            local_client=local_client,
+            experiment_id=experiment_id,
+            workflow_name=name,
+            model=model,
+            description=f"{test_name}: {name}",
+        )
+        for name in workflow_names
+    ]
+    workflow_details_responses = await asyncio.gather(
+        *[wait_for_workflow_complete(local_client, workflow.id) for workflow in workflows]
+    )
+
+    for workflow_details in workflow_details_responses:
+        assert workflow_details
+        assert workflow_details.status == WorkflowStatus.SUCCEEDED
+        assert workflow_details.artifacts_download_url
+        check_artifacts_contain_times(workflow_details.artifacts_download_url)
+
+    validate_experiment_results(local_client, experiment_id, workflow_details_responses)
+    retrieve_and_validate_workflow_logs(local_client, workflow_details_responses)
+
+    # Clean up ...
+    delete_experiment_and_validate(local_client, experiment_id, workflow_details_responses)
 
 
 @pytest.mark.integration
-def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependency_overrides_services):
-    """This is the main integration test: it checks:
+@pytest.mark.asyncio
+async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+    """Test ensures that the timeout set on jobs causes the workflow to fail:
     * The backend health status
     * Uploading a dataset
     * Creating an experiment
-    * Running workflows for the experiment (max 1 sec timeout)
+    * Running a workflow for the experiment (max 1 sec timeout)
     * Check that the workflow is in failed state
-    * Check that the job is in stopped state
+    * Check that any jobs are in a stopped state
     """
     # Hardcoded values for summarization
     task_definition = {"task": "summarization"}
 
     check_backend_health_status(local_client)
+
     initial_count = check_initial_dataset_count(local_client)
     dataset = upload_dataset(local_client, dialog_dataset)
     check_dataset_count_after_upload(local_client, initial_count)
+
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow_1 = run_workflow(
-        local_client,
-        experiment_id,
-        "Workflow_1",
+    workflow = run_workflow(
+        local_client=local_client,
+        experiment_id=experiment_id,
+        workflow_name="timed_out_workflow",
         model=TEST_SEQ2SEQ_MODEL,
-        job_timeout_sec=1,
+        job_timeout_sec=1,  # 1 second timeout to fail the workflow quickly
+        description="This workflow should fail",
     )
-    workflow_1_details = wait_for_workflow_complete(local_client, workflow_1.id)
-    assert workflow_1_details.status == WorkflowStatus.FAILED
-    for job in workflow_1_details.jobs:
-        all_params = {param["name"]: param["value"] for param in job.parameters if "name" in param and "value" in param}
-        response = local_client.get(f"/jobs/{all_params['ray_job_id']}")
-        response_json = response.json()
-        assert response.status_code == 200
-        assert (JobResponse(**response_json)).status.value == JobStatus.STOPPED
+    workflow_details = await wait_for_workflow_complete(local_client, workflow.id)
+    assert workflow_details is not None
+    assert workflow_details.status == WorkflowStatus.FAILED
+    ensure_job_status(local_client, workflow_details, JobStatus.STOPPED)
+
+
+def ensure_job_status(local_client: TestClient, workflow_details: WorkflowDetailsResponse, expected_status: JobStatus):
+    """Helper function to check that all jobs in a workflow have the expected status."""
+    for job in workflow_details.jobs:
+        ray_job_id = next((param["value"] for param in job.parameters if param.get("name") == "ray_job_id"), None)
+        assert ray_job_id, f"'ray_job_id' missing for job {job.id}"
+        response = local_client.get(f"/jobs/{ray_job_id}")
+        response.raise_for_status()
+        job_response = JobResponse.model_validate(response.json())
+        # Assert that the job status matches the expected status
+        assert job_response.status == expected_status, (
+            f"Job {job.id}, status: {job_response.status}, expected {expected_status}"
+        )
 
 
 def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
@@ -442,7 +537,7 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
-def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> WorkflowDetailsResponse | None:
+async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> WorkflowDetailsResponse | None:
     """Wait for the workflow to complete, including post-completion processing for successful
     workflows to create compiled results.
 
@@ -461,7 +556,7 @@ def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> W
     while attempt < max_attempts:
         # Allow the waiting interval if we're coming around again.
         if attempt > 0:
-            time.sleep(wait_duration)
+            await asyncio.sleep(wait_duration)
 
         attempt += 1
         try:

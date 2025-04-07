@@ -430,7 +430,7 @@ async def test_full_experiment_launch(
         f"Running '{test_name}"
         f"dataset_name: {dataset_name}, "
         f"task_definition: {task_definition.get('task')}, "
-        f"model: {model}, ",
+        f"model: {model}",
     )
 
     # Load the fixture using the name in the 'parametrize' params

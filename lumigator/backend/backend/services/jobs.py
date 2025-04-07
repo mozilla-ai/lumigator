@@ -538,7 +538,7 @@ class JobService:
         :param job_id: the ID of the job to retrieve
         :return: the job record which includes information on whether a job belongs to an experiment
         :rtype: JobRecord
-        :raises JobNotFoundError: If the job does not exist
+        :raises JobNotFoundError: If the job does not exist in Lumigator.
         :raises JobUpstreamError: If there is an error with the upstream service returning the latest job status.
         """
         record = self._get_job_record(job_id)
@@ -553,9 +553,7 @@ class JobService:
             job_status = self.get_upstream_job_status(job_id)
         except JobNotFoundError as e:
             job_status = JobStatus.UNRECOVERABLE.value.lower()
-            loguru.logger.error(
-                f"Job ID: {job_id} cannot be found in Ray, Using status: {job_status.value}", f"error: {e}"
-            )
+            loguru.logger.error(f"Job ID: {job_id} cannot be found in Ray, Using status: {job_status}", f"error: {e}")
 
         # Update job status in the DB if it differs from the current status
         if job_status != record.status.value.lower():

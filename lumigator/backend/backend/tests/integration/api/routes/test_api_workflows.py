@@ -280,7 +280,7 @@ def run_workflow(
         "model": model,
         "provider": "hf",
         "experiment_id": experiment_id,
-        "job_timeout_sec": 1000,
+        "job_timeout_sec": 60 * 3,
     }
     # The timeout cannot be 0
     if job_timeout_sec:
@@ -598,7 +598,7 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
             f"Workflow: {workflow_id},"
             f"request: ({attempt}/{max_attempts}), "
             f"status: {workflow.status}, "
-            f"succeeded and processed)"
+            f"succeeded and processed"
         )
         return workflow
 

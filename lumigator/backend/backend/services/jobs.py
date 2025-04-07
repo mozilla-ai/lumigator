@@ -2,6 +2,7 @@ import asyncio
 import csv
 import json
 import re
+import time
 from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -71,7 +72,7 @@ job_settings_map = {
 
 DEFAULT_SKIP = 0
 DEFAULT_LIMIT = 100
-DEFAULT_POST_INFER_JOB_TIMEOUT_SEC = 10 * 60
+DEFAULT_POST_INFER_JOB_TIMEOUT_SEC = 5 * 60
 JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
@@ -150,8 +151,8 @@ class JobService:
             return True
 
         try:
-            status = await self.wait_for_job_complete(job_id, max_wait_time_sec=10)
-        except JobUpstreamError as e:
+            status = await self.wait_for_job_complete(job_id, timeout_seconds=10)
+        except TimeoutError as e:
             loguru.logger.error("Failed to stop job {}: {}", job_id, e)
             return False
 
@@ -369,34 +370,50 @@ class JobService:
         except json.JSONDecodeError as e:
             raise JobUpstreamError("ray", f"JSON decode error from {resp.text or ''}") from e
 
-    async def wait_for_job_complete(self, job_id, max_wait_time_sec):
+    async def wait_for_job_complete(
+        self,
+        job_id: UUID,
+        timeout_seconds: int = 300,
+        initial_poll_interval_seconds: float = 1.0,
+        max_poll_interval_seconds: float = 10.0,
+        backoff_factor: float = 1.5,
+    ):
         """Waits for a job to complete, or until a maximum wait time is reached.
 
         :param job_id: The ID of the job to wait for.
-        :param max_wait_time_sec: The maximum time in seconds to wait for the job to complete.
-        :return: The status of the job when it completes.
-        :rtype: str
-        :raises JobUpstreamError: If there is an error with the upstream service returning the
-                                  job status
+        :param timeout_seconds: The maximum time in seconds to wait for the job to complete.
+        :param initial_poll_interval_seconds: The initial time in seconds to wait between polling the job status.
+        :param max_poll_interval_seconds: The maximum time in seconds to wait between polling the job status.
+        :param backoff_factor: The factor by which the poll interval will increase after each poll.
+        :return str: The status of the job when it completes.
+        :raises TimeoutError: If the job does not complete within the timeout period.
         """
-        loguru.logger.info(f"Waiting for job {job_id} to complete...")
-        # Get the initial job status
-        job_status = self.get_upstream_job_status(job_id)
+        start_time = time.time()
+        poll_interval = initial_poll_interval_seconds
+        previous_status = ""
+        loguru.logger.info(f"Waiting for job {job_id} to complete (timeout {timeout_seconds} seconds)...")
 
-        # Wait for the job to complete
-        elapsed_time = 0
-        while job_status not in self.TERMINAL_STATUS:
-            if elapsed_time >= max_wait_time_sec:
-                loguru.logger.info(f"Job {job_id} did not complete within the maximum wait time.")
-                break
-            await asyncio.sleep(5)
-            elapsed_time += 5
-            job_status = self.get_upstream_job_status(job_id)
+        while time.time() - start_time < timeout_seconds:
+            try:
+                job_status = self.get_upstream_job_status(job_id)
 
-        # Once the job is finished, retrieve the log and store it in the internal db
-        self.get_job_logs(job_id)
+                if job_status in self.TERMINAL_STATUS:
+                    # Once the job is finished, retrieve the log and store it in the internal DB
+                    self.get_job_logs(job_id)
+                    loguru.logger.info(f"Job {job_id}, terminal status: {job_status}")
+                    return job_status
 
-        return job_status
+                if job_status != previous_status:
+                    loguru.logger.info(f"Job {job_id}, current status: {job_status}")
+                    previous_status = job_status
+
+            except JobUpstreamError as e:
+                loguru.logger.error("Error waiting for job {}. Cannot get upstream status: {}", job_id, e)
+
+            await asyncio.sleep(poll_interval)
+            poll_interval = min(poll_interval * backoff_factor, max_poll_interval_seconds)
+
+        raise TimeoutError(f"Job {job_id} did not complete within {timeout_seconds} seconds.")
 
     async def handle_annotation_job(self, job_id: UUID, request: JobCreate, max_wait_time_sec: int):
         """Long term we maybe want to move logic about how to handle a specific job
@@ -409,8 +426,13 @@ class JobService:
         dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
         dataset_filename = Path(dataset_filename).stem
         dataset_filename = f"{dataset_filename}-annotated.csv"
+        job_status = ""
 
-        job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
+        try:
+            job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
+        except TimeoutError as e:
+            loguru.logger.error(f"Job {job_id} timed out after {max_wait_time_sec} seconds: {e}")
+
         if job_status == JobStatus.SUCCEEDED.value:
             self._add_dataset_to_db(
                 job_id=job_id,

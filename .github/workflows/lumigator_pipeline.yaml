@@ -222,17 +222,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Set HF_HOME environment variable
-        run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
-
-      - name: Cache HuggingFace models
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/.cache/huggingface
-          key: huggingface-${{ runner.os }}-v1
-          restore-keys: |
-            huggingface-${{ runner.os }}-v1
-
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run:  make start-lumigator-build
@@ -240,9 +229,45 @@ jobs:
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
+      # Restore cached Docker images if available
+      - name: Restore Docker images cache
+        id: restore-docker-cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/docker-images.tar
+          key: ${{ runner.os }}-docker-images-${{ hashFiles('docker-compose.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-images-
+
+      # If cache was found, load the cached images into Docker
+      - name: Load Docker images from cache
+        if: steps.restore-docker-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/docker-images.tar
+
+      # Bring up containers (this step pulls any missing/updated images)
+      - name: Spinning up containers for the tests
+        run: make start-lumigator-build
+
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-integration
+
+      # Save external Docker images to cache
+      - name: Save external Docker images to cache
+        run: |
+          docker save \
+            quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z \
+            redis:8.0-M03-alpine \
+            rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX} \
+            ghcr.io/mlflow/mlflow:v2.20.3 \
+            -o /tmp/docker-images.tar
+
+      - name: Update Docker images cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/docker-images.tar
+          key: ${{ runner.os }}-docker-images-${{ hashFiles('docker-compose.yml') }}
+
 
       - name: Collect logs in case of failure
         if: failure()
@@ -313,17 +338,6 @@ jobs:
         run: |
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
-
-      - name: Set HF_HOME environment variable
-        run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
-
-      - name: Cache HuggingFace models
-        uses: actions/cache@v3
-        with:
-          path: /home/runner/.cache/huggingface
-          key: huggingface-${{ runner.os }}-v1
-          restore-keys: |
-            huggingface-${{ runner.os }}-v1
 
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

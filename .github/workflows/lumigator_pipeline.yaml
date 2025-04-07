@@ -1,8 +1,5 @@
 name: Lumigator pipeline
 
-env:
-  HF_HOME: $${{ HOME }}/.cache/huggingface
-
 on:
   pull_request:
     branches:
@@ -232,6 +229,9 @@ jobs:
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
+      - name: Set HF_HOME environment variable
+        run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
+
       - name: Cache HuggingFace models
         uses: actions/cache@v3
         with:
@@ -320,6 +320,9 @@ jobs:
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
+
+      - name: Set HF_HOME environment variable
+        run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
 
       - name: Cache HuggingFace models
         uses: actions/cache@v3

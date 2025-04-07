@@ -210,14 +210,6 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
-      - name: Cache HuggingFace models
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.HOME }}/.cache/huggingface
-          key: huggingface-${{ runner.os }}-v1
-          restore-keys: |
-            huggingface-${{ runner.os }}-v1
-
       - name: Create HF cache
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
@@ -236,6 +228,14 @@ jobs:
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.HOME }}/.cache/huggingface
+          key: huggingface-${{ runner.os }}-v1
+          restore-keys: |
+            huggingface-${{ runner.os }}-v1
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -305,14 +305,6 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: uv python install
 
-      - name: Cache HuggingFace models
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.HOME }}/.cache/huggingface
-          key: huggingface-${{ runner.os }}-v1
-          restore-keys: |
-            huggingface-${{ runner.os }}-v1
-
       - name: Create HF cache
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: |
@@ -325,6 +317,14 @@ jobs:
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.HOME }}/.cache/huggingface
+          key: huggingface-${{ runner.os }}-v1
+          restore-keys: |
+            huggingface-${{ runner.os }}-v1
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

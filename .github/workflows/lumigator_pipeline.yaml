@@ -222,13 +222,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Spinning up containers for the tests
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build
-
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
-
       - name: Set HF_HOME environment variable
         run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
 
@@ -239,6 +232,13 @@ jobs:
           key: huggingface-${{ runner.os }}-v1
           restore-keys: |
             huggingface-${{ runner.os }}-v1
+
+      - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run:  make start-lumigator-build
+
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -314,13 +314,6 @@ jobs:
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
-      - name: Spinning up containers for the tests
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build-postgres
-
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
-
       - name: Set HF_HOME environment variable
         run: echo "HF_HOME=${HOME}/.cache/huggingface" >> $GITHUB_ENV
 
@@ -331,6 +324,13 @@ jobs:
           key: huggingface-${{ runner.os }}-v1
           restore-keys: |
             huggingface-${{ runner.os }}-v1
+
+      - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run:  make start-lumigator-build-postgres
+
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

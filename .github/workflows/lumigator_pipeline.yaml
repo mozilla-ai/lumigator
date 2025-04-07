@@ -232,7 +232,7 @@ jobs:
       - name: Cache HuggingFace models
         uses: actions/cache@v3
         with:
-          path: ${{ HOME }}/.cache/huggingface
+          path: ${HOME}/.cache/huggingface
           key: huggingface-${{ runner.os }}-v1
           restore-keys: |
             huggingface-${{ runner.os }}-v1
@@ -321,7 +321,7 @@ jobs:
       - name: Cache HuggingFace models
         uses: actions/cache@v3
         with:
-          path: ${{ HOME }}/.cache/huggingface
+          path: ${HOME}/.cache/huggingface
           key: huggingface-${{ runner.os }}-v1
           restore-keys: |
             huggingface-${{ runner.os }}-v1

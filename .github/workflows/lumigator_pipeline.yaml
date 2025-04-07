@@ -109,7 +109,7 @@ jobs:
 
       # Cache Playwright Browsers
       - name: Cache Playwright Browsers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/lumigator/frontend/package-lock.json') }}
@@ -230,7 +230,7 @@ jobs:
         run: ./scripts/set_env_vars.sh
 
       - name: Cache HuggingFace models
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ HOME }}/.cache/huggingface
           key: huggingface-${{ runner.os }}-v1
@@ -319,7 +319,7 @@ jobs:
         run: ./scripts/set_env_vars.sh
 
       - name: Cache HuggingFace models
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ HOME }}/.cache/huggingface
           key: huggingface-${{ runner.os }}-v1

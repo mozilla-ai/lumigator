@@ -255,12 +255,9 @@ jobs:
       # Save external Docker images to cache
       - name: Save external Docker images to cache
         run: |
-          docker save \
-            quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z \
-            redis:8.0-M03-alpine \
-            rayproject/ray:2.30.0-py311${COMPUTE_TYPE}${RAY_ARCH_SUFFIX} \
-            ghcr.io/mlflow/mlflow:v2.20.3 \
-            -o /tmp/docker-images.tar
+              IMAGES=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '^(quay.io/minio/minio|redis|rayproject/ray|ghcr.io/mlflow/mlflow):')
+              docker save $IMAGES -o /tmp/docker-images.tar
+
 
       - name: Update Docker images cache
         uses: actions/cache@v3

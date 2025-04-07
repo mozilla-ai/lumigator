@@ -180,7 +180,6 @@ const tagSeverity = computed(() => {
     case JobStatus.SUCCEEDED:
       return 'success'
     case JobStatus.FAILED:
-    case JobStatus.UNRECOVERABLE:
       return 'danger'
     default:
       return 'warn'

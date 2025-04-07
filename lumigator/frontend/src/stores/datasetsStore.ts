@@ -11,7 +11,7 @@ export const useDatasetStore = defineStore('datasets', () => {
   const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
 
-  const completedStatus = [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.UNRECOVERABLE]
+  const completedStatus = [JobStatus.SUCCEEDED, JobStatus.FAILED]
 
   const jobs: Ref<Job[]> = ref([])
   const inferenceJobs: Ref<Job[]> = ref([])

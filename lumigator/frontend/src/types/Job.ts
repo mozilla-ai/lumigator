@@ -1,11 +1,8 @@
 export enum JobStatus {
-  CREATED = 'created',
   PENDING = 'pending',
   RUNNING = 'running',
   FAILED = 'failed',
   SUCCEEDED = 'succeeded',
-  STOPPED = 'stopped',
-  UNRECOVERABLE = 'unrecoverable',
 }
 
 export type Job = {

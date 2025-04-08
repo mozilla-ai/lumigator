@@ -443,7 +443,7 @@ class WorkflowService:
     async def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
-        workflow = self.get_workflow(workflow_id)
+        workflow = await self.get_workflow(workflow_id)
         if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
         return await self._tracking_client.delete_workflow(workflow_id)

@@ -78,5 +78,5 @@ async def delete_workflow(
         workflow_id: ID of the workflow to delete
         force: If True, force deletion even if the workflow is active or has dependencies
     """
-    result = await service.delete_workflow(workflow_id, force=force)
+    result = await service.delete_workflow(workflow_id, force)
     return WorkflowDetailsResponse.model_validate(result.model_dump())

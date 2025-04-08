@@ -183,7 +183,7 @@ if __name__ == "__main__":
     else:
         config = EvalJobConfig.model_validate_json(args.config)
         # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
-        if "g_eval_summarization" in config.evaluation.metrics and (api_key := os.environ.get("api_key")):
+        if any(s.startswith("g_eval_") for s in config.evaluation.metrics) and (api_key := os.environ.get("api_key")):
             os.environ["OPENAI_API_KEY"] = api_key
 
         job_id: UUID = UUID(os.environ.get("MZAI_JOB_ID"))

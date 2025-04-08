@@ -1,9 +1,7 @@
 import csv
 import io
 import json
-import logging
 import os
-import sys
 import time
 import uuid
 from collections.abc import Generator
@@ -31,6 +29,7 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.models import ModelsResponse
 from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunTag
+from ray.dashboard.modules.job.sdk import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
@@ -451,8 +450,18 @@ def job_record(db_session):
 
 
 @pytest.fixture(scope="function")
-def job_service(db_session, job_repository, result_repository, dataset_service, secret_service, background_tasks):
-    return JobService(job_repository, result_repository, None, dataset_service, secret_service, background_tasks)
+def fake_ray_client() -> JobSubmissionClient:
+    """Mocked Ray client for testing."""
+    return MagicMock(spec=JobSubmissionClient)
+
+
+@pytest.fixture(scope="function")
+def job_service(
+    db_session, job_repository, result_repository, fake_ray_client, dataset_service, secret_service, background_tasks
+):
+    return JobService(
+        job_repository, result_repository, fake_ray_client, dataset_service, secret_service, background_tasks
+    )
 
 
 @pytest.fixture(scope="function")
@@ -613,3 +622,9 @@ def fake_mlflow_run_deleted():
     run_data = RunData(metrics={}, params={}, tags={})
 
     return Run(run_info=run_info, run_data=run_data)
+
+
+@pytest.fixture(scope="function")
+def valid_job_id() -> UUID:
+    """Fixture that returns a random UUID."""
+    return UUID("d34dbeef-4bea-4d19-ad06-214202165812")

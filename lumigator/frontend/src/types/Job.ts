@@ -1,10 +1,15 @@
-import type { WorkflowStatus } from './Workflow'
+export enum JobStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  FAILED = 'failed',
+  SUCCEEDED = 'succeeded',
+}
 
 export type Job = {
   type: string
   submission_id: string
   driver_info?: unknown
-  status: WorkflowStatus
+  status: JobStatus
   config: {
     name: string
     max_samples: number

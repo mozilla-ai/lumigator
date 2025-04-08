@@ -92,7 +92,12 @@ class JobService:
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
+    TERMINAL_STATUS = [
+        JobStatus.FAILED.value,
+        JobStatus.SUCCEEDED.value,
+        JobStatus.STOPPED.value,
+        JobStatus.UNRECOVERABLE.value,
+    ]
     """list: A list of terminal job statuses."""
 
     SAFE_JOB_NAME_REGEX = re.compile(r"[^\w\-_.]")
@@ -110,15 +115,15 @@ class JobService:
         secret_service: SecretService,
         background_tasks: BackgroundTasks,
     ):
-        self.job_repo = job_repo
-        self.result_repo = result_repo
-        self.ray_client = ray_client
+        self._job_repo = job_repo
+        self._result_repo = result_repo
+        self._ray_client = ray_client
         self._dataset_service = dataset_service
         self._secret_service = secret_service
         self._background_tasks = background_tasks
 
     def _get_job_record_per_type(self, job_type: str) -> list[JobRecord]:
-        records = self.job_repo.get_by_job_type(job_type)
+        records = self._job_repo.get_by_job_type(job_type)
         if records is None:
             return []
         return records
@@ -131,7 +136,7 @@ class JobService:
         :rtype: JobRecord
         :raises JobNotFoundError: If the job does not exist
         """
-        record = self.job_repo.get(job_id)
+        record = self._job_repo.get(job_id)
         if record is None:
             raise JobNotFoundError(job_id) from None
 
@@ -182,7 +187,7 @@ class JobService:
         :rtype: JobRecord
         :raises JobNotFoundError: If the job does not exist in the database
         """
-        record = self.job_repo.update(job_id, **updates)
+        record = self._job_repo.update(job_id, **updates)
         if record is None:
             raise JobNotFoundError(job_id) from None
 
@@ -312,18 +317,20 @@ class JobService:
     def get_upstream_job_status(self, job_id: UUID) -> str:
         """Returns the (lowercase) status of the upstream job.
 
-        Example: PENDING, RUNNING, STOPPED, SUCCEEDED, FAILED.
+        Example: pending, running, stopped, succeeded, failed.
 
         :param job_id: The ID of the job to retrieve the status for.
         :return: The status of the upstream job.
-        :rtype: str
-        :raises JobUpstreamError: If there is an error with the upstream service returning the
-                                  job status
+        :raises JobNotFoundError: If the job cannot be found in the upstream service.
+        :raises JobUpstreamError: If there is an error with the upstream service returning the job status
         """
         try:
-            status_response = self.ray_client.get_job_status(str(job_id))
+            status_response = self._ray_client.get_job_status(str(job_id))
             return str(status_response.value.lower())
         except RuntimeError as e:
+            # See: https://github.com/ray-project/ray/blob/24ad12d81f8201859f2f00919929e00a750fa4d2/python/ray/dashboard/modules/dashboard_sdk.py#L282-L285
+            if "status code 404" in str(e):
+                raise JobNotFoundError(job_id, "Job not found in upstream Ray service") from e
             raise JobUpstreamError("ray", "error getting Ray job status") from e
 
     def get_job_logs(self, job_id: UUID) -> JobLogsResponse:
@@ -335,7 +342,7 @@ class JobService:
         :raises JobUpstreamError: If there is an error with the upstream service returning the job logs,
                 and there are no logs currently persisted in Lumigator's storage.
         """
-        job = self.job_repo.get(job_id)
+        job = self._job_repo.get(job_id)
         if not job:
             raise JobNotFoundError(job_id) from None
 
@@ -456,7 +463,7 @@ class JobService:
         # Create a db record for the job
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
-        record = self.job_repo.create(name=request.name, description=request.description, job_type=job_type)
+        record = self._job_repo.create(name=request.name, description=request.description, job_type=job_type)
         job_result_storage_path = self._get_s3_uri(record.id)
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
         job_config = job_settings.generate_config(request, record.id, dataset_s3_path, job_result_storage_path)
@@ -506,7 +513,7 @@ class JobService:
             num_gpus=settings.RAY_WORKER_GPUS,
         )
         loguru.logger.info(f"Submitting {job_type} Ray job...")
-        submit_ray_job(self.ray_client, entrypoint)
+        submit_ray_job(self._ray_client, entrypoint)
 
         # NOTE: Only inference jobs can store results in a dataset atm. Among them:
         # - prediction jobs are run in a workflow before evaluations => they trigger dataset saving
@@ -531,21 +538,26 @@ class JobService:
         :param job_id: the ID of the job to retrieve
         :return: the job record which includes information on whether a job belongs to an experiment
         :rtype: JobRecord
-        :raises JobNotFoundError: If the job does not exist
+        :raises JobNotFoundError: If the job does not exist in Lumigator.
+        :raises JobUpstreamError: If there is an error with the upstream service returning the latest job status.
         """
         record = self._get_job_record(job_id)
-        loguru.logger.info(f"Obtaining info for job {job_id}: {record.name}")
+        loguru.logger.info(f"Obtained info for job ID: {job_id} name: {record.name}")
 
+        # If the job is finished (successfully or not), return the record.
         if record.status.value in self.TERMINAL_STATUS:
             return JobResponse.model_validate(record)
 
-        # get job status from ray
-        job_status = self.ray_client.get_job_status(job_id)
-        loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
+        # Attempt to get the latest job status from the upstream service.
+        try:
+            job_status = self.get_upstream_job_status(job_id)
+        except JobNotFoundError as e:
+            job_status = JobStatus.UNRECOVERABLE.value.lower()
+            loguru.logger.error(f"Job ID: {job_id} cannot be found in Ray, Using status: {job_status}", f"error: {e}")
 
-        # update job status in the DB if it differs from the current status
-        if job_status.lower() != record.status.value.lower():
-            record = self._update_job_record(job_id, status=job_status.lower())
+        # Update job status in the DB if it differs from the current status
+        if job_status != record.status.value.lower():
+            record = self._update_job_record(job_id, status=job_status)
 
         return JobResponse.model_validate(record)
 
@@ -558,7 +570,7 @@ class JobService:
         # It would be better if we could just feed an empty dict,
         # but this complicates things at the ORM level,
         # see https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.or_
-        records = self.job_repo.list(
+        records = self._job_repo.list(
             skip,
             limit,
             criteria=[or_(*[JobRecord.job_type == job_type for job_type in job_types])],
@@ -593,7 +605,7 @@ class JobService:
         :rtype: JobResultResponse
         :raises JobNotFoundError: if the job does not exist
         """
-        result_record = self.result_repo.get_by_job_id(job_id)
+        result_record = self._result_repo.get_by_job_id(job_id)
         if result_record is None:
             raise JobNotFoundError(job_id) from None
 

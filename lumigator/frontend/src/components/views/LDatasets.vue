@@ -117,7 +117,7 @@ import type { Dataset } from '@/types/Dataset'
 import LJobDetails from '../datasets/LJobDetails.vue'
 import type { Job } from '@/types/Job'
 import { jobsService } from '@/sdk/jobsService'
-import { WorkflowStatus } from '@/types/Workflow'
+import { JobStatus } from '@/types/Job'
 import { datasetsService } from '@/sdk/datasetsService'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import type { AxiosError } from 'axios'
@@ -210,7 +210,7 @@ watch(
     if (newValue) {
       retrieveJobLogs()
     }
-    if (newValue?.status === WorkflowStatus.RUNNING) {
+    if (newValue?.status === JobStatus.RUNNING) {
       startPollingForAnnotationJobLogs()
     } else if (isPollingForJobLogs.value) {
       stopPollingForAnnotationJobLogs()

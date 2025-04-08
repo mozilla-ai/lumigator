@@ -38,7 +38,7 @@
       /> -->
       <!-- <l-experiment-logs :logs="workflowLogs" v-if="showLogs" /> -->
     </l-experiments-drawer>
-    <CreateExperimentForm
+    <CreateExperimentModal
       :selectedDataset="selectedDataset"
       @close="closeExperimentForm"
       v-if="isNewExperimentFormVisible"
@@ -64,7 +64,7 @@ import {
 } from '@/helpers/getExperimentResults'
 import { useConfirm, useToast } from 'primevue'
 import { useRouter } from 'vue-router'
-import CreateExperimentForm from '../experiments/CreateExperimentForm.vue'
+import CreateExperimentModal from '../experiments/CreateExperimentModal.vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
 import { getAxiosError } from '@/helpers/getAxiosError'

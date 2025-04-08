@@ -9,9 +9,9 @@ from pydantic.json_schema import SkipJsonSchema
 
 from lumigator_schemas.redactable_base_model import RedactableBaseModel
 from lumigator_schemas.tasks import (
-    DEFAULT_METRICS_BY_TASK,
     SummarizationTaskDefinition,
     TaskDefinition,
+    get_metrics_for_task,
 )
 from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
@@ -114,20 +114,13 @@ class DeepEvalLocalModelConfig(BaseModel):
 
 class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
+    # NOTE: If changing the default task definition, please ensure that it has a corresponding default
+    # metrics mapping in the get_metrics_for_task function. This is important because the task definition.
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
     # NOTE: If changing the default metrics, please ensure that they do not include
     # any requirements for external API calls that require an API key to be configured.
-    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
-    metrics: list[str] = Field(
-        default_factory=lambda info: JobEvalConfig.get_default_metrics_for_task(
-            info.get("task_definition", SummarizationTaskDefinition())
-        )
-    )
+    metrics: set[str] = Field(default_factory=lambda info: get_metrics_for_task(info["task_definition"].task))
     llm_as_judge: DeepEvalLocalModelConfig | None = None
-
-    @staticmethod
-    def get_default_metrics_for_task(task_definition: TaskDefinition) -> list[str]:
-        """Return default metrics based on the task type."""
-        return DEFAULT_METRICS_BY_TASK.get(task_definition.task)
 
 
 class GenerationConfig(BaseModel):

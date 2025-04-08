@@ -33,6 +33,7 @@ export type Metrics = {
   rougeL_mean: number
   rougeLsum_mean: number
   rouge2_mean: number
+  comet_mean: number
 }
 
 export enum WorkflowStatus {

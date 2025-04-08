@@ -23,6 +23,7 @@ export type TableDataForExperimentResults = {
   model: string
   'bert-p'?: string
   Meteor?: string
+  Comet?: string
   'bert-r'?: string
   'bert-f1'?: string
   'rouge-1'?: string
@@ -40,6 +41,7 @@ export type TableDataForWorkflowResults = {
   'rouge-2'?: string
   'rouge-l'?: string
   meteor?: string
+  comet?: string
   'bert-p'?: string
   'bert-f1'?: string
   bleu?: string
@@ -66,6 +68,7 @@ function transformExperimentResults(
     ...(data.metrics.rouge && { 'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2) }),
     ...(data.metrics.rouge && { 'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2) }),
     ...(data.metrics.bleu && { bleu: data.metrics.bleu.bleu_mean.toFixed(2) }),
+    ...(data.metrics.comet && { Comet: data.metrics.comet.comet_mean.toFixed(2) }),
     ...(model &&
       model.info && {
         'model size': model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2'),
@@ -92,27 +95,28 @@ export function transformWorkflowResults(
       'Ground Truth': objectData.artifacts.ground_truth?.[index],
       predictions: objectData.artifacts.predictions?.[index],
       ...(objectData.metrics.meteor && {
-        meteor: objectData.metrics.meteor.meteor?.[index].toFixed(2),
+      meteor: objectData.metrics.meteor.meteor?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-        'bert-p': objectData.metrics.bertscore.precision?.[index].toFixed(2),
+      'bert-p': objectData.metrics.bertscore.precision?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-        'bert-r': objectData.metrics.bertscore.recall?.[index].toFixed(2),
+      'bert-r': objectData.metrics.bertscore.recall?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-        'bert-f1': objectData.metrics.bertscore.f1?.[index].toFixed(2),
+      'bert-f1': objectData.metrics.bertscore.f1?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-        'rouge-1': objectData.metrics.rouge.rouge1?.[index].toFixed(2),
+      'rouge-1': objectData.metrics.rouge.rouge1?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-        'rouge-2': objectData.metrics.rouge.rouge2?.[index].toFixed(2),
+      'rouge-2': objectData.metrics.rouge.rouge2?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-        'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
+      'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bleu && { bleu: objectData.metrics.bleu.bleu?.[index].toFixed(2) }),
+      ...(objectData.metrics.comet && { comet: objectData.metrics.comet.comet?.[index].toFixed(2) }),
       evaluation_time: String(objectData.artifacts.evaluation_time.toFixed(2) ?? '0'),
       inference_time: String(objectData.artifacts.inference_time.toFixed(2) ?? '0'),
     }

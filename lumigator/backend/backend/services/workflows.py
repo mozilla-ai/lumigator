@@ -20,6 +20,7 @@ from lumigator_schemas.workflows import (
     WorkflowResponse,
     WorkflowStatus,
 )
+from mlflow.entities import Run
 from pydantic_core._pydantic_core import ValidationError
 from typing_extensions import deprecated
 
@@ -96,31 +97,26 @@ class WorkflowService:
         # Mark the parent workflow as failed.
         await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
-        # Get the list of non-complete jobs in the workflow, to stop them and mark them failed.
-        non_terminal_runs = [
-            run
-            for run in await self._tracking_client.list_jobs(workflow_id)
-            if not (await self._tracking_client.is_status_terminal(run.info.status))
-        ]
+        # Get the list of non-complete jobs in the workflow.
+        async def non_terminal_jobs(jobs: list[Run]):
+            for job in jobs:
+                if not await self._tracking_client.is_status_terminal(job.info.status):
+                    yield job
 
-        # Get Ray jobs tied to this workflow so we can stop them.
-        ray_stop_tasks = [
+        workflow_jobs = await self._tracking_client.list_jobs(workflow_id)
+        non_terminal_jobs = [job async for job in non_terminal_jobs(workflow_jobs)]
+
+        # Create a list of tasks: Ray jobs to stop, and MLFlow runs to mark as failed.
+        stop_tasks = [
             self._job_service.stop_job(UUID(ray_job_id))
-            for job in non_terminal_runs
+            for job in non_terminal_jobs
             if (ray_job_id := job.data.params.get("ray_job_id"))
-        ]
-
-        # Mark MLFlow jobs (runs) that are not in a terminal state, as failed.
-        mlflow_stop_tasks = [
+        ] + [
             self._tracking_client.update_workflow_status(run.info.run_id, WorkflowStatus.FAILED)
-            for run in non_terminal_runs
+            for run in non_terminal_jobs
         ]
 
-        stop_tasks = []
-        stop_tasks.extend(ray_stop_tasks)
-        stop_tasks.extend(mlflow_stop_tasks)
-
-        # Wait for all tasks to complete concurrently.
+        # Wait for all tasks to complete concurrently (if we have any).
         if stop_tasks:
             await asyncio.gather(*stop_tasks, return_exceptions=False)
 

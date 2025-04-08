@@ -66,6 +66,8 @@ def get_metrics_for_task(task_type: TaskType) -> set[Metric]:
     :return: A set of metrics associated with the given task type.
     :raises KeyError: If the task type is mapped to a set of default metrics.
     """
+    # NOTE: If changing the default metrics, please ensure that they do not include
+    # any requirements for external API calls that require an API key to be configured.
     metrics_by_task = {
         TaskType.SUMMARIZATION: {Metric.BERTSCORE, Metric.METEOR, Metric.ROUGE},
         TaskType.TRANSLATION: {Metric.BLEU, Metric.COMET, Metric.METEOR},

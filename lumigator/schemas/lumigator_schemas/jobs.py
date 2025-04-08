@@ -114,11 +114,9 @@ class DeepEvalLocalModelConfig(BaseModel):
 
 class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    # NOTE: If changing the default task definition, please ensure that it has a corresponding default
-    # metrics mapping in the get_metrics_for_task function. This is important because the task definition.
+    # NOTE: If changing the default task definition (currently summarization),
+    # please ensure that it has a corresponding default metrics mapping in the get_metrics_for_task function.
     task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
-    # NOTE: If changing the default metrics, please ensure that they do not include
-    # any requirements for external API calls that require an API key to be configured.
     metrics: set[str] = Field(default_factory=lambda info: get_metrics_for_task(info["task_definition"].task))
     llm_as_judge: DeepEvalLocalModelConfig | None = None
 

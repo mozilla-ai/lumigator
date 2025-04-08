@@ -257,20 +257,20 @@ class WorkflowService:
 
         # FIXME The ray status is now _not enough_ to set the job status,
 
-        job_config = JobEvalConfig()
+        job_eval_config = JobEvalConfig(task_definition=experiment.task_definition)
         if request.metrics:
-            job_config.metrics = request.metrics
+            job_eval_config.metrics = request.metrics
             # NOTE: This should be considered a temporary solution as we currently only support
             # GEval by querying OpenAI's API. This should be refactored to be more robust.
-            if "g_eval_summarization" in job_config.metrics:
-                job_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
+            if "g_eval_summarization" in job_eval_config.metrics:
+                job_eval_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=inference_dataset_id,
             max_samples=experiment.max_samples,
-            job_config=job_config,
+            job_config=job_eval_config,
         )
 
         try:

@@ -36,3 +36,10 @@ class TextGenerationTaskDefinition(BaseModel):
 TaskDefinition = Annotated[
     SummarizationTaskDefinition | TranslationTaskDefinition | TextGenerationTaskDefinition, Field(discriminator="task")
 ]
+
+
+DEFAULT_METRICS_BY_TASK = {
+    TaskType.SUMMARIZATION: ["rouge", "meteor", "bertscore"],
+    TaskType.TRANSLATION: ["bleu", "meteor", "comet"],
+    TaskType.TEXT_GENERATION: ["rouge", "meteor", "bertscore", "bleu"],
+}

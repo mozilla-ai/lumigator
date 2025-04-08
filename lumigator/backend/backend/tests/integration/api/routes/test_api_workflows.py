@@ -175,8 +175,15 @@ def test_upload_data_no_gt_launch_annotation(
         "description": "Test run for Huggingface model",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
-        "job_config": {"job_type": JobType.ANNOTATION, "task": "summarization"},
+        "job_config": {
+            "job_type": JobType.ANNOTATION,
+            "task": "summarization",
+            "model": TEST_SEQ2SEQ_MODEL,
+            "provider": "hf",
+            "output_field": "ground_truth",
+        },
     }
+
     create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201
 

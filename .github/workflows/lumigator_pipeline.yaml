@@ -93,7 +93,7 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     needs: lint-frontend
-    runs-on: aws-custom-runner
+    runs-on: lumigator-integration-tests-runner
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -181,7 +181,7 @@ jobs:
 
   integration-tests:
     name: Integration tests (SQLite)
-    runs-on: aws-custom-runner
+    runs-on: lumigator-integration-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -336,7 +336,7 @@ jobs:
 
   notebook-integration-test:
     name: Notebook integration tests
-    runs-on: aws-custom-runner
+    runs-on: lumigator-integration-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     steps:

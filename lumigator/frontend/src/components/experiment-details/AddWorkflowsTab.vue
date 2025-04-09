@@ -64,7 +64,7 @@
             />
           </div>
         </div>
-        <div class="models-wrapper">
+        <div class="models-wrapper" v-if="customModels.length">
           <h5 class="caption-caps">Custom</h5>
           <div class="models-grid">
             <ModelCard

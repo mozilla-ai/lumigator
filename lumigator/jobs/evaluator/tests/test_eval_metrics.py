@@ -85,7 +85,7 @@ def test_empty_fields_cast_as_float64():
 
 
 @patch("eval_metrics.EvaluationMetrics._g_eval_measure_with_retry")
-@patch("deepeval.metrics.GEval")
+@patch("eval_metrics.GEval")
 def test_geval_metrics_dict(mock_geval, mock_g_eval_measure_with_retry):
     """Verifies that all geval-based metrics appear in the outputs.
 

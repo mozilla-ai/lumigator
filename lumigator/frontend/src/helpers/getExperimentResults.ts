@@ -116,7 +116,9 @@ export function transformWorkflowResults(
         'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bleu && { bleu: objectData.metrics.bleu.bleu?.[index].toFixed(2) }),
-      ...(objectData.metrics.comet && { comet: objectData.metrics.comet.scores?.[index].toFixed(2) }),
+      ...(objectData.metrics.comet && {
+        comet: objectData.metrics.comet.scores?.[index].toFixed(2),
+      }),
       evaluation_time: String(objectData.artifacts.evaluation_time.toFixed(2) ?? '0'),
       inference_time: String(objectData.artifacts.inference_time.toFixed(2) ?? '0'),
     }

@@ -28,6 +28,7 @@ CONFIG_USER_KEY_FILE:=$(CONFIG_USER_DIR)/lumigator.key
 # Env var name to hold encryption key
 CONFIG_USER_KEY_ENV_VAR=LUMIGATOR_SECRET_KEY
 
+RANDOM := $(shell echo $$RANDOM)
 # used in docker-compose to choose the right Ray image
 ARCH := $(shell uname -m)
 RAY_ARCH_SUFFIX :=
@@ -138,7 +139,7 @@ start-lumigator: config-generate-env
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build: config-generate-env
-	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env"  --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
+	RAY_ARCH_SUFFIX=$(RAY_ARCH_SUFFIX) ARCH=${ARCH} COMPUTE_TYPE=$(COMPUTE_TYPE) docker compose --env-file "$(CONFIG_BUILD_DIR)/.env" -p $(RANDOM) --profile local $(GPU_COMPOSE)  -f $(LOCAL_DOCKERCOMPOSE_FILE) up -d --build
 
 # Launches lumigator with no code mounted in, and forces build of containers (used in CI for integration tests)
 start-lumigator-build-postgres: config-generate-env

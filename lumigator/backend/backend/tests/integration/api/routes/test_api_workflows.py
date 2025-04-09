@@ -55,10 +55,11 @@ def test_upload_data_launch_job(
     dialog_dataset,
     dependency_overrides_services,
 ):
+    logger.info("Running test: 'test_upload_data_launch_job'")
+
     response = local_client.get("/health")
     assert response.status_code == 200
 
-    logger.info("Running test...")
     # store how many ds are in the db before we start
     get_ds_response = local_client.get("/datasets/")
     assert get_ds_response.status_code == 200
@@ -80,8 +81,8 @@ def test_upload_data_launch_job(
     assert get_ds_before.total == get_ds.total + 1
 
     infer_payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
+        "name": "test_upload_data_launch_job-inference",
+        "description": "Huggingface model inference",
         "dataset": str(created_dataset.id),
         "max_samples": 10,
         "job_config": {
@@ -113,8 +114,8 @@ def test_upload_data_launch_job(
     assert output_infer_job_response_model is not None
 
     eval_payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
+        "name": "test_upload_data_launch_job-evaluation",
+        "description": "Huggingface model evaluation",
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
         "job_config": {
@@ -172,7 +173,7 @@ def test_upload_data_no_gt_launch_annotation(
 
     annotation_payload = {
         "name": "test_annotate",
-        "description": "Test run for Huggingface model",
+        "description": "Annotation job to add ground truth",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
         "job_config": {
@@ -454,7 +455,7 @@ async def test_full_experiment_launch(
 
     # Trigger experiment/workflows
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow_names = ["Workflow_1", "Workflow_2"]
+    workflow_names = ["Backend_Workflow_1", "Backend_Workflow_2"]
     workflows = [
         run_workflow(
             local_client=local_client,
@@ -614,72 +615,46 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
     return None
 
 
-def _test_launch_job_with_secret(
+def test_launch_job_with_secret(
     local_client: TestClient,
     dialog_dataset,
-    dependency_overrides_services,
+    dependency_overrides_services,  # Required even if not used directly in the test
 ):
-    logger.info("Running test...")
-    ko_secret = SecretUploadRequest(value="<WRONG SECRET HERE>", description="Mistral API key")
+    logger.info("Running test: 'test_launch_job_with_secret'")
     secret_name = "MISTRAL_API_KEY"  # pragma: allowlist secret
+
+    # Upload the Mistral API key as a secret with an incorrect value.
+    ko_secret = SecretUploadRequest(value="<WRONG SECRET HERE>", description="Mistral API key")
     response = local_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
-    logger.info(f"Uploading KO key {secret_name}: {response}")
+    logger.info(f"Uploaded KO key {secret_name}: {response}")
     assert response.status_code == HTTPStatus.CREATED or response.status_code == HTTPStatus.NO_CONTENT
 
-    get_ds_response = local_client.get("/datasets/")
-    assert get_ds_response.status_code == 200
-    get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
-
+    # Upload a dataset
     create_response = local_client.post(
         "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
     )
-
     assert create_response.status_code == 201
-
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_before_response = local_client.get("/datasets/")
-    assert get_ds_before_response.status_code == 200
-    get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
-    assert get_ds_before.total == get_ds.total + 1
-
-    infer_model = JobInferenceCreate(
-        name="test_run_hugging_face",
-        description="Test run for Huggingface model",
+    # Create an inference job but don't use the secret.
+    infer_create = JobInferenceCreate(
+        name="test_launch_job_with_no_secret",
+        description="Mistral model with no API key",
         dataset=str(created_dataset.id),
         max_samples=2,
         job_config=JobInferenceConfig(
             model="ministral-8b-latest",
             provider="mistral",
+            secret_key_name=secret_name,
         ),
     )
-    infer_payload = infer_model.model_dump(mode="json")
-    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
-    if create_inference_job_response.status_code >= 400:
-        logger.error(f"error: {create_inference_job_response.text}")
-    assert create_inference_job_response.status_code == 201
-    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
-    assert not wait_for_job(local_client, create_inference_job_response_model.id)
-
-    ok_secret = SecretUploadRequest(value="<CORRECT SECRET HERE>", description="Mistral API key")
-    response = local_client.put(f"/settings/secrets/{secret_name}", json=ok_secret.model_dump())
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-    infer_model = JobInferenceCreate(
-        name="test_run_hugging_face",
-        description="Test run for Huggingface model",
-        dataset=str(created_dataset.id),
-        max_samples=2,
-        api_keys=[secret_name],
-        job_config=JobInferenceConfig(
-            model="ministral-8b-latest",
-            provider="mistral",
-        ),
+    create_inference_job_response = local_client.post(
+        url="/jobs/inference/", headers=POST_HEADER, json=infer_create.model_dump(mode="json")
     )
-    infer_payload = infer_model.model_dump(mode="json")
-    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+    create_inference_job_response.raise_for_status()
     assert create_inference_job_response.status_code == 201
-    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
-    assert wait_for_job(local_client, create_inference_job_response_model.id)
+    job_response = JobResponse.model_validate(create_inference_job_response.json())
+    # We expect the job to fail because it needs a VALID API key for Mistral.
+    assert not wait_for_job(local_client, job_response.id, max_retries=60, retry_interval=5)

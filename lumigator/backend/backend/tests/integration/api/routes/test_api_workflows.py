@@ -55,10 +55,11 @@ def test_upload_data_launch_job(
     dialog_dataset,
     dependency_overrides_services,
 ):
+    logger.info("Running test: 'test_upload_data_launch_job'")
+
     response = local_client.get("/health")
     assert response.status_code == 200
 
-    logger.info("Running test...")
     # store how many ds are in the db before we start
     get_ds_response = local_client.get("/datasets/")
     assert get_ds_response.status_code == 200
@@ -80,8 +81,8 @@ def test_upload_data_launch_job(
     assert get_ds_before.total == get_ds.total + 1
 
     infer_payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
+        "name": "test_upload_data_launch_job-inference",
+        "description": "Huggingface model inference",
         "dataset": str(created_dataset.id),
         "max_samples": 10,
         "job_config": {
@@ -113,8 +114,8 @@ def test_upload_data_launch_job(
     assert output_infer_job_response_model is not None
 
     eval_payload = {
-        "name": "test_run_hugging_face",
-        "description": "Test run for Huggingface model",
+        "name": "test_upload_data_launch_job-evaluation",
+        "description": "Huggingface model evaluation",
         "dataset": str(output_infer_job_response_model.id),
         "max_samples": 10,
         "job_config": {
@@ -172,7 +173,7 @@ def test_upload_data_no_gt_launch_annotation(
 
     annotation_payload = {
         "name": "test_annotate",
-        "description": "Test run for Huggingface model",
+        "description": "Annotation job to add ground truth",
         "dataset": str(created_dataset.id),
         "max_samples": 2,
         "job_config": {"job_type": JobType.ANNOTATION, "task": "summarization"},
@@ -446,7 +447,7 @@ async def test_full_experiment_launch(
 
     # Trigger experiment/workflows
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow_names = ["Workflow_1", "Workflow_2"]
+    workflow_names = ["Backend_Workflow_1", "Backend_Workflow_2"]
     workflows = [
         run_workflow(
             local_client=local_client,
@@ -609,6 +610,7 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
 def test_launch_job_with_secret(
     local_client: TestClient,
     dialog_dataset,
+    dependency_overrides_services,  # Required even if not used directly in the test
 ):
     logger.info("Running test: 'test_launch_job_with_secret'")
     secret_name = "MISTRAL_API_KEY"  # pragma: allowlist secret

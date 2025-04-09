@@ -76,8 +76,8 @@ export type Meteor = {
 }
 
 export type Comet = {
-  comet: number[]
-  comet_mean: number
+  scores: number[]
+  mean_score: number
 }
 
 export type Rouge = {

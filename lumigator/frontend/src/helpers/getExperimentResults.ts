@@ -68,7 +68,7 @@ function transformExperimentResults(
     ...(data.metrics.rouge && { 'rouge-2': data.metrics.rouge.rouge2_mean.toFixed(2) }),
     ...(data.metrics.rouge && { 'rouge-l': data.metrics.rouge.rougeL_mean.toFixed(2) }),
     ...(data.metrics.bleu && { bleu: data.metrics.bleu.bleu_mean.toFixed(2) }),
-    ...(data.metrics.comet && { Comet: data.metrics.comet.comet_mean.toFixed(2) }),
+    ...(data.metrics.comet && { Comet: data.metrics.comet.mean_score.toFixed(2) }),
     ...(model &&
       model.info && {
         'model size': model.info.model_size.replace(/(\d+(?:\.\d+)?)([a-zA-Z]+)/g, '$1 $2'),
@@ -116,7 +116,7 @@ export function transformWorkflowResults(
       'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bleu && { bleu: objectData.metrics.bleu.bleu?.[index].toFixed(2) }),
-      ...(objectData.metrics.comet && { comet: objectData.metrics.comet.comet?.[index].toFixed(2) }),
+      ...(objectData.metrics.comet && { comet: objectData.metrics.comet.scores?.[index].toFixed(2) }),
       evaluation_time: String(objectData.artifacts.evaluation_time.toFixed(2) ?? '0'),
       inference_time: String(objectData.artifacts.inference_time.toFixed(2) ?? '0'),
     }

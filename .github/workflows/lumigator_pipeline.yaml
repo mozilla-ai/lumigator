@@ -137,9 +137,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Spinning up containers for the tests
-        run:  make start-lumigator-build
-
       - name: Run e2e tests
         run: npm run test:e2e
         working-directory: lumigator/frontend
@@ -222,9 +219,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Spinning up containers for the tests
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
@@ -303,9 +297,6 @@ jobs:
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
-      - name: Spinning up containers for the tests
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build-postgres
 
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
@@ -385,9 +376,6 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
-      - name: Setup containers
-        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build
 
       - name: Run notebook
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

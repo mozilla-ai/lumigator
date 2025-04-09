@@ -18,15 +18,47 @@
         <TabPanel value="basic">
           <div class="basic-panel">
             <div class="form-fields">
-              <FloatLabel variant="in" class="form-field">
-                <label for="model-id" class="field-label">model id</label>
-                <InputText id="model-id" v-model="modelId" variant="filled"></InputText>
-              </FloatLabel>
+              <div variant="in" class="form-field" v-if="isBYOM">
+                <label for="via" class="field-label">Via</label>
+                <Select
+                  v-model="via"
+                  label-id="via"
+                  :options="['Hugging Face', 'Self-Hosted']"
+                  variant="filled"
+                ></Select>
+              </div>
 
-              <FloatLabel variant="in" class="form-field">
+              <!-- <div variant="in" class="form-field" v-if="via== 'Hugging Face'">
+                <label for="hugging-face-model-id" class="field-label">Hugging Face Model id</label>
+                <InputText id="hugging-face-model-id" v-model="huggingFaceModelId" variant="filled" placeholder="Paste your model title or link here"></InputText>
+              </div> -->
+
+              <div variant="in" class="form-field" v-if="via == 'Self-Hosted'">
+                <label for="base-url" class="field-label">Base Url</label>
+                <InputText
+                  id="base-url"
+                  v-model="baseUrl"
+                  variant="filled"
+                  placeholder="Paste URL link here"
+                ></InputText>
+              </div>
+
+              <div variant="in" class="form-field">
+                <label for="model-id" class="field-label">{{
+                  via === 'Hugging Face' ? 'Hugging Face Model id' : 'model id'
+                }}</label>
+                <InputText
+                  id="model-id"
+                  v-model="modelId"
+                  variant="filled"
+                  :placeholder="via === 'Hugging Face' ? 'Paste your model title or link here' : ''"
+                ></InputText>
+              </div>
+
+              <div variant="in" class="form-field">
                 <label for="run-title" class="field-label">run title</label>
                 <InputText id="run-title" v-model="runTitle" variant="filled"></InputText>
-              </FloatLabel>
+              </div>
 
               <div class="prompt-field">
                 <label for="prompt" class="field-label">Model Prompt</label>
@@ -106,9 +138,9 @@ import type { CreateWorkflowPayload } from '@/types/Workflow'
 import {
   Button,
   Dialog,
-  FloatLabel,
   InputNumber,
   InputText,
+  Select,
   Slider,
   Tab,
   TabList,
@@ -122,7 +154,7 @@ import { computed, ref } from 'vue'
 const props = withDefaults(
   defineProps<{
     // isVisible: boolean
-    model: CreateWorkflowPayload
+    model: CreateWorkflowPayload | undefined
     isBYOM: boolean
   }>(),
   {
@@ -135,20 +167,22 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const modelId = ref(props.model.model)
-const runTitle = ref(props.model.name)
-const prompt = ref(props.model.system_prompt)
-const baseUrl = ref(props.model.base_url)
-const temperature = ref(props.model.generation_config?.temperature)
-const topP = ref(props.model.generation_config?.top_p)
+const modelId = ref(props.model?.model)
+const runTitle = ref(props.model?.name)
+const prompt = ref(props.model?.system_prompt)
+const baseUrl = ref(props.model?.base_url)
+const temperature = ref(props.model?.generation_config?.temperature)
+const topP = ref(props.model?.generation_config?.top_p)
+const via = ref()
+// const huggingFaceModelId = ref()
 
 const defaultPrompt = computed(() => {
-  const task = props.model.task_definition.task
+  const task = props.model?.task_definition.task
   if (task === 'summarization') {
     return 'You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.'
   } else {
     const { source_language: sourceLanguage, target_language: targetLanguage } =
-      props.model.task_definition
+      props.model?.task_definition || {}
     return `translate ${sourceLanguage} to ${targetLanguage}:`
   }
 })
@@ -161,10 +195,11 @@ const handleCancelClicked = () => {
 const handleContinueClicked = () => {
   emit('save', {
     ...props.model,
-    base_url: baseUrl.value || props.model.base_url,
-    model: modelId.value || props.model.model,
-    name: runTitle.value || props.model.name,
+    base_url: baseUrl.value || props.model?.base_url,
+    model: modelId.value || props.model?.model,
+    name: runTitle.value || props.model?.name,
     system_prompt: prompt.value || defaultPrompt.value,
+    provider: via.value === 'Hugging Face' ? 'hf' : 'self-hosted',
     generation_config: {
       temperature: temperature.value,
       top_p: topP.value,
@@ -174,7 +209,12 @@ const handleContinueClicked = () => {
 
 const isLoading = ref(false)
 const isFormInvalid = computed(() => {
-  return !modelId.value || !runTitle.value || !prompt.value
+  return (
+    !modelId.value ||
+    !runTitle.value ||
+    !prompt.value ||
+    (via.value === 'Self-Hosted' && !baseUrl.value)
+  )
 })
 </script>
 

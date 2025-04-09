@@ -64,6 +64,22 @@
             />
           </div>
         </div>
+        <div class="models-wrapper">
+          <h5 class="caption-caps">Custom</h5>
+          <div class="models-grid">
+            <ModelCard
+              v-for="model in customModels"
+              :key="model.model"
+              :model="model"
+              :is-selected="selectedModels.includes(model.model)"
+              :is-custom="customWorkflows.some((workflow) => workflow.model === model.model)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
+          </div>
+        </div>
       </div>
     </div>
     <div class="right-container">
@@ -112,9 +128,9 @@
       </div>
 
       <ConfigureWorkflowModal
-        v-if="isConfigureWorkflowModalVisible && modelBeingConfigured"
+        v-if="isCustomWorkflowModalVisible"
         :model="modelBeingConfigured"
-        :isBYOM="false"
+        :isBYOM="isBYOM"
         @save="saveModelConfiguration"
         @close="handleConfigureWorkflowModalClosed"
       ></ConfigureWorkflowModal>
@@ -127,7 +143,7 @@ import { useModelStore } from '@/stores/modelsStore'
 import type { Experiment } from '@/types/Experiment'
 import type { Model } from '@/types/Model'
 import { Button, InputNumber, Slider, Textarea, useToast } from 'primevue'
-import { computed, ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import ModelCard from './ModelCard.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
@@ -142,11 +158,14 @@ const selectedModels = ref<Model['model'][]>([])
 const customWorkflows = ref<CreateWorkflowPayload[]>([])
 const queryClient = useQueryClient()
 const emit = defineEmits(['workflowCreated'])
-const isConfigureWorkflowModalVisible = ref(false)
+const isCustomWorkflowModalVisible = ref(false)
 const modelBeingConfigured = ref<CreateWorkflowPayload>()
+const isBYOM = ref(false)
+
 const handleConfigureWorkflowModalClosed = () => {
   modelBeingConfigured.value = undefined
-  isConfigureWorkflowModalVisible.value = false
+  isCustomWorkflowModalVisible.value = false
+  isBYOM.value = false
 }
 
 const experimentPrompt = ref('')
@@ -202,9 +221,11 @@ const createWorkflowMutation = useMutation({
   },
 })
 
-const models = computed(() =>
-  modelStore.filterModelsByUseCase(props.experiment.task_definition.task),
-)
+const customOrSelfHostedModels: Ref<Array<Model | (Model & CreateWorkflowPayload)>> = ref([])
+const models = computed(() => [
+  ...modelStore.filterModelsByUseCase(props.experiment.task_definition.task),
+  ...customOrSelfHostedModels.value,
+])
 const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
   return models.value.filter((model: Model) => {
     const isKeyPresent = model.requirements?.includes(requirementKey)
@@ -213,8 +234,29 @@ const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model
 }
 const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
 const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
+const customModels = computed(() => modelsByRequirement('custom', true))
 
-const handleAddModelClicked = () => {}
+const handleAddModelClicked = () => {
+  isBYOM.value = true
+  isCustomWorkflowModalVisible.value = true
+  modelBeingConfigured.value = {
+    dataset: props.experiment.dataset,
+    experiment_id: props.experiment.id,
+    task_definition: props.experiment.task_definition,
+    system_prompt: experimentPrompt.value || defaultPrompt.value,
+    description: props.experiment.description,
+    max_samples: props.experiment.max_samples,
+    name: '',
+    model: '',
+    provider: '',
+    secret_key_name: undefined,
+    base_url: undefined,
+    generation_config: {
+      temperature: temperature.value,
+      top_p: topP.value,
+    },
+  }
+}
 
 const handleRunClicked = () => {
   selectedModels.value.forEach((selectedModel) => {
@@ -283,15 +325,33 @@ const transformModelToWorkflowPayload = (model: Model): CreateWorkflowPayload =>
 const handleCustomizeClicked = (model: Model) => {
   console.log('customize clicked', model)
   modelBeingConfigured.value = transformModelToWorkflowPayload(model)
-  isConfigureWorkflowModalVisible.value = true
+  isCustomWorkflowModalVisible.value = true
 }
 
 const saveModelConfiguration = (payload: CreateWorkflowPayload) => {
   customWorkflows.value.push(payload)
+
+  if (!models.value.some((m: Model) => m.model === payload.model)) {
+    customOrSelfHostedModels.value.push({
+      ...payload,
+
+      base_url: payload.base_url || '',
+      description: payload.description,
+      generation_config: payload.generation_config,
+      model: payload.model,
+      display_name: payload.name,
+      provider: payload.provider,
+      requirements: [],
+      task_definition: payload.task_definition,
+      system_prompt: payload.system_prompt,
+      tasks: [],
+      website_url: payload.base_url || '',
+    })
+  }
   selectedModels.value.push(payload.model)
 
   modelBeingConfigured.value = undefined
-  isConfigureWorkflowModalVisible.value = false
+  isCustomWorkflowModalVisible.value = false
 }
 
 const handleDeleteClicked = (model: Model) => {

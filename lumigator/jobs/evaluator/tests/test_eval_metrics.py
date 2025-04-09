@@ -85,7 +85,8 @@ def test_empty_fields_cast_as_float64():
 
 
 @patch("eval_metrics.EvaluationMetrics._g_eval_measure_with_retry")
-def test_geval_metrics_dict(mock_geval):
+@patch("deepeval.metrics.GEval")
+def test_geval_metrics_dict(mock_geval, mock_g_eval_measure_with_retry):
     """Verifies that all geval-based metrics appear in the outputs.
 
     When a new geval_based metric is added to evaluator, eval outputs change according
@@ -110,7 +111,8 @@ def test_geval_metrics_dict(mock_geval):
     em = EvaluationMetrics(g_eval_metrics)
 
     # run all g_eval* evaluations (mocked) to obtain the output dictionary
-    mock_geval.return_value = {"score": np.random.rand(), "reason": "Because I said so"}
+    mock_geval.return_value = None
+    mock_g_eval_measure_with_retry.return_value = {"score": np.random.rand(), "reason": "Because I said so"}
     results = em.run_all(
         examples=["Ceci n'est pas un pipe"],
         pred=["This is not a pipe"],

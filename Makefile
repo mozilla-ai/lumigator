@@ -272,11 +272,11 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	@cd lumigator/jobs/evaluator; \
-	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
+	uv run --with pytest --with ../../schemas --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
 	@cd lumigator/jobs/inference; \
-	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
+	uv run --with pytest --with ../../schemas --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 

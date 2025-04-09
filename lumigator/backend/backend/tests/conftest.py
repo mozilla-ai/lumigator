@@ -100,29 +100,17 @@ def format_dataset(data: list[list[str]]) -> str:
     return buffer.read()
 
 
-def wait_for_job(client, job_id: UUID) -> bool:
-    succeeded = False
-    timed_out = True
-    for _ in range(1, MAX_POLLS):
-        get_job_response = client.get(f"/jobs/{job_id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            timed_out = False
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            timed_out = False
-            break
-        if get_job_response_model.status == JobStatus.STOPPED.value:
-            succeeded = False
-            timed_out = False
-            break
-        time.sleep(POLL_WAIT_TIME)
-    if timed_out:
-        raise Exception("Job poll timed out")
-    return succeeded
+def wait_for_job(client, job_id: UUID, max_retries: int = MAX_POLLS, retry_interval: int = POLL_WAIT_TIME) -> bool:
+    for _ in range(max_retries):
+        response = client.get(f"/jobs/{job_id}")
+        assert response.status_code == 200
+        job_status = JobResponse.model_validate(response.json()).status
+
+        if job_status in JobService.TERMINAL_STATUS:
+            return job_status == JobStatus.SUCCEEDED.value
+        time.sleep(retry_interval)
+
+    raise Exception("Job poll timed out")
 
 
 def wait_for_experiment(client, experiment_id: UUID) -> bool:

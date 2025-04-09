@@ -95,25 +95,25 @@ export function transformWorkflowResults(
       'Ground Truth': objectData.artifacts.ground_truth?.[index],
       predictions: objectData.artifacts.predictions?.[index],
       ...(objectData.metrics.meteor && {
-      meteor: objectData.metrics.meteor.meteor?.[index].toFixed(2),
+        meteor: objectData.metrics.meteor.meteor?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-      'bert-p': objectData.metrics.bertscore.precision?.[index].toFixed(2),
+        'bert-p': objectData.metrics.bertscore.precision?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-      'bert-r': objectData.metrics.bertscore.recall?.[index].toFixed(2),
+        'bert-r': objectData.metrics.bertscore.recall?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bertscore && {
-      'bert-f1': objectData.metrics.bertscore.f1?.[index].toFixed(2),
+        'bert-f1': objectData.metrics.bertscore.f1?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-      'rouge-1': objectData.metrics.rouge.rouge1?.[index].toFixed(2),
+        'rouge-1': objectData.metrics.rouge.rouge1?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-      'rouge-2': objectData.metrics.rouge.rouge2?.[index].toFixed(2),
+        'rouge-2': objectData.metrics.rouge.rouge2?.[index].toFixed(2),
       }),
       ...(objectData.metrics.rouge && {
-      'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
+        'rouge-l': objectData.metrics.rouge.rougeL?.[index].toFixed(2),
       }),
       ...(objectData.metrics.bleu && { bleu: objectData.metrics.bleu.bleu?.[index].toFixed(2) }),
       ...(objectData.metrics.comet && { comet: objectData.metrics.comet.scores?.[index].toFixed(2) }),

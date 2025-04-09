@@ -270,22 +270,29 @@ def run_workflow(
     local_client: TestClient,
     experiment_id: str,
     workflow_name: str,
-    model: str,
+    hf_model: str,
     job_timeout_sec: PositiveInt | None = MAX_JOB_TIMEOUT_SECS,
     description: str = "Test workflow for inf and eval",
 ) -> WorkflowResponse:
-    """Run a workflow for the experiment."""
+    """Run a new workflow under the specified experiment.
+
+    :param local_client: The test client used to make requests to the API.
+    :param experiment_id: The ID of the experiment to which the workflow belongs.
+    :param workflow_name: The name of the workflow.
+    :param hf_model: The Hugging Face model to use for the workflow.
+    :param job_timeout_sec: The timeout for any job in the workflow, in seconds.
+    :param description: A description for the workflow.
+    :return: The created workflow response.
+    """
     workflow_payload = {
         "name": workflow_name,
         "description": description,
-        "model": model,
+        "model": hf_model,
         "provider": "hf",
         "experiment_id": experiment_id,
-        "job_timeout_sec": 1000,
+        "job_timeout_sec": job_timeout_sec,
     }
-    # The timeout cannot be 0
-    if job_timeout_sec:
-        workflow_payload["job_timeout_sec"] = job_timeout_sec
+
     workflow = WorkflowResponse.model_validate(
         local_client.post(
             "/workflows/",
@@ -453,7 +460,7 @@ async def test_full_experiment_launch(
             local_client=local_client,
             experiment_id=experiment_id,
             workflow_name=name,
-            model=model,
+            hf_model=model,
             description=f"{test_name}: {name}",
         )
         for name in workflow_names
@@ -500,7 +507,7 @@ async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dep
         local_client=local_client,
         experiment_id=experiment_id,
         workflow_name="timed_out_workflow",
-        model=TEST_SEQ2SEQ_MODEL,
+        hf_model=TEST_SEQ2SEQ_MODEL,
         job_timeout_sec=1,  # 1 second timeout to fail the workflow quickly
         description="This workflow should fail",
     )

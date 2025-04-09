@@ -288,6 +288,7 @@ def run_workflow(
         "provider": "hf",
         "experiment_id": experiment_id,
         "job_timeout_sec": 1000,
+        "metrics": ["rouge", "meteor"],
     }
     # The timeout cannot be 0
     if job_timeout_sec:

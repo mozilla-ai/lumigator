@@ -168,7 +168,7 @@ def prepare_judge_model(config: EvalJobConfig) -> None:
     else:
         # otherwise, deepeval will use its default (OpenAI Client), so set up auth first
         # (note that we don't care if `api_key` is not set if we don't run a geval metric)
-        os.environ["OPENAI_API_KEY"] = os.environ.get("api_key")
+        os.environ["OPENAI_API_KEY"] = os.environ.get("api_key", "")
 
         # then make sure we'll start without a .deepeval config file
         Path(DEEPEVAL_CONFIG_FILENAME).unlink(missing_ok=True)

@@ -360,9 +360,14 @@ const saveModelConfiguration = (payload: WorkflowForm) => {
       return workflowForm
     })
   }
-  configuredWorkflowIds.value.push(payload.id)
-  selectedWorkflowIds.value.push(payload.id)
+  if (!configuredWorkflowIds.value.includes(payload.id)) {
+    configuredWorkflowIds.value.push(payload.id)
+  }
+  if (!selectedWorkflowIds.value.includes(payload.id)) {
+    selectedWorkflowIds.value.push(payload.id)
+  }
 
+  isBYOM.value = false
   workflowBeingConfigured.value = undefined
   isCustomWorkflowModalVisible.value = false
 }

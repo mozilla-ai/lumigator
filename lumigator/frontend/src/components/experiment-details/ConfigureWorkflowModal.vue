@@ -194,11 +194,15 @@ const handleCancelClicked = () => {
 const handleContinueClicked = () => {
   emit('save', {
     ...props.workflow,
-    base_url: baseUrl.value || props.workflow.base_url,
+    base_url: props.isBYOM ? baseUrl.value || props.workflow.base_url : props.workflow.base_url,
     model: modelId.value || props.workflow.model,
     name: runTitle.value || props.workflow.name,
     system_prompt: prompt.value || defaultPrompt.value,
-    provider: via.value === 'Hugging Face' ? 'hf' : 'self-hosted',
+    provider: props.isBYOM
+      ? via.value === 'Hugging Face'
+        ? 'hf'
+        : 'self-hosted'
+      : props.workflow.provider,
     generation_config: {
       temperature: temperature.value,
       top_p: topP.value,

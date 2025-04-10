@@ -203,8 +203,7 @@ const temperature = ref(
 )
 const createWorkflowMutation = useMutation({
   mutationFn: (workflowForm: WorkflowForm) => {
-    const { id: _id, ...rest } = workflowForm
-    return workflowsService.createWorkflow(rest)
+    return workflowsService.createWorkflow(workflowForm)
   },
   onError: (error) => {
     toast.add({
@@ -271,15 +270,21 @@ const transformModelToWorkflowForm = (model: Model): WorkflowForm => {
 const workflowsFromLocalStorage = JSON.parse(
   localStorage.getItem(`${props.experiment.id}/allWorkflows`) || '[]',
 )
+
+const systemWorkflows = computed(() => {
+  return modelStore
+    .filterModelsByUseCase(props.experiment.task_definition.task)
+    .map(transformModelToWorkflowForm) // system models that can do this task
+})
 const allWorkflows: Ref<WorkflowForm[]> = ref(
-  workflowsFromLocalStorage.length
-    ? workflowsFromLocalStorage
-    : [
-        ...modelStore
-          .filterModelsByUseCase(props.experiment.task_definition.task)
-          .map(transformModelToWorkflowForm), // system models that can do this task
-      ],
+  workflowsFromLocalStorage.length ? workflowsFromLocalStorage : systemWorkflows.value,
 )
+
+watch(systemWorkflows, (newSystemWorkflows) => {
+  allWorkflows.value = workflowsFromLocalStorage.length
+    ? workflowsFromLocalStorage
+    : newSystemWorkflows
+})
 
 const workflowsByRequirement = (requirementKey: string, isRequired: boolean): WorkflowForm[] => {
   return allWorkflows.value.filter((workflow: WorkflowForm) => {

@@ -98,6 +98,8 @@ def test_upload_data_launch_job(
 
     create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
 
+    assert wait_for_job(local_client, create_inference_job_response_model.id, max_retries=60, retry_interval=5)
+
     logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
@@ -128,6 +130,8 @@ def test_upload_data_launch_job(
     assert create_evaluation_job_response.status_code == 201
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
+
+    assert wait_for_job(local_client, create_evaluation_job_response_model.id, max_retries=60, retry_interval=5)
 
     logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
     logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
@@ -185,6 +189,8 @@ def test_upload_data_no_gt_launch_annotation(
     assert create_annotation_job_response.status_code == 201
 
     create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
+
+    assert wait_for_job(local_client, create_annotation_job_response_model.id, max_retries=60, retry_interval=5)
 
     logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
@@ -427,6 +433,12 @@ async def test_full_experiment_launch(
     * Uploading a dataset
     * Creating an experiment
     * Running workflows for the experiment
+    * Waiting for workflows to complete
+    * Validating experiment results
+    * Adding additional workflows to the experiment
+    * Validating updated experiment results
+    * Retrieving and validating workflow logs
+    * Deleting the experiment and ensuring associated workflows are also deleted
     """
     test_name = f"test_full_experiment_launch/{dataset_name}"
 
@@ -451,7 +463,7 @@ async def test_full_experiment_launch(
     # Trigger experiment/workflows
     experiment_id = create_experiment(local_client, dataset.id, task_definition)
     workflow_names = ["Backend_Workflow_1", "Backend_Workflow_2"]
-    for name in workflow_names:
+    workflows = [
         run_workflow(
             local_client=local_client,
             experiment_id=experiment_id,
@@ -459,6 +471,23 @@ async def test_full_experiment_launch(
             hf_model=model,
             description=f"{test_name}: {name}",
         )
+        for name in workflow_names
+    ]
+    workflow_details_responses = await asyncio.gather(
+        *[wait_for_workflow_complete(local_client, workflow.id) for workflow in workflows]
+    )
+
+    for workflow_details in workflow_details_responses:
+        assert workflow_details
+        assert workflow_details.status == WorkflowStatus.SUCCEEDED
+        assert workflow_details.artifacts_download_url
+        check_artifacts_contain_times(workflow_details.artifacts_download_url)
+
+    validate_experiment_results(local_client, experiment_id, workflow_details_responses)
+    retrieve_and_validate_workflow_logs(local_client, workflow_details_responses)
+
+    # Clean up ...
+    delete_experiment_and_validate(local_client, experiment_id, workflow_details_responses)
 
 
 @pytest.mark.integration

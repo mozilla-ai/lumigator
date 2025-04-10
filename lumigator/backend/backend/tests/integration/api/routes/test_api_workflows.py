@@ -30,9 +30,9 @@ from pydantic import PositiveInt, ValidationError
 
 from backend.main import app
 from backend.tests.conftest import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_RETRY_INTERVAL_SECONDS,
     MAX_JOB_TIMEOUT_SECS,
-    MAX_POLLS,
-    POLL_WAIT_TIME,
     TEST_CAUSAL_MODEL,
     TEST_SEQ2SEQ_MODEL,
     wait_for_job,
@@ -98,7 +98,7 @@ def test_upload_data_launch_job(
 
     create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
 
-    assert wait_for_job(local_client, create_inference_job_response_model.id)
+    assert wait_for_job(local_client, create_inference_job_response_model.id, max_retries=60, retry_interval=5)
 
     logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
@@ -131,7 +131,7 @@ def test_upload_data_launch_job(
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
 
-    assert wait_for_job(local_client, create_evaluation_job_response_model.id)
+    assert wait_for_job(local_client, create_evaluation_job_response_model.id, max_retries=60, retry_interval=5)
 
     logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
     logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
@@ -190,7 +190,7 @@ def test_upload_data_no_gt_launch_annotation(
 
     create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
 
-    assert wait_for_job(local_client, create_annotation_job_response_model.id)
+    assert wait_for_job(local_client, create_annotation_job_response_model.id, max_retries=60, retry_interval=5)
 
     logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
@@ -277,23 +277,30 @@ def run_workflow(
     local_client: TestClient,
     experiment_id: str,
     workflow_name: str,
-    model: str,
+    hf_model: str,
     job_timeout_sec: PositiveInt | None = MAX_JOB_TIMEOUT_SECS,
     description: str = "Test workflow for inf and eval",
 ) -> WorkflowResponse:
-    """Run a workflow for the experiment."""
+    """Run a new workflow under the specified experiment.
+
+    :param local_client: The test client used to make requests to the API.
+    :param experiment_id: The ID of the experiment to which the workflow belongs.
+    :param workflow_name: The name of the workflow.
+    :param hf_model: The Hugging Face model to use for the workflow.
+    :param job_timeout_sec: The timeout for any job in the workflow, in seconds.
+    :param description: A description for the workflow.
+    :return: The created workflow response.
+    """
     workflow_payload = {
         "name": workflow_name,
         "description": description,
-        "model": model,
+        "model": hf_model,
         "provider": "hf",
         "experiment_id": experiment_id,
-        "job_timeout_sec": 1000,
+        "job_timeout_sec": job_timeout_sec,
         "metrics": ["rouge", "meteor"],
     }
-    # The timeout cannot be 0
-    if job_timeout_sec:
-        workflow_payload["job_timeout_sec"] = job_timeout_sec
+
     workflow = WorkflowResponse.model_validate(
         local_client.post(
             "/workflows/",
@@ -461,7 +468,7 @@ async def test_full_experiment_launch(
             local_client=local_client,
             experiment_id=experiment_id,
             workflow_name=name,
-            model=model,
+            hf_model=model,
             description=f"{test_name}: {name}",
         )
         for name in workflow_names
@@ -508,7 +515,7 @@ async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dep
         local_client=local_client,
         experiment_id=experiment_id,
         workflow_name="timed_out_workflow",
-        model=TEST_SEQ2SEQ_MODEL,
+        hf_model=TEST_SEQ2SEQ_MODEL,
         job_timeout_sec=1,  # 1 second timeout to fail the workflow quickly
         description="This workflow should fail",
     )
@@ -546,26 +553,29 @@ def test_job_non_existing(local_client: TestClient, dependency_overrides_service
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
 
-async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID) -> WorkflowDetailsResponse | None:
+async def wait_for_workflow_complete(
+    local_client: TestClient,
+    workflow_id: UUID,
+    max_retries: PositiveInt = DEFAULT_MAX_RETRIES,
+    retry_interval: PositiveInt = DEFAULT_RETRY_INTERVAL_SECONDS,
+) -> WorkflowDetailsResponse | None:
     """Wait for the workflow to complete, including post-completion processing for successful
     workflows to create compiled results.
 
-    Makes a total of ``MAX_POLLS`` (as configured in the ``conftest.py``).
-    Sleeps for ``POLL_WAIT_TIME`` seconds between each poll (as configured in the ``conftest.py``).
+    Makes a total of ``max_retries`` requests, sleeping for ``retry_interval`` seconds between each poll.
 
     :param local_client: The test client.
     :param workflow_id: The workflow ID of the workflow to wait for.
+    :param max_retries: The maximum number of retries to check the workflow status.
+    :param retry_interval: The interval in seconds to wait between retries.
     :return: The workflow details, or ``None`` if the workflow did not reach the required completed state
                 within the maximum number of polls.
     """
     attempt = 0
-    max_attempts = MAX_POLLS
-    wait_duration = POLL_WAIT_TIME
-
-    while attempt < max_attempts:
+    while attempt < max_retries:
         # Allow the waiting interval if we're coming around again.
         if attempt > 0:
-            await asyncio.sleep(wait_duration)
+            await asyncio.sleep(retry_interval)
 
         attempt += 1
         try:
@@ -576,14 +586,14 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
             workflow = WorkflowDetailsResponse.model_validate(response.json())
         except (RequestError, HTTPStatusError) as e:
             # Log the error but allow us to retry the request until we've maxed out our attempts.
-            logger.warning(f"Workflow: {workflow_id}, request: ({attempt}/{max_attempts}) failed: {e}")
+            logger.warning(f"Workflow: {workflow_id}, request: ({attempt}/{max_retries}) failed: {e}")
             continue
 
         # Check if the workflow is not in a terminal state.
         if workflow.status not in {WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED}:
             logger.info(
                 f"Workflow: {workflow_id}, "
-                f"request: ({attempt}/{max_attempts}), "
+                f"request: ({attempt}/{max_retries}), "
                 f"status: {workflow.status}, "
                 f"not in terminal state"
             )
@@ -597,7 +607,7 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
         if not workflow.artifacts_download_url:
             logger.info(
                 f"Workflow: {workflow_id}, "
-                f"request: ({attempt}/{max_attempts}), "
+                f"request: ({attempt}/{max_retries}), "
                 f"status: {workflow.status}, "
                 f"artifacts not ready"
             )
@@ -605,7 +615,7 @@ async def wait_for_workflow_complete(local_client: TestClient, workflow_id: UUID
 
         logger.info(
             f"Workflow: {workflow_id},"
-            f"request: ({attempt}/{max_attempts}), "
+            f"request: ({attempt}/{max_retries}), "
             f"status: {workflow.status}, "
             f"succeeded and processed)"
         )

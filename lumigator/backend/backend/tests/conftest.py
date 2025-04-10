@@ -9,6 +9,7 @@ import uuid
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock
 from uuid import UUID
 
@@ -31,6 +32,7 @@ from lumigator_schemas.jobs import (
 )
 from lumigator_schemas.models import ModelsResponse
 from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunTag
+from pydantic import PositiveInt
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
@@ -55,13 +57,12 @@ TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGenerati
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 MODELS_PATH = Path(__file__).resolve().parents[1] / "models.yaml"
 
-# Maximum amount of polls done to check if a job has finished
-# (status FAILED or SUCCEEDED) in fucntion tests.
-# An Exception will be raised if the number of polls is exceeded.
-MAX_POLLS = 18
+# The recommended default value for the maximum amount of polls to carry out
+# in order to determine whether a task finished or not.
+DEFAULT_MAX_RETRIES = 18
 
-# Time between job status polls.
-POLL_WAIT_TIME = 10
+# The recommended default value for the interval between polls/retries in seconds.
+DEFAULT_RETRY_INTERVAL_SECONDS = 10
 
 # Maximum time we should allow test jobs to run
 MAX_JOB_TIMEOUT_SECS = 60 * 5
@@ -100,7 +101,21 @@ def format_dataset(data: list[list[str]]) -> str:
     return buffer.read()
 
 
-def wait_for_job(client, job_id: UUID, max_retries: int = MAX_POLLS, retry_interval: int = POLL_WAIT_TIME) -> bool:
+def wait_for_job(
+    client: TestClient,
+    job_id: UUID,
+    max_retries: PositiveInt = DEFAULT_MAX_RETRIES,
+    retry_interval: PositiveInt = DEFAULT_RETRY_INTERVAL_SECONDS,
+) -> bool:
+    """Attempts to wait for the specified job to finish and returns True if it succeeded.
+
+    :param client: The test client to use for making requests.
+    :param job_id: The ID of the job to wait for.
+    :param max_retries: The maximum number of retries to perform before timing out.
+    :param retry_interval: The interval in seconds between retries.
+    :return: True if the job succeeded, False if it failed.
+    :raises TimeoutError: If the job does not reach a finished state within the specified max retries.
+    """
     for _ in range(max_retries):
         response = client.get(f"/jobs/{job_id}")
         assert response.status_code == 200
@@ -110,28 +125,34 @@ def wait_for_job(client, job_id: UUID, max_retries: int = MAX_POLLS, retry_inter
             return job_status == JobStatus.SUCCEEDED.value
         time.sleep(retry_interval)
 
-    raise Exception("Job poll timed out")
+    raise TimeoutError("Job poll timed out")
 
 
-def wait_for_experiment(client, experiment_id: UUID) -> bool:
-    succeeded = False
-    timed_out = True
-    for _ in range(1, MAX_POLLS):
-        get_experiment_response = client.get(f"/experiments/{experiment_id}")
-        assert get_experiment_response.status_code == 200
-        get_experiment_response_model = GetExperimentResponse.model_validate(get_experiment_response.json())
-        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            timed_out = False
-            break
-        if get_experiment_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            timed_out = False
-            break
-        time.sleep(POLL_WAIT_TIME)
-    if timed_out:
-        raise Exception("Experiment poll timed out")
-    return succeeded
+def wait_for_experiment(
+    client: TestClient,
+    experiment_id: UUID,
+    max_retries: PositiveInt = DEFAULT_MAX_RETRIES,
+    retry_interval: PositiveInt = DEFAULT_RETRY_INTERVAL_SECONDS,
+) -> bool:
+    """Attempts to wait for the specified experiment to finish and returns True if it succeeded.
+
+    :param client: The test client to use for making requests.
+    :param experiment_id: The ID of the experiment to wait for.
+    :param max_retries: The maximum number of retries to perform before timing out.
+    :param retry_interval: The interval in seconds between retries.
+    :return: True if the experiment succeeded, False if it failed.
+    :raises TimeoutError: If the experiment does not reach a finished state within the specified max retries.
+    """
+    for _ in range(max_retries):
+        response = client.get(f"/experiments/{experiment_id}")
+        assert response.status_code == 200
+        experiment_status = GetExperimentResponse.model_validate(response.json()).status
+
+        if experiment_status in JobService.TERMINAL_STATUS:
+            return experiment_status == JobStatus.SUCCEEDED.value
+        time.sleep(retry_interval)
+
+    raise TimeoutError("Experiment poll timed out")
 
 
 @pytest.fixture
@@ -312,7 +333,7 @@ def app():
 
 
 @pytest.fixture(scope="function")
-def app_client(app: FastAPI):
+def app_client(app: FastAPI) -> Generator[TestClient, Any, None]:
     """Create a test client for calling the FastAPI app."""
     base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
@@ -320,7 +341,7 @@ def app_client(app: FastAPI):
 
 
 @pytest.fixture(scope="function")
-def local_client(app: FastAPI):
+def local_client(app: FastAPI) -> Generator[TestClient, Any, None]:
     """Create a test client for calling the real backend."""
     base_url = "http://localhost/api/v1/"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:

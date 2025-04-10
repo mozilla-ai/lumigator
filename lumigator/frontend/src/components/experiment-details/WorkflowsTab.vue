@@ -165,7 +165,7 @@ const onWorkflowClicked = () => {
   return handleViewAllResultsClicked()
 }
 
-const columns = ['model', 'created_at', 'status', 'options']
+const columns = ['model', 'run title', 'prompt', 'created_at', 'status', 'options']
 const tableData = computed(() => {
   return props.experiment.workflows.map((workflow: Workflow) => {
     return {
@@ -174,6 +174,9 @@ const tableData = computed(() => {
       ...workflow,
       model: workflow.model,
       created_at: workflow.created_at,
+      'run title': workflow.name,
+      prompt: workflow.system_prompt,
+
       // name: workflow.name,
       status: workflow.status,
       options: 'options',

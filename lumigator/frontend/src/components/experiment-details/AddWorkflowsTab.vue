@@ -243,7 +243,7 @@ const transformModelToWorkflowForm = (model: Model): WorkflowForm => {
     system_prompt: experimentPrompt.value || defaultPrompt.value,
     description: props.experiment.description,
     max_samples: props.experiment.max_samples,
-    name: `${props.experiment.name}/${model.model}`,
+    name: `${model.model}`,
     model: model.model,
     provider: model.provider,
     secret_key_name: model.requirements.includes('api_key')

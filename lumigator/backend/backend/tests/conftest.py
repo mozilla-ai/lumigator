@@ -89,18 +89,6 @@ def disable_background_tasks(monkeypatch):
     monkeypatch.setattr(fastapi.BackgroundTasks, "add_task", noop_add_task)
 
 
-@pytest.fixture(scope="function")
-def test_client_without_background_tasks(app: FastAPI, disable_background_tasks) -> Generator[TestClient, Any, None]:
-    """Create a test client that directly calls FastAPI, with background tasks 'disabled'.
-
-    Any underlying call in the application's code to `add_task` will return immediately (no-op).
-    This is useful for testing when you don't need background tasks to complete, and you want to avoid waiting for them.
-    """
-    base_url = "http://localhost/api/v1/"  # This URL is mainly for display purposes.
-    with TestClient(app, base_url=base_url) as c:
-        yield c
-
-
 @pytest.fixture(scope="session")
 def common_resources_dir() -> Path:
     return Path(__file__).parent.parent.parent.parent
@@ -361,17 +349,21 @@ def app():
 
 
 @pytest.fixture(scope="function")
-def app_client(app: FastAPI) -> Generator[TestClient, Any, None]:
+def test_client(app: FastAPI) -> Generator[TestClient, Any, None]:
     """Create a test client for calling the FastAPI app directly."""
-    base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
+    base_url = "http://localhost/api/v1/"  # Fake base URL for the app, mainly for display purposes.
     with TestClient(app, base_url=base_url) as c:
         yield c
 
 
 @pytest.fixture(scope="function")
-def local_client(app: FastAPI) -> Generator[TestClient, Any, None]:
-    """Create a test client for calling the real backend."""
-    base_url = "http://localhost/api/v1/"  # Fake base URL for the app
+def test_client_without_background_tasks(app: FastAPI, disable_background_tasks) -> Generator[TestClient, Any, None]:
+    """Create a test client that directly calls FastAPI, with background tasks 'disabled'.
+
+    Any underlying call in the application's code to `add_task` will return immediately (no-op).
+    This is useful for testing when you don't need background tasks to complete, and you want to avoid waiting for them.
+    """
+    base_url = "http://localhost/api/v1/"  # Fake base URL, mainly for display purposes.
     with TestClient(app, base_url=base_url) as c:
         yield c
 

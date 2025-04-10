@@ -45,8 +45,8 @@ POST_HEADER = {
 
 
 @app.on_event("startup")
-def test_health_ok(local_client: TestClient):
-    response = local_client.get("/health/")
+def test_health_ok(test_client: TestClient):
+    response = test_client.get("/health/")
     assert response.status_code == 200
 
 
@@ -415,16 +415,16 @@ def ensure_job_status(local_client: TestClient, workflow_details: WorkflowDetail
         )
 
 
-def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
+def test_experiment_non_existing(test_client: TestClient, dependency_overrides_services):
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/experiments/{non_existing_id}")
+    response = test_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
-def test_job_non_existing(local_client: TestClient, dependency_overrides_services):
+def test_job_non_existing(test_client: TestClient, dependency_overrides_services):
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/jobs/{non_existing_id}")
+    response = test_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
@@ -502,7 +502,7 @@ async def wait_for_workflow_complete(
 
 
 def test_launch_job_with_secret(
-    local_client: TestClient,
+    test_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,  # Required even if not used directly in the test
 ):
@@ -511,12 +511,12 @@ def test_launch_job_with_secret(
 
     # Upload the Mistral API key as a secret with an incorrect value.
     ko_secret = SecretUploadRequest(value="<WRONG SECRET HERE>", description="Mistral API key")
-    response = local_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
+    response = test_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
     logger.info(f"Uploaded KO key {secret_name}: {response}")
     assert response.status_code == HTTPStatus.CREATED or response.status_code == HTTPStatus.NO_CONTENT
 
     # Upload a dataset
-    create_response = local_client.post(
+    create_response = test_client.post(
         "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -536,11 +536,11 @@ def test_launch_job_with_secret(
             secret_key_name=secret_name,
         ),
     )
-    create_inference_job_response = local_client.post(
+    create_inference_job_response = test_client.post(
         url="/jobs/inference/", headers=POST_HEADER, json=infer_create.model_dump(mode="json")
     )
     create_inference_job_response.raise_for_status()
     assert create_inference_job_response.status_code == 201
     job_response = JobResponse.model_validate(create_inference_job_response.json())
     # We expect the job to fail because it needs a VALID API key for Mistral.
-    assert not wait_for_job(local_client, job_response.id, max_retries=60, retry_interval=5)
+    assert not wait_for_job(test_client, job_response.id, max_retries=60, retry_interval=5)

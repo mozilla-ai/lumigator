@@ -45,27 +45,27 @@ POST_HEADER = {
 
 
 @app.on_event("startup")
-def test_health_ok(local_client: TestClient):
-    response = local_client.get("/health/")
+def test_health_ok(test_client: TestClient):
+    response = test_client.get("/health/")
     assert response.status_code == 200
 
 
 def test_upload_data_launch_job(
-    local_client: TestClient,
+    test_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,
 ):
     logger.info("Running test: 'test_upload_data_launch_job'")
 
-    response = local_client.get("/health")
+    response = test_client.get("/health")
     assert response.status_code == 200
 
     # store how many ds are in the db before we start
-    get_ds_response = local_client.get("/datasets/")
+    get_ds_response = test_client.get("/datasets/")
     assert get_ds_response.status_code == 200
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
-    create_response = local_client.post(
+    create_response = test_client.post(
         "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -75,7 +75,7 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_before_response = local_client.get("/datasets/")
+    get_ds_before_response = test_client.get("/datasets/")
     assert get_ds_before_response.status_code == 200
     get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
     assert get_ds_before.total == get_ds.total + 1
@@ -93,20 +93,20 @@ def test_upload_data_launch_job(
             "store_to_dataset": True,
         },
     }
-    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+    create_inference_job_response = test_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     assert create_inference_job_response.status_code == 201
 
     create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
 
-    assert wait_for_job(local_client, create_inference_job_response_model.id, max_retries=60, retry_interval=5)
+    assert wait_for_job(test_client, create_inference_job_response_model.id, max_retries=60, retry_interval=5)
 
-    logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
+    logs_infer_job_response = test_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
     logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
     logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
     logger.info(f"#{logs_infer_job_response_model.logs}#")
 
     # retrieve the DS for the infer job...
-    output_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/dataset")
+    output_infer_job_response = test_client.get(f"/jobs/{create_inference_job_response_model.id}/dataset")
     assert output_infer_job_response is not None
     assert output_infer_job_response.status_code == 200
 
@@ -126,42 +126,42 @@ def test_upload_data_launch_job(
         },
     }
 
-    create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
+    create_evaluation_job_response = test_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
     assert create_evaluation_job_response.status_code == 201
 
     create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
 
-    assert wait_for_job(local_client, create_evaluation_job_response_model.id, max_retries=60, retry_interval=5)
+    assert wait_for_job(test_client, create_evaluation_job_response_model.id, max_retries=60, retry_interval=5)
 
-    logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
+    logs_evaluation_job_response = test_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
     logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
     logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
     logger.info(f"#{logs_evaluation_job_response_model.logs}#")
 
     # FIXME Either remove the store_to_dataset option, or
     # restore it to the jobs service
-    get_ds_after_response = local_client.get("/datasets/")
+    get_ds_after_response = test_client.get("/datasets/")
     assert get_ds_after_response.status_code == 200
     get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
     assert get_ds_after.total == get_ds_before.total + 1
 
-    get_all_jobs = local_client.get("/jobs")
+    get_all_jobs = test_client.get("/jobs")
     assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
-    get_jobs_infer = local_client.get("/jobs?job_types=inference")
+    get_jobs_infer = test_client.get("/jobs?job_types=inference")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
-    get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
+    get_jobs_eval = test_client.get("/jobs?job_types=evaluator")
     assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
-    local_client: TestClient,
+    test_client: TestClient,
     unnanotated_dataset,
     dependency_overrides_services,
 ):
     dataset = request.getfixturevalue(unnanotated_dataset)
-    create_response = local_client.post(
+    create_response = test_client.post(
         "/datasets/",
         data={},
         files={"dataset": dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -185,20 +185,20 @@ def test_upload_data_no_gt_launch_annotation(
         },
     }
 
-    create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
+    create_annotation_job_response = test_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201
 
     create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
 
-    assert wait_for_job(local_client, create_annotation_job_response_model.id, max_retries=60, retry_interval=5)
+    assert wait_for_job(test_client, create_annotation_job_response_model.id, max_retries=60, retry_interval=5)
 
-    logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
+    logs_annotation_job_response = test_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
     logs_annotation_job_response_model = JobLogsResponse.model_validate(logs_annotation_job_response.json())
     logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
     logger.info(f"#{logs_annotation_job_response_model.logs}#")
 
-    logs_annotation_job_results = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/result/download")
+    logs_annotation_job_results = test_client.get(f"/jobs/{create_annotation_job_response_model.id}/result/download")
     logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(logs_annotation_job_results.json())
     logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
     annotation_job_results_url = requests.get(
@@ -421,7 +421,7 @@ def check_artifacts_contain_times(artifacts_url: str):
     ],
 )
 async def test_full_experiment_launch(
-    local_client: TestClient,
+    test_client: TestClient,
     dataset_name: str,
     task_definition: dict,
     model: str,
@@ -453,19 +453,19 @@ async def test_full_experiment_launch(
     dataset = request.getfixturevalue(dataset_name)
 
     # Health check
-    check_backend_health_status(local_client)
+    check_backend_health_status(test_client)
 
     # Dataset upload
-    initial_count = check_initial_dataset_count(local_client)
-    dataset = upload_dataset(local_client, dataset)
-    check_dataset_count_after_upload(local_client, initial_count)
+    initial_count = check_initial_dataset_count(test_client)
+    dataset = upload_dataset(test_client, dataset)
+    check_dataset_count_after_upload(test_client, initial_count)
 
     # Trigger experiment/workflows
-    experiment_id = create_experiment(local_client, dataset.id, task_definition)
+    experiment_id = create_experiment(test_client, dataset.id, task_definition)
     workflow_names = ["Backend_Workflow_1", "Backend_Workflow_2"]
     workflows = [
         run_workflow(
-            local_client=local_client,
+            local_client=test_client,
             experiment_id=experiment_id,
             workflow_name=name,
             hf_model=model,
@@ -474,7 +474,7 @@ async def test_full_experiment_launch(
         for name in workflow_names
     ]
     workflow_details_responses = await asyncio.gather(
-        *[wait_for_workflow_complete(local_client, workflow.id) for workflow in workflows]
+        *[wait_for_workflow_complete(test_client, workflow.id) for workflow in workflows]
     )
 
     for workflow_details in workflow_details_responses:
@@ -483,16 +483,16 @@ async def test_full_experiment_launch(
         assert workflow_details.artifacts_download_url
         check_artifacts_contain_times(workflow_details.artifacts_download_url)
 
-    validate_experiment_results(local_client, experiment_id, workflow_details_responses)
-    retrieve_and_validate_workflow_logs(local_client, workflow_details_responses)
+    validate_experiment_results(test_client, experiment_id, workflow_details_responses)
+    retrieve_and_validate_workflow_logs(test_client, workflow_details_responses)
 
     # Clean up ...
-    delete_experiment_and_validate(local_client, experiment_id, workflow_details_responses)
+    delete_experiment_and_validate(test_client, experiment_id, workflow_details_responses)
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+async def test_timedout_experiment(test_client: TestClient, dialog_dataset, dependency_overrides_services):
     """Test ensures that the timeout set on jobs causes the workflow to fail:
     * The backend health status
     * Uploading a dataset
@@ -504,25 +504,25 @@ async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dep
     # Hardcoded values for summarization
     task_definition = {"task": "summarization"}
 
-    check_backend_health_status(local_client)
+    check_backend_health_status(test_client)
 
-    initial_count = check_initial_dataset_count(local_client)
-    dataset = upload_dataset(local_client, dialog_dataset)
-    check_dataset_count_after_upload(local_client, initial_count)
+    initial_count = check_initial_dataset_count(test_client)
+    dataset = upload_dataset(test_client, dialog_dataset)
+    check_dataset_count_after_upload(test_client, initial_count)
 
-    experiment_id = create_experiment(local_client, dataset.id, task_definition)
+    experiment_id = create_experiment(test_client, dataset.id, task_definition)
     workflow = run_workflow(
-        local_client=local_client,
+        local_client=test_client,
         experiment_id=experiment_id,
         workflow_name="timed_out_workflow",
         hf_model=TEST_SEQ2SEQ_MODEL,
         job_timeout_sec=1,  # 1 second timeout to fail the workflow quickly
         description="This workflow should fail",
     )
-    workflow_details = await wait_for_workflow_complete(local_client, workflow.id)
+    workflow_details = await wait_for_workflow_complete(test_client, workflow.id)
     assert workflow_details is not None
     assert workflow_details.status == WorkflowStatus.FAILED
-    ensure_job_status(local_client, workflow_details, JobStatus.STOPPED)
+    ensure_job_status(test_client, workflow_details, JobStatus.STOPPED)
 
 
 def ensure_job_status(local_client: TestClient, workflow_details: WorkflowDetailsResponse, expected_status: JobStatus):
@@ -539,16 +539,16 @@ def ensure_job_status(local_client: TestClient, workflow_details: WorkflowDetail
         )
 
 
-def test_experiment_non_existing(local_client: TestClient, dependency_overrides_services):
+def test_experiment_non_existing(test_client: TestClient, dependency_overrides_services):
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/experiments/{non_existing_id}")
+    response = test_client.get(f"/experiments/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Experiment with ID {non_existing_id} not found"
 
 
-def test_job_non_existing(local_client: TestClient, dependency_overrides_services):
+def test_job_non_existing(test_client: TestClient, dependency_overrides_services):
     non_existing_id = "d34dbeef-4bea-4d19-ad06-214202165812"
-    response = local_client.get(f"/jobs/{non_existing_id}")
+    response = test_client.get(f"/jobs/{non_existing_id}")
     assert response.status_code == 404
     assert response.json()["detail"] == f"Job with ID {non_existing_id} not found"
 
@@ -626,7 +626,7 @@ async def wait_for_workflow_complete(
 
 
 def test_launch_job_with_secret(
-    local_client: TestClient,
+    test_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,  # Required even if not used directly in the test
 ):
@@ -635,12 +635,12 @@ def test_launch_job_with_secret(
 
     # Upload the Mistral API key as a secret with an incorrect value.
     ko_secret = SecretUploadRequest(value="<WRONG SECRET HERE>", description="Mistral API key")
-    response = local_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
+    response = test_client.put(f"/settings/secrets/{secret_name}", json=ko_secret.model_dump())
     logger.info(f"Uploaded KO key {secret_name}: {response}")
     assert response.status_code == HTTPStatus.CREATED or response.status_code == HTTPStatus.NO_CONTENT
 
     # Upload a dataset
-    create_response = local_client.post(
+    create_response = test_client.post(
         "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -660,11 +660,11 @@ def test_launch_job_with_secret(
             secret_key_name=secret_name,
         ),
     )
-    create_inference_job_response = local_client.post(
+    create_inference_job_response = test_client.post(
         url="/jobs/inference/", headers=POST_HEADER, json=infer_create.model_dump(mode="json")
     )
     create_inference_job_response.raise_for_status()
     assert create_inference_job_response.status_code == 201
     job_response = JobResponse.model_validate(create_inference_job_response.json())
     # We expect the job to fail because it needs a VALID API key for Mistral.
-    assert not wait_for_job(local_client, job_response.id, max_retries=60, retry_interval=5)
+    assert not wait_for_job(test_client, job_response.id, max_retries=60, retry_interval=5)

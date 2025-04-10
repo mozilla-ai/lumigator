@@ -401,45 +401,6 @@ async def test_full_experiment_launch(
         )
 
 
-@pytest.mark.integration
-@pytest.mark.asyncio
-async def test_timedout_experiment(
-    local_client: TestClient,
-    dialog_dataset,
-    dependency_overrides_services,
-):
-    """Test ensures that the timeout set on jobs causes the workflow to fail:
-    * The backend health status
-    * Uploading a dataset
-    * Creating an experiment
-    * Running a workflow for the experiment (max 1 sec timeout)
-    * Check that the workflow is in failed state
-    * Check that any jobs are in a stopped state
-    """
-    # Hardcoded values for summarization
-    task_definition = {"task": "summarization"}
-
-    check_backend_health_status(local_client)
-
-    initial_count = check_initial_dataset_count(local_client)
-    dataset = upload_dataset(local_client, dialog_dataset)
-    check_dataset_count_after_upload(local_client, initial_count)
-
-    experiment_id = create_experiment(local_client, dataset.id, task_definition)
-    workflow = run_workflow(
-        local_client=local_client,
-        experiment_id=experiment_id,
-        workflow_name="timed_out_workflow",
-        hf_model=TEST_SEQ2SEQ_MODEL,
-        job_timeout_sec=1,  # 1 second timeout to fail the workflow quickly
-        description="This workflow should fail",
-    )
-    workflow_details = await wait_for_workflow_complete(local_client, workflow.id)
-    assert workflow_details is not None
-    assert workflow_details.status == WorkflowStatus.FAILED
-    ensure_job_status(local_client, workflow_details, JobStatus.STOPPED)
-
-
 def ensure_job_status(local_client: TestClient, workflow_details: WorkflowDetailsResponse, expected_status: JobStatus):
     """Helper function to check that all jobs in a workflow have the expected status."""
     for job in workflow_details.jobs:

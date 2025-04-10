@@ -146,7 +146,7 @@ import { useModelStore } from '@/stores/modelsStore'
 import type { Experiment } from '@/types/Experiment'
 import type { Model } from '@/types/Model'
 import { Button, InputNumber, Slider, Textarea, useToast } from 'primevue'
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import ModelCard from './ModelCard.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
@@ -158,9 +158,16 @@ const { models } = storeToRefs(useModelStore())
 const props = defineProps<{ experiment: Experiment }>()
 const modelStore = useModelStore()
 const toast = useToast()
-const selectedWorkflowIds = ref<string[]>([])
-const configuredWorkflowIds = ref<WorkflowForm['id'][]>([])
-const deletableWorkflowIds = ref<WorkflowForm['id'][]>([])
+const selectedWorkflowIds = ref<string[]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/selectedWorkflowIds`) || '[]'),
+)
+const configuredWorkflowIds = ref<WorkflowForm['id'][]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/configuredWorkflowIds`) || '[]'),
+)
+
+const deletableWorkflowIds = ref<WorkflowForm['id'][]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/deletableWorkflowIds`) || '[]'),
+)
 const queryClient = useQueryClient()
 const emit = defineEmits(['workflowCreated'])
 const isCustomWorkflowModalVisible = ref(false)
@@ -177,7 +184,9 @@ export type WorkflowForm = CreateWorkflowPayload & {
   id: string
 }
 
-const experimentPrompt = ref('')
+const experimentPrompt = ref(
+  localStorage.getItem(`${props.experiment.id}/experimentPrompt`) || '""',
+)
 const defaultPrompt = computed(() => {
   const task = props.experiment.task_definition.task
   if (task === 'summarization') {
@@ -188,8 +197,10 @@ const defaultPrompt = computed(() => {
     return `translate ${sourceLanguage} to ${targetLanguage}:`
   }
 })
-const topP = ref(0.55)
-const temperature = ref(0.55)
+const topP = ref(JSON.parse(localStorage.getItem(`${props.experiment.id}/topP`) || '0.5'))
+const temperature = ref(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/temperature`) || '0.5'),
+)
 const createWorkflowMutation = useMutation({
   mutationFn: (workflowForm: WorkflowForm) => {
     const { id: _id, ...rest } = workflowForm
@@ -257,11 +268,18 @@ const transformModelToWorkflowForm = (model: Model): WorkflowForm => {
   }
 }
 
-const allWorkflows: Ref<WorkflowForm[]> = ref([
-  ...modelStore
-    .filterModelsByUseCase(props.experiment.task_definition.task)
-    .map(transformModelToWorkflowForm), // system models that can do this task
-])
+const workflowsFromLocalStorage = JSON.parse(
+  localStorage.getItem(`${props.experiment.id}/allWorkflows`) || '[]',
+)
+const allWorkflows: Ref<WorkflowForm[]> = ref(
+  workflowsFromLocalStorage.length
+    ? workflowsFromLocalStorage
+    : [
+        ...modelStore
+          .filterModelsByUseCase(props.experiment.task_definition.task)
+          .map(transformModelToWorkflowForm), // system models that can do this task
+      ],
+)
 
 const workflowsByRequirement = (requirementKey: string, isRequired: boolean): WorkflowForm[] => {
   return allWorkflows.value.filter((workflow: WorkflowForm) => {
@@ -307,6 +325,7 @@ const handleRunClicked = () => {
     const workflowPayload: WorkflowForm = foundCustomWorkflow
     createWorkflowMutation.mutate(workflowPayload)
     selectedWorkflowIds.value = []
+    configuredWorkflowIds.value = []
   })
 }
 
@@ -318,7 +337,6 @@ const handleCheckboxToggled = (workflow: WorkflowForm) => {
 
 const handleCloneClicked = (workflow: WorkflowForm) => {
   console.log('clone clicked', workflow)
-  configuredWorkflowIds.value.push(workflow.id)
   const id = Math.floor(Math.random() * 1000000).toString(16)
   allWorkflows.value.push({
     ...workflow,
@@ -386,6 +404,44 @@ const handleDeleteClicked = (workflow: WorkflowForm) => {
     (deletableWorkflowId) => deletableWorkflowId !== workflow.id,
   )
 }
+
+watch(
+  [
+    selectedWorkflowIds,
+    configuredWorkflowIds,
+    deletableWorkflowIds,
+    experimentPrompt,
+    topP,
+    temperature,
+    allWorkflows,
+  ],
+  ([
+    newSelectedWorkflowIds,
+    newConfiguredWorkflowIds,
+    newDeletableWorkflowIds,
+    newExperimentPrompt,
+    newTopP,
+    newTemperature,
+    newAllWorkflows,
+  ]) => {
+    localStorage.setItem(
+      `${props.experiment.id}/selectedWorkflowIds`,
+      JSON.stringify(newSelectedWorkflowIds),
+    )
+    localStorage.setItem(
+      `${props.experiment.id}/configuredWorkflowIds`,
+      JSON.stringify(newConfiguredWorkflowIds),
+    )
+    localStorage.setItem(
+      `${props.experiment.id}/deletableWorkflowIds`,
+      JSON.stringify(newDeletableWorkflowIds),
+    )
+    localStorage.setItem(`${props.experiment.id}/experimentPrompt`, newExperimentPrompt)
+    localStorage.setItem(`${props.experiment.id}/topP`, JSON.stringify(newTopP))
+    localStorage.setItem(`${props.experiment.id}/temperature`, JSON.stringify(newTemperature))
+    localStorage.setItem(`${props.experiment.id}/allWorkflows`, JSON.stringify(newAllWorkflows))
+  },
+)
 </script>
 
 <style scoped lang="scss">

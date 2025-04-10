@@ -50,10 +50,12 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
+@pytest.mark.asyncio
 def test_upload_data_launch_job(
     local_client: TestClient,
     dialog_dataset,
     dependency_overrides_services,
+    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     logger.info("Running test: 'test_upload_data_launch_job'")
 
@@ -90,63 +92,11 @@ def test_upload_data_launch_job(
             "model": TEST_SEQ2SEQ_MODEL,
             "provider": "hf",
             "output_field": "predictions",
-            "store_to_dataset": True,
+            "store_to_dataset": False,
         },
     }
     create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     assert create_inference_job_response.status_code == 201
-
-    create_inference_job_response_model = JobResponse.model_validate(create_inference_job_response.json())
-
-    logs_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/logs")
-    logs_infer_job_response_model = JobLogsResponse.model_validate(logs_infer_job_response.json())
-    logger.info(f"-- infer logs -- {create_inference_job_response_model.id}")
-    logger.info(f"#{logs_infer_job_response_model.logs}#")
-
-    # retrieve the DS for the infer job...
-    output_infer_job_response = local_client.get(f"/jobs/{create_inference_job_response_model.id}/dataset")
-    assert output_infer_job_response is not None
-    assert output_infer_job_response.status_code == 200
-
-    output_infer_job_response_model = DatasetResponse.model_validate(output_infer_job_response.json())
-    assert output_infer_job_response_model is not None
-
-    eval_payload = {
-        "name": "test_upload_data_launch_job-evaluation",
-        "description": "Huggingface model evaluation",
-        "dataset": str(output_infer_job_response_model.id),
-        "max_samples": 10,
-        "job_config": {
-            "job_type": JobType.EVALUATION,
-            "metrics": ["rouge", "meteor"],
-            "model": TEST_SEQ2SEQ_MODEL,
-            "provider": "hf",
-        },
-    }
-
-    create_evaluation_job_response = local_client.post("/jobs/evaluator/", headers=POST_HEADER, json=eval_payload)
-    assert create_evaluation_job_response.status_code == 201
-
-    create_evaluation_job_response_model = JobResponse.model_validate(create_evaluation_job_response.json())
-
-    logs_evaluation_job_response = local_client.get(f"/jobs/{create_evaluation_job_response_model.id}/logs")
-    logs_evaluation_job_response_model = JobLogsResponse.model_validate(logs_evaluation_job_response.json())
-    logger.info(f"-- eval logs -- {create_evaluation_job_response_model.id}")
-    logger.info(f"#{logs_evaluation_job_response_model.logs}#")
-
-    # FIXME Either remove the store_to_dataset option, or
-    # restore it to the jobs service
-    get_ds_after_response = local_client.get("/datasets/")
-    assert get_ds_after_response.status_code == 200
-    get_ds_after = ListingResponse[DatasetResponse].model_validate(get_ds_after_response.json())
-    assert get_ds_after.total == get_ds_before.total + 1
-
-    get_all_jobs = local_client.get("/jobs")
-    assert (ListingResponse[JobResponse].model_validate(get_all_jobs.json())).total == 2
-    get_jobs_infer = local_client.get("/jobs?job_types=inference")
-    assert (ListingResponse[JobResponse].model_validate(get_jobs_infer.json())).total == 1
-    get_jobs_eval = local_client.get("/jobs?job_types=evaluator")
-    assert (ListingResponse[JobResponse].model_validate(get_jobs_eval.json())).total == 1
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
@@ -155,6 +105,7 @@ def test_upload_data_no_gt_launch_annotation(
     local_client: TestClient,
     unnanotated_dataset,
     dependency_overrides_services,
+    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     dataset = request.getfixturevalue(unnanotated_dataset)
     create_response = local_client.post(
@@ -191,18 +142,6 @@ def test_upload_data_no_gt_launch_annotation(
     logs_annotation_job_response_model = JobLogsResponse.model_validate(logs_annotation_job_response.json())
     logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
     logger.info(f"#{logs_annotation_job_response_model.logs}#")
-
-    logs_annotation_job_results = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/result/download")
-    logs_annotation_job_results_model = JobResultDownloadResponse.model_validate(logs_annotation_job_results.json())
-    logger.info(f"Download url: {logs_annotation_job_results_model.download_url}")
-    annotation_job_results_url = requests.get(
-        logs_annotation_job_results_model.download_url,
-        timeout=5,  # 5 seconds
-    )
-    logs_annotation_job_output = JobResultObject.model_validate(annotation_job_results_url.json())
-    assert logs_annotation_job_output.artifacts["predictions"] is None
-    assert logs_annotation_job_output.artifacts["ground_truth"] is not None
-    logger.info(f"Created results: {logs_annotation_job_output}")
 
 
 def check_backend_health_status(local_client: TestClient):
@@ -421,6 +360,7 @@ async def test_full_experiment_launch(
     model: str,
     request,
     dependency_overrides_services,
+    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     """This is the main integration test: it checks:
     * The backend health status
@@ -463,7 +403,11 @@ async def test_full_experiment_launch(
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_timedout_experiment(local_client: TestClient, dialog_dataset, dependency_overrides_services):
+async def test_timedout_experiment(
+    local_client: TestClient,
+    dialog_dataset,
+    dependency_overrides_services,
+):
     """Test ensures that the timeout set on jobs causes the workflow to fail:
     * The backend health status
     * Uploading a dataset

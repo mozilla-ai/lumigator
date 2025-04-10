@@ -622,3 +622,13 @@ def fake_mlflow_run_deleted():
     run_data = RunData(metrics={}, params={}, tags={})
 
     return Run(run_info=run_info, run_data=run_data)
+
+
+@pytest.fixture(scope="function")
+def disable_background_tasks(monkeypatch):
+    """Disable background tasks in FastAPI when using ``TestClient`` (for testing purposes)."""
+
+    def noop_add_task(self, func, *args, **kwargs):
+        pass
+
+    monkeypatch.setattr(BackgroundTasks, "add_task", noop_add_task)

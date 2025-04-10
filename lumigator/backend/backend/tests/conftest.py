@@ -14,6 +14,7 @@ from unittest.mock import MagicMock
 from uuid import UUID
 
 import evaluator
+import fastapi
 import fsspec
 import pytest
 import requests_mock
@@ -71,6 +72,33 @@ MAX_JOB_TIMEOUT_SECS = 60 * 5
 @pytest.fixture(scope="session")
 def background_tasks() -> BackgroundTasks:
     return BackgroundTasks()
+
+
+@pytest.fixture(scope="function")
+def disable_background_tasks(monkeypatch):
+    """Patches background tasks' ``add_task`` method as a no-op.
+
+    Useful for testing purposes to disable background tasks inside a ``TestClient``.
+    Background tasks run asynchronously in normal operation, but when using ``TestClient`` they
+    become synchronous, causing tests to wait for them to complete before exiting.
+    """
+
+    def noop_add_task(self, func, *args, **kwargs):
+        pass
+
+    monkeypatch.setattr(fastapi.BackgroundTasks, "add_task", noop_add_task)
+
+
+@pytest.fixture(scope="function")
+def test_client_without_background_tasks(app: FastAPI, disable_background_tasks) -> Generator[TestClient, Any, None]:
+    """Create a test client that directly calls FastAPI, with background tasks 'disabled'.
+
+    Any underlying call in the application's code to `add_task` will return immediately (no-op).
+    This is useful for testing when you don't need background tasks to complete, and you want to avoid waiting for them.
+    """
+    base_url = "http://localhost/api/v1/"  # This URL is mainly for display purposes.
+    with TestClient(app, base_url=base_url) as c:
+        yield c
 
 
 @pytest.fixture(scope="session")
@@ -334,7 +362,7 @@ def app():
 
 @pytest.fixture(scope="function")
 def app_client(app: FastAPI) -> Generator[TestClient, Any, None]:
-    """Create a test client for calling the FastAPI app."""
+    """Create a test client for calling the FastAPI app directly."""
     base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
     with TestClient(app, base_url=base_url) as c:
         yield c
@@ -622,13 +650,3 @@ def fake_mlflow_run_deleted():
     run_data = RunData(metrics={}, params={}, tags={})
 
     return Run(run_info=run_info, run_data=run_data)
-
-
-@pytest.fixture(scope="function")
-def disable_background_tasks(monkeypatch):
-    """Disable background tasks in FastAPI when using ``TestClient`` (for testing purposes)."""
-
-    def noop_add_task(self, func, *args, **kwargs):
-        pass
-
-    monkeypatch.setattr(BackgroundTasks, "add_task", noop_add_task)

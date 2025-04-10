@@ -50,24 +50,23 @@ def test_health_ok(local_client: TestClient):
     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
 def test_upload_data_launch_job(
-    local_client: TestClient,
+    test_client_without_background_tasks: TestClient,
     dialog_dataset,
     dependency_overrides_services,
-    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     logger.info("Running test: 'test_upload_data_launch_job'")
+    client = test_client_without_background_tasks
 
-    response = local_client.get("/health")
+    response = client.get("/health")
     assert response.status_code == 200
 
     # store how many ds are in the db before we start
-    get_ds_response = local_client.get("/datasets/")
+    get_ds_response = client.get("/datasets/")
     assert get_ds_response.status_code == 200
     get_ds = ListingResponse[DatasetResponse].model_validate(get_ds_response.json())
 
-    create_response = local_client.post(
+    create_response = client.post(
         "/datasets/",
         data={},
         files={"dataset": dialog_dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -77,7 +76,7 @@ def test_upload_data_launch_job(
 
     created_dataset = DatasetResponse.model_validate(create_response.json())
 
-    get_ds_before_response = local_client.get("/datasets/")
+    get_ds_before_response = client.get("/datasets/")
     assert get_ds_before_response.status_code == 200
     get_ds_before = ListingResponse[DatasetResponse].model_validate(get_ds_before_response.json())
     assert get_ds_before.total == get_ds.total + 1
@@ -95,20 +94,21 @@ def test_upload_data_launch_job(
             "store_to_dataset": False,
         },
     }
-    create_inference_job_response = local_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+    create_inference_job_response = client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
     assert create_inference_job_response.status_code == 201
 
 
 @pytest.mark.parametrize("unnanotated_dataset", ["dialog_empty_gt_dataset", "dialog_no_gt_dataset"])
 def test_upload_data_no_gt_launch_annotation(
     request: pytest.FixtureRequest,
-    local_client: TestClient,
+    test_client_without_background_tasks: TestClient,
     unnanotated_dataset,
     dependency_overrides_services,
-    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     dataset = request.getfixturevalue(unnanotated_dataset)
-    create_response = local_client.post(
+    client = test_client_without_background_tasks
+
+    create_response = client.post(
         "/datasets/",
         data={},
         files={"dataset": dataset, "format": (None, DatasetFormat.JOB.value)},
@@ -132,12 +132,12 @@ def test_upload_data_no_gt_launch_annotation(
         },
     }
 
-    create_annotation_job_response = local_client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
+    create_annotation_job_response = client.post("/jobs/annotate/", headers=POST_HEADER, json=annotation_payload)
     assert create_annotation_job_response.status_code == 201
 
     create_annotation_job_response_model = JobResponse.model_validate(create_annotation_job_response.json())
 
-    logs_annotation_job_response = local_client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
+    logs_annotation_job_response = client.get(f"/jobs/{create_annotation_job_response_model.id}/logs")
     logger.info(logs_annotation_job_response)
     logs_annotation_job_response_model = JobLogsResponse.model_validate(logs_annotation_job_response.json())
     logger.info(f"-- infer logs -- {create_annotation_job_response_model.id}")
@@ -354,13 +354,12 @@ def check_artifacts_contain_times(artifacts_url: str):
     ],
 )
 async def test_full_experiment_launch(
-    local_client: TestClient,
+    test_client_without_background_tasks: TestClient,
     dataset_name: str,
     task_definition: dict,
     model: str,
     request,
     dependency_overrides_services,
-    disable_background_tasks,  # Disable background tasks to avoid running them during the test
 ):
     """This is the main integration test: it checks:
     * The backend health status
@@ -368,6 +367,7 @@ async def test_full_experiment_launch(
     * Creating an experiment
     * Running workflows for the experiment
     """
+    client = test_client_without_background_tasks
     test_name = f"test_full_experiment_launch/{dataset_name}"
 
     logger.info(
@@ -381,19 +381,19 @@ async def test_full_experiment_launch(
     dataset = request.getfixturevalue(dataset_name)
 
     # Health check
-    check_backend_health_status(local_client)
+    check_backend_health_status(client)
 
     # Dataset upload
-    initial_count = check_initial_dataset_count(local_client)
-    dataset = upload_dataset(local_client, dataset)
-    check_dataset_count_after_upload(local_client, initial_count)
+    initial_count = check_initial_dataset_count(client)
+    dataset = upload_dataset(client, dataset)
+    check_dataset_count_after_upload(client, initial_count)
 
     # Trigger experiment/workflows
-    experiment_id = create_experiment(local_client, dataset.id, task_definition)
+    experiment_id = create_experiment(client, dataset.id, task_definition)
     workflow_names = ["Backend_Workflow_1", "Backend_Workflow_2"]
     for name in workflow_names:
         run_workflow(
-            local_client=local_client,
+            local_client=client,
             experiment_id=experiment_id,
             workflow_name=name,
             hf_model=model,

@@ -133,8 +133,6 @@
 </template>
 
 <script setup lang="ts">
-import type { CreateWorkflowPayload } from '@/types/Workflow'
-
 import {
   Button,
   Dialog,
@@ -150,11 +148,12 @@ import {
   Textarea,
 } from 'primevue'
 import { computed, ref } from 'vue'
+import type { WorkflowForm } from './AddWorkflowsTab.vue'
 
 const props = withDefaults(
   defineProps<{
     // isVisible: boolean
-    model: CreateWorkflowPayload | undefined
+    workflow: WorkflowForm
     isBYOM: boolean
   }>(),
   {
@@ -163,26 +162,26 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  save: [payload: CreateWorkflowPayload]
+  save: [payload: WorkflowForm]
   close: []
 }>()
 
-const modelId = ref(props.model?.model)
-const runTitle = ref(props.model?.name)
-const prompt = ref(props.model?.system_prompt)
-const baseUrl = ref(props.model?.base_url)
-const temperature = ref(props.model?.generation_config?.temperature)
-const topP = ref(props.model?.generation_config?.top_p)
+const modelId = ref(props.workflow.model)
+const runTitle = ref(props.workflow.name)
+const prompt = ref(props.workflow.system_prompt)
+const baseUrl = ref(props.workflow.base_url)
+const temperature = ref(props.workflow.generation_config?.temperature)
+const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref()
 // const huggingFaceModelId = ref()
 
 const defaultPrompt = computed(() => {
-  const task = props.model?.task_definition.task
+  const task = props.workflow.task_definition.task
   if (task === 'summarization') {
     return 'You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences.'
   } else {
     const { source_language: sourceLanguage, target_language: targetLanguage } =
-      props.model?.task_definition || {}
+      props.workflow.task_definition || {}
     return `translate ${sourceLanguage} to ${targetLanguage}:`
   }
 })
@@ -194,17 +193,17 @@ const handleCancelClicked = () => {
 
 const handleContinueClicked = () => {
   emit('save', {
-    ...props.model,
-    base_url: baseUrl.value || props.model?.base_url,
-    model: modelId.value || props.model?.model,
-    name: runTitle.value || props.model?.name,
+    ...props.workflow,
+    base_url: baseUrl.value || props.workflow.base_url,
+    model: modelId.value || props.workflow.model,
+    name: runTitle.value || props.workflow.name,
     system_prompt: prompt.value || defaultPrompt.value,
     provider: via.value === 'Hugging Face' ? 'hf' : 'self-hosted',
     generation_config: {
       temperature: temperature.value,
       top_p: topP.value,
     },
-  } as CreateWorkflowPayload)
+  })
 }
 
 const isLoading = ref(false)

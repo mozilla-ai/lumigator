@@ -573,7 +573,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.push_fe == contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)

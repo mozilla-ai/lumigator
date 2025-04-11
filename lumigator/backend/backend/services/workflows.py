@@ -254,12 +254,19 @@ class WorkflowService:
         # FIXME The ray status is now _not enough_ to set the job status,
 
         job_eval_config = JobEvalConfig(task_definition=experiment.task_definition)
+
+        # if some custom parameters are provided for evaluation (e.g. special metrics
+        # such as those based on g-eval), bring them over to the job
         if request.metrics:
             job_eval_config.metrics = request.metrics
-            # NOTE: This should be considered a temporary solution as we currently only support
-            # GEval by querying OpenAI's API. This should be refactored to be more robust.
-            if "g_eval_summarization" in job_eval_config.metrics:
-                job_eval_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
+
+            if request.llm_as_judge:
+                # if params for local model in llm-as-judge are provided, bring them over
+                # (and ignore any API keys because they are not required for ollama/local models)
+                job_eval_config.llm_as_judge = request.llm_as_judge
+            else:
+                if any(s.startswith("g_eval_") for s in job_eval_config.metrics):
+                    job_eval_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(

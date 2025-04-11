@@ -109,7 +109,6 @@ class BaseJobConfig(BaseModel, ABC):
 class DeepEvalLocalModelConfig(BaseModel):
     model_name: str
     model_base_url: str
-    model_api_key: str | None = "ollama"
 
 
 class JobEvalConfig(BaseJobConfig):

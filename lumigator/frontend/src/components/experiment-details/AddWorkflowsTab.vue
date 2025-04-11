@@ -282,12 +282,13 @@ const allWorkflows: Ref<WorkflowForm[]> = ref(
   workflowsFromLocalStorage.length ? workflowsFromLocalStorage : systemWorkflows.value,
 )
 
-watch(systemWorkflows, (newSystemWorkflows) => {
-  if (workflowsFromLocalStorage.length) return
-
-  allWorkflows.value = workflowsFromLocalStorage.length
-    ? workflowsFromLocalStorage
-    : newSystemWorkflows
+// wait for models to be fetched in case of refreshing the page
+watch(systemWorkflows, (newSystemWorkflows, oldValue) => {
+  if (newSystemWorkflows.length !== oldValue.length) {
+    allWorkflows.value = workflowsFromLocalStorage.length
+      ? workflowsFromLocalStorage
+      : newSystemWorkflows
+  }
 })
 
 const workflowsByRequirement = (requirementKey: string, isRequired: boolean): WorkflowForm[] => {

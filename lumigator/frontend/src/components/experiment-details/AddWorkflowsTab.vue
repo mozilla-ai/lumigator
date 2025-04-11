@@ -283,6 +283,8 @@ const allWorkflows: Ref<WorkflowForm[]> = ref(
 )
 
 watch(systemWorkflows, (newSystemWorkflows) => {
+  if (workflowsFromLocalStorage.length) return
+
   allWorkflows.value = workflowsFromLocalStorage.length
     ? workflowsFromLocalStorage
     : newSystemWorkflows

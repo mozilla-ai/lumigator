@@ -431,7 +431,7 @@ jobs:
           target: "main_image"
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+            ghcr.io/${{ github.repository }}:backend_${{ env.GITHUB_SHA_SHORT }}
 
   build-frontend-image:
     name: Build Frontend Docker image
@@ -520,15 +520,15 @@ jobs:
 
       - name: Tag and push Docker image (tagged releases)
         if: steps.filter.outputs.push_be == contains(github.ref, 'refs/tags/')
-        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
         if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')
-        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:backend_${{ env.GITHUB_SHA_SHORT }}
 
       - name: Tag and push Docker image (latest)
         if: steps.filter.outputs.push_be == 'true' && github.ref == 'refs/heads/main'
-        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:latest
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:latest
 
   push-frontend-images:
     name: Push frontend Docker images

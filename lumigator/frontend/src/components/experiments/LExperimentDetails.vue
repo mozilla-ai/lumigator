@@ -304,7 +304,7 @@ function isExperiment(item: Experiment | Workflow): item is Experiment {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/styles/variables' as *;
 .l-experiment-details {
   $root: &;

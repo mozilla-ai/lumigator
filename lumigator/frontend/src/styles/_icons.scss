@@ -7,6 +7,7 @@
   -webkit-mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
   mask: url('@/assets/icons/DatasetsIcon.svg') no-repeat center;
   -webkit-mask-size: contain;
+  vertical-align: middle;
   mask-size: contain;
 }
 
@@ -19,6 +20,7 @@
   -webkit-mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
   mask: url('@/assets/icons/ExperimentIcon.svg') no-repeat center;
   -webkit-mask-size: contain;
+  vertical-align: middle;
   mask-size: contain;
 }
 
@@ -31,6 +33,7 @@
   -webkit-mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
   mask: url('@/assets/icons/DownloadIcon.svg') no-repeat center;
   -webkit-mask-size: contain;
+  vertical-align: middle;
   mask-size: contain;
 }
 
@@ -43,5 +46,6 @@
   -webkit-mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
   mask: url('@/assets/icons/BinIcon.svg') no-repeat center;
   -webkit-mask-size: contain;
+  vertical-align: middle;
   mask-size: contain;
 }

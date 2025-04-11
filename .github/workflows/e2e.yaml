@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v*.*.*'
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -79,7 +83,7 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     needs: lint-frontend
-    runs-on: lumigator-integration-tests-runner
+    runs-on: lumigator-e2e-tests-runner
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -165,9 +169,9 @@ jobs:
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
         run: make test-${{ matrix.test }}-unit
 
-  integration-tests:
-    name: Integration tests (SQLite)
-    runs-on: lumigator-integration-tests-runner
+  e2e-tests:
+    name: E2E tests (SQLite)
+    runs-on: lumigator-e2e-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -215,9 +219,9 @@ jobs:
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
-      - name: Run ${{ matrix.test }} integration tests
+      - name: Run ${{ matrix.test }} e2e tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run: make test-${{ matrix.test }}-integration
+        run: make test-${{ matrix.test }}-e2e
 
       - name: Collect logs in case of failure
         if: failure()
@@ -252,9 +256,9 @@ jobs:
           overwrite: true
           path: /tmp/backendlogs/backend.log
 
-  integration-tests-postgres:
-    name: Integration tests (PostgreSQL)
-    runs-on: lumigator-integration-tests-runner
+  e2e-tests-postgres:
+    name: e2e tests (PostgreSQL)
+    runs-on: lumigator-e2e-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -296,15 +300,15 @@ jobs:
       - name: Configure 'default' test environment variables
         run: ./scripts/set_env_vars.sh
 
-      - name: Run ${{ matrix.test }} integration tests
+      - name: Run ${{ matrix.test }} e2e tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        # This setting only affects backend integration tests
+        # This setting only affects backend e2e tests
         # localhost is used since the postgres DB needs to be
         # accessed from pytest
         # The SDK tests already use a separate Lumigator started
         # with postgres overrides
         # Allowing secrets for local test postgres
-        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-e2e # pragma: allowlist secret
 
       - name: Collect Ray logs in case of failure
         if: failure()
@@ -320,9 +324,9 @@ jobs:
           overwrite: true
           path: /tmp/raylogs/ray/session_*/logs/
 
-  notebook-integration-test:
-    name: Notebook integration tests
-    runs-on: lumigator-integration-tests-runner
+  notebook-e2e-test:
+    name: Notebook e2e tests
+    runs-on: lumigator-e2e-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     steps:
@@ -479,8 +483,8 @@ jobs:
 
   push-backend-images:
     name: Push backend Docker images
-    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "integration-tests", "notebook-integration-test", "unit-tests-frontend", "e2e-tests-frontend" ]
-    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success'}}
+    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "e2e-tests", "notebook-e2e-test", "unit-tests-frontend", "e2e-tests-frontend" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.e2e-tests.result == 'success' && needs.notebook-e2e-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -515,7 +519,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.push_be == contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
@@ -528,8 +532,8 @@ jobs:
 
   push-frontend-images:
     name: Push frontend Docker images
-    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "integration-tests", "notebook-integration-test", "unit-tests-frontend", "e2e-tests-frontend" ]
-    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success' }}
+    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "e2e-tests", "notebook-e2e-test", "unit-tests-frontend", "e2e-tests-frontend" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.e2e-tests.result == 'success' && needs.notebook-e2e-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -564,7 +568,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Tag and push Docker image (tagged releases)
-        if: contains(github.ref, 'refs/tags/')
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
         run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:${{ github.ref_name }}
 
       - name: Tag and push Docker image (normal build)
@@ -577,8 +581,8 @@ jobs:
 
   sdk-packaging:
     name: Package SDK
-    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
-    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    needs: [ "notebook-e2e-test", "e2e-tests", "unit-tests" ]
+    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.notebook-e2e-test.result == 'success' && needs.e2e-tests.result == 'success' && needs.unit-tests.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

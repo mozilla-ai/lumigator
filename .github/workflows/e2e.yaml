@@ -2,10 +2,12 @@ name: Lumigator e2e pipeline
 
 
 on:
-  pull_request:
+  push:
     branches:
-      - "**"
-
+      - main
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:

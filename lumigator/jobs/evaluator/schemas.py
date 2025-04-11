@@ -88,6 +88,15 @@ class GEvalSummarizationMetrics(BaseModel):
     relevance_mean: float
 
 
+class GEvalTranslationMetrics(BaseModel):
+    """The following metric names and their respective prompts are defined in `g_eval_prompts.json`."""
+
+    consistency: list[GEvalMetric]
+    consistency_mean: float
+    fluency: list[GEvalMetric]
+    fluency_mean: float
+
+
 class TokenLength(BaseModel):
     ref_token_length: list[int]
     pred_token_length: list[int]
@@ -102,6 +111,8 @@ class EvalJobMetrics(BaseModel):
     bleu: Bleu | None = None
     comet: Comet | None = None
     g_eval_summarization: GEvalSummarizationMetrics | None = None
+    g_eval_translation: GEvalTranslationMetrics | None = None
+    g_eval_translation_noref: GEvalTranslationMetrics | None = None
     token_length: TokenLength | None = None
 
 

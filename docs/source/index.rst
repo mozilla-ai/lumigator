@@ -77,6 +77,7 @@ For more information about the backend routes, see the rendered API specs in the
    user-guides/local-models
    user-guides/prepare-evaluation-dataset
    user-guides/translation-eval
+   user-guides/llm-as-judge
 
 .. toctree::
    :maxdepth: 2

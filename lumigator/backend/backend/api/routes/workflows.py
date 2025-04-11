@@ -12,6 +12,7 @@ from backend.api.deps import WorkflowServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
+    WorkflowUpstreamError,
     WorkflowValidationError,
 )
 
@@ -22,6 +23,7 @@ def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     return {
         WorkflowNotFoundError: status.HTTP_404_NOT_FOUND,
         WorkflowValidationError: status.HTTP_400_BAD_REQUEST,
+        WorkflowUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
     }
 
 
@@ -76,5 +78,5 @@ async def delete_workflow(
         workflow_id: ID of the workflow to delete
         force: If True, force deletion even if the workflow is active or has dependencies
     """
-    result = await service.delete_workflow(workflow_id, force=force)
+    result = await service.delete_workflow(workflow_id, force)
     return WorkflowDetailsResponse.model_validate(result.model_dump())

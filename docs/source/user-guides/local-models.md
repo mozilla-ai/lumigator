@@ -149,7 +149,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 
 ### Procedure
 
-1. Setup vLLM Completions Endpoint Locally. While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://github.com/vllm-project/vllm/blob/main/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/Dockerfile.arm) for ARM architecture.
+1. Setup vLLM Completions Endpoint Locally. While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.arm) for ARM architecture.
 
    ```console
    user@host:~/$ git clone https://github.com/vllm-project/vllm.git

@@ -10,6 +10,11 @@ on:
   # required to enable manual triggers on the GH web ui
   workflow_dispatch:
 
+permissions:
+  pull-requests: read
+  contents: read
+  packages: write
+
 jobs:
   lint:
     name: Code linting

@@ -173,7 +173,6 @@ defineExpose({ loading })
 @use '@/styles/variables' as *;
 
 .l-dataset-table {
-  $root: &;
   width: 100%;
   display: flex;
   place-content: center;

@@ -272,11 +272,6 @@ function stopPollingForWorkflowLogs() {
   }
 }
 
-// function getJobRuntime(jobId: string) {
-//   const job = jobs.value.find((job) => job.id === jobId)
-//   return job ? job.runTime : undefined
-// }
-
 watch(
   selectedExperiment,
   (newValue) => {
@@ -341,7 +336,6 @@ watch(showSlidingPanel, (newValue) => {
 @use '@/styles/variables' as *;
 
 .l-experiments {
-  $root: &;
   max-width: $l-main-width;
   margin: 0 auto;
 

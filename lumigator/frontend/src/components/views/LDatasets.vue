@@ -363,7 +363,6 @@ const onGenerateGT = () => {
 @use '@/styles/variables' as *;
 
 .l-datasets {
-  $root: &;
   max-width: $l-main-width;
   width: 100%;
   margin: 0 auto;
@@ -393,8 +392,6 @@ const onGenerateGT = () => {
 @use '@/styles/mixins';
 
 .l-datasets .p-tabs {
-  $root: &;
-
   & .p-tablist {
     margin-bottom: $l-spacing-1;
   }

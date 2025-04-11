@@ -8,7 +8,7 @@ import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 import { LumiPreset } from './primevue.config'
-
+import { setupSentry } from './helpers/setupSentry'
 const app = createApp(App)
 
 app
@@ -27,5 +27,7 @@ app
   .use(ConfirmationService)
   .use(ToastService)
   .directive('tooltip', Tooltip)
+
+setupSentry(app, router)
 
 app.mount('#app')

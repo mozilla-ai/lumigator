@@ -307,7 +307,6 @@ function isExperiment(item: Experiment | Workflow): item is Experiment {
 <style lang="scss">
 @use '@/styles/variables' as *;
 .l-experiment-details {
-  $root: &;
   display: flex;
   flex-direction: column;
 

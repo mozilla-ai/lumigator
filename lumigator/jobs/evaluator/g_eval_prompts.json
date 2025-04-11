@@ -32,5 +32,22 @@
                 "Assign a score for relevance based on the Evaluation Criteria."
             ]
         }
+    },
+    "translation": {
+        "consistency": {
+            "criteria": "The factual alignment between the original text and its translation. A factually consistent translation contains only statements that are entailed by the source document. Annotators were also asked to penalize translations that contained hallucinated facts.",
+            "evaluation_steps": [
+                "Read the source document carefully and identify the main facts and details it presents.",
+                "Read the translation and compare it to the source document. Check if the translation contains any factual errors that are not supported by the source document.",
+                "Assign a score for consistency based on the Evaluation Criteria."
+            ]
+        },
+        "fluency": {
+            "criteria": "The quality of the translation in terms of grammar, spelling, punctuation, word choice, and sentence structure.",
+            "evaluation_steps": [
+                "Read the translation and identify whether it contains any errors in terms of grammar, spelling, punctuation, word choice, and sentence structure.",
+                "Assign a score for fluency based on the Evaluation Criteria and the following rubric: Poor [0-3]: the translation has many errors that make it hard to understand or sound unnatural. Fair [4-7]: the translation has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible. Good [8-10]: the translation has few or no errors and is easy to read and follow."
+            ]
+        }
     }
 }

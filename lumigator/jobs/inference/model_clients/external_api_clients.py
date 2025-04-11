@@ -27,7 +27,7 @@ class LiteLLMModelClient(BaseModelClient):
         logger.info(f"LiteLLMModelClient initialized with config: {config}")
 
     @retry_with_backoff(max_retries=3)
-    def _make_completion_request(self, litellm_model: str, examples: list[dict[str, str]]) -> list[ModelResponse]:
+    def _make_completion_request(self, litellm_model: str, examples: list[list[dict[str, str]]]) -> list[ModelResponse]:
         """Make a request to the LLM with proper error handling"""
         return batch_completion(
             model=litellm_model,
@@ -44,6 +44,9 @@ class LiteLLMModelClient(BaseModelClient):
     def _create_prediction_result(self, response_with_index):
         index, response = response_with_index
         logger.info(response)
+        # Check if the response is an exception (e.g. litellm.exceptions.AuthenticationError).
+        if isinstance(response, Exception):
+            raise response
 
         # Extract and log cost. In the case of self-hosted models,
         # there is not a _hidden_params attribute in the response.

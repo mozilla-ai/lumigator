@@ -1,5 +1,5 @@
 <template>
-  <Dialog modal :closable="true" close-icon="''" :visible="true">
+  <Dialog modal v-model:visible="isVisible" @update:visible="handleIsVisibleChanged">
     <template #header>
       <div class="header">
         <h5 class="modal-title">Configure Model Run</h5>
@@ -127,7 +127,7 @@
           </div>
         </TabPanel>
         <TabPanel value="json">
-          <pre>{{ workflowForm  }}</pre>
+          <pre>{{ workflowForm }}</pre>
         </TabPanel>
       </TabPanels>
     </Tabs>
@@ -152,7 +152,6 @@ import {
 import { computed, ref } from 'vue'
 import type { WorkflowForm } from './AddWorkflowsTab.vue'
 
-
 const props = withDefaults(
   defineProps<{
     // isVisible: boolean
@@ -169,6 +168,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const isVisible = ref(true)
 const modelId = ref(props.workflow.model)
 const runTitle = ref(props.workflow.name)
 const prompt = ref(props.workflow.system_prompt)
@@ -178,21 +178,26 @@ const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref()
 // const huggingFaceModelId = ref()
 
+const handleIsVisibleChanged = (value: boolean) => {
+  isVisible.value = value
+  emit('close')
+}
+
 const workflowForm = computed(() => ({
-    ...props.workflow,
-    base_url: props.isBYOM ? baseUrl.value || props.workflow.base_url : props.workflow.base_url,
-    model: modelId.value || props.workflow.model,
-    name: runTitle.value || props.workflow.name,
-    system_prompt: prompt.value || defaultPrompt.value,
-    provider: props.isBYOM
-      ? via.value === 'Hugging Face'
-        ? 'hf'
-        : 'self-hosted'
-      : props.workflow.provider,
-    generation_config: {
-      temperature: temperature.value,
-      top_p: topP.value,
-    },
+  ...props.workflow,
+  base_url: props.isBYOM ? baseUrl.value || props.workflow.base_url : props.workflow.base_url,
+  model: modelId.value || props.workflow.model,
+  name: runTitle.value || props.workflow.name,
+  system_prompt: prompt.value || defaultPrompt.value,
+  provider: props.isBYOM
+    ? via.value === 'Hugging Face'
+      ? 'hf'
+      : 'self-hosted'
+    : props.workflow.provider,
+  generation_config: {
+    temperature: temperature.value,
+    top_p: topP.value,
+  },
 }))
 const defaultPrompt = computed(() => {
   const task = props.workflow.task_definition.task

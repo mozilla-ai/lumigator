@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, type Ref, onBeforeUnmount } from 'vue'
+import { onMounted, ref, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useModelStore } from '@/stores/modelsStore'
@@ -209,10 +209,6 @@ const resetDrawerContent = () => {
   showLogs.value = false
   showDrawer.value = false
 }
-
-// This is a temporary solution until 'experiments/' endpoint
-// updates the status of each experiment
-let pollingId: number | undefined
 
 onMounted(async () => {
   await Promise.all([modelStore.fetchModels(), refetch()])

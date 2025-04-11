@@ -1,0 +1,626 @@
+name: Lumigator e2e pipeline
+
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Code linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install Python and virtual environment
+        run: uv sync
+
+      - name: Install pre-commit
+        run: uv run pre-commit install
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+        continue-on-error: false
+
+  lint-frontend:
+    name: Lint, Format, Type check (Frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: lumigator/frontend
+
+      - name: Run type checking
+        run: npm run type-check
+        working-directory: lumigator/frontend
+
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: lumigator/frontend
+
+      - name: Run Prettier Check
+        run: npm run format:check
+        working-directory: lumigator/frontend
+
+  unit-tests-frontend:
+    name: Unit tests Frontend
+    needs: lint-frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: lumigator/frontend
+
+      - name: Run tests
+        run: npm run test:unit
+        working-directory: lumigator/frontend
+
+  e2e-tests-frontend:
+    name: E2E tests Frontend
+    needs: lint-frontend
+    runs-on: lumigator-integration-tests-runner
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: lumigator/frontend
+
+      # Cache Playwright Browsers
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/lumigator/frontend/package-lock.json') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
+
+      # Install Playwright Browsers if they aren't cached
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: lumigator/frontend
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        run: uv python install
+
+      - name: Create HF cache
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        run:  make start-lumigator-build
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        working-directory: lumigator/frontend
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend", "jobs"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
+      - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: uv python install
+
+      - name: Run ${{ matrix.test }} unit tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: make test-${{ matrix.test }}-unit
+
+  integration-tests:
+    name: Integration tests (SQLite)
+    runs-on: lumigator-integration-tests-runner
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
+      - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: uv python install
+
+      - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run:  make start-lumigator-build
+
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
+
+      - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: make test-${{ matrix.test }}-integration
+
+      - name: Collect logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          mkdir /tmp/backendlogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+          docker logs lumigator-ray-1 > /tmp/raydocker.log
+          docker logs lumigator-backend-1 > /tmp/backendlogs/backend.log
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          overwrite: true
+          path: /tmp/raylogs/ray/session_*/logs/
+
+      - name: Upload Ray docker log in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-docker-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          overwrite: true
+          path: /tmp/raydocker.log
+
+      - name: Upload backend log in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-log-${{ matrix.test }}-sqlite-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          overwrite: true
+          path: /tmp/backendlogs/backend.log
+
+  integration-tests-postgres:
+    name: Integration tests (PostgreSQL)
+    runs-on: lumigator-integration-tests-runner
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    strategy:
+      matrix:
+        test: ["sdk", "backend" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
+      - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install python
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: uv python install
+
+      - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Spinning up containers for the tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run:  make start-lumigator-build-postgres
+
+      - name: Configure 'default' test environment variables
+        run: ./scripts/set_env_vars.sh
+
+      - name: Run ${{ matrix.test }} integration tests
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        # This setting only affects backend integration tests
+        # localhost is used since the postgres DB needs to be
+        # accessed from pytest
+        # The SDK tests already use a separate Lumigator started
+        # with postgres overrides
+        # Allowing secrets for local test postgres
+        run: SQLALCHEMY_DATABASE_URL=postgresql://admin:password@localhost/lumigator make test-${{ matrix.test }}-integration # pragma: allowlist secret
+
+      - name: Collect Ray logs in case of failure
+        if: failure()
+        run: |
+          mkdir /tmp/raylogs
+          docker cp lumigator-ray-1:/tmp/ray/ /tmp/raylogs/
+
+      - name: Upload Ray logs in case of failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-logs-${{ matrix.test }}-postgres-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          overwrite: true
+          path: /tmp/raylogs/ray/session_*/logs/
+
+  notebook-integration-test:
+    name: Notebook integration tests
+    runs-on: lumigator-integration-tests-runner
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - '.github/**'
+              - 'lumigator/**'
+              - '*'
+              - 'scripts/**'
+
+      - name: Install uv
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        uses: astral-sh/setup-uv@v3
+
+      - name: Create a virtual environment
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: uv venv
+        working-directory: notebooks
+
+      - name: Install required packages
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: uv pip install -r requirements.txt
+        working-directory: notebooks
+
+      - name: Install kernel
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: source .venv/bin/activate && python -m ipykernel install --user --name=lumigator
+        working-directory: notebooks
+
+      - name: Create HF cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p ${HOME}/.cache/huggingface
+          chmod -R 777 ${HOME}/.cache/huggingface
+
+      - name: Create pip cache
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p /tmp/ray_pip_cache
+          chmod -R 777 /tmp/ray_pip_cache
+
+      - name: Setup containers
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run:  make start-lumigator-build
+
+      - name: Run notebook
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: source .venv/bin/activate && jupyter execute --kernel_name=lumigator walkthrough.ipynb
+        working-directory: notebooks
+        shell: bash
+
+  build-backend-image:
+    name: Build Backend Docker image
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ needs.lint.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            build:
+              - '.github/**'
+              - 'lumigator/**'
+
+      - name: Truncate commit SHA
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Set up QEMU
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        if: steps.filter.outputs.build == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          target: "main_image"
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+
+  build-frontend-image:
+    name: Build Frontend Docker image
+    runs-on: ubuntu-latest
+    needs: [lint-frontend]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            build_fe:
+              - '.github/**'
+              - 'lumigator/**'
+
+      - name: Truncate commit SHA
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Set up QEMU
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker buildx
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v6
+        if: steps.filter.outputs.build_fe == 'true' || contains(github.ref, 'refs/tags/')
+        with:
+          file: "lumigator/frontend/Dockerfile"
+          platforms: linux/amd64,linux/arm64
+          push: true
+          target: "server"
+          tags: |
+            ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }}
+
+  push-backend-images:
+    name: Push backend Docker images
+    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "integration-tests", "notebook-integration-test", "unit-tests-frontend", "e2e-tests-frontend" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            push_be:
+              - '.github/**'
+              - 'lumigator/**'
+
+      - name: Truncate commit SHA
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        if: steps.filter.outputs.push_be == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag and push Docker image (tagged releases)
+        if: contains(github.ref, 'refs/tags/')
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:${{ github.ref_name }}
+
+      - name: Tag and push Docker image (normal build)
+        if: steps.filter.outputs.push_be == 'true' && !contains(github.ref, 'refs/tags/')
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:backend_dev_${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Tag and push Docker image (latest)
+        if: steps.filter.outputs.push_be == 'true' && github.ref == 'refs/heads/main'
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:backend_dev_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator:latest
+
+  push-frontend-images:
+    name: Push frontend Docker images
+    needs: [ "build-backend-image", "build-frontend-image", "unit-tests", "integration-tests", "notebook-integration-test", "unit-tests-frontend", "e2e-tests-frontend" ]
+    if: ${{ needs.build-backend-image.result == 'success' && needs.build-frontend-image.result == 'success' && needs.unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.notebook-integration-test.result == 'success' && needs.unit-tests-frontend.result == 'success' && needs.e2e-tests-frontend.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for modified paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            push_fe:
+              - '.github/**'
+              - 'lumigator/**'
+
+      - name: Truncate commit SHA
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
+        run: echo "GITHUB_SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        if: steps.filter.outputs.push_fe == 'true' || contains(github.ref, 'refs/tags/')
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag and push Docker image (tagged releases)
+        if: contains(github.ref, 'refs/tags/')
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:${{ github.ref_name }}
+
+      - name: Tag and push Docker image (normal build)
+        if: steps.filter.outputs.push_fe == 'true' && !contains(github.ref, 'refs/tags/')
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:frontend_${{ env.GITHUB_SHA_SHORT }}
+
+      - name: Tag and push Docker image (latest)
+        if: steps.filter.outputs.push_fe == 'true' && github.ref == 'refs/heads/main'
+        run: skopeo copy --all docker://ghcr.io/${{ github.repository }}:frontend_${{ env.GITHUB_SHA_SHORT }} docker://mzdotai/lumigator-frontend:latest
+
+  sdk-packaging:
+    name: Package SDK
+    needs: [ "notebook-integration-test", "integration-tests", "unit-tests" ]
+    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.notebook-integration-test.result == 'success' && needs.integration-tests.result == 'success' && needs.unit-tests.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add scripts directory to path
+        run: echo ${PWD}/scripts >> $GITHUB_PATH
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install yq package
+        run: sudo snap install yq
+
+      - name: Check tag consistency (SDK)
+        run: check_version.sh
+        working-directory: lumigator/sdk
+
+      - name: Check tag consistency (schemas)
+        run: check_version.sh
+        working-directory: lumigator/schemas
+
+      - name: Install python (SDK)
+        run: uv python install
+        working-directory: lumigator/sdk
+
+      - name: Install python (schemas)
+        run: uv python install
+        working-directory: lumigator/schemas
+
+      - name: Package SDK
+        run: uv build
+        working-directory: lumigator/sdk
+
+      - name: Package schemas
+        run: uv build
+        working-directory: lumigator/schemas
+
+      - name: Upload SDK packages to PyPI
+        working-directory: lumigator/sdk
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose
+
+      - name: Upload schemas packages to PyPI
+        working-directory: lumigator/schemas
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }} --verbose

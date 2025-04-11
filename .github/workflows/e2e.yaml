@@ -143,7 +143,6 @@ jobs:
     name: Unit tests
     runs-on: ubuntu-latest
     needs: lint
-    if: ${{ needs.lint.result == 'success' }}
     strategy:
       matrix:
         test: ["sdk", "backend", "jobs"]
@@ -178,7 +177,6 @@ jobs:
     name: E2E tests (SQLite)
     runs-on: lumigator-integration-tests-runner
     needs: lint
-    if: ${{ needs.lint.result == 'success' }}
     strategy:
       matrix:
         test: ["sdk", "backend" ]
@@ -265,7 +263,6 @@ jobs:
     name: e2e tests (PostgreSQL)
     runs-on: lumigator-integration-tests-runner
     needs: lint
-    if: ${{ needs.lint.result == 'success' }}
     strategy:
       matrix:
         test: ["sdk", "backend" ]
@@ -333,7 +330,6 @@ jobs:
     name: Notebook e2e tests
     runs-on: lumigator-integration-tests-runner
     needs: lint
-    if: ${{ needs.lint.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -394,7 +390,6 @@ jobs:
     name: Build Backend Docker image
     runs-on: ubuntu-latest
     needs: lint
-    if: ${{ needs.lint.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

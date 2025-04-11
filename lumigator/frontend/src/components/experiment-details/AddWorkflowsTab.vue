@@ -448,6 +448,7 @@ watch(
     localStorage.setItem(`${props.experiment.id}/temperature`, JSON.stringify(newTemperature))
     localStorage.setItem(`${props.experiment.id}/allWorkflows`, JSON.stringify(newAllWorkflows))
   },
+  { deep: true },
 )
 </script>
 

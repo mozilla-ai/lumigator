@@ -184,9 +184,6 @@ export type WorkflowForm = CreateWorkflowPayload & {
   id: string
 }
 
-const experimentPrompt = ref(
-  localStorage.getItem(`${props.experiment.id}/experimentPrompt`) || '""',
-)
 const defaultPrompt = computed(() => {
   const task = props.experiment.task_definition.task
   if (task === 'summarization') {
@@ -197,6 +194,11 @@ const defaultPrompt = computed(() => {
     return `translate ${sourceLanguage} to ${targetLanguage}:`
   }
 })
+
+const experimentPrompt = ref(
+  localStorage.getItem(`${props.experiment.id}/experimentPrompt`) || defaultPrompt.value,
+)
+
 const topP = ref(JSON.parse(localStorage.getItem(`${props.experiment.id}/topP`) || '0.5'))
 const temperature = ref(
   JSON.parse(localStorage.getItem(`${props.experiment.id}/temperature`) || '0.5'),

@@ -126,7 +126,9 @@
             </div>
           </div>
         </TabPanel>
-        <TabPanel value="json"> Json tab </TabPanel>
+        <TabPanel value="json">
+          <pre>{{ workflowForm  }}</pre>
+        </TabPanel>
       </TabPanels>
     </Tabs>
   </Dialog>
@@ -149,6 +151,7 @@ import {
 } from 'primevue'
 import { computed, ref } from 'vue'
 import type { WorkflowForm } from './AddWorkflowsTab.vue'
+
 
 const props = withDefaults(
   defineProps<{
@@ -175,6 +178,22 @@ const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref()
 // const huggingFaceModelId = ref()
 
+const workflowForm = computed(() => ({
+    ...props.workflow,
+    base_url: props.isBYOM ? baseUrl.value || props.workflow.base_url : props.workflow.base_url,
+    model: modelId.value || props.workflow.model,
+    name: runTitle.value || props.workflow.name,
+    system_prompt: prompt.value || defaultPrompt.value,
+    provider: props.isBYOM
+      ? via.value === 'Hugging Face'
+        ? 'hf'
+        : 'self-hosted'
+      : props.workflow.provider,
+    generation_config: {
+      temperature: temperature.value,
+      top_p: topP.value,
+    },
+}))
 const defaultPrompt = computed(() => {
   const task = props.workflow.task_definition.task
   if (task === 'summarization') {
@@ -192,22 +211,7 @@ const handleCancelClicked = () => {
 }
 
 const handleContinueClicked = () => {
-  emit('save', {
-    ...props.workflow,
-    base_url: props.isBYOM ? baseUrl.value || props.workflow.base_url : props.workflow.base_url,
-    model: modelId.value || props.workflow.model,
-    name: runTitle.value || props.workflow.name,
-    system_prompt: prompt.value || defaultPrompt.value,
-    provider: props.isBYOM
-      ? via.value === 'Hugging Face'
-        ? 'hf'
-        : 'self-hosted'
-      : props.workflow.provider,
-    generation_config: {
-      temperature: temperature.value,
-      top_p: topP.value,
-    },
-  })
+  emit('save', workflowForm.value)
 }
 
 const isLoading = ref(false)

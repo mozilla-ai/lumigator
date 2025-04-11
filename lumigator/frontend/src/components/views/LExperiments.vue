@@ -88,7 +88,6 @@ const headerDescription = ref(`Experiments are a logical sequence of inference a
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isNewExperimentFormVisible = ref(false)
-const isThrottled = ref(false)
 
 const closeExperimentForm = () => {
   isNewExperimentFormVisible.value = false
@@ -211,19 +210,6 @@ const resetDrawerContent = () => {
   showDrawer.value = false
 }
 
-// Throttle ensures the function is invoked at most once every defined period.
-async function throttledUpdateAllWorkflows() {
-  if (isThrottled.value) {
-    return
-  } // Skip if throttle is active
-
-  isThrottled.value = true
-  await refetch()
-  setTimeout(() => {
-    isThrottled.value = false // Release throttle after delay
-  }, 5000) // 5 seconds throttle
-}
-
 // This is a temporary solution until 'experiments/' endpoint
 // updates the status of each experiment
 let pollingId: number | undefined
@@ -234,13 +220,6 @@ onMounted(async () => {
   if (selectedDataset.value) {
     handleCreateExperimentClicked()
   }
-  pollingId = setInterval(async () => {
-    await throttledUpdateAllWorkflows()
-  }, 1000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(pollingId)
 })
 </script>
 

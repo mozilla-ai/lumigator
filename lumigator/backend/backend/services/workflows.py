@@ -94,9 +94,6 @@ class WorkflowService:
         """Handle a workflow failure by updating the workflow status and stopping any running jobs."""
         loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
 
-        # Mark the parent workflow as failed.
-        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
-
         # Get the list of non-complete jobs in the workflow.
         async def non_terminal_jobs(jobs: list[Run]):
             for job in jobs:
@@ -119,6 +116,9 @@ class WorkflowService:
         # Wait for all tasks to complete concurrently (if we have any).
         if stop_tasks:
             await asyncio.gather(*stop_tasks, return_exceptions=False)
+
+        # Finally, mark the parent workflow as failed.
+        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
     async def _run_inference_eval_pipeline(
         self,

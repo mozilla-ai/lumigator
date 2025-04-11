@@ -11,8 +11,8 @@ def load_json(path: Path) -> str:
         return json.load(file)
 
 
-def test_health_check(app_client: TestClient):
-    response = app_client.get("/health")
+def test_health_check(test_client: TestClient):
+    response = test_client.get("/health")
     assert response.status_code == status.HTTP_200_OK
     health = HealthResponse.model_validate(response.json())
     assert health.status == "OK"

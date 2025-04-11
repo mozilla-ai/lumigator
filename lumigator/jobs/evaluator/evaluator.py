@@ -149,20 +149,28 @@ def run_eval(config: EvalJobConfig, job_id: UUID) -> str | None:
     return output_path
 
 
-def prepare_deepeval_config_file(config: EvalJobConfig) -> None:
+def prepare_judge_model(config: EvalJobConfig) -> None:
     if config.evaluation.llm_as_judge is not None:
-        # create a .deepeval config file if an ollama model is specified
+        # first check if an API key was provided: if not, assume the user is going to use ollama
+        # (deepeval uses "ollama" as LOCAL_MODEL_API_KEY to choose whether to use ollama or not)
+        local_model_api_key = os.environ.get("api_key", "ollama")
+
+        # create a .deepeval config file if a local model is specified
         deepeval_config = {
             "LOCAL_MODEL_NAME": config.evaluation.llm_as_judge.model_name,
             "LOCAL_MODEL_BASE_URL": config.evaluation.llm_as_judge.model_base_url,
             "USE_LOCAL_MODEL": "YES",
             "USE_AZURE_OPENAI": "NO",
-            "LOCAL_MODEL_API_KEY": config.evaluation.llm_as_judge.model_api_key,
+            "LOCAL_MODEL_API_KEY": local_model_api_key,
         }
         with Path(DEEPEVAL_CONFIG_FILENAME).open("w") as f:
             json.dump(deepeval_config, f, indent=4)
     else:
-        # otherwise, make sure we'll start without a .deepeval config file
+        # otherwise, deepeval will use its default (OpenAI Client), so set up auth first
+        # (note that we don't care if `api_key` is not set if we don't run a geval metric)
+        os.environ["OPENAI_API_KEY"] = os.environ.get("api_key", "")
+
+        # then make sure we'll start without a .deepeval config file
         Path(DEEPEVAL_CONFIG_FILENAME).unlink(missing_ok=True)
 
 
@@ -181,11 +189,9 @@ if __name__ == "__main__":
         err_str = "No input configuration provided. Please pass one using the --config flag"
         logger.error(err_str)
     else:
+        # depending on the configuration provided, set up
         config = EvalJobConfig.model_validate_json(args.config)
-        # NOTE: Temporary solution to avoid API key issues in G-Eval which defaults to calling OpenAI.
-        if "g_eval_summarization" in config.evaluation.metrics and (api_key := os.environ.get("api_key")):
-            os.environ["OPENAI_API_KEY"] = api_key
+        prepare_judge_model(config)
 
         job_id: UUID = UUID(os.environ.get("MZAI_JOB_ID"))
-        prepare_deepeval_config_file(config)
         run_eval(config, job_id)

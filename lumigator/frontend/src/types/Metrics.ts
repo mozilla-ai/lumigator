@@ -22,6 +22,7 @@ export type MetricsResult = {
     bleu: number[]
     bleu_mean: number
   }
+  comet?: Comet
 }
 
 export type Parameters = {
@@ -72,6 +73,11 @@ export type Bertscore = {
 export type Meteor = {
   meteor: number[]
   meteor_mean: number
+}
+
+export type Comet = {
+  scores: number[]
+  mean_score: number
 }
 
 export type Rouge = {

@@ -76,6 +76,7 @@ def create_app() -> FastAPI:
     _init_db()
 
     app = FastAPI(**LUMIGATOR_APP_TAGS)
+    logger.info(f"Lumigator backend, version: {settings.VERSION}")
 
     # Get the allowed origins for CORS requests.
     origins = settings.API_CORS_ALLOWED_ORIGINS

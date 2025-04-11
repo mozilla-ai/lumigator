@@ -7,7 +7,12 @@ from lumigator_schemas.extras import ListingResponse
 
 from backend.repositories.jobs import JobRepository
 from backend.services.datasets import DatasetService
-from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
+from backend.services.exceptions.experiment_exceptions import (
+    ExperimentConflictError,
+    ExperimentNotFoundError,
+    ExperimentUpstreamError,
+)
+from backend.services.exceptions.tracking_exceptions import TrackingClientUpstreamError
 from backend.services.jobs import JobService
 from backend.tracking import TrackingClient
 
@@ -25,14 +30,33 @@ class ExperimentService:
         self._dataset_service = dataset_service
         self._tracking_session = tracking_session
 
-    def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
-        experiment = self._tracking_session.create_experiment(
-            request.name,
-            request.description,
-            request.task_definition,
-            request.dataset,
-            request.max_samples,
-        )
+    async def create_experiment(self, request: ExperimentCreate) -> GetExperimentResponse:
+        """Creates a new experiment to be tracked by the tracking client.
+
+        If the experiment ``name`` already exists, a timestamp suffix will be appended
+        to the ``name`` and the operation will be retried before an exception is raised.
+
+        :param request: The experiment creation request containing the name, description, task definition,
+        :return: The experiment response containing the new experiment ID and other details.
+        :raises ExperimentConflictError: If the experiment name already exists.
+        :raises TrackingClientUpstreamError: If there is a problem with the tracking client.
+        """
+        try:
+            experiment = await self._tracking_session.create_experiment(
+                request.name,
+                request.description,
+                request.task_definition,
+                request.dataset,
+                request.max_samples,
+            )
+        except ExperimentConflictError as e:
+            raise ExperimentUpstreamError("mlflow", f"Conflict creating experiment with name: {request.name}") from e
+        except TrackingClientUpstreamError as e:
+            raise ExperimentUpstreamError(
+                "mlflow",
+                f"Unexpected error while creating experiment with name {request.name}",
+            ) from e
+
         loguru.logger.info(f"Created tracking experiment '{experiment.name}' with ID '{experiment.id}'.")
         return experiment
 
@@ -50,5 +74,5 @@ class ExperimentService:
             items=[GetExperimentResponse.model_validate(x) for x in records],
         )
 
-    def delete_experiment(self, experiment_id: str):
-        self._tracking_session.delete_experiment(experiment_id)
+    async def delete_experiment(self, experiment_id: str):
+        await self._tracking_session.delete_experiment(experiment_id)

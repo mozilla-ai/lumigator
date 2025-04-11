@@ -3,6 +3,7 @@ import datetime
 from pydantic import BaseModel, Field, PositiveInt
 
 from lumigator_schemas.jobs import (
+    DeepEvalLocalModelConfig,
     GenerationConfig,
     JobResults,
     LowercaseEnum,
@@ -37,6 +38,7 @@ class WorkflowCreateRequest(BaseModel):
     job_timeout_sec: PositiveInt = 60 * 60
     # Eventually metrics should be managed by the experiment level https://github.com/mozilla-ai/lumigator/issues/1105
     metrics: list[str] | None = None
+    llm_as_judge: DeepEvalLocalModelConfig | None = None
 
 
 class WorkflowResponse(BaseModel, from_attributes=True):

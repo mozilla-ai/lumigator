@@ -12,6 +12,7 @@ from backend.api.deps import WorkflowServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowNotFoundError,
+    WorkflowUpstreamError,
     WorkflowValidationError,
 )
 
@@ -22,6 +23,7 @@ def workflow_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     return {
         WorkflowNotFoundError: status.HTTP_404_NOT_FOUND,
         WorkflowValidationError: status.HTTP_400_BAD_REQUEST,
+        WorkflowUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
     }
 
 
@@ -44,13 +46,14 @@ async def get_workflow(service: WorkflowServiceDep, workflow_id: str) -> Workflo
 
 # get the logs
 @router.get("/{workflow_id}/logs")
-def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsResponse:
+async def get_workflow_logs(service: WorkflowServiceDep, workflow_id: str) -> JobLogsResponse:
     """Get the logs for a workflow."""
-    return JobLogsResponse.model_validate(service.get_workflow_logs(workflow_id).model_dump())
+    logs = await service.get_workflow_logs(workflow_id)
+    return JobLogsResponse.model_validate(logs.model_dump())
 
 
 @router.get("/{workflow_id}/result/download")
-def get_workflow_result_download(
+async def get_workflow_result_download(
     service: WorkflowServiceDep,
     workflow_id: str,
 ) -> str:
@@ -60,12 +63,14 @@ def get_workflow_result_download(
         service: Workflow service dependency
         workflow_id: ID of the workflow whose results will be returned
     """
-    return service.get_workflow_result_download(workflow_id)
+    return await service.get_workflow_result_download(workflow_id)
 
 
 # delete a workflow
 @router.delete("/{workflow_id}")
-def delete_workflow(service: WorkflowServiceDep, workflow_id: str, force: bool = False) -> WorkflowDetailsResponse:
+async def delete_workflow(
+    service: WorkflowServiceDep, workflow_id: str, force: bool = False
+) -> WorkflowDetailsResponse:
     """Delete a workflow by ID.
 
     Args:
@@ -73,4 +78,5 @@ def delete_workflow(service: WorkflowServiceDep, workflow_id: str, force: bool =
         workflow_id: ID of the workflow to delete
         force: If True, force deletion even if the workflow is active or has dependencies
     """
-    return WorkflowDetailsResponse.model_validate(service.delete_workflow(workflow_id, force=force).model_dump())
+    result = await service.delete_workflow(workflow_id, force)
+    return WorkflowDetailsResponse.model_validate(result.model_dump())

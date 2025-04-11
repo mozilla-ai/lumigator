@@ -11,6 +11,7 @@ from lumigator_schemas.redactable_base_model import RedactableBaseModel
 from lumigator_schemas.tasks import (
     SummarizationTaskDefinition,
     TaskDefinition,
+    get_metrics_for_task,
 )
 from lumigator_schemas.transforms.job_submission_response_transform import transform_job_submission_response
 
@@ -108,14 +109,14 @@ class BaseJobConfig(BaseModel, ABC):
 class DeepEvalLocalModelConfig(BaseModel):
     model_name: str
     model_base_url: str
-    model_api_key: str | None = "ollama"
 
 
 class JobEvalConfig(BaseJobConfig):
     job_type: Literal[JobType.EVALUATION] = JobType.EVALUATION
-    # NOTE: If changing the default  metrics, please ensure that they do not include
-    # any requirements for external API calls that require an API key to be configured.
-    metrics: list[str] = ["rouge", "meteor", "bertscore", "bleu"]
+    # NOTE: If changing the default task definition (currently summarization),
+    # please ensure that it has a corresponding default metrics mapping in the get_metrics_for_task function.
+    task_definition: TaskDefinition = Field(default_factory=lambda: SummarizationTaskDefinition())
+    metrics: set[str] = Field(default_factory=lambda info: get_metrics_for_task(info["task_definition"].task))
     llm_as_judge: DeepEvalLocalModelConfig | None = None
 
 
@@ -258,10 +259,21 @@ class JobResultObject(BaseModel):
     it should be accepted by the backend.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
     metrics: dict = {}
     parameters: dict = {}
     artifacts: dict = {}
+
+    def merge(self, other: "JobResultObject"):
+        """Merge the properties from another JobResultObject into this one."""
+        for field in self.model_fields:
+            # Get the current and new field values
+            current_value = getattr(self, field)
+            new_value = getattr(other, field)
+
+            # Update if the field is a dict and the new value is non-empty
+            if isinstance(current_value, dict) and new_value:
+                current_value.update(new_value)
 
 
 class Job(JobResponse, JobSubmissionResponse):

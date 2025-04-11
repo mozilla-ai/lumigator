@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import json
+import re
 from http import HTTPStatus
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -31,10 +32,12 @@ from lumigator_schemas.jobs import (
     JobResultObject,
     JobResultResponse,
     JobStatus,
+    JobType,
 )
 from ray.job_submission import JobSubmissionClient
 from s3fs import S3FileSystem
 from sqlalchemy.sql.expression import or_
+from starlette.datastructures import Headers
 
 from backend.ray_submit.submission import RayJobEntrypoint, submit_ray_job
 from backend.records.jobs import JobRecord
@@ -79,19 +82,24 @@ JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 
 
 class JobService:
-    # set storage path
-    storage_path = f"s3://{Path(settings.S3_BUCKET) / settings.S3_JOB_RESULTS_PREFIX}/"
+    """Job service is responsible for managing jobs in Lumigator."""
 
-    NON_TERMINAL_STATUS = [
+    NON_TERMINAL_STATUS = {
         JobStatus.CREATED.value,
         JobStatus.PENDING.value,
         JobStatus.RUNNING.value,
-    ]
+    }
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
+    TERMINAL_STATUS = {JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value}
     """list: A list of terminal job statuses."""
+
+    SAFE_JOB_NAME_REGEX = re.compile(r"[^\w\-_.]")
+    """A regex pattern to match unsafe characters in job names."""
+
+    JOB_NAME_REPLACEMENT_CHAR = "-"
+    """The character to replace unsafe characters in job names."""
 
     def __init__(
         self,
@@ -186,19 +194,33 @@ class JobService:
         The S3 key is constructed from:
         - settings.S3_JOB_RESULTS_PREFIX: the path where jobs are stored
         - settings.S3_JOB_RESULTS_FILENAME: a filename template that is to be formatted with some of
-         the job record's metadata (e.g. exp name/id)
+                the job record's metadata (e.g. name/id)
+
+        NOTE: The job's name is sanitized to be S3-safe.
 
         :param job_id: The ID of the job to retrieve the S3 key for
-        :return: The returned string contains the S3 key *excluding the bucket / s3 prefix*,
-        as it is to be used by the boto3 client which accepts them separately.
-        :rtype: str
+        :return: The returned string contains the S3 key *excluding the bucket and s3 prefix*.
+        :raises JobNotFoundError: If the job does not exist.
         """
         record = self._get_job_record(job_id)
+        if record.name is None:
+            raise JobValidationError(f"Job {job_id} is missing 'name'") from None
 
         return str(
             Path(settings.S3_JOB_RESULTS_PREFIX)
-            / settings.S3_JOB_RESULTS_FILENAME.format(job_name=record.name, job_id=record.id)
+            / settings.S3_JOB_RESULTS_FILENAME.format(
+                job_name=self.sanitize_job_name(str(record.name)), job_id=record.id
+            )
         )
+
+    def _get_s3_uri(self, job_id: UUID) -> str:
+        """Construct a full S3 URI for job result artifacts.
+
+        :param job_id: The ID of the job to retrieve the S3 URI for.
+        :return: The S3 URI for the job results.
+        :raises JobNotFoundError: If the job does not exist.
+        """
+        return f"s3://{settings.S3_BUCKET}/{self._get_results_s3_key(job_id)}"
 
     def _results_to_binary_file(self, results: dict[str, Any], fields: list[str]) -> BytesIO:
         """Given a JSON string containing inference results and the fields
@@ -225,20 +247,19 @@ class JobService:
         s3_file_system: S3FileSystem,
         dataset_filename: str,
         is_gt_generated: bool = True,
-    ):
+    ) -> UUID:
         """Attempts to add the result of a job (generated dataset) as a new dataset in Lumigator.
 
         :param job_id: The ID of the job, used to identify the S3 path
         :param request: The job request containing the dataset and output fields
         :param s3_file_system: The S3 filesystem dependency for accessing storage
+        :return: The ID of the dataset that was created
         :raises DatasetNotFoundError: If the dataset in the request does not exist
         :raises DatasetSizeError: if the dataset is too large
         :raises DatasetInvalidError: if the dataset is invalid
         :raises DatasetMissingFieldsError: if the dataset is missing any of the required fields
         :raises DatasetUpstreamError: if there is an exception interacting with S3
         """
-        loguru.logger.info("Adding a new dataset entry to the database...")
-
         # Get the dataset from the S3 bucket
         results = self._validate_results(job_id, s3_file_system)
 
@@ -261,7 +282,7 @@ class JobService:
             file=bin_data,
             size=bin_data_size,
             filename=dataset_filename,
-            headers={"content-type": "text/csv"},
+            headers=Headers({"content-type": "text/csv"}),
         )
         dataset_record = self._dataset_service.upload_dataset(
             upload_file,
@@ -272,24 +293,21 @@ class JobService:
         )
 
         loguru.logger.info(f"Dataset '{dataset_filename}' with ID '{dataset_record.id}' added to the database.")
+        return dataset_record.id
 
     def _validate_results(self, job_id: UUID, s3_file_system: S3FileSystem) -> JobResultObject:
-        """Handles the evaluation result for a given job.
+        """Retrieves a job's results from S3 and validates they conform to the ``JobResultObject`` schema.
 
         Args:
             job_id (UUID): The unique identifier of the job.
             s3_file_system (S3FileSystem): The S3 file system object used to interact with the S3 bucket.
 
-        Note:
-            Currently, this function only validates the evaluation result. Future implementations
-            may include storing the results in a database (e.g., mlflow).
+        Raises: ``ValidationError`` if the results do not conform to the schema.
         """
-        loguru.logger.info("Handling evaluation result")
-
-        result_key = self._get_results_s3_key(job_id)
-        # TODO: use a path creation function.
-        with s3_file_system.open(f"{settings.S3_BUCKET}/{result_key}", "r") as f:
-            return JobResultObject.model_validate(json.loads(f.read()))
+        result_path = self._get_s3_uri(job_id)
+        with s3_file_system.open(result_path, "r") as f:
+            data = f.read()
+            return JobResultObject.model_validate_json(data)
 
     def get_upstream_job_status(self, job_id: UUID) -> str:
         """Returns the (lowercase) status of the upstream job.
@@ -387,8 +405,6 @@ class JobService:
         get added to the dataset db. The job routes that store the results
         in the db will add this function as a background task after the job is created.
         """
-        loguru.logger.info("Handling inference job result")
-
         # Figure out the dataset filename
         dataset_filename = self._dataset_service.get_dataset(dataset_id=request.dataset).filename
         dataset_filename = Path(dataset_filename).stem
@@ -396,7 +412,12 @@ class JobService:
 
         job_status = await self.wait_for_job_complete(job_id, max_wait_time_sec)
         if job_status == JobStatus.SUCCEEDED.value:
-            self._add_dataset_to_db(job_id, request, self._dataset_service.s3_filesystem, dataset_filename)
+            self._add_dataset_to_db(
+                job_id=job_id,
+                request=request,
+                s3_file_system=self._dataset_service.s3_filesystem,
+                dataset_filename=dataset_filename,
+            )
         else:
             loguru.logger.warning(f"Job {job_id} failed, results not stored in DB")
 
@@ -436,9 +457,9 @@ class JobService:
         # To find the experiment that a job belongs to,
         # we'd use https://mlflow.org/docs/latest/python_api/mlflow.client.html#mlflow.client.MlflowClient.search_runs
         record = self.job_repo.create(name=request.name, description=request.description, job_type=job_type)
-
+        job_result_storage_path = self._get_s3_uri(record.id)
         dataset_s3_path = self._dataset_service.get_dataset_s3_path(request.dataset)
-        job_config = job_settings.generate_config(request, record.id, dataset_s3_path, self.storage_path)
+        job_config = job_settings.generate_config(request, record.id, dataset_s3_path, job_result_storage_path)
 
         # Build runtime ENV for workers
         runtime_env_vars = settings.with_ray_worker_env_vars({"MZAI_JOB_ID": str(record.id)})
@@ -457,8 +478,6 @@ class JobService:
         # command parameters provided via command line to the ray job.
         # To do this, we use a dict where keys are parameter names as they'd
         # appear on the command line and the values are the respective params.
-
-        # ...and use directly Job*Config(request.job.config.model_dump_json())
         job_config_args = {
             "--config": job_config.model_dump_json(),
         }
@@ -495,7 +514,7 @@ class JobService:
         # - annotation jobs do not run in workflows => they trigger dataset saving here at job level
         # As JobType.ANNOTATION is not used uniformly throughout our code yet, we rely on the already
         # existing `store_to_dataset` parameter to explicitly trigger this in the annotation case
-        if getattr(request.job_config, "store_to_dataset", False):
+        if job_type != JobType.EVALUATION and getattr(request.job_config, "store_to_dataset", False):
             self.add_background_task(
                 self._background_tasks,
                 self.handle_annotation_job,
@@ -504,7 +523,6 @@ class JobService:
                 DEFAULT_POST_INFER_JOB_TIMEOUT_SEC,
             )
 
-        loguru.logger.info("Getting response...")
         return JobResponse.model_validate(record)
 
     def get_job(self, job_id: UUID) -> JobResponse:
@@ -522,7 +540,7 @@ class JobService:
             return JobResponse.model_validate(record)
 
         # get job status from ray
-        job_status = self.ray_client.get_job_status(job_id)
+        job_status = self.ray_client.get_job_status(str(job_id))
         loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
 
         # update job status in the DB if it differs from the current status
@@ -595,3 +613,11 @@ class JobService:
             ExpiresIn=settings.S3_URL_EXPIRATION,
         )
         return JobResultDownloadResponse(id=job_id, download_url=download_url)
+
+    def sanitize_job_name(self, job_name: str) -> str:
+        """Sanitize a job name to be S3-safe.
+
+        :param job_name: The job name to sanitize.
+        :return: The sanitized job name.
+        """
+        return re.sub(self.SAFE_JOB_NAME_REGEX, self.JOB_NAME_REPLACEMENT_CHAR, job_name)

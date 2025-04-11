@@ -1,14 +1,20 @@
 import csv
 import io
+import json
+import logging
 import os
+import sys
 import time
 import uuid
 from collections.abc import Generator
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock
 from uuid import UUID
 
 import evaluator
+import fastapi
 import fsspec
 import pytest
 import requests_mock
@@ -26,6 +32,8 @@ from lumigator_schemas.jobs import (
     JobType,
 )
 from lumigator_schemas.models import ModelsResponse
+from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunTag
+from pydantic import PositiveInt
 from s3fs import S3FileSystem
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
@@ -50,18 +58,35 @@ TEST_SEQ2SEQ_MODEL = "hf-internal-testing/tiny-random-BARTForConditionalGenerati
 TEST_CAUSAL_MODEL = "hf-internal-testing/tiny-random-LlamaForCausalLM"
 MODELS_PATH = Path(__file__).resolve().parents[1] / "models.yaml"
 
-# Maximum amount of polls done to check if a job has finished
-# (status FAILED or SUCCEEDED) in fucntion tests.
-# An Exception will be raised if the number of polls is exceeded.
-MAX_POLLS = 18
+# The recommended default value for the maximum amount of polls to carry out
+# in order to determine whether a task finished or not.
+DEFAULT_MAX_RETRIES = 18
 
-# Time between job status polls.
-POLL_WAIT_TIME = 10
+# The recommended default value for the interval between polls/retries in seconds.
+DEFAULT_RETRY_INTERVAL_SECONDS = 10
+
+# Maximum time we should allow test jobs to run
+MAX_JOB_TIMEOUT_SECS = 60 * 5
 
 
 @pytest.fixture(scope="session")
 def background_tasks() -> BackgroundTasks:
     return BackgroundTasks()
+
+
+@pytest.fixture(scope="function")
+def disable_background_tasks(monkeypatch):
+    """Patches background tasks' ``add_task`` method as a no-op.
+
+    Useful for testing purposes to disable background tasks inside a ``TestClient``.
+    Background tasks run asynchronously in normal operation, but when using ``TestClient`` they
+    become synchronous, causing tests to wait for them to complete before exiting.
+    """
+
+    def noop_add_task(self, func, *args, **kwargs):
+        pass
+
+    monkeypatch.setattr(fastapi.BackgroundTasks, "add_task", noop_add_task)
 
 
 @pytest.fixture(scope="session")
@@ -92,50 +117,58 @@ def format_dataset(data: list[list[str]]) -> str:
     return buffer.read()
 
 
-def wait_for_job(client, job_id: UUID) -> bool:
-    succeeded = False
-    timed_out = True
-    for _ in range(1, MAX_POLLS):
-        get_job_response = client.get(f"/jobs/{job_id}")
-        assert get_job_response.status_code == 200
-        get_job_response_model = JobResponse.model_validate(get_job_response.json())
-        if get_job_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            timed_out = False
-            break
-        if get_job_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            timed_out = False
-            break
-        if get_job_response_model.status == JobStatus.STOPPED.value:
-            succeeded = False
-            timed_out = False
-            break
-        time.sleep(POLL_WAIT_TIME)
-    if timed_out:
-        raise Exception("Job poll timed out")
-    return succeeded
+def wait_for_job(
+    client: TestClient,
+    job_id: UUID,
+    max_retries: PositiveInt = DEFAULT_MAX_RETRIES,
+    retry_interval: PositiveInt = DEFAULT_RETRY_INTERVAL_SECONDS,
+) -> bool:
+    """Attempts to wait for the specified job to finish and returns True if it succeeded.
+
+    :param client: The test client to use for making requests.
+    :param job_id: The ID of the job to wait for.
+    :param max_retries: The maximum number of retries to perform before timing out.
+    :param retry_interval: The interval in seconds between retries.
+    :return: True if the job succeeded, False if it failed.
+    :raises TimeoutError: If the job does not reach a finished state within the specified max retries.
+    """
+    for _ in range(max_retries):
+        response = client.get(f"/jobs/{job_id}")
+        assert response.status_code == 200
+        job_status = JobResponse.model_validate(response.json()).status
+
+        if job_status in JobService.TERMINAL_STATUS:
+            return job_status == JobStatus.SUCCEEDED.value
+        time.sleep(retry_interval)
+
+    raise TimeoutError("Job poll timed out")
 
 
-def wait_for_experiment(client, experiment_id: UUID) -> bool:
-    succeeded = False
-    timed_out = True
-    for _ in range(1, MAX_POLLS):
-        get_experiment_response = client.get(f"/experiments/{experiment_id}")
-        assert get_experiment_response.status_code == 200
-        get_experiment_response_model = GetExperimentResponse.model_validate(get_experiment_response.json())
-        if get_experiment_response_model.status == JobStatus.SUCCEEDED.value:
-            succeeded = True
-            timed_out = False
-            break
-        if get_experiment_response_model.status == JobStatus.FAILED.value:
-            succeeded = False
-            timed_out = False
-            break
-        time.sleep(POLL_WAIT_TIME)
-    if timed_out:
-        raise Exception("Experiment poll timed out")
-    return succeeded
+def wait_for_experiment(
+    client: TestClient,
+    experiment_id: UUID,
+    max_retries: PositiveInt = DEFAULT_MAX_RETRIES,
+    retry_interval: PositiveInt = DEFAULT_RETRY_INTERVAL_SECONDS,
+) -> bool:
+    """Attempts to wait for the specified experiment to finish and returns True if it succeeded.
+
+    :param client: The test client to use for making requests.
+    :param experiment_id: The ID of the experiment to wait for.
+    :param max_retries: The maximum number of retries to perform before timing out.
+    :param retry_interval: The interval in seconds between retries.
+    :return: True if the experiment succeeded, False if it failed.
+    :raises TimeoutError: If the experiment does not reach a finished state within the specified max retries.
+    """
+    for _ in range(max_retries):
+        response = client.get(f"/experiments/{experiment_id}")
+        assert response.status_code == 200
+        experiment_status = GetExperimentResponse.model_validate(response.json()).status
+
+        if experiment_status in JobService.TERMINAL_STATUS:
+            return experiment_status == JobStatus.SUCCEEDED.value
+        time.sleep(retry_interval)
+
+    raise TimeoutError("Experiment poll timed out")
 
 
 @pytest.fixture
@@ -277,6 +310,7 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
     aws_endpoint_url = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:9000")
     aws_default_region = os.environ.get("AWS_DEFAULT_REGION", "us-east-2")
 
+    # Mock the S3 'storage_options' property to match the real client.
     s3fs = S3FileSystem(
         key=aws_access_key_id,
         secret=aws_secret_access_key,
@@ -284,7 +318,15 @@ def boto_s3fs() -> Generator[S3FileSystem, None, None]:
         client_kwargs={"region_name": aws_default_region},
     )
 
-    mock_s3fs = MagicMock(wraps=s3fs, storage_options={"endpoint_url": aws_endpoint_url})
+    mock_s3fs = MagicMock(
+        wraps=s3fs,
+        storage_options={
+            "client_kwargs": {"region_name": aws_default_region},
+            "key": aws_access_key_id,
+            "secret": aws_secret_access_key,
+            "endpoint_url": aws_endpoint_url,
+        },
+    )
 
     yield mock_s3fs
     logger.info(f"intercepted s3fs calls: {str(mock_s3fs.mock_calls)}")
@@ -307,17 +349,21 @@ def app():
 
 
 @pytest.fixture(scope="function")
-def app_client(app: FastAPI):
-    """Create a test client for calling the FastAPI app."""
-    base_url = f"http://dev{API_V1_PREFIX}"  # Fake base URL for the app
+def test_client(app: FastAPI) -> Generator[TestClient, Any, None]:
+    """Create a test client for calling the FastAPI app directly."""
+    base_url = "http://localhost/api/v1/"  # Fake base URL for the app, mainly for display purposes.
     with TestClient(app, base_url=base_url) as c:
         yield c
 
 
 @pytest.fixture(scope="function")
-def local_client(app: FastAPI):
-    """Create a test client for calling the real backend."""
-    base_url = "http://localhost/api/v1/"  # Fake base URL for the app
+def test_client_without_background_tasks(app: FastAPI, disable_background_tasks) -> Generator[TestClient, Any, None]:
+    """Create a test client that directly calls FastAPI, with background tasks 'disabled'.
+
+    Any underlying call in the application's code to `add_task` will return immediately (no-op).
+    This is useful for testing when you don't need background tasks to complete, and you want to avoid waiting for them.
+    """
+    base_url = "http://localhost/api/v1/"  # Fake base URL, mainly for display purposes.
     with TestClient(app, base_url=base_url) as c:
         yield c
 
@@ -532,3 +578,67 @@ def model_specs_data() -> list[ModelsResponse]:
     models = [ModelsResponse.model_validate(item) for item in model_specs]
 
     return models
+
+
+@pytest.fixture(scope="function")
+def fake_mlflow_tracking_client(fake_s3fs):
+    """Fixture for MLflowTrackingClient using the real MLflowClient."""
+    return MLflowTrackingClient(tracking_uri="http://mlflow.mock", s3_file_system=fake_s3fs)
+
+
+@pytest.fixture(scope="session")
+def json_mlflow_runs_search_single(resources_dir) -> dict:
+    path = resources_dir / "mlflow_runs_search_single.json"
+    with Path.open(path) as file:
+        return json.load(file)
+
+
+@pytest.fixture
+def sample_mlflow_run():
+    """Fixture for a sample MlflowRun with mock data."""
+    return Run(
+        run_info=RunInfo(
+            run_uuid="d34dbeef-1000-0000-0000-000000000000",
+            experiment_id="exp-1",
+            user_id="user",
+            status="FINISHED",
+            start_time=123456789,
+            end_time=None,
+            lifecycle_stage="active",
+            artifact_uri="",
+        ),
+        run_data=RunData(
+            metrics=[
+                Metric(key="accuracy", value=0.75, timestamp=123456789, step=0),
+            ],
+            params=[
+                Param(key="batch_size", value="32"),
+            ],
+            tags=[
+                RunTag(key="description", value="A sample workflow"),
+                RunTag(key="mlflow.runName", value="Run2"),
+                RunTag(key="model", value="SampleModel"),
+                RunTag(key="system_prompt", value="Prompt text"),
+                RunTag(key="status", value="COMPLETED"),
+            ],
+        ),
+    )
+
+
+@pytest.fixture
+def fake_mlflow_run_deleted():
+    """Fixture for a deleted MLflow run."""
+    run_info = RunInfo(
+        run_uuid="d34dbeef-1000-0000-0000-000000000000",
+        experiment_id="exp-456",
+        user_id="user-789",
+        status="FAILED",
+        start_time=int(datetime(2024, 1, 1).timestamp() * 1000),
+        end_time=None,
+        lifecycle_stage="deleted",
+        artifact_uri="s3://some-bucket",
+    )
+
+    run_data = RunData(metrics={}, params={}, tags={})
+
+    return Run(run_info=run_info, run_data=run_data)

@@ -83,7 +83,7 @@ jobs:
   e2e-tests-frontend:
     name: E2E tests Frontend
     needs: lint-frontend
-    runs-on: lumigator-e2e-tests-runner
+    runs-on: lumigator-integration-tests-runner
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -171,7 +171,7 @@ jobs:
 
   e2e-tests:
     name: E2E tests (SQLite)
-    runs-on: lumigator-e2e-tests-runner
+    runs-on: lumigator-integration-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -258,7 +258,7 @@ jobs:
 
   e2e-tests-postgres:
     name: e2e tests (PostgreSQL)
-    runs-on: lumigator-e2e-tests-runner
+    runs-on: lumigator-integration-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     strategy:
@@ -326,7 +326,7 @@ jobs:
 
   notebook-e2e-test:
     name: Notebook e2e tests
-    runs-on: lumigator-e2e-tests-runner
+    runs-on: lumigator-integration-tests-runner
     needs: lint
     if: ${{ needs.lint.result == 'success' }}
     steps:

@@ -2,12 +2,12 @@ name: Lumigator e2e pipeline
 
 
 on:
-  pull_request:
+  push:
     branches:
-      - "**"
-    # synchronized is when you push new commits
-    types: ["opened", "synchronize"]
-  # required to enable manual triggers on the GH web ui
+      - "main"
+    tags:
+      # Not the right semver regexp, but good enough
+      - 'v*.*.*'
   workflow_dispatch:
 
 permissions:

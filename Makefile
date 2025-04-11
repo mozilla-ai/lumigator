@@ -1,4 +1,4 @@
-.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-schemas test-schemas-unit test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key
+.PHONY: local-up local-down local-logs clean-docker-buildcache clean-docker-images clean-docker-containers start-lumigator-external-services start-lumigator start-lumigator-postgres stop-lumigator test-schemas test-schemas-unit test-sdk-unit test-sdk-integration test-sdk-integration-containers test-sdk test-backend-unit test-backend-integration test-backend-integration-containers test-backend test-jobs-evaluation-unit test-jobs-inference-unit test-jobs test-all config-clean config-generate-env setup config-generate-key test-e2e test-sdk-e2e
 
 SHELL:=/bin/bash
 UNAME:= $(shell uname -o)
@@ -209,6 +209,10 @@ test-sdk-integration:
 	@cd lumigator/sdk/tests; \
 	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
 
+test-sdk-e2e:
+	@cd lumigator/sdk/tests; \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+
 test-sdk-integration-gpu:
 	cd lumigator/sdk/tests; \
 	RAY_WORKER_GPUS="1.0" \
@@ -272,14 +276,24 @@ test-backend: test-backend-unit test-backend-integration-containers
 # with all the deps specified in their respective `requirements.txt` files.
 test-jobs-evaluation-unit:
 	@cd lumigator/jobs/evaluator; \
-	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
+	uv run --with pytest --with ../../schemas --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-inference-unit:
 	@cd lumigator/jobs/inference; \
-	uv run --with pytest --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
+	uv run --with pytest --with ../../schemas --with-requirements requirements.txt --isolated $(DEBUGPY_ARGS) -m pytest
 
 test-jobs-unit: test-jobs-evaluation-unit test-jobs-inference-unit
 
+test-backend-e2e: export SQLALCHEMY_DATABASE_URL = sqlite:////tmp/local.db
+test-backend-e2e: config-generate-env
+	@if [ "$(USE_ENV_FILE)" = "true" ]; then \
+		source ./scripts/set_env_vars.sh "$(CONFIG_BUILD_DIR)/.env"; \
+	else \
+		source ./scripts/set_env_vars.sh ""; \
+	fi && \
+	cd lumigator/backend/ && \
+	PYTHONPATH=../jobs:$$PYTHONPATH \
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="backend/tests/e2e/*test_*.py"
 
 # test everything
 test-all: test-schemas test-sdk test-backend test-jobs-unit

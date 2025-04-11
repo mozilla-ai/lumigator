@@ -5,8 +5,8 @@ from lumigator_schemas.models import ModelsResponse
 from backend.api.routes.models import _filter_models_by_tasks, _get_supported_tasks
 
 
-def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs_data):
-    response = app_client.get("/models/?tasks=summarization")
+def test_get_suggested_models_single_task_ok(test_client: TestClient, model_specs_data):
+    response = test_client.get("/models/?tasks=summarization")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
@@ -17,8 +17,8 @@ def test_get_suggested_models_single_task_ok(app_client: TestClient, model_specs
     assert len(models.items) == len(filtered_data)
 
 
-def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_specs_data):
-    response = app_client.get("/models/?tasks=summarization&tasks=translation")
+def test_get_suggested_models_multiple_tasks_ok(test_client: TestClient, model_specs_data):
+    response = test_client.get("/models/?tasks=summarization&tasks=translation")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
@@ -29,9 +29,9 @@ def test_get_suggested_models_multiple_tasks_ok(app_client: TestClient, model_sp
     assert len(models.items) == len(filtered_data)
 
 
-def test_get_suggested_models_no_task_specified(app_client: TestClient, model_specs_data):
+def test_get_suggested_models_no_task_specified(test_client: TestClient, model_specs_data):
     # Should return all models based on your implementation
-    response = app_client.get("/models/")
+    response = test_client.get("/models/")
     assert response.status_code == 200
     models = ListingResponse[ModelsResponse].model_validate(response.json())
 
@@ -39,8 +39,8 @@ def test_get_suggested_models_no_task_specified(app_client: TestClient, model_sp
     assert len(models.items) == len(model_specs_data)
 
 
-def test_get_suggested_models_invalid_task(app_client: TestClient, model_specs_data):
-    response = app_client.get("/models/?tasks=invalid_task")
+def test_get_suggested_models_invalid_task(test_client: TestClient, model_specs_data):
+    response = test_client.get("/models/?tasks=invalid_task")
     assert response.status_code == 400
 
     supported_tasks = _get_supported_tasks(model_specs_data)

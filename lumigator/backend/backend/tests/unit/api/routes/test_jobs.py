@@ -25,7 +25,7 @@ def load_json(path: Path) -> str:
 
 
 def test_get_job_status(
-    app_client: TestClient,
+    test_client: TestClient,
     job_repository,
     request_mock,
     json_ray_version,
@@ -48,7 +48,7 @@ def test_get_job_status(
         text=json.dumps(load_json(json_data_health_job_metadata_ray)),
     )
 
-    response = app_client.get(f"/jobs/{created_job.id}")
+    response = test_client.get(f"/jobs/{created_job.id}")
 
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
@@ -63,7 +63,7 @@ def test_get_job_status(
 
 
 def test_get_job_results(
-    app_client: TestClient,
+    test_client: TestClient,
     job_repository,
     request_mock,
     json_ray_version,
@@ -78,7 +78,7 @@ def test_get_job_results(
         status_code=status.HTTP_200_OK,
         text=json.dumps(load_json(json_ray_version)),
     )
-    response = app_client.get(f"/jobs/{created_job.id}/result/download")
+    response = test_client.get(f"/jobs/{created_job.id}/result/download")
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
@@ -89,7 +89,7 @@ def test_get_job_results(
 
 
 def test_job_logs(
-    app_client: TestClient,
+    test_client: TestClient,
     job_repository,
     request_mock,
     json_ray_version,
@@ -109,14 +109,14 @@ def test_job_logs(
         status_code=status.HTTP_200_OK,
         text=json.dumps(load_json(json_ray_version)),
     )
-    response = app_client.get(f"/jobs/{created_job.id}/logs")
+    response = test_client.get(f"/jobs/{created_job.id}/logs")
     assert response is not None
     assert response.status_code == status.HTTP_200_OK
     assert json.loads(logs_content)["logs"] == json.loads(f'"{log}"')
 
 
 def test_missing_api_key_in_job_creation(
-    job_service, app_client, dependency_overrides_fakes, job_service_dependency_override
+    job_service, test_client, dependency_overrides_fakes, job_service_dependency_override
 ):
     key_name = "MISTRAL_KEY"
     infer_model = JobInferenceCreate(
@@ -134,6 +134,6 @@ def test_missing_api_key_in_job_creation(
 
     with patch("backend.api.deps.JobSubmissionClient"):
         with patch.object(job_service, "create_job", side_effect=SecretNotFoundError("test error msg")):
-            response = app_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
+            response = test_client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)
             assert response is not None
             assert response.status_code == status.HTTP_400_BAD_REQUEST

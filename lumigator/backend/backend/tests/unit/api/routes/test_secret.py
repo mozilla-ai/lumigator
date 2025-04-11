@@ -10,7 +10,7 @@ from backend.services.secrets import SecretService
 
 
 def test_put_secret(
-    app_client: TestClient,
+    test_client: TestClient,
     secret_service: SecretService,
     secret_repository: SecretRepository,
     dependency_overrides_fakes,
@@ -18,7 +18,7 @@ def test_put_secret(
     new_secret = SecretUploadRequest(value="123456", description="test secret")
     new_secret_name = "TEST_AI_CLIENT_KEY"  # pragma: allowlist secret
     assert secret_repository.list() == []
-    response = app_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
+    response = test_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
     assert response.status_code == status.HTTP_201_CREATED
     assert secret_repository.list() != []
     assert len(secret_repository.list()) == 1
@@ -31,7 +31,7 @@ def test_put_secret(
     # Repeat now that it already exists to ensure we get the right status code response.
     new_secret.description = "test secret 2"
     new_secret.value = "secret2"
-    response = app_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
+    response = test_client.put(f"/settings/secrets/{new_secret_name}", json=new_secret.model_dump())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert secret_repository.list() != []
     assert len(secret_repository.list()) == 1
@@ -55,13 +55,13 @@ def test_put_secret(
 )
 def test_api_list_secrets(
     app: FastAPI,
-    app_client: TestClient,
+    test_client: TestClient,
     mock_return_value,
 ):
     expected_pairs = {(secret.name.lower(), secret.description) for secret in mock_return_value}
 
     with patch.object(SecretService, "list_secrets", return_value=mock_return_value):
-        response = app_client.get("/settings/secrets")
+        response = test_client.get("/settings/secrets")
         assert response.status_code == status.HTTP_200_OK
 
         json_response = response.json()

@@ -91,7 +91,7 @@ def test_upload_data_launch_job(
             "model": TEST_SEQ2SEQ_MODEL,
             "provider": "hf",
             "output_field": "predictions",
-            "store_to_dataset": False,
+            "store_to_dataset": True,
         },
     }
     create_inference_job_response = client.post("/jobs/inference/", headers=POST_HEADER, json=infer_payload)

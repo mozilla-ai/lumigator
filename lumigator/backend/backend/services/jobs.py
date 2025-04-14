@@ -84,15 +84,15 @@ JobSpecificRestrictedConfig = type[JobEvalConfig | JobInferenceConfig]
 class JobService:
     """Job service is responsible for managing jobs in Lumigator."""
 
-    NON_TERMINAL_STATUS = [
+    NON_TERMINAL_STATUS = {
         JobStatus.CREATED.value,
         JobStatus.PENDING.value,
         JobStatus.RUNNING.value,
-    ]
+    }
     """list: A list of non-terminal job statuses."""
 
     # TODO: rely on https://github.com/ray-project/ray/blob/7c2a200ef84f17418666dad43017a82f782596a3/python/ray/dashboard/modules/job/common.py#L53
-    TERMINAL_STATUS = [JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value]
+    TERMINAL_STATUS = {JobStatus.FAILED.value, JobStatus.SUCCEEDED.value, JobStatus.STOPPED.value}
     """list: A list of terminal job statuses."""
 
     SAFE_JOB_NAME_REGEX = re.compile(r"[^\w\-_.]")
@@ -540,7 +540,7 @@ class JobService:
             return JobResponse.model_validate(record)
 
         # get job status from ray
-        job_status = self.ray_client.get_job_status(job_id)
+        job_status = self.ray_client.get_job_status(str(job_id))
         loguru.logger.info(f"Obtaining info from ray for job {job_id}: {job_status}")
 
         # update job status in the DB if it differs from the current status

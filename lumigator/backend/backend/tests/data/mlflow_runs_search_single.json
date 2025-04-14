@@ -1,0 +1,110 @@
+{
+      "runs": [
+        {
+          "info": {
+            "run_uuid": "e3540cb03c994c549b327b83851cfd2a",
+            "experiment_id": "4",
+            "run_name": "evaluation",
+            "user_id": "unknown",
+            "status": "RUNNING",
+            "start_time": 1741985806224,
+            "artifact_uri": "s3://lumigator-storage/mlflow/4/e3540cb03c994c549b327b83851cfd2a/artifacts",
+            "lifecycle_stage": "active",
+            "run_id": "e3540cb03c994c549b327b83851cfd2a"
+          },
+          "data": {
+            "params": [
+              {
+                "key": "ray_job_id",
+                "value": "b8dc76d4-64b7-4db8-8bfe-7fcf88b2086b"
+              }
+            ],
+            "tags": [
+              {
+                "key": "mlflow.parentRunId",
+                "value": "712d0ff32e22431d9bd60e95791f174d"
+              },
+              {
+                "key": "mlflow.runName",
+                "value": "evaluation"
+              }
+            ]
+          },
+          "inputs": {}
+        },
+        {
+          "info": {
+            "run_uuid": "55e682b9b4d54d82b207418a57e8de46",
+            "experiment_id": "4",
+            "run_name": "inference",
+            "user_id": "unknown",
+            "status": "RUNNING",
+            "start_time": 1741985795206,
+            "artifact_uri": "s3://lumigator-storage/mlflow/4/55e682b9b4d54d82b207418a57e8de46/artifacts",
+            "lifecycle_stage": "active",
+            "run_id": "55e682b9b4d54d82b207418a57e8de46"
+          },
+          "data": {
+            "params": [
+              {
+                "key": "ray_job_id",
+                "value": "388f9903-8f2d-45f1-bc7c-5e666036f014"
+              },
+              {
+                "key": "inference_output_s3_path",
+                "value": "lumigator-storage/jobs/results/Workflow_1-inference/388f9903-8f2d-45f1-bc7c-5e666036f014/results.json"
+              }
+            ],
+            "tags": [
+              {
+                "key": "mlflow.parentRunId",
+                "value": "712d0ff32e22431d9bd60e95791f174d"
+              },
+              {
+                "key": "mlflow.runName",
+                "value": "inference"
+              }
+            ]
+          },
+          "inputs": {}
+        },
+        {
+          "info": {
+            "run_uuid": "712d0ff32e22431d9bd60e95791f174d",
+            "experiment_id": "4",
+            "run_name": "Workflow_1",
+            "user_id": "unknown",
+            "status": "RUNNING",
+            "start_time": 1741985795135,
+            "artifact_uri": "s3://lumigator-storage/mlflow/4/712d0ff32e22431d9bd60e95791f174d/artifacts",
+            "lifecycle_stage": "active",
+            "run_id": "712d0ff32e22431d9bd60e95791f174d"
+          },
+          "data": {
+            "tags": [
+              {
+                "key": "mlflow.runName",
+                "value": "Workflow_1"
+              },
+              {
+                "key": "status",
+                "value": "running"
+              },
+              {
+                "key": "description",
+                "value": "Test workflow for inf and eval"
+              },
+              {
+                "key": "model",
+                "value": "hf-internal-testing/tiny-random-BARTForConditionalGeneration"
+              },
+              {
+                "key": "system_prompt",
+                "value": "You are a helpful assistant, expert in text summarization. For every prompt you receive, provide a summary of its contents in at most two sentences."
+              }
+            ]
+          },
+          "inputs": {}
+        }
+      ]
+    }

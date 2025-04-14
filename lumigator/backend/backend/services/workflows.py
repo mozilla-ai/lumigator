@@ -20,6 +20,7 @@ from lumigator_schemas.workflows import (
     WorkflowResponse,
     WorkflowStatus,
 )
+from mlflow.entities import Run
 from pydantic_core._pydantic_core import ValidationError
 from typing_extensions import deprecated
 
@@ -37,9 +38,11 @@ from backend.services.exceptions.job_exceptions import (
     JobUpstreamError,
 )
 from backend.services.exceptions.secret_exceptions import SecretNotFoundError
+from backend.services.exceptions.tracking_exceptions import TrackingClientUpstreamError
 from backend.services.exceptions.workflow_exceptions import (
     WorkflowDownloadNotAvailableError,
     WorkflowNotFoundError,
+    WorkflowUpstreamError,
     WorkflowValidationError,
 )
 from backend.services.jobs import JobService
@@ -91,36 +94,31 @@ class WorkflowService:
         """Handle a workflow failure by updating the workflow status and stopping any running jobs."""
         loguru.logger.error("Workflow failed: {} ... updating status and stopping jobs", workflow_id)
 
-        # Mark the parent workflow as failed.
-        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
+        # Get the list of non-complete jobs in the workflow.
+        async def non_terminal_jobs(jobs: list[Run]):
+            for job in jobs:
+                if not await self._tracking_client.is_status_terminal(job.info.status):
+                    yield job
 
-        # Get the list of non-complete jobs in the workflow, to stop them and mark them failed.
-        non_terminal_runs = [
-            run
-            for run in await self._tracking_client.list_jobs(workflow_id)
-            if not (await self._tracking_client.is_status_terminal(run.info.status))
-        ]
+        workflow_jobs = await self._tracking_client.list_jobs(workflow_id)
+        non_terminal_jobs = [job async for job in non_terminal_jobs(workflow_jobs)]
 
-        # Get Ray jobs tied to this workflow so we can stop them.
-        ray_stop_tasks = [
+        # Create a list of tasks: Ray jobs to stop, and MLFlow runs to mark as failed.
+        stop_tasks = [
             self._job_service.stop_job(UUID(ray_job_id))
-            for job in non_terminal_runs
+            for job in non_terminal_jobs
             if (ray_job_id := job.data.params.get("ray_job_id"))
-        ]
-
-        # Mark MLFlow jobs (runs) that are not in a terminal state, as failed.
-        mlflow_stop_tasks = [
+        ] + [
             self._tracking_client.update_workflow_status(run.info.run_id, WorkflowStatus.FAILED)
-            for run in non_terminal_runs
+            for run in non_terminal_jobs
         ]
 
-        stop_tasks = []
-        stop_tasks.extend(ray_stop_tasks)
-        stop_tasks.extend(mlflow_stop_tasks)
-
-        # Wait for all tasks to complete concurrently.
+        # Wait for all tasks to complete concurrently (if we have any).
         if stop_tasks:
             await asyncio.gather(*stop_tasks, return_exceptions=False)
+
+        # Finally, mark the parent workflow as failed.
+        await self._tracking_client.update_workflow_status(workflow_id, WorkflowStatus.FAILED)
 
     async def _run_inference_eval_pipeline(
         self,
@@ -255,20 +253,27 @@ class WorkflowService:
 
         # FIXME The ray status is now _not enough_ to set the job status,
 
-        job_config = JobEvalConfig()
+        job_eval_config = JobEvalConfig(task_definition=experiment.task_definition)
+
+        # if some custom parameters are provided for evaluation (e.g. special metrics
+        # such as those based on g-eval), bring them over to the job
         if request.metrics:
-            job_config.metrics = request.metrics
-            # NOTE: This should be considered a temporary solution as we currently only support
-            # GEval by querying OpenAI's API. This should be refactored to be more robust.
-            if "g_eval_summarization" in job_config.metrics:
-                job_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
+            job_eval_config.metrics = request.metrics
+
+            if request.llm_as_judge:
+                # if params for local model in llm-as-judge are provided, bring them over
+                # (and ignore any API keys because they are not required for ollama/local models)
+                job_eval_config.llm_as_judge = request.llm_as_judge
+            else:
+                if any(s.startswith("g_eval_") for s in job_eval_config.metrics):
+                    job_eval_config.secret_key_name = "openai_api_key"  # pragma: allowlist secret
 
         # prepare the inputs for the evaluation job and pass the id of the new dataset
         job_eval_create = JobCreate(
             name=f"{request.name}-evaluation",
             dataset=inference_dataset_id,
             max_samples=experiment.max_samples,
-            job_config=job_config,
+            job_config=job_eval_config,
         )
 
         try:
@@ -370,10 +375,21 @@ class WorkflowService:
             raise WorkflowDownloadNotAvailableError(workflow_id) from None
 
     async def get_workflow(self, workflow_id: str) -> WorkflowDetailsResponse:
-        """Get a workflow."""
-        tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
+        """Get a workflow.
+
+        :param workflow_id: The ID of the workflow to retrieve.
+        :return: The workflow details.
+        :raises WorkflowNotFoundError: If the workflow is not found.
+        :raises WorkflowUpstreamError: If there is an error retrieving the workflow from the tracking client.
+        """
+        try:
+            tracking_server_workflow = await self._tracking_client.get_workflow(workflow_id)
+        except TrackingClientUpstreamError as e:
+            raise WorkflowUpstreamError("mlflow", f"Workflow: {workflow_id}, Error getting workflow.") from e
+
         if tracking_server_workflow is None:
             raise WorkflowNotFoundError(workflow_id) from None
+
         return tracking_server_workflow
 
     async def create_workflow(self, request: WorkflowCreateRequest) -> WorkflowResponse:
@@ -430,7 +446,7 @@ class WorkflowService:
     async def delete_workflow(self, workflow_id: str, force: bool) -> WorkflowResponse:
         """Delete a workflow by ID."""
         # if the workflow is running, we should throw an error
-        workflow = self.get_workflow(workflow_id)
+        workflow = await self.get_workflow(workflow_id)
         if workflow.status == WorkflowStatus.RUNNING and not force:
             raise WorkflowValidationError("Cannot delete a running workflow")
         return await self._tracking_client.delete_workflow(workflow_id)

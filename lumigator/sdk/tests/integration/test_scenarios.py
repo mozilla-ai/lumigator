@@ -286,7 +286,7 @@ def test_create_exp_workflow_check_results(
 
     # Create a workflow for the experiment
     request = WorkflowCreateRequest(
-        name="Workflow_1",
+        name="SDK_Workflow_1",
         description="Test workflow for inf and eval",
         model=model,
         provider="hf",
@@ -310,7 +310,7 @@ def test_create_exp_workflow_check_results(
 
     # Add another workflow to the experiment
     request = WorkflowCreateRequest(
-        name="Workflow_2",
+        name="SDK_Workflow_2",
         description="Test workflow for inf and eval",
         model=model,
         provider="hf",

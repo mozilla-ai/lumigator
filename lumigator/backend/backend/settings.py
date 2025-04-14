@@ -1,7 +1,9 @@
 import os
 import re
+import tomllib
 from collections.abc import Mapping
 from enum import Enum
+from pathlib import Path
 from typing import Final
 
 from lumigator_schemas.extras import DeploymentType
@@ -174,6 +176,23 @@ class BackendSettings(BaseSettings):
                 result.append(o)
 
         return result
+
+    @computed_field
+    @property
+    def PROJECT_ROOT(self) -> Path:  # noqa: N802
+        """Returns the root path of the Lumigator backend project."""
+        return Path(__file__).resolve().parent.parent
+
+    @computed_field
+    @property
+    def VERSION(self) -> str:  # noqa: N802
+        """Returns the version of the Lumigator backend."""
+        try:
+            with Path.open(Path(self.PROJECT_ROOT / "pyproject.toml"), "rb") as f:
+                data = tomllib.load(f)
+            return data["project"]["version"]
+        except Exception as e:
+            raise RuntimeError("Unable to retrieve Lumigator backend version.") from e
 
 
 settings = BackendSettings()

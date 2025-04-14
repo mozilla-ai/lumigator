@@ -1,10 +1,12 @@
+import json
 import shutil
 from pathlib import Path
+from unittest.mock import patch
 from uuid import UUID
 
 import numpy as np
 import pytest
-from datasets import load_dataset, load_from_disk
+from datasets import load_dataset
 from eval_metrics import EvaluationMetrics
 from evaluator import run_eval
 
@@ -80,3 +82,43 @@ def test_empty_fields_cast_as_float64():
     )
     run_eval(eval, non_existing_id)
     shutil.rmtree(test_path)
+
+
+@patch("eval_metrics.EvaluationMetrics._g_eval_measure_with_retry")
+@patch("eval_metrics.GEval")
+def test_geval_metrics_dict(mock_geval, mock_g_eval_measure_with_retry):
+    """Verifies that all geval-based metrics appear in the outputs.
+
+    When a new geval_based metric is added to evaluator, eval outputs change according
+    to informations stored in three different places:
+
+    - `g_eval_prompts.json`, which contains sub_metric names (e.g. coherence, fluency, etc)
+       and a mapping from tasks to task-specific prompts.
+    - `EvaluationMetrics._supported_metrics` in `eval_metrics`, to map the new metric
+       name with a specific task (and possible extra params).
+    - `EvalJobMetrics` in `schemas` which specifies the format of the new evaluation
+       results and where they will appear in the resulting dictionary.
+
+    This test automatically verifies, for each metric called geval_*, that there is
+    actually an output with the same name inside the resulting dictionary.
+    """
+    # we cannot access _supported_metrics statically, so we instantiate
+    # the EvaluationMetrics class with a known metric
+    em = EvaluationMetrics(["g_eval_summarization"])
+    # get the list of supported metrics, and instantiate the EvaluationMetrics
+    # class again with all the g_eval* ones
+    g_eval_metrics = [x for x in em._supported_metrics if x.startswith("g_eval")]
+    em = EvaluationMetrics(g_eval_metrics)
+
+    # run all g_eval* evaluations (mocked) to obtain the output dictionary
+    mock_geval.return_value = None
+    mock_g_eval_measure_with_retry.return_value = {"score": np.random.rand(), "reason": "Because I said so"}
+    results = em.run_all(
+        examples=["Ceci n'est pas un pipe"],
+        pred=["This is not a pipe"],
+        ref=["This is not a pipe"],
+    )
+
+    # check that all g_eval metrics are present in the output dictionary
+    for metric_name in g_eval_metrics:
+        assert metric_name in results.model_dump()

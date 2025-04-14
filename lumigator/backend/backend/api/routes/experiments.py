@@ -9,7 +9,7 @@ from lumigator_schemas.extras import ListingResponse
 
 from backend.api.deps import ExperimentServiceDep
 from backend.services.exceptions.base_exceptions import ServiceError
-from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError
+from backend.services.exceptions.experiment_exceptions import ExperimentNotFoundError, ExperimentUpstreamError
 
 router = APIRouter()
 
@@ -17,6 +17,7 @@ router = APIRouter()
 def experiment_exception_mappings() -> dict[type[ServiceError], HTTPStatus]:
     return {
         ExperimentNotFoundError: status.HTTP_404_NOT_FOUND,
+        ExperimentUpstreamError: status.HTTP_500_INTERNAL_SERVER_ERROR,
     }
 
 

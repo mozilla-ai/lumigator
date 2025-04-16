@@ -496,7 +496,7 @@ watch(
 
 .models-grid {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, 1fr); // Ensures 2 equal-width columns
   column-gap: 0.5rem;
   row-gap: 0.5rem;
 }

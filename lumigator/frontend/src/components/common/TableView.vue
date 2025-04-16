@@ -129,7 +129,7 @@ import {
   type DataTableCellEditCompleteEvent,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
-import { defineComponent, ref, toRef, type PropType } from 'vue'
+import { defineComponent, ref, toRef, toRefs, type PropType } from 'vue'
 import { WorkflowStatus } from '@/types/Workflow'
 
 export default defineComponent({
@@ -199,6 +199,7 @@ export default defineComponent({
   emits: ['row-click'],
   setup(props) {
     const reactiveData = toRef(props, 'data')
+    const reactiveProps = toRefs(props)
     const isVisible = ref(true)
     const dataTable = ref()
     const selectedColumns = ref(props.columns)
@@ -266,7 +267,7 @@ export default defineComponent({
       collapseAll,
       exportCSV,
       reactiveData,
-      ...props,
+      ...reactiveProps,
     }
   },
 })

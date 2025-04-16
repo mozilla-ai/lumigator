@@ -21,6 +21,7 @@
     <div :class="{ 'no-data': experiment.workflows.length === 0 }">
       <l-experiments-empty
         v-if="experiment.workflows.length === 0"
+        instructions="Model runs are a logical sequence of inference and evaluation jobs that run sequentially to evaluate an LLM with a given set of parameters."
         :button-text="'Add Model Run'"
         @l-add-experiment="handleAddModelClicked"
       />

@@ -144,15 +144,23 @@
           <TabPanel value="json">
             <div class="json-panel">
               <!-- <pre>{{ workflowForm }}</pre> -->
-              <JsonEditorVue
-                class="jse-theme-dark"
-                :debounce="300"
-                :mode="mode"
-                :ask-to-format="true"
-                :onChange="handleJSONChanged"
-                :main-menu-bar="false"
-                :model-value="workflowForm"
-              ></JsonEditorVue>
+              <div style="position: relative">
+                <JsonEditorVue
+                  class="jse-theme-dark"
+                  :debounce="300"
+                  :mode="mode"
+                  :ask-to-format="true"
+                  :onChange="handleJSONChanged"
+                  :main-menu-bar="false"
+                  :model-value="workflowForm"
+                ></JsonEditorVue>
+                <i
+                  v-tooltip="'Copy JSON'"
+                  @click="copyToClipboard(JSON.stringify(workflowForm, null, 2))"
+                  :class="['copy-icon', isCopied ? 'pi pi-check' : 'pi pi-clone']"
+                  style="font-size: 14px; padding-left: 3px"
+                ></i>
+              </div>
               <p class="json-note">
                 Ensure the schema is configured correctly. Check all parameters and their values to
                 ensure optimal performance. An incorrect configuration can result in a failed job or
@@ -229,6 +237,16 @@ const temperature = ref(props.workflow.generation_config?.temperature)
 const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref('Hugging Face')
 const provider = ref(props.workflow.provider)
+const isCopied = ref(false)
+
+const copyToClipboard = async (longString: string) => {
+  isCopied.value = true
+  setTimeout(() => {
+    isCopied.value = false
+  }, 3000)
+  await navigator.clipboard.writeText(longString)
+}
+
 const mode = Mode.text
 const handleJSONChanged = (change: TextContent) => {
   const string = change.text
@@ -417,5 +435,12 @@ const isFormInvalid = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.copy-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
 }
 </style>

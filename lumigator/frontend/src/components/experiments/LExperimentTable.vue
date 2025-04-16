@@ -60,7 +60,7 @@ import { type DataTableRowClickEvent } from 'primevue/datatable'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
-import { blockBodyScroll, Button } from 'primevue'
+import { Button } from 'primevue'
 import TableView from '../common/TableView.vue'
 import { useDatasetStore } from '@/stores/datasetsStore'
 const props = defineProps({

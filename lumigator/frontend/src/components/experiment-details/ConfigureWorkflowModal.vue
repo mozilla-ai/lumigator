@@ -5,7 +5,13 @@
         <h5 class="modal-title">Configure Model Run</h5>
         <p class="note">
           Note that model parameter configurations will override experiment parameters.
-          <!-- <a href="#" rel="noopener" target="_blank">Learn more↗</a> -->
+          <a
+            href="https://mozilla-ai.github.io/lumigator/get-started/quickstart.html#trigger-the-workflows"
+            rel="noopener"
+            target="_blank"
+            style="background-color: transparent"
+            >Learn more <span class="pi pi-arrow-up-right"></span>
+          </a>
         </p>
       </div>
     </template>

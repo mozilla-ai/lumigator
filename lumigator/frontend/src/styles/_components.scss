@@ -210,7 +210,7 @@
   .p-tablist-content > .p-tablist-tab-list {
     align-items: center;
     background: variables.$l-menu-bg;
-    gap: variables.$l-spacing-1;
+    gap: 1.5rem;
 
     .p-tab {
       padding: 0.5rem 0;

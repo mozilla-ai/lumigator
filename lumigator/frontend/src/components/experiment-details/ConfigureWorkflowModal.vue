@@ -49,9 +49,20 @@
                 }}</label>
                 <InputText
                   id="model-id"
+                  :disabled="!isBYOM"
                   v-model="modelId"
                   variant="filled"
                   :placeholder="via === 'Hugging Face' ? 'Paste your model title or link here' : ''"
+                ></InputText>
+              </div>
+
+              <div variant="in" class="form-field">
+                <label for="provider" class="field-label">Provider</label>
+                <InputText
+                  id="provider"
+                  :disabled="!isBYOM"
+                  v-model="provider"
+                  variant="filled"
                 ></InputText>
               </div>
 
@@ -149,7 +160,7 @@ import {
   Tabs,
   Textarea,
 } from 'primevue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { WorkflowForm } from './AddWorkflowsTab.vue'
 
 const props = withDefaults(
@@ -176,7 +187,17 @@ const baseUrl = ref(props.workflow.base_url)
 const temperature = ref(props.workflow.generation_config?.temperature)
 const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref()
-// const huggingFaceModelId = ref()
+const provider = ref(props.workflow.provider)
+
+watch(via, (value) => {
+  if (props.isBYOM) {
+    if (value === 'Hugging Face') {
+      provider.value = 'hf'
+    } else if (value === 'Self-Hosted') {
+      provider.value = 'self-hosted'
+    }
+  }
+})
 
 const handleIsVisibleChanged = (value: boolean) => {
   isVisible.value = value
@@ -189,11 +210,7 @@ const workflowForm = computed(() => ({
   model: modelId.value || props.workflow.model,
   name: runTitle.value || props.workflow.name,
   system_prompt: prompt.value || defaultPrompt.value,
-  provider: props.isBYOM
-    ? via.value === 'Hugging Face'
-      ? 'hf'
-      : 'self-hosted'
-    : props.workflow.provider,
+  provider: provider.value,
   generation_config: {
     temperature: temperature.value,
     top_p: topP.value,

@@ -105,4 +105,4 @@ def test_backend_version():
     """Test to ensure we know the current backend version."""
     from backend.settings import settings
 
-    assert settings.VERSION == "0.1.3-alpha"
+    assert settings.VERSION == "0.1.4-alpha"

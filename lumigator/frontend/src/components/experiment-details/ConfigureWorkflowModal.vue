@@ -60,7 +60,7 @@
                     v-model="modelId"
                     variant="filled"
                     :placeholder="
-                      via === 'Hugging Face' ? 'Paste your model title or link here' : ''
+                      via === 'Hugging Face' ? 'paste Model ID here' : 'paste Model ID here'
                     "
                   ></InputText>
                 </div>
@@ -71,13 +71,19 @@
                     id="provider"
                     :disabled="!isBYOM"
                     v-model="provider"
+                    placeholder="Model Provider"
                     variant="filled"
                   ></InputText>
                 </div>
 
                 <div variant="in" class="form-field">
                   <label for="run-title" class="field-label">run title</label>
-                  <InputText id="run-title" v-model="runTitle" variant="filled"></InputText>
+                  <InputText
+                    id="run-title"
+                    v-model="runTitle"
+                    variant="filled"
+                    placeholder="Type run title here"
+                  ></InputText>
                 </div>
 
                 <div class="prompt-field">
@@ -136,16 +142,23 @@
             </div>
           </TabPanel>
           <TabPanel value="json">
-            <!-- <pre>{{ workflowForm }}</pre> -->
-            <JsonEditorVue
-              class="jse-theme-dark"
-              :debounce="300"
-              :mode="mode"
-              :ask-to-format="true"
-              :onChange="handleJSONChanged"
-              :main-menu-bar="false"
-              :model-value="workflowForm"
-            ></JsonEditorVue>
+            <div class="json-panel">
+              <!-- <pre>{{ workflowForm }}</pre> -->
+              <JsonEditorVue
+                class="jse-theme-dark"
+                :debounce="300"
+                :mode="mode"
+                :ask-to-format="true"
+                :onChange="handleJSONChanged"
+                :main-menu-bar="false"
+                :model-value="workflowForm"
+              ></JsonEditorVue>
+              <p class="json-note">
+                Ensure the schema is configured correctly. Check all parameters and their values to
+                ensure optimal performance. An incorrect configuration can result in a failed job or
+                gibberish output.
+              </p>
+            </div>
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -214,7 +227,7 @@ const prompt = ref(props.workflow.system_prompt)
 const baseUrl = ref(props.workflow.base_url)
 const temperature = ref(props.workflow.generation_config?.temperature)
 const topP = ref(props.workflow.generation_config?.top_p)
-const via = ref()
+const via = ref('Hugging Face')
 const provider = ref(props.workflow.provider)
 const mode = Mode.text
 const handleJSONChanged = (change: TextContent) => {
@@ -393,5 +406,16 @@ const isFormInvalid = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.json-note {
+  color: var(--l-grey-100);
+  @include mixins.caption;
+}
+
+.json-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 </style>

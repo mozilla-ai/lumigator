@@ -8,7 +8,7 @@ of view, these look like just other evaluation metrics that can be specified via
 At the present time LLM-as-judge metrics are only available via API, but we are planning to make them available in the UI soon. As soon as they are, you'll be able to add them to your evaluations just as any other metric.
 ```
 
-By default, [DeepEval uses gpt-4o](https://docs.confident-ai.com/integrations/model-openai) to power all of
+By default, [DeepEval uses gpt-4o](https://www.deepeval.com/integrations/models/openai) to power all of
 its evaluation metrics. It is however possible to use self-hosted models as an alternative, and we'll show
 you how in this guide.
 

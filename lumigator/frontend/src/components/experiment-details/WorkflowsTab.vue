@@ -39,6 +39,7 @@
         <Button
           icon="pi pi-trash"
           @click="handleDeleteWorkflowClicked(slotProps.data)"
+          v-tooltip.bottom="'Delete'"
           severity="secondary"
           variant="text"
           rounded
@@ -47,6 +48,7 @@
         <Button
           icon="pi pi-file"
           @click="handleViewLogsClicked(slotProps.data)"
+          v-tooltip.bottom="'Logs'"
           severity="secondary"
           variant="text"
           rounded
@@ -55,6 +57,7 @@
         <Button
           icon="pi pi-download"
           @click="handleDownloadResultsClicked(slotProps.data)"
+          v-tooltip.bottom="'Download results'"
           severity="secondary"
           variant="text"
           :disabled="slotProps.data.status !== WorkflowStatus.SUCCEEDED"

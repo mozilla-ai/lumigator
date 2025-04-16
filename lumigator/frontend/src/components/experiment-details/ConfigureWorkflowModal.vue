@@ -5,7 +5,7 @@
         <h5 class="modal-title">Configure Model Run</h5>
         <p class="note">
           Note that model parameter configurations will override experiment parameters.
-          <a href="#" rel="noopener" target="_blank">Learn more↗</a>
+          <!-- <a href="#" rel="noopener" target="_blank">Learn more↗</a> -->
         </p>
       </div>
     </template>

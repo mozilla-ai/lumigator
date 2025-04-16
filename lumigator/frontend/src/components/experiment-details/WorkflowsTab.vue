@@ -9,14 +9,21 @@
           label="View All Results"
           @click="handleViewAllResultsClicked"
         ></Button>
-        <Button
+        <!-- <Button
           severity="secondary"
           rounded
           label="Add Model"
           icon="pi pi-plus"
           @click="handleAddModelClicked"
-        ></Button>
+        ></Button> -->
       </div>
+    </div>
+    <div class="no-data">
+      <l-experiments-empty
+        v-if="experiment.workflows.length === 0"
+        :button-text="'Add Model Run'"
+        @l-add-experiment="handleAddModelClicked"
+      />
     </div>
     <TableView
       v-if="experiment.workflows.length > 0"
@@ -90,6 +97,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import { downloadContent } from '@/helpers/downloadContent'
+import LExperimentsEmpty from '../experiments/LExperimentsEmpty.vue'
 
 const props = defineProps<{
   experiment: Experiment
@@ -261,5 +269,11 @@ const handleViewAllResultsClicked = async () => {
   display: flex;
   gap: 1rem;
   flex-direction: column;
+}
+
+.no-data {
+  display: grid;
+  place-content: center;
+  margin-top: 5rem;
 }
 </style>

@@ -22,6 +22,7 @@
     "@tanstack/vue-query": "^5.68.0",
     "@tanstack/vue-query-devtools": "^5.68.0",
     "axios": "^1.8.3",
+    "json-editor-vue": "^0.18.1",
     "papaparse": "^5.5.2",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",

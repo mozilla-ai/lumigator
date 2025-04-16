@@ -15,139 +15,158 @@
         </p>
       </div>
     </template>
-    <Tabs :value="activeTab" @update:value="activeTab = String($event)">
-      <TabList>
-        <Tab value="basic">Basic </Tab>
-        <Tab value="json"> JSON </Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel value="basic">
-          <div class="basic-panel">
-            <div class="form-fields">
-              <div variant="in" class="form-field" v-if="isBYOM">
-                <label for="via" class="field-label">Via</label>
-                <Select
-                  v-model="via"
-                  label-id="via"
-                  :options="['Hugging Face', 'Self-Hosted']"
-                  variant="filled"
-                ></Select>
-              </div>
+    <div class="tabs-wrapper">
+      <Tabs :value="activeTab" @update:value="activeTab = String($event)">
+        <TabList>
+          <Tab value="basic">Basic </Tab>
+          <Tab value="json"> JSON </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="basic">
+            <div class="basic-panel">
+              <div class="form-fields">
+                <div variant="in" class="form-field" v-if="isBYOM">
+                  <label for="via" class="field-label">Via</label>
+                  <Select
+                    v-model="via"
+                    label-id="via"
+                    :options="['Hugging Face', 'Self-Hosted']"
+                    variant="filled"
+                  ></Select>
+                </div>
 
-              <!-- <div variant="in" class="form-field" v-if="via== 'Hugging Face'">
+                <!-- <div variant="in" class="form-field" v-if="via== 'Hugging Face'">
                 <label for="hugging-face-model-id" class="field-label">Hugging Face Model id</label>
                 <InputText id="hugging-face-model-id" v-model="huggingFaceModelId" variant="filled" placeholder="Paste your model title or link here"></InputText>
               </div> -->
 
-              <div variant="in" class="form-field" v-if="via == 'Self-Hosted'">
-                <label for="base-url" class="field-label">Base Url</label>
-                <InputText
-                  id="base-url"
-                  v-model="baseUrl"
-                  variant="filled"
-                  placeholder="Paste URL link here"
-                ></InputText>
+                <div variant="in" class="form-field" v-if="via == 'Self-Hosted'">
+                  <label for="base-url" class="field-label">Base Url</label>
+                  <InputText
+                    id="base-url"
+                    v-model="baseUrl"
+                    variant="filled"
+                    placeholder="Paste URL link here"
+                  ></InputText>
+                </div>
+
+                <div variant="in" class="form-field">
+                  <label for="model-id" class="field-label">{{
+                    via === 'Hugging Face' ? 'Hugging Face Model id' : 'model id'
+                  }}</label>
+                  <InputText
+                    id="model-id"
+                    :disabled="!isBYOM"
+                    v-model="modelId"
+                    variant="filled"
+                    :placeholder="
+                      via === 'Hugging Face' ? 'Paste your model title or link here' : ''
+                    "
+                  ></InputText>
+                </div>
+
+                <div variant="in" class="form-field">
+                  <label for="provider" class="field-label">Provider</label>
+                  <InputText
+                    id="provider"
+                    :disabled="!isBYOM"
+                    v-model="provider"
+                    variant="filled"
+                  ></InputText>
+                </div>
+
+                <div variant="in" class="form-field">
+                  <label for="run-title" class="field-label">run title</label>
+                  <InputText id="run-title" v-model="runTitle" variant="filled"></InputText>
+                </div>
+
+                <div class="prompt-field">
+                  <label for="prompt" class="field-label">Model Prompt</label>
+                  <Textarea
+                    id="prompt"
+                    :model-value="prompt || defaultPrompt"
+                    @update:model-value="(value) => (prompt = value || defaultPrompt)"
+                    autoResize
+                    fluid
+                  ></Textarea>
+                </div>
               </div>
 
-              <div variant="in" class="form-field">
-                <label for="model-id" class="field-label">{{
-                  via === 'Hugging Face' ? 'Hugging Face Model id' : 'model id'
-                }}</label>
-                <InputText
-                  id="model-id"
-                  :disabled="!isBYOM"
-                  v-model="modelId"
-                  variant="filled"
-                  :placeholder="via === 'Hugging Face' ? 'Paste your model title or link here' : ''"
-                ></InputText>
-              </div>
-
-              <div variant="in" class="form-field">
-                <label for="provider" class="field-label">Provider</label>
-                <InputText
-                  id="provider"
-                  :disabled="!isBYOM"
-                  v-model="provider"
-                  variant="filled"
-                ></InputText>
-              </div>
-
-              <div variant="in" class="form-field">
-                <label for="run-title" class="field-label">run title</label>
-                <InputText id="run-title" v-model="runTitle" variant="filled"></InputText>
-              </div>
-
-              <div class="prompt-field">
-                <label for="prompt" class="field-label">Model Prompt</label>
-                <Textarea
-                  id="prompt"
-                  :model-value="prompt || defaultPrompt"
-                  @update:model-value="(value) => (prompt = value || defaultPrompt)"
-                  autoResize
-                  fluid
-                ></Textarea>
-              </div>
-            </div>
-
-            <div class="parameters-wrapper">
-              <h6 class="parameters-header">Model parameters</h6>
-              <div class="parameters">
-                <div class="parameter-field">
-                  <div class="inline-parameter-field">
-                    <label for="temperature" class="parameter-label">Temperature</label>
-                    <InputNumber
-                      :max="1"
-                      :min="0"
+              <div class="parameters-wrapper">
+                <h6 class="parameters-header">Model parameters</h6>
+                <div class="parameters">
+                  <div class="parameter-field">
+                    <div class="inline-parameter-field">
+                      <label for="temperature" class="parameter-label">Temperature</label>
+                      <InputNumber
+                        :max="1"
+                        :min="0"
+                        v-model="temperature"
+                        :step="0.1"
+                        size="small"
+                        class="input-number"
+                        fluid
+                      />
+                    </div>
+                    <Slider
                       v-model="temperature"
-                      :step="0.1"
-                      size="small"
-                      class="input-number"
-                      fluid
-                    />
-                  </div>
-                  <Slider v-model="temperature" name="temperature" :step="0.01" :min="0" :max="1" />
-                </div>
-                <div class="parameter-field">
-                  <div class="inline-parameter-field">
-                    <label for="topP" class="parameter-label">Top-P</label>
-                    <InputNumber
-                      :max="1"
+                      name="temperature"
+                      :step="0.01"
                       :min="0"
-                      v-model="topP"
-                      :step="0.1"
-                      size="small"
-                      class="input-number"
-                      fluid
+                      :max="1"
                     />
                   </div>
-                  <Slider v-model="topP" name="top-p" :step="0.01" :min="0" :max="1" />
+                  <div class="parameter-field">
+                    <div class="inline-parameter-field">
+                      <label for="topP" class="parameter-label">Top-P</label>
+                      <InputNumber
+                        :max="1"
+                        :min="0"
+                        v-model="topP"
+                        :step="0.1"
+                        size="small"
+                        class="input-number"
+                        fluid
+                      />
+                    </div>
+                    <Slider v-model="topP" name="top-p" :step="0.01" :min="0" :max="1" />
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="actions">
-              <Button
-                type="button"
-                label="Cancel"
-                rounded
-                severity="secondary"
-                @click="handleCancelClicked"
-              ></Button>
-              <Button
-                type="button"
-                rounded
-                :loading="isLoading"
-                label="Done"
-                :disabled="isFormInvalid"
-                @click="handleContinueClicked"
-              ></Button>
-            </div>
-          </div>
-        </TabPanel>
-        <TabPanel value="json">
-          <pre>{{ workflowForm }}</pre>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+          </TabPanel>
+          <TabPanel value="json">
+            <!-- <pre>{{ workflowForm }}</pre> -->
+            <JsonEditorVue
+              class="jse-theme-dark"
+              :debounce="300"
+              :mode="mode"
+              :ask-to-format="true"
+              :onChange="handleJSONChanged"
+              :main-menu-bar="false"
+              :model-value="workflowForm"
+            ></JsonEditorVue>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+      <div class="actions">
+        <Button
+          type="button"
+          label="Cancel"
+          rounded
+          severity="secondary"
+          @click="handleCancelClicked"
+        ></Button>
+        <Button
+          type="button"
+          rounded
+          :loading="isLoading"
+          label="Done"
+          :disabled="isFormInvalid"
+          @click="handleContinueClicked"
+        ></Button>
+      </div>
+    </div>
   </Dialog>
 </template>
 
@@ -168,6 +187,9 @@ import {
 } from 'primevue'
 import { computed, ref, watch } from 'vue'
 import type { WorkflowForm } from './AddWorkflowsTab.vue'
+import JsonEditorVue from 'json-editor-vue'
+import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
+import { Mode, type TextContent } from 'vanilla-jsoneditor'
 
 const props = withDefaults(
   defineProps<{
@@ -194,6 +216,21 @@ const temperature = ref(props.workflow.generation_config?.temperature)
 const topP = ref(props.workflow.generation_config?.top_p)
 const via = ref()
 const provider = ref(props.workflow.provider)
+const mode = Mode.text
+const handleJSONChanged = (change: TextContent) => {
+  const string = change.text
+  try {
+    const val = JSON.parse(string)
+    modelId.value = val.model
+    runTitle.value = val.name
+    prompt.value = val.system_prompt
+    baseUrl.value = val.base_url
+    temperature.value = val.generation_config?.temperature
+    topP.value = val.generation_config?.top_p
+  } catch (e) {
+    console.error('Error parsing JSON', e)
+  }
+}
 
 watch(via, (value) => {
   if (props.isBYOM) {
@@ -350,5 +387,11 @@ const isFormInvalid = computed(() => {
 
 .input-number {
   max-width: 2.5rem;
+}
+
+.tabs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 </style>

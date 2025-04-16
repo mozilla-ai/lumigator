@@ -280,6 +280,10 @@
   --l-dialog-background: var(--l-grey-400);
 }
 
+.p-dialog-header {
+  align-items: flex-start !important;
+}
+
 .p-dialog-content {
   --l-dialog-content-padding: 1rem;
 }

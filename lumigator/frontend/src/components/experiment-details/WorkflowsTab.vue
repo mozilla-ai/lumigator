@@ -18,7 +18,7 @@
         ></Button> -->
       </div>
     </div>
-    <div class="no-data">
+    <div :class="{ 'no-data': experiment.workflows.length === 0 }">
       <l-experiments-empty
         v-if="experiment.workflows.length === 0"
         :button-text="'Add Model Run'"
@@ -83,7 +83,7 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { computed, ref, type Ref } from 'vue'
 import TableView from '../common/TableView.vue'
-import { Button, useConfirm, useToast } from 'primevue'
+import { Button, useConfirm, useToast, type DataTableRowClickEvent } from 'primevue'
 import LExperimentsDrawer from '../experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '../experiments/LExperimentResults.vue'
 import {
@@ -169,8 +169,10 @@ const deleteWorkflowMutation = useMutation({
   },
 })
 
-const onWorkflowClicked = () => {
-  return handleViewAllResultsClicked()
+const onWorkflowClicked = (item: DataTableRowClickEvent) => {
+  if (item.data.status === WorkflowStatus.SUCCEEDED) {
+    handleViewAllResultsClicked()
+  }
 }
 
 const columns = ['model', 'run title', 'prompt', 'created_at', 'status', 'options']

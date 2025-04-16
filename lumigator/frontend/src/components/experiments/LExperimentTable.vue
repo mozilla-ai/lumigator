@@ -17,6 +17,7 @@
           <Button
             icon="pi pi-trash"
             @click="handleDeleteExperimentClicked(slotProps.data)"
+            v-tooltip.bottom="'Delete'"
             severity="secondary"
             variant="text"
             rounded
@@ -25,6 +26,7 @@
           <Button
             icon="pi pi-download"
             @click="handleDownloadResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'Download Results'"
             severity="secondary"
             variant="text"
             rounded
@@ -34,6 +36,7 @@
           <Button
             icon="pi pi-chart-bar"
             @click="handleViewResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'View results'"
             severity="secondary"
             variant="text"
             :disabled="
@@ -57,7 +60,7 @@ import { type DataTableRowClickEvent } from 'primevue/datatable'
 import { formatDate } from '@/helpers/formatDate'
 import { WorkflowStatus } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
-import { Button } from 'primevue'
+import { blockBodyScroll, Button } from 'primevue'
 import TableView from '../common/TableView.vue'
 import { useDatasetStore } from '@/stores/datasetsStore'
 const props = defineProps({

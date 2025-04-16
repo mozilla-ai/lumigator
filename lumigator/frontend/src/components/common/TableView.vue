@@ -1,7 +1,10 @@
 <template>
   <DataTable
-    :class="showGridlines ? '' : 'gridlines'"
     :value="reactiveData"
+    :class="{
+      'no-cursor-pointer': !hasCursorPointer,
+      gridlines: !showGridlines,
+    }"
     ref="dataTable"
     :reorderableColumns="true"
     :removableSort="true"
@@ -182,6 +185,10 @@ export default defineComponent({
       type: String,
       default: 'download',
     },
+    hasCursorPointer: {
+      type: Boolean,
+      default: true,
+    },
     isEditable: {
       type: Boolean,
       default: false,
@@ -313,9 +320,11 @@ export default defineComponent({
 }
 
 // global css overrides the cursor to be pointer, reset it back
-:deep(.p-datatable-table-container) {
-  [class*='p-row-'] {
-    cursor: unset;
+.no-cursor-pointer {
+  :deep(.p-datatable-table-container) {
+    [class*='p-row-'] {
+      cursor: unset;
+    }
   }
 }
 </style>

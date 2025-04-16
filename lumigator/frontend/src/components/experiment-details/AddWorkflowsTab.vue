@@ -526,7 +526,7 @@ article {
 }
 
 .left-container {
-  flex: 1;
+  flex: 2;
   display: flex;
   flex-direction: column;
   gap: 1rem;

@@ -17,6 +17,7 @@
           <Button
             icon="pi pi-trash"
             @click="handleDeleteExperimentClicked(slotProps.data)"
+            v-tooltip.bottom="'Delete'"
             severity="secondary"
             variant="text"
             rounded
@@ -25,6 +26,7 @@
           <Button
             icon="pi pi-download"
             @click="handleDownloadResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'Download Results'"
             severity="secondary"
             variant="text"
             rounded
@@ -34,6 +36,7 @@
           <Button
             icon="pi pi-chart-bar"
             @click="handleViewResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'View results'"
             severity="secondary"
             variant="text"
             :disabled="

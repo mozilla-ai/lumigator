@@ -18,7 +18,7 @@
           <Button
             severity="secondary"
             rounded
-            label="Add Model"
+            label="Add Model Run"
             icon="pi pi-plus"
             @click="handleAddModelClicked"
           ></Button>
@@ -36,7 +36,7 @@
           <h5 class="caption-caps">via hugging face</h5>
           <div class="models-grid">
             <ModelCard
-              v-for="workflow in workflowsRequiringNoApiKey"
+              v-for="workflow in huggingFaceWorkflows"
               :key="workflow.id"
               :workflow="workflow"
               :is-selected="selectedWorkflowIds.includes(workflow.id)"
@@ -54,6 +54,23 @@
           <div class="models-grid">
             <ModelCard
               v-for="workflow in workflowsRequiringApiKey"
+              :key="workflow.id"
+              :workflow="workflow"
+              :is-selected="selectedWorkflowIds.includes(workflow.id)"
+              :is-custom="configuredWorkflowIds.includes(workflow.id)"
+              :is-deletable="deletableWorkflowIds.includes(workflow.id)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
+          </div>
+        </div>
+        <div class="models-wrapper" v-if="otherWorkflows.length">
+          <h5 class="caption-caps">Others</h5>
+          <div class="models-grid">
+            <ModelCard
+              v-for="workflow in otherWorkflows"
               :key="workflow.id"
               :workflow="workflow"
               :is-selected="selectedWorkflowIds.includes(workflow.id)"
@@ -150,7 +167,7 @@ import { computed, ref, watch, type Ref } from 'vue'
 import ModelCard from './ModelCard.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
-import type { CreateWorkflowPayload } from '@/types/Workflow'
+import { type CreateWorkflowPayload } from '@/types/Workflow'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import ConfigureWorkflowModal from './ConfigureWorkflowModal.vue'
 import { storeToRefs } from 'pinia'
@@ -300,7 +317,19 @@ const workflowsByRequirement = (requirementKey: string, isRequired: boolean): Wo
   })
 }
 const workflowsRequiringApiKey = computed(() => workflowsByRequirement('api_key', true))
-const workflowsRequiringNoApiKey = computed(() => workflowsByRequirement('api_key', false))
+const huggingFaceWorkflows = computed(() =>
+  allWorkflows.value.filter((workflow: WorkflowForm) => {
+    return workflow.provider === 'hf'
+  }),
+)
+const otherWorkflows = computed(() => {
+  return allWorkflows.value.filter((workflow: WorkflowForm) => {
+    return (
+      workflow.provider !== 'hf' &&
+      !workflowsRequiringApiKey.value.some((apiKeyWorkflow) => apiKeyWorkflow.id === workflow.id)
+    )
+  })
+})
 
 const handleAddModelClicked = () => {
   isBYOM.value = true
@@ -484,7 +513,7 @@ watch(
 
 .models-grid {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, 1fr); // Ensures 2 equal-width columns
   column-gap: 0.5rem;
   row-gap: 0.5rem;
 }
@@ -514,7 +543,7 @@ article {
 }
 
 .left-container {
-  flex: 1;
+  flex: 2;
   display: flex;
   flex-direction: column;
   gap: 1rem;

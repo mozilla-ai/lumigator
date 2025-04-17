@@ -28,6 +28,7 @@
         icon="pi pi-trash"
         severity="secondary"
         @click="emit('deleteClicked', workflow)"
+        v-tooltip.bottom="'Delete'"
         variant="text"
         rounded
         aria-label="Delete"
@@ -36,6 +37,7 @@
         icon="pi pi-clone"
         severity="secondary"
         @click="emit('cloneClicked', workflow)"
+        v-tooltip.bottom="'Clone'"
         variant="text"
         rounded
         aria-label="Clone"
@@ -44,6 +46,7 @@
         icon="pi pi-sliders-v"
         :severity="isCustom ? 'primary' : 'secondary'"
         @click="emit('customizeClicked', workflow)"
+        v-tooltip.bottom="'Configure'"
         variant="text"
         rounded
         aria-label="Customize"

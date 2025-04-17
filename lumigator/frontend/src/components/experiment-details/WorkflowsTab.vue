@@ -9,14 +9,22 @@
           label="View All Results"
           @click="handleViewAllResultsClicked"
         ></Button>
-        <Button
+        <!-- <Button
           severity="secondary"
           rounded
           label="Add Model"
           icon="pi pi-plus"
           @click="handleAddModelClicked"
-        ></Button>
+        ></Button> -->
       </div>
+    </div>
+    <div :class="{ 'no-data': experiment.workflows.length === 0 }">
+      <l-experiments-empty
+        v-if="experiment.workflows.length === 0"
+        instructions="Model runs are a logical sequence of inference and evaluation jobs that run sequentially to evaluate an LLM with a given set of parameters."
+        :button-text="'Add Model Run'"
+        @l-add-experiment="handleAddModelClicked"
+      />
     </div>
     <TableView
       v-if="experiment.workflows.length > 0"
@@ -31,6 +39,7 @@
         <Button
           icon="pi pi-trash"
           @click="handleDeleteWorkflowClicked(slotProps.data)"
+          v-tooltip.bottom="'Delete'"
           severity="secondary"
           variant="text"
           rounded
@@ -39,6 +48,7 @@
         <Button
           icon="pi pi-file"
           @click="handleViewLogsClicked(slotProps.data)"
+          v-tooltip.bottom="'Logs'"
           severity="secondary"
           variant="text"
           rounded
@@ -47,6 +57,7 @@
         <Button
           icon="pi pi-download"
           @click="handleDownloadResultsClicked(slotProps.data)"
+          v-tooltip.bottom="'Download results'"
           severity="secondary"
           variant="text"
           :disabled="slotProps.data.status !== WorkflowStatus.SUCCEEDED"
@@ -76,7 +87,7 @@ import { WorkflowStatus, type Workflow } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
 import { computed, ref, type Ref } from 'vue'
 import TableView from '../common/TableView.vue'
-import { Button, useConfirm, useToast } from 'primevue'
+import { Button, useConfirm, useToast, type DataTableRowClickEvent } from 'primevue'
 import LExperimentsDrawer from '../experiments/LExperimentsDrawer.vue'
 import LExperimentResults from '../experiments/LExperimentResults.vue'
 import {
@@ -90,6 +101,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import { downloadContent } from '@/helpers/downloadContent'
+import LExperimentsEmpty from '../experiments/LExperimentsEmpty.vue'
 
 const props = defineProps<{
   experiment: Experiment
@@ -161,8 +173,10 @@ const deleteWorkflowMutation = useMutation({
   },
 })
 
-const onWorkflowClicked = () => {
-  return handleViewAllResultsClicked()
+const onWorkflowClicked = (item: DataTableRowClickEvent) => {
+  if (item.data.status === WorkflowStatus.SUCCEEDED) {
+    handleViewAllResultsClicked()
+  }
 }
 
 const columns = ['model', 'run title', 'prompt', 'created_at', 'status', 'options']
@@ -185,13 +199,7 @@ const tableData = computed(() => {
 })
 const experimentResults: Ref<TableDataForExperimentResults[]> = ref([])
 const columnStyles = computed(() => {
-  return {
-    // expander: 'width: 4rem',
-    // name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
-    // created: 'width: 12rem',
-    // status: 'width: 12rem',
-    // useCase: 'width: 8rem',
-  }
+  return {}
 })
 
 const handleDeleteWorkflowClicked = (workflow: (typeof tableData.value)[0]) => {
@@ -261,5 +269,11 @@ const handleViewAllResultsClicked = async () => {
   display: flex;
   gap: 1rem;
   flex-direction: column;
+}
+
+.no-data {
+  display: grid;
+  place-content: center;
+  margin-top: 5rem;
 }
 </style>

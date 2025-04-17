@@ -86,10 +86,10 @@
           <label for="targetLanguage">Target Language</label>
         </FloatLabel>
       </div>
-      <div v-if="useCase === 'summarization'" class="g-eval-field">
+      <!-- <div class="g-eval-field">
         <Checkbox disabled v-model="includeGEval" inputId="g-eval" name="g-eval" binary />
         <label for="g-eval"> Include G-Eval scores using LLM as a Judge </label>
-      </div>
+      </div> -->
     </div>
     <template #footer>
       <div class="actions">
@@ -123,7 +123,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { storeToRefs } from 'pinia'
 import {
   Button,
-  Checkbox,
+  // Checkbox,
   Dialog,
   FloatLabel,
   InputNumber,
@@ -147,7 +147,7 @@ const filteredDatasets = computed(() =>
   datasets.value.filter((dataset) => dataset.ground_truth === true),
 )
 const dataset: Ref<Dataset | undefined> = ref(selectedDataset)
-const includeGEval = ref(false)
+// const includeGEval = ref(false)
 
 const useCaseOptions = ref([
   { label: 'Summarization', value: 'summarization' },

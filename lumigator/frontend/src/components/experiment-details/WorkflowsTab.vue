@@ -200,11 +200,6 @@ const tableData = computed(() => {
 const experimentResults: Ref<TableDataForExperimentResults[]> = ref([])
 const columnStyles = computed(() => {
   return {
-    // expander: 'width: 4rem',
-    // name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
-    // created: 'width: 12rem',
-    // status: 'width: 12rem',
-    // useCase: 'width: 8rem',
   }
 })
 

@@ -199,8 +199,7 @@ const tableData = computed(() => {
 })
 const experimentResults: Ref<TableDataForExperimentResults[]> = ref([])
 const columnStyles = computed(() => {
-  return {
-  }
+  return {}
 })
 
 const handleDeleteWorkflowClicked = (workflow: (typeof tableData.value)[0]) => {

@@ -18,14 +18,14 @@
           <Button
             severity="secondary"
             rounded
-            label="Add Model"
+            label="Add Model Run"
             icon="pi pi-plus"
             @click="handleAddModelClicked"
           ></Button>
           <Button
             rounded
             label="Run"
-            :disabled="selectedModels.length === 0 || createWorkflowMutation.isPending.value"
+            :disabled="selectedWorkflowIds.length === 0 || createWorkflowMutation.isPending.value"
             icon="pi pi-play"
             @click="handleRunClicked"
           ></Button>
@@ -36,11 +36,12 @@
           <h5 class="caption-caps">via hugging face</h5>
           <div class="models-grid">
             <ModelCard
-              v-for="model in modelsRequiringNoAPIKey"
-              :key="model.model"
-              :model="model"
-              :is-selected="selectedModels.includes(model.model)"
-              :is-custom="customWorkflows.some((workflow) => workflow.model === model.model)"
+              v-for="workflow in huggingFaceWorkflows"
+              :key="workflow.id"
+              :workflow="workflow"
+              :is-selected="selectedWorkflowIds.includes(workflow.id)"
+              :is-custom="configuredWorkflowIds.includes(workflow.id)"
+              :is-deletable="deletableWorkflowIds.includes(workflow.id)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -52,11 +53,29 @@
           <h5 class="caption-caps">via apis</h5>
           <div class="models-grid">
             <ModelCard
-              v-for="model in modelsRequiringAPIKey"
-              :key="model.model"
-              :model="model"
-              :is-selected="selectedModels.includes(model.model)"
-              :is-custom="customWorkflows.some((workflow) => workflow.model === model.model)"
+              v-for="workflow in workflowsRequiringApiKey"
+              :key="workflow.id"
+              :workflow="workflow"
+              :is-selected="selectedWorkflowIds.includes(workflow.id)"
+              :is-custom="configuredWorkflowIds.includes(workflow.id)"
+              :is-deletable="deletableWorkflowIds.includes(workflow.id)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
+          </div>
+        </div>
+        <div class="models-wrapper" v-if="otherWorkflows.length">
+          <h5 class="caption-caps">Others</h5>
+          <div class="models-grid">
+            <ModelCard
+              v-for="workflow in otherWorkflows"
+              :key="workflow.id"
+              :workflow="workflow"
+              :is-selected="selectedWorkflowIds.includes(workflow.id)"
+              :is-custom="configuredWorkflowIds.includes(workflow.id)"
+              :is-deletable="deletableWorkflowIds.includes(workflow.id)"
               @checkbox-toggled="handleCheckboxToggled"
               @clone-clicked="handleCloneClicked"
               @customize-clicked="handleCustomizeClicked"
@@ -112,9 +131,9 @@
       </div>
 
       <ConfigureWorkflowModal
-        v-if="isConfigureWorkflowModalVisible && modelBeingConfigured"
-        :model="modelBeingConfigured"
-        :isBYOM="false"
+        v-if="isCustomWorkflowModalVisible && workflowBeingConfigured"
+        :workflow="workflowBeingConfigured"
+        :isBYOM="isBYOM"
         @save="saveModelConfiguration"
         @close="handleConfigureWorkflowModalClosed"
       ></ConfigureWorkflowModal>
@@ -127,29 +146,44 @@ import { useModelStore } from '@/stores/modelsStore'
 import type { Experiment } from '@/types/Experiment'
 import type { Model } from '@/types/Model'
 import { Button, InputNumber, Slider, Textarea, useToast } from 'primevue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import ModelCard from './ModelCard.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { workflowsService } from '@/sdk/workflowsService'
-import type { CreateWorkflowPayload } from '@/types/Workflow'
+import { type CreateWorkflowPayload } from '@/types/Workflow'
 import { getAxiosError } from '@/helpers/getAxiosError'
 import ConfigureWorkflowModal from './ConfigureWorkflowModal.vue'
-
+import { storeToRefs } from 'pinia'
+const { models } = storeToRefs(useModelStore())
 const props = defineProps<{ experiment: Experiment }>()
 const modelStore = useModelStore()
 const toast = useToast()
-const selectedModels = ref<Model['model'][]>([])
-const customWorkflows = ref<CreateWorkflowPayload[]>([])
+const selectedWorkflowIds = ref<string[]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/selectedWorkflowIds`) || '[]'),
+)
+const configuredWorkflowIds = ref<WorkflowForm['id'][]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/configuredWorkflowIds`) || '[]'),
+)
+
+const deletableWorkflowIds = ref<WorkflowForm['id'][]>(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/deletableWorkflowIds`) || '[]'),
+)
 const queryClient = useQueryClient()
 const emit = defineEmits(['workflowCreated'])
-const isConfigureWorkflowModalVisible = ref(false)
-const modelBeingConfigured = ref<CreateWorkflowPayload>()
+const isCustomWorkflowModalVisible = ref(false)
+const workflowBeingConfigured = ref<WorkflowForm>()
+const isBYOM = ref(false)
+
 const handleConfigureWorkflowModalClosed = () => {
-  modelBeingConfigured.value = undefined
-  isConfigureWorkflowModalVisible.value = false
+  workflowBeingConfigured.value = undefined
+  isCustomWorkflowModalVisible.value = false
+  isBYOM.value = false
 }
 
-const experimentPrompt = ref('')
+export type WorkflowForm = CreateWorkflowPayload & {
+  id: string
+}
+
 const defaultPrompt = computed(() => {
   const task = props.experiment.task_definition.task
   if (task === 'summarization') {
@@ -160,10 +194,19 @@ const defaultPrompt = computed(() => {
     return `translate ${sourceLanguage} to ${targetLanguage}:`
   }
 })
-const topP = ref(0.55)
-const temperature = ref(0.55)
+
+const experimentPrompt = ref(
+  localStorage.getItem(`${props.experiment.id}/experimentPrompt`) || defaultPrompt.value,
+)
+
+const topP = ref(JSON.parse(localStorage.getItem(`${props.experiment.id}/topP`) || '0.5'))
+const temperature = ref(
+  JSON.parse(localStorage.getItem(`${props.experiment.id}/temperature`) || '0.5'),
+)
 const createWorkflowMutation = useMutation({
-  mutationFn: workflowsService.createWorkflow,
+  mutationFn: (workflowForm: WorkflowForm) => {
+    return workflowsService.createWorkflow(workflowForm)
+  },
   onError: (error) => {
     toast.add({
       group: 'br',
@@ -184,9 +227,10 @@ const createWorkflowMutation = useMutation({
     queryClient.invalidateQueries({
       queryKey: ['experiment', props.experiment.id],
     })
-    if (customWorkflows.value.some((workflow) => workflow.model === variables.model)) {
-      customWorkflows.value = customWorkflows.value.filter(
-        (workflow) => workflow.model !== variables.model,
+    if (configuredWorkflowIds.value.some((workflowId) => workflowId === variables.id)) {
+      // remove the workflow from the configured workflows list so it doesn't show up as active
+      configuredWorkflowIds.value = configuredWorkflowIds.value.filter(
+        (workflowId) => workflowId !== variables.id,
       )
     }
     emit('workflowCreated')
@@ -202,71 +246,16 @@ const createWorkflowMutation = useMutation({
   },
 })
 
-const models = computed(() =>
-  modelStore.filterModelsByUseCase(props.experiment.task_definition.task),
-)
-const modelsByRequirement = (requirementKey: string, isRequired: boolean): Model[] => {
-  return models.value.filter((model: Model) => {
-    const isKeyPresent = model.requirements?.includes(requirementKey)
-    return isRequired ? isKeyPresent : !isKeyPresent
-  })
-}
-const modelsRequiringAPIKey = computed(() => modelsByRequirement('api_key', true))
-const modelsRequiringNoAPIKey = computed(() => modelsByRequirement('api_key', false))
-
-const handleAddModelClicked = () => {}
-
-const handleRunClicked = () => {
-  selectedModels.value.forEach((selectedModel) => {
-    const model = models.value.find((m: Model) => m.model === selectedModel)
-    const foundCustomWorkflow = customWorkflows.value.find(
-      (workflow) => workflow.model === selectedModel,
-    )
-    const workflowPayload: CreateWorkflowPayload = foundCustomWorkflow || {
-      dataset: props.experiment.dataset,
-      experiment_id: props.experiment.id,
-      task_definition: props.experiment.task_definition,
-      system_prompt: experimentPrompt.value || defaultPrompt.value,
-      description: props.experiment.description,
-      max_samples: props.experiment.max_samples,
-      name: `${props.experiment.name}/${model.model}`,
-      model: model.model,
-      provider: model.provider,
-      secret_key_name: model.requirements.includes('api_key')
-        ? `${model.provider}_api_key`
-        : undefined,
-      base_url: model.base_url,
-      generation_config: {
-        temperature: temperature.value,
-        top_p: topP.value,
-        // max_new_tokens: 1024,
-        // frequency_penalty: 0
-      },
-    }
-    createWorkflowMutation.mutate(workflowPayload)
-    selectedModels.value = []
-  })
-}
-
-const handleCheckboxToggled = (model: Model) => {
-  selectedModels.value = selectedModels.value.includes(model.model)
-    ? selectedModels.value.filter((selectedModel) => selectedModel !== model.model)
-    : [...selectedModels.value, model.model]
-}
-
-const handleCloneClicked = (model: Model) => {
-  console.log('clone clicked', model)
-}
-
-const transformModelToWorkflowPayload = (model: Model): CreateWorkflowPayload => {
+const transformModelToWorkflowForm = (model: Model): WorkflowForm => {
   return {
+    id: model.model.concat(Math.floor(Math.random() * 1000000).toString(16)),
     dataset: props.experiment.dataset,
     experiment_id: props.experiment.id,
     task_definition: props.experiment.task_definition,
     system_prompt: experimentPrompt.value || defaultPrompt.value,
     description: props.experiment.description,
     max_samples: props.experiment.max_samples,
-    name: `${props.experiment.name}/${model.model}`,
+    name: `${model.model}`,
     model: model.model,
     provider: model.provider,
     secret_key_name: model.requirements.includes('api_key')
@@ -280,23 +269,202 @@ const transformModelToWorkflowPayload = (model: Model): CreateWorkflowPayload =>
   }
 }
 
-const handleCustomizeClicked = (model: Model) => {
-  console.log('customize clicked', model)
-  modelBeingConfigured.value = transformModelToWorkflowPayload(model)
-  isConfigureWorkflowModalVisible.value = true
+const workflowsFromLocalStorage = JSON.parse(
+  localStorage.getItem(`${props.experiment.id}/allWorkflows`) || '[]',
+)
+
+const systemWorkflows = computed(() => {
+  return modelStore
+    .filterModelsByUseCase(props.experiment.task_definition.task)
+    .map(transformModelToWorkflowForm) // system models that can do this task
+})
+const allWorkflows: Ref<WorkflowForm[]> = ref(
+  workflowsFromLocalStorage.length ? workflowsFromLocalStorage : systemWorkflows.value,
+)
+
+// wait for models to be fetched in case of refreshing the page
+watch(systemWorkflows, (newSystemWorkflows, oldValue) => {
+  if (newSystemWorkflows.length !== oldValue.length) {
+    allWorkflows.value = workflowsFromLocalStorage.length
+      ? workflowsFromLocalStorage
+      : newSystemWorkflows
+  }
+})
+
+const workflowsByRequirement = (requirementKey: string, isRequired: boolean): WorkflowForm[] => {
+  return allWorkflows.value.filter((workflow: WorkflowForm) => {
+    const model = models.value.find((model: Model) => model.model === workflow.model)
+    if (!model) return !isRequired
+    const isKeyPresent = model.requirements.includes(requirementKey)
+    return isRequired ? isKeyPresent : !isKeyPresent
+  })
+}
+const workflowsRequiringApiKey = computed(() => workflowsByRequirement('api_key', true))
+const huggingFaceWorkflows = computed(() =>
+  allWorkflows.value.filter((workflow: WorkflowForm) => {
+    return workflow.provider === 'hf'
+  }),
+)
+const otherWorkflows = computed(() => {
+  return allWorkflows.value.filter((workflow: WorkflowForm) => {
+    return (
+      workflow.provider !== 'hf' &&
+      !workflowsRequiringApiKey.value.some((apiKeyWorkflow) => apiKeyWorkflow.id === workflow.id)
+    )
+  })
+})
+
+const handleAddModelClicked = () => {
+  isBYOM.value = true
+  isCustomWorkflowModalVisible.value = true
+  workflowBeingConfigured.value = {
+    id: Math.floor(Math.random() * 1000000).toString(16),
+    dataset: props.experiment.dataset,
+    experiment_id: props.experiment.id,
+    task_definition: props.experiment.task_definition,
+    system_prompt: experimentPrompt.value || defaultPrompt.value,
+    description: props.experiment.description,
+    max_samples: props.experiment.max_samples,
+    name: '',
+    model: '',
+    provider: '',
+    secret_key_name: undefined,
+    base_url: undefined,
+    generation_config: {
+      temperature: temperature.value,
+      top_p: topP.value,
+    },
+  }
 }
 
-const saveModelConfiguration = (payload: CreateWorkflowPayload) => {
-  customWorkflows.value.push(payload)
-  selectedModels.value.push(payload.model)
-
-  modelBeingConfigured.value = undefined
-  isConfigureWorkflowModalVisible.value = false
+const handleRunClicked = () => {
+  selectedWorkflowIds.value.forEach((selectedWorkflowId) => {
+    // const workflow = allWorkflows.value.find((workflowForm: WorkflowForm) => workflowForm.id === selectedWorkflowId)!
+    // const model = models.value.find((model: Model) => model.model === workflow.model)
+    const foundCustomWorkflow = allWorkflows.value.find(
+      (workflow) => workflow.id === selectedWorkflowId,
+    )!
+    const workflowPayload: WorkflowForm = foundCustomWorkflow
+    createWorkflowMutation.mutate(workflowPayload)
+    selectedWorkflowIds.value = []
+    configuredWorkflowIds.value = []
+  })
 }
 
-const handleDeleteClicked = (model: Model) => {
-  console.log('delete clicked', model)
+const handleCheckboxToggled = (workflow: WorkflowForm) => {
+  selectedWorkflowIds.value = selectedWorkflowIds.value.includes(workflow.id)
+    ? selectedWorkflowIds.value.filter((selectedWorkflowId) => selectedWorkflowId !== workflow.id)
+    : [...selectedWorkflowIds.value, workflow.id]
 }
+
+const handleCloneClicked = (workflow: WorkflowForm) => {
+  console.log('clone clicked', workflow)
+  const id = Math.floor(Math.random() * 1000000).toString(16)
+  allWorkflows.value.push({
+    ...workflow,
+    id: id,
+  })
+  deletableWorkflowIds.value.push(id)
+  // customModels.value.push({
+  //   ...model,
+  //   model: `${model.model}`,
+  //   display_name: `${model.display_name}-copy`,
+  // })
+}
+
+const handleCustomizeClicked = (workflow: WorkflowForm) => {
+  console.log('customize clicked', workflow)
+  workflowBeingConfigured.value = workflow
+  isCustomWorkflowModalVisible.value = true
+}
+
+const saveModelConfiguration = (payload: WorkflowForm) => {
+  const existingWorkflow = allWorkflows.value.find(
+    (workflowForm: WorkflowForm) => workflowForm.id === payload.id,
+  )
+  if (!existingWorkflow) {
+    // incase of BYOM
+    allWorkflows.value.push({
+      ...payload,
+    })
+    deletableWorkflowIds.value.push(payload.id)
+  } else {
+    // incase of configuring existing workflow
+    allWorkflows.value = allWorkflows.value.map((workflowForm: WorkflowForm) => {
+      if (workflowForm.id === payload.id) {
+        return {
+          ...workflowForm,
+          ...payload,
+        }
+      }
+      return workflowForm
+    })
+  }
+  if (!configuredWorkflowIds.value.includes(payload.id)) {
+    configuredWorkflowIds.value.push(payload.id)
+  }
+  if (!selectedWorkflowIds.value.includes(payload.id)) {
+    selectedWorkflowIds.value.push(payload.id)
+  }
+
+  isBYOM.value = false
+  workflowBeingConfigured.value = undefined
+  isCustomWorkflowModalVisible.value = false
+}
+
+const handleDeleteClicked = (workflow: WorkflowForm) => {
+  allWorkflows.value = allWorkflows.value.filter(
+    (workflowForm: WorkflowForm) => workflowForm.id !== workflow.id,
+  )
+  configuredWorkflowIds.value = configuredWorkflowIds.value.filter(
+    (configuredWorkflowId) => configuredWorkflowId !== workflow.id,
+  )
+  selectedWorkflowIds.value = selectedWorkflowIds.value.filter(
+    (selectedWorkflowId) => selectedWorkflowId !== workflow.id,
+  )
+  deletableWorkflowIds.value = deletableWorkflowIds.value.filter(
+    (deletableWorkflowId) => deletableWorkflowId !== workflow.id,
+  )
+}
+
+watch(
+  [
+    selectedWorkflowIds,
+    configuredWorkflowIds,
+    deletableWorkflowIds,
+    experimentPrompt,
+    topP,
+    temperature,
+    allWorkflows,
+  ],
+  ([
+    newSelectedWorkflowIds,
+    newConfiguredWorkflowIds,
+    newDeletableWorkflowIds,
+    newExperimentPrompt,
+    newTopP,
+    newTemperature,
+    newAllWorkflows,
+  ]) => {
+    localStorage.setItem(
+      `${props.experiment.id}/selectedWorkflowIds`,
+      JSON.stringify(newSelectedWorkflowIds),
+    )
+    localStorage.setItem(
+      `${props.experiment.id}/configuredWorkflowIds`,
+      JSON.stringify(newConfiguredWorkflowIds),
+    )
+    localStorage.setItem(
+      `${props.experiment.id}/deletableWorkflowIds`,
+      JSON.stringify(newDeletableWorkflowIds),
+    )
+    localStorage.setItem(`${props.experiment.id}/experimentPrompt`, newExperimentPrompt)
+    localStorage.setItem(`${props.experiment.id}/topP`, JSON.stringify(newTopP))
+    localStorage.setItem(`${props.experiment.id}/temperature`, JSON.stringify(newTemperature))
+    localStorage.setItem(`${props.experiment.id}/allWorkflows`, JSON.stringify(newAllWorkflows))
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped lang="scss">
@@ -328,7 +496,7 @@ const handleDeleteClicked = (model: Model) => {
 
 .models-grid {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, 1fr); // Ensures 2 equal-width columns
   column-gap: 0.5rem;
   row-gap: 0.5rem;
 }
@@ -358,7 +526,7 @@ article {
 }
 
 .left-container {
-  flex: 1;
+  flex: 2;
   display: flex;
   flex-direction: column;
   gap: 1rem;

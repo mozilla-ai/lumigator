@@ -1,25 +1,40 @@
 <template>
-  <div class="l-experiments" :class="{ 'no-data': experiments.length === 0 }">
+  <div class="l-experiments" :class="{ 'no-data': showEmptyState }">
     <l-experiments-empty
-      v-if="experiments.length === 0"
+      v-if="showEmptyState"
       @l-add-experiment="handleCreateExperimentClicked()"
     />
-    <div v-if="experiments.length > 0" class="l-experiments__header-container">
+    <div class="l-experiments__header-container" v-if="!showEmptyState">
       <l-page-header
         title="Experiments"
         :description="headerDescription"
         button-label="Create Experiment"
-        :column="experiments.length === 0"
+        :column="experiments?.length === 0"
         @l-header-action="handleCreateExperimentClicked()"
       />
     </div>
-    <div v-if="experiments.length > 0" class="l-experiments__table-container">
+    <div class="l-experiments__table-container" v-if="!showEmptyState">
       <l-experiment-table
-        :experiments="experiments"
+        :is-loading="isLoading"
+        :experiments="experiments || []"
         @l-experiment-selected="handleExperimentClicked($event)"
         @delete-option-clicked="handleDeleteButtonClicked"
         @view-experiment-results-clicked="onShowExperimentResults($event)"
       />
+    </div>
+    <div v-if="error" class="l-experiments__error">
+      <p>Error loading experiments: {{ error.message }}</p>
+      <Button
+        label="Retry"
+        severity="secondary"
+        @click="
+          () => {
+            queryClient.invalidateQueries({ queryKey: ['experiments'] })
+          }
+        "
+        class="p-button-outlined"
+      >
+      </Button>
     </div>
     <l-experiments-drawer
       v-if="showDrawer"
@@ -38,7 +53,7 @@
       /> -->
       <!-- <l-experiment-logs :logs="workflowLogs" v-if="showLogs" /> -->
     </l-experiments-drawer>
-    <CreateExperimentForm
+    <CreateExperimentModal
       :selectedDataset="selectedDataset"
       @close="closeExperimentForm"
       v-if="isNewExperimentFormVisible"
@@ -47,7 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, type Ref, onBeforeUnmount } from 'vue'
+import { computed, onMounted, ref, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDatasetStore } from '@/stores/datasetsStore'
 import { useModelStore } from '@/stores/modelsStore'
@@ -62,9 +77,9 @@ import {
   getExperimentResults,
   type TableDataForExperimentResults,
 } from '@/helpers/getExperimentResults'
-import { useConfirm, useToast } from 'primevue'
+import { Button, useConfirm, useToast } from 'primevue'
 import { useRouter } from 'vue-router'
-import CreateExperimentForm from '../experiments/CreateExperimentForm.vue'
+import CreateExperimentModal from '../experiments/CreateExperimentModal.vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { retrieveStatus } from '@/helpers/retrieveStatus'
 import { getAxiosError } from '@/helpers/getAxiosError'
@@ -88,7 +103,6 @@ const headerDescription = ref(`Experiments are a logical sequence of inference a
 evaluation tasks that run sequentially to evaluate an LLM.`)
 
 const isNewExperimentFormVisible = ref(false)
-const isThrottled = ref(false)
 
 const closeExperimentForm = () => {
   isNewExperimentFormVisible.value = false
@@ -99,11 +113,13 @@ const getDrawerHeader = () => {
   return showLogs.value ? 'Logs' : `Experiment: ${selectedExperiment.value?.name}`
 }
 
-const { data: experiments, refetch } = useQuery({
+const {
+  data: experiments,
+  isLoading,
+  error,
+} = useQuery({
   queryKey: ['experiments'],
-  queryFn: experimentsService.fetchExperiments,
-  initialData: [],
-  placeholderData: [],
+  queryFn: () => experimentsService.fetchExperiments(),
   select: (data) =>
     data.map((experiment: Experiment) => {
       return {
@@ -111,6 +127,10 @@ const { data: experiments, refetch } = useQuery({
         status: retrieveStatus(experiment) || 'empty',
       }
     }),
+})
+
+const showEmptyState = computed(() => {
+  return experiments.value?.length === 0 && !isLoading.value
 })
 
 const queryClient = useQueryClient()
@@ -121,7 +141,7 @@ const handleCreateExperimentClicked = () => {
 }
 
 const handleExperimentClicked = (experiment: Experiment) => {
-  selectedExperiment.value = experiments.value.find((e: Experiment) => e.id === experiment.id)
+  selectedExperiment.value = experiments.value?.find((e: Experiment) => e.id === experiment.id)
 
   router.push(`/experiments/${experiment.id}`)
 }
@@ -163,6 +183,10 @@ const deleteExperimentMutation = useMutation({
       detail: 'Experiment deleted',
       life: 3000,
     })
+    // refetch experiments to remove it from the table
+    queryClient.invalidateQueries({
+      queryKey: ['experiments'],
+    })
     router.push('/experiments')
   },
 })
@@ -191,10 +215,6 @@ async function handleDeleteButtonClicked(selectedItem: Experiment) {
     },
     accept: async () => {
       deleteExperimentMutation.mutate(experiment.id)
-      // refetch experiments to remove it from the table
-      await queryClient.invalidateQueries({
-        queryKey: ['experiments'],
-      })
     },
     reject: () => {},
   })
@@ -229,7 +249,7 @@ async function throttledUpdateAllWorkflows() {
 let pollingId: number | undefined
 
 onMounted(async () => {
-  await Promise.all([modelStore.fetchModels(), refetch()])
+  await Promise.all([modelStore.fetchModels()])
 
   if (selectedDataset.value) {
     handleCreateExperimentClicked()
@@ -237,10 +257,6 @@ onMounted(async () => {
   pollingId = setInterval(async () => {
     await throttledUpdateAllWorkflows()
   }, 1000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(pollingId)
 })
 </script>
 

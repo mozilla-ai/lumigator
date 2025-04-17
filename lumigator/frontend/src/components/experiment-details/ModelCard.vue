@@ -2,14 +2,14 @@
   <article class="model-card">
     <div class="model-field">
       <Checkbox
-        :input-id="model.model"
-        :name="model.model"
-        :value="model.model"
+        :input-id="workflow.id"
+        :name="workflow.id"
+        :value="workflow.id"
         binary
         :model-value="isSelected"
-        @update:model-value="emit('checkboxToggled', model)"
+        @update:model-value="emit('checkboxToggled', workflow)"
       ></Checkbox>
-      <label :for="model.model" class="model-label">{{ model.display_name }}</label>
+      <label :for="workflow.model" class="model-label">{{ workflow.name }}</label>
       <!-- <Button
                     as="a"
                     icon="pi pi-external-link"
@@ -24,9 +24,11 @@
     </div>
     <div class="model-actions">
       <Button
+        v-if="isDeletable"
         icon="pi pi-trash"
         severity="secondary"
-        @click="emit('deleteClicked', model)"
+        @click="emit('deleteClicked', workflow)"
+        v-tooltip.bottom="'Delete'"
         variant="text"
         rounded
         aria-label="Delete"
@@ -34,7 +36,8 @@
       <Button
         icon="pi pi-clone"
         severity="secondary"
-        @click="emit('cloneClicked', model)"
+        @click="emit('cloneClicked', workflow)"
+        v-tooltip.bottom="'Clone'"
         variant="text"
         rounded
         aria-label="Clone"
@@ -42,7 +45,8 @@
       <Button
         icon="pi pi-sliders-v"
         :severity="isCustom ? 'primary' : 'secondary'"
-        @click="emit('customizeClicked', model)"
+        @click="emit('customizeClicked', workflow)"
+        v-tooltip.bottom="'Configure'"
         variant="text"
         rounded
         aria-label="Customize"
@@ -52,15 +56,21 @@
 </template>
 
 <script setup lang="ts">
-import type { Model } from '@/types/Model'
 import { Button, Checkbox } from 'primevue'
+import type { WorkflowForm } from './AddWorkflowsTab.vue'
 
-const { isSelected, isCustom } = defineProps<{
-  model: Model
+const { isSelected, isCustom, isDeletable } = defineProps<{
+  workflow: WorkflowForm
   isSelected: boolean
   isCustom: boolean
+  isDeletable: boolean
 }>()
-const emit = defineEmits(['checkboxToggled', 'deleteClicked', 'cloneClicked', 'customizeClicked'])
+const emit = defineEmits<{
+  checkboxToggled: [payload: WorkflowForm]
+  deleteClicked: [payload: WorkflowForm]
+  cloneClicked: [payload: WorkflowForm]
+  customizeClicked: [payload: WorkflowForm]
+}>()
 </script>
 
 <style scoped lang="scss">

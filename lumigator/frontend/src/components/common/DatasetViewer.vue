@@ -16,6 +16,7 @@
       ></PrimeVueButton>
     </template>
     <TableView
+      :has-cursor-pointer="false"
       :data="data"
       :columns="columns"
       :downloadFileName="downloadFileName"

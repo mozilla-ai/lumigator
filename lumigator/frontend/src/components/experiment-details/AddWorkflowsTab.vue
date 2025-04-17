@@ -83,6 +83,23 @@
             />
           </div>
         </div>
+        <!-- <div class="models-wrapper" v-if="customModels.length">
+          <h5 class="caption-caps">Custom</h5>
+          <div class="models-grid">
+            <ModelCard
+              v-for="workflow in otherWorkflows"
+              :key="workflow.id"
+              :workflow="workflow"
+              :is-selected="selectedWorkflowIds.includes(workflow.id)"
+              :is-custom="configuredWorkflowIds.includes(workflow.id)"
+              :is-deletable="deletableWorkflowIds.includes(workflow.id)"
+              @checkbox-toggled="handleCheckboxToggled"
+              @clone-clicked="handleCloneClicked"
+              @customize-clicked="handleCustomizeClicked"
+              @delete-clicked="handleDeleteClicked"
+            />
+          </div>
+        </div>
       </div>
     </div>
     <div class="right-container">

@@ -237,6 +237,9 @@ onMounted(async () => {
   if (selectedDataset.value) {
     handleCreateExperimentClicked()
   }
+  pollingId = setInterval(async () => {
+    await throttledUpdateAllWorkflows()
+  }, 1000)
 })
 </script>
 

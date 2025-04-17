@@ -1,15 +1,15 @@
 <template>
-  <div class="l-datasets" :class="{ 'is-empty': datasets.length === 0 || !datasets }">
+  <div class="l-datasets" :class="{ 'is-empty': !datasets || datasets.length === 0 }">
     <div v-if="datasets.length > 0" class="l-datasets__header-container">
       <l-page-header
         title="Datasets"
         :description="headerDescription"
         subtitle="Only CSV files are currently supported."
         button-label="Provide Dataset"
-        @l-header-action="onDatasetAdded()"
+        @l-header-action="handleAddDatasetClicked()"
       />
     </div>
-    <l-dataset-empty v-else @l-add-dataset="onDatasetAdded()" />
+    <l-dataset-empty v-else @l-add-dataset="handleAddDatasetClicked()" />
     <div v-if="datasets.length > 0" class="l-datasets__table-container">
       <Tabs v-model:value="currentTab" @update:value="showSlidingPanel = false">
         <TabList>
@@ -22,14 +22,14 @@
         </TabList>
         <TabPanels>
           <TabPanel value="0">
-            <l-dataset-table
+            <LDatasetTable
               v-if="datasets.length"
-              ref="refDatasetTable"
+              :isLoading="isDatasetsLoading || isDatasetsFetching"
               :table-data="datasets"
               @l-dataset-selected="onDatasetSelected($event)"
-              @l-experiment="onExperimentDataset($event)"
-              @l-download-dataset="onDownloadDataset($event)"
-              @l-delete-dataset="deleteConfirmation($event)"
+              @use-in-experiment-clicked="handleUseInExperimentClicked($event)"
+              @l-download-dataset="handleDownloadDatasetClicked($event)"
+              @l-delete-dataset="handleDeleteDatasetClicked($event)"
               @view-dataset-clicked="handleViewDatasetClicked"
             />
           </TabPanel>
@@ -43,7 +43,7 @@
         </TabPanels>
       </Tabs>
     </div>
-    <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="onDatasetUpload($event)" />
+    <l-file-upload ref="datasetInput" entity="dataset" @l-file-upload="uploadDataset($event)" />
     <DatasetViewer
       v-if="isDatasetViewerVisible"
       :downloadFileName="selectedDataset?.filename.split('.')[0] || 'download'"
@@ -63,11 +63,11 @@
     <Teleport to=".sliding-panel">
       <l-dataset-details
         v-if="selectedDataset"
-        @l-experiment="onExperimentDataset($event)"
+        @use-in-experiment-clicked="handleUseInExperimentClicked($event)"
         @l-generate-gt="onGenerateGT()"
         @l-details-closed="onClearSelection()"
-        @l-delete-dataset="deleteConfirmation($event)"
-        @l-download-dataset="onDownloadDataset($event)"
+        @l-delete-dataset="handleDeleteDatasetClicked($event)"
+        @l-download-dataset="handleDownloadDatasetClicked($event)"
         @view-dataset-clicked="handleViewDatasetClicked"
       />
       <l-job-details
@@ -124,10 +124,17 @@ import type { AxiosError } from 'axios'
 import { downloadContent } from '@/helpers/downloadContent'
 import Papa from 'papaparse'
 import DatasetViewer from '../common/DatasetViewer.vue'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 const datasetStore = useDatasetStore()
-const { datasets, selectedDataset, inferenceJobs, hasRunningInferenceJob } =
-  storeToRefs(datasetStore)
+const {
+  datasets,
+  selectedDataset,
+  inferenceJobs,
+  hasRunningInferenceJob,
+  isDatasetsLoading,
+  isDatasetsFetching,
+} = storeToRefs(datasetStore)
 const selectedJob: Ref<Job | undefined> = ref()
 const { showSlidingPanel } = useSlidePanel()
 const toast = useToast()
@@ -136,7 +143,6 @@ const confirm = useConfirm()
 const router = useRouter()
 const currentTab = ref('0')
 const showLogs = ref(false)
-const refDatasetTable = ref()
 const jobLogs: Ref<string[]> = ref([])
 const isPollingForJobLogs = ref(false)
 let jobLogsInterval: number | undefined = undefined
@@ -144,14 +150,112 @@ const datasetFileContent = ref()
 const datasetColumns = ref()
 const isDatasetViewerVisible = ref(false)
 
+const queryClient = useQueryClient()
+
+const uploadDatasetMutation = useMutation({
+  mutationFn: datasetsService.postDataset,
+  onMutate: () => {
+    toast.add({
+      severity: 'info',
+      summary: 'Uploading dataset...',
+      messageicon: 'pi pi-upload',
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onError: (error) => {
+    const errorMessage = getAxiosError(error as Error | AxiosError)
+    toast.add({
+      severity: 'error',
+      summary: `${errorMessage}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onSuccess: async () => {
+    toast.add({
+      severity: 'success',
+      summary: 'Dataset uploaded',
+      messageicon: 'pi pi-check',
+      life: 3000,
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+    await queryClient.invalidateQueries({
+      queryKey: ['datasets'],
+    })
+  },
+})
+
+const deleteDatasetMutation = useMutation({
+  mutationFn: datasetsService.deleteDataset,
+  onMutate: () => {
+    toast.add({
+      severity: 'info',
+      summary: 'Deleting dataset...',
+      messageicon: 'pi pi-trash',
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onError: (error) => {
+    const errorMessage = getAxiosError(error as Error | AxiosError)
+    toast.add({
+      severity: 'error',
+      summary: `${errorMessage}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onSuccess: async () => {
+    toast.add({
+      severity: 'success',
+      summary: 'Dataset deleted',
+      messageicon: 'pi pi-check',
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
+    await queryClient.invalidateQueries({
+      queryKey: ['datasets'],
+    })
+  },
+})
+
+const downloadDatasetMutation = useMutation({
+  mutationFn: (dataset: Dataset) => datasetsService.downloadDataset(dataset.id),
+  onMutate: () => {
+    toast.add({
+      severity: 'info',
+      summary: 'Downloading dataset...',
+      messageicon: 'pi pi-download',
+      group: 'br',
+      life: 3000,
+    } as ToastMessageOptions & { messageicon: string })
+  },
+
+  onError: (error) => {
+    const errorMessage = getAxiosError(error as Error | AxiosError)
+    toast.add({
+      severity: 'error',
+      summary: `${errorMessage}`,
+      messageicon: 'pi pi-exclamation-triangle',
+      group: 'br',
+    } as ToastMessageOptions & { messageicon: string })
+  },
+  onSuccess: async (blob: Blob) => {
+    if (selectedDataset.value) {
+      downloadContent(blob, selectedDataset.value?.filename)
+    }
+  },
+})
+
 onMounted(async () => {
-  await datasetStore.fetchDatasets()
+  await reloadDatasetTable()
 })
 
 const headerDescription = ref(`Use a dataset as the basis for your evaluation.
 It includes data for the model you'd like to evaluate and possibly a ground truth "answer".`)
 
-function deleteConfirmation(dataset: Dataset) {
+function handleDeleteDatasetClicked(dataset: Dataset) {
   confirm.require({
     message: `${dataset.filename}`,
     header: 'Delete  dataset?',
@@ -166,19 +270,17 @@ function deleteConfirmation(dataset: Dataset) {
       label: 'Delete',
       severity: 'danger',
     },
-    accept: () => {
-      onDeleteDataset(dataset.id)
+    accept: async () => {
+      if (!dataset.id) {
+        return
+      }
+      if (selectedDataset.value?.id === dataset.id) {
+        datasetStore.setSelectedDataset(undefined)
+      }
+      await deleteDatasetMutation.mutate(dataset.id)
       if (!selectedDataset.value && showSlidingPanel.value) {
         showSlidingPanel.value = false
       }
-      toast.add({
-        severity: 'secondary',
-        summary: `Dataset removed`,
-        messageicon: 'pi pi-trash',
-        detail: `${dataset.filename}`,
-        group: 'br',
-        life: 3000,
-      } as ToastMessageOptions & { messageicon: string })
     },
     reject: () => {},
   })
@@ -251,28 +353,22 @@ async function handleViewDatasetClicked(dataset: Dataset) {
   isDatasetViewerVisible.value = true
 }
 
-async function onDownloadDataset(dataset: Dataset) {
+async function handleDownloadDatasetClicked(dataset: Dataset) {
   datasetStore.setSelectedDataset(dataset)
   if (selectedDataset.value) {
-    const blob = await datasetsService.downloadDataset(selectedDataset.value?.id)
-    downloadContent(blob, selectedDataset.value?.filename)
+    await downloadDatasetMutation.mutate(dataset)
   }
 }
 
-const onDatasetAdded = () => {
+const handleAddDatasetClicked = () => {
   datasetInput.value.input.click()
 }
 
-const reloadDatasetTable = () => {
-  datasetStore.fetchDatasets()
-  refDatasetTable.value.loading = true
-  setTimeout(async () => {
-    await datasetStore.fetchDatasets()
-    refDatasetTable.value.loading = false
-  }, 1500)
+const reloadDatasetTable = async () => {
+  await datasetStore.fetchDatasets()
 }
 
-const onDatasetUpload = async (datasetFile: File) => {
+const uploadDataset = async (datasetFile: File) => {
   if (!datasetFile) {
     return
   }
@@ -280,33 +376,10 @@ const onDatasetUpload = async (datasetFile: File) => {
   const formData = new FormData()
   formData.append('dataset', datasetFile) // Attach the file
   formData.append('format', 'job') // Specification @localhost:8000/docs
-  try {
-    await datasetsService.postDataset(formData)
-  } catch (error) {
-    const errorMessage = getAxiosError(error as Error | AxiosError)
-    toast.add({
-      severity: 'error',
-      summary: `${errorMessage}`,
-      messageicon: 'pi pi-exclamation-triangle',
-      group: 'br',
-    } as ToastMessageOptions & { messageicon: string })
-  }
 
+  uploadDatasetMutation.mutate(formData, {})
   // refetch datasets after create
-  datasetStore.fetchDatasets()
-}
-
-const onDeleteDataset = async (datasetID: string) => {
-  if (!datasetID) {
-    return
-  }
-  if (selectedDataset.value?.id === datasetID) {
-    datasetStore.setSelectedDataset(undefined)
-  }
-  await datasetsService.deleteDataset(datasetID)
-
-  // refetch datasets after removing to update the table
-  await datasetStore.fetchDatasets()
+  await reloadDatasetTable()
 }
 
 async function fetchDatasetDetails(datasetID: string) {
@@ -327,7 +400,8 @@ const onClearSelection = () => {
   datasetStore.setSelectedDataset(undefined)
 }
 
-const onExperimentDataset = (dataset: Dataset) => {
+const handleUseInExperimentClicked = (dataset: Dataset) => {
+  showSlidingPanel.value = false
   router.push('experiments')
   datasetStore.setSelectedDataset(dataset)
   fetchDatasetDetails(dataset.id)
@@ -388,32 +462,11 @@ const onGenerateGT = () => {
 }
 </style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '@/styles/variables' as *;
 @use '@/styles/mixins';
 
-.l-datasets .p-tabs {
-  $root: &;
-
-  & .p-tablist {
-    margin-bottom: $l-spacing-1;
-  }
-
-  & .p-tablist-tab-list {
-    background: $l-card-bg !important;
-    border-color: $l-main-bg;
-
-    & .p-tab {
-      padding-left: $l-spacing-1;
-      padding-right: $l-spacing-1;
-      border-color: $l-main-bg;
-
-      &:hover {
-        border-color: $l-main-bg;
-      }
-    }
-  }
-
+.l-datasets {
   .is-running::after {
     content: '';
     display: inline-block;

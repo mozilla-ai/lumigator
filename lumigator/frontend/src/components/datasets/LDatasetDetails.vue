@@ -92,7 +92,7 @@
           label="Use in Experiment"
           class="l-dataset-empty__action-btn"
           :disabled="!selectedDataset?.ground_truth"
-          @click="emit('l-experiment', selectedDataset)"
+          @click="emit('use-in-experiment-clicked', selectedDataset)"
         ></Button>
         <Button
           v-else
@@ -137,7 +137,7 @@ const emit = defineEmits([
   'l-generate-gt',
   'l-download-dataset',
   'l-details-closed',
-  'l-experiment',
+  'use-in-experiment-clicked',
   'view-dataset-clicked',
 ])
 

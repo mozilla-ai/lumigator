@@ -11,7 +11,7 @@
         style="margin-left: auto"
         class="l-experiment-form__close"
         @click="emit('l-close-details')"
-      />
+      ></Button>
     </TabList>
     <TabPanels>
       <TabPanel value="0">

@@ -49,7 +49,7 @@
       </div>
       <div class="field">
         <h6 class="field-title">dataset</h6>
-        <p class="field-value">{{ experiment.dataset }}</p>
+        <p class="field-value">{{ datasetName }}</p>
       </div>
       <div class="field">
         <h6 class="field-title">Maximum samples</h6>
@@ -70,18 +70,17 @@
 <script setup lang="ts">
 import { getAxiosError } from '@/helpers/getAxiosError'
 import { experimentsService } from '@/sdk/experimentsService'
+import { useDatasetStore } from '@/stores/datasetsStore'
 import type { Experiment } from '@/types/Experiment'
 import { useMutation } from '@tanstack/vue-query'
 import { Button, useConfirm, useToast } from 'primevue'
-import { ref } from 'vue'
+import { computed, ref, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   experiment: Experiment
 }>()
 
-const toast = useToast()
-const router = useRouter()
 const confirm = useConfirm()
 
 const isCopied = ref(false)
@@ -93,6 +92,15 @@ const copyToClipboard = async (longString: string) => {
   }, 3000)
   await navigator.clipboard.writeText(longString)
 }
+
+const toast = useToast()
+const router = useRouter()
+const datasetStore = useDatasetStore()
+const { datasets } = toRefs(datasetStore)
+const datasetName = computed(() => {
+  const dataset = datasets.value.find((dataset) => dataset.id === props.experiment.dataset)
+  return dataset?.filename || props.experiment.dataset
+})
 
 const deleteExperimentMutation = useMutation({
   mutationFn: experimentsService.deleteExperiment,

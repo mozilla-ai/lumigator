@@ -1,23 +1,21 @@
 <template>
   <div class="l-experiment-empty">
     <h2 class="l-experiment-empty__instructions">
-      Experiments are a logical sequence of inference and evaluation tasks that run sequentially to
-      evaluate an LLM.
+      {{ instructions }}
     </h2>
     <p class="l-experiment-empty__instructions-text"></p>
     <Button
       rounded
       size="small"
       icon="pi pi-plus"
-      label="Create Experiment"
+      :label="buttonText"
       class="l-experiment-empty__action-btn"
       @click="emit('l-add-experiment')"
     >
     </Button>
     <p class="l-experiment-empty__note">
       <span>
-        We evaluate tasks using various industry-standard metrics that measure different aspects of
-        prediction-ground truth similarity.
+        {{ note }}
         <a
           href="https://mozilla-ai.github.io/lumigator/"
           target="_blank"
@@ -32,12 +30,27 @@
 <script lang="ts" setup>
 import Button from 'primevue/button'
 const emit = defineEmits(['l-add-experiment'])
+
+withDefaults(
+  defineProps<{
+    instructions?: string
+    note?: string
+    buttonText?: string
+  }>(),
+  {
+    instructions:
+      'Experiments are a logical sequence of inference and evaluation tasks that run sequentially to evaluate an LLM.',
+    note: 'We evaluate tasks using various industry-standard metrics that measure different aspects of prediction-ground truth similarity.',
+    buttonText: 'Create Experiment',
+  },
+)
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
 .l-experiment-empty {
+  text-align: center;
   $root: &;
   margin: auto;
   max-width: 560px;

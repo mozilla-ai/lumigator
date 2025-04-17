@@ -2,6 +2,7 @@
   <div class="l-experiment-results">
     <TableView
       :data="results"
+      :hasCursorPointer="false"
       :columns="Object.keys(results[0]).filter((key) => key !== 'subRows' && key !== 'rowNumber')"
       :downloadFileName="'results'"
       :isEditable="false"

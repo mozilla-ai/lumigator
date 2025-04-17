@@ -1,12 +1,18 @@
 <template>
   <DataTable
-    :class="showGridlines ? '' : 'gridlines'"
-    :value="data"
+    :value="reactiveData"
+    :class="{
+      'no-cursor-pointer': !hasCursorPointer,
+      gridlines: !showGridlines,
+    }"
     ref="dataTable"
     :reorderableColumns="true"
     :removableSort="true"
     :scrollable="true"
     scrollHeight="flex"
+    :loading="isLoading"
+    :sort-field="sortField"
+    :sort-order="sortOrder"
     :resizableColumns="false"
     :columnResizeMode="'fit'"
     :showGridlines="showGridlines"
@@ -18,6 +24,7 @@
     v-model:expandedRows="expandedRows"
     @rowExpand="onRowExpand"
     @rowCollapse="onRowCollapse"
+    @row-click="$emit('row-click', $event)"
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
@@ -58,7 +65,7 @@
     ></Column>
     <Column
       v-for="col in selectedColumns"
-      sortable
+      :sortable="col !== 'options'"
       :key="col"
       :field="col"
       :header="col"
@@ -125,7 +132,7 @@ import {
   type DataTableCellEditCompleteEvent,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
-import { defineComponent, ref, type PropType } from 'vue'
+import { defineComponent, ref, toRef, toRefs, type PropType } from 'vue'
 import { WorkflowStatus } from '@/types/Workflow'
 
 export default defineComponent({
@@ -142,6 +149,18 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    sortField: {
+      type: String,
+      default: undefined,
+    },
+    sortOrder: {
+      type: Number,
+      default: undefined,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
+    },
     showGridlines: {
       type: Boolean,
       default: true,
@@ -166,6 +185,10 @@ export default defineComponent({
       type: String,
       default: 'download',
     },
+    hasCursorPointer: {
+      type: Boolean,
+      default: true,
+    },
     isEditable: {
       type: Boolean,
       default: false,
@@ -180,7 +203,10 @@ export default defineComponent({
     },
   },
   exposes: ['exportCSV'],
+  emits: ['row-click'],
   setup(props) {
+    const reactiveData = toRef(props, 'data')
+    const reactiveProps = toRefs(props)
     const isVisible = ref(true)
     const dataTable = ref()
     const selectedColumns = ref(props.columns)
@@ -247,7 +273,8 @@ export default defineComponent({
       expandAll,
       collapseAll,
       exportCSV,
-      ...props,
+      reactiveData,
+      ...reactiveProps,
     }
   },
 })
@@ -293,9 +320,11 @@ export default defineComponent({
 }
 
 // global css overrides the cursor to be pointer, reset it back
-:deep(.p-datatable-table-container) {
-  [class*='p-row-'] {
-    cursor: unset;
+.no-cursor-pointer {
+  :deep(.p-datatable-table-container) {
+    [class*='p-row-'] {
+      cursor: unset;
+    }
   }
 }
 </style>

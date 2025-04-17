@@ -1,120 +1,70 @@
 <template>
   <div class="l-experiment-table">
     <transition name="transition-fade" mode="out-in">
-      <DataTable
+      <TableView
+        style="width: 100%"
         v-if="tableVisible"
-        v-model:selection="focusedItem"
-        v-model:expandedRows="expandedRows"
-        selectionMode="single"
-        data-key="id"
-        :value="tableData"
-        :loading="isLoading"
-        :tableStyle="style"
-        columnResizeMode="expand"
-        sortField="created"
         :sortOrder="-1"
-        scrollable
-        scrollHeight="80vh"
-        :pt="{ table: 'table-root' }"
+        :isLoading="isLoading"
+        :sortField="'created_at'"
+        :columns="columns"
+        :data="tableData"
         @row-click="handleRowClick"
+        :is-search-enabled="false"
+        :has-column-toggle="false"
       >
-        <Column expander :style="columnStyles.expander" />
-        <Column field="name" :style="columnStyles.name" header="experiment title" />
-        <Column field="created" header="created" sortable :style="columnStyles.created">
-          <template #body="slotProps">
-            {{ formatDate(slotProps.data.created_at) }}
-          </template>
-        </Column>
-        <Column field="useCase" :style="columnStyles.useCase" header="use-case">
-          <template #body="slotProps">
-            <span style="text-transform: capitalize">{{
-              slotProps.data.task_definition.task
-            }}</span>
-          </template>
-        </Column>
-        <Column field="status" header="status" :style="columnStyles.status">
-          <template #body="slotProps">
-            <div>
-              <Tag
-                v-if="retrieveStatus(slotProps.data) === WorkflowStatus.SUCCEEDED"
-                severity="success"
-                rounded
-                :value="retrieveStatus(slotProps.data)"
-                :pt="{ root: 'l-experiment-table__tag' }"
-              />
-              <Tag
-                v-else-if="retrieveStatus(slotProps.data) === WorkflowStatus.FAILED"
-                severity="danger"
-                rounded
-                :value="retrieveStatus(slotProps.data)"
-                :pt="{ root: 'l-experiment-table__tag' }"
-              />
-              <Tag
-                v-else-if="retrieveStatus(slotProps.data) === WorkflowStatus.INCOMPLETE"
-                severity="info"
-                rounded
-                :value="retrieveStatus(slotProps.data)"
-                :pt="{ root: 'l-experiment-table__tag' }"
-              />
-              <Tag
-                v-else
-                severity="warn"
-                rounded
-                :value="retrieveStatus(slotProps.data)"
-                :pt="{ root: 'l-experiment-table__tag' }"
-              />
-            </div>
-          </template>
-        </Column>
-        <Column header="options">
-          <template #body="slotProps">
-            <span
-              class="pi pi-fw pi-ellipsis-h l-experiment-table__options-trigger"
-              style="pointer-events: all"
-              aria-haspopup="true"
-              aria-controls="optionsMenu"
-              @click="toggleOptionsMenu($event, slotProps.data)"
-            >
-            </span>
-          </template>
-        </Column>
-        <Menu id="options_menu" ref="optionsMenu" :model="options" :popup="true"> </Menu>
-        <template #expansion="slotProps">
-          <div class="l-experiment-table__jobs-table-container">
-            <l-jobs-table
-              :column-styles="columnStyles"
-              :table-data="slotProps.data.workflows"
-              :useCase="slotProps.data.task_definition.task"
-              @l-job-selected="onWorkflowSelected($event)"
-              @view-workflow-results-clicked="$emit('view-workflow-results-clicked', $event)"
-              @delete-workflow-clicked="$emit('delete-option-clicked', $event)"
-            />
-          </div>
+        <template #options="slotProps">
+          <Button
+            icon="pi pi-trash"
+            @click="handleDeleteExperimentClicked(slotProps.data)"
+            v-tooltip.bottom="'Delete'"
+            severity="secondary"
+            variant="text"
+            rounded
+            aria-label="Delete"
+          ></Button>
+          <Button
+            icon="pi pi-download"
+            @click="handleDownloadResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'Download Results'"
+            severity="secondary"
+            variant="text"
+            rounded
+            disabled
+            aria-label="Download Results"
+          ></Button>
+          <Button
+            icon="pi pi-chart-bar"
+            @click="handleViewResultsClicked(slotProps.data)"
+            v-tooltip.bottom="'View results'"
+            severity="secondary"
+            variant="text"
+            :disabled="
+              slotProps.data.status !== WorkflowStatus.INCOMPLETE &&
+              slotProps.data.status !== WorkflowStatus.SUCCEEDED
+            "
+            rounded
+            aria-label="View results"
+          ></Button>
         </template>
-      </DataTable>
+      </TableView>
     </transition>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, type PropType, onBeforeUnmount } from 'vue'
+import { ref, computed, type PropType } from 'vue'
 import { storeToRefs } from 'pinia'
-import DataTable, { type DataTableRowClickEvent } from 'primevue/datatable'
-import Column from 'primevue/column'
+import { type DataTableRowClickEvent } from 'primevue/datatable'
 
-import { useSlidePanel } from '@/composables/useSlidePanel'
-import Tag from 'primevue/tag'
-import LJobsTable from '@/components/experiments/LJobsTable.vue'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import { formatDate } from '@/helpers/formatDate'
-import { WorkflowStatus, type Workflow } from '@/types/Workflow'
+import { WorkflowStatus } from '@/types/Workflow'
 import type { Experiment } from '@/types/Experiment'
-import { workflowsService } from '@/sdk/workflowsService'
-import { retrieveStatus } from '@/helpers/retrieveStatus'
-import type { MenuItem } from 'primevue/menuitem'
-import { Menu } from 'primevue'
+import { Button } from 'primevue'
+import TableView from '../common/TableView.vue'
+import { useDatasetStore } from '@/stores/datasetsStore'
 const props = defineProps({
-  tableData: {
+  experiments: {
     type: Array as PropType<Experiment[]>,
     required: true,
   },
@@ -124,201 +74,54 @@ const props = defineProps({
   },
 })
 
+const datasetStore = useDatasetStore()
+const { datasets } = storeToRefs(datasetStore)
+
+const tableData = computed(() => {
+  return props.experiments.map((experiment) => {
+    return {
+      ...experiment,
+      dataset:
+        datasets.value.find((dataset) => dataset.id === experiment.dataset)?.filename ||
+        experiment.dataset,
+      created_at: formatDate(experiment.created_at),
+      use_case: experiment.task_definition.task,
+    }
+  })
+})
+
+const columns = ['name', 'dataset', 'use_case', 'created_at', 'status', 'options']
+
 const emit = defineEmits([
   'l-experiment-selected',
-  'l-workflow-selected',
   'delete-option-clicked',
   'view-experiment-results-clicked',
-  'view-workflow-results-clicked',
 ])
 
-const isThrottled = ref(false)
-const { showSlidingPanel } = useSlidePanel()
-const experimentStore = useExperimentStore()
-const { experiments } = storeToRefs(experimentStore)
 const tableVisible = ref(true)
-const focusedItem = ref()
-const expandedRows = ref([])
-const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
 
-const optionsMenu = ref()
-const options = ref<MenuItem[]>([
-  {
-    label: 'View Results',
-    icon: 'pi pi-external-link',
-    disabled: () => {
-      return Boolean(focusedItem.value?.status !== WorkflowStatus.SUCCEEDED)
-    },
-    command: () => {
-      emit('view-experiment-results-clicked', focusedItem.value)
-    },
-  },
-  {
-    label: 'Download Results',
-    icon: 'pi pi-download',
-    disabled: false,
-    visible: false,
-    command: () => {
-      // emit('l-download-experiment', focusedItem.value)
-    },
-  },
-  {
-    label: () => {
-      return 'Delete Experiment'
-    },
-    icon: 'pi pi-trash',
-    style: 'color: red; --l-menu-item-icon-color: red; --l-menu-item-icon-focus-color: red;',
-    disabled: false,
-    command: () => {
-      emit('delete-option-clicked', focusedItem.value)
-    },
-  },
-])
-
-const style = computed(() => {
-  return showSlidingPanel.value ? 'width: 100%;' : 'min-width: min(80vw, 1200px);max-width:1300px'
-})
-
-const toggleOptionsMenu = (event: MouseEvent, selectedItem: Workflow | Experiment) => {
-  event.stopPropagation()
-  focusedItem.value = selectedItem
-  optionsMenu.value.toggle(event)
+const handleDeleteExperimentClicked = (experiment: Experiment) => {
+  emit('delete-option-clicked', experiment)
 }
-
-const columnStyles = computed(() => {
-  return {
-    expander: 'width: 4rem',
-    name: showSlidingPanel.value ? 'width: 20rem' : 'width: 26rem',
-    created: 'width: 12rem',
-    status: 'width: 12rem',
-    useCase: 'width: 8rem',
-  }
-})
+const handleDownloadResultsClicked = (experiment: Experiment) => {
+  console.log('Download results clicked', experiment)
+}
+const handleViewResultsClicked = (experiment: Experiment) => {
+  emit('view-experiment-results-clicked', experiment)
+}
 
 function handleRowClick(event: DataTableRowClickEvent) {
-  if (
-    (event.originalEvent.target as HTMLElement)?.closest('svg.p-icon.p-datatable-row-toggle-icon')
-  ) {
-    // preventing experiment selection on row expansion
-    return
-  }
   emit('l-experiment-selected', event.data)
 }
-
-async function onWorkflowSelected(workflow: Workflow) {
-  // fetching job details from BE instead of filtering
-  // because job might be still running
-  // const inferenceJob = workflow.jobs.find((job: JobResult) => job.metrics?.length > 0)
-  if (workflow.jobs) {
-    emit('l-workflow-selected', workflow)
-  }
-}
-
-/**
- * The retrieved IDs will determine which experiment is still Running
- * @returns {string[]} IDs of stored experiments that have not completed
- */
-function getIncompleteExperiments(): Experiment[] {
-  return experiments.value.filter(
-    (experiment: Experiment) => !completedStatus.includes(experiment.status),
-  )
-}
-
-/**
- *
- * @param {string} id - String (UUID) representing the experiment which should be updated with the latest status
- */
-async function updateExperimentStatus(experiment: Experiment): Promise<void> {
-  try {
-    const incompleteWorkflows = experiment.workflows.filter(
-      (workflow) => !completedStatus.includes(workflow.status),
-    )
-
-    const incompleteWorkflowDetails = await Promise.all(
-      incompleteWorkflows.map((workflow) => workflowsService.fetchWorkflowDetails(workflow.id)),
-    )
-
-    incompleteWorkflowDetails.forEach((workflow) => {
-      // TODO: immutability would be nice
-      const existingWorkflow = experiment.workflows.find((w) => w.id === workflow.id)
-      if (existingWorkflow) {
-        existingWorkflow.status = workflow.status
-        existingWorkflow.artifacts_download_url = workflow.artifacts_download_url
-      }
-    })
-
-    const status =
-      incompleteWorkflowDetails.length &&
-      incompleteWorkflowDetails.every((workflow) => completedStatus.includes(workflow.status))
-        ? incompleteWorkflowDetails[0].status
-        : retrieveStatus(experiment)
-
-    // const e = experiments.value.find((exp) => exp.id === experiment.id)
-    // if (e) {
-    // e.status = status
-    experiment.status = status
-    // }
-  } catch (error) {
-    console.error(`Failed to update status for exp ${experiment} ${error}`)
-  }
-}
-
-/**
- * Updates the status for stored experiments that are not completed
- */
-async function updateStatusForIncompleteExperiments() {
-  await Promise.all(
-    getIncompleteExperiments().map((experiment) => updateExperimentStatus(experiment)),
-  )
-}
-
-// Throttle ensures the function is invoked at most once every defined period.
-async function throttledUpdateAllWorkflows() {
-  if (isThrottled.value) {
-    return
-  } // Skip if throttle is active
-
-  isThrottled.value = true
-  await updateStatusForIncompleteExperiments()
-  setTimeout(() => {
-    isThrottled.value = false // Release throttle after delay
-  }, 5000) // 5 seconds throttle
-}
-
-// This is a temporary solution until 'experiments/' endpoint
-// updates the status of each experiment
-let pollingId: number | undefined
-onMounted(async () => {
-  await updateStatusForIncompleteExperiments()
-  pollingId = setInterval(async () => {
-    await throttledUpdateAllWorkflows()
-  }, 1000)
-}) // Check every second, throttled to execute every 5 seconds
-
-onBeforeUnmount(() => {
-  clearInterval(pollingId)
-})
-
-watch(showSlidingPanel, (newValue) => {
-  focusedItem.value = newValue ? focusedItem.value : undefined
-})
-
-watch(
-  () => props.tableData.length,
-  async () => {
-    await updateStatusForIncompleteExperiments()
-  },
-)
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
 .l-experiment-table {
-  $root: &;
   width: 100%;
   display: flex;
-  place-content: center;
+  // place-content: center;
 
   &__tag {
     color: $l-grey-100;

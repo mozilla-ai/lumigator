@@ -36,6 +36,7 @@
   --l-inputtext-border-radius: 0.5rem;
   --l-inputtext-border-color: var(--l-grey-300);
   --l-inputtext-shadow: var(--neutral-box-shadow);
+  --l-inputtext-filled-hover-background: var(--l-inputtext-filled-background);
 
   color: variables.$l-text-color;
   padding: variables.$l-spacing-1 * 0.5;
@@ -47,6 +48,8 @@
   --l-textarea-border-color: var(--l-grey-300);
   --l-textarea-shadow: var(--neutral-box-shadow);
 
+  font-size: 0.875rem !important;
+
   color: variables.$l-text-color;
   padding: variables.$l-spacing-1 * 0.5;
 }
@@ -57,6 +60,7 @@
   --l-select-border-radius: 0.5rem;
   --l-select-border-color: var(--l-grey-300);
   --l-select-shadow: var(--neutral-box-shadow);
+  --l-select-filled-hover-background: var(--l-select-background);
 
   color: variables.$l-text-color;
 }

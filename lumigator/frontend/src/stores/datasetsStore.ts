@@ -7,9 +7,11 @@ import { jobsService } from '@/sdk/jobsService'
 import type { Job } from '@/types/Job'
 import { WorkflowStatus } from '@/types/Workflow'
 import { calculateDuration } from '@/helpers/calculateDuration'
+import { useQuery } from '@tanstack/vue-query'
+import { useToast } from 'primevue'
+import { getAxiosError } from '@/helpers/getAxiosError'
 
 export const useDatasetStore = defineStore('datasets', () => {
-  const datasets: Ref<Dataset[]> = ref([])
   const selectedDataset: Ref<Dataset | undefined> = ref()
 
   const completedStatus = [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]
@@ -19,13 +21,37 @@ export const useDatasetStore = defineStore('datasets', () => {
 
   const isPollingForJobStatus = ref(false)
   let jobStatusInterval: number | undefined = undefined
+  // const isDatasetsQueryEnabled = ref(false)
+
+  const {
+    data: datasets,
+    isError,
+    error,
+    refetch: refetchDatasets,
+    isFetching: isDatasetsFetching,
+    isLoading: isDatasetsLoading,
+  } = useQuery({
+    queryKey: ['datasets'],
+    queryFn: datasetsService.fetchDatasets,
+    // enabled: isDatasetsQueryEnabled,
+    initialData: [],
+    placeholderData: [],
+  })
+
+  const toast = useToast()
+
+  if (isError.value && error.value) {
+    console.error('Failed to fetch datasets:', error.value)
+    toast.add({
+      severity: 'error',
+      summary: 'Failed to fetch datasets',
+      detail: getAxiosError(error.value),
+    })
+  }
 
   async function fetchDatasets() {
-    try {
-      datasets.value = await datasetsService.fetchDatasets()
-    } catch {
-      datasets.value = []
-    }
+    // isDatasetsQueryEnabled.value = true
+    refetchDatasets()
   }
 
   const setSelectedDataset = (dataset: Dataset | undefined): void => {
@@ -145,6 +171,8 @@ export const useDatasetStore = defineStore('datasets', () => {
 
   return {
     datasets,
+    isDatasetsLoading,
+    isDatasetsFetching,
     selectedDataset,
     jobs,
     inferenceJobs,

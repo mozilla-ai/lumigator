@@ -1,15 +1,21 @@
 <template>
   <DataTable
-    class="gridlines"
-    :value="data"
+    :value="reactiveData"
+    :class="{
+      'no-cursor-pointer': !hasCursorPointer,
+      gridlines: !showGridlines,
+    }"
     ref="dataTable"
     :reorderableColumns="true"
     :removableSort="true"
     :scrollable="true"
     scrollHeight="flex"
+    :loading="isLoading"
+    :sort-field="sortField"
+    :sort-order="sortOrder"
     :resizableColumns="false"
     :columnResizeMode="'fit'"
-    :showGridlines="true"
+    :showGridlines="showGridlines"
     :stripedRows="false"
     :exportFilename="downloadFileName"
     :globalFilterFields="columns"
@@ -18,12 +24,14 @@
     v-model:expandedRows="expandedRows"
     @rowExpand="onRowExpand"
     @rowCollapse="onRowCollapse"
+    @row-click="$emit('row-click', $event)"
     @cell-edit-complete="onCellEditComplete"
     @cell-edit-cancel="onCellEditCancel"
   >
-    <template #header>
+    <template #header v-if="hasColumnToggle || isSearchEnabled">
       <div style="display: flex; gap: 2rem; justify-content: flex-end">
         <MultiSelect
+          v-if="hasColumnToggle"
           :modelValue="selectedColumns"
           :options="columns"
           :size="'small'"
@@ -57,7 +65,7 @@
     ></Column>
     <Column
       v-for="col in selectedColumns"
-      sortable
+      :sortable="col !== 'options'"
       :key="col"
       :field="col"
       :header="col"
@@ -67,6 +75,26 @@
           : undefined
       "
     >
+      <template #body="slotProps" v-if="col === 'status' || col === 'options'">
+        <Tag
+          v-if="col === 'status'"
+          :severity="
+            slotProps.data.status === WorkflowStatus.SUCCEEDED
+              ? 'success'
+              : slotProps.data.status === WorkflowStatus.FAILED
+                ? 'danger'
+                : 'warn'
+          "
+          rounded
+          :value="slotProps.data.status"
+          class="tag"
+        >
+          {{ slotProps.data.status }}
+        </Tag>
+        <div class="options" v-if="col === 'options'">
+          <slot name="options" :data="slotProps.data"></slot>
+        </div>
+      </template>
       <template #editor="{ data, field }" v-if="isEditable">
         <PrimeVueTextarea v-model="data[field]" autoResize autofocus fluid></PrimeVueTextarea>
       </template>
@@ -98,18 +126,21 @@ import {
   InputIcon,
   InputText,
   MultiSelect,
+  Tag,
   Textarea,
   type DataTableCellEditCancelEvent,
   type DataTableCellEditCompleteEvent,
 } from 'primevue'
 import { FilterMatchMode } from '@primevue/core/api'
-import { defineComponent, ref, type PropType } from 'vue'
+import { defineComponent, ref, toRef, toRefs, type PropType } from 'vue'
+import { WorkflowStatus } from '@/types/Workflow'
 
 export default defineComponent({
   name: 'TableView',
   components: {
     DataTable,
     Column,
+    Tag,
     // PrimeVueButton: Button,
     PrimeVueTextarea: Textarea,
     IconField,
@@ -118,6 +149,22 @@ export default defineComponent({
     MultiSelect,
   },
   props: {
+    sortField: {
+      type: String,
+      default: undefined,
+    },
+    sortOrder: {
+      type: Number,
+      default: undefined,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
+    },
+    showGridlines: {
+      type: Boolean,
+      default: true,
+    },
     hasEqualColumnSizes: {
       type: Boolean,
       default: false,
@@ -138,6 +185,10 @@ export default defineComponent({
       type: String,
       default: 'download',
     },
+    hasCursorPointer: {
+      type: Boolean,
+      default: true,
+    },
     isEditable: {
       type: Boolean,
       default: false,
@@ -152,7 +203,10 @@ export default defineComponent({
     },
   },
   exposes: ['exportCSV'],
+  emits: ['row-click'],
   setup(props) {
+    const reactiveData = toRef(props, 'data')
+    const reactiveProps = toRefs(props)
     const isVisible = ref(true)
     const dataTable = ref()
     const selectedColumns = ref(props.columns)
@@ -207,6 +261,7 @@ export default defineComponent({
       dataTable,
       handleDownloadClicked,
       onCellEditComplete,
+      WorkflowStatus,
       onCellEditCancel,
       filters,
       // allColumns,
@@ -218,7 +273,8 @@ export default defineComponent({
       expandAll,
       collapseAll,
       exportCSV,
-      ...props,
+      reactiveData,
+      ...reactiveProps,
     }
   },
 })
@@ -238,6 +294,20 @@ export default defineComponent({
   border: none;
 }
 
+.options {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tag {
+  color: var(--l-grey-100);
+  font-size: var(--l-font-size-sm);
+  line-height: 1;
+  font-weight: var(--l-font-weight-normal);
+  text-transform: uppercase;
+}
+
 .title-slot {
   @include mixins.paragraph;
 }
@@ -250,9 +320,11 @@ export default defineComponent({
 }
 
 // global css overrides the cursor to be pointer, reset it back
-:deep(.p-datatable-table-container) {
-  [class*='p-row-'] {
-    cursor: unset;
+.no-cursor-pointer {
+  :deep(.p-datatable-table-container) {
+    [class*='p-row-'] {
+      cursor: unset;
+    }
   }
 }
 </style>

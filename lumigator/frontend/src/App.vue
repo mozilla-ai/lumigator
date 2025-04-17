@@ -39,9 +39,9 @@
         <ConfirmDialog></ConfirmDialog>
         <Toast position="bottom-right" group="br">
           <template #message="slotProps">
-            <div class="toaster-content" :class="slotProps.message.severity">
+            <div class="toast-content" :class="slotProps.message.severity">
               <span :class="slotProps.message.messageicon"></span>
-              <div class="toaster-content__text">
+              <div class="toast-content__text">
                 <h4>{{ slotProps.message.summary }}</h4>
                 <p v-if="slotProps.message.detail">{{ slotProps.message.detail }}</p>
               </div>
@@ -63,7 +63,6 @@
 import { onMounted, ref } from 'vue'
 import LMenu from '@/components/layout/LMenu.vue'
 import { useDatasetStore } from '@/stores/datasetsStore'
-import { useExperimentStore } from '@/stores/experimentsStore'
 import { useSlidePanel } from '@/composables/useSlidePanel'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
@@ -72,7 +71,6 @@ import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 import { initFeatureFlags } from './helpers/FeatureFlags'
 
 const datasetsStore = useDatasetStore()
-const experimentsStore = useExperimentStore()
 
 const tooltipConfig = ref({
   value: `Lumigator is connected to external GPUs.`,
@@ -99,11 +97,7 @@ const { showSlidingPanel } = useSlidePanel()
 
 onMounted(async () => {
   initFeatureFlags(window.location.search)
-  await Promise.all([
-    datasetsStore.fetchAllJobs(),
-    datasetsStore.fetchDatasets(),
-    experimentsStore.fetchAllExperiments(),
-  ])
+  await Promise.all([datasetsStore.fetchAllJobs(), datasetsStore.fetchDatasets()])
 })
 </script>
 
@@ -166,6 +160,7 @@ onMounted(async () => {
 
   .l-main-container {
     flex: 1;
+    overflow: scroll;
     background-color: $l-card-bg;
     transition: margin-right 0.3s ease-in-out;
     border-radius: $l-main-radius;
@@ -197,7 +192,7 @@ onMounted(async () => {
   }
 }
 
-.toaster-content {
+.toast-content {
   width: 100%;
   display: flex;
   gap: 5px;

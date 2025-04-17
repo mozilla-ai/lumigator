@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, nextTick, type Ref, toRefs } from 'vue'
+import { ref, watch, computed, nextTick, type Ref, toRefs, onMounted } from 'vue'
 
 const props = defineProps<{ logs: string[] }>()
 
@@ -38,6 +38,9 @@ const onScroll = () => {
     isAutoScrollEnabled.value = isAtBottom
   }
 }
+onMounted(() => {
+  scrollToBottom()
+})
 
 watch(logsLength, scrollToBottom)
 </script>

@@ -152,6 +152,7 @@
 }
 
 .p-select-label {
+  align-content: center;
   font-size: variables.$l-font-size-sm;
 }
 
@@ -201,7 +202,7 @@
 .p-tooltip {
   font-size: variables.$l-font-size-sm;
   color: variables.$l-grey-100;
-  background-color: variables.$l-main-bg;
+  background-color: transparent;
 }
 
 // Tabs
@@ -209,7 +210,7 @@
   .p-tablist-content > .p-tablist-tab-list {
     align-items: center;
     background: variables.$l-menu-bg;
-    gap: variables.$l-spacing-1;
+    gap: 1.5rem;
 
     .p-tab {
       padding: 0.5rem 0;
@@ -263,6 +264,28 @@
 .p-disabled {
   cursor: not-allowed !important;
   pointer-events: all !important;
+}
+
+.p-dialog {
+  display: flex;
+  width: 37.5rem;
+  // height: 50rem;
+  padding: 1.5rem 2rem;
+  --l-dialog-header-padding: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  --l-dialog-color: var(--l-grey-100);
+  --l-dialog-border-radius: 0.5rem;
+  --l-dialog-background: var(--l-grey-400);
+}
+
+.p-dialog-header {
+  align-items: flex-start !important;
+}
+
+.p-dialog-content {
+  --l-dialog-content-padding: 1rem;
 }
 
 // hides the "X" button from confirm popup

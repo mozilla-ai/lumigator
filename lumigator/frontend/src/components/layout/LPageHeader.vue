@@ -12,7 +12,8 @@
       :label="buttonLabel"
       class="l-page-header__action-btn"
       @click="handleAction"
-    />
+    >
+    </Button>
   </div>
 </template>
 

@@ -219,7 +219,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    annotate_job_config = JobAnnotateConfig(task_definition={"task": "summarization"}, model=TEST_SEQ2SEQ_MODEL)
+    annotate_job_config = JobAnnotateConfig(task_definition={"task": "summarization"})
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",
@@ -231,7 +231,16 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     logger.info(annotate_job)
     annotate_job_creation_result = lumi_client_int.jobs.create_job(annotate_job)
     assert annotate_job_creation_result is not None
-    assert lumi_client_int.jobs.get_job(annotate_job_creation_result.id) is not None
+    assert lumi_client_int.jobs.get_jobs() is not None
+
+    job_status = lumi_client_int.jobs.wait_for_job(annotate_job_creation_result.id, retries=11, poll_wait=30)
+    logger.info(job_status)
+
+    download_info = lumi_client_int.jobs.get_job_download(annotate_job_creation_result.id)
+    logger.info(f"getting result from {download_info.download_url}")
+    results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
+    logger.info(f"Annotated set has keys: {results.json().keys()}")
+    assert "ground_truth" in results.json()["artifacts"].keys()
 
 
 def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):

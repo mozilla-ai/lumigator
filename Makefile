@@ -211,7 +211,7 @@ test-sdk-integration:
 
 test-sdk-e2e:
 	@cd lumigator/sdk/tests; \
-	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="integration/test_*.py integration/*/test_*.py"
+	uv run $(DEBUGPY_ARGS) -m pytest -s -o python_files="e2e/test_*.py e2e/*/test_*.py"
 
 test-sdk-integration-gpu:
 	cd lumigator/sdk/tests; \

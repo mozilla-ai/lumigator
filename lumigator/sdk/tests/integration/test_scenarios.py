@@ -234,15 +234,6 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
     assert lumi_client_int.jobs.get_job(annotate_job_creation_result.id) is not None
 
 
-def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):
-    """Wait for a workflow to complete."""
-    workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
-    while workflow_details.status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
-        sleep(5)
-        workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
-    return workflow_details
-
-
 @pytest.mark.parametrize(
     "dataset_name, task_definition, model",
     [
@@ -284,7 +275,7 @@ def test_create_exp_workflow_check_results(
         experiment_id=str(experiment_id),
     )
 
-    # Get the workflow & the experiment
+    # Get the results of the workflow & the experiment
     workflow_1_response = lumi_client_int.workflows.create_workflow(request)
     workflow_1_id = workflow_1_response.id
     workflow_1_details = lumi_client_int.workflows.get_workflow(workflow_1_id)
@@ -305,10 +296,12 @@ def test_create_exp_workflow_check_results(
         experiment_id=str(experiment_id),
     )
 
+    # Get the results of the workflow & the experiment
     workflow_2_response = lumi_client_int.workflows.create_workflow(request)
     workflow_2_id = workflow_2_response.id
     workflow_2_details = lumi_client_int.workflows.get_workflow(workflow_2_id)
     experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
+
     assert workflow_2_response is not None
     assert workflow_2_details is not None
     assert experiment_results is not None

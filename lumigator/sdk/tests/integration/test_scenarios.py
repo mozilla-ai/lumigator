@@ -200,7 +200,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
         ("mock_long_sequences", "long_sequences_data_unannotated"),
     ],
 )
-def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, dataset_fixture: str, request):
+def test_jobs_annotate_create(lumi_client_int: LumigatorClient, dataset_name: str, dataset_fixture: str, request):
     # Clear existing datasets
     datasets = lumi_client_int.datasets.get_datasets()
     if datasets.total > 0:
@@ -245,7 +245,7 @@ def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, 
         ),
     ],
 )
-def test_create_exp_workflow_check_results(
+def test_experiment_and_workflows_create(
     lumi_client_int: LumigatorClient, dataset_name: str, task_definition: dict, model: str, request
 ):
     """Test creating an experiment with associated workflows and checking results."""
@@ -257,7 +257,7 @@ def test_create_exp_workflow_check_results(
 
     # Create an experiment
     request = ExperimentCreate(
-        name="test_create_exp_workflow_check_results",
+        name="test_experiment_and_workflows_create",
         description="Test for an experiment with associated workflows",
         task_definition=task_definition,
         dataset=dataset_id,
@@ -308,6 +308,11 @@ def test_create_exp_workflow_check_results(
     assert len(experiment_results.workflows) == 2
     logger.info(f"Workflow 2 details: {workflow_2_details}")
     logger.info(f"Experiment results: {experiment_results}")
+
+    # Check the workflow ids in the experiment
+    expected_workflow_ids = {workflow_1_id, workflow_2_id}
+    experiment_workflow_ids = {w.id for w in experiment_results.workflows}
+    assert experiment_workflow_ids == expected_workflow_ids
 
     # Get the logs
     logs_response = lumi_client_int.workflows.get_workflow_logs(workflow_1_details.id)

@@ -200,7 +200,7 @@ def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, 
         ("mock_long_sequences", "long_sequences_data_unannotated"),
     ],
 )
-def test_jobs_annotate_create(lumi_client_int: LumigatorClient, dataset_name: str, dataset_fixture: str, request):
+def test_annotate_datasets(lumi_client_int: LumigatorClient, dataset_name: str, dataset_fixture: str, request):
     # Clear existing datasets
     datasets = lumi_client_int.datasets.get_datasets()
     if datasets.total > 0:
@@ -219,7 +219,7 @@ def test_jobs_annotate_create(lumi_client_int: LumigatorClient, dataset_name: st
     n_current_datasets = datasets.total
     assert n_current_datasets - n_initial_datasets == 1
 
-    annotate_job_config = JobAnnotateConfig(task_definition={"task": "summarization"}, model=TEST_SEQ2SEQ_MODEL)
+    annotate_job_config = JobAnnotateConfig(task_definition={"task": "summarization"})
     annotate_job = JobCreate(
         name="test_annotate",
         description="Test run for Huggingface model",
@@ -231,7 +231,25 @@ def test_jobs_annotate_create(lumi_client_int: LumigatorClient, dataset_name: st
     logger.info(annotate_job)
     annotate_job_creation_result = lumi_client_int.jobs.create_job(annotate_job)
     assert annotate_job_creation_result is not None
-    assert lumi_client_int.jobs.get_job(annotate_job_creation_result.id) is not None
+    assert lumi_client_int.jobs.get_jobs() is not None
+
+    job_status = lumi_client_int.jobs.wait_for_job(annotate_job_creation_result.id, retries=11, poll_wait=30)
+    logger.info(job_status)
+
+    download_info = lumi_client_int.jobs.get_job_download(annotate_job_creation_result.id)
+    logger.info(f"getting result from {download_info.download_url}")
+    results = requests.get(download_info.download_url, allow_redirects=True, timeout=10)
+    logger.info(f"Annotated set has keys: {results.json().keys()}")
+    assert "ground_truth" in results.json()["artifacts"].keys()
+
+
+def wait_for_workflow_complete(lumi_client_int: LumigatorClient, workflow_id: UUID):
+    """Wait for a workflow to complete."""
+    workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
+    while workflow_details.status not in [WorkflowStatus.SUCCEEDED, WorkflowStatus.FAILED]:
+        sleep(5)
+        workflow_details = lumi_client_int.workflows.get_workflow(workflow_id)
+    return workflow_details
 
 
 @pytest.mark.parametrize(
@@ -245,7 +263,7 @@ def test_jobs_annotate_create(lumi_client_int: LumigatorClient, dataset_name: st
         ),
     ],
 )
-def test_experiment_and_workflows_create(
+def test_create_exp_workflow_check_results(
     lumi_client_int: LumigatorClient, dataset_name: str, task_definition: dict, model: str, request
 ):
     """Test creating an experiment with associated workflows and checking results."""
@@ -257,7 +275,7 @@ def test_experiment_and_workflows_create(
 
     # Create an experiment
     request = ExperimentCreate(
-        name="test_experiment_and_workflows_create",
+        name="test_create_exp_workflow_check_results",
         description="Test for an experiment with associated workflows",
         task_definition=task_definition,
         dataset=dataset_id,
@@ -274,18 +292,21 @@ def test_experiment_and_workflows_create(
         provider="hf",
         experiment_id=str(experiment_id),
     )
-
-    # Get the results of the workflow & the experiment
     workflow_1_response = lumi_client_int.workflows.create_workflow(request)
-    workflow_1_id = workflow_1_response.id
-    workflow_1_details = lumi_client_int.workflows.get_workflow(workflow_1_id)
-    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
-
     assert workflow_1_response is not None
-    assert workflow_1_details is not None
+    workflow_1_id = workflow_1_response.id
+
+    # Wait till the workflow is done
+    workflow_1_details = wait_for_workflow_complete(lumi_client_int, workflow_1_id)
+
+    # Get the results of the experiment
+    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
     assert experiment_results is not None
-    logger.info(f"Workflow 1 details: {workflow_1_details}")
-    logger.info(f"Experiment results: {experiment_results}")
+    assert workflow_1_details.experiment_id == experiment_results.id
+    assert len(experiment_results.workflows) == 1
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) == experiment_results.workflows[
+        0
+    ].model_dump(exclude={"artifacts_download_url"})
 
     # Add another workflow to the experiment
     request = WorkflowCreateRequest(
@@ -295,26 +316,56 @@ def test_experiment_and_workflows_create(
         provider="hf",
         experiment_id=str(experiment_id),
     )
-
-    # Get the results of the workflow & the experiment
     workflow_2_response = lumi_client_int.workflows.create_workflow(request)
-    workflow_2_id = workflow_2_response.id
-    workflow_2_details = lumi_client_int.workflows.get_workflow(workflow_2_id)
-    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
-
     assert workflow_2_response is not None
-    assert workflow_2_details is not None
+    workflow_2_id = workflow_2_response.id
+
+    # Wait till the workflow is done
+    workflow_2_details = wait_for_workflow_complete(lumi_client_int, workflow_2_id)
+
+    # Get the results of the experiment
+    experiment_results = lumi_client_int.experiments.get_experiment(experiment_id)
     assert experiment_results is not None
     assert len(experiment_results.workflows) == 2
-    logger.info(f"Workflow 2 details: {workflow_2_details}")
-    logger.info(f"Experiment results: {experiment_results}")
-
-    # Check the workflow ids in the experiment
-    expected_workflow_ids = {workflow_1_id, workflow_2_id}
-    experiment_workflow_ids = {w.id for w in experiment_results.workflows}
-    assert experiment_workflow_ids == expected_workflow_ids
+    assert workflow_1_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
+    assert workflow_2_details.model_dump(exclude={"artifacts_download_url"}) in [
+        w.model_dump(exclude={"artifacts_download_url"}) for w in experiment_results.workflows
+    ]
 
     # Get the logs
     logs_response = lumi_client_int.workflows.get_workflow_logs(workflow_1_details.id)
     assert logs_response is not None
     assert logs_response.logs is not None
+    assert "Inference results stored at" in logs_response.logs
+    assert "Storing evaluation results to" in logs_response.logs
+    assert "Storing evaluation results for S3 to" in logs_response.logs
+    assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
+        "Storing evaluation results to"
+    )
+    assert logs_response.logs.index("Inference results stored at") < logs_response.logs.index(
+        "Storing evaluation results for S3 to"
+    )
+
+    # Delete the experiment
+    lumi_client_int.experiments.delete_experiment(experiment_id)
+
+    # Should throw exception: lumi_client_int.experiments.get_experiment(experiment_id)
+    try:
+        lumi_client_int.experiments.get_experiment(experiment_id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass
+
+    try:
+        lumi_client_int.workflows.get_workflow(workflow_1_details.id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass
+
+    try:
+        lumi_client_int.workflows.get_workflow(workflow_2_details.id)
+        raise Exception("Should have thrown an exception")
+    except requests.exceptions.HTTPError:
+        pass

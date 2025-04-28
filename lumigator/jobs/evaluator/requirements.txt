@@ -5,7 +5,7 @@ datasets==2.20.0
 deepeval==2.5.2
 evaluate==0.4.3
 loguru==0.7.2
-nltk==3.8.1
+nltk==3.9.1
 numpy<2.0.0
 platformdirs>=2.1
 pydantic>=2.10.0

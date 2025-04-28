@@ -162,12 +162,15 @@ jobs:
           mkdir -p /tmp/ray_pip_cache
           chmod -R 777 /tmp/ray_pip_cache
 
+      - name: Add Artifactory configuration
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> .default.conf
+          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> .default.conf
+
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build
-
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
+        run: CI=true make start-lumigator-build
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
@@ -243,12 +246,15 @@ jobs:
           mkdir -p ${HOME}/.cache/huggingface
           chmod -R 777 ${HOME}/.cache/huggingface
 
+      - name: Add Artifactory configuration
+        if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
+        run: |
+          echo HF_TOKEN=${{ secrets.JF_ACCESS_TOKEN }} >> .default.conf
+          echo HF_ENDPOINT=${{ secrets.JF_URL_HF }} >> .default.conf
+
       - name: Spinning up containers for the tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')
-        run:  make start-lumigator-build-postgres
-
-      - name: Configure 'default' test environment variables
-        run: ./scripts/set_env_vars.sh
+        run: CI=true make start-lumigator-build-postgres
 
       - name: Run ${{ matrix.test }} integration tests
         if: steps.filter.outputs.test == 'true' || contains(github.ref, 'refs/tags/')

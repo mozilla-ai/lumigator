@@ -1,7 +1,7 @@
 # Lumigator Demo Notebooks
 
 A collection of Jupyter notebooks and scripts showcasing Lumigator's functionalities. For installing
-Lumigator, see the main [README.md](README.md)
+Lumigator, see the main [README.md]https://github.com/mozilla-ai/lumigator/blob/main/README.md).
 
 The notebook runs on Jupyter. If you don't yet have Jupyter set up:
 

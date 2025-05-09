@@ -15,7 +15,7 @@ This tutorial will show you how to perform inference as a single job. If you wou
 
 1. A running instance of [Lumigator](../get-started/quickstart.md).
 
-2. A dataset for experimentation: you can upload the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
+2. A dataset for experimentation: you can upload the {{ '[sample dataset](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator) or upload your own dataset through the [Lumigator UI](../get-started/ui-guide.md#upload-a-dataset).
 
 3. Create a bash file `common_variables.sh` and initialize the following variables before proceeding with different local LLM tools.
     ```bash
@@ -149,7 +149,7 @@ user@host:~/$ export HUGGING_FACE_HUB_TOKEN=<your_huggingface_token>
 
 ### Procedure
 
-1. Setup vLLM Completions Endpoint Locally. While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.arm) for ARM architecture.
+1. Setup vLLM Completions Endpoint Locally. While vLLM provides an [official Docker image](https://docs.vllm.ai/en/latest/deployment/docker.html#use-vllm-s-official-docker-image), it assumes that you have GPUs available. However, if you are running vLLM on a machine without GPUs, you can use the [Dockerfile.cpu](https://raw.githubusercontent.com/vllm-project/vllm/refs/heads/main/docker/Dockerfile.cpu) for x86 architecture and [Dockerfile.arm](https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.arm) for ARM architecture.
 
    ```console
    user@host:~/$ git clone https://github.com/vllm-project/vllm.git

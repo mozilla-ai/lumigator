@@ -17,7 +17,7 @@ For *summarization*, Lumigator supports any summarization model uploaded to the 
 2. multi-lingual models based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`)
 3. bilingual and multi-lingual models based on [Opus-MT](https://huggingface.co/Helsinki-NLP#models) built on top of the [marian architecture](https://huggingface.co/docs/transformers/en/model_doc/marian)
 
-Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
+Please check the full list of {{ '[supported HF models](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
 ```
 
 In this guide, we assume that you have already [installed Lumigator locally](quickstart), and have a
@@ -98,28 +98,28 @@ launched it.
 
 **Summarization-Specific Models**
 
-| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
-|----------------|---------------------------------------|-----------------|---------|---------------|
-| seq2seq        | facebook/bart-large-cnn              | <div align="center">X</div> |         |               |
-| seq2seq        | Falconsai/text_summarization         | <div align="center">X</div> |         |               |
+| **Model Type** | **Model**                    | **HuggingFace**             | **API** | **llamafile** |
+|----------------|------------------------------|-----------------------------|---------|---------------|
+| seq2seq        | facebook/bart-large-cnn      | <div align="center">X</div> |         |               |
+| seq2seq        | Falconsai/text_summarization | <div align="center">X</div> |         |               |
 
 **Translation-Specific Models**
 
-| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
-|----------------|---------------------------------------|-----------------|---------|---------------|
-| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B              | <div align="center">X</div> |         |               |
-| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl              | <div align="center">X</div> |         |               |
-| seq2seq        | Helsinki-NLP/opus-mt-{src}-{tgt}             | <div align="center">X</div> |         |               |
+| **Model Type** | **Model**                                                          | **HuggingFace**             | **API** | **llamafile** |
+|----------------|--------------------------------------------------------------------|-----------------------------|---------|---------------|
+| seq2seq        | facebook/m2m100_418M,<br>facebook/m2m100_1.2B                      | <div align="center">X</div> |         |               |
+| seq2seq        | bigscience/mt0-base,<br>bigscience/mt0-large,<br>bigscience/mt0-xl | <div align="center">X</div> |         |               |
+| seq2seq        | Helsinki-NLP/opus-mt-{src}-{tgt}                                   | <div align="center">X</div> |         |               |
 
 **Task-Agnostic Models**:
 These models can be used for either summarization or translation by changing the instructions in the prompt.
 
-| **Model Type** | **Model**                              | **HuggingFace** | **API** | **llamafile** |
-|----------------|---------------------------------------|-----------------|---------|---------------|
-| causal         | gpt-4o-mini, gpt-4o                  |                 | <div align="center">X</div> |               |
-| causal         | deepseek-V3, deepseek-R1             |                 | <div align="center">X</div> |               |
-| causal         | Ministral-8B                         |                 | <div align="center">X</div> |               |
-| causal         | Mistral-7B-Instruct                  |                 |         | <div align="center">X</div> |
+| **Model Type** | **Model**                | **HuggingFace** | **API**                     | **llamafile**               |
+|----------------|--------------------------|-----------------|-----------------------------|-----------------------------|
+| causal         | gpt-4o-mini, gpt-4o      |                 | <div align="center">X</div> |                             |
+| causal         | deepseek-V3, deepseek-R1 |                 | <div align="center">X</div> |                             |
+| causal         | Ministral-8B             |                 | <div align="center">X</div> |                             |
+| causal         | Mistral-7B-Instruct      |                 |                             | <div align="center">X</div> |
 
 
 ### BART Large CNN
@@ -128,7 +128,7 @@ The [`facebook/bart-large-cnn`](https://huggingface.co/facebook/bart-large-cnn) 
 on English language, and fine-tuned on [CNN Daily Mail](https://huggingface.co/datasets/cnn_dailymail).
 It was introduced in the paper
 [BART: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension](https://arxiv.org/abs/1910.13461)
-by Lewis et al. and first released [here](https://github.com/pytorch/fairseq/tree/master/examples/bart).
+by Lewis et al. and first released [here](https://github.com/facebookresearch/fairseq/tree/main/examples/bart).
 
 The model has 406M parameters (FP32), and the model size is 1.63GB. The default parameters used for
 evaluation are:

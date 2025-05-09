@@ -33,7 +33,7 @@ but explicitly ignoring the reference translation (helpful in case you don't hav
 When you choose any of the above metrics, Lumigator will prompt an external LLM (either OpenAI's
 or self-hosted) to evaluate your model's predictions across all the dimensions that are predefined
 for the specified task. These dimensions, as well as the prompts that are used for them, are specified
-{{ '[in this JSON file](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/evaluator/g_eval_prompts.json)'.format(commit_id) }}.
+{{ '[in this JSON file](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/jobs/evaluator/g_eval_prompts.json)'.format(commit_id) }}.
 
 ## Running LLM-as-judge with gpt-4o
 

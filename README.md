@@ -45,7 +45,6 @@ need to have the following prerequisites installed on your machine:
     - On Linux, you need to follow the
       [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/).
 - The system Python (version managers such as uv should be deactivated)
-- At least 5 GB available on disk and allocated for docker, since some small language models, [bart](facebook/bart-large) & [roberta](https://huggingface.co/FacebookAI/roberta-large),  will be pre downloaded
 
 You can run and develop Lumigator locally using Docker Compose. This creates four container
 services networked together to make up all the components of the Lumigator application:
@@ -126,19 +125,19 @@ Since Lumigator is in active development, we always pull the latest images for t
 
 ## Kubernetes Installation
 
-You can also deploy Lumigator on Kubernetes using our [Helm](lumigator/infra/mzai/helm/lumigator) chart.
+You can also deploy Lumigator on Kubernetes using our [helm](https://github.com/mozilla-ai/lumigator/tree/main/infra/helm) chart.
 
 ## Documentation
 
 For the complete Lumigator documentation, visit the
-[docs page](https://mozilla-ai.github.io/lumigator).
+[docs page](https://mozilla-ai.github.io/lumigator/).
 
 ## Contribute
 
-For contribution guidelines, see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+For contribution guidelines, see the [CONTRIBUTING.md](https://github.com/mozilla-ai/lumigator/blob/main/CONTRIBUTING.md) file.
 
 ## Questions? Problems? Suggestions?
 
 To report a bug or request a feature, please open a
-[GitHub issue](https://github.com/mozilla-ai/lumigator/issues/new/choose). Be sure to check if
+[GitHub issue](https://github.com/mozilla-ai/lumigator/issues/new/choose/). Be sure to check if
 someone else has already created an issue for the same topic.

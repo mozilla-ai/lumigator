@@ -1,0 +1,25 @@
+max_concurrency = 5
+max_retries = 5
+retry_wait_time = 5
+max_redirects = 2
+# I got lots of Github links...
+accept = [429, 200]
+cache = true
+cache_exclude_status = 429
+max_cache_age = "5m"
+exclude = [
+    '^s3://*',
+    '^mailto:.*',
+    'localhost',
+]
+exclude_loopback = true
+exclude_private = true
+exclude_path = [
+    "docs/source",
+    "docs/rules",
+    "docs/build/html/_sources/",
+    "lumigator/frontend/node_modules",
+    "lumigator/frontend/package-lock.json",
+    ".venv",
+    ".github",
+]

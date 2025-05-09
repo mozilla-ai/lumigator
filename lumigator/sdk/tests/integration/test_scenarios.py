@@ -101,6 +101,7 @@ def test_dataset_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_da
     assert n_current_datasets - n_initial_datasets == 0
 
 
+@pytest.mark.skip(reason="Identical test exists as an e2e test, this test should be refactored or removed.")
 def test_job_lifecycle_remote_ok(lumi_client_int: LumigatorClient, dialog_data, simple_eval_template):
     """Test a complete job lifecycle test: add a new dataset,
     create a new job, run the job, get the results

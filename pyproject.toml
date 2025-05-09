@@ -27,7 +27,7 @@ dev = [
     "debugpy>=1.8.12",
     "fastapi>=0.115.6",
     "ipykernel>=6.29.5",
-    "litellm>=1.60.4",
+    "litellm>=1.68.0",
     "loguru>=0.7.2",
     "lumigator-schemas",
     "lumigator-sdk",

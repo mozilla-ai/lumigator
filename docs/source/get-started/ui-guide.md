@@ -12,7 +12,7 @@ The main purpose of Lumigator is to help you select the model that works best fo
 
 The first step is to upload your dataset. This can be done by clicking on the **Provide Dataset** button in the **Datasets** section. This will open a dialog box where you can select the dataset file to be uploaded from your local machine. The dataset file should be in `csv` format with columns examples and (optionally) ground_truth.
 
-You can get started by uploading the {{ '[sample dataset](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
+You can get started by uploading the {{ '[sample dataset](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }} provided in the [Lumigator repository](https://github.com/mozilla-ai/lumigator).
 
 ![Datasets Page](../../assets/ui_guide_steps/datasets_page.png)
 
@@ -75,29 +75,30 @@ This will open a sidebar where you would specify which use case and dataset, and
 
 Below that, you have the option to select the models to be used for the experiment. Multiple models may be simultaneously selected.
 
-| ![Experiment Fields](../../assets/ui_guide_steps/experiment_fields.png) | ![Model Selection](../../assets/ui_guide_steps/model_select.png) |
-| --- | --- |
+| {{ '![Experiment Fields](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/experiment_fields.png)'.format(commit_id) }} | {{ '![Model Selection](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/model_select.png)'.format(commit_id) }} |
+|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 
 ```{note}
-Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK). See more in the [API settings configuration](../operations-guide/configuration.md#api-settings).
+Reminder: In order to be able to use API based models, you must have provided the respective secret API keys to Lumigator, via the settings (UI/SDK).
+See more in the [API settings configuration](https://mozilla-ai.github.io/lumigator/operations-guide/configuration.html#api-settings).
 ```
 
 Finally click the **Run Experiment** button.
 
-![Experiments Running](../../assets/ui_guide_steps/experiments_running.png)
+{{ '![Experiments Running](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/experiments_running.png)'.format(commit_id) }}
 
 The **Experiments** page gets populated with the experiment details and the status of the experiment, which would initially be `RUNNING` and changes to `SUCCEEDED` once the experiment is complete or `FAILED` if the experiment fails.
 
-![Experiments Completed](../../assets/ui_guide_steps/experiments_completed.png)
+{{ '![Experiments Completed](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/experiments_completed.png)'.format(commit_id) }}
 
 ## View Results
 For each experiment, you can view the sidebar which contains a **View Results** button. On clicking this button, we would be able to see a table with evaluation metrics comparing the previously selected models.
 
-![Results Overall Comparison](../../assets/ui_guide_steps/results_overall_comparison.png)
+{{ '![Results Overall Comparison](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/results_overall_comparison.png)'.format(commit_id) }}
 
 You can further view the row by row predictions for each individual model by expanding under a given model. This gives you a detailed view of how the model predictions compare to the ground truth for each instance in the dataset.
 
-![Results Row by Row Comparison](../../assets/ui_guide_steps/results_row_by_row.png)
+{{ '![Results Row by Row Comparison](https://github.com/mozilla-ai/lumigator/blob/{}/docs/assets/ui_guide_steps/results_row_by_row.png)'.format(commit_id) }}
 
 ---
 

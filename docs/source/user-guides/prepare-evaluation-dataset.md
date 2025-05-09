@@ -11,8 +11,8 @@ This guide will cover the format Lumigator expects, what to focus on when collec
 
 Lumigator expects a CSV file containing two columns, namely `examples` and `ground_truth`.
 
-You can refer to the sample [dialogum dataset](../../../lumigator/sample_data/summarization/dialogsum_exc.csv ) for summarization use case and the sample [English-Spanish dataset](../../../lumigator/sample_data/translation/sample_translation_en_es.csv) for translation use case.
-
+You can refer to the sample {{ '[dialogum dataset](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/sample_data/summarization/dialogsum_exc.csv)'.format(commit_id) }} for summarization use case,
+and the sample {{ '[English-Spanish dataset](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/sample_data/translation/sample_translation_en_es.csv)'.format(commit_id) }} for translation use case.
 
 ## Content
 

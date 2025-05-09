@@ -85,15 +85,13 @@ jobs:
         # Excluding the docs folder because the links in there are dynamic and are checked after
         # they're compiled into html
         args: |
-          --base . --verbose --no-progress --cache --max-cache-age 5m
+          --verbose
+          --no-progress
+          --config lychee.toml
+          --base .
           './**/*.md' './docs/build/**/*.html' './**/*.rst'
-          --exclude 'mailto:|localhost'
-          --exclude-path 'docs/source'
-          --exclude-path '.venv'
-          --max-retries 5
-          --retry-wait-time 3
       env:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'

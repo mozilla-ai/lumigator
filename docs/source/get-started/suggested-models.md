@@ -17,7 +17,7 @@ For *summarization*, Lumigator supports any summarization model uploaded to the 
 2. multi-lingual models based on [language code specification](https://huggingface.co/facebook/m2m100_418M) in the generation pipeline (`facebook/m2m100_418M`)
 3. bilingual and multi-lingual models based on [Opus-MT](https://huggingface.co/Helsinki-NLP#models) built on top of the [marian architecture](https://huggingface.co/docs/transformers/en/model_doc/marian)
 
-Please check the full list of supported HF models {{ '[here](https://github.com/mozilla-ai/lumigator/blob/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
+Please check the full list of {{ '[supported HF models](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/lumigator/jobs/inference/model_clients/translation_models.yaml)'.format(commit_id) }}.
 ```
 
 In this guide, we assume that you have already [installed Lumigator locally](quickstart), and have a

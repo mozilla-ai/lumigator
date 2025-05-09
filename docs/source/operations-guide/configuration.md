@@ -10,7 +10,7 @@ This guide explains how configuration works in Lumigator and how you can make ch
 
 ## Where are the config files?
 
-The default Lumigator settings are found in the repository root under {{ '[`.default.conf`](https://github.com/mozilla-ai/lumigator/blob/{}/.default.conf)'.format(commit_id) }}.
+The default Lumigator settings are found in the repository root under {{ '[`.default.conf`](https://raw.githubusercontent.com/mozilla-ai/lumigator/{}/.default.conf)'.format(commit_id) }}.
 
 They are specified in key=value format within the config file.
 

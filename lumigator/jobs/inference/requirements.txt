@@ -9,5 +9,5 @@ pydantic==2.10.6
 python-box==7.3.2
 s3fs==2024.2.0
 sentencepiece==0.2.0
-torch==2.6.0
+torch==2.7.1+cpu
 transformers==4.49.0

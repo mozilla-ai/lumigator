@@ -16,4 +16,4 @@ s3fs==2024.5.0
 six>=1.14
 transformers==4.48.0
 unbabel-comet==2.2.4
-urllib3==2.3.0
+urllib3==2.5.0

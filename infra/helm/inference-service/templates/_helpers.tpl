@@ -5,7 +5,3 @@ Truncate at 63 chars since Kubernetes name fields are limited by the DNS naming 
 {{- define "inference-service.name" -}}
 {{- default .Chart.Name .Values.inferenceServiceName | trunc 63 | trimSuffix "-" }}
 {{- end}}
-
-{{- define "inference-service.namespace" -}}
-{{- default "default" .Values.inferenceServiceNamespace }}
-{{- end}}

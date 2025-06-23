@@ -2,7 +2,6 @@ apiVersion: ray.io/v1
 kind: RayService
 metadata:
   name: {{ include "inference-service.name" . }}
-  namespace: {{ include "inference-service.namespace" . }}
 spec:
   serveConfigV2: |
     applications:
@@ -12,8 +11,6 @@ spec:
       deployments:
       - name: VLLMDeployment
         num_replicas: {{ .Values.application.numReplicas }}
-        ray_actor_options:
-          num_cpus: {{ .Values.application.numCpus }}
       runtime_env:
         working_dir: {{ .Values.application.runtimeEnv.workingDir }}
         pip: {{ toYaml .Values.application.runtimeEnv.pip | nindent 8 }}
@@ -66,21 +63,21 @@ spec:
           {{- if or .Values.rayCluster.workerGroup.affinity.gpuClass .Values.rayCluster.workerGroup.affinity.region }}
           affinity:
             nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
-                - key: gpu.nvidia.com/class
-                  operator: In
-                  values:
-                  - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
-                {{- end }}
-                {{- if .Values.rayCluster.workerGroup.affinity.region }}
-                - key: topology.kubernetes.io/region
-                  operator: In
-                  values:
-                  - {{ .Values.rayCluster.workerGroup.affinity.region }}
-                {{- end }}
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                  - key: gpu.nvidia.com/class
+                    operator: In
+                    values:
+                    - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                  {{- end }}
+                  {{- if .Values.rayCluster.workerGroup.affinity.region }}
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                    - {{ .Values.rayCluster.workerGroup.affinity.region }}
+                  {{- end }}
           {{- end }}
     workerGroupSpecs:
       - groupName: {{ .Values.rayCluster.workerGroup.groupName }}
@@ -114,19 +111,19 @@ spec:
             {{- if or .Values.rayCluster.workerGroup.affinity.gpuClass .Values.rayCluster.workerGroup.affinity.region }}
             affinity:
               nodeAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                nodeSelectorTerms:
-                - matchExpressions:
-                  {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
-                  - key: gpu.nvidia.com/class
-                    operator: In
-                    values:
-                    - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
-                  {{- end }}
-                  {{- if .Values.rayCluster.workerGroup.affinity.region }}
-                  - key: topology.kubernetes.io/region
-                    operator: In
-                    values:
-                    - {{ .Values.rayCluster.workerGroup.affinity.region }}
-                  {{- end }}
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                  - matchExpressions:
+                    {{- if .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                    - key: gpu.nvidia.com/class
+                      operator: In
+                      values:
+                      - {{ .Values.rayCluster.workerGroup.affinity.gpuClass }}
+                    {{- end }}
+                    {{- if .Values.rayCluster.workerGroup.affinity.region }}
+                    - key: topology.kubernetes.io/region
+                      operator: In
+                      values:
+                      - {{ .Values.rayCluster.workerGroup.affinity.region }}
+                    {{- end }}
             {{- end }}

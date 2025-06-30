@@ -59,8 +59,8 @@ services networked together to make up all the components of the Lumigator appli
 > uses SQLite for this purpose.
 
 > [!WARNING]
-> Lumigator by default uses a local bucket, created in minio, named "lumigator-storage". It's
-> important to highlight that we don't host or manage any public bucket with this name.
+> By default, Lumigator uses a local bucket named "lumigator-storage", created in minio.
+> Important: we don't host or manage any public bucket with this name.
 
 To start Lumigator locally, follow these steps:
 

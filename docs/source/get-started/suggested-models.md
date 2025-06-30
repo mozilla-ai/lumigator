@@ -125,7 +125,7 @@ These models can be used for either summarization or translation by changing the
 ### BART Large CNN
 
 The [`facebook/bart-large-cnn`](https://huggingface.co/facebook/bart-large-cnn) model is pre-trained
-on English language, and fine-tuned on [CNN Daily Mail](https://huggingface.co/datasets/cnn_dailymail).
+on English language, and fine-tuned on [CNN Daily Mail](https://huggingface.co/datasets/abisee/cnn_dailymail).
 It was introduced in the paper
 [BART: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension](https://arxiv.org/abs/1910.13461)
 by Lewis et al. and first released [here](https://github.com/facebookresearch/fairseq/tree/main/examples/bart).

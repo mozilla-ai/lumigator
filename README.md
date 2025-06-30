@@ -58,6 +58,10 @@ services networked together to make up all the components of the Lumigator appli
 > Lumigator requires an SQL database to hold metadata for datasets and jobs. The local deployment
 > uses SQLite for this purpose.
 
+> 🚨 Security advice
+> Lumigator by default uses a local bucket, created in minio, named "lumigator-storage". It's
+> important to highlight that we don't host or manage any public bucket with this name.
+
 To start Lumigator locally, follow these steps:
 
 1. Clone the Lumigator repository:

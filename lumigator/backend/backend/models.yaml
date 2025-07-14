@@ -160,7 +160,7 @@
 
 - display_name: Llamafile/Mistral-7B-Instruct-v0.2
   model: mistralai/Mistral-7B-Instruct-v0.2
-  provider: hosted_vllm
+  provider: llamafile
   base_url: http://localhost:8080/v1
   website_url: https://huggingface.co/Mozilla/Mistral-7B-Instruct-v0.2-llamafile
   description: A llamafile package of Mistral's 7B Instruct model. Assumes that llamafile is running on the same system where the Ray cluster is located.

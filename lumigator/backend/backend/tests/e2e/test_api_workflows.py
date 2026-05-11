@@ -6,6 +6,15 @@ from uuid import UUID
 
 import pytest
 import requests
+from backend.main import app
+from backend.tests.conftest import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_RETRY_INTERVAL_SECONDS,
+    MAX_JOB_TIMEOUT_SECS,
+    TEST_CAUSAL_MODEL,
+    TEST_SEQ2SEQ_MODEL,
+    wait_for_job,
+)
 from fastapi.testclient import TestClient
 from httpx import HTTPStatusError, RequestError
 from inference.schemas import GenerationConfig, InferenceJobConfig, InferenceServerConfig
@@ -27,16 +36,6 @@ from lumigator_schemas.secrets import SecretUploadRequest
 from lumigator_schemas.tasks import TaskType
 from lumigator_schemas.workflows import WorkflowDetailsResponse, WorkflowResponse, WorkflowStatus
 from pydantic import PositiveInt, ValidationError
-
-from backend.main import app
-from backend.tests.conftest import (
-    DEFAULT_MAX_RETRIES,
-    DEFAULT_RETRY_INTERVAL_SECONDS,
-    MAX_JOB_TIMEOUT_SECS,
-    TEST_CAUSAL_MODEL,
-    TEST_SEQ2SEQ_MODEL,
-    wait_for_job,
-)
 
 POST_HEADER = {
     "accept": "application/json",

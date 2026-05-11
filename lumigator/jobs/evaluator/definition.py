@@ -1,9 +1,8 @@
 from uuid import UUID
 
+from backend.services.job_interface import JobDefinition
 from evaluator.schemas import DatasetConfig, EvalJobConfig, EvaluationConfig
 from lumigator_schemas.jobs import JobCreate, JobType
-
-from backend.services.job_interface import JobDefinition
 
 
 class JobDefinitionEvaluation(JobDefinition):

@@ -3,13 +3,12 @@ from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from backend.services.exceptions.tracking_exceptions import RunNotFoundError
+from backend.tracking.mlflow import MLflowTrackingClient
 from lumigator_schemas.jobs import JobResults
 from lumigator_schemas.workflows import WorkflowStatus
 from mlflow.entities import Metric, Param, Run, RunData, RunInfo, RunStatus, RunTag
 from mlflow.exceptions import MlflowException
-
-from backend.services.exceptions.tracking_exceptions import RunNotFoundError
-from backend.tracking.mlflow import MLflowTrackingClient
 
 
 @pytest.mark.asyncio

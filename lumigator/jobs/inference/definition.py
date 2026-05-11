@@ -1,6 +1,7 @@
 import os
 from uuid import UUID
 
+from backend.services.job_interface import JobDefinition
 from inference.schemas import (
     DatasetConfig,
     HuggingFacePipelineConfig,
@@ -9,8 +10,6 @@ from inference.schemas import (
     JobConfig,
 )
 from lumigator_schemas.jobs import JobCreate, JobType
-
-from backend.services.job_interface import JobDefinition
 
 # Served models
 OAI_API_URL: str = "https://api.openai.com/v1"
